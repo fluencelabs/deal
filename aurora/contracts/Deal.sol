@@ -7,63 +7,53 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 contract Deal is Staking {
     using SafeERC20 for IERC20;
 
-    IERC20 private _paymentToken;
+    uint public constant WITHDRAW_TIMEOUT = 1 hours;
+
+    IERC20 public immutable paymentToken;
+
+    bool public isStopped;
+    uint public withdrawUnlockTime;
+
     mapping(uint256 => uint256) private paymentsBitMap;
 
-    constructor(IERC20 paymentToken_) {
-        _paymentToken = paymentToken_;
-    }
-
-    function paymentToken() external view returns (address) {
-        return address(_paymentToken);
+    constructor(
+        IERC20 paymentToken_,
+        address daoAddress_,
+        AquaProxy aquaProxy_,
+        IERC20 fluenceToken_
+    ) Staking(daoAddress_, aquaProxy_, fluenceToken_) {
+        paymentToken = paymentToken_;
     }
 
     function deposit(uint amount) external {
-        //Call to near
-        _paymentToken.safeTransferFrom(msg.sender, address(this), amount);
+        require(block.timestamp > withdrawUnlockTime, "Deposit is locked");
 
-        _callToNear("deposit");
+        if (!isStopped) {
+            isStopped = true;
+        }
+
+        paymentToken.safeTransferFrom(msg.sender, address(this), amount);
     }
 
-    function updateBalance(uint amount) external {
-        uint balance = _paymentToken.balanceOf(address(this));
-
-        _callToNear("updateBalance");
+    function createWithdrawRequest() external {
+        isStopped = true;
+        withdrawUnlockTime = block.timestamp + WITHDRAW_TIMEOUT;
     }
 
-    function withdraw(uint amount) external {
-        _callToNear("withdraw");
-
-        _paymentToken.safeTransfer(msg.sender, amount);
-    }
-
-    function spend(address validator) external {
-        uint amount = getRewardAmount(
-            validator
+    function withdraw() external {
+        require(
+            isStopped && block.timestamp > withdrawUnlockTime,
+            "Withdraw request is not created or not expired delay"
         );
-        
-        require(amount > 0, "");
-        _paymentToken.safeTransfer(addr, amount);
-        _withdrawReward();
+
+        uint balance = paymentToken.balanceOf(address(this));
+        paymentToken.safeTransfer(msg.sender, balance);
     }
 
-    function getRewardAmount(address addr)
-        public
-        view
-        returns (
-            uint,
-        )
+    function submitGoldenParticle(AquaProxy.Particle calldata particle)
+        external
     {
-        //TODO: call to near
-        return (1000);
-    }
-
-    function getDebtAmount() public view returns (uint) {
-        //TODO: call to near
-        return 100;
-    }
-
-    function _withdrawReward(uint256 id) private {
-        //TODO: near
+        //verify
+        //spend
     }
 }
