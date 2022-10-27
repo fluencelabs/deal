@@ -10,6 +10,14 @@ import "./Utils.sol";
 library Codec {
     using Borsh for Borsh.Data;
 
+    function encodeU8(uint8 v) internal pure returns (bytes1) {
+        return bytes1(v);
+    }
+
+    function encodeU16(uint16 v) internal pure returns (bytes2) {
+        return bytes2(Utils.swapBytes2(v));
+    }
+
     function encodeU32(uint32 v) public pure returns (bytes4) {
         return bytes4(Utils.swapBytes4(v));
     }
@@ -27,14 +35,8 @@ library Codec {
         return abi.encodePacked(encodeU32(uint32(value.length)), bytes(value));
     }
 
-    /// Encode Execution mode enum into borsh.
-    function encode(ExecutionMode mode) public pure returns (bytes1) {
-        return bytes1(uint8(mode));
-    }
-
-    /// Encode PromiseArgsVariant enum into borsh.
-    function encode(PromiseArgsVariant mode) public pure returns (bytes1) {
-        return bytes1(uint8(mode));
+    function encode(uint8 v) public pure returns (bytes1) {
+        return bytes1(v);
     }
 
     /// Encode base promise into borsh.
@@ -74,8 +76,8 @@ library Codec {
     ) public pure returns (bytes memory) {
         return
             abi.encodePacked(
-                encode(mode),
-                encode(PromiseArgsVariant.Create),
+                encode(uint8(mode)),
+                encode(uint8(PromiseArgsVariant.Create)),
                 encode(nearPromise)
             );
     }
@@ -88,8 +90,8 @@ library Codec {
     ) public pure returns (bytes memory) {
         return
             abi.encodePacked(
-                encode(mode),
-                encode(PromiseArgsVariant.Callback),
+                encode(uint8(mode)),
+                encode(uint8(PromiseArgsVariant.Callback)),
                 encode(nearPromise)
             );
     }
@@ -100,7 +102,7 @@ library Codec {
         pure
         returns (PromiseResult memory result)
     {
-        result.status = PromiseResultStatus(uint8(data.decodeU8()));
+        result.status = PromiseResultStatus(data.decodeU8());
         if (result.status == PromiseResultStatus.Successful) {
             result.output = data.decodeBytes();
         }

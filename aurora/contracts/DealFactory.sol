@@ -10,6 +10,8 @@ contract DealFactory {
     AquaProxy public immutable aquaProxy;
     IERC20 public immutable fluenceToken;
 
+    event CreateDeal(address addr);
+
     constructor(
         address daoAddress_,
         AquaProxy aquaProxy_,
@@ -20,11 +22,17 @@ contract DealFactory {
         fluenceToken = fluenceToken_;
     }
 
-    function createDeal(IERC20 paymentToken_) external returns (address) {
-        //TODO: add event
-        return
-            address(
-                new Deal(paymentToken_, daoAddress, aquaProxy, fluenceToken)
-            );
+    function createDeal(IERC20 paymentToken, bytes32 airScriptHash) external {
+        address addr = address(
+            new Deal(
+                paymentToken,
+                daoAddress,
+                aquaProxy,
+                fluenceToken,
+                airScriptHash
+            )
+        );
+
+        emit CreateDeal(addr);
     }
 }
