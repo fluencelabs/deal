@@ -28,9 +28,17 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const fluenceToken = await developerFaucet.fluenceToken();
   const usdTokenAddress = await developerFaucet.usdToken();
 
+  const codedLib = await hre.deployments.deploy("Codec", {
+    from: deployer,
+    log: true,
+    autoMine: true,
+    waitConfirmations: 1,
+  });
+
   const aquaProxyDeploy = await hre.deployments.deploy("AquaProxy", {
     from: deployer,
     args: [NEAR_AQUA_VM_ADDRESS],
+    libraries: { Codec: codedLib.address },
     log: true,
     autoMine: true,
     waitConfirmations: 1,

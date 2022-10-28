@@ -1,8 +1,11 @@
 pragma solidity ^0.8.17;
 
 import "./AuroraSDK/Types.sol";
+import "./AuroraSDK/Codec.sol";
 
 contract AquaProxy {
+    using Codec for PromiseCreateArgs;
+
     struct Particle {
         string air;
         string prevData;
@@ -39,7 +42,7 @@ contract AquaProxy {
         );
 
         (bool success, bytes memory returnData) = XCC_PRECOMPILE.call(
-            "" //   nearPromise.encodeCrossContractCallArgs(ExecutionMode.Eager)
+            nearPromise.encodeCrossContractCallArgs(ExecutionMode.Eager)
         );
 
         if (!success) {
