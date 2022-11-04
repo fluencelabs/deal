@@ -12,7 +12,11 @@ import type {
   Signer,
   utils,
 } from "ethers";
-import type { FunctionFragment, Result } from "@ethersproject/abi";
+import type {
+  FunctionFragment,
+  Result,
+  EventFragment,
+} from "@ethersproject/abi";
 import type { Listener, Provider } from "@ethersproject/providers";
 import type {
   TypedEventFilter,
@@ -40,23 +44,95 @@ export declare namespace AquaProxy {
 
 export interface AquaProxyInterface extends utils.Interface {
   functions: {
-    "isValidScript((string,string,string,string))": FunctionFragment;
+    "aquaVMAddress()": FunctionFragment;
+    "aquaVMImplicitAddress()": FunctionFragment;
+    "callback(bytes32)": FunctionFragment;
+    "near()": FunctionFragment;
+    "particlesStatuses(bytes32)": FunctionFragment;
+    "selfReprsentativeImplicitAddress()": FunctionFragment;
+    "verifyParticle((string,string,string,string))": FunctionFragment;
   };
 
-  getFunction(nameOrSignatureOrTopic: "isValidScript"): FunctionFragment;
+  getFunction(
+    nameOrSignatureOrTopic:
+      | "aquaVMAddress"
+      | "aquaVMImplicitAddress"
+      | "callback"
+      | "near"
+      | "particlesStatuses"
+      | "selfReprsentativeImplicitAddress"
+      | "verifyParticle"
+  ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "isValidScript",
+    functionFragment: "aquaVMAddress",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "aquaVMImplicitAddress",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "callback",
+    values: [PromiseOrValue<BytesLike>]
+  ): string;
+  encodeFunctionData(functionFragment: "near", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "particlesStatuses",
+    values: [PromiseOrValue<BytesLike>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "selfReprsentativeImplicitAddress",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "verifyParticle",
     values: [AquaProxy.ParticleStruct]
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "isValidScript",
+    functionFragment: "aquaVMAddress",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "aquaVMImplicitAddress",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "callback", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "near", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "particlesStatuses",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "selfReprsentativeImplicitAddress",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "verifyParticle",
     data: BytesLike
   ): Result;
 
-  events: {};
+  events: {
+    "VerifyParticle(bytes32,string,string,string,string)": EventFragment;
+  };
+
+  getEvent(nameOrSignatureOrTopic: "VerifyParticle"): EventFragment;
 }
+
+export interface VerifyParticleEventObject {
+  hash: string;
+  air: string;
+  prevData: string;
+  params: string;
+  callResults: string;
+}
+export type VerifyParticleEvent = TypedEvent<
+  [string, string, string, string, string],
+  VerifyParticleEventObject
+>;
+
+export type VerifyParticleEventFilter = TypedEventFilter<VerifyParticleEvent>;
 
 export interface AquaProxy extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -85,35 +161,156 @@ export interface AquaProxy extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    isValidScript(
+    aquaVMAddress(overrides?: CallOverrides): Promise<[string]>;
+
+    aquaVMImplicitAddress(overrides?: CallOverrides): Promise<[string]>;
+
+    callback(
+      particleHash: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    near(
+      overrides?: CallOverrides
+    ): Promise<[boolean, string] & { initialized: boolean; wNEAR: string }>;
+
+    particlesStatuses(
+      arg0: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<[number]>;
+
+    selfReprsentativeImplicitAddress(
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
+    verifyParticle(
       particle: AquaProxy.ParticleStruct,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
   };
 
-  isValidScript(
+  aquaVMAddress(overrides?: CallOverrides): Promise<string>;
+
+  aquaVMImplicitAddress(overrides?: CallOverrides): Promise<string>;
+
+  callback(
+    particleHash: PromiseOrValue<BytesLike>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  near(
+    overrides?: CallOverrides
+  ): Promise<[boolean, string] & { initialized: boolean; wNEAR: string }>;
+
+  particlesStatuses(
+    arg0: PromiseOrValue<BytesLike>,
+    overrides?: CallOverrides
+  ): Promise<number>;
+
+  selfReprsentativeImplicitAddress(overrides?: CallOverrides): Promise<string>;
+
+  verifyParticle(
     particle: AquaProxy.ParticleStruct,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    isValidScript(
+    aquaVMAddress(overrides?: CallOverrides): Promise<string>;
+
+    aquaVMImplicitAddress(overrides?: CallOverrides): Promise<string>;
+
+    callback(
+      particleHash: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    near(
+      overrides?: CallOverrides
+    ): Promise<[boolean, string] & { initialized: boolean; wNEAR: string }>;
+
+    particlesStatuses(
+      arg0: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<number>;
+
+    selfReprsentativeImplicitAddress(
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    verifyParticle(
       particle: AquaProxy.ParticleStruct,
       overrides?: CallOverrides
-    ): Promise<boolean>;
+    ): Promise<void>;
   };
 
-  filters: {};
+  filters: {
+    "VerifyParticle(bytes32,string,string,string,string)"(
+      hash?: null,
+      air?: null,
+      prevData?: null,
+      params?: null,
+      callResults?: null
+    ): VerifyParticleEventFilter;
+    VerifyParticle(
+      hash?: null,
+      air?: null,
+      prevData?: null,
+      params?: null,
+      callResults?: null
+    ): VerifyParticleEventFilter;
+  };
 
   estimateGas: {
-    isValidScript(
+    aquaVMAddress(overrides?: CallOverrides): Promise<BigNumber>;
+
+    aquaVMImplicitAddress(overrides?: CallOverrides): Promise<BigNumber>;
+
+    callback(
+      particleHash: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    near(overrides?: CallOverrides): Promise<BigNumber>;
+
+    particlesStatuses(
+      arg0: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    selfReprsentativeImplicitAddress(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    verifyParticle(
       particle: AquaProxy.ParticleStruct,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    isValidScript(
+    aquaVMAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    aquaVMImplicitAddress(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    callback(
+      particleHash: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    near(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    particlesStatuses(
+      arg0: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    selfReprsentativeImplicitAddress(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    verifyParticle(
       particle: AquaProxy.ParticleStruct,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;

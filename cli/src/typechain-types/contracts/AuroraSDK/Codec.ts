@@ -81,9 +81,10 @@ export declare namespace Borsh {
 export interface CodecInterface extends utils.Interface {
   functions: {
     "decodePromiseResult((uint256,uint256))": FunctionFragment;
+    "encode(uint8)": FunctionFragment;
+    "encode(uint8)": FunctionFragment;
     "encode(bytes)": FunctionFragment;
     "encode((string,string,bytes,uint128,uint64))": FunctionFragment;
-    "encode(uint8)": FunctionFragment;
     "encode(((string,string,bytes,uint128,uint64),(string,string,bytes,uint128,uint64)))": FunctionFragment;
     "encodeCrossContractCallArgs(((string,string,bytes,uint128,uint64),(string,string,bytes,uint128,uint64)),uint8)": FunctionFragment;
     "encodeCrossContractCallArgs((string,string,bytes,uint128,uint64),uint8)": FunctionFragment;
@@ -96,9 +97,10 @@ export interface CodecInterface extends utils.Interface {
   getFunction(
     nameOrSignatureOrTopic:
       | "decodePromiseResult"
+      | "encode(uint8)"
+      | "encode(uint8)"
       | "encode(bytes)"
       | "encode((string,string,bytes,uint128,uint64))"
-      | "encode(uint8)"
       | "encode(((string,string,bytes,uint128,uint64),(string,string,bytes,uint128,uint64)))"
       | "encodeCrossContractCallArgs(((string,string,bytes,uint128,uint64),(string,string,bytes,uint128,uint64)),uint8)"
       | "encodeCrossContractCallArgs((string,string,bytes,uint128,uint64),uint8)"
@@ -113,16 +115,20 @@ export interface CodecInterface extends utils.Interface {
     values: [Borsh.DataStruct]
   ): string;
   encodeFunctionData(
+    functionFragment: "encode(uint8)",
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "encode(uint8)",
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
     functionFragment: "encode(bytes)",
     values: [PromiseOrValue<BytesLike>]
   ): string;
   encodeFunctionData(
     functionFragment: "encode((string,string,bytes,uint128,uint64))",
     values: [PromiseCreateArgsStruct]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "encode(uint8)",
-    values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
     functionFragment: "encode(((string,string,bytes,uint128,uint64),(string,string,bytes,uint128,uint64)))",
@@ -158,15 +164,19 @@ export interface CodecInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "encode(uint8)",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "encode(uint8)",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "encode(bytes)",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "encode((string,string,bytes,uint128,uint64))",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "encode(uint8)",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -226,6 +236,16 @@ export interface Codec extends BaseContract {
       [PromiseResultStructOutput] & { result: PromiseResultStructOutput }
     >;
 
+    "encode(uint8)"(
+      mode: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
+    "encode(uint8)"(
+      mode: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
     "encode(bytes)"(
       value: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
@@ -233,11 +253,6 @@ export interface Codec extends BaseContract {
 
     "encode((string,string,bytes,uint128,uint64))"(
       nearPromise: PromiseCreateArgsStruct,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
-
-    "encode(uint8)"(
-      v: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<[string]>;
 
@@ -284,6 +299,16 @@ export interface Codec extends BaseContract {
     overrides?: CallOverrides
   ): Promise<PromiseResultStructOutput>;
 
+  "encode(uint8)"(
+    mode: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  "encode(uint8)"(
+    mode: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
   "encode(bytes)"(
     value: PromiseOrValue<BytesLike>,
     overrides?: CallOverrides
@@ -291,11 +316,6 @@ export interface Codec extends BaseContract {
 
   "encode((string,string,bytes,uint128,uint64))"(
     nearPromise: PromiseCreateArgsStruct,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
-  "encode(uint8)"(
-    v: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<string>;
 
@@ -342,6 +362,16 @@ export interface Codec extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PromiseResultStructOutput>;
 
+    "encode(uint8)"(
+      mode: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    "encode(uint8)"(
+      mode: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
     "encode(bytes)"(
       value: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
@@ -349,11 +379,6 @@ export interface Codec extends BaseContract {
 
     "encode((string,string,bytes,uint128,uint64))"(
       nearPromise: PromiseCreateArgsStruct,
-      overrides?: CallOverrides
-    ): Promise<string>;
-
-    "encode(uint8)"(
-      v: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<string>;
 
@@ -403,6 +428,16 @@ export interface Codec extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    "encode(uint8)"(
+      mode: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "encode(uint8)"(
+      mode: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     "encode(bytes)"(
       value: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
@@ -410,11 +445,6 @@ export interface Codec extends BaseContract {
 
     "encode((string,string,bytes,uint128,uint64))"(
       nearPromise: PromiseCreateArgsStruct,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "encode(uint8)"(
-      v: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -462,6 +492,16 @@ export interface Codec extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    "encode(uint8)"(
+      mode: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "encode(uint8)"(
+      mode: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     "encode(bytes)"(
       value: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
@@ -469,11 +509,6 @@ export interface Codec extends BaseContract {
 
     "encode((string,string,bytes,uint128,uint64))"(
       nearPromise: PromiseCreateArgsStruct,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "encode(uint8)"(
-      v: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

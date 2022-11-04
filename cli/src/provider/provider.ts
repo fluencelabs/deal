@@ -1,6 +1,8 @@
 import { ethers } from "ethers";
 import { CONFIG } from "../config/config";
 import {
+  AquaProxy,
+  AquaProxy__factory,
   Deal,
   DealFactory,
   DealFactory__factory,
@@ -20,6 +22,10 @@ function getWallet(privKey: string): ethers.Wallet {
 
 function getFactoryContract(wallet: ethers.Wallet): DealFactory {
   return DealFactory__factory.connect(CONFIG.dealFactoryAddress, wallet);
+}
+
+function getAquaProxy(address: string, wallet: ethers.Wallet): AquaProxy {
+  return AquaProxy__factory.connect(address, wallet);
 }
 
 function getDeveloperContract(wallet: ethers.Wallet): DeveloperFaucet {
@@ -45,6 +51,7 @@ async function getFLTContract(wallet: ethers.Wallet): Promise<ERC20> {
 
 export {
   getWallet,
+  getAquaProxy,
   getFactoryContract,
   getDeveloperContract,
   getUSDContract,

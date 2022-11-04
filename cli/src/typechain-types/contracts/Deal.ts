@@ -48,10 +48,10 @@ export interface DealInterface extends utils.Interface {
     "createWithdrawRequest()": FunctionFragment;
     "daoAddress()": FunctionFragment;
     "deposit(uint256)": FunctionFragment;
-    "exit((string,string,string,string),address)": FunctionFragment;
     "fluenceToken()": FunctionFragment;
     "isStopped()": FunctionFragment;
     "paymentToken()": FunctionFragment;
+    "slash((string,string,string,string),address)": FunctionFragment;
     "stake(uint256)": FunctionFragment;
     "submitGoldenParticle((string,string,string,string))": FunctionFragment;
     "validators(address)": FunctionFragment;
@@ -68,10 +68,10 @@ export interface DealInterface extends utils.Interface {
       | "createWithdrawRequest"
       | "daoAddress"
       | "deposit"
-      | "exit"
       | "fluenceToken"
       | "isStopped"
       | "paymentToken"
+      | "slash"
       | "stake"
       | "submitGoldenParticle"
       | "validators"
@@ -102,10 +102,6 @@ export interface DealInterface extends utils.Interface {
     values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
-    functionFragment: "exit",
-    values: [AquaProxy.ParticleStruct, PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
     functionFragment: "fluenceToken",
     values?: undefined
   ): string;
@@ -113,6 +109,10 @@ export interface DealInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "paymentToken",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "slash",
+    values: [AquaProxy.ParticleStruct, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "stake",
@@ -148,7 +148,6 @@ export interface DealInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "daoAddress", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "deposit", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "exit", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "fluenceToken",
     data: BytesLike
@@ -158,6 +157,7 @@ export interface DealInterface extends utils.Interface {
     functionFragment: "paymentToken",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "slash", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "stake", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "submitGoldenParticle",
@@ -219,17 +219,17 @@ export interface Deal extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    exit(
-      particle: AquaProxy.ParticleStruct,
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
     fluenceToken(overrides?: CallOverrides): Promise<[string]>;
 
     isStopped(overrides?: CallOverrides): Promise<[boolean]>;
 
     paymentToken(overrides?: CallOverrides): Promise<[string]>;
+
+    slash(
+      particle: AquaProxy.ParticleStruct,
+      account: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
 
     stake(
       amount: PromiseOrValue<BigNumberish>,
@@ -274,17 +274,17 @@ export interface Deal extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  exit(
-    particle: AquaProxy.ParticleStruct,
-    account: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   fluenceToken(overrides?: CallOverrides): Promise<string>;
 
   isStopped(overrides?: CallOverrides): Promise<boolean>;
 
   paymentToken(overrides?: CallOverrides): Promise<string>;
+
+  slash(
+    particle: AquaProxy.ParticleStruct,
+    account: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
 
   stake(
     amount: PromiseOrValue<BigNumberish>,
@@ -325,17 +325,17 @@ export interface Deal extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    exit(
-      particle: AquaProxy.ParticleStruct,
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     fluenceToken(overrides?: CallOverrides): Promise<string>;
 
     isStopped(overrides?: CallOverrides): Promise<boolean>;
 
     paymentToken(overrides?: CallOverrides): Promise<string>;
+
+    slash(
+      particle: AquaProxy.ParticleStruct,
+      account: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     stake(
       amount: PromiseOrValue<BigNumberish>,
@@ -381,17 +381,17 @@ export interface Deal extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    exit(
-      particle: AquaProxy.ParticleStruct,
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
     fluenceToken(overrides?: CallOverrides): Promise<BigNumber>;
 
     isStopped(overrides?: CallOverrides): Promise<BigNumber>;
 
     paymentToken(overrides?: CallOverrides): Promise<BigNumber>;
+
+    slash(
+      particle: AquaProxy.ParticleStruct,
+      account: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
 
     stake(
       amount: PromiseOrValue<BigNumberish>,
@@ -435,17 +435,17 @@ export interface Deal extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    exit(
-      particle: AquaProxy.ParticleStruct,
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
     fluenceToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     isStopped(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     paymentToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    slash(
+      particle: AquaProxy.ParticleStruct,
+      account: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
 
     stake(
       amount: PromiseOrValue<BigNumberish>,
