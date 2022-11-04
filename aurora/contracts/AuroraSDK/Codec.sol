@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: CC-BY-1.0
-// https://github.com/aurora-is-near/native-erc20-connector/tree/270355763784f7086f215880fba7ff1616949bd8/aurora-locker
+// https://github.com/aurora-is-near/native-erc20-connector
 pragma solidity ^0.8.17;
 
 import "./Borsh.sol";
@@ -35,8 +35,14 @@ library Codec {
         return abi.encodePacked(encodeU32(uint32(value.length)), bytes(value));
     }
 
-    function encode(uint8 v) public pure returns (bytes1) {
-        return bytes1(v);
+    /// Encode Execution mode enum into borsh.
+    function encode(ExecutionMode mode) public pure returns (bytes1) {
+        return bytes1(uint8(mode));
+    }
+
+    /// Encode PromiseArgsVariant enum into borsh.
+    function encode(PromiseArgsVariant mode) public pure returns (bytes1) {
+        return bytes1(uint8(mode));
     }
 
     /// Encode base promise into borsh.
@@ -76,8 +82,8 @@ library Codec {
     ) public pure returns (bytes memory) {
         return
             abi.encodePacked(
-                encode(uint8(mode)),
-                encode(uint8(PromiseArgsVariant.Create)),
+                encode(mode),
+                encode(PromiseArgsVariant.Create),
                 encode(nearPromise)
             );
     }
@@ -90,8 +96,8 @@ library Codec {
     ) public pure returns (bytes memory) {
         return
             abi.encodePacked(
-                encode(uint8(mode)),
-                encode(uint8(PromiseArgsVariant.Callback)),
+                encode(mode),
+                encode(PromiseArgsVariant.Callback),
                 encode(nearPromise)
             );
     }

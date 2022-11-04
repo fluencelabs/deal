@@ -2,8 +2,9 @@ import { Command, Flags } from "@oclif/core";
 import { CONFIG } from "../../config/config";
 import { DealFactory__factory } from "../../typechain-types";
 import { readFileSync } from "fs";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import {
+  getAquaProxy,
   getDealContract,
   getFactoryContract,
   getFLTContract,
@@ -11,7 +12,7 @@ import {
   getWallet,
 } from "../../provider/provider";
 
-export default class Exit extends Command {
+export default class Stake extends Command {
   static flags = {
     privKey: Flags.string({
       char: "p",
@@ -22,22 +23,28 @@ export default class Exit extends Command {
 
   static args = [
     {
-      name: "dealAddress",
-      description: "Deal address",
+      name: "particle",
+      description: "Fluence particle",
       required: true,
     },
   ];
 
   async run(): Promise<void> {
-    const { args, flags } = await this.parse(Exit);
+    const { args, flags } = await this.parse(Stake);
 
+    const particle = JSON.parse(args.particle);
     const privKey = flags.privKey;
-    const dealAddress = args.dealAddress;
-    const particle = args.particle;
 
     const wallet = getWallet(privKey);
-    const deal = getDealContract(dealAddress, wallet);
+    const dealFacroty = getFactoryContract(wallet);
+    const aquaProxyAddress = await dealFacroty.aquaProxy();
 
-    await (await deal.exit(JSON.parse(particle), wallet.address)).wait();
+    const aquaProxy = getAquaProxy(aquaProxyAddress, wallet);
+
+    const tx = await aquaProxy.verifyParticle(particle);
+
+    await tx.wait();
+    console.log("AquaProxy address: " + aquaProxyAddress);
+    console.log("Tx hash: " + tx.hash);
   }
 }

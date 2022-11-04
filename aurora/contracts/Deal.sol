@@ -90,7 +90,7 @@ contract Deal {
         fluenceToken.transferFrom(msg.sender, address(this), amount);
     }
 
-    function exit(AquaProxy.Particle calldata particle, address account)
+    function slash(AquaProxy.Particle calldata particle, address account)
         external
     {
         require(
@@ -98,12 +98,22 @@ contract Deal {
             "Invalid script in particle"
         );
 
-        bool isValid = aquaProxy.isValidScript(particle);
-        if (isValid) {
-            _exit(account);
-        } else {
-            _slash(account);
-        }
+        bytes32 particleHash = keccak256(
+            abi.encodePacked(
+                particle.air,
+                particle.prevData,
+                particle.params,
+                particle.callResults
+            )
+        );
+
+        require(
+            aquaProxy.particlesStatuses(particleHash) ==
+                AquaProxy.ParticleStatus.Failure,
+            "Particle is not failed"
+        );
+
+        _slash(account);
     }
 
     function _slash(address account) private {

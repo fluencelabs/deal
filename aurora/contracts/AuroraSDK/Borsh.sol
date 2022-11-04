@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: CC-BY-1.0
-// https://github.com/aurora-is-near/native-erc20-connector/tree/270355763784f7086f215880fba7ff1616949bd8/aurora-locker
+// https://github.com/aurora-is-near/native-erc20-connector
+// https://github.com/aurora-is-near/native-erc20-connector
 pragma solidity ^0.8.17;
 
 import "./Utils.sol";
