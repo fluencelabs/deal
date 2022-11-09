@@ -1,6 +1,6 @@
 pragma solidity ^0.8.17;
 
-import "./auroraSDK/AuroraSdk.sol";
+import "./AuroraSDK/AuroraSdk.sol";
 import "./AquaProxy.sol";
 
 contract Core {

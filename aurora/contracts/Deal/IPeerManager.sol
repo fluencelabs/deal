@@ -25,5 +25,6 @@ interface IPeerManager {
     function slash(AquaProxy.Particle calldata particle, address account)
         external;
 
-    function claimReward(AquaProxy.Particle calldata particle) external;
+    function claimReward(AquaProxy.Particle calldata particle, address account)
+        external;
 }
