@@ -115,16 +115,17 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     throw new Error("AquaProxy address mismatch");
   }
 
-  const aquaProxy = AquaProxy__factory.connect(
-    aquaProxyDeploy.address,
-    await hre.ethers.getSigner(deployer)
-  );
-
-  await tx.wait();
+  const coreDeploy = await hre.deployments.deploy("Core", {
+    from: deployer,
+    args: [aquaProxyDeploy.address, fluenceToken],
+    log: true,
+    autoMine: true,
+    waitConfirmations: 1,
+  });
 
   await hre.deployments.deploy("DealFactory", {
     from: deployer,
-    args: [daoAddress, aquaProxyDeploy.address, fluenceToken],
+    args: [coreDeploy.address],
     log: true,
     autoMine: true,
     waitConfirmations: 1,

@@ -1,7 +1,7 @@
 import { Command, Flags } from "@oclif/core";
 import { getDealContract, getWallet } from "../../../provider/provider";
 
-export default class CreateWithdraw extends Command {
+export default class CreateExitRq extends Command {
   static flags = {
     privKey: Flags.string({
       char: "p",
@@ -19,7 +19,7 @@ export default class CreateWithdraw extends Command {
   ];
 
   async run(): Promise<void> {
-    const { args, flags } = await this.parse(CreateWithdraw);
+    const { args, flags } = await this.parse(CreateExitRq);
 
     const privKey = flags.privKey;
     const dealAddress = args.dealAddress;
@@ -27,7 +27,7 @@ export default class CreateWithdraw extends Command {
     const wallet = getWallet(privKey);
     const deal = getDealContract(dealAddress, wallet);
 
-    await (await deal.createWithdrawRequest()).wait();
+    await (await deal.createExitRequest()).wait();
 
     this.log("Your request created.");
   }

@@ -1,14 +1,7 @@
 import { Command, Flags } from "@oclif/core";
-import { CONFIG } from "../../config/config";
-import { DealFactory__factory } from "../../typechain-types";
-import { readFileSync } from "fs";
-import { BigNumber, ethers } from "ethers";
 import {
   getAquaProxy,
-  getDealContract,
-  getFactoryContract,
-  getFLTContract,
-  getUSDContract,
+  getCoreContract,
   getWallet,
 } from "../../provider/provider";
 
@@ -36,8 +29,8 @@ export default class Stake extends Command {
     const privKey = flags.privKey;
 
     const wallet = getWallet(privKey);
-    const dealFacroty = getFactoryContract(wallet);
-    const aquaProxyAddress = await dealFacroty.aquaProxy();
+    const core = getCoreContract(wallet);
+    const aquaProxyAddress = await core.aquaProxy();
 
     const aquaProxy = getAquaProxy(aquaProxyAddress, wallet);
 

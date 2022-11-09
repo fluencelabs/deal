@@ -1,6 +1,4 @@
 import { Command, Flags } from "@oclif/core";
-import { CONFIG } from "../../config/config";
-import { DealFactory__factory } from "../../typechain-types";
 import { readFileSync } from "fs";
 import { ethers } from "ethers";
 import {

@@ -13,6 +13,10 @@ import * as Contracts from ".";
 declare module "hardhat/types/runtime" {
   interface HardhatEthersHelpers extends HardhatEthersHelpersBase {
     getContractFactory(
+      name: "Ownable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Ownable__factory>;
+    getContractFactory(
       name: "ERC20",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ERC20__factory>;
@@ -45,9 +49,29 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Utils__factory>;
     getContractFactory(
+      name: "Core",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Core__factory>;
+    getContractFactory(
+      name: "BaseDeal",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.BaseDeal__factory>;
+    getContractFactory(
       name: "Deal",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Deal__factory>;
+    getContractFactory(
+      name: "IDeal",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IDeal__factory>;
+    getContractFactory(
+      name: "IPeerManager",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IPeerManager__factory>;
+    getContractFactory(
+      name: "PeersManager",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.PeersManager__factory>;
     getContractFactory(
       name: "DealFactory",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -61,6 +85,11 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TestERC20__factory>;
 
+    getContractAt(
+      name: "Ownable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Ownable>;
     getContractAt(
       name: "ERC20",
       address: string,
@@ -102,10 +131,35 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Utils>;
     getContractAt(
+      name: "Core",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Core>;
+    getContractAt(
+      name: "BaseDeal",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.BaseDeal>;
+    getContractAt(
       name: "Deal",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.Deal>;
+    getContractAt(
+      name: "IDeal",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IDeal>;
+    getContractAt(
+      name: "IPeerManager",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IPeerManager>;
+    getContractAt(
+      name: "PeersManager",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.PeersManager>;
     getContractAt(
       name: "DealFactory",
       address: string,

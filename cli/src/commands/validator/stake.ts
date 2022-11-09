@@ -1,13 +1,8 @@
 import { Command, Flags } from "@oclif/core";
-import { CONFIG } from "../../config/config";
-import { DealFactory__factory } from "../../typechain-types";
-import { readFileSync } from "fs";
-import { BigNumber, ethers } from "ethers";
+import { BigNumber } from "ethers";
 import {
   getDealContract,
-  getFactoryContract,
   getFLTContract,
-  getUSDContract,
   getWallet,
 } from "../../provider/provider";
 
@@ -43,6 +38,6 @@ export default class Stake extends Command {
 
     let v = BigNumber.from(10).mul(BigNumber.from(10).pow(18));
     await (await flt.approve(dealAddress, v)).wait();
-    await (await deal.stake(v)).wait();
+    await (await deal.stake()).wait();
   }
 }
