@@ -10,10 +10,13 @@ contract PeersManager is IPeerManager, BaseDeal {
     using SafeERC20 for IERC20;
 
     uint public constant STAKE_AMOUNT = 10 * 10**18;
+    uint public constant REWARD_AMOUNT = 10 * 10**18;
+    uint public constant GOLDEN_PARTICLE_TARGET = 1;
     uint constant SLASH_FACTOR = 100;
     uint public constant EXIT_TIMEOUT = 1 minutes;
 
     mapping(address => Validator) public validators; //TODO: mv interface or not?
+    mapping(bytes32 => bool) public payedParticles;
 
     constructor(
         IERC20 paymentToken_,
@@ -63,9 +66,41 @@ contract PeersManager is IPeerManager, BaseDeal {
         fluenceToken().transferFrom(address(this), msg.sender, balance);
     }
 
-    function claimReward(AquaProxy.Particle calldata particle) external {
-        //verify
-        //spend
+    function claimReward(AquaProxy.Particle calldata particle, address account)
+        external
+    {
+        // TODO: last particle
+
+        require(
+            keccak256(abi.encodePacked(particle.air)) == airScriptHash,
+            "Invalid script in particle"
+        );
+
+        bytes32 particleHash = keccak256(
+            abi.encodePacked(
+                particle.air,
+                particle.prevData,
+                particle.params,
+                particle.callResults
+            )
+        );
+
+        require(!payedParticles[particleHash], "Already payed");
+
+        require(
+            aquaProxy().particlesStatuses(particleHash) ==
+                AquaProxy.ParticleStatus.Success,
+            "Particle is not success"
+        );
+
+        require(
+            uint(particleHash) >= GOLDEN_PARTICLE_TARGET,
+            "It is not golden particle"
+        );
+
+        payedParticles[particleHash] = true;
+
+        fluenceToken().transferFrom(address(this), account, REWARD_AMOUNT);
     }
 
     function slash(AquaProxy.Particle calldata particle, address account)
