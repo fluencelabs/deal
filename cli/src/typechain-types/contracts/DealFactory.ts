@@ -28,21 +28,16 @@ import type {
 
 export interface DealFactoryInterface extends utils.Interface {
   functions: {
-    "aquaProxy()": FunctionFragment;
+    "core()": FunctionFragment;
     "createDeal(address,bytes32)": FunctionFragment;
     "daoAddress()": FunctionFragment;
-    "fluenceToken()": FunctionFragment;
   };
 
   getFunction(
-    nameOrSignatureOrTopic:
-      | "aquaProxy"
-      | "createDeal"
-      | "daoAddress"
-      | "fluenceToken"
+    nameOrSignatureOrTopic: "core" | "createDeal" | "daoAddress"
   ): FunctionFragment;
 
-  encodeFunctionData(functionFragment: "aquaProxy", values?: undefined): string;
+  encodeFunctionData(functionFragment: "core", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "createDeal",
     values: [PromiseOrValue<string>, PromiseOrValue<BytesLike>]
@@ -51,18 +46,10 @@ export interface DealFactoryInterface extends utils.Interface {
     functionFragment: "daoAddress",
     values?: undefined
   ): string;
-  encodeFunctionData(
-    functionFragment: "fluenceToken",
-    values?: undefined
-  ): string;
 
-  decodeFunctionResult(functionFragment: "aquaProxy", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "core", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "createDeal", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "daoAddress", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "fluenceToken",
-    data: BytesLike
-  ): Result;
 
   events: {
     "CreateDeal(address)": EventFragment;
@@ -105,7 +92,7 @@ export interface DealFactory extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    aquaProxy(overrides?: CallOverrides): Promise<[string]>;
+    core(overrides?: CallOverrides): Promise<[string]>;
 
     createDeal(
       paymentToken: PromiseOrValue<string>,
@@ -114,11 +101,9 @@ export interface DealFactory extends BaseContract {
     ): Promise<ContractTransaction>;
 
     daoAddress(overrides?: CallOverrides): Promise<[string]>;
-
-    fluenceToken(overrides?: CallOverrides): Promise<[string]>;
   };
 
-  aquaProxy(overrides?: CallOverrides): Promise<string>;
+  core(overrides?: CallOverrides): Promise<string>;
 
   createDeal(
     paymentToken: PromiseOrValue<string>,
@@ -128,10 +113,8 @@ export interface DealFactory extends BaseContract {
 
   daoAddress(overrides?: CallOverrides): Promise<string>;
 
-  fluenceToken(overrides?: CallOverrides): Promise<string>;
-
   callStatic: {
-    aquaProxy(overrides?: CallOverrides): Promise<string>;
+    core(overrides?: CallOverrides): Promise<string>;
 
     createDeal(
       paymentToken: PromiseOrValue<string>,
@@ -140,8 +123,6 @@ export interface DealFactory extends BaseContract {
     ): Promise<void>;
 
     daoAddress(overrides?: CallOverrides): Promise<string>;
-
-    fluenceToken(overrides?: CallOverrides): Promise<string>;
   };
 
   filters: {
@@ -150,7 +131,7 @@ export interface DealFactory extends BaseContract {
   };
 
   estimateGas: {
-    aquaProxy(overrides?: CallOverrides): Promise<BigNumber>;
+    core(overrides?: CallOverrides): Promise<BigNumber>;
 
     createDeal(
       paymentToken: PromiseOrValue<string>,
@@ -159,12 +140,10 @@ export interface DealFactory extends BaseContract {
     ): Promise<BigNumber>;
 
     daoAddress(overrides?: CallOverrides): Promise<BigNumber>;
-
-    fluenceToken(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    aquaProxy(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    core(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     createDeal(
       paymentToken: PromiseOrValue<string>,
@@ -173,7 +152,5 @@ export interface DealFactory extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     daoAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    fluenceToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }

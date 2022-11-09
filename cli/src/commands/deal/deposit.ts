@@ -1,11 +1,7 @@
 import { Command, Flags } from "@oclif/core";
-import { CONFIG } from "../../config/config";
-import { DealFactory__factory } from "../../typechain-types";
-import { readFileSync } from "fs";
 import { BigNumber, ethers } from "ethers";
 import {
   getDealContract,
-  getFactoryContract,
   getUSDContract,
   getWallet,
 } from "../../provider/provider";

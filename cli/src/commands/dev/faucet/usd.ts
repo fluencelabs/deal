@@ -1,6 +1,5 @@
 import { Command, Flags } from "@oclif/core";
-import { readFileSync } from "fs";
-import { BigNumber, ethers } from "ethers";
+import { BigNumber } from "ethers";
 import { getDeveloperContract, getWallet } from "../../../provider/provider";
 
 export default class USD extends Command {

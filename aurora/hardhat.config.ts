@@ -7,6 +7,11 @@ dotenv.config();
 const config: HardhatUserConfig = {
   solidity: "0.8.17",
   networks: {
+    hardhat: {
+      forking: {
+        url: "https://testnet.aurora.dev",
+      },
+    },
     localhost: {
       url: "http://localhost:8545",
     },

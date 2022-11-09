@@ -1,6 +1,4 @@
 import { Command, Flags } from "@oclif/core";
-import { readFileSync } from "fs";
-import { ethers } from "ethers";
 import { getDealContract, getWallet } from "../../../provider/provider";
 
 export default class ReceiveWithdraw extends Command {
