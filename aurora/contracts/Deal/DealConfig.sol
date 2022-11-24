@@ -6,21 +6,26 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "../AquaProxy.sol";
 import "../Core.sol";
 
-contract BaseDeal is Ownable {
-    using SafeERC20 for IERC20;
-
+contract DealConfigState {
     IERC20 public immutable paymentToken;
+
+    constructor(IERC20 paymentToken_) {
+        paymentToken = paymentToken_;
+    }
 
     Core public core;
     bytes32 public airScriptHash;
+}
+
+contract DealConfig is DealConfigState, Ownable {
+    using SafeERC20 for IERC20;
 
     constructor(
         IERC20 paymentToken_,
         bytes32 airScriptHash_,
         Core core_,
         address owner_
-    ) {
-        paymentToken = paymentToken_;
+    ) DealConfigState(paymentToken_) {
         airScriptHash = airScriptHash_;
         core = core_;
 

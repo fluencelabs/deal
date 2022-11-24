@@ -1,6 +1,6 @@
 export const CONFIG = {
-  ethereumNodeUrl: "http://localhost:8545",
-  coreAddress: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
-  dealFactoryAddress: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
-  developerFaucetAddress: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+  ethereumNodeUrl: "https://testnet.aurora.dev",
+  coreAddress: "0xa12dE4E33486dc08B4E4402e471DF765C710b211",
+  dealFactoryAddress: "0xac79d84e76C8Ca8c4dc6Ec08619925c9d9b17D9e",
+  developerFaucetAddress: "0x034ec637671FfBe7cf575aa2200029d8e512aACA",
 };

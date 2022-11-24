@@ -82,7 +82,6 @@ export interface CodecInterface extends utils.Interface {
   functions: {
     "decodePromiseResult((uint256,uint256))": FunctionFragment;
     "encode(uint8)": FunctionFragment;
-    "encode(uint8)": FunctionFragment;
     "encode(bytes)": FunctionFragment;
     "encode((string,string,bytes,uint128,uint64))": FunctionFragment;
     "encode(((string,string,bytes,uint128,uint64),(string,string,bytes,uint128,uint64)))": FunctionFragment;

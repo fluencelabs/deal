@@ -39,6 +39,11 @@ const _abi = [
         name: "particle",
         type: "tuple",
       },
+      {
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
     ],
     name: "claimReward",
     outputs: [],

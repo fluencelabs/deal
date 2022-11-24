@@ -9,11 +9,8 @@ import "../AquaProxy.sol";
 contract PeersManager is IPeerManager, BaseDeal {
     using SafeERC20 for IERC20;
 
-    uint public constant STAKE_AMOUNT = 10 * 10**18;
-    uint public constant REWARD_AMOUNT = 10 * 10**18;
-    uint public constant GOLDEN_PARTICLE_TARGET = 1;
-    uint constant SLASH_FACTOR = 100;
-    uint public constant EXIT_TIMEOUT = 1 minutes;
+    uint256 public requierdStakeAmount;
+    uint256 public pricePerEpoch;
 
     mapping(address => Validator) public validators; //TODO: mv interface or not?
     mapping(bytes32 => bool) public payedParticles;
@@ -34,7 +31,7 @@ contract PeersManager is IPeerManager, BaseDeal {
         );
 
         validator.balance = STAKE_AMOUNT;
-        validator.status == Status.Active;
+        validator.status = Status.Active;
 
         fluenceToken().transferFrom(msg.sender, address(this), STAKE_AMOUNT);
     }
@@ -44,7 +41,7 @@ contract PeersManager is IPeerManager, BaseDeal {
 
         require(validator.status == Status.Active, "Not active");
 
-        validator.status == Status.Exit;
+        validator.status = Status.Exit;
         validator.lastExitRqTime = block.timestamp;
     }
 
@@ -54,13 +51,13 @@ contract PeersManager is IPeerManager, BaseDeal {
         require(validator.status == Status.Exit, "Not in exit mode");
 
         require(
-            validator.lastExitRqTime + EXIT_TIMEOUT > block.timestamp,
+            block.timestamp > validator.lastExitRqTime + EXIT_TIMEOUT,
             "Wait exit timeout"
         );
 
         uint256 balance = validator.balance;
 
-        validator.status == Status.Inactive;
+        validator.status = Status.Inactive;
         validator.balance = 0;
 
         fluenceToken().transferFrom(address(this), msg.sender, balance);
@@ -69,8 +66,6 @@ contract PeersManager is IPeerManager, BaseDeal {
     function claimReward(AquaProxy.Particle calldata particle, address account)
         external
     {
-        // TODO: last particle
-
         require(
             keccak256(abi.encodePacked(particle.air)) == airScriptHash,
             "Invalid script in particle"
@@ -95,7 +90,7 @@ contract PeersManager is IPeerManager, BaseDeal {
 
         require(
             uint(particleHash) >= GOLDEN_PARTICLE_TARGET,
-            "It is not golden particle"
+            "It is not a golden particle"
         );
 
         payedParticles[particleHash] = true;
