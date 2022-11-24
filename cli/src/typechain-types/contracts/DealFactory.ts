@@ -30,26 +30,18 @@ export interface DealFactoryInterface extends utils.Interface {
   functions: {
     "core()": FunctionFragment;
     "createDeal(address,bytes32)": FunctionFragment;
-    "daoAddress()": FunctionFragment;
   };
 
-  getFunction(
-    nameOrSignatureOrTopic: "core" | "createDeal" | "daoAddress"
-  ): FunctionFragment;
+  getFunction(nameOrSignatureOrTopic: "core" | "createDeal"): FunctionFragment;
 
   encodeFunctionData(functionFragment: "core", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "createDeal",
     values: [PromiseOrValue<string>, PromiseOrValue<BytesLike>]
   ): string;
-  encodeFunctionData(
-    functionFragment: "daoAddress",
-    values?: undefined
-  ): string;
 
   decodeFunctionResult(functionFragment: "core", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "createDeal", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "daoAddress", data: BytesLike): Result;
 
   events: {
     "CreateDeal(address)": EventFragment;
@@ -99,8 +91,6 @@ export interface DealFactory extends BaseContract {
       airScriptHash: PromiseOrValue<BytesLike>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
-
-    daoAddress(overrides?: CallOverrides): Promise<[string]>;
   };
 
   core(overrides?: CallOverrides): Promise<string>;
@@ -111,8 +101,6 @@ export interface DealFactory extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  daoAddress(overrides?: CallOverrides): Promise<string>;
-
   callStatic: {
     core(overrides?: CallOverrides): Promise<string>;
 
@@ -121,8 +109,6 @@ export interface DealFactory extends BaseContract {
       airScriptHash: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<void>;
-
-    daoAddress(overrides?: CallOverrides): Promise<string>;
   };
 
   filters: {
@@ -138,8 +124,6 @@ export interface DealFactory extends BaseContract {
       airScriptHash: PromiseOrValue<BytesLike>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
-
-    daoAddress(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -150,7 +134,5 @@ export interface DealFactory extends BaseContract {
       airScriptHash: PromiseOrValue<BytesLike>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
-
-    daoAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }

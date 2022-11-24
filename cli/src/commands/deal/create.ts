@@ -6,6 +6,7 @@ import {
   getUSDContract,
   getWallet,
 } from "../../provider/provider";
+import console = require("console");
 
 export default class Create extends Command {
   static flags = {
@@ -18,7 +19,7 @@ export default class Create extends Command {
 
   static args = [
     {
-      name: "aquaScriptPath",
+      name: "airScriptPath",
       description: "Path for aqua script",
       required: true,
     },
@@ -28,9 +29,9 @@ export default class Create extends Command {
     const { args, flags } = await this.parse(Create);
 
     const privKey = flags.privKey;
-    const aquaScriptPath = args.aquaScriptPath;
+    const airScriptPath = args.airScriptPath;
 
-    let aquaScript = readFileSync(aquaScriptPath, "utf8");
+    let aquaScript = readFileSync(airScriptPath, "utf8");
     let hash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(aquaScript));
 
     this.log("Aqua script hash: ", hash);
@@ -46,7 +47,9 @@ export default class Create extends Command {
     const res = await tx.wait();
 
     const dealAddress = factory.interface.parseLog(
-      res.logs.find((x) => factory.interface.parseLog(x).name === "CreateDeal")!
+      res.logs.find((x) => {
+        return x.topics[0] == factory.interface.getEventTopic("CreateDeal");
+      })!
     ).args.addr;
 
     this.log(`Your deal contract: ${dealAddress}`);

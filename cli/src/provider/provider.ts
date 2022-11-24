@@ -18,7 +18,7 @@ import {
 function getWallet(privKey: string): ethers.Wallet {
   return new ethers.Wallet(
     privKey,
-    new ethers.providers.JsonRpcProvider("http://localhost:8545")
+    new ethers.providers.JsonRpcProvider(CONFIG.ethereumNodeUrl)
   );
 }
 

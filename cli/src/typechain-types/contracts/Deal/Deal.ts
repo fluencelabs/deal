@@ -46,11 +46,13 @@ export declare namespace AquaProxy {
 export interface DealInterface extends utils.Interface {
   functions: {
     "EXIT_TIMEOUT()": FunctionFragment;
+    "GOLDEN_PARTICLE_TARGET()": FunctionFragment;
+    "REWARD_AMOUNT()": FunctionFragment;
     "STAKE_AMOUNT()": FunctionFragment;
     "WITHDRAW_TIMEOUT()": FunctionFragment;
     "airScriptHash()": FunctionFragment;
     "aquaProxy()": FunctionFragment;
-    "claimReward((string,string,string,string))": FunctionFragment;
+    "claimReward((string,string,string,string),address)": FunctionFragment;
     "core()": FunctionFragment;
     "createExitRequest()": FunctionFragment;
     "createWithdrawRequest()": FunctionFragment;
@@ -59,6 +61,7 @@ export interface DealInterface extends utils.Interface {
     "fluenceToken()": FunctionFragment;
     "lastWithdrawRqTime()": FunctionFragment;
     "owner()": FunctionFragment;
+    "payedParticles(bytes32)": FunctionFragment;
     "paymentToken()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "slash((string,string,string,string),address)": FunctionFragment;
@@ -71,6 +74,8 @@ export interface DealInterface extends utils.Interface {
   getFunction(
     nameOrSignatureOrTopic:
       | "EXIT_TIMEOUT"
+      | "GOLDEN_PARTICLE_TARGET"
+      | "REWARD_AMOUNT"
       | "STAKE_AMOUNT"
       | "WITHDRAW_TIMEOUT"
       | "airScriptHash"
@@ -84,6 +89,7 @@ export interface DealInterface extends utils.Interface {
       | "fluenceToken"
       | "lastWithdrawRqTime"
       | "owner"
+      | "payedParticles"
       | "paymentToken"
       | "renounceOwnership"
       | "slash"
@@ -95,6 +101,14 @@ export interface DealInterface extends utils.Interface {
 
   encodeFunctionData(
     functionFragment: "EXIT_TIMEOUT",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "GOLDEN_PARTICLE_TARGET",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "REWARD_AMOUNT",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -112,7 +126,7 @@ export interface DealInterface extends utils.Interface {
   encodeFunctionData(functionFragment: "aquaProxy", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "claimReward",
-    values: [AquaProxy.ParticleStruct]
+    values: [AquaProxy.ParticleStruct, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(functionFragment: "core", values?: undefined): string;
   encodeFunctionData(
@@ -138,6 +152,10 @@ export interface DealInterface extends utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
+    functionFragment: "payedParticles",
+    values: [PromiseOrValue<BytesLike>]
+  ): string;
+  encodeFunctionData(
     functionFragment: "paymentToken",
     values?: undefined
   ): string;
@@ -162,6 +180,14 @@ export interface DealInterface extends utils.Interface {
 
   decodeFunctionResult(
     functionFragment: "EXIT_TIMEOUT",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "GOLDEN_PARTICLE_TARGET",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "REWARD_AMOUNT",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -201,6 +227,10 @@ export interface DealInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "payedParticles",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "paymentToken",
     data: BytesLike
@@ -266,6 +296,10 @@ export interface Deal extends BaseContract {
   functions: {
     EXIT_TIMEOUT(overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    GOLDEN_PARTICLE_TARGET(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    REWARD_AMOUNT(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     STAKE_AMOUNT(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     WITHDRAW_TIMEOUT(overrides?: CallOverrides): Promise<[BigNumber]>;
@@ -276,6 +310,7 @@ export interface Deal extends BaseContract {
 
     claimReward(
       particle: AquaProxy.ParticleStruct,
+      account: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -303,6 +338,11 @@ export interface Deal extends BaseContract {
     lastWithdrawRqTime(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
+
+    payedParticles(
+      arg0: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
 
     paymentToken(overrides?: CallOverrides): Promise<[string]>;
 
@@ -343,6 +383,10 @@ export interface Deal extends BaseContract {
 
   EXIT_TIMEOUT(overrides?: CallOverrides): Promise<BigNumber>;
 
+  GOLDEN_PARTICLE_TARGET(overrides?: CallOverrides): Promise<BigNumber>;
+
+  REWARD_AMOUNT(overrides?: CallOverrides): Promise<BigNumber>;
+
   STAKE_AMOUNT(overrides?: CallOverrides): Promise<BigNumber>;
 
   WITHDRAW_TIMEOUT(overrides?: CallOverrides): Promise<BigNumber>;
@@ -353,6 +397,7 @@ export interface Deal extends BaseContract {
 
   claimReward(
     particle: AquaProxy.ParticleStruct,
+    account: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -380,6 +425,11 @@ export interface Deal extends BaseContract {
   lastWithdrawRqTime(overrides?: CallOverrides): Promise<BigNumber>;
 
   owner(overrides?: CallOverrides): Promise<string>;
+
+  payedParticles(
+    arg0: PromiseOrValue<BytesLike>,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
 
   paymentToken(overrides?: CallOverrides): Promise<string>;
 
@@ -420,6 +470,10 @@ export interface Deal extends BaseContract {
   callStatic: {
     EXIT_TIMEOUT(overrides?: CallOverrides): Promise<BigNumber>;
 
+    GOLDEN_PARTICLE_TARGET(overrides?: CallOverrides): Promise<BigNumber>;
+
+    REWARD_AMOUNT(overrides?: CallOverrides): Promise<BigNumber>;
+
     STAKE_AMOUNT(overrides?: CallOverrides): Promise<BigNumber>;
 
     WITHDRAW_TIMEOUT(overrides?: CallOverrides): Promise<BigNumber>;
@@ -430,6 +484,7 @@ export interface Deal extends BaseContract {
 
     claimReward(
       particle: AquaProxy.ParticleStruct,
+      account: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -451,6 +506,11 @@ export interface Deal extends BaseContract {
     lastWithdrawRqTime(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<string>;
+
+    payedParticles(
+      arg0: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
 
     paymentToken(overrides?: CallOverrides): Promise<string>;
 
@@ -497,6 +557,10 @@ export interface Deal extends BaseContract {
   estimateGas: {
     EXIT_TIMEOUT(overrides?: CallOverrides): Promise<BigNumber>;
 
+    GOLDEN_PARTICLE_TARGET(overrides?: CallOverrides): Promise<BigNumber>;
+
+    REWARD_AMOUNT(overrides?: CallOverrides): Promise<BigNumber>;
+
     STAKE_AMOUNT(overrides?: CallOverrides): Promise<BigNumber>;
 
     WITHDRAW_TIMEOUT(overrides?: CallOverrides): Promise<BigNumber>;
@@ -507,6 +571,7 @@ export interface Deal extends BaseContract {
 
     claimReward(
       particle: AquaProxy.ParticleStruct,
+      account: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -534,6 +599,11 @@ export interface Deal extends BaseContract {
     lastWithdrawRqTime(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    payedParticles(
+      arg0: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     paymentToken(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -569,6 +639,12 @@ export interface Deal extends BaseContract {
   populateTransaction: {
     EXIT_TIMEOUT(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    GOLDEN_PARTICLE_TARGET(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    REWARD_AMOUNT(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     STAKE_AMOUNT(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     WITHDRAW_TIMEOUT(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -579,6 +655,7 @@ export interface Deal extends BaseContract {
 
     claimReward(
       particle: AquaProxy.ParticleStruct,
+      account: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -608,6 +685,11 @@ export interface Deal extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    payedParticles(
+      arg0: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     paymentToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

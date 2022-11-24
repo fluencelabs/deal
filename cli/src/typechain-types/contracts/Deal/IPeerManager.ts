@@ -40,7 +40,7 @@ export declare namespace AquaProxy {
 
 export interface IPeerManagerInterface extends utils.Interface {
   functions: {
-    "claimReward((string,string,string,string))": FunctionFragment;
+    "claimReward((string,string,string,string),address)": FunctionFragment;
     "createExitRequest()": FunctionFragment;
     "exit()": FunctionFragment;
     "slash((string,string,string,string),address)": FunctionFragment;
@@ -58,7 +58,7 @@ export interface IPeerManagerInterface extends utils.Interface {
 
   encodeFunctionData(
     functionFragment: "claimReward",
-    values: [AquaProxy.ParticleStruct]
+    values: [AquaProxy.ParticleStruct, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "createExitRequest",
@@ -115,6 +115,7 @@ export interface IPeerManager extends BaseContract {
   functions: {
     claimReward(
       particle: AquaProxy.ParticleStruct,
+      account: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -139,6 +140,7 @@ export interface IPeerManager extends BaseContract {
 
   claimReward(
     particle: AquaProxy.ParticleStruct,
+    account: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -163,6 +165,7 @@ export interface IPeerManager extends BaseContract {
   callStatic: {
     claimReward(
       particle: AquaProxy.ParticleStruct,
+      account: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -184,6 +187,7 @@ export interface IPeerManager extends BaseContract {
   estimateGas: {
     claimReward(
       particle: AquaProxy.ParticleStruct,
+      account: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -209,6 +213,7 @@ export interface IPeerManager extends BaseContract {
   populateTransaction: {
     claimReward(
       particle: AquaProxy.ParticleStruct,
+      account: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
