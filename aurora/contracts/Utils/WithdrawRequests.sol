@@ -6,7 +6,7 @@ library WithdrawRequests {
     using LinkedList for LinkedList.Bytes32List;
 
     struct Info {
-        uint totalAmount;
+        uint _totalAmount;
         LinkedList.Bytes32List list;
         mapping(uint256 => uint256) requests;
     }
@@ -17,14 +17,12 @@ library WithdrawRequests {
     }
 
     function totalAmount(Info storage self) internal view returns (uint) {
-        return self.totalAmount;
+        return self._totalAmount;
     }
 
-    function first(Info storage self)
-        internal
-        view
-        returns (Request memory request, bool isOk)
-    {
+    function first(
+        Info storage self
+    ) internal view returns (Request memory request, bool isOk) {
         bytes32 firstKey = self.list.first();
         if (firstKey == NULL) return (request, false);
 
@@ -32,11 +30,9 @@ library WithdrawRequests {
         request.amount = self.requests[request.timestamp];
     }
 
-    function last(Info storage self)
-        internal
-        view
-        returns (Request memory request, bool isOk)
-    {
+    function last(
+        Info storage self
+    ) internal view returns (Request memory request, bool isOk) {
         bytes32 lastKey = self.list.last();
         if (lastKey == NULL) return (request, false);
 
@@ -52,21 +48,20 @@ library WithdrawRequests {
         }
 
         self.requests[timestamp] += amount;
-        self.totalAmount += amount;
+        self._totalAmount += amount;
     }
 
     function remove(Info storage self, uint256 timestamp) internal {
         self.list.remove(bytes32(timestamp));
 
-        self.totalAmount -= self.requests[timestamp];
+        self._totalAmount -= self.requests[timestamp];
         delete self.requests[timestamp];
     }
 
-    function get(Info storage self, uint timestamp)
-        internal
-        view
-        returns (Request memory request, bool isOk)
-    {
+    function get(
+        Info storage self,
+        uint timestamp
+    ) internal view returns (Request memory request, bool isOk) {
         isOk = self.list.exist(bytes32(timestamp));
         if (!isOk) {
             return (request, false);
@@ -76,11 +71,10 @@ library WithdrawRequests {
         request.amount = self.requests[timestamp];
     }
 
-    function next(Info storage self, uint timestamp)
-        internal
-        view
-        returns (Request memory request, bool isOk)
-    {
+    function next(
+        Info storage self,
+        uint timestamp
+    ) internal view returns (Request memory request, bool isOk) {
         (bytes32 nextKey, bool isExist) = self.list.next(bytes32(timestamp));
         if (!isExist) {
             return (request, false);

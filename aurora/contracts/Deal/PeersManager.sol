@@ -2,131 +2,81 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "./IPeerManager.sol";
-import "./BaseDeal.sol";
-import "../AquaProxy.sol";
+import "../Core/Core.sol";
+import "./DepositManager.sol";
+import "./RoleManager.sol";
 
-contract PeersManager is IPeerManager, BaseDeal {
+contract PeersManagerState {
+    type PATId is bytes32;
+    mapping(address => mapping(PATId => uint256)) public collaterals;
+}
+
+abstract contract PeersManager is
+    PeersManagerState,
+    RoleManager,
+    DepositManager
+{
     using SafeERC20 for IERC20;
 
-    uint256 public requierdStakeAmount;
-    uint256 public pricePerEpoch;
+    function registerPeerToken(bytes32 salt) external onlyResourceManager {
+        IERC20 token = fluenceToken();
+        address addr = msg.sender;
+        PATId PATID = PATId.wrap(keccak256(abi.encode(block.number, salt)));
 
-    mapping(address => Validator) public validators; //TODO: mv interface or not?
-    mapping(bytes32 => bool) public payedParticles;
-
-    constructor(
-        IERC20 paymentToken_,
-        bytes32 airScriptHash_,
-        Core core_,
-        address owner_
-    ) BaseDeal(paymentToken_, airScriptHash_, core_, owner_) {}
-
-    function stake() external {
-        Validator storage validator = validators[msg.sender];
+        require(collaterals[addr][PATID] == 0, "Id already used");
 
         require(
-            validator.balance == 0 && validator.status == Status.Inactive,
-            "Already staked"
+            roles[addr] == Role.ResourceManager,
+            "Participant isn't ResourceManager"
         );
 
-        validator.balance = STAKE_AMOUNT;
-        validator.status = Status.Active;
+        uint256 requiredStake = settings.requiredStake;
+        uint256 balance = balances[addr].balanceByToken[token];
+        require(
+            (balance - requiredStake) >= 0,
+            "PeersManager: not enough balance"
+        );
 
-        fluenceToken().transferFrom(msg.sender, address(this), STAKE_AMOUNT);
+        balances[addr].balanceByToken[token] = balance - settings.requiredStake;
+        collaterals[addr][PATID] += requiredStake;
     }
 
-    function createExitRequest() external {
-        Validator storage validator = validators[msg.sender];
-
-        require(validator.status == Status.Active, "Not active");
-
-        validator.status = Status.Exit;
-        validator.lastExitRqTime = block.timestamp;
+    function removePeerToken(PATId id) external onlyResourceManager {
+        _removePeerToken(id, msg.sender);
     }
 
-    function exit() external {
-        Validator storage validator = validators[msg.sender];
+    function slash(
+        PATId PDTId,
+        address addr,
+        AquaProxy.Particle calldata particle
+    ) external {
+        try aquaProxy().verifyParticle(particle) {
+            revert("PeersManager: particle is valid");
+        } catch {
+            IERC20 token = fluenceToken();
 
-        require(validator.status == Status.Exit, "Not in exit mode");
+            uint collateralAmount = _removePeerToken(PDTId, addr);
+            uint slashAmount = (collateralAmount / 100) * core.slashFactor();
 
-        require(
-            block.timestamp > validator.lastExitRqTime + EXIT_TIMEOUT,
-            "Wait exit timeout"
-        );
+            balances[addr].balanceByToken[token] -= slashAmount;
 
-        uint256 balance = validator.balance;
-
-        validator.status = Status.Inactive;
-        validator.balance = 0;
-
-        fluenceToken().transferFrom(address(this), msg.sender, balance);
+            //TODO: send to treasury
+            token.safeTransfer(address(0x00), slashAmount);
+        }
     }
 
-    function claimReward(AquaProxy.Particle calldata particle, address account)
-        external
-    {
-        require(
-            keccak256(abi.encodePacked(particle.air)) == airScriptHash,
-            "Invalid script in particle"
-        );
+    function _removePeerToken(
+        PATId id,
+        address addr
+    ) private returns (uint256) {
+        IERC20 token = fluenceToken();
 
-        bytes32 particleHash = keccak256(
-            abi.encodePacked(
-                particle.air,
-                particle.prevData,
-                particle.params,
-                particle.callResults
-            )
-        );
+        uint256 collateral = collaterals[addr][id];
+        require(collateral > 0, "");
 
-        require(!payedParticles[particleHash], "Already payed");
+        balances[addr].balanceByToken[token] += collateral;
+        collaterals[addr][id] = 0;
 
-        require(
-            aquaProxy().particlesStatuses(particleHash) ==
-                AquaProxy.ParticleStatus.Success,
-            "Particle is not success"
-        );
-
-        require(
-            uint(particleHash) >= GOLDEN_PARTICLE_TARGET,
-            "It is not a golden particle"
-        );
-
-        payedParticles[particleHash] = true;
-
-        fluenceToken().transferFrom(address(this), account, REWARD_AMOUNT);
-    }
-
-    function slash(AquaProxy.Particle calldata particle, address account)
-        external
-    {
-        require(
-            keccak256(abi.encodePacked(particle.air)) == airScriptHash,
-            "Invalid script in particle"
-        );
-
-        bytes32 particleHash = keccak256(
-            abi.encodePacked(
-                particle.air,
-                particle.prevData,
-                particle.params,
-                particle.callResults
-            )
-        );
-
-        require(
-            aquaProxy().particlesStatuses(particleHash) ==
-                AquaProxy.ParticleStatus.Failure,
-            "Particle is not failed"
-        );
-
-        Validator memory validator = validators[account];
-        uint slashAmount = (validator.balance / 100) * SLASH_FACTOR;
-
-        validator.balance -= slashAmount;
-
-        validators[account] = validator;
-        fluenceToken().transferFrom(address(this), owner(), slashAmount);
+        return collateral;
     }
 }
