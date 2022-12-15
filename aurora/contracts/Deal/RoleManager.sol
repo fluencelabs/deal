@@ -9,29 +9,42 @@ contract RoleManagerState {
         None,
         ResourceManager
     }
-    mapping(address => Role) roles;
+
+    struct RoleState {
+        mapping(address => Role) roles;
+    }
+
+    RoleState internal _roleManagerState;
 }
 
-contract RoleManager is RoleManagerState {
+contract RoleManagerPrivate is RoleManagerState {
     modifier onlyResourceManager() {
-        require(roles[msg.sender] == Role.ResourceManager, "Only peer owner");
+        require(
+            _roleManagerState.roles[msg.sender] == Role.ResourceManager,
+            "Only peer owner"
+        );
         _;
     }
 
-    function register() external {
-        _register(msg.sender, Role.ResourceManager);
-    }
-
-    function _register(address participantAddr, Role role) private {
+    function _register(address participantAddr, Role role) internal {
         require(
-            roles[participantAddr] == Role.None,
+            _roleManagerState.roles[participantAddr] == Role.None,
             "Participant already exist"
         );
-        roles[participantAddr] = role;
+        _roleManagerState.roles[participantAddr] = role;
     }
 
     function _setRole(address addr, Role role) internal {
-        require(roles[addr] == Role.None, "Participant already exist");
-        roles[addr] = role;
+        require(
+            _roleManagerState.roles[addr] == Role.None,
+            "Participant already exist"
+        );
+        _roleManagerState.roles[addr] = role;
+    }
+}
+
+contract RoleManager is RoleManagerPrivate {
+    function register() external {
+        _register(msg.sender, Role.ResourceManager);
     }
 }

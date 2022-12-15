@@ -8,45 +8,73 @@ import "./RoleManager.sol";
 
 contract PeersManagerState {
     type PATId is bytes32;
-    mapping(address => mapping(PATId => uint256)) public collaterals;
+    struct PAT {
+        address owner;
+        uint256 collateral;
+    }
+    mapping(PATId => PAT) public PATs;
 }
 
-abstract contract PeersManager is
+abstract contract PeersManagerPrivate is
     PeersManagerState,
     RoleManager,
     DepositManager
 {
     using SafeERC20 for IERC20;
 
+    function _removeCollateral(
+        PATId id,
+        PAT memory pat,
+        IERC20 token
+    ) internal {
+        require(pat.collateral > 0, ""); //TODO: text
+
+        _depositManagerState.balances[pat.owner].balanceByToken[token] += pat
+            .collateral;
+
+        delete PATs[id];
+    }
+}
+
+abstract contract PeersManager is PeersManagerPrivate {
+    using SafeERC20 for IERC20;
+
     function registerPeerToken(bytes32 salt) external onlyResourceManager {
         IERC20 token = fluenceToken();
         address addr = msg.sender;
-        PATId PATID = PATId.wrap(keccak256(abi.encode(block.number, salt)));
+        //TODO: owner
+        PATId id = PATId.wrap(keccak256(abi.encode(block.number, salt, addr)));
 
-        require(collaterals[addr][PATID] == 0, "Id already used");
+        require(PATs[id].owner == address(0x00), "Id already used");
 
         require(
-            roles[addr] == Role.ResourceManager,
+            _roleManagerState.roles[addr] == Role.ResourceManager,
             "Participant isn't ResourceManager"
         );
 
-        uint256 requiredStake = settings.requiredStake;
-        uint256 balance = balances[addr].balanceByToken[token];
+        uint256 requiredStake = _dealConfigState.settings.requiredStake;
+        uint256 balance = _depositManagerState.balances[addr].balanceByToken[
+            token
+        ];
         require(
             (balance - requiredStake) >= 0,
             "PeersManager: not enough balance"
         );
 
-        balances[addr].balanceByToken[token] = balance - settings.requiredStake;
-        collaterals[addr][PATID] += requiredStake;
+        _depositManagerState.balances[addr].balanceByToken[token] =
+            balance -
+            _dealConfigState.settings.requiredStake;
+        PATs[id].collateral += requiredStake;
     }
 
     function removePeerToken(PATId id) external onlyResourceManager {
-        _removePeerToken(id, msg.sender);
+        PAT memory pat = PATs[id];
+        require(pat.owner == msg.sender, "PeersManager: not owner");
+        _removeCollateral(id, pat, fluenceToken());
     }
 
     function slash(
-        PATId PDTId,
+        PATId id,
         address addr,
         AquaProxy.Particle calldata particle
     ) external {
@@ -54,29 +82,18 @@ abstract contract PeersManager is
             revert("PeersManager: particle is valid");
         } catch {
             IERC20 token = fluenceToken();
+            PAT memory pat = PATs[id];
 
-            uint collateralAmount = _removePeerToken(PDTId, addr);
-            uint slashAmount = (collateralAmount / 100) * core.slashFactor();
+            _removeCollateral(id, pat, token);
 
-            balances[addr].balanceByToken[token] -= slashAmount;
+            uint slashAmount = (pat.collateral / 100) *
+                _dealConfigState.core.slashFactor();
+            _depositManagerState.balances[addr].balanceByToken[
+                token
+            ] -= slashAmount;
 
             //TODO: send to treasury
             token.safeTransfer(address(0x00), slashAmount);
         }
-    }
-
-    function _removePeerToken(
-        PATId id,
-        address addr
-    ) private returns (uint256) {
-        IERC20 token = fluenceToken();
-
-        uint256 collateral = collaterals[addr][id];
-        require(collateral > 0, "");
-
-        balances[addr].balanceByToken[token] += collateral;
-        collaterals[addr][id] = 0;
-
-        return collateral;
     }
 }

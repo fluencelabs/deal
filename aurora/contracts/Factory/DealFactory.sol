@@ -7,7 +7,7 @@ import "../Deal/Deal.sol";
 contract DealFactory {
     Core public core;
 
-    event CreateDeal(address deal);
+    event CreateDeal(address deal, DealConfig.Settings settings);
 
     constructor(Core core_) {
         core = core_;
@@ -18,6 +18,6 @@ contract DealFactory {
         DealConfig.Settings memory settings
     ) external {
         Deal deal = new Deal(core, subnetId, settings);
-        emit CreateDeal(address(deal));
+        emit CreateDeal(address(deal), settings);
     }
 }

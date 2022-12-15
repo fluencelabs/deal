@@ -11,8 +11,11 @@ contract DepositManagerState {
         mapping(IERC20 => uint256) balanceByToken;
         mapping(IERC20 => WithdrawRequests.Info) withdrawRequestsByToken;
     }
+    struct DepositState {
+        mapping(address => Balance) balances;
+    }
 
-    mapping(address => Balance) balances;
+    DepositState internal _depositManagerState;
 }
 
 abstract contract DepositManager is DepositManagerState, DealConfig {
@@ -20,23 +23,31 @@ abstract contract DepositManager is DepositManagerState, DealConfig {
     using WithdrawRequests for WithdrawRequests.Info;
 
     function deposit(IERC20 token, uint amount) external {
-        balances[msg.sender].balanceByToken[token] += amount;
+        _depositManagerState.balances[msg.sender].balanceByToken[
+            token
+        ] += amount;
         token.safeTransferFrom(msg.sender, address(this), amount);
     }
 
     function createWithdrawRequest(IERC20 token, uint amount) external {
-        WithdrawRequests.Info storage requests = balances[msg.sender]
+        WithdrawRequests.Info storage requests = _depositManagerState
+            .balances[msg.sender]
             .withdrawRequestsByToken[token];
 
-        uint balance = balances[msg.sender].balanceByToken[token];
+        uint balance = _depositManagerState.balances[msg.sender].balanceByToken[
+            token
+        ];
         require((balance - amount) > 0, "Not enough balance");
 
-        balances[msg.sender].balanceByToken[token] = balance - amount;
+        _depositManagerState.balances[msg.sender].balanceByToken[token] =
+            balance -
+            amount;
         requests.createOrAddAmount(amount);
     }
 
     function cancelWithdrawRequest(IERC20 token, uint timestamp) external {
-        WithdrawRequests.Info storage requests = balances[msg.sender]
+        WithdrawRequests.Info storage requests = _depositManagerState
+            .balances[msg.sender]
             .withdrawRequestsByToken[token];
 
         (WithdrawRequests.Request memory request, bool isOk) = requests.get(
@@ -45,17 +56,24 @@ abstract contract DepositManager is DepositManagerState, DealConfig {
         require(isOk, "Request isn't exist");
 
         requests.remove(timestamp);
-        balances[msg.sender].balanceByToken[token] += request.amount;
+        _depositManagerState.balances[msg.sender].balanceByToken[
+            token
+        ] += request.amount;
     }
 
     function withdraw(IERC20 token) external {
-        WithdrawRequests.Info storage requests = balances[msg.sender]
+        WithdrawRequests.Info storage requests = _depositManagerState
+            .balances[msg.sender]
             .withdrawRequestsByToken[token];
 
         (WithdrawRequests.Request memory rq, bool isOk) = requests.first();
 
         require(isOk, "Request isn't exist");
-        require(block.timestamp > (rq.timestamp + core.withdrawTimeout()), ""); //TODO error text
+        require(
+            block.timestamp >
+                (rq.timestamp + _dealConfigState.core.withdrawTimeout()),
+            ""
+        ); //TODO error text
 
         requests.remove(rq.timestamp);
         token.safeTransferFrom(address(this), msg.sender, rq.amount);
