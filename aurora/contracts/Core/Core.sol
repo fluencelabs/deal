@@ -10,6 +10,8 @@ contract CoreState {
     IERC20 public fluenceToken;
     AquaProxy public aquaProxy;
     uint public withdrawTimeout;
+    uint public epochDelayForReward;
+    uint public minAmountOfEpochsForReward;
     uint public slashFactor;
     uint public updateSettingsTimeout;
     EpochManager public epochManager;
@@ -20,6 +22,7 @@ contract Core is OwnableUpgradeable, CoreState, UUPSUpgradeable {
         IERC20 fluenceToken_,
         AquaProxy aquaProxy_,
         uint withdrawTimeout_,
+        uint epochDelayForReward_,
         uint slashFactor_,
         uint updateSettingsTimeout_,
         EpochManager epochManager_
@@ -27,6 +30,7 @@ contract Core is OwnableUpgradeable, CoreState, UUPSUpgradeable {
         fluenceToken = fluenceToken_;
         aquaProxy = aquaProxy_;
         withdrawTimeout = withdrawTimeout_;
+        epochDelayForReward = epochDelayForReward_;
         slashFactor = slashFactor_;
         updateSettingsTimeout = updateSettingsTimeout_;
         epochManager = epochManager_;
@@ -44,6 +48,18 @@ contract Core is OwnableUpgradeable, CoreState, UUPSUpgradeable {
 
     function setWithdrawTimeout(uint withdrawTimeout_) external onlyOwner {
         withdrawTimeout = withdrawTimeout_;
+    }
+
+    function setEpochDelayForReward(
+        uint epochDelayForReward_
+    ) external onlyOwner {
+        epochDelayForReward = epochDelayForReward_;
+    }
+
+    function setMinAmountOfEpochsForReward(
+        uint minAmountOfEpochsForReward_
+    ) external onlyOwner {
+        minAmountOfEpochsForReward = minAmountOfEpochsForReward_;
     }
 
     function setSlashFactor(uint slashFactor_) external onlyOwner {
