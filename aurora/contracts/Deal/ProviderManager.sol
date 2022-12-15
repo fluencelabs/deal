@@ -6,7 +6,7 @@ import "../Core/Core.sol";
 import "./DepositManager.sol";
 import "./RoleManager.sol";
 
-contract PeersManagerState {
+contract ProviderManagerState {
     type PATId is bytes32;
     struct PAT {
         address owner;
@@ -15,8 +15,8 @@ contract PeersManagerState {
     mapping(PATId => PAT) public PATs;
 }
 
-abstract contract PeersManagerPrivate is
-    PeersManagerState,
+abstract contract ProviderManagerPrivate is
+    ProviderManagerState,
     RoleManager,
     DepositManager
 {
@@ -36,10 +36,10 @@ abstract contract PeersManagerPrivate is
     }
 }
 
-abstract contract PeersManager is PeersManagerPrivate {
+abstract contract ProviderManager is ProviderManagerPrivate {
     using SafeERC20 for IERC20;
 
-    function registerPeerToken(bytes32 salt) external onlyResourceManager {
+    function addProviderToken(bytes32 salt) external onlyResourceManager {
         IERC20 token = fluenceToken();
         address addr = msg.sender;
         //TODO: owner
@@ -58,7 +58,7 @@ abstract contract PeersManager is PeersManagerPrivate {
         ];
         require(
             (balance - requiredStake) >= 0,
-            "PeersManager: not enough balance"
+            "ProviderManager: not enough balance"
         );
 
         _depositManagerState.balances[addr].balanceByToken[token] =
@@ -67,9 +67,9 @@ abstract contract PeersManager is PeersManagerPrivate {
         PATs[id].collateral += requiredStake;
     }
 
-    function removePeerToken(PATId id) external onlyResourceManager {
+    function removeProviderToken(PATId id) external onlyResourceManager {
         PAT memory pat = PATs[id];
-        require(pat.owner == msg.sender, "PeersManager: not owner");
+        require(pat.owner == msg.sender, "ProviderManager: not owner");
         _removeCollateral(id, pat, fluenceToken());
     }
 
@@ -79,7 +79,7 @@ abstract contract PeersManager is PeersManagerPrivate {
         AquaProxy.Particle calldata particle
     ) external {
         try aquaProxy().verifyParticle(particle) {
-            revert("PeersManager: particle is valid");
+            revert("ProviderManager: particle is valid");
         } catch {
             IERC20 token = fluenceToken();
             PAT memory pat = PATs[id];
