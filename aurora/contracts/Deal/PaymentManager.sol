@@ -3,11 +3,11 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../Core/Core.sol";
-import "./PeersManager.sol";
+import "./ProviderManager.sol";
 
 //TODO
 /*
-contract PaymentManagerState is PeersManagerState {
+contract PaymentManagerState is ProviderManagerState {
     struct Particle {
         PATId[] PATs;
     }
@@ -20,7 +20,7 @@ contract PaymentManagerState is PeersManagerState {
     State internal _paymentManagerState;
 }
 
-abstract contract PaymentManagerPrivate is PeersManager, PaymentManagerState {
+abstract contract PaymentManagerPrivate is ProviderManager, PaymentManagerState {
     using SafeERC20 for IERC20;
 
     function _hashEpoch(PATId id, uint256 epoch) internal view returns (bool) {
