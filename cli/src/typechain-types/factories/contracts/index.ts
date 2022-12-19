@@ -2,9 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export * as auroraSdk from "./AuroraSDK";
+export * as core from "./Core";
 export * as deal from "./Deal";
-export { AquaProxy__factory } from "./AquaProxy__factory";
-export { Core__factory } from "./Core__factory";
-export { DealFactory__factory } from "./DealFactory__factory";
-export { DeveloperFaucet__factory } from "./DeveloperFaucet__factory";
-export { TestERC20__factory } from "./TestERC20__factory";
+export * as dev from "./Dev";
+export * as factory from "./Factory";

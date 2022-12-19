@@ -1,6 +1,6 @@
 import { Command, Flags } from "@oclif/core";
 import { readFileSync } from "fs";
-import { ethers } from "ethers";
+import { BigNumber, ethers, utils } from "ethers";
 import {
   getFactoryContract,
   getUSDContract,
@@ -19,8 +19,18 @@ export default class Create extends Command {
 
   static args = [
     {
-      name: "airScriptPath",
-      description: "Path for aqua script",
+      name: "subnetId",
+      description: "Subnet ID for deal",
+      required: true,
+    },
+    {
+      name: "pricePerEpoch",
+      description: "price per epoch",
+      required: true,
+    },
+    {
+      name: "requiredStake",
+      description: "required stake for a peer",
       required: true,
     },
   ];
@@ -28,21 +38,19 @@ export default class Create extends Command {
   async run(): Promise<void> {
     const { args, flags } = await this.parse(Create);
 
-    const privKey = flags.privKey;
-    const airScriptPath = args.airScriptPath;
-
-    let aquaScript = readFileSync(airScriptPath, "utf8");
-    let hash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(aquaScript));
-
-    this.log("Aqua script hash: ", hash);
-
-    const wallet = getWallet(privKey);
+    const wallet = getWallet(flags.privKey);
     const factory = await getFactoryContract(wallet);
     const tx = await factory.createDeal(
-      (
-        await getUSDContract(wallet)
-      ).address,
-      hash
+      utils.keccak256(utils.toUtf8Bytes(args.subnetId)), //TODO: base64?
+      {
+        paymentToken: (await getUSDContract(wallet)).address,
+        pricePerEpoch: BigNumber.from(args.pricePerEpoch).mul(
+          BigNumber.from(10).pow(18)
+        ),
+        requiredStake: BigNumber.from(args.requiredStake).mul(
+          BigNumber.from(10).pow(18)
+        ),
+      }
     );
     const res = await tx.wait();
 
@@ -50,7 +58,7 @@ export default class Create extends Command {
       res.logs.find((x) => {
         return x.topics[0] == factory.interface.getEventTopic("CreateDeal");
       })!
-    ).args.addr;
+    ).args.deal;
 
     this.log(`Your deal contract: ${dealAddress}`);
   }

@@ -13,9 +13,45 @@ import * as Contracts from ".";
 declare module "hardhat/types/runtime" {
   interface HardhatEthersHelpers extends HardhatEthersHelpersBase {
     getContractFactory(
+      name: "OwnableUpgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.OwnableUpgradeable__factory>;
+    getContractFactory(
+      name: "Initializable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Initializable__factory>;
+    getContractFactory(
+      name: "ContextUpgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ContextUpgradeable__factory>;
+    getContractFactory(
       name: "Ownable",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Ownable__factory>;
+    getContractFactory(
+      name: "IERC1822Proxiable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC1822Proxiable__factory>;
+    getContractFactory(
+      name: "IBeacon",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IBeacon__factory>;
+    getContractFactory(
+      name: "ERC1967Proxy",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC1967Proxy__factory>;
+    getContractFactory(
+      name: "ERC1967Upgrade",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC1967Upgrade__factory>;
+    getContractFactory(
+      name: "Proxy",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Proxy__factory>;
+    getContractFactory(
+      name: "UUPSUpgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.UUPSUpgradeable__factory>;
     getContractFactory(
       name: "ERC20",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -33,10 +69,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC20__factory>;
     getContractFactory(
-      name: "AquaProxy",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.AquaProxy__factory>;
-    getContractFactory(
       name: "AuroraSdk",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.AuroraSdk__factory>;
@@ -49,33 +81,49 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Utils__factory>;
     getContractFactory(
+      name: "AquaProxy",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.AquaProxy__factory>;
+    getContractFactory(
       name: "Core",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Core__factory>;
     getContractFactory(
-      name: "BaseDeal",
+      name: "CoreState",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.BaseDeal__factory>;
+    ): Promise<Contracts.CoreState__factory>;
+    getContractFactory(
+      name: "EpochManager",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.EpochManager__factory>;
     getContractFactory(
       name: "Deal",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Deal__factory>;
     getContractFactory(
-      name: "IDeal",
+      name: "DealConfig",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IDeal__factory>;
+    ): Promise<Contracts.DealConfig__factory>;
     getContractFactory(
-      name: "IPeerManager",
+      name: "DepositManager",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IPeerManager__factory>;
+    ): Promise<Contracts.DepositManager__factory>;
     getContractFactory(
-      name: "PeersManager",
+      name: "ProviderManager",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.PeersManager__factory>;
+    ): Promise<Contracts.ProviderManager__factory>;
     getContractFactory(
-      name: "DealFactory",
+      name: "ProviderManagerPrivate",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.DealFactory__factory>;
+    ): Promise<Contracts.ProviderManagerPrivate__factory>;
+    getContractFactory(
+      name: "ProviderManagerState",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ProviderManagerState__factory>;
+    getContractFactory(
+      name: "RoleManager",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.RoleManager__factory>;
     getContractFactory(
       name: "DeveloperFaucet",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -84,12 +132,61 @@ declare module "hardhat/types/runtime" {
       name: "TestERC20",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TestERC20__factory>;
+    getContractFactory(
+      name: "DealFactory",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.DealFactory__factory>;
 
+    getContractAt(
+      name: "OwnableUpgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.OwnableUpgradeable>;
+    getContractAt(
+      name: "Initializable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Initializable>;
+    getContractAt(
+      name: "ContextUpgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ContextUpgradeable>;
     getContractAt(
       name: "Ownable",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.Ownable>;
+    getContractAt(
+      name: "IERC1822Proxiable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC1822Proxiable>;
+    getContractAt(
+      name: "IBeacon",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IBeacon>;
+    getContractAt(
+      name: "ERC1967Proxy",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC1967Proxy>;
+    getContractAt(
+      name: "ERC1967Upgrade",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC1967Upgrade>;
+    getContractAt(
+      name: "Proxy",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Proxy>;
+    getContractAt(
+      name: "UUPSUpgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.UUPSUpgradeable>;
     getContractAt(
       name: "ERC20",
       address: string,
@@ -111,11 +208,6 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IERC20>;
     getContractAt(
-      name: "AquaProxy",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.AquaProxy>;
-    getContractAt(
       name: "AuroraSdk",
       address: string,
       signer?: ethers.Signer
@@ -131,40 +223,60 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Utils>;
     getContractAt(
+      name: "AquaProxy",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.AquaProxy>;
+    getContractAt(
       name: "Core",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.Core>;
     getContractAt(
-      name: "BaseDeal",
+      name: "CoreState",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.BaseDeal>;
+    ): Promise<Contracts.CoreState>;
+    getContractAt(
+      name: "EpochManager",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.EpochManager>;
     getContractAt(
       name: "Deal",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.Deal>;
     getContractAt(
-      name: "IDeal",
+      name: "DealConfig",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.IDeal>;
+    ): Promise<Contracts.DealConfig>;
     getContractAt(
-      name: "IPeerManager",
+      name: "DepositManager",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.IPeerManager>;
+    ): Promise<Contracts.DepositManager>;
     getContractAt(
-      name: "PeersManager",
+      name: "ProviderManager",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.PeersManager>;
+    ): Promise<Contracts.ProviderManager>;
     getContractAt(
-      name: "DealFactory",
+      name: "ProviderManagerPrivate",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.DealFactory>;
+    ): Promise<Contracts.ProviderManagerPrivate>;
+    getContractAt(
+      name: "ProviderManagerState",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ProviderManagerState>;
+    getContractAt(
+      name: "RoleManager",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.RoleManager>;
     getContractAt(
       name: "DeveloperFaucet",
       address: string,
@@ -175,6 +287,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.TestERC20>;
+    getContractAt(
+      name: "DealFactory",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.DealFactory>;
 
     // default types
     getContractFactory(

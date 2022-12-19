@@ -56,6 +56,14 @@ contract DealConfig is DealConfigState, DealConfigPrivate, Ownable {
         return _dealConfigState.core.aquaProxy();
     }
 
+    function subnetId() public view returns (bytes32) {
+        return _dealConfigState.subnetId;
+    }
+
+    function settings() public view returns (Settings memory) {
+        return _dealConfigState.settings;
+    }
+
     function setNewSettings(
         Settings calldata settings_,
         bytes32 propertyBits

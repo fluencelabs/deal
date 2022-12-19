@@ -27,6 +27,20 @@ import type {
   PromiseOrValue,
 } from "../../common";
 
+export declare namespace DealConfigState {
+  export type SettingsStruct = {
+    paymentToken: PromiseOrValue<string>;
+    pricePerEpoch: PromiseOrValue<BigNumberish>;
+    requiredStake: PromiseOrValue<BigNumberish>;
+  };
+
+  export type SettingsStructOutput = [string, BigNumber, BigNumber] & {
+    paymentToken: string;
+    pricePerEpoch: BigNumber;
+    requiredStake: BigNumber;
+  };
+}
+
 export declare namespace AquaProxy {
   export type ParticleStruct = {
     air: PromiseOrValue<string>;
@@ -45,171 +59,124 @@ export declare namespace AquaProxy {
 
 export interface DealInterface extends utils.Interface {
   functions: {
-    "EXIT_TIMEOUT()": FunctionFragment;
-    "GOLDEN_PARTICLE_TARGET()": FunctionFragment;
-    "REWARD_AMOUNT()": FunctionFragment;
-    "STAKE_AMOUNT()": FunctionFragment;
-    "WITHDRAW_TIMEOUT()": FunctionFragment;
-    "airScriptHash()": FunctionFragment;
+    "PATs(bytes32)": FunctionFragment;
+    "addProviderToken(bytes32)": FunctionFragment;
     "aquaProxy()": FunctionFragment;
-    "claimReward((string,string,string,string),address)": FunctionFragment;
-    "core()": FunctionFragment;
-    "createExitRequest()": FunctionFragment;
-    "createWithdrawRequest()": FunctionFragment;
-    "deposit(uint256)": FunctionFragment;
-    "exit()": FunctionFragment;
+    "cancelWithdrawRequest(address,uint256)": FunctionFragment;
+    "createWithdrawRequest(address,uint256)": FunctionFragment;
+    "deposit(address,uint256)": FunctionFragment;
     "fluenceToken()": FunctionFragment;
-    "lastWithdrawRqTime()": FunctionFragment;
+    "getRole(address)": FunctionFragment;
     "owner()": FunctionFragment;
-    "payedParticles(bytes32)": FunctionFragment;
-    "paymentToken()": FunctionFragment;
+    "register()": FunctionFragment;
+    "removeProviderToken(bytes32)": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
-    "slash((string,string,string,string),address)": FunctionFragment;
-    "stake()": FunctionFragment;
+    "setNewSettings((address,uint256,uint256),bytes32)": FunctionFragment;
+    "settings()": FunctionFragment;
+    "slash(bytes32,address,(string,string,string,string))": FunctionFragment;
+    "subnetId()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
-    "validators(address)": FunctionFragment;
-    "withdraw()": FunctionFragment;
+    "updateSettings()": FunctionFragment;
+    "withdraw(address)": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "EXIT_TIMEOUT"
-      | "GOLDEN_PARTICLE_TARGET"
-      | "REWARD_AMOUNT"
-      | "STAKE_AMOUNT"
-      | "WITHDRAW_TIMEOUT"
-      | "airScriptHash"
+      | "PATs"
+      | "addProviderToken"
       | "aquaProxy"
-      | "claimReward"
-      | "core"
-      | "createExitRequest"
+      | "cancelWithdrawRequest"
       | "createWithdrawRequest"
       | "deposit"
-      | "exit"
       | "fluenceToken"
-      | "lastWithdrawRqTime"
+      | "getRole"
       | "owner"
-      | "payedParticles"
-      | "paymentToken"
+      | "register"
+      | "removeProviderToken"
       | "renounceOwnership"
+      | "setNewSettings"
+      | "settings"
       | "slash"
-      | "stake"
+      | "subnetId"
       | "transferOwnership"
-      | "validators"
+      | "updateSettings"
       | "withdraw"
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "EXIT_TIMEOUT",
-    values?: undefined
+    functionFragment: "PATs",
+    values: [PromiseOrValue<BytesLike>]
   ): string;
   encodeFunctionData(
-    functionFragment: "GOLDEN_PARTICLE_TARGET",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "REWARD_AMOUNT",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "STAKE_AMOUNT",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "WITHDRAW_TIMEOUT",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "airScriptHash",
-    values?: undefined
+    functionFragment: "addProviderToken",
+    values: [PromiseOrValue<BytesLike>]
   ): string;
   encodeFunctionData(functionFragment: "aquaProxy", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "claimReward",
-    values: [AquaProxy.ParticleStruct, PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(functionFragment: "core", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "createExitRequest",
-    values?: undefined
+    functionFragment: "cancelWithdrawRequest",
+    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
     functionFragment: "createWithdrawRequest",
-    values?: undefined
+    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
     functionFragment: "deposit",
-    values: [PromiseOrValue<BigNumberish>]
+    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
   ): string;
-  encodeFunctionData(functionFragment: "exit", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "fluenceToken",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "lastWithdrawRqTime",
-    values?: undefined
+    functionFragment: "getRole",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(functionFragment: "register", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "payedParticles",
+    functionFragment: "removeProviderToken",
     values: [PromiseOrValue<BytesLike>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "paymentToken",
-    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "renounceOwnership",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "slash",
-    values: [AquaProxy.ParticleStruct, PromiseOrValue<string>]
+    functionFragment: "setNewSettings",
+    values: [DealConfigState.SettingsStruct, PromiseOrValue<BytesLike>]
   ): string;
-  encodeFunctionData(functionFragment: "stake", values?: undefined): string;
+  encodeFunctionData(functionFragment: "settings", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "slash",
+    values: [
+      PromiseOrValue<BytesLike>,
+      PromiseOrValue<string>,
+      AquaProxy.ParticleStruct
+    ]
+  ): string;
+  encodeFunctionData(functionFragment: "subnetId", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "validators",
+    functionFragment: "updateSettings",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "withdraw",
     values: [PromiseOrValue<string>]
   ): string;
-  encodeFunctionData(functionFragment: "withdraw", values?: undefined): string;
 
+  decodeFunctionResult(functionFragment: "PATs", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "EXIT_TIMEOUT",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "GOLDEN_PARTICLE_TARGET",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "REWARD_AMOUNT",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "STAKE_AMOUNT",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "WITHDRAW_TIMEOUT",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "airScriptHash",
+    functionFragment: "addProviderToken",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "aquaProxy", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "claimReward",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "core", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "createExitRequest",
+    functionFragment: "cancelWithdrawRequest",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -217,43 +184,58 @@ export interface DealInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "deposit", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "exit", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "fluenceToken",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "lastWithdrawRqTime",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: "getRole", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "register", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "payedParticles",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "paymentToken",
+    functionFragment: "removeProviderToken",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "renounceOwnership",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "setNewSettings",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "settings", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "slash", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "stake", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "subnetId", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "validators", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "updateSettings",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
 
   events: {
+    "AddProviderToken(address,bytes32)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "AddProviderToken"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
 }
+
+export interface AddProviderTokenEventObject {
+  owner: string;
+  id: string;
+}
+export type AddProviderTokenEvent = TypedEvent<
+  [string, string],
+  AddProviderTokenEventObject
+>;
+
+export type AddProviderTokenEventFilter =
+  TypedEventFilter<AddProviderTokenEvent>;
 
 export interface OwnershipTransferredEventObject {
   previousOwner: string;
@@ -294,256 +276,268 @@ export interface Deal extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    EXIT_TIMEOUT(overrides?: CallOverrides): Promise<[BigNumber]>;
+    PATs(
+      arg0: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<[string, BigNumber] & { owner: string; collateral: BigNumber }>;
 
-    GOLDEN_PARTICLE_TARGET(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    REWARD_AMOUNT(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    STAKE_AMOUNT(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    WITHDRAW_TIMEOUT(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    airScriptHash(overrides?: CallOverrides): Promise<[string]>;
-
-    aquaProxy(overrides?: CallOverrides): Promise<[string]>;
-
-    claimReward(
-      particle: AquaProxy.ParticleStruct,
-      account: PromiseOrValue<string>,
+    addProviderToken(
+      salt: PromiseOrValue<BytesLike>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    core(overrides?: CallOverrides): Promise<[string]>;
+    aquaProxy(overrides?: CallOverrides): Promise<[string]>;
 
-    createExitRequest(
+    cancelWithdrawRequest(
+      token: PromiseOrValue<string>,
+      timestamp: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
     createWithdrawRequest(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    deposit(
+      token: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    exit(
+    deposit(
+      token: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
     fluenceToken(overrides?: CallOverrides): Promise<[string]>;
 
-    lastWithdrawRqTime(overrides?: CallOverrides): Promise<[BigNumber]>;
+    getRole(
+      addr: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<[number]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
-    payedParticles(
-      arg0: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
+    register(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
 
-    paymentToken(overrides?: CallOverrides): Promise<[string]>;
+    removeProviderToken(
+      id: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    slash(
-      particle: AquaProxy.ParticleStruct,
-      account: PromiseOrValue<string>,
+    setNewSettings(
+      settings_: DealConfigState.SettingsStruct,
+      propertyBits: PromiseOrValue<BytesLike>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    stake(
+    settings(
+      overrides?: CallOverrides
+    ): Promise<[DealConfigState.SettingsStructOutput]>;
+
+    slash(
+      id: PromiseOrValue<BytesLike>,
+      addr: PromiseOrValue<string>,
+      particle: AquaProxy.ParticleStruct,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
+
+    subnetId(overrides?: CallOverrides): Promise<[string]>;
 
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    validators(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, number, BigNumber] & {
-        balance: BigNumber;
-        status: number;
-        lastExitRqTime: BigNumber;
-      }
-    >;
+    updateSettings(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
 
     withdraw(
+      token: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
   };
 
-  EXIT_TIMEOUT(overrides?: CallOverrides): Promise<BigNumber>;
+  PATs(
+    arg0: PromiseOrValue<BytesLike>,
+    overrides?: CallOverrides
+  ): Promise<[string, BigNumber] & { owner: string; collateral: BigNumber }>;
 
-  GOLDEN_PARTICLE_TARGET(overrides?: CallOverrides): Promise<BigNumber>;
-
-  REWARD_AMOUNT(overrides?: CallOverrides): Promise<BigNumber>;
-
-  STAKE_AMOUNT(overrides?: CallOverrides): Promise<BigNumber>;
-
-  WITHDRAW_TIMEOUT(overrides?: CallOverrides): Promise<BigNumber>;
-
-  airScriptHash(overrides?: CallOverrides): Promise<string>;
-
-  aquaProxy(overrides?: CallOverrides): Promise<string>;
-
-  claimReward(
-    particle: AquaProxy.ParticleStruct,
-    account: PromiseOrValue<string>,
+  addProviderToken(
+    salt: PromiseOrValue<BytesLike>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  core(overrides?: CallOverrides): Promise<string>;
+  aquaProxy(overrides?: CallOverrides): Promise<string>;
 
-  createExitRequest(
+  cancelWithdrawRequest(
+    token: PromiseOrValue<string>,
+    timestamp: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   createWithdrawRequest(
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  deposit(
+    token: PromiseOrValue<string>,
     amount: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  exit(
+  deposit(
+    token: PromiseOrValue<string>,
+    amount: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   fluenceToken(overrides?: CallOverrides): Promise<string>;
 
-  lastWithdrawRqTime(overrides?: CallOverrides): Promise<BigNumber>;
+  getRole(
+    addr: PromiseOrValue<string>,
+    overrides?: CallOverrides
+  ): Promise<number>;
 
   owner(overrides?: CallOverrides): Promise<string>;
 
-  payedParticles(
-    arg0: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
+  register(
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
 
-  paymentToken(overrides?: CallOverrides): Promise<string>;
+  removeProviderToken(
+    id: PromiseOrValue<BytesLike>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
 
   renounceOwnership(
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  slash(
-    particle: AquaProxy.ParticleStruct,
-    account: PromiseOrValue<string>,
+  setNewSettings(
+    settings_: DealConfigState.SettingsStruct,
+    propertyBits: PromiseOrValue<BytesLike>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  stake(
+  settings(
+    overrides?: CallOverrides
+  ): Promise<DealConfigState.SettingsStructOutput>;
+
+  slash(
+    id: PromiseOrValue<BytesLike>,
+    addr: PromiseOrValue<string>,
+    particle: AquaProxy.ParticleStruct,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
+
+  subnetId(overrides?: CallOverrides): Promise<string>;
 
   transferOwnership(
     newOwner: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  validators(
-    arg0: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<
-    [BigNumber, number, BigNumber] & {
-      balance: BigNumber;
-      status: number;
-      lastExitRqTime: BigNumber;
-    }
-  >;
+  updateSettings(
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
 
   withdraw(
+    token: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    EXIT_TIMEOUT(overrides?: CallOverrides): Promise<BigNumber>;
+    PATs(
+      arg0: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<[string, BigNumber] & { owner: string; collateral: BigNumber }>;
 
-    GOLDEN_PARTICLE_TARGET(overrides?: CallOverrides): Promise<BigNumber>;
-
-    REWARD_AMOUNT(overrides?: CallOverrides): Promise<BigNumber>;
-
-    STAKE_AMOUNT(overrides?: CallOverrides): Promise<BigNumber>;
-
-    WITHDRAW_TIMEOUT(overrides?: CallOverrides): Promise<BigNumber>;
-
-    airScriptHash(overrides?: CallOverrides): Promise<string>;
-
-    aquaProxy(overrides?: CallOverrides): Promise<string>;
-
-    claimReward(
-      particle: AquaProxy.ParticleStruct,
-      account: PromiseOrValue<string>,
+    addProviderToken(
+      salt: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    core(overrides?: CallOverrides): Promise<string>;
+    aquaProxy(overrides?: CallOverrides): Promise<string>;
 
-    createExitRequest(overrides?: CallOverrides): Promise<void>;
+    cancelWithdrawRequest(
+      token: PromiseOrValue<string>,
+      timestamp: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
-    createWithdrawRequest(overrides?: CallOverrides): Promise<void>;
-
-    deposit(
+    createWithdrawRequest(
+      token: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    exit(overrides?: CallOverrides): Promise<void>;
-
-    fluenceToken(overrides?: CallOverrides): Promise<string>;
-
-    lastWithdrawRqTime(overrides?: CallOverrides): Promise<BigNumber>;
-
-    owner(overrides?: CallOverrides): Promise<string>;
-
-    payedParticles(
-      arg0: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-
-    paymentToken(overrides?: CallOverrides): Promise<string>;
-
-    renounceOwnership(overrides?: CallOverrides): Promise<void>;
-
-    slash(
-      particle: AquaProxy.ParticleStruct,
-      account: PromiseOrValue<string>,
+    deposit(
+      token: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    stake(overrides?: CallOverrides): Promise<void>;
+    fluenceToken(overrides?: CallOverrides): Promise<string>;
+
+    getRole(
+      addr: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<number>;
+
+    owner(overrides?: CallOverrides): Promise<string>;
+
+    register(overrides?: CallOverrides): Promise<void>;
+
+    removeProviderToken(
+      id: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    renounceOwnership(overrides?: CallOverrides): Promise<void>;
+
+    setNewSettings(
+      settings_: DealConfigState.SettingsStruct,
+      propertyBits: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    settings(
+      overrides?: CallOverrides
+    ): Promise<DealConfigState.SettingsStructOutput>;
+
+    slash(
+      id: PromiseOrValue<BytesLike>,
+      addr: PromiseOrValue<string>,
+      particle: AquaProxy.ParticleStruct,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    subnetId(overrides?: CallOverrides): Promise<string>;
 
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    validators(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, number, BigNumber] & {
-        balance: BigNumber;
-        status: number;
-        lastExitRqTime: BigNumber;
-      }
-    >;
+    updateSettings(overrides?: CallOverrides): Promise<void>;
 
-    withdraw(overrides?: CallOverrides): Promise<void>;
+    withdraw(
+      token: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
   };
 
   filters: {
+    "AddProviderToken(address,bytes32)"(
+      owner?: PromiseOrValue<string> | null,
+      id?: null
+    ): AddProviderTokenEventFilter;
+    AddProviderToken(
+      owner?: PromiseOrValue<string> | null,
+      id?: null
+    ): AddProviderTokenEventFilter;
+
     "OwnershipTransferred(address,address)"(
       previousOwner?: PromiseOrValue<string> | null,
       newOwner?: PromiseOrValue<string> | null
@@ -555,169 +549,171 @@ export interface Deal extends BaseContract {
   };
 
   estimateGas: {
-    EXIT_TIMEOUT(overrides?: CallOverrides): Promise<BigNumber>;
+    PATs(
+      arg0: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
-    GOLDEN_PARTICLE_TARGET(overrides?: CallOverrides): Promise<BigNumber>;
-
-    REWARD_AMOUNT(overrides?: CallOverrides): Promise<BigNumber>;
-
-    STAKE_AMOUNT(overrides?: CallOverrides): Promise<BigNumber>;
-
-    WITHDRAW_TIMEOUT(overrides?: CallOverrides): Promise<BigNumber>;
-
-    airScriptHash(overrides?: CallOverrides): Promise<BigNumber>;
-
-    aquaProxy(overrides?: CallOverrides): Promise<BigNumber>;
-
-    claimReward(
-      particle: AquaProxy.ParticleStruct,
-      account: PromiseOrValue<string>,
+    addProviderToken(
+      salt: PromiseOrValue<BytesLike>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    core(overrides?: CallOverrides): Promise<BigNumber>;
+    aquaProxy(overrides?: CallOverrides): Promise<BigNumber>;
 
-    createExitRequest(
+    cancelWithdrawRequest(
+      token: PromiseOrValue<string>,
+      timestamp: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     createWithdrawRequest(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    deposit(
+      token: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    exit(
+    deposit(
+      token: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     fluenceToken(overrides?: CallOverrides): Promise<BigNumber>;
 
-    lastWithdrawRqTime(overrides?: CallOverrides): Promise<BigNumber>;
-
-    owner(overrides?: CallOverrides): Promise<BigNumber>;
-
-    payedParticles(
-      arg0: PromiseOrValue<BytesLike>,
+    getRole(
+      addr: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    paymentToken(overrides?: CallOverrides): Promise<BigNumber>;
+    owner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    register(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    removeProviderToken(
+      id: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    slash(
-      particle: AquaProxy.ParticleStruct,
-      account: PromiseOrValue<string>,
+    setNewSettings(
+      settings_: DealConfigState.SettingsStruct,
+      propertyBits: PromiseOrValue<BytesLike>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    stake(
+    settings(overrides?: CallOverrides): Promise<BigNumber>;
+
+    slash(
+      id: PromiseOrValue<BytesLike>,
+      addr: PromiseOrValue<string>,
+      particle: AquaProxy.ParticleStruct,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
+
+    subnetId(overrides?: CallOverrides): Promise<BigNumber>;
 
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    validators(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
+    updateSettings(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     withdraw(
+      token: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    EXIT_TIMEOUT(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    GOLDEN_PARTICLE_TARGET(
+    PATs(
+      arg0: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    REWARD_AMOUNT(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    STAKE_AMOUNT(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    WITHDRAW_TIMEOUT(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    airScriptHash(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    aquaProxy(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    claimReward(
-      particle: AquaProxy.ParticleStruct,
-      account: PromiseOrValue<string>,
+    addProviderToken(
+      salt: PromiseOrValue<BytesLike>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    core(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    aquaProxy(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    createExitRequest(
+    cancelWithdrawRequest(
+      token: PromiseOrValue<string>,
+      timestamp: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     createWithdrawRequest(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    deposit(
+      token: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    exit(
+    deposit(
+      token: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     fluenceToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    lastWithdrawRqTime(
+    getRole(
+      addr: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    payedParticles(
-      arg0: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
+    register(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    paymentToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    removeProviderToken(
+      id: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    slash(
-      particle: AquaProxy.ParticleStruct,
-      account: PromiseOrValue<string>,
+    setNewSettings(
+      settings_: DealConfigState.SettingsStruct,
+      propertyBits: PromiseOrValue<BytesLike>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    stake(
+    settings(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    slash(
+      id: PromiseOrValue<BytesLike>,
+      addr: PromiseOrValue<string>,
+      particle: AquaProxy.ParticleStruct,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
+
+    subnetId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    validators(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
+    updateSettings(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     withdraw(
+      token: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
   };
