@@ -8,6 +8,9 @@ import "./RoleManager.sol";
 
 contract ProviderManagerState {
     type PATId is bytes32;
+
+    event AddProviderToken(address indexed owner, PATId id);
+
     struct PAT {
         address owner;
         uint256 collateral;
@@ -65,6 +68,8 @@ abstract contract ProviderManager is ProviderManagerPrivate {
             balance -
             _dealConfigState.settings.requiredStake;
         PATs[id].collateral += requiredStake;
+
+        emit AddProviderToken(addr, id);
     }
 
     function removeProviderToken(PATId id) external onlyResourceManager {

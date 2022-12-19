@@ -3,10 +3,11 @@
 /* eslint-disable */
 import type * as auroraSdk from "./AuroraSDK";
 export type { auroraSdk };
+import type * as core from "./Core";
+export type { core };
 import type * as deal from "./Deal";
 export type { deal };
-export type { AquaProxy } from "./AquaProxy";
-export type { Core } from "./Core";
-export type { DealFactory } from "./DealFactory";
-export type { DeveloperFaucet } from "./DeveloperFaucet";
-export type { TestERC20 } from "./TestERC20";
+import type * as dev from "./Dev";
+export type { dev };
+import type * as factory from "./Factory";
+export type { factory };

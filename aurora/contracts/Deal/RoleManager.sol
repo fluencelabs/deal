@@ -47,4 +47,8 @@ contract RoleManager is RoleManagerPrivate {
     function register() external {
         _register(msg.sender, Role.ResourceManager);
     }
+
+    function getRole(address addr) external view returns (Role) {
+        return _roleManagerState.roles[addr];
+    }
 }
