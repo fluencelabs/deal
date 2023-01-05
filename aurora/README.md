@@ -1,13 +1,16 @@
-# Sample Hardhat Project
+# Deal Contracts System
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
-
-Try running some of the following tasks:
+## Run local network with contracts
 
 ```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
+npm install
+npm run compile
 npx hardhat node
-npx hardhat run scripts/deploy.ts
+```
+
+## Run local network with contracts (docker
+
+```shell
+docker build -f docker/Dockerfile . -t contracts-env
+docker run -p 8545:8545 contracts-env
 ```

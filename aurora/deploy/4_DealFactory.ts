@@ -2,7 +2,6 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 import "hardhat-deploy";
 import "@nomiclabs/hardhat-ethers";
-import { DeveloperFaucet__factory } from "../typechain-types";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const accounts = await hre.getUnnamedAccounts();

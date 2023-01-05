@@ -4,6 +4,7 @@ import "hardhat-deploy";
 import dotenv from "dotenv";
 
 dotenv.config();
+
 const config: HardhatUserConfig = {
   solidity: "0.8.17",
   networks: {
@@ -17,7 +18,10 @@ const config: HardhatUserConfig = {
     },
     aurora: {
       url: "https://testnet.aurora.dev",
-      accounts: [process.env.AURORA_PRIVATE_KEY ?? ""],
+      accounts: [
+        process.env.AURORA_PRIVATE_KEY ??
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+      ],
     },
   },
 };
