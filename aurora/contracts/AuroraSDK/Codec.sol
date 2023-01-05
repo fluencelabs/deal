@@ -36,21 +36,21 @@ library Codec {
     }
 
     /// Encode Execution mode enum into borsh.
-    function encode(ExecutionMode mode) public pure returns (bytes1) {
+    function encodeEM(ExecutionMode mode) public pure returns (bytes1) {
         return bytes1(uint8(mode));
     }
 
     /// Encode PromiseArgsVariant enum into borsh.
-    function encode(PromiseArgsVariant mode) public pure returns (bytes1) {
+    function encodePromise(
+        PromiseArgsVariant mode
+    ) public pure returns (bytes1) {
         return bytes1(uint8(mode));
     }
 
     /// Encode base promise into borsh.
-    function encode(PromiseCreateArgs memory nearPromise)
-        public
-        pure
-        returns (bytes memory)
-    {
+    function encode(
+        PromiseCreateArgs memory nearPromise
+    ) public pure returns (bytes memory) {
         return
             abi.encodePacked(
                 encode(bytes(nearPromise.targetAccountId)),
@@ -62,11 +62,9 @@ library Codec {
     }
 
     /// Encode promise with callback into borsh.
-    function encode(PromiseWithCallback memory nearPromise)
-        public
-        pure
-        returns (bytes memory)
-    {
+    function encode(
+        PromiseWithCallback memory nearPromise
+    ) public pure returns (bytes memory) {
         return
             abi.encodePacked(
                 encode(nearPromise.base),
@@ -82,8 +80,8 @@ library Codec {
     ) public pure returns (bytes memory) {
         return
             abi.encodePacked(
-                encode(mode),
-                encode(PromiseArgsVariant.Create),
+                encodeEM(mode),
+                encodePromise(PromiseArgsVariant.Create),
                 encode(nearPromise)
             );
     }
@@ -96,18 +94,16 @@ library Codec {
     ) public pure returns (bytes memory) {
         return
             abi.encodePacked(
-                encode(mode),
-                encode(PromiseArgsVariant.Callback),
+                encodeEM(mode),
+                encodePromise(PromiseArgsVariant.Callback),
                 encode(nearPromise)
             );
     }
 
     /// Decode promise result using borsh.
-    function decodePromiseResult(Borsh.Data memory data)
-        public
-        pure
-        returns (PromiseResult memory result)
-    {
+    function decodePromiseResult(
+        Borsh.Data memory data
+    ) public pure returns (PromiseResult memory result) {
         result.status = PromiseResultStatus(data.decodeU8());
         if (result.status == PromiseResultStatus.Successful) {
             result.output = data.decodeBytes();
