@@ -1,0 +1,9 @@
+/contracts
+/deploy
+/deployments
+/docker
+/utils
+/artifacts
+/cache
+/typechain-types
+/hardhat.config.ts
