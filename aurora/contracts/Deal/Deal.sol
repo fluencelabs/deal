@@ -1,10 +1,12 @@
 pragma solidity ^0.8.17;
 
-import "./DealConfig.sol";
-import "./ProviderManager.sol";
+import "./DealConfig/DealConfig.sol";
+import "./DepositManager/DepositManager.sol";
+import "./ProviderManager/ProviderManager.sol";
+import "./RoleManager/RoleManager.sol";
 import "../Core/Core.sol";
 
-contract Deal is ProviderManager {
+contract Deal is DealConfig, DepositManager, ProviderManager, RoleManager {
     constructor(
         Core core_,
         bytes32 subnetId_,

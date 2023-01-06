@@ -1,7 +1,7 @@
 pragma solidity ^0.8.17;
 
 import "../Core/Core.sol";
-import "../Deal/DealConfig.sol";
+import "../Deal/DealConfig/DealConfig.sol";
 import "../Deal/Deal.sol";
 
 contract DealFactory {
