@@ -15,32 +15,37 @@ contract DealConfig is
 {
     using SafeERC20 for IERC20;
 
-    IDealConfig.ConfigState private _state;
+    Core private _coreAddr;
+    bytes32 private _subnetId;
+    Settings private _settings;
+    Settings private _newSettings;
+    uint256 private _settingsChangeTimestamp;
+    bytes32 private _settingsPropertyBits;
 
     constructor(
         Core core_,
         bytes32 subnetId_,
         IDealConfig.Settings memory settings_
     ) {
-        _state.core = core_;
-        _state.subnetId = subnetId_;
-        _state.settings = settings_;
+        _coreAddr = core_;
+        _subnetId = subnetId_;
+        _settings = settings_;
     }
 
     function fluenceToken() external view returns (IERC20) {
-        return _state.core.fluenceToken();
+        return _coreAddr.fluenceToken();
     }
 
     function aquaProxy() external view returns (AquaProxy) {
-        return _state.core.aquaProxy();
+        return _coreAddr.aquaProxy();
     }
 
     function subnetId() external view returns (bytes32) {
-        return _state.subnetId;
+        return _subnetId;
     }
 
     function settings() external view returns (IDealConfig.Settings memory) {
-        return _state.settings;
+        return _settings;
     }
 
     function setNewSettings(
@@ -48,52 +53,53 @@ contract DealConfig is
         bytes32 propertyBits
     ) public onlyOwner {
         if (_bitExist(propertyBits, SettingPropertyBit.PaymentToken)) {
-            _state.newSettings.paymentToken = settings_.paymentToken;
+            _newSettings.paymentToken = settings_.paymentToken;
         }
 
         if (_bitExist(propertyBits, SettingPropertyBit.PricePerEpoch)) {
-            _state.newSettings.pricePerEpoch = settings_.pricePerEpoch;
+            _newSettings.pricePerEpoch = settings_.pricePerEpoch;
         }
 
         if (_bitExist(propertyBits, SettingPropertyBit.RequiredStake)) {
-            _state.newSettings.requiredStake = settings_.requiredStake;
+            _newSettings.requiredStake = settings_.requiredStake;
         }
 
-        _state._settingsPropertyBits = propertyBits;
-        _state.settingsChangeTimestamp =
+        _settingsPropertyBits = propertyBits;
+        _settingsChangeTimestamp =
             block.timestamp +
-            _state.core.updateSettingsTimeout();
+            _coreAddr.updateSettingsTimeout();
     }
 
     function updateSettings() public onlyOwner {
         require(
-            _state.settingsChangeTimestamp != 0 &&
-                _state.settingsChangeTimestamp >= block.timestamp,
+            _settingsChangeTimestamp != 0 &&
+                _settingsChangeTimestamp >= block.timestamp,
             "DealConfig: timeout not passed"
         );
 
-        bytes32 propertyBits = _state._settingsPropertyBits;
+        bytes32 propertyBits = _settingsPropertyBits;
         if (_bitExist(propertyBits, SettingPropertyBit.PaymentToken)) {
-            _state.settings.paymentToken = _state.newSettings.paymentToken;
+            _settings.paymentToken = _newSettings.paymentToken;
         }
 
         if (_bitExist(propertyBits, SettingPropertyBit.PricePerEpoch)) {
-            _state.settings.pricePerEpoch = _state.newSettings.pricePerEpoch;
+            _settings.pricePerEpoch = _newSettings.pricePerEpoch;
         }
 
         if (_bitExist(propertyBits, SettingPropertyBit.RequiredStake)) {
-            _state.settings.requiredStake = _state.newSettings.requiredStake;
+            _settings.requiredStake = _newSettings.requiredStake;
         }
 
-        _state.settingsChangeTimestamp = 0;
+        _settingsChangeTimestamp = 0;
     }
 
-    function _dealConfigState()
-        internal
-        view
-        override
-        returns (IDealConfig.ConfigState memory)
-    {
-        return _state;
+    // --------- Internal functions ---------
+
+    function _core() internal view override returns (Core) {
+        return _coreAddr;
+    }
+
+    function _requiredStake() internal view override returns (uint) {
+        return _settings.requiredStake;
     }
 }

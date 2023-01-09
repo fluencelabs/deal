@@ -3,7 +3,6 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../DealConfig/DealConfigInternal.sol";
-import "../DepositManager/DepositManagerInternal.sol";
 import "./ProviderManagerInternal.sol";
 import "./IProviderManager.sol";
 import "../RoleManager/RMInternalInterface.sol";
@@ -16,53 +15,53 @@ abstract contract ProviderManager is
 {
     using SafeERC20 for IERC20;
 
-    function addProviderToken(bytes32 salt) external onlyResourceManager {
-        IERC20 token = _dealConfigState().core.fluenceToken();
-        address addr = msg.sender;
+    function createProviderToken(bytes32 salt) external onlyResourceManager {
+        IERC20 token = _core().fluenceToken();
+        address owner = msg.sender;
 
         //TODO: owner
-        PATId id = PATId.wrap(keccak256(abi.encode(block.number, salt, addr)));
-        PAT memory pat = _getPAT(id);
-
-        require(pat.owner == address(0x00), "Id already used");
+        PATId id = PATId.wrap(keccak256(abi.encode(block.number, salt, owner)));
+        require(_getPATOwner(id) == address(0x00), "Id already used");
         require(
-            _getRole(addr) == Role.ResourceManager,
+            _getRole(owner) == Role.ResourceManager,
             "Participant isn't ResourceManager"
         );
 
-        uint256 requiredStake = _dealConfigState().settings.requiredStake;
-        _addCollateral(id, pat, token, requiredStake);
+        _addCollateral(id, owner, token, _requiredStake());
 
-        emit AddProviderToken(addr, id);
+        emit AddProviderToken(owner, id);
     }
 
     function removeProviderToken(PATId id) external onlyResourceManager {
-        IERC20 token = _dealConfigState().core.fluenceToken();
+        IERC20 token = _core().fluenceToken();
 
-        PAT memory pat = _getPAT(id);
-        require(pat.owner == msg.sender, "ProviderManager: not owner");
-        _removeCollateral(id, pat, token);
+        require(_getPATOwner(id) == msg.sender, "ProviderManager: not owner");
+        _removeCollateral(id, token);
     }
 
-    function slash(
-        PATId id,
-        address addr,
-        AquaProxy.Particle calldata particle
-    ) external {
-        try _dealConfigState().core.aquaProxy().verifyParticle(particle) {
+    function slash(PATId id, AquaProxy.Particle calldata particle) external {
+        try _core().aquaProxy().verifyParticle(particle) {
             revert("ProviderManager: particle is valid");
         } catch {
-            IERC20 token = _dealConfigState().core.fluenceToken();
-            PAT memory pat = _getPAT(id);
+            IERC20 token = _core().fluenceToken();
+            address owner = _getPATOwner(id);
+            uint256 collateral = _getCollateral(id);
 
-            _removeCollateral(id, pat, token);
+            _removeCollateral(id, token);
 
-            uint slashAmount = (pat.collateral / 100) *
-                _dealConfigState().core.slashFactor();
-            _subBalance(token, slashAmount, addr);
+            uint slashAmount = (collateral / 100) * _core().slashFactor();
 
             //TODO: send to treasury
-            token.safeTransfer(address(0x00), slashAmount);
+            address treasury = address(0x00);
+            _transferBalance(
+                token,
+                owner,
+                treasury,
+                uint(PATId.unwrap(id)),
+                0,
+                slashAmount
+            );
+            _instantWithdraw(token, treasury, 0, slashAmount);
         }
     }
 }

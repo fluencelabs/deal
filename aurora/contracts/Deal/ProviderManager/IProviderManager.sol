@@ -12,13 +12,9 @@ interface IProviderManager {
         uint256 collateral;
     }
 
-    function addProviderToken(bytes32 salt) external;
+    function createProviderToken(bytes32 salt) external;
 
     function removeProviderToken(PATId id) external;
 
-    function slash(
-        PATId id,
-        address addr,
-        AquaProxy.Particle calldata particle
-    ) external;
+    function slash(PATId id, AquaProxy.Particle calldata particle) external;
 }

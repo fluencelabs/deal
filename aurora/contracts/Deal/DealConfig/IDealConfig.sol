@@ -10,15 +10,6 @@ interface IDealConfig {
         uint256 requiredStake;
     }
 
-    struct ConfigState {
-        Core core;
-        bytes32 subnetId;
-        Settings settings;
-        Settings newSettings;
-        uint256 settingsChangeTimestamp;
-        bytes32 _settingsPropertyBits;
-    }
-
     function fluenceToken() external view returns (IERC20);
 
     function aquaProxy() external view returns (AquaProxy);
