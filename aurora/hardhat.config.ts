@@ -12,6 +12,10 @@ const config: HardhatUserConfig = {
       forking: {
         url: "https://testnet.aurora.dev",
       },
+      accounts: {
+        passphrase:
+          "test test test test claim trade stairs crew inspire obey veteran budget",
+      },
     },
     localhost: {
       url: "http://localhost:8545",
