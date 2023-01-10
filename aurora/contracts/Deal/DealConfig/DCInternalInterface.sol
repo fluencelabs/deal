@@ -9,5 +9,5 @@ abstract contract DCInternalInterface {
 
     function _paymentToken() internal view virtual returns (IERC20);
 
-    function _pricePerEpoch() internal view override returns (uint);
+    function _pricePerEpoch() internal view virtual returns (uint);
 }

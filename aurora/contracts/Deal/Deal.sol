@@ -5,12 +5,14 @@ import "./BalanceManager/BalanceManagerInternal.sol";
 import "./ProviderManager/ProviderManager.sol";
 import "./RoleManager/RoleManager.sol";
 import "../Core/Core.sol";
+import "./PaymentManager/PaymentManager.sol";
 
 contract Deal is
-    DealConfig,
-    BalanceManagerInternal,
     ProviderManager,
-    RoleManager
+    PaymentManager,
+    RoleManager,
+    DealConfig,
+    BalanceManagerInternal
 {
     constructor(
         Core core_,
