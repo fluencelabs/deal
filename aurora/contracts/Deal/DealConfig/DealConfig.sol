@@ -102,4 +102,12 @@ contract DealConfig is
     function _requiredStake() internal view override returns (uint) {
         return _settings.requiredStake;
     }
+
+    function _paymentToken() internal view override returns (IERC20) {
+        return _settings.paymentToken;
+    }
+
+    function _pricePerEpoch() internal view override returns (uint) {
+        return _settings.pricePerEpoch;
+    }
 }

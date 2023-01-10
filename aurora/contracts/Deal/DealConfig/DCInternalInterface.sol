@@ -6,4 +6,8 @@ abstract contract DCInternalInterface {
     function _core() internal view virtual returns (Core);
 
     function _requiredStake() internal view virtual returns (uint);
+
+    function _paymentToken() internal view virtual returns (IERC20);
+
+    function _pricePerEpoch() internal view override returns (uint);
 }
