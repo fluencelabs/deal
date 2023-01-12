@@ -1,0 +1,8 @@
+{
+  "bootstrap-sha": "a0c2fa1070cf833b918e5eefd4f2489fc315f436",
+  "release-type": "node",
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": true,
+  "packages": {
+    "aurora": {}
+  }
