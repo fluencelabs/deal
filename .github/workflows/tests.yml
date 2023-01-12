@@ -85,6 +85,9 @@ jobs:
       - run: npm run build
         working-directory: aurora
 
+      - run: npm run node
+        working-directory: aurora
+
       - name: Run tests
         run: npm run test
         working-directory: aurora
