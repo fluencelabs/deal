@@ -1,0 +1,8 @@
+services:
+  hardhat-node:
+    build:
+      context: .
+    ports:
+      - "8545:8545"
+    volumes:
+      - "./node_modules:/aurora/node_modules"
