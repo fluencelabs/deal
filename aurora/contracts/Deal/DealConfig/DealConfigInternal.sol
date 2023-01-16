@@ -16,6 +16,6 @@ abstract contract DealConfigInternal {
         bytes32 propertyBits,
         SettingPropertyBit bit
     ) internal pure returns (bool) {
-        return (propertyBits & bytes32(uint256(bit)) != 0);
+        return (propertyBits & bytes32(1 << uint256(bit)) != 0);
     }
 }

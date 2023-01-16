@@ -37,6 +37,8 @@ abstract contract ProviderManager is
 
         require(_getPATOwner(id) == msg.sender, "ProviderManager: not owner");
         _removeCollateral(id, token);
+
+        emit RemoveProviderToken(id);
     }
 
     function slash(PATId id, AquaProxy.Particle calldata particle) external {
@@ -63,5 +65,9 @@ abstract contract ProviderManager is
             );
             _instantWithdraw(token, treasury, 0, slashAmount);
         }
+    }
+
+    function getPATOwner(PATId id) external view returns (address) {
+        return _getPATOwner(id);
     }
 }

@@ -11,6 +11,7 @@ const config: HardhatUserConfig = {
     hardhat: {
       forking: {
         url: "https://testnet.aurora.dev",
+        blockNumber: 83101397,
       },
     },
     localhost: {

@@ -16,6 +16,10 @@ abstract contract PaymentManager is
 
     mapping(uint => bool) private _isExistGoldenParticleByEpoch;
 
+    function getBalance(address owner) external view returns (uint256) {
+        return _getBalance(_paymentToken(), owner, DEFAULT_BALANCE);
+    }
+
     function deposit(uint256 amount) external {
         IERC20 token = _paymentToken();
         _deposit(token, msg.sender, DEFAULT_BALANCE, amount);
@@ -42,9 +46,9 @@ abstract contract PaymentManager is
 
         //TODO: if it's last amount in balance, golden particle receive sum without work confirmation
 
-        require(amount >= free, "Not enough free balance");
+        require(amount <= free, "Not enough free balance");
 
         IERC20 token = _paymentToken();
-        _deposit(token, msg.sender, DEFAULT_BALANCE, amount);
+        _instantWithdraw(token, msg.sender, DEFAULT_BALANCE, amount);
     }
 }

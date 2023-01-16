@@ -18,6 +18,8 @@ contract DealFactory {
         DealConfig.Settings memory settings
     ) external {
         Deal deal = new Deal(core, subnetId, settings);
+        deal.transferOwnership(msg.sender);
+
         emit CreateDeal(address(deal), settings);
     }
 }

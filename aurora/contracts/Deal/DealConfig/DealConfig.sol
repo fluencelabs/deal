@@ -50,8 +50,10 @@ contract DealConfig is
 
     function setNewSettings(
         IDealConfig.Settings calldata settings_,
-        bytes32 propertyBits
+        uint256 propertyBitsUint
     ) public onlyOwner {
+        bytes32 propertyBits = bytes32(propertyBitsUint);
+
         if (_bitExist(propertyBits, SettingPropertyBit.PaymentToken)) {
             _newSettings.paymentToken = settings_.paymentToken;
         }
@@ -73,7 +75,7 @@ contract DealConfig is
     function updateSettings() public onlyOwner {
         require(
             _settingsChangeTimestamp != 0 &&
-                _settingsChangeTimestamp >= block.timestamp,
+                block.timestamp >= _settingsChangeTimestamp,
             "DealConfig: timeout not passed"
         );
 

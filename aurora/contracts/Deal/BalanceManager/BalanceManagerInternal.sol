@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../../Utils/WithdrawRequests.sol";
 import "../../Core/Core.sol";
 import "../DealConfig/DCInternalInterface.sol";
-import "./IBalanceManager.sol";
 import "./BMInternalInterface.sol";
 
 abstract contract BalanceManagerInternal is
