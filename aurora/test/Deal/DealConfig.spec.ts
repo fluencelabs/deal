@@ -124,8 +124,6 @@ describe("DealConfig", () => {
 
     const newSettings = await deal.settings();
 
-    console.log(JSON.stringify(settings, null, 2));
-    console.log(JSON.stringify(newSettings, null, 2));
     expect(newSettings.paymentToken).to.be.equal(settings.paymentToken);
     expect(newSettings.pricePerEpoch).to.be.equal(settings.pricePerEpoch);
     expect(newSettings.requiredStake).to.be.equal(settings.requiredStake);

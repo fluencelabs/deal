@@ -1,18 +1,26 @@
 pragma solidity ^0.8.17;
 
-import "./DealConfig/DealConfig.sol";
-import "./BalanceManager/BalanceManagerInternal.sol";
-import "./ProviderManager/ProviderManager.sol";
-import "./RoleManager/RoleManager.sol";
-import "../Core/Core.sol";
-import "./PaymentManager/PaymentManager.sol";
+import "./external/BalanceManager.sol";
+import "./external/DealConfig.sol";
+import "./external/PaymentManager.sol";
+import "./external/ProviderManager.sol";
+import "./external/RoleManager.sol";
+
+import "./internal/BalanceManagerInternal.sol";
+import "./internal/DealConfigInternal.sol";
+import "./internal/ProviderManagerInternal.sol";
+import "./internal/RoleManagerInternal.sol";
 
 contract Deal is
-    ProviderManager,
-    PaymentManager,
-    RoleManager,
+    BalanceManager,
     DealConfig,
-    BalanceManagerInternal
+    PaymentManager,
+    ProviderManager,
+    RoleManager,
+    BalanceManagerInternal,
+    DealConfigInternal,
+    ProviderManagerInternal,
+    RoleManagerInternal
 {
     constructor(
         Core core_,

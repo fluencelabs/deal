@@ -3,16 +3,10 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./IDealConfig.sol";
-import "./DealConfigInternal.sol";
-import "./DCInternalInterface.sol";
+import "./interfaces/IDealConfig.sol";
+import "../internal/interfaces/DCInternalInterface.sol";
 
-contract DealConfig is
-    IDealConfig,
-    DealConfigInternal,
-    DCInternalInterface,
-    Ownable
-{
+abstract contract DealConfig is IDealConfig, DCInternalInterface, Ownable {
     using SafeERC20 for IERC20;
 
     Core private _coreAddr;
@@ -101,7 +95,7 @@ contract DealConfig is
         return _coreAddr;
     }
 
-    function _requiredStake() internal view override returns (uint) {
+    function _requiredStake() internal view override returns (uint256) {
         return _settings.requiredStake;
     }
 
@@ -109,7 +103,7 @@ contract DealConfig is
         return _settings.paymentToken;
     }
 
-    function _pricePerEpoch() internal view override returns (uint) {
+    function _pricePerEpoch() internal view override returns (uint256) {
         return _settings.pricePerEpoch;
     }
 }

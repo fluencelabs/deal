@@ -1,7 +1,7 @@
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../../Core/Core.sol";
+import "../../../Core/Core.sol";
 
 interface IDealConfig {
     struct Settings {

@@ -101,7 +101,7 @@ describe("PaymentManager", () => {
     const withdrawValue = value.div(2);
 
     const balanceBefore = await deal.getBalance(userAccount);
-    await (await deal.withdraw(withdrawValue)).wait();
+    await (await deal.withdrawDeposit(withdrawValue)).wait();
     const balanceAfter = await deal.getBalance(userAccount);
 
     expect(balanceAfter).to.be.equal(balanceBefore.sub(withdrawValue));

@@ -1,8 +1,8 @@
 pragma solidity ^0.8.17;
 
-import "./RoleManagerInternal.sol";
+import "../internal/interfaces/RMInternalInterface.sol";
 
-contract RoleManager is RoleManagerInternal {
+abstract contract RoleManager is RMInternalInterface {
     function register() external {
         _register(msg.sender, Role.ResourceManager);
     }

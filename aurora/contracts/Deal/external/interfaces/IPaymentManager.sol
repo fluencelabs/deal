@@ -5,5 +5,5 @@ interface IPaymentManager {
 
     function deposit(uint256 amount) external;
 
-    function withdraw(uint256 amount) external;
+    function withdrawDeposit(uint256 amount) external;
 }

@@ -1,6 +1,6 @@
 pragma solidity ^0.8.17;
 
-import "./RMInternalInterface.sol";
+import "./interfaces/RMInternalInterface.sol";
 
 contract RoleManagerInternal is RMInternalInterface {
     mapping(address => Role) private _roles;

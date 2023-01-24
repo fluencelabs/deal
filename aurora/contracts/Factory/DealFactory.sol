@@ -1,7 +1,6 @@
 pragma solidity ^0.8.17;
 
 import "../Core/Core.sol";
-import "../Deal/DealConfig/DealConfig.sol";
 import "../Deal/Deal.sol";
 
 contract DealFactory {
@@ -13,10 +12,9 @@ contract DealFactory {
         core = core_;
     }
 
-    function createDeal(
-        bytes32 subnetId,
-        DealConfig.Settings memory settings
-    ) external {
+    function createDeal(bytes32 subnetId, DealConfig.Settings memory settings)
+        external
+    {
         Deal deal = new Deal(core, subnetId, settings);
         deal.transferOwnership(msg.sender);
 

@@ -63,30 +63,45 @@ const setupTest = async (account: string) =>
         await faucet.fluenceToken()
       )) as IERC20;
 
+      const core = (await ethers.getContractAt(
+        "Core",
+        (
+          await deployments.get("Core")
+        ).address
+      )) as Core;
+
       return {
         deal: deal,
         usdToken: usdToken,
         fltToken: fltToken,
+        core: core,
       };
     }
   )();
 
+const setTimeNextTime = async (time: number) => {
+  await ethers.provider.send("evm_setNextBlockTimestamp", [time]);
+  await ethers.provider.send("evm_mine", []);
+};
+
 describe("ProviderManager", () => {
   let userAccount: string = "";
   let deal: Deal;
+  let core: Core;
   let usdToken: IERC20;
   let fltToken: IERC20;
+
+  let patId: string = "";
 
   before(async () => {
     const accounts = await getUnnamedAccounts();
     userAccount = accounts[0];
-  });
 
-  beforeEach(async () => {
     const config = await setupTest(userAccount);
     deal = config.deal;
     usdToken = config.usdToken;
     fltToken = config.fltToken;
+    core = config.core;
   });
 
   it("createProviderToken", async () => {
@@ -105,7 +120,7 @@ describe("ProviderManager", () => {
     const args = deal.interface.parseLog(log!).args;
 
     const owner: string = args["owner"];
-    const patId: string = args["id"];
+    patId = args["id"];
 
     expect(patId).not.to.be.undefined;
 
@@ -114,22 +129,6 @@ describe("ProviderManager", () => {
   });
 
   it("removeProviderToken", async () => {
-    await (await deal.register()).wait();
-
-    await (await fltToken.approve(deal.address, requiredStake)).wait();
-    const tx = await deal.createProviderToken(
-      ethers.utils.keccak256(ethers.utils.toUtf8Bytes("salt"))
-    );
-
-    const eventTopic = deal.interface.getEventTopic("AddProviderToken");
-    const log = (await tx.wait()).logs.find(
-      ({ topics }: any) => topics[0] === eventTopic
-    );
-
-    const args = deal.interface.parseLog(log!).args;
-
-    const patId: string = args["id"];
-
     const removeTokenTx = await deal.removeProviderToken(patId);
 
     const removeEventTopic = deal.interface.getEventTopic(
@@ -142,5 +141,22 @@ describe("ProviderManager", () => {
     expect(deal.interface.parseLog(logRemoveTopic!).args["id"]).to.be.equal(
       patId
     );
+  });
+
+  it("withdraw", async () => {
+    const balanceBefore = await fltToken.balanceOf(userAccount);
+
+    const timeout = await core.withdrawTimeout();
+    const block = await ethers.provider.getBlock("latest");
+    const settings = await deal.settings();
+
+    setTimeNextTime(block.timestamp + timeout);
+
+    const withdrawTx = await deal.withdraw(fltToken.address, 0);
+    await withdrawTx.wait();
+
+    const balanceAfter = await fltToken.balanceOf(userAccount);
+
+    expect(balanceAfter).to.be.eq(balanceBefore.add(settings.requiredStake));
   });
 });
