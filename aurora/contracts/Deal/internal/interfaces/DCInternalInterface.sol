@@ -4,12 +4,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../../../Core/Core.sol";
 
 abstract contract DCInternalInterface {
-    enum SettingPropertyBit {
-        PaymentToken,
-        PricePerEpoch,
-        RequiredStake
-    }
-
     function _core() internal view virtual returns (Core);
 
     function _requiredStake() internal view virtual returns (uint256);
@@ -18,9 +12,11 @@ abstract contract DCInternalInterface {
 
     function _pricePerEpoch() internal view virtual returns (uint256);
 
-    function _bitExist(bytes32 propertyBits, SettingPropertyBit bit)
-        internal
-        pure
-        virtual
-        returns (bool);
+    function _fluenceToken() internal view virtual returns (IERC20);
+
+    function _subnetId() internal view virtual returns (bytes32);
+
+    function _setPricePerEpoch(uint256 pricePerEpoch_) internal virtual;
+
+    function _setRequiredStake(uint256 requiredStake_) internal virtual;
 }

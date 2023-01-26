@@ -11,24 +11,9 @@ abstract contract PMInternalInterface {
         virtual
         returns (address);
 
-    function _getCollateral(IProviderManager.PATId id)
+    function _createPAT(IProviderManager.PATId id, address owner)
         internal
-        view
-        virtual
-        returns (uint256);
+        virtual;
 
-    function _getPATToken(IProviderManager.PATId id)
-        internal
-        view
-        virtual
-        returns (IERC20);
-
-    function _addCollateral(
-        IProviderManager.PATId id,
-        address owner,
-        IERC20 token,
-        uint256 collateral
-    ) internal virtual;
-
-    function _removeCollateral(IProviderManager.PATId id) internal virtual;
+    function _removePAT(IProviderManager.PATId id) internal virtual;
 }

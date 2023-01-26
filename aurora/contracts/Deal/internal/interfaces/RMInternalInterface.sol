@@ -8,7 +8,7 @@ abstract contract RMInternalInterface {
 
     modifier onlyResourceManager() virtual;
 
-    function _register(address participantAddr, Role role) internal virtual;
+    modifier onlyDealOwner() virtual;
 
     function _setRole(address addr, Role role) internal virtual;
 

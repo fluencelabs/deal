@@ -33,11 +33,9 @@ const setupTest = async (account: string) =>
 
       const tx = await factory.createDeal(
         ethers.utils.keccak256(ethers.utils.toUtf8Bytes("123123")),
-        {
-          paymentToken: faucet.usdToken(),
-          pricePerEpoch: pricePerEpoch,
-          requiredStake: requiredStake,
-        }
+        faucet.usdToken(),
+        pricePerEpoch,
+        requiredStake
       );
 
       const eventTopic = factory.interface.getEventTopic("CreateDeal");
@@ -81,13 +79,13 @@ describe("PaymentManager", () => {
   });
 
   it("deposit", async () => {
-    const balanceBefore = await deal.getBalance(userAccount);
+    const balanceBefore = await deal.getBalance();
     const value = ethers.utils.parseEther("1");
 
     await (await usdToken.approve(deal.address, value)).wait();
     await (await deal.deposit(value)).wait();
 
-    const balanceAfter = await deal.getBalance(userAccount);
+    const balanceAfter = await deal.getBalance();
 
     expect(balanceAfter).to.be.equal(balanceBefore.add(value));
   });
@@ -100,9 +98,11 @@ describe("PaymentManager", () => {
 
     const withdrawValue = value.div(2);
 
-    const balanceBefore = await deal.getBalance(userAccount);
-    await (await deal.withdrawDeposit(withdrawValue)).wait();
-    const balanceAfter = await deal.getBalance(userAccount);
+    const balanceBefore = await deal.getBalance();
+    await (
+      await deal.withdrawPaymentBalance(usdToken.address, withdrawValue)
+    ).wait();
+    const balanceAfter = await deal.getBalance();
 
     expect(balanceAfter).to.be.equal(balanceBefore.sub(withdrawValue));
   });

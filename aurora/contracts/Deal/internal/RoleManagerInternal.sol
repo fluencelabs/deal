@@ -1,8 +1,9 @@
 pragma solidity ^0.8.17;
 
 import "./interfaces/RMInternalInterface.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract RoleManagerInternal is RMInternalInterface {
+contract RoleManagerInternal is Ownable, RMInternalInterface {
     mapping(address => Role) private _roles;
 
     modifier onlyResourceManager() override {
@@ -13,12 +14,9 @@ contract RoleManagerInternal is RMInternalInterface {
         _;
     }
 
-    function _register(address participantAddr, Role role) internal override {
-        require(
-            _roles[participantAddr] == Role.None,
-            "Participant already exist"
-        );
-        _roles[participantAddr] = role;
+    modifier onlyDealOwner() override {
+        require(msg.sender == owner(), "Only deal owner");
+        _;
     }
 
     function _setRole(address addr, Role role) internal override {

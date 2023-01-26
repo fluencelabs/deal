@@ -1,18 +1,16 @@
 pragma solidity ^0.8.17;
 
-import "./LinkedList.sol";
+import "./Consts.sol";
 
 library WithdrawRequests {
-    using LinkedList for LinkedList.Bytes32List;
-
     struct Requests {
-        Request[] requests;
-        uint256 indexOffset;
+        Request[] _requests;
+        uint256 _indexOffset;
     }
 
     struct Request {
-        uint32 createTimestamp;
-        uint224 cumulative;
+        uint32 _createTimestamp;
+        uint224 _cumulative;
     }
 
     function getAt(Requests storage self, uint256 index)
@@ -20,26 +18,26 @@ library WithdrawRequests {
         view
         returns (uint256 timestamp, uint256 amount)
     {
-        uint256 realLength = self.requests.length;
-        uint256 realIndex = index + self.indexOffset;
+        uint256 realLength = self._requests.length;
+        uint256 realIndex = index + self._indexOffset;
 
         if (realIndex >= realLength) {
             revert("Index is out of range");
         }
 
-        Request storage request = self.requests[realIndex];
+        Request storage request = self._requests[realIndex];
 
-        amount = request.cumulative;
+        amount = request._cumulative;
         if (realIndex != 0) {
-            Request storage previousRequest = self.requests[realIndex - 1];
-            amount -= previousRequest.cumulative;
+            Request storage previousRequest = self._requests[realIndex - 1];
+            amount -= previousRequest._cumulative;
         }
 
-        return (request.createTimestamp, amount);
+        return (request._createTimestamp, amount);
     }
 
     function length(Requests storage self) internal view returns (uint256) {
-        return self.requests.length - self.indexOffset;
+        return self._requests.length - self._indexOffset;
     }
 
     function getAmountBy(Requests storage self, uint256 timestamp)
@@ -59,27 +57,27 @@ library WithdrawRequests {
 
         //TODO: check overflow
         uint224 uint224Amount = uint224(amount);
-        uint256 realLength = self.requests.length;
-        uint256 currentLength = realLength - self.indexOffset;
+        uint256 realLength = self._requests.length;
+        uint256 currentLength = realLength - self._indexOffset;
 
         if (currentLength != 0) {
-            Request storage last = self.requests[realLength - 1];
-            if (last.createTimestamp == timestamp) {
-                last.cumulative += uint224Amount;
+            Request storage last = self._requests[realLength - 1];
+            if (last._createTimestamp == timestamp) {
+                last._cumulative += uint224Amount;
                 return;
             } else {
-                self.requests.push(
-                    Request(timestamp, last.cumulative + uint224Amount)
+                self._requests.push(
+                    Request(timestamp, last._cumulative + uint224Amount)
                 );
             }
         } else {
-            self.requests.push(Request(timestamp, uint224Amount));
+            self._requests.push(Request(timestamp, uint224Amount));
         }
     }
 
     function removeFromLast(Requests storage self, uint256 amount) internal {
-        uint256 realLength = self.requests.length;
-        uint256 currentLength = realLength - self.indexOffset;
+        uint256 realLength = self._requests.length;
+        uint256 currentLength = realLength - self._indexOffset;
 
         require(currentLength != 0, "Requests is empty");
         require(amount <= UINT224_MAX, "Amount is too big");
@@ -87,15 +85,15 @@ library WithdrawRequests {
         //TODO: check overflow
         uint224 uint224Amount = uint224(amount);
 
-        Request storage last = self.requests[currentLength - 1];
-        uint256 currentAmount = last.cumulative;
+        Request storage last = self._requests[currentLength - 1];
+        uint256 currentAmount = last._cumulative;
 
         require(currentAmount >= uint224Amount, "Not enough amount");
 
         if (uint224Amount < currentAmount) {
-            last.cumulative -= uint224Amount;
+            last._cumulative -= uint224Amount;
         } else {
-            self.requests.pop();
+            self._requests.pop();
         }
     }
 
@@ -104,7 +102,7 @@ library WithdrawRequests {
         returns (uint256)
     {
         (uint256 index, uint256 amount) = _getIndexAndAmountBy(self, timestamp);
-        self.indexOffset = index + 1;
+        self._indexOffset = index + 1;
         return amount;
     }
 
@@ -113,8 +111,8 @@ library WithdrawRequests {
         view
         returns (uint256, uint256)
     {
-        uint256 realLength = self.requests.length;
-        uint256 indexOffset = self.indexOffset;
+        uint256 realLength = self._requests.length;
+        uint256 indexOffset = self._indexOffset;
 
         uint256 currentLength = realLength - indexOffset;
 
@@ -126,9 +124,9 @@ library WithdrawRequests {
             realLength - 1,
             timestamp
         );
-        uint256 amount = request.cumulative;
+        uint256 amount = request._cumulative;
         if (indexOffset != 0) {
-            amount -= self.requests[indexOffset - 1].cumulative;
+            amount -= self._requests[indexOffset - 1]._cumulative;
         }
 
         return (index, amount);
@@ -144,10 +142,10 @@ library WithdrawRequests {
         uint256 high = startHigh;
 
         uint256 mid = (low + high) / 2;
-        request = self.requests[mid];
+        request = self._requests[mid];
 
         while (low != high) {
-            uint256 midTimestamp = request.createTimestamp;
+            uint256 midTimestamp = request._createTimestamp;
             if (midTimestamp == timestamp) {
                 return (mid, request);
             } else if (midTimestamp < timestamp) {
@@ -157,7 +155,7 @@ library WithdrawRequests {
             }
 
             mid = (low + high) / 2;
-            request = self.requests[mid];
+            request = self._requests[mid];
         }
 
         return (mid, request);

@@ -6,18 +6,37 @@ import "../Deal/Deal.sol";
 contract DealFactory {
     Core public core;
 
-    event CreateDeal(address deal, DealConfig.Settings settings);
+    event CreateDeal(
+        address deal,
+        address paymentToken,
+        uint256 pricePerEpoch,
+        uint256 requiredStake
+    );
 
     constructor(Core core_) {
         core = core_;
     }
 
-    function createDeal(bytes32 subnetId, DealConfig.Settings memory settings)
-        external
-    {
-        Deal deal = new Deal(core, subnetId, settings);
+    function createDeal(
+        bytes32 subnetId,
+        address paymentToken,
+        uint256 pricePerEpoch,
+        uint256 requiredStake
+    ) external {
+        Deal deal = new Deal(
+            core,
+            subnetId,
+            paymentToken,
+            pricePerEpoch,
+            requiredStake
+        );
         deal.transferOwnership(msg.sender);
 
-        emit CreateDeal(address(deal), settings);
+        emit CreateDeal(
+            address(deal),
+            paymentToken,
+            pricePerEpoch,
+            requiredStake
+        );
     }
 }

@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import { deployments, ethers, getUnnamedAccounts } from "hardhat";
 import {
+  Core,
   Deal,
   DealFactory,
   DeveloperFaucet,
@@ -34,11 +35,9 @@ const setupTest = async (account: string) =>
 
       const tx = await factory.createDeal(
         ethers.utils.keccak256(ethers.utils.toUtf8Bytes("123123")),
-        {
-          paymentToken: faucet.usdToken(),
-          pricePerEpoch: pricePerEpoch,
-          requiredStake: requiredStake,
-        }
+        faucet.usdToken(),
+        pricePerEpoch,
+        requiredStake
       );
 
       const eventTopic = factory.interface.getEventTopic("CreateDeal");
@@ -107,6 +106,8 @@ describe("ProviderManager", () => {
   it("createProviderToken", async () => {
     await (await deal.register()).wait();
 
+    const requiredStake = await deal.requiredStake();
+
     await (await fltToken.approve(deal.address, requiredStake)).wait();
     const tx = await deal.createProviderToken(
       ethers.utils.keccak256(ethers.utils.toUtf8Bytes("salt"))
@@ -148,15 +149,15 @@ describe("ProviderManager", () => {
 
     const timeout = await core.withdrawTimeout();
     const block = await ethers.provider.getBlock("latest");
-    const settings = await deal.settings();
+    const requiredStake = await deal.requiredStake();
 
-    setTimeNextTime(block.timestamp + timeout);
+    setTimeNextTime(block.timestamp + timeout.toNumber());
 
-    const withdrawTx = await deal.withdraw(fltToken.address, 0);
+    const withdrawTx = await deal.withdraw(fltToken.address);
     await withdrawTx.wait();
 
     const balanceAfter = await fltToken.balanceOf(userAccount);
 
-    expect(balanceAfter).to.be.eq(balanceBefore.add(settings.requiredStake));
+    expect(balanceAfter).to.be.eq(balanceBefore.add(requiredStake));
   });
 });

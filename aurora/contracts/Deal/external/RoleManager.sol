@@ -4,7 +4,7 @@ import "../internal/interfaces/RMInternalInterface.sol";
 
 abstract contract RoleManager is RMInternalInterface {
     function register() external {
-        _register(msg.sender, Role.ResourceManager);
+        _setRole(msg.sender, Role.ResourceManager);
     }
 
     function getRole(address addr) external view returns (Role) {

@@ -7,7 +7,6 @@ import {
   DeveloperFaucet,
   IERC20,
 } from "../../typechain-types";
-import { core } from "../../typechain-types/contracts";
 
 const pricePerEpoch = ethers.utils.parseEther("1");
 const requiredStake = ethers.utils.parseEther("1");
@@ -36,11 +35,9 @@ const setupTest = async (account: string) =>
 
       const tx = await factory.createDeal(
         ethers.utils.keccak256(ethers.utils.toUtf8Bytes("123123")),
-        {
-          paymentToken: faucet.usdToken(),
-          pricePerEpoch: pricePerEpoch,
-          requiredStake: requiredStake,
-        }
+        faucet.usdToken(),
+        pricePerEpoch,
+        requiredStake
       );
 
       const eventTopic = factory.interface.getEventTopic("CreateDeal");
