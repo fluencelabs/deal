@@ -1,4 +1,0 @@
-import "@fluencelabs/aqua-lib/builtin.aqua"
-
-func sum(a: i32, b: i32) -> i32:
-    <- a + b

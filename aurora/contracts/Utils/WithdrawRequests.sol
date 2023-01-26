@@ -1,87 +1,163 @@
 pragma solidity ^0.8.17;
 
-import "./LinkedList.sol";
+import "./Consts.sol";
 
 library WithdrawRequests {
-    using LinkedList for LinkedList.Bytes32List;
-
-    struct Info {
-        uint _totalAmount;
-        LinkedList.Bytes32List list;
-        mapping(uint256 => uint256) requests;
+    struct Requests {
+        Request[] _requests;
+        uint256 _indexOffset;
     }
 
     struct Request {
-        uint timestamp;
-        uint amount;
+        uint32 _createTimestamp;
+        uint224 _cumulative;
     }
 
-    function totalAmount(Info storage self) internal view returns (uint) {
-        return self._totalAmount;
-    }
+    function getAt(Requests storage self, uint256 index)
+        internal
+        view
+        returns (uint256 timestamp, uint256 amount)
+    {
+        uint256 realLength = self._requests.length;
+        uint256 realIndex = index + self._indexOffset;
 
-    function first(
-        Info storage self
-    ) internal view returns (Request memory request, bool isOk) {
-        bytes32 firstKey = self.list.first();
-        if (firstKey == NULL) return (request, false);
-
-        request.timestamp = uint256(firstKey);
-        request.amount = self.requests[request.timestamp];
-    }
-
-    function last(
-        Info storage self
-    ) internal view returns (Request memory request, bool isOk) {
-        bytes32 lastKey = self.list.last();
-        if (lastKey == NULL) return (request, false);
-
-        request.timestamp = uint256(lastKey);
-        request.amount = self.requests[request.timestamp];
-    }
-
-    function createOrAddAmount(Info storage self, uint256 amount) internal {
-        uint timestamp = block.timestamp;
-
-        if (self.requests[timestamp] == 0) {
-            self.list.push(bytes32(timestamp));
+        if (realIndex >= realLength) {
+            revert("Index is out of range");
         }
 
-        self.requests[timestamp] += amount;
-        self._totalAmount += amount;
-    }
+        Request storage request = self._requests[realIndex];
 
-    function remove(Info storage self, uint256 timestamp) internal {
-        self.list.remove(bytes32(timestamp));
-
-        self._totalAmount -= self.requests[timestamp];
-        delete self.requests[timestamp];
-    }
-
-    function get(
-        Info storage self,
-        uint timestamp
-    ) internal view returns (Request memory request, bool isOk) {
-        isOk = self.list.exist(bytes32(timestamp));
-        if (!isOk) {
-            return (request, false);
+        amount = request._cumulative;
+        if (realIndex != 0) {
+            Request storage previousRequest = self._requests[realIndex - 1];
+            amount -= previousRequest._cumulative;
         }
 
-        request.timestamp = timestamp;
-        request.amount = self.requests[timestamp];
+        return (request._createTimestamp, amount);
     }
 
-    function next(
-        Info storage self,
-        uint timestamp
-    ) internal view returns (Request memory request, bool isOk) {
-        (bytes32 nextKey, bool isExist) = self.list.next(bytes32(timestamp));
-        if (!isExist) {
-            return (request, false);
-        }
-        isOk = true;
+    function length(Requests storage self) internal view returns (uint256) {
+        return self._requests.length - self._indexOffset;
+    }
 
-        request.timestamp = uint256(nextKey);
-        request.amount = self.requests[uint256(nextKey)];
+    function getAmountBy(Requests storage self, uint256 timestamp)
+        internal
+        view
+        returns (uint256)
+    {
+        (, uint256 amount) = _getIndexAndAmountBy(self, timestamp);
+        return amount;
+    }
+
+    function push(Requests storage self, uint256 amount) internal {
+        uint32 timestamp = uint32(block.timestamp);
+
+        require(amount > 0, "Amount can't be zero");
+        require(amount <= UINT224_MAX, "Amount is too big");
+
+        //TODO: check overflow
+        uint224 uint224Amount = uint224(amount);
+        uint256 realLength = self._requests.length;
+        uint256 currentLength = realLength - self._indexOffset;
+
+        if (currentLength != 0) {
+            Request storage last = self._requests[realLength - 1];
+            if (last._createTimestamp == timestamp) {
+                last._cumulative += uint224Amount;
+                return;
+            } else {
+                self._requests.push(
+                    Request(timestamp, last._cumulative + uint224Amount)
+                );
+            }
+        } else {
+            self._requests.push(Request(timestamp, uint224Amount));
+        }
+    }
+
+    function removeFromLast(Requests storage self, uint256 amount) internal {
+        uint256 realLength = self._requests.length;
+        uint256 currentLength = realLength - self._indexOffset;
+
+        require(currentLength != 0, "Requests is empty");
+        require(amount <= UINT224_MAX, "Amount is too big");
+
+        //TODO: check overflow
+        uint224 uint224Amount = uint224(amount);
+
+        Request storage last = self._requests[currentLength - 1];
+        uint256 currentAmount = last._cumulative;
+
+        require(currentAmount >= uint224Amount, "Not enough amount");
+
+        if (uint224Amount < currentAmount) {
+            last._cumulative -= uint224Amount;
+        } else {
+            self._requests.pop();
+        }
+    }
+
+    function confirmBy(Requests storage self, uint256 timestamp)
+        internal
+        returns (uint256)
+    {
+        (uint256 index, uint256 amount) = _getIndexAndAmountBy(self, timestamp);
+        self._indexOffset = index + 1;
+        return amount;
+    }
+
+    function _getIndexAndAmountBy(Requests storage self, uint256 timestamp)
+        private
+        view
+        returns (uint256, uint256)
+    {
+        uint256 realLength = self._requests.length;
+        uint256 indexOffset = self._indexOffset;
+
+        uint256 currentLength = realLength - indexOffset;
+
+        require(currentLength != 0, "Requests is empty");
+
+        (uint256 index, Request storage request) = _getIndexBy(
+            self,
+            indexOffset,
+            realLength - 1,
+            timestamp
+        );
+        uint256 amount = request._cumulative;
+        if (indexOffset != 0) {
+            amount -= self._requests[indexOffset - 1]._cumulative;
+        }
+
+        return (index, amount);
+    }
+
+    function _getIndexBy(
+        Requests storage self,
+        uint256 startLow,
+        uint256 startHigh,
+        uint256 timestamp
+    ) private view returns (uint256, Request storage request) {
+        uint256 low = startLow;
+        uint256 high = startHigh;
+
+        uint256 mid = (low + high) / 2;
+        request = self._requests[mid];
+
+        while (low != high) {
+            uint256 midTimestamp = request._createTimestamp;
+            if (midTimestamp == timestamp) {
+                return (mid, request);
+            } else if (midTimestamp < timestamp) {
+                low = mid + 1;
+            } else {
+                high = mid - 1;
+            }
+
+            mid = (low + high) / 2;
+            request = self._requests[mid];
+        }
+
+        return (mid, request);
     }
 }
