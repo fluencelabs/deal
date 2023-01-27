@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.1.2...deal-aurora-v0.1.3) (2023-01-27)
+
+
+### Bug Fixes
+
+* fix npm pkgs ([#16](https://github.com/fluencelabs/deal/issues/16)) ([f750279](https://github.com/fluencelabs/deal/commit/f750279a2f2be8d8c0972916489845de88c81758))
+
 ## [0.1.2](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.1.1...deal-aurora-v0.1.2) (2023-01-27)
 
 
