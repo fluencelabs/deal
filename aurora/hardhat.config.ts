@@ -18,6 +18,10 @@ const config: HardhatUserConfig = {
         url: "https://testnet.aurora.dev",
         blockNumber: 83101397,
       },
+      accounts: {
+        passphrase:
+          "test test test test claim trade stairs crew inspire obey veteran budget",
+      },
     },
     localhost: {
       url: "http://localhost:8545",
