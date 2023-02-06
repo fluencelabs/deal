@@ -15,12 +15,16 @@ abstract contract ProviderManagerInternal is
 {
     using SafeERC20 for IERC20;
 
+    struct OwnerInfo {
+        uint256 patsCount;
+    }
+
     bytes32 private constant _PREFIX_PAT_OWNER_SLOT =
         keccak256("network.fluence.ProviderManager.pat.owner.");
     bytes32 private constant _PREFIX_PAT_COLLATERAL_SLOT =
         keccak256("network.fluence.ProviderManager.pat.collateral.");
 
-    mapping(address => IProviderManager.PATId[]) private _PATsByOwner;
+    mapping(address => OwnerInfo) private _ownersInfo;
 
     function _getPATOwner(IProviderManager.PATId id)
         internal
@@ -39,8 +43,10 @@ abstract contract ProviderManagerInternal is
             _getSlotPATOwner(id)
         );
 
+        uint256 patsCountByOwner = _ownersInfo[owner].patsCount;
+
         require(
-            _PATsByOwner[owner].length < _maxWorkersPerProvider(),
+            patsCountByOwner < _maxWorkersPerProvider(),
             "Max workers per provider reached"
         );
         require(ownerSlot.value == address(0x00), "Id already used");
@@ -55,7 +61,7 @@ abstract contract ProviderManagerInternal is
         ownerSlot.value = owner;
         collateralSlot.value = requiredStake;
 
-        _PATsByOwner[owner].push(id);
+        _ownersInfo[owner].patsCount = patsCountByOwner + 1;
     }
 
     function _removePAT(IProviderManager.PATId id) internal override {
@@ -73,19 +79,7 @@ abstract contract ProviderManagerInternal is
         delete ownerSlot.value;
         delete collateralSlot.value;
 
-        IProviderManager.PATId last = _PATsByOwner[owner][
-            _PATsByOwner[owner].length - 1
-        ];
-
-        for (uint256 i = 0; i < _PATsByOwner[owner].length; i++) {
-            if (_PATsByOwner[owner][i] == id) {
-                _PATsByOwner[owner][i] = last;
-                break;
-            }
-        }
-
-
-        _PATsByOwner[owner][0];
+        _ownersInfo[owner].patsCount--;
     }
 
     function _getSlotPATOwner(IProviderManager.PATId id)
