@@ -24,6 +24,7 @@ abstract contract ProviderManagerInternal is
     bytes32 private constant _PREFIX_PAT_COLLATERAL_SLOT =
         keccak256("network.fluence.ProviderManager.pat.collateral.");
 
+    uint256 private _currentWorkers;
     mapping(address => OwnerInfo) private _ownersInfo;
 
     function _getPATOwner(IProviderManager.PATId id)
@@ -44,11 +45,12 @@ abstract contract ProviderManagerInternal is
         );
 
         uint256 patsCountByOwner = _ownersInfo[owner].patsCount;
-
+        uint256 currentWorkers = _currentWorkers;
         require(
             patsCountByOwner < _maxWorkersPerProvider(),
             "Max workers per provider reached"
         );
+        require(currentWorkers < _targetWorkers(), "Target workers reached");
         require(ownerSlot.value == address(0x00), "Id already used");
 
         uint256 requiredStake = _requiredStake();
@@ -62,6 +64,7 @@ abstract contract ProviderManagerInternal is
         collateralSlot.value = requiredStake;
 
         _ownersInfo[owner].patsCount = patsCountByOwner + 1;
+        _currentWorkers = currentWorkers + 1;
     }
 
     function _removePAT(IProviderManager.PATId id) internal override {
@@ -80,6 +83,7 @@ abstract contract ProviderManagerInternal is
         delete collateralSlot.value;
 
         _ownersInfo[owner].patsCount--;
+        _currentWorkers--;
     }
 
     function _getSlotPATOwner(IProviderManager.PATId id)

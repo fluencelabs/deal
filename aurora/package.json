@@ -8,7 +8,8 @@
     "deploy:local": "hardhat deploy --network localhost",
     "clean": "hardhat clean",
     "node": "hardhat node",
-    "compile": "shx rm -rf dist && shx rm -rf artifacts && shx rm -rf cache && shx rm -rf typechain-types && hardhat compile && tsc -b"
+    "compile": "shx rm -rf dist && shx rm -rf artifacts && shx rm -rf cache && shx rm -rf typechain-types && hardhat compile && tsc -b",
+    "prepare": "husky install"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.5",
@@ -36,6 +37,7 @@
     "hardhat-docgen": "^1.3.0",
     "hardhat-gas-reporter": "^1.0.2",
     "hardhat-tracer": "^1.2.1",
+    "husky": "^8.0.3",
     "prettier": "^2.8.1",
     "prettier-plugin-solidity": "^1.1.1",
     "shx": "^0.3.4",

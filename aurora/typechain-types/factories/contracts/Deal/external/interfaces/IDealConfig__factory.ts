@@ -64,7 +64,7 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "maxWorkers",
+    name: "maxWorkersPerProvider",
     outputs: [
       {
         internalType: "uint256",

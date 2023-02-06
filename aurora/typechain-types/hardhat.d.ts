@@ -129,17 +129,9 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ProviderManager__factory>;
     getContractFactory(
-      name: "RoleManager",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.RoleManager__factory>;
-    getContractFactory(
       name: "WithdrawManager",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.WithdrawManager__factory>;
-    getContractFactory(
-      name: "RoleManagerInternal",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.RoleManagerInternal__factory>;
     getContractFactory(
       name: "DeveloperFaucet",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -299,20 +291,10 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.ProviderManager>;
     getContractAt(
-      name: "RoleManager",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.RoleManager>;
-    getContractAt(
       name: "WithdrawManager",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.WithdrawManager>;
-    getContractAt(
-      name: "RoleManagerInternal",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.RoleManagerInternal>;
     getContractAt(
       name: "DeveloperFaucet",
       address: string,

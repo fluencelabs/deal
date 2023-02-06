@@ -17,16 +17,12 @@ abstract contract ProviderManager is
         return _getPATOwner(id);
     }
 
-    function createProviderToken(bytes32 salt) external onlyResourceManager {
+    function createProviderToken(bytes32 salt) external {
         address owner = msg.sender;
 
         //TODO: owner
         PATId id = PATId.wrap(
             keccak256(abi.encode(address(this), block.number, salt, owner))
-        );
-        require(
-            _getRole(owner) == Role.ResourceManager,
-            "Participant isn't ResourceManager"
         );
 
         _createPAT(id, owner);
@@ -34,7 +30,7 @@ abstract contract ProviderManager is
         emit AddProviderToken(owner, id);
     }
 
-    function removeProviderToken(PATId id) external onlyResourceManager {
+    function removeProviderToken(PATId id) external {
         require(_getPATOwner(id) == msg.sender, "ProviderManager: not owner");
         _removePAT(id);
 

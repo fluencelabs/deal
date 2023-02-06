@@ -38,14 +38,12 @@ export interface DealInterface extends utils.Interface {
     "fluenceToken()": FunctionFragment;
     "getBalance()": FunctionFragment;
     "getPATOwner(bytes32)": FunctionFragment;
-    "getRole(address)": FunctionFragment;
     "getUnlockedCollateralBy(address,uint256)": FunctionFragment;
-    "maxWorkers()": FunctionFragment;
+    "maxWorkersPerProvider()": FunctionFragment;
     "minWorkers()": FunctionFragment;
     "owner()": FunctionFragment;
     "paymentToken()": FunctionFragment;
     "pricePerEpoch()": FunctionFragment;
-    "register()": FunctionFragment;
     "removeProviderToken(bytes32)": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "requiredStake()": FunctionFragment;
@@ -66,14 +64,12 @@ export interface DealInterface extends utils.Interface {
       | "fluenceToken"
       | "getBalance"
       | "getPATOwner"
-      | "getRole"
       | "getUnlockedCollateralBy"
-      | "maxWorkers"
+      | "maxWorkersPerProvider"
       | "minWorkers"
       | "owner"
       | "paymentToken"
       | "pricePerEpoch"
-      | "register"
       | "removeProviderToken"
       | "renounceOwnership"
       | "requiredStake"
@@ -114,15 +110,11 @@ export interface DealInterface extends utils.Interface {
     values: [PromiseOrValue<BytesLike>]
   ): string;
   encodeFunctionData(
-    functionFragment: "getRole",
-    values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
     functionFragment: "getUnlockedCollateralBy",
     values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
-    functionFragment: "maxWorkers",
+    functionFragment: "maxWorkersPerProvider",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -138,7 +130,6 @@ export interface DealInterface extends utils.Interface {
     functionFragment: "pricePerEpoch",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "register", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "removeProviderToken",
     values: [PromiseOrValue<BytesLike>]
@@ -192,12 +183,14 @@ export interface DealInterface extends utils.Interface {
     functionFragment: "getPATOwner",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "getRole", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getUnlockedCollateralBy",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "maxWorkers", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "maxWorkersPerProvider",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "minWorkers", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
@@ -208,7 +201,6 @@ export interface DealInterface extends utils.Interface {
     functionFragment: "pricePerEpoch",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "register", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "removeProviderToken",
     data: BytesLike
@@ -335,18 +327,13 @@ export interface Deal extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string]>;
 
-    getRole(
-      addr: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[number]>;
-
     getUnlockedCollateralBy(
       owner: PromiseOrValue<string>,
       timestamp: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
-    maxWorkers(overrides?: CallOverrides): Promise<[BigNumber]>;
+    maxWorkersPerProvider(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     minWorkers(overrides?: CallOverrides): Promise<[BigNumber]>;
 
@@ -355,10 +342,6 @@ export interface Deal extends BaseContract {
     paymentToken(overrides?: CallOverrides): Promise<[string]>;
 
     pricePerEpoch(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    register(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
 
     removeProviderToken(
       id: PromiseOrValue<BytesLike>,
@@ -417,18 +400,13 @@ export interface Deal extends BaseContract {
     overrides?: CallOverrides
   ): Promise<string>;
 
-  getRole(
-    addr: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<number>;
-
   getUnlockedCollateralBy(
     owner: PromiseOrValue<string>,
     timestamp: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  maxWorkers(overrides?: CallOverrides): Promise<BigNumber>;
+  maxWorkersPerProvider(overrides?: CallOverrides): Promise<BigNumber>;
 
   minWorkers(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -437,10 +415,6 @@ export interface Deal extends BaseContract {
   paymentToken(overrides?: CallOverrides): Promise<string>;
 
   pricePerEpoch(overrides?: CallOverrides): Promise<BigNumber>;
-
-  register(
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
 
   removeProviderToken(
     id: PromiseOrValue<BytesLike>,
@@ -499,18 +473,13 @@ export interface Deal extends BaseContract {
       overrides?: CallOverrides
     ): Promise<string>;
 
-    getRole(
-      addr: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<number>;
-
     getUnlockedCollateralBy(
       owner: PromiseOrValue<string>,
       timestamp: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    maxWorkers(overrides?: CallOverrides): Promise<BigNumber>;
+    maxWorkersPerProvider(overrides?: CallOverrides): Promise<BigNumber>;
 
     minWorkers(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -519,8 +488,6 @@ export interface Deal extends BaseContract {
     paymentToken(overrides?: CallOverrides): Promise<string>;
 
     pricePerEpoch(overrides?: CallOverrides): Promise<BigNumber>;
-
-    register(overrides?: CallOverrides): Promise<void>;
 
     removeProviderToken(
       id: PromiseOrValue<BytesLike>,
@@ -601,18 +568,13 @@ export interface Deal extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    getRole(
-      addr: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     getUnlockedCollateralBy(
       owner: PromiseOrValue<string>,
       timestamp: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    maxWorkers(overrides?: CallOverrides): Promise<BigNumber>;
+    maxWorkersPerProvider(overrides?: CallOverrides): Promise<BigNumber>;
 
     minWorkers(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -621,10 +583,6 @@ export interface Deal extends BaseContract {
     paymentToken(overrides?: CallOverrides): Promise<BigNumber>;
 
     pricePerEpoch(overrides?: CallOverrides): Promise<BigNumber>;
-
-    register(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
 
     removeProviderToken(
       id: PromiseOrValue<BytesLike>,
@@ -686,18 +644,15 @@ export interface Deal extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    getRole(
-      addr: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     getUnlockedCollateralBy(
       owner: PromiseOrValue<string>,
       timestamp: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    maxWorkers(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    maxWorkersPerProvider(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     minWorkers(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -706,10 +661,6 @@ export interface Deal extends BaseContract {
     paymentToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     pricePerEpoch(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    register(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
 
     removeProviderToken(
       id: PromiseOrValue<BytesLike>,
