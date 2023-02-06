@@ -24,7 +24,7 @@ abstract contract DCInternalInterface {
 
     function _minWorkers() internal view virtual returns (uint256);
 
-    function _maxWorkers() internal view virtual returns (uint256);
+    function _maxWorkersPerProvider() internal view virtual returns (uint256);
 
     function _targetWorkers() internal view virtual returns (uint256);
 

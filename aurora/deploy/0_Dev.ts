@@ -8,6 +8,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const deployer = accounts[0];
 
   console.log("Deploying account:", deployer);
+  console.log("Block number:", await hre.ethers.provider.getBlockNumber());
+
   await hre.deployments.deploy("DeveloperFaucet", {
     from: deployer,
     args: [],

@@ -2,15 +2,15 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IPaymentManager.sol";
 import "../internal/interfaces/DCInternalInterface.sol";
-import "../internal/interfaces/RMInternalInterface.sol";
 import "../../Utils/Consts.sol";
 
 abstract contract PaymentManager is
     IPaymentManager,
-    RMInternalInterface,
-    DCInternalInterface
+    DCInternalInterface,
+    Ownable
 {
     using SafeERC20 for IERC20;
 
@@ -23,8 +23,7 @@ abstract contract PaymentManager is
         return _balance[_paymentToken()];
     }
 
-    function deposit(uint256 amount) external onlyDealOwner {
-        ///TODO: Only owner
+    function deposit(uint256 amount) external onlyOwner {
         IERC20 token = _paymentToken();
         token.safeTransferFrom(msg.sender, address(this), amount);
         _balance[_paymentToken()] += amount;
@@ -32,7 +31,7 @@ abstract contract PaymentManager is
 
     function withdrawPaymentBalance(IERC20 token, uint256 amount)
         external
-        onlyDealOwner
+        onlyOwner
     {
         uint256 currentEpoch = _core().epochManager().getEpoch();
         uint256 goldenParticleCount = 0;

@@ -40,8 +40,8 @@ abstract contract DealConfig is IDealConfig, DCInternalInterface {
         return _minWorkers();
     }
 
-    function maxWorkers() external view returns (uint256) {
-        return _maxWorkers();
+    function maxWorkersPerProvider() external view returns (uint256) {
+        return _maxWorkersPerProvider();
     }
 
     function targetWorkers() external view returns (uint256) {

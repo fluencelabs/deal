@@ -4,13 +4,11 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../internal/interfaces/PMInternalInterface.sol";
 import "../internal/interfaces/DCInternalInterface.sol";
-import "../internal/interfaces/RMInternalInterface.sol";
 import "./interfaces/IProviderManager.sol";
 
 abstract contract ProviderManager is
     IProviderManager,
     PMInternalInterface,
-    RMInternalInterface,
     DCInternalInterface
 {
     using SafeERC20 for IERC20;

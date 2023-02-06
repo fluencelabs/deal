@@ -14,7 +14,7 @@ abstract contract DealConfigInternal is DCInternalInterface {
     uint256 private _requiredStake_;
     bytes32[] private _effectorWasmsCids_;
     uint256 private _minWorkers_;
-    uint256 private _maxWorkers_;
+    uint256 private _maxWorkersPerProvider_;
     uint256 private _targetWorkers_;
 
     constructor(
@@ -24,7 +24,7 @@ abstract contract DealConfigInternal is DCInternalInterface {
         uint256 pricePerEpoch_,
         uint256 requiredStake_,
         uint256 minWorkers_,
-        uint256 maxWorkers_,
+        uint256 maxWorkersPerProvider_,
         uint256 targetWorkers_,
         bytes32 appCID_,
         bytes32[] memory effectorWasmsCids_
@@ -35,7 +35,7 @@ abstract contract DealConfigInternal is DCInternalInterface {
         _pricePerEpoch_ = pricePerEpoch_;
         _requiredStake_ = requiredStake_;
         _minWorkers_ = minWorkers_;
-        _maxWorkers_ = maxWorkers_;
+        _maxWorkersPerProvider_ = maxWorkersPerProvider_;
         _targetWorkers_ = targetWorkers_;
         _appCID_ = appCID_;
         _effectorWasmsCids_ = effectorWasmsCids_;
@@ -78,8 +78,8 @@ abstract contract DealConfigInternal is DCInternalInterface {
         return _minWorkers_;
     }
 
-    function _maxWorkers() internal view override returns (uint256) {
-        return _maxWorkers_;
+    function _maxWorkersPerProvider() internal view override returns (uint256) {
+        return _maxWorkersPerProvider_;
     }
 
     function _targetWorkers() internal view override returns (uint256) {

@@ -12,10 +12,11 @@ contract DealFactory {
         uint256 pricePerEpoch,
         uint256 requiredStake,
         uint256 minWorkers,
-        uint256 maxWorkers,
+        uint256 maxWorkersPerProvider,
         uint256 targetWorkers,
         bytes32 appCID,
-        bytes32[] effectorWasmsCids
+        bytes32[] effectorWasmsCIDs,
+        uint256 epoch
     );
 
     constructor(Core core_) {
@@ -27,10 +28,10 @@ contract DealFactory {
         uint256 pricePerEpoch_,
         uint256 requiredStake_,
         uint256 minWorkers_,
-        uint256 maxWorkers_,
+        uint256 maxWorkersPerProvider_,
         uint256 targetWorkers_,
         bytes32 appCID_,
-        bytes32[] memory effectorWasmsCids_
+        bytes32[] memory effectorWasmsCIDs_
     ) external {
         Deal deal = new Deal(
             core,
@@ -38,10 +39,10 @@ contract DealFactory {
             pricePerEpoch_,
             requiredStake_,
             minWorkers_,
-            maxWorkers_,
+            maxWorkersPerProvider_,
             targetWorkers_,
             appCID_,
-            effectorWasmsCids_
+            effectorWasmsCIDs_
         );
 
         deal.transferOwnership(msg.sender);
@@ -52,10 +53,11 @@ contract DealFactory {
             pricePerEpoch_,
             requiredStake_,
             minWorkers_,
-            maxWorkers_,
+            maxWorkersPerProvider_,
             targetWorkers_,
             appCID_,
-            effectorWasmsCids_
+            effectorWasmsCIDs_,
+            core.epochManager().getEpoch()
         );
     }
 }

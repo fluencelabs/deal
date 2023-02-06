@@ -16,6 +16,7 @@ const config: HardhatUserConfig = {
     hardhat: {
       forking: {
         url: "https://endpoints.omniatech.io/v1/aurora/testnet/public",
+        blockNumber: 115897705,
       },
       accounts: {
         passphrase:
