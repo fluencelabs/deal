@@ -53,7 +53,7 @@ library WithdrawRequests {
         uint32 timestamp = uint32(block.timestamp);
 
         require(amount > 0, "Amount can't be zero");
-        require(amount <= UINT224_MAX, "Amount is too big");
+        require(amount <= type(uint224).max, "Amount is too big");
 
         //TODO: check overflow
         uint224 uint224Amount = uint224(amount);
@@ -80,7 +80,7 @@ library WithdrawRequests {
         uint256 currentLength = realLength - self._indexOffset;
 
         require(currentLength != 0, "Requests is empty");
-        require(amount <= UINT224_MAX, "Amount is too big");
+        require(amount <= type(uint224).max, "Amount is too big");
 
         //TODO: check overflow
         uint224 uint224Amount = uint224(amount);

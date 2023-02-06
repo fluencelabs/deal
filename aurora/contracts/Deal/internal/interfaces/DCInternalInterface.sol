@@ -14,7 +14,19 @@ abstract contract DCInternalInterface {
 
     function _fluenceToken() internal view virtual returns (IERC20);
 
-    function _subnetId() internal view virtual returns (bytes32);
+    function _appCID() internal view virtual returns (bytes32);
+
+    function _effectorWasmsCids()
+        internal
+        view
+        virtual
+        returns (bytes32[] memory);
+
+    function _minWorkers() internal view virtual returns (uint256);
+
+    function _maxWorkers() internal view virtual returns (uint256);
+
+    function _targetWorkers() internal view virtual returns (uint256);
 
     function _setPricePerEpoch(uint256 pricePerEpoch_) internal virtual;
 

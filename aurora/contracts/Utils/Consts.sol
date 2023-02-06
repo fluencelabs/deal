@@ -1,7 +1,3 @@
 pragma solidity ^0.8.17;
 
 bytes32 constant NULL = hex"0000000000000000000000000000000000000000000000000000000000000000";
-
-uint224 constant UINT224_MAX = 2**224 - 1;
-uint256 constant DEFAULT_BALANCE = 0;
-uint256 constant COMMON_BALANCE_ID = 0;

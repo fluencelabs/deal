@@ -30,7 +30,7 @@ import type {
 export interface DealFactoryInterface extends utils.Interface {
   functions: {
     "core()": FunctionFragment;
-    "createDeal(bytes32,address,uint256,uint256)": FunctionFragment;
+    "createDeal(address,uint256,uint256,uint256,uint256,uint256,bytes32,bytes32[])": FunctionFragment;
   };
 
   getFunction(nameOrSignatureOrTopic: "core" | "createDeal"): FunctionFragment;
@@ -39,10 +39,14 @@ export interface DealFactoryInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "createDeal",
     values: [
-      PromiseOrValue<BytesLike>,
       PromiseOrValue<string>,
       PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BytesLike>,
+      PromiseOrValue<BytesLike>[]
     ]
   ): string;
 
@@ -50,24 +54,39 @@ export interface DealFactoryInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "createDeal", data: BytesLike): Result;
 
   events: {
-    "CreateDeal(address,address,uint256,uint256)": EventFragment;
+    "DealCreated(address,address,uint256,uint256,uint256,uint256,uint256,bytes32,bytes32[])": EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "CreateDeal"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "DealCreated"): EventFragment;
 }
 
-export interface CreateDealEventObject {
+export interface DealCreatedEventObject {
   deal: string;
   paymentToken: string;
   pricePerEpoch: BigNumber;
   requiredStake: BigNumber;
+  minWorkers: BigNumber;
+  maxWorkers: BigNumber;
+  targetWorkers: BigNumber;
+  appCID: string;
+  effectorWasmsCids: string[];
 }
-export type CreateDealEvent = TypedEvent<
-  [string, string, BigNumber, BigNumber],
-  CreateDealEventObject
+export type DealCreatedEvent = TypedEvent<
+  [
+    string,
+    string,
+    BigNumber,
+    BigNumber,
+    BigNumber,
+    BigNumber,
+    BigNumber,
+    string,
+    string[]
+  ],
+  DealCreatedEventObject
 >;
 
-export type CreateDealEventFilter = TypedEventFilter<CreateDealEvent>;
+export type DealCreatedEventFilter = TypedEventFilter<DealCreatedEvent>;
 
 export interface DealFactory extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -99,10 +118,14 @@ export interface DealFactory extends BaseContract {
     core(overrides?: CallOverrides): Promise<[string]>;
 
     createDeal(
-      subnetId: PromiseOrValue<BytesLike>,
-      paymentToken: PromiseOrValue<string>,
-      pricePerEpoch: PromiseOrValue<BigNumberish>,
-      requiredStake: PromiseOrValue<BigNumberish>,
+      paymentToken_: PromiseOrValue<string>,
+      pricePerEpoch_: PromiseOrValue<BigNumberish>,
+      requiredStake_: PromiseOrValue<BigNumberish>,
+      minWorkers_: PromiseOrValue<BigNumberish>,
+      maxWorkers_: PromiseOrValue<BigNumberish>,
+      targetWorkers_: PromiseOrValue<BigNumberish>,
+      appCID_: PromiseOrValue<BytesLike>,
+      effectorWasmsCids_: PromiseOrValue<BytesLike>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
   };
@@ -110,10 +133,14 @@ export interface DealFactory extends BaseContract {
   core(overrides?: CallOverrides): Promise<string>;
 
   createDeal(
-    subnetId: PromiseOrValue<BytesLike>,
-    paymentToken: PromiseOrValue<string>,
-    pricePerEpoch: PromiseOrValue<BigNumberish>,
-    requiredStake: PromiseOrValue<BigNumberish>,
+    paymentToken_: PromiseOrValue<string>,
+    pricePerEpoch_: PromiseOrValue<BigNumberish>,
+    requiredStake_: PromiseOrValue<BigNumberish>,
+    minWorkers_: PromiseOrValue<BigNumberish>,
+    maxWorkers_: PromiseOrValue<BigNumberish>,
+    targetWorkers_: PromiseOrValue<BigNumberish>,
+    appCID_: PromiseOrValue<BytesLike>,
+    effectorWasmsCids_: PromiseOrValue<BytesLike>[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -121,37 +148,55 @@ export interface DealFactory extends BaseContract {
     core(overrides?: CallOverrides): Promise<string>;
 
     createDeal(
-      subnetId: PromiseOrValue<BytesLike>,
-      paymentToken: PromiseOrValue<string>,
-      pricePerEpoch: PromiseOrValue<BigNumberish>,
-      requiredStake: PromiseOrValue<BigNumberish>,
+      paymentToken_: PromiseOrValue<string>,
+      pricePerEpoch_: PromiseOrValue<BigNumberish>,
+      requiredStake_: PromiseOrValue<BigNumberish>,
+      minWorkers_: PromiseOrValue<BigNumberish>,
+      maxWorkers_: PromiseOrValue<BigNumberish>,
+      targetWorkers_: PromiseOrValue<BigNumberish>,
+      appCID_: PromiseOrValue<BytesLike>,
+      effectorWasmsCids_: PromiseOrValue<BytesLike>[],
       overrides?: CallOverrides
     ): Promise<void>;
   };
 
   filters: {
-    "CreateDeal(address,address,uint256,uint256)"(
+    "DealCreated(address,address,uint256,uint256,uint256,uint256,uint256,bytes32,bytes32[])"(
       deal?: null,
       paymentToken?: null,
       pricePerEpoch?: null,
-      requiredStake?: null
-    ): CreateDealEventFilter;
-    CreateDeal(
+      requiredStake?: null,
+      minWorkers?: null,
+      maxWorkers?: null,
+      targetWorkers?: null,
+      appCID?: null,
+      effectorWasmsCids?: null
+    ): DealCreatedEventFilter;
+    DealCreated(
       deal?: null,
       paymentToken?: null,
       pricePerEpoch?: null,
-      requiredStake?: null
-    ): CreateDealEventFilter;
+      requiredStake?: null,
+      minWorkers?: null,
+      maxWorkers?: null,
+      targetWorkers?: null,
+      appCID?: null,
+      effectorWasmsCids?: null
+    ): DealCreatedEventFilter;
   };
 
   estimateGas: {
     core(overrides?: CallOverrides): Promise<BigNumber>;
 
     createDeal(
-      subnetId: PromiseOrValue<BytesLike>,
-      paymentToken: PromiseOrValue<string>,
-      pricePerEpoch: PromiseOrValue<BigNumberish>,
-      requiredStake: PromiseOrValue<BigNumberish>,
+      paymentToken_: PromiseOrValue<string>,
+      pricePerEpoch_: PromiseOrValue<BigNumberish>,
+      requiredStake_: PromiseOrValue<BigNumberish>,
+      minWorkers_: PromiseOrValue<BigNumberish>,
+      maxWorkers_: PromiseOrValue<BigNumberish>,
+      targetWorkers_: PromiseOrValue<BigNumberish>,
+      appCID_: PromiseOrValue<BytesLike>,
+      effectorWasmsCids_: PromiseOrValue<BytesLike>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
   };
@@ -160,10 +205,14 @@ export interface DealFactory extends BaseContract {
     core(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     createDeal(
-      subnetId: PromiseOrValue<BytesLike>,
-      paymentToken: PromiseOrValue<string>,
-      pricePerEpoch: PromiseOrValue<BigNumberish>,
-      requiredStake: PromiseOrValue<BigNumberish>,
+      paymentToken_: PromiseOrValue<string>,
+      pricePerEpoch_: PromiseOrValue<BigNumberish>,
+      requiredStake_: PromiseOrValue<BigNumberish>,
+      minWorkers_: PromiseOrValue<BigNumberish>,
+      maxWorkers_: PromiseOrValue<BigNumberish>,
+      targetWorkers_: PromiseOrValue<BigNumberish>,
+      appCID_: PromiseOrValue<BytesLike>,
+      effectorWasmsCids_: PromiseOrValue<BytesLike>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
   };

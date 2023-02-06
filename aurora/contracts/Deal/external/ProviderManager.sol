@@ -26,8 +26,6 @@ abstract contract ProviderManager is
         PATId id = PATId.wrap(
             keccak256(abi.encode(address(this), block.number, salt, owner))
         );
-        require(_getPATOwner(id) == address(0x00), "Id already used");
-
         require(
             _getRole(owner) == Role.ResourceManager,
             "Participant isn't ResourceManager"
