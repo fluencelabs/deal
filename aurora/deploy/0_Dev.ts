@@ -7,6 +7,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const accounts = await hre.getUnnamedAccounts();
   const deployer = accounts[0];
 
+  console.log("Deploying account:", deployer);
   await hre.deployments.deploy("DeveloperFaucet", {
     from: deployer,
     args: [],

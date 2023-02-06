@@ -15,8 +15,7 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       forking: {
-        url: "https://testnet.aurora.dev",
-        blockNumber: 83101397,
+        url: "https://endpoints.omniatech.io/v1/aurora/testnet/public",
       },
       accounts: {
         passphrase:
@@ -27,7 +26,7 @@ const config: HardhatUserConfig = {
       url: "http://localhost:8545",
     },
     aurora: {
-      url: "https://testnet.aurora.dev",
+      url: "https://endpoints.omniatech.io/v1/aurora/testnet/public",
       accounts: [
         process.env.AURORA_PRIVATE_KEY ??
           "0x0000000000000000000000000000000000000000000000000000000000000000",

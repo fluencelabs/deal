@@ -6,27 +6,39 @@ import "./interfaces/DCInternalInterface.sol";
 
 abstract contract DealConfigInternal is DCInternalInterface {
     Core private immutable _coreAddr;
-    bytes32 private immutable _subnetId_;
     IERC20 private immutable _fluenceToken_;
     IERC20 private immutable _paymentToken_;
+    bytes32 private immutable _appCID_;
 
     uint256 private _pricePerEpoch_;
     uint256 private _requiredStake_;
+    bytes32[] private _effectorWasmsCids_;
+    uint256 private _minWorkers_;
+    uint256 private _maxWorkers_;
+    uint256 private _targetWorkers_;
 
     constructor(
         Core core_,
-        bytes32 subnetId_,
-        IERC20 fluenceToken_,
-        IERC20 paymentToken_,
+        address fluenceToken_,
+        address paymentToken_,
         uint256 pricePerEpoch_,
-        uint256 requiredStake_
+        uint256 requiredStake_,
+        uint256 minWorkers_,
+        uint256 maxWorkers_,
+        uint256 targetWorkers_,
+        bytes32 appCID_,
+        bytes32[] memory effectorWasmsCids_
     ) {
         _coreAddr = core_;
-        _subnetId_ = subnetId_;
-        _fluenceToken_ = fluenceToken_;
-        _paymentToken_ = paymentToken_;
+        _fluenceToken_ = IERC20(fluenceToken_);
+        _paymentToken_ = IERC20(paymentToken_);
         _pricePerEpoch_ = pricePerEpoch_;
         _requiredStake_ = requiredStake_;
+        _minWorkers_ = minWorkers_;
+        _maxWorkers_ = maxWorkers_;
+        _targetWorkers_ = targetWorkers_;
+        _appCID_ = appCID_;
+        _effectorWasmsCids_ = effectorWasmsCids_;
     }
 
     function _core() internal view override returns (Core) {
@@ -49,8 +61,29 @@ abstract contract DealConfigInternal is DCInternalInterface {
         return _fluenceToken_;
     }
 
-    function _subnetId() internal view override returns (bytes32) {
-        return _subnetId_;
+    function _appCID() internal view override returns (bytes32) {
+        return _appCID_;
+    }
+
+    function _effectorWasmsCids()
+        internal
+        view
+        override
+        returns (bytes32[] memory)
+    {
+        return _effectorWasmsCids_;
+    }
+
+    function _minWorkers() internal view override returns (uint256) {
+        return _minWorkers_;
+    }
+
+    function _maxWorkers() internal view override returns (uint256) {
+        return _maxWorkers_;
+    }
+
+    function _targetWorkers() internal view override returns (uint256) {
+        return _targetWorkers_;
     }
 
     function _setPricePerEpoch(uint256 pricePerEpoch_) internal override {

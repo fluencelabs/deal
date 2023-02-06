@@ -18,17 +18,19 @@ export interface DealFactoryInterface extends utils.Interface {
     decodeFunctionResult(functionFragment: "core", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "createDeal", data: BytesLike): Result;
     events: {
-        "CreateDeal(address,address,uint256,uint256)": EventFragment;
+        "CreateDeal(address,bytes32,address,uint256,uint256)": EventFragment;
     };
     getEvent(nameOrSignatureOrTopic: "CreateDeal"): EventFragment;
 }
 export interface CreateDealEventObject {
     deal: string;
+    subnetId: string;
     paymentToken: string;
     pricePerEpoch: BigNumber;
     requiredStake: BigNumber;
 }
 export type CreateDealEvent = TypedEvent<[
+    string,
     string,
     string,
     BigNumber,
@@ -64,8 +66,8 @@ export interface DealFactory extends BaseContract {
         createDeal(subnetId: PromiseOrValue<BytesLike>, paymentToken: PromiseOrValue<string>, pricePerEpoch: PromiseOrValue<BigNumberish>, requiredStake: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<void>;
     };
     filters: {
-        "CreateDeal(address,address,uint256,uint256)"(deal?: null, paymentToken?: null, pricePerEpoch?: null, requiredStake?: null): CreateDealEventFilter;
-        CreateDeal(deal?: null, paymentToken?: null, pricePerEpoch?: null, requiredStake?: null): CreateDealEventFilter;
+        "CreateDeal(address,bytes32,address,uint256,uint256)"(deal?: null, subnetId?: null, paymentToken?: null, pricePerEpoch?: null, requiredStake?: null): CreateDealEventFilter;
+        CreateDeal(deal?: null, subnetId?: null, paymentToken?: null, pricePerEpoch?: null, requiredStake?: null): CreateDealEventFilter;
     };
     estimateGas: {
         core(overrides?: CallOverrides): Promise<BigNumber>;
