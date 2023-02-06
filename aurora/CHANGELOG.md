@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.1.3...deal-aurora-v0.1.4) (2023-02-06)
+
+
+### Features
+
+* update DealConfig ([#18](https://github.com/fluencelabs/deal/issues/18)) ([d0a3ce6](https://github.com/fluencelabs/deal/commit/d0a3ce6ace96e62e2dc43daffb0138e45574f990))
+
 ## [0.1.3](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.1.2...deal-aurora-v0.1.3) (2023-01-27)
 
 
