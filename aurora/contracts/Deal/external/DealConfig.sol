@@ -28,11 +28,11 @@ abstract contract DealConfig is IDealConfig, DCInternalInterface {
         return _fluenceToken();
     }
 
-    function appCID() external view returns (bytes32) {
+    function appCID() external view returns (bytes memory) {
         return _appCID();
     }
 
-    function effectorWasmsCids() external view returns (bytes32[] memory) {
+    function effectorWasmsCids() external view returns (bytes[] memory) {
         return _effectorWasmsCids();
     }
 

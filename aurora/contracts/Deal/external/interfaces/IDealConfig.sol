@@ -14,9 +14,9 @@ interface IDealConfig {
 
     function fluenceToken() external view returns (IERC20);
 
-    function appCID() external view returns (bytes32);
+    function appCID() external view returns (bytes memory);
 
-    function effectorWasmsCids() external view returns (bytes32[] memory);
+    function effectorWasmsCids() external view returns (bytes[] memory);
 
     function minWorkers() external view returns (uint256);
 

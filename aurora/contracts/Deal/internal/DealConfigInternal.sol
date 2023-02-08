@@ -8,14 +8,14 @@ abstract contract DealConfigInternal is DCInternalInterface {
     Core private immutable _coreAddr;
     IERC20 private immutable _fluenceToken_;
     IERC20 private immutable _paymentToken_;
-    bytes32 private immutable _appCID_;
 
     uint256 private _pricePerEpoch_;
     uint256 private _requiredStake_;
-    bytes32[] private _effectorWasmsCids_;
+    bytes private _appCID_;
     uint256 private _minWorkers_;
     uint256 private _maxWorkers_;
     uint256 private _targetWorkers_;
+    bytes[] private _effectorWasmsCids_;
 
     constructor(
         Core core_,
@@ -26,8 +26,8 @@ abstract contract DealConfigInternal is DCInternalInterface {
         uint256 minWorkers_,
         uint256 maxWorkers_,
         uint256 targetWorkers_,
-        bytes32 appCID_,
-        bytes32[] memory effectorWasmsCids_
+        bytes memory appCID_,
+        bytes[] memory effectorWasmsCids_
     ) {
         _coreAddr = core_;
         _fluenceToken_ = IERC20(fluenceToken_);
@@ -61,7 +61,7 @@ abstract contract DealConfigInternal is DCInternalInterface {
         return _fluenceToken_;
     }
 
-    function _appCID() internal view override returns (bytes32) {
+    function _appCID() internal view override returns (bytes memory) {
         return _appCID_;
     }
 
@@ -69,7 +69,7 @@ abstract contract DealConfigInternal is DCInternalInterface {
         internal
         view
         override
-        returns (bytes32[] memory)
+        returns (bytes[] memory)
     {
         return _effectorWasmsCids_;
     }

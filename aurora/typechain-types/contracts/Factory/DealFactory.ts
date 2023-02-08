@@ -30,7 +30,7 @@ import type {
 export interface DealFactoryInterface extends utils.Interface {
   functions: {
     "core()": FunctionFragment;
-    "createDeal(address,uint256,uint256,uint256,uint256,uint256,bytes32,bytes32[])": FunctionFragment;
+    "createDeal(address,uint256,uint256,uint256,uint256,uint256,bytes,bytes[])": FunctionFragment;
   };
 
   getFunction(nameOrSignatureOrTopic: "core" | "createDeal"): FunctionFragment;
@@ -54,7 +54,7 @@ export interface DealFactoryInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "createDeal", data: BytesLike): Result;
 
   events: {
-    "DealCreated(address,address,uint256,uint256,uint256,uint256,uint256,bytes32,bytes32[])": EventFragment;
+    "DealCreated(address,address,uint256,uint256,uint256,uint256,uint256,bytes,bytes[])": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "DealCreated"): EventFragment;
@@ -161,7 +161,7 @@ export interface DealFactory extends BaseContract {
   };
 
   filters: {
-    "DealCreated(address,address,uint256,uint256,uint256,uint256,uint256,bytes32,bytes32[])"(
+    "DealCreated(address,address,uint256,uint256,uint256,uint256,uint256,bytes,bytes[])"(
       deal?: null,
       paymentToken?: null,
       pricePerEpoch?: null,

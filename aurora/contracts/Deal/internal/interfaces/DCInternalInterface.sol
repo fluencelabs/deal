@@ -14,13 +14,13 @@ abstract contract DCInternalInterface {
 
     function _fluenceToken() internal view virtual returns (IERC20);
 
-    function _appCID() internal view virtual returns (bytes32);
+    function _appCID() internal view virtual returns (bytes memory);
 
     function _effectorWasmsCids()
         internal
         view
         virtual
-        returns (bytes32[] memory);
+        returns (bytes[] memory);
 
     function _minWorkers() internal view virtual returns (uint256);
 
