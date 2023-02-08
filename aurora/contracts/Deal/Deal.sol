@@ -30,8 +30,8 @@ contract Deal is
         uint256 minWorkers_,
         uint256 maxWorkers_,
         uint256 targetWorkers_,
-        bytes32 appCID_,
-        bytes32[] memory effectorWasmsCids_
+        bytes memory appCID_,
+        bytes[] memory effectorWasmsCids_
     )
         DealConfigInternal(
             core_,

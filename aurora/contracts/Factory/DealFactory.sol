@@ -14,8 +14,8 @@ contract DealFactory {
         uint256 minWorkers,
         uint256 maxWorkers,
         uint256 targetWorkers,
-        bytes32 appCID,
-        bytes32[] effectorWasmsCids
+        bytes appCID,
+        bytes[] effectorWasmsCids
     );
 
     constructor(Core core_) {
@@ -29,8 +29,8 @@ contract DealFactory {
         uint256 minWorkers_,
         uint256 maxWorkers_,
         uint256 targetWorkers_,
-        bytes32 appCID_,
-        bytes32[] memory effectorWasmsCids_
+        bytes memory appCID_,
+        bytes[] memory effectorWasmsCids_
     ) external {
         Deal deal = new Deal(
             core,
