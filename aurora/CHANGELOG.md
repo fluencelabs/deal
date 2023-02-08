@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.5](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.1.4...deal-aurora-v0.1.5) (2023-02-08)
+
+
+### Bug Fixes
+
+* change type in DealCreated event ([#20](https://github.com/fluencelabs/deal/issues/20)) ([60968fa](https://github.com/fluencelabs/deal/commit/60968fa43379e6a5baa117f467eee58a6be970cc))
+
 ## [0.1.4](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.1.3...deal-aurora-v0.1.4) (2023-02-06)
 
 
