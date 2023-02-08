@@ -11,9 +11,9 @@ const _abi = [
         name: "appCID",
         outputs: [
             {
-                internalType: "bytes32",
+                internalType: "string",
                 name: "",
-                type: "bytes32",
+                type: "string",
             },
         ],
         stateMutability: "view",
@@ -37,9 +37,9 @@ const _abi = [
         name: "effectorWasmsCids",
         outputs: [
             {
-                internalType: "bytes32[]",
+                internalType: "string[]",
                 name: "",
-                type: "bytes32[]",
+                type: "string[]",
             },
         ],
         stateMutability: "view",

@@ -30,7 +30,7 @@ import type {
 export interface DealFactoryInterface extends utils.Interface {
   functions: {
     "core()": FunctionFragment;
-    "createDeal(address,uint256,uint256,uint256,uint256,uint256,bytes,bytes[])": FunctionFragment;
+    "createDeal(address,uint256,uint256,uint256,uint256,uint256,string,string[])": FunctionFragment;
   };
 
   getFunction(nameOrSignatureOrTopic: "core" | "createDeal"): FunctionFragment;
@@ -45,8 +45,8 @@ export interface DealFactoryInterface extends utils.Interface {
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<BytesLike>[]
+      PromiseOrValue<string>,
+      PromiseOrValue<string>[]
     ]
   ): string;
 
@@ -54,7 +54,7 @@ export interface DealFactoryInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "createDeal", data: BytesLike): Result;
 
   events: {
-    "DealCreated(address,address,uint256,uint256,uint256,uint256,uint256,bytes,bytes[])": EventFragment;
+    "DealCreated(address,address,uint256,uint256,uint256,uint256,uint256,string,string[])": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "DealCreated"): EventFragment;
@@ -124,8 +124,8 @@ export interface DealFactory extends BaseContract {
       minWorkers_: PromiseOrValue<BigNumberish>,
       maxWorkers_: PromiseOrValue<BigNumberish>,
       targetWorkers_: PromiseOrValue<BigNumberish>,
-      appCID_: PromiseOrValue<BytesLike>,
-      effectorWasmsCids_: PromiseOrValue<BytesLike>[],
+      appCID_: PromiseOrValue<string>,
+      effectorWasmsCids_: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
   };
@@ -139,8 +139,8 @@ export interface DealFactory extends BaseContract {
     minWorkers_: PromiseOrValue<BigNumberish>,
     maxWorkers_: PromiseOrValue<BigNumberish>,
     targetWorkers_: PromiseOrValue<BigNumberish>,
-    appCID_: PromiseOrValue<BytesLike>,
-    effectorWasmsCids_: PromiseOrValue<BytesLike>[],
+    appCID_: PromiseOrValue<string>,
+    effectorWasmsCids_: PromiseOrValue<string>[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -154,14 +154,14 @@ export interface DealFactory extends BaseContract {
       minWorkers_: PromiseOrValue<BigNumberish>,
       maxWorkers_: PromiseOrValue<BigNumberish>,
       targetWorkers_: PromiseOrValue<BigNumberish>,
-      appCID_: PromiseOrValue<BytesLike>,
-      effectorWasmsCids_: PromiseOrValue<BytesLike>[],
+      appCID_: PromiseOrValue<string>,
+      effectorWasmsCids_: PromiseOrValue<string>[],
       overrides?: CallOverrides
     ): Promise<void>;
   };
 
   filters: {
-    "DealCreated(address,address,uint256,uint256,uint256,uint256,uint256,bytes,bytes[])"(
+    "DealCreated(address,address,uint256,uint256,uint256,uint256,uint256,string,string[])"(
       deal?: null,
       paymentToken?: null,
       pricePerEpoch?: null,
@@ -195,8 +195,8 @@ export interface DealFactory extends BaseContract {
       minWorkers_: PromiseOrValue<BigNumberish>,
       maxWorkers_: PromiseOrValue<BigNumberish>,
       targetWorkers_: PromiseOrValue<BigNumberish>,
-      appCID_: PromiseOrValue<BytesLike>,
-      effectorWasmsCids_: PromiseOrValue<BytesLike>[],
+      appCID_: PromiseOrValue<string>,
+      effectorWasmsCids_: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
   };
@@ -211,8 +211,8 @@ export interface DealFactory extends BaseContract {
       minWorkers_: PromiseOrValue<BigNumberish>,
       maxWorkers_: PromiseOrValue<BigNumberish>,
       targetWorkers_: PromiseOrValue<BigNumberish>,
-      appCID_: PromiseOrValue<BytesLike>,
-      effectorWasmsCids_: PromiseOrValue<BytesLike>[],
+      appCID_: PromiseOrValue<string>,
+      effectorWasmsCids_: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
   };
