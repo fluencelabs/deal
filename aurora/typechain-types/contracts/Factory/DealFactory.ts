@@ -30,7 +30,7 @@ import type {
 export interface DealFactoryInterface extends utils.Interface {
   functions: {
     "core()": FunctionFragment;
-    "createDeal(address,uint256,uint256,uint256,uint256,uint256,bytes32,bytes32[])": FunctionFragment;
+    "createDeal(address,uint256,uint256,uint256,uint256,uint256,string,string[])": FunctionFragment;
   };
 
   getFunction(nameOrSignatureOrTopic: "core" | "createDeal"): FunctionFragment;
@@ -45,8 +45,8 @@ export interface DealFactoryInterface extends utils.Interface {
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<BytesLike>[]
+      PromiseOrValue<string>,
+      PromiseOrValue<string>[]
     ]
   ): string;
 
@@ -54,7 +54,7 @@ export interface DealFactoryInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "createDeal", data: BytesLike): Result;
 
   events: {
-    "DealCreated(address,address,uint256,uint256,uint256,uint256,uint256,bytes32,bytes32[],uint256)": EventFragment;
+    "DealCreated(address,address,uint256,uint256,uint256,uint256,uint256,string,string[],uint256)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "DealCreated"): EventFragment;
@@ -69,7 +69,7 @@ export interface DealCreatedEventObject {
   maxWorkersPerProvider: BigNumber;
   targetWorkers: BigNumber;
   appCID: string;
-  effectorWasmsCIDs: string[];
+  effectorWasmsCids: string[];
   epoch: BigNumber;
 }
 export type DealCreatedEvent = TypedEvent<
@@ -126,8 +126,8 @@ export interface DealFactory extends BaseContract {
       minWorkers_: PromiseOrValue<BigNumberish>,
       maxWorkersPerProvider_: PromiseOrValue<BigNumberish>,
       targetWorkers_: PromiseOrValue<BigNumberish>,
-      appCID_: PromiseOrValue<BytesLike>,
-      effectorWasmsCIDs_: PromiseOrValue<BytesLike>[],
+      appCID_: PromiseOrValue<string>,
+      effectorWasmsCids_: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
   };
@@ -141,8 +141,8 @@ export interface DealFactory extends BaseContract {
     minWorkers_: PromiseOrValue<BigNumberish>,
     maxWorkersPerProvider_: PromiseOrValue<BigNumberish>,
     targetWorkers_: PromiseOrValue<BigNumberish>,
-    appCID_: PromiseOrValue<BytesLike>,
-    effectorWasmsCIDs_: PromiseOrValue<BytesLike>[],
+    appCID_: PromiseOrValue<string>,
+    effectorWasmsCids_: PromiseOrValue<string>[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -156,14 +156,14 @@ export interface DealFactory extends BaseContract {
       minWorkers_: PromiseOrValue<BigNumberish>,
       maxWorkersPerProvider_: PromiseOrValue<BigNumberish>,
       targetWorkers_: PromiseOrValue<BigNumberish>,
-      appCID_: PromiseOrValue<BytesLike>,
-      effectorWasmsCIDs_: PromiseOrValue<BytesLike>[],
+      appCID_: PromiseOrValue<string>,
+      effectorWasmsCids_: PromiseOrValue<string>[],
       overrides?: CallOverrides
     ): Promise<void>;
   };
 
   filters: {
-    "DealCreated(address,address,uint256,uint256,uint256,uint256,uint256,bytes32,bytes32[],uint256)"(
+    "DealCreated(address,address,uint256,uint256,uint256,uint256,uint256,string,string[],uint256)"(
       deal?: null,
       paymentToken?: null,
       pricePerEpoch?: null,
@@ -172,7 +172,7 @@ export interface DealFactory extends BaseContract {
       maxWorkersPerProvider?: null,
       targetWorkers?: null,
       appCID?: null,
-      effectorWasmsCIDs?: null,
+      effectorWasmsCids?: null,
       epoch?: null
     ): DealCreatedEventFilter;
     DealCreated(
@@ -184,7 +184,7 @@ export interface DealFactory extends BaseContract {
       maxWorkersPerProvider?: null,
       targetWorkers?: null,
       appCID?: null,
-      effectorWasmsCIDs?: null,
+      effectorWasmsCids?: null,
       epoch?: null
     ): DealCreatedEventFilter;
   };
@@ -199,8 +199,8 @@ export interface DealFactory extends BaseContract {
       minWorkers_: PromiseOrValue<BigNumberish>,
       maxWorkersPerProvider_: PromiseOrValue<BigNumberish>,
       targetWorkers_: PromiseOrValue<BigNumberish>,
-      appCID_: PromiseOrValue<BytesLike>,
-      effectorWasmsCIDs_: PromiseOrValue<BytesLike>[],
+      appCID_: PromiseOrValue<string>,
+      effectorWasmsCids_: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
   };
@@ -215,8 +215,8 @@ export interface DealFactory extends BaseContract {
       minWorkers_: PromiseOrValue<BigNumberish>,
       maxWorkersPerProvider_: PromiseOrValue<BigNumberish>,
       targetWorkers_: PromiseOrValue<BigNumberish>,
-      appCID_: PromiseOrValue<BytesLike>,
-      effectorWasmsCIDs_: PromiseOrValue<BytesLike>[],
+      appCID_: PromiseOrValue<string>,
+      effectorWasmsCids_: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
   };

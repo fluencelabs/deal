@@ -22,12 +22,13 @@ export interface DealInterface extends utils.Interface {
         "removeProviderToken(bytes32)": FunctionFragment;
         "renounceOwnership()": FunctionFragment;
         "requiredStake()": FunctionFragment;
+        "setAppCID(string)": FunctionFragment;
         "targetWorkers()": FunctionFragment;
         "transferOwnership(address)": FunctionFragment;
         "withdraw(address)": FunctionFragment;
         "withdrawPaymentBalance(address,uint256)": FunctionFragment;
     };
-    getFunction(nameOrSignatureOrTopic: "PAYMENT_DURATION_IN_EPOCHS" | "appCID" | "core" | "createProviderToken" | "deposit" | "effectorWasmsCids" | "fluenceToken" | "getBalance" | "getPATOwner" | "getUnlockedCollateralBy" | "maxWorkersPerProvider" | "minWorkers" | "owner" | "paymentToken" | "pricePerEpoch" | "removeProviderToken" | "renounceOwnership" | "requiredStake" | "targetWorkers" | "transferOwnership" | "withdraw" | "withdrawPaymentBalance"): FunctionFragment;
+    getFunction(nameOrSignatureOrTopic: "PAYMENT_DURATION_IN_EPOCHS" | "appCID" | "core" | "createProviderToken" | "deposit" | "effectorWasmsCids" | "fluenceToken" | "getBalance" | "getPATOwner" | "getUnlockedCollateralBy" | "maxWorkersPerProvider" | "minWorkers" | "owner" | "paymentToken" | "pricePerEpoch" | "removeProviderToken" | "renounceOwnership" | "requiredStake" | "setAppCID" | "targetWorkers" | "transferOwnership" | "withdraw" | "withdrawPaymentBalance"): FunctionFragment;
     encodeFunctionData(functionFragment: "PAYMENT_DURATION_IN_EPOCHS", values?: undefined): string;
     encodeFunctionData(functionFragment: "appCID", values?: undefined): string;
     encodeFunctionData(functionFragment: "core", values?: undefined): string;
@@ -46,6 +47,7 @@ export interface DealInterface extends utils.Interface {
     encodeFunctionData(functionFragment: "removeProviderToken", values: [PromiseOrValue<BytesLike>]): string;
     encodeFunctionData(functionFragment: "renounceOwnership", values?: undefined): string;
     encodeFunctionData(functionFragment: "requiredStake", values?: undefined): string;
+    encodeFunctionData(functionFragment: "setAppCID", values: [PromiseOrValue<string>]): string;
     encodeFunctionData(functionFragment: "targetWorkers", values?: undefined): string;
     encodeFunctionData(functionFragment: "transferOwnership", values: [PromiseOrValue<string>]): string;
     encodeFunctionData(functionFragment: "withdraw", values: [PromiseOrValue<string>]): string;
@@ -68,16 +70,19 @@ export interface DealInterface extends utils.Interface {
     decodeFunctionResult(functionFragment: "removeProviderToken", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "renounceOwnership", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "requiredStake", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "setAppCID", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "targetWorkers", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "transferOwnership", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "withdrawPaymentBalance", data: BytesLike): Result;
     events: {
         "AddProviderToken(address,bytes32)": EventFragment;
+        "NewAppCID(string)": EventFragment;
         "OwnershipTransferred(address,address)": EventFragment;
         "RemoveProviderToken(bytes32)": EventFragment;
     };
     getEvent(nameOrSignatureOrTopic: "AddProviderToken"): EventFragment;
+    getEvent(nameOrSignatureOrTopic: "NewAppCID"): EventFragment;
     getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
     getEvent(nameOrSignatureOrTopic: "RemoveProviderToken"): EventFragment;
 }
@@ -90,6 +95,11 @@ export type AddProviderTokenEvent = TypedEvent<[
     string
 ], AddProviderTokenEventObject>;
 export type AddProviderTokenEventFilter = TypedEventFilter<AddProviderTokenEvent>;
+export interface NewAppCIDEventObject {
+    appCID: string;
+}
+export type NewAppCIDEvent = TypedEvent<[string], NewAppCIDEventObject>;
+export type NewAppCIDEventFilter = TypedEventFilter<NewAppCIDEvent>;
 export interface OwnershipTransferredEventObject {
     previousOwner: string;
     newOwner: string;
@@ -147,6 +157,9 @@ export interface Deal extends BaseContract {
             from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
         requiredStake(overrides?: CallOverrides): Promise<[BigNumber]>;
+        setAppCID(appCID_: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
+        }): Promise<ContractTransaction>;
         targetWorkers(overrides?: CallOverrides): Promise<[BigNumber]>;
         transferOwnership(newOwner: PromiseOrValue<string>, overrides?: Overrides & {
             from?: PromiseOrValue<string>;
@@ -184,6 +197,9 @@ export interface Deal extends BaseContract {
         from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
     requiredStake(overrides?: CallOverrides): Promise<BigNumber>;
+    setAppCID(appCID_: PromiseOrValue<string>, overrides?: Overrides & {
+        from?: PromiseOrValue<string>;
+    }): Promise<ContractTransaction>;
     targetWorkers(overrides?: CallOverrides): Promise<BigNumber>;
     transferOwnership(newOwner: PromiseOrValue<string>, overrides?: Overrides & {
         from?: PromiseOrValue<string>;
@@ -213,6 +229,7 @@ export interface Deal extends BaseContract {
         removeProviderToken(id: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<void>;
         renounceOwnership(overrides?: CallOverrides): Promise<void>;
         requiredStake(overrides?: CallOverrides): Promise<BigNumber>;
+        setAppCID(appCID_: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
         targetWorkers(overrides?: CallOverrides): Promise<BigNumber>;
         transferOwnership(newOwner: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
         withdraw(token: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
@@ -221,6 +238,8 @@ export interface Deal extends BaseContract {
     filters: {
         "AddProviderToken(address,bytes32)"(owner?: PromiseOrValue<string> | null, id?: null): AddProviderTokenEventFilter;
         AddProviderToken(owner?: PromiseOrValue<string> | null, id?: null): AddProviderTokenEventFilter;
+        "NewAppCID(string)"(appCID?: null): NewAppCIDEventFilter;
+        NewAppCID(appCID?: null): NewAppCIDEventFilter;
         "OwnershipTransferred(address,address)"(previousOwner?: PromiseOrValue<string> | null, newOwner?: PromiseOrValue<string> | null): OwnershipTransferredEventFilter;
         OwnershipTransferred(previousOwner?: PromiseOrValue<string> | null, newOwner?: PromiseOrValue<string> | null): OwnershipTransferredEventFilter;
         "RemoveProviderToken(bytes32)"(id?: null): RemoveProviderTokenEventFilter;
@@ -253,6 +272,9 @@ export interface Deal extends BaseContract {
             from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
         requiredStake(overrides?: CallOverrides): Promise<BigNumber>;
+        setAppCID(appCID_: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
+        }): Promise<BigNumber>;
         targetWorkers(overrides?: CallOverrides): Promise<BigNumber>;
         transferOwnership(newOwner: PromiseOrValue<string>, overrides?: Overrides & {
             from?: PromiseOrValue<string>;
@@ -291,6 +313,9 @@ export interface Deal extends BaseContract {
             from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
         requiredStake(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        setAppCID(appCID_: PromiseOrValue<string>, overrides?: Overrides & {
+            from?: PromiseOrValue<string>;
+        }): Promise<PopulatedTransaction>;
         targetWorkers(overrides?: CallOverrides): Promise<PopulatedTransaction>;
         transferOwnership(newOwner: PromiseOrValue<string>, overrides?: Overrides & {
             from?: PromiseOrValue<string>;

@@ -6,9 +6,9 @@ export declare class IDealConfig__factory {
         readonly inputs: readonly [];
         readonly name: "appCID";
         readonly outputs: readonly [{
-            readonly internalType: "bytes32";
+            readonly internalType: "string";
             readonly name: "";
-            readonly type: "bytes32";
+            readonly type: "string";
         }];
         readonly stateMutability: "view";
         readonly type: "function";
@@ -26,9 +26,9 @@ export declare class IDealConfig__factory {
         readonly inputs: readonly [];
         readonly name: "effectorWasmsCids";
         readonly outputs: readonly [{
-            readonly internalType: "bytes32[]";
+            readonly internalType: "string[]";
             readonly name: "";
-            readonly type: "bytes32[]";
+            readonly type: "string[]";
         }];
         readonly stateMutability: "view";
         readonly type: "function";
@@ -91,6 +91,16 @@ export declare class IDealConfig__factory {
             readonly type: "uint256";
         }];
         readonly stateMutability: "view";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "string";
+            readonly name: "appCID_";
+            readonly type: "string";
+        }];
+        readonly name: "setAppCID";
+        readonly outputs: readonly [];
+        readonly stateMutability: "nonpayable";
         readonly type: "function";
     }, {
         readonly inputs: readonly [];

@@ -6,6 +6,8 @@ import type {
   BigNumber,
   BytesLike,
   CallOverrides,
+  ContractTransaction,
+  Overrides,
   PopulatedTransaction,
   Signer,
   utils,
@@ -31,6 +33,7 @@ export interface IDealConfigInterface extends utils.Interface {
     "paymentToken()": FunctionFragment;
     "pricePerEpoch()": FunctionFragment;
     "requiredStake()": FunctionFragment;
+    "setAppCID(string)": FunctionFragment;
     "targetWorkers()": FunctionFragment;
   };
 
@@ -45,6 +48,7 @@ export interface IDealConfigInterface extends utils.Interface {
       | "paymentToken"
       | "pricePerEpoch"
       | "requiredStake"
+      | "setAppCID"
       | "targetWorkers"
   ): FunctionFragment;
 
@@ -79,6 +83,10 @@ export interface IDealConfigInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "setAppCID",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
     functionFragment: "targetWorkers",
     values?: undefined
   ): string;
@@ -110,6 +118,7 @@ export interface IDealConfigInterface extends utils.Interface {
     functionFragment: "requiredStake",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "setAppCID", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "targetWorkers",
     data: BytesLike
@@ -163,6 +172,11 @@ export interface IDealConfig extends BaseContract {
 
     requiredStake(overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    setAppCID(
+      appCID_: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     targetWorkers(overrides?: CallOverrides): Promise<[BigNumber]>;
   };
 
@@ -184,6 +198,11 @@ export interface IDealConfig extends BaseContract {
 
   requiredStake(overrides?: CallOverrides): Promise<BigNumber>;
 
+  setAppCID(
+    appCID_: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   targetWorkers(overrides?: CallOverrides): Promise<BigNumber>;
 
   callStatic: {
@@ -204,6 +223,11 @@ export interface IDealConfig extends BaseContract {
     pricePerEpoch(overrides?: CallOverrides): Promise<BigNumber>;
 
     requiredStake(overrides?: CallOverrides): Promise<BigNumber>;
+
+    setAppCID(
+      appCID_: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     targetWorkers(overrides?: CallOverrides): Promise<BigNumber>;
   };
@@ -229,6 +253,11 @@ export interface IDealConfig extends BaseContract {
 
     requiredStake(overrides?: CallOverrides): Promise<BigNumber>;
 
+    setAppCID(
+      appCID_: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     targetWorkers(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
@@ -252,6 +281,11 @@ export interface IDealConfig extends BaseContract {
     pricePerEpoch(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     requiredStake(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    setAppCID(
+      appCID_: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
 
     targetWorkers(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };

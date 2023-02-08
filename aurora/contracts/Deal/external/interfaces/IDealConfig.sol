@@ -14,13 +14,15 @@ interface IDealConfig {
 
     function fluenceToken() external view returns (IERC20);
 
-    function appCID() external view returns (bytes32);
+    function appCID() external view returns (string memory);
 
-    function effectorWasmsCids() external view returns (bytes32[] memory);
+    function effectorWasmsCids() external view returns (string[] memory);
 
     function minWorkers() external view returns (uint256);
 
     function maxWorkersPerProvider() external view returns (uint256);
 
     function targetWorkers() external view returns (uint256);
+
+    function setAppCID(string calldata appCID_) external;
 }

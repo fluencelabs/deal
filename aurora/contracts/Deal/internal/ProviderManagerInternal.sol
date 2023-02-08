@@ -78,7 +78,7 @@ abstract contract ProviderManagerInternal is
         uint256 collateral = collateralSlot.value;
         address owner = ownerSlot.value;
 
-        _createWithdrawRequest(_fluenceToken(), owner, collateral);
+        _createWithdrawRequest(_fluenceToken(), ownerSlot.value, collateral);
 
         delete ownerSlot.value;
         delete collateralSlot.value;

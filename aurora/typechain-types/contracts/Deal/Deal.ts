@@ -47,6 +47,7 @@ export interface DealInterface extends utils.Interface {
     "removeProviderToken(bytes32)": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "requiredStake()": FunctionFragment;
+    "setAppCID(string)": FunctionFragment;
     "targetWorkers()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "withdraw(address)": FunctionFragment;
@@ -73,6 +74,7 @@ export interface DealInterface extends utils.Interface {
       | "removeProviderToken"
       | "renounceOwnership"
       | "requiredStake"
+      | "setAppCID"
       | "targetWorkers"
       | "transferOwnership"
       | "withdraw"
@@ -141,6 +143,10 @@ export interface DealInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "requiredStake",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setAppCID",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "targetWorkers",
@@ -213,6 +219,7 @@ export interface DealInterface extends utils.Interface {
     functionFragment: "requiredStake",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "setAppCID", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "targetWorkers",
     data: BytesLike
@@ -229,11 +236,13 @@ export interface DealInterface extends utils.Interface {
 
   events: {
     "AddProviderToken(address,bytes32)": EventFragment;
+    "NewAppCID(string)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
     "RemoveProviderToken(bytes32)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "AddProviderToken"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "NewAppCID"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RemoveProviderToken"): EventFragment;
 }
@@ -249,6 +258,13 @@ export type AddProviderTokenEvent = TypedEvent<
 
 export type AddProviderTokenEventFilter =
   TypedEventFilter<AddProviderTokenEvent>;
+
+export interface NewAppCIDEventObject {
+  appCID: string;
+}
+export type NewAppCIDEvent = TypedEvent<[string], NewAppCIDEventObject>;
+
+export type NewAppCIDEventFilter = TypedEventFilter<NewAppCIDEvent>;
 
 export interface OwnershipTransferredEventObject {
   previousOwner: string;
@@ -354,6 +370,11 @@ export interface Deal extends BaseContract {
 
     requiredStake(overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    setAppCID(
+      appCID_: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     targetWorkers(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     transferOwnership(
@@ -427,6 +448,11 @@ export interface Deal extends BaseContract {
 
   requiredStake(overrides?: CallOverrides): Promise<BigNumber>;
 
+  setAppCID(
+    appCID_: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   targetWorkers(overrides?: CallOverrides): Promise<BigNumber>;
 
   transferOwnership(
@@ -498,6 +524,11 @@ export interface Deal extends BaseContract {
 
     requiredStake(overrides?: CallOverrides): Promise<BigNumber>;
 
+    setAppCID(
+      appCID_: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     targetWorkers(overrides?: CallOverrides): Promise<BigNumber>;
 
     transferOwnership(
@@ -526,6 +557,9 @@ export interface Deal extends BaseContract {
       owner?: PromiseOrValue<string> | null,
       id?: null
     ): AddProviderTokenEventFilter;
+
+    "NewAppCID(string)"(appCID?: null): NewAppCIDEventFilter;
+    NewAppCID(appCID?: null): NewAppCIDEventFilter;
 
     "OwnershipTransferred(address,address)"(
       previousOwner?: PromiseOrValue<string> | null,
@@ -594,6 +628,11 @@ export interface Deal extends BaseContract {
     ): Promise<BigNumber>;
 
     requiredStake(overrides?: CallOverrides): Promise<BigNumber>;
+
+    setAppCID(
+      appCID_: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
 
     targetWorkers(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -672,6 +711,11 @@ export interface Deal extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     requiredStake(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    setAppCID(
+      appCID_: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
 
     targetWorkers(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

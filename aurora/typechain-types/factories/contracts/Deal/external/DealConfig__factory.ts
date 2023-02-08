@@ -11,13 +11,26 @@ import type {
 
 const _abi = [
   {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "string",
+        name: "appCID",
+        type: "string",
+      },
+    ],
+    name: "NewAppCID",
+    type: "event",
+  },
+  {
     inputs: [],
     name: "appCID",
     outputs: [
       {
-        internalType: "bytes32",
+        internalType: "string",
         name: "",
-        type: "bytes32",
+        type: "string",
       },
     ],
     stateMutability: "view",
@@ -41,9 +54,9 @@ const _abi = [
     name: "effectorWasmsCids",
     outputs: [
       {
-        internalType: "bytes32[]",
+        internalType: "string[]",
         name: "",
-        type: "bytes32[]",
+        type: "string[]",
       },
     ],
     stateMutability: "view",
@@ -125,6 +138,19 @@ const _abi = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "appCID_",
+        type: "string",
+      },
+    ],
+    name: "setAppCID",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {

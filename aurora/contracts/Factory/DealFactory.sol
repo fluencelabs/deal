@@ -14,8 +14,8 @@ contract DealFactory {
         uint256 minWorkers,
         uint256 maxWorkersPerProvider,
         uint256 targetWorkers,
-        bytes32 appCID,
-        bytes32[] effectorWasmsCIDs,
+        string appCID,
+        string[] effectorWasmsCids,
         uint256 epoch
     );
 
@@ -30,8 +30,8 @@ contract DealFactory {
         uint256 minWorkers_,
         uint256 maxWorkersPerProvider_,
         uint256 targetWorkers_,
-        bytes32 appCID_,
-        bytes32[] memory effectorWasmsCIDs_
+        string memory appCID_,
+        string[] memory effectorWasmsCids_
     ) external {
         Deal deal = new Deal(
             core,
@@ -42,7 +42,7 @@ contract DealFactory {
             maxWorkersPerProvider_,
             targetWorkers_,
             appCID_,
-            effectorWasmsCIDs_
+            effectorWasmsCids_
         );
 
         deal.transferOwnership(msg.sender);
@@ -56,7 +56,7 @@ contract DealFactory {
             maxWorkersPerProvider_,
             targetWorkers_,
             appCID_,
-            effectorWasmsCIDs_,
+            effectorWasmsCids_,
             core.epochManager().getEpoch()
         );
     }
