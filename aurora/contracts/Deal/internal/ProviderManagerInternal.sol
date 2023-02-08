@@ -46,11 +46,12 @@ abstract contract ProviderManagerInternal is
 
         uint256 patsCountByOwner = _ownersInfo[owner].patsCount;
         uint256 currentWorkers = _currentWorkers;
+
+        require(currentWorkers < _targetWorkers(), "Target workers reached");
         require(
             patsCountByOwner < _maxWorkersPerProvider(),
             "Max workers per provider reached"
         );
-        require(currentWorkers < _targetWorkers(), "Target workers reached");
         require(ownerSlot.value == address(0x00), "Id already used");
 
         uint256 requiredStake = _requiredStake();
