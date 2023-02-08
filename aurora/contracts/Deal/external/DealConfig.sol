@@ -7,6 +7,7 @@ import "../internal/interfaces/DCInternalInterface.sol";
 
 abstract contract DealConfig is IDealConfig, DCInternalInterface {
     using SafeERC20 for IERC20;
+    event NewAppCID(string appCID);
 
     function core() external view returns (Core) {
         return _core();
@@ -46,5 +47,11 @@ abstract contract DealConfig is IDealConfig, DCInternalInterface {
 
     function targetWorkers() external view returns (uint256) {
         return _targetWorkers();
+    }
+
+    function setAppCID(string calldata appCID_) external override {
+        _setAppCID(appCID_);
+
+        emit NewAppCID(appCID_);
     }
 }

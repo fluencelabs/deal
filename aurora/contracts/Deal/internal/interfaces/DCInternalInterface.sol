@@ -31,4 +31,6 @@ abstract contract DCInternalInterface {
     function _setPricePerEpoch(uint256 pricePerEpoch_) internal virtual;
 
     function _setRequiredStake(uint256 requiredStake_) internal virtual;
+
+    function _setAppCID(string calldata appCID_) internal virtual;
 }

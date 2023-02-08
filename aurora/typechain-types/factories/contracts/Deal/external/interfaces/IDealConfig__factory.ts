@@ -128,6 +128,19 @@ const _abi = [
     type: "function",
   },
   {
+    inputs: [
+      {
+        internalType: "string",
+        name: "appCID_",
+        type: "string",
+      },
+    ],
+    name: "setAppCID",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
     inputs: [],
     name: "targetWorkers",
     outputs: [

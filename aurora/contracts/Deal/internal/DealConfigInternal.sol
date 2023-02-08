@@ -93,4 +93,8 @@ abstract contract DealConfigInternal is DCInternalInterface {
     function _setRequiredStake(uint256 requiredStake_) internal override {
         _requiredStake_ = requiredStake_;
     }
+
+    function _setAppCID(string calldata appCID_) internal override {
+        _appCID_ = appCID_;
+    }
 }
