@@ -2,16 +2,11 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "./interfaces/IPaymentManager.sol";
-import "../internal/interfaces/DCInternalInterface.sol";
-import "../../Utils/Consts.sol";
+import "../../internal/interfaces/IDealConfigInternal.sol";
+import "../../../Utils/Consts.sol";
 
-abstract contract PaymentManager is
-    IPaymentManager,
-    DCInternalInterface,
-    Ownable
-{
+/*
+abstract contract PaymentWithGoldenInternal is IDealConfigInternal, Ownable {
     using SafeERC20 for IERC20;
 
     uint256 public constant PAYMENT_DURATION_IN_EPOCHS = 3;
@@ -19,19 +14,18 @@ abstract contract PaymentManager is
     mapping(uint256 => bool) private _isExistGoldenParticleByEpoch;
     mapping(IERC20 => uint256) private _balance;
 
-    function getBalance() external view returns (uint256) {
+    function _getPaymentBalance() internal view returns (uint256) {
         return _balance[_paymentToken()];
     }
 
-    function deposit(uint256 amount) external onlyOwner {
+    function _depositToPaymentBalance(uint256 amount) internal {
         IERC20 token = _paymentToken();
         token.safeTransferFrom(msg.sender, address(this), amount);
         _balance[_paymentToken()] += amount;
     }
 
-    function withdrawPaymentBalance(IERC20 token, uint256 amount)
-        external
-        onlyOwner
+    function _withdrawFromPaymentBalance(IERC20 token, uint256 amount)
+        internal
     {
         uint256 currentEpoch = _core().epochManager().getEpoch();
         uint256 goldenParticleCount = 0;
@@ -65,3 +59,4 @@ abstract contract PaymentManager is
         token.safeTransfer(msg.sender, amount);
     }
 }
+*/

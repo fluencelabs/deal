@@ -1,7 +1,7 @@
 import { Signer } from "ethers";
 import type { Provider } from "@ethersproject/providers";
-import type { IWithdrawCollateralManager, IWithdrawCollateralManagerInterface } from "../../../../../contracts/Deal/external/interfaces/IWithdrawCollateralManager";
-export declare class IWithdrawCollateralManager__factory {
+import type { IWithdrawManager, IWithdrawManagerInterface } from "../../../../../contracts/Deal/external/interfaces/IWithdrawManager";
+export declare class IWithdrawManager__factory {
     static readonly abi: readonly [{
         readonly inputs: readonly [{
             readonly internalType: "address";
@@ -31,6 +31,6 @@ export declare class IWithdrawCollateralManager__factory {
         readonly stateMutability: "nonpayable";
         readonly type: "function";
     }];
-    static createInterface(): IWithdrawCollateralManagerInterface;
-    static connect(address: string, signerOrProvider: Signer | Provider): IWithdrawCollateralManager;
+    static createInterface(): IWithdrawManagerInterface;
+    static connect(address: string, signerOrProvider: Signer | Provider): IWithdrawManager;
 }

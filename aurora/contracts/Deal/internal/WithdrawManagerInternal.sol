@@ -2,13 +2,13 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "./interfaces/WMInternalInterface.sol";
-import "./interfaces/DCInternalInterface.sol";
+import "./interfaces/IWithdrawManagerInternal.sol";
+import "./interfaces/IDealConfigInternal.sol";
 import "../../Utils/WithdrawRequests.sol";
 
 abstract contract WithdrawManagerInternal is
-    WMInternalInterface,
-    DCInternalInterface
+    IDealConfigInternal,
+    IWithdrawManagerInternal
 {
     using WithdrawRequests for WithdrawRequests.Requests;
     using SafeERC20 for IERC20;

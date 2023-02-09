@@ -2,7 +2,7 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-interface IWithdrawCollateralManager {
+interface IWithdrawManager {
     function getUnlockedCollateralBy(address owner, uint256 timestamp)
         external
         view

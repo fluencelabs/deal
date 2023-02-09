@@ -55,8 +55,8 @@ export type { IPaymentManager } from "./contracts/Deal/external/interfaces/IPaym
 export { IPaymentManager__factory } from "./factories/contracts/Deal/external/interfaces/IPaymentManager__factory";
 export type { IProviderManager } from "./contracts/Deal/external/interfaces/IProviderManager";
 export { IProviderManager__factory } from "./factories/contracts/Deal/external/interfaces/IProviderManager__factory";
-export type { IWithdrawCollateralManager } from "./contracts/Deal/external/interfaces/IWithdrawCollateralManager";
-export { IWithdrawCollateralManager__factory } from "./factories/contracts/Deal/external/interfaces/IWithdrawCollateralManager__factory";
+export type { IWithdrawManager } from "./contracts/Deal/external/interfaces/IWithdrawManager";
+export { IWithdrawManager__factory } from "./factories/contracts/Deal/external/interfaces/IWithdrawManager__factory";
 export type { PaymentManager } from "./contracts/Deal/external/PaymentManager";
 export { PaymentManager__factory } from "./factories/contracts/Deal/external/PaymentManager__factory";
 export type { ProviderManager } from "./contracts/Deal/external/ProviderManager";

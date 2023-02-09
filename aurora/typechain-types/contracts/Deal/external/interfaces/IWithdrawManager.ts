@@ -23,7 +23,7 @@ import type {
   PromiseOrValue,
 } from "../../../../common";
 
-export interface IWithdrawCollateralManagerInterface extends utils.Interface {
+export interface IWithdrawManagerInterface extends utils.Interface {
   functions: {
     "getUnlockedCollateralBy(address,uint256)": FunctionFragment;
     "withdraw(address)": FunctionFragment;
@@ -51,12 +51,12 @@ export interface IWithdrawCollateralManagerInterface extends utils.Interface {
   events: {};
 }
 
-export interface IWithdrawCollateralManager extends BaseContract {
+export interface IWithdrawManager extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: IWithdrawCollateralManagerInterface;
+  interface: IWithdrawManagerInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,

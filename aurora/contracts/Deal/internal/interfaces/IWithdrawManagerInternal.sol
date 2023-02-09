@@ -2,9 +2,9 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "../../external/interfaces/IProviderManager.sol";
+import "../../external/interfaces/IWorkersManager.sol";
 
-abstract contract WMInternalInterface {
+abstract contract IWithdrawManagerInternal {
     function _getUnlockedAmountBy(
         IERC20 token,
         address owner,

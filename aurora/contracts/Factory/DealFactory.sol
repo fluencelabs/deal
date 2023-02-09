@@ -57,7 +57,7 @@ contract DealFactory {
             targetWorkers_,
             appCID_,
             effectorWasmsCids_,
-            core.epochManager().getEpoch()
+            core.epochManager().currentEpoch()
         );
     }
 }

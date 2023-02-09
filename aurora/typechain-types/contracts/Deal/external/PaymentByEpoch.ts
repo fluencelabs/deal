@@ -13,7 +13,11 @@ import type {
   Signer,
   utils,
 } from "ethers";
-import type { FunctionFragment, Result } from "@ethersproject/abi";
+import type {
+  FunctionFragment,
+  Result,
+  EventFragment,
+} from "@ethersproject/abi";
 import type { Listener, Provider } from "@ethersproject/providers";
 import type {
   TypedEventFilter,
@@ -21,12 +25,15 @@ import type {
   TypedListener,
   OnEvent,
   PromiseOrValue,
-} from "../../../../common";
+} from "../../../common";
 
-export interface IPaymentManagerInterface extends utils.Interface {
+export interface PaymentByEpochInterface extends utils.Interface {
   functions: {
     "depositToPaymentBalance(uint256)": FunctionFragment;
     "getPaymentBalance()": FunctionFragment;
+    "owner()": FunctionFragment;
+    "renounceOwnership()": FunctionFragment;
+    "transferOwnership(address)": FunctionFragment;
     "withdrawFromPaymentBalance(address,uint256)": FunctionFragment;
   };
 
@@ -34,6 +41,9 @@ export interface IPaymentManagerInterface extends utils.Interface {
     nameOrSignatureOrTopic:
       | "depositToPaymentBalance"
       | "getPaymentBalance"
+      | "owner"
+      | "renounceOwnership"
+      | "transferOwnership"
       | "withdrawFromPaymentBalance"
   ): FunctionFragment;
 
@@ -44,6 +54,15 @@ export interface IPaymentManagerInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "getPaymentBalance",
     values?: undefined
+  ): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "renounceOwnership",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "transferOwnership",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "withdrawFromPaymentBalance",
@@ -58,20 +77,45 @@ export interface IPaymentManagerInterface extends utils.Interface {
     functionFragment: "getPaymentBalance",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "renounceOwnership",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "transferOwnership",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "withdrawFromPaymentBalance",
     data: BytesLike
   ): Result;
 
-  events: {};
+  events: {
+    "OwnershipTransferred(address,address)": EventFragment;
+  };
+
+  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
 }
 
-export interface IPaymentManager extends BaseContract {
+export interface OwnershipTransferredEventObject {
+  previousOwner: string;
+  newOwner: string;
+}
+export type OwnershipTransferredEvent = TypedEvent<
+  [string, string],
+  OwnershipTransferredEventObject
+>;
+
+export type OwnershipTransferredEventFilter =
+  TypedEventFilter<OwnershipTransferredEvent>;
+
+export interface PaymentByEpoch extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: IPaymentManagerInterface;
+  interface: PaymentByEpochInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -100,6 +144,17 @@ export interface IPaymentManager extends BaseContract {
 
     getPaymentBalance(overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    owner(overrides?: CallOverrides): Promise<[string]>;
+
+    renounceOwnership(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    transferOwnership(
+      newOwner: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     withdrawFromPaymentBalance(
       token: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
@@ -113,6 +168,17 @@ export interface IPaymentManager extends BaseContract {
   ): Promise<ContractTransaction>;
 
   getPaymentBalance(overrides?: CallOverrides): Promise<BigNumber>;
+
+  owner(overrides?: CallOverrides): Promise<string>;
+
+  renounceOwnership(
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  transferOwnership(
+    newOwner: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
 
   withdrawFromPaymentBalance(
     token: PromiseOrValue<string>,
@@ -128,6 +194,15 @@ export interface IPaymentManager extends BaseContract {
 
     getPaymentBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
+    owner(overrides?: CallOverrides): Promise<string>;
+
+    renounceOwnership(overrides?: CallOverrides): Promise<void>;
+
+    transferOwnership(
+      newOwner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     withdrawFromPaymentBalance(
       token: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
@@ -135,7 +210,16 @@ export interface IPaymentManager extends BaseContract {
     ): Promise<void>;
   };
 
-  filters: {};
+  filters: {
+    "OwnershipTransferred(address,address)"(
+      previousOwner?: PromiseOrValue<string> | null,
+      newOwner?: PromiseOrValue<string> | null
+    ): OwnershipTransferredEventFilter;
+    OwnershipTransferred(
+      previousOwner?: PromiseOrValue<string> | null,
+      newOwner?: PromiseOrValue<string> | null
+    ): OwnershipTransferredEventFilter;
+  };
 
   estimateGas: {
     depositToPaymentBalance(
@@ -144,6 +228,17 @@ export interface IPaymentManager extends BaseContract {
     ): Promise<BigNumber>;
 
     getPaymentBalance(overrides?: CallOverrides): Promise<BigNumber>;
+
+    owner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    renounceOwnership(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    transferOwnership(
+      newOwner: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
 
     withdrawFromPaymentBalance(
       token: PromiseOrValue<string>,
@@ -159,6 +254,17 @@ export interface IPaymentManager extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     getPaymentBalance(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    renounceOwnership(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    transferOwnership(
+      newOwner: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
 
     withdrawFromPaymentBalance(
       token: PromiseOrValue<string>,

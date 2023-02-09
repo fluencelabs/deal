@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.IWithdrawCollateralManager__factory = void 0;
+exports.IWithdrawManager__factory = void 0;
 const ethers_1 = require("ethers");
 const _abi = [
     {
@@ -44,7 +44,7 @@ const _abi = [
         type: "function",
     },
 ];
-class IWithdrawCollateralManager__factory {
+class IWithdrawManager__factory {
     static createInterface() {
         return new ethers_1.utils.Interface(_abi);
     }
@@ -52,5 +52,5 @@ class IWithdrawCollateralManager__factory {
         return new ethers_1.Contract(address, _abi, signerOrProvider);
     }
 }
-exports.IWithdrawCollateralManager__factory = IWithdrawCollateralManager__factory;
-IWithdrawCollateralManager__factory.abi = _abi;
+exports.IWithdrawManager__factory = IWithdrawManager__factory;
+IWithdrawManager__factory.abi = _abi;

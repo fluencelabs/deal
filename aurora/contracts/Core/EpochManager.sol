@@ -7,7 +7,7 @@ contract EpochManager {
         epochDuration = epochDuration_;
     }
 
-    function getEpoch() external view returns (uint256) {
+    function currentEpoch() external view returns (uint256) {
         return block.timestamp / epochDuration;
     }
 }

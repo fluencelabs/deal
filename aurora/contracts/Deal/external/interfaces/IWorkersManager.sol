@@ -2,7 +2,7 @@ pragma solidity ^0.8.17;
 
 import "../../../Core/Core.sol";
 
-interface IProviderManager {
+interface IWorkersManager {
     type PATId is bytes32;
 
     event AddProviderToken(address indexed owner, PATId id);

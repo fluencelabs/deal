@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../../../Core/Core.sol";
 
-abstract contract DCInternalInterface {
+abstract contract IDealConfigInternal {
     function _core() internal view virtual returns (Core);
 
     function _requiredStake() internal view virtual returns (uint256);

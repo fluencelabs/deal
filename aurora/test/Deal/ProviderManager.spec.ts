@@ -32,8 +32,6 @@ describe("ProviderManager", () => {
   });
 
   it("createProviderToken", async () => {
-    await (await deal.register()).wait();
-
     const requiredStake = await deal.requiredStake();
 
     await (await fltToken.approve(deal.address, requiredStake)).wait();
@@ -55,6 +53,25 @@ describe("ProviderManager", () => {
 
     expect(owner).to.be.equal(await deal.getPATOwner(patId));
     expect(owner).to.be.equal(userAccount);
+  });
+
+  it("getRewards", async () => {
+    const value = ethers.utils.parseEther("100");
+
+    const price = await deal.pricePerEpoch();
+
+    await (await usdToken.approve(deal.address, value)).wait();
+    await (await deal.depositToPaymentBalance(value)).wait();
+
+    const balance = await deal.getPaymentBalance();
+
+    const block = await ethers.provider.getBlock("latest");
+
+    await setTimeNextTime(block.timestamp + 120 * 2); //TODO: change to epoches
+
+    expect(await deal.getPaymentBalance()).to.be.equal(
+      balance.sub(price.mul(2))
+    );
   });
 
   it("removeProviderToken", async () => {
@@ -79,7 +96,7 @@ describe("ProviderManager", () => {
     const block = await ethers.provider.getBlock("latest");
     const requiredStake = await deal.requiredStake();
 
-    setTimeNextTime(block.timestamp + timeout.toNumber());
+    await setTimeNextTime(block.timestamp + timeout.toNumber());
 
     const withdrawTx = await deal.withdraw(fltToken.address);
     await withdrawTx.wait();

@@ -2,14 +2,14 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "../internal/interfaces/PMInternalInterface.sol";
-import "../internal/interfaces/DCInternalInterface.sol";
-import "./interfaces/IProviderManager.sol";
+import "../internal/interfaces/IWorkersManagerInternal.sol";
+import "../internal/interfaces/IDealConfigInternal.sol";
+import "./interfaces/IWorkersManager.sol";
 
-abstract contract ProviderManager is
-    IProviderManager,
-    PMInternalInterface,
-    DCInternalInterface
+abstract contract WorkersManager is
+    IWorkersManager,
+    IDealConfigInternal,
+    IWorkersManagerInternal
 {
     using SafeERC20 for IERC20;
 
@@ -31,7 +31,7 @@ abstract contract ProviderManager is
     }
 
     function removeProviderToken(PATId id) external {
-        require(_getPATOwner(id) == msg.sender, "ProviderManager: not owner");
+        require(_getPATOwner(id) == msg.sender, "WorkersManager: not owner");
         _removePAT(id);
 
         emit RemoveProviderToken(id);

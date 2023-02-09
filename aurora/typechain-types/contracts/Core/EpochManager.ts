@@ -22,25 +22,31 @@ import type {
 
 export interface EpochManagerInterface extends utils.Interface {
   functions: {
+    "currentEpoch()": FunctionFragment;
     "epochDuration()": FunctionFragment;
-    "getEpoch()": FunctionFragment;
   };
 
   getFunction(
-    nameOrSignatureOrTopic: "epochDuration" | "getEpoch"
+    nameOrSignatureOrTopic: "currentEpoch" | "epochDuration"
   ): FunctionFragment;
 
+  encodeFunctionData(
+    functionFragment: "currentEpoch",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "epochDuration",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "getEpoch", values?: undefined): string;
 
+  decodeFunctionResult(
+    functionFragment: "currentEpoch",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "epochDuration",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "getEpoch", data: BytesLike): Result;
 
   events: {};
 }
@@ -72,32 +78,32 @@ export interface EpochManager extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    epochDuration(overrides?: CallOverrides): Promise<[BigNumber]>;
+    currentEpoch(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    getEpoch(overrides?: CallOverrides): Promise<[BigNumber]>;
+    epochDuration(overrides?: CallOverrides): Promise<[BigNumber]>;
   };
+
+  currentEpoch(overrides?: CallOverrides): Promise<BigNumber>;
 
   epochDuration(overrides?: CallOverrides): Promise<BigNumber>;
 
-  getEpoch(overrides?: CallOverrides): Promise<BigNumber>;
-
   callStatic: {
-    epochDuration(overrides?: CallOverrides): Promise<BigNumber>;
+    currentEpoch(overrides?: CallOverrides): Promise<BigNumber>;
 
-    getEpoch(overrides?: CallOverrides): Promise<BigNumber>;
+    epochDuration(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   filters: {};
 
   estimateGas: {
-    epochDuration(overrides?: CallOverrides): Promise<BigNumber>;
+    currentEpoch(overrides?: CallOverrides): Promise<BigNumber>;
 
-    getEpoch(overrides?: CallOverrides): Promise<BigNumber>;
+    epochDuration(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    epochDuration(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    currentEpoch(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    getEpoch(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    epochDuration(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }

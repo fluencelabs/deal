@@ -2,7 +2,7 @@ import type { BaseContract, BigNumber, BigNumberish, BytesLike, CallOverrides, C
 import type { FunctionFragment, Result } from "@ethersproject/abi";
 import type { Listener, Provider } from "@ethersproject/providers";
 import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent, PromiseOrValue } from "../../../../common";
-export interface IWithdrawCollateralManagerInterface extends utils.Interface {
+export interface IWithdrawManagerInterface extends utils.Interface {
     functions: {
         "getUnlockedCollateralBy(address,uint256)": FunctionFragment;
         "withdraw(address)": FunctionFragment;
@@ -14,11 +14,11 @@ export interface IWithdrawCollateralManagerInterface extends utils.Interface {
     decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
     events: {};
 }
-export interface IWithdrawCollateralManager extends BaseContract {
+export interface IWithdrawManager extends BaseContract {
     connect(signerOrProvider: Signer | Provider | string): this;
     attach(addressOrName: string): this;
     deployed(): Promise<this>;
-    interface: IWithdrawCollateralManagerInterface;
+    interface: IWithdrawManagerInterface;
     queryFilter<TEvent extends TypedEvent>(event: TypedEventFilter<TEvent>, fromBlockOrBlockhash?: string | number | undefined, toBlock?: string | number | undefined): Promise<Array<TEvent>>;
     listeners<TEvent extends TypedEvent>(eventFilter?: TypedEventFilter<TEvent>): Array<TypedListener<TEvent>>;
     listeners(eventName?: string): Array<Listener>;
