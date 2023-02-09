@@ -30,6 +30,10 @@ abstract contract PaymentByEpochInternal is
         internal
         override
     {
+        require(
+            _getPaymentBalance() >= amount,
+            "PaymentByEpochInternal: Not enough balance"
+        );
         _balance -= amount;
         token.safeTransfer(msg.sender, amount);
     }

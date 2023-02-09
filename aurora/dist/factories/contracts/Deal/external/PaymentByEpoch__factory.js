@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PaymentManager__factory = void 0;
+exports.PaymentByEpoch__factory = void 0;
 const ethers_1 = require("ethers");
 const _abi = [
     {
@@ -26,19 +26,6 @@ const _abi = [
         type: "event",
     },
     {
-        inputs: [],
-        name: "PAYMENT_DURATION_IN_EPOCHS",
-        outputs: [
-            {
-                internalType: "uint256",
-                name: "",
-                type: "uint256",
-            },
-        ],
-        stateMutability: "view",
-        type: "function",
-    },
-    {
         inputs: [
             {
                 internalType: "uint256",
@@ -46,14 +33,14 @@ const _abi = [
                 type: "uint256",
             },
         ],
-        name: "deposit",
+        name: "depositToPaymentBalance",
         outputs: [],
         stateMutability: "nonpayable",
         type: "function",
     },
     {
         inputs: [],
-        name: "getBalance",
+        name: "getPaymentBalance",
         outputs: [
             {
                 internalType: "uint256",
@@ -110,13 +97,13 @@ const _abi = [
                 type: "uint256",
             },
         ],
-        name: "withdrawPaymentBalance",
+        name: "withdrawFromPaymentBalance",
         outputs: [],
         stateMutability: "nonpayable",
         type: "function",
     },
 ];
-class PaymentManager__factory {
+class PaymentByEpoch__factory {
     static createInterface() {
         return new ethers_1.utils.Interface(_abi);
     }
@@ -124,5 +111,5 @@ class PaymentManager__factory {
         return new ethers_1.Contract(address, _abi, signerOrProvider);
     }
 }
-exports.PaymentManager__factory = PaymentManager__factory;
-PaymentManager__factory.abi = _abi;
+exports.PaymentByEpoch__factory = PaymentByEpoch__factory;
+PaymentByEpoch__factory.abi = _abi;

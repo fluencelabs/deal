@@ -4,15 +4,14 @@ import type { Listener, Provider } from "@ethersproject/providers";
 import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent, PromiseOrValue } from "../../common";
 export interface DealInterface extends utils.Interface {
     functions: {
-        "PAYMENT_DURATION_IN_EPOCHS()": FunctionFragment;
         "appCID()": FunctionFragment;
         "core()": FunctionFragment;
         "createProviderToken(bytes32)": FunctionFragment;
-        "deposit(uint256)": FunctionFragment;
+        "depositToPaymentBalance(uint256)": FunctionFragment;
         "effectorWasmsCids()": FunctionFragment;
         "fluenceToken()": FunctionFragment;
-        "getBalance()": FunctionFragment;
         "getPATOwner(bytes32)": FunctionFragment;
+        "getPaymentBalance()": FunctionFragment;
         "getUnlockedCollateralBy(address,uint256)": FunctionFragment;
         "maxWorkersPerProvider()": FunctionFragment;
         "minWorkers()": FunctionFragment;
@@ -26,18 +25,17 @@ export interface DealInterface extends utils.Interface {
         "targetWorkers()": FunctionFragment;
         "transferOwnership(address)": FunctionFragment;
         "withdraw(address)": FunctionFragment;
-        "withdrawPaymentBalance(address,uint256)": FunctionFragment;
+        "withdrawFromPaymentBalance(address,uint256)": FunctionFragment;
     };
-    getFunction(nameOrSignatureOrTopic: "PAYMENT_DURATION_IN_EPOCHS" | "appCID" | "core" | "createProviderToken" | "deposit" | "effectorWasmsCids" | "fluenceToken" | "getBalance" | "getPATOwner" | "getUnlockedCollateralBy" | "maxWorkersPerProvider" | "minWorkers" | "owner" | "paymentToken" | "pricePerEpoch" | "removeProviderToken" | "renounceOwnership" | "requiredStake" | "setAppCID" | "targetWorkers" | "transferOwnership" | "withdraw" | "withdrawPaymentBalance"): FunctionFragment;
-    encodeFunctionData(functionFragment: "PAYMENT_DURATION_IN_EPOCHS", values?: undefined): string;
+    getFunction(nameOrSignatureOrTopic: "appCID" | "core" | "createProviderToken" | "depositToPaymentBalance" | "effectorWasmsCids" | "fluenceToken" | "getPATOwner" | "getPaymentBalance" | "getUnlockedCollateralBy" | "maxWorkersPerProvider" | "minWorkers" | "owner" | "paymentToken" | "pricePerEpoch" | "removeProviderToken" | "renounceOwnership" | "requiredStake" | "setAppCID" | "targetWorkers" | "transferOwnership" | "withdraw" | "withdrawFromPaymentBalance"): FunctionFragment;
     encodeFunctionData(functionFragment: "appCID", values?: undefined): string;
     encodeFunctionData(functionFragment: "core", values?: undefined): string;
     encodeFunctionData(functionFragment: "createProviderToken", values: [PromiseOrValue<BytesLike>]): string;
-    encodeFunctionData(functionFragment: "deposit", values: [PromiseOrValue<BigNumberish>]): string;
+    encodeFunctionData(functionFragment: "depositToPaymentBalance", values: [PromiseOrValue<BigNumberish>]): string;
     encodeFunctionData(functionFragment: "effectorWasmsCids", values?: undefined): string;
     encodeFunctionData(functionFragment: "fluenceToken", values?: undefined): string;
-    encodeFunctionData(functionFragment: "getBalance", values?: undefined): string;
     encodeFunctionData(functionFragment: "getPATOwner", values: [PromiseOrValue<BytesLike>]): string;
+    encodeFunctionData(functionFragment: "getPaymentBalance", values?: undefined): string;
     encodeFunctionData(functionFragment: "getUnlockedCollateralBy", values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]): string;
     encodeFunctionData(functionFragment: "maxWorkersPerProvider", values?: undefined): string;
     encodeFunctionData(functionFragment: "minWorkers", values?: undefined): string;
@@ -51,16 +49,15 @@ export interface DealInterface extends utils.Interface {
     encodeFunctionData(functionFragment: "targetWorkers", values?: undefined): string;
     encodeFunctionData(functionFragment: "transferOwnership", values: [PromiseOrValue<string>]): string;
     encodeFunctionData(functionFragment: "withdraw", values: [PromiseOrValue<string>]): string;
-    encodeFunctionData(functionFragment: "withdrawPaymentBalance", values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]): string;
-    decodeFunctionResult(functionFragment: "PAYMENT_DURATION_IN_EPOCHS", data: BytesLike): Result;
+    encodeFunctionData(functionFragment: "withdrawFromPaymentBalance", values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]): string;
     decodeFunctionResult(functionFragment: "appCID", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "core", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "createProviderToken", data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: "deposit", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "depositToPaymentBalance", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "effectorWasmsCids", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "fluenceToken", data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: "getBalance", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "getPATOwner", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "getPaymentBalance", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "getUnlockedCollateralBy", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "maxWorkersPerProvider", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "minWorkers", data: BytesLike): Result;
@@ -74,17 +71,19 @@ export interface DealInterface extends utils.Interface {
     decodeFunctionResult(functionFragment: "targetWorkers", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "transferOwnership", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: "withdrawPaymentBalance", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "withdrawFromPaymentBalance", data: BytesLike): Result;
     events: {
         "AddProviderToken(address,bytes32)": EventFragment;
         "NewAppCID(string)": EventFragment;
         "OwnershipTransferred(address,address)": EventFragment;
         "RemoveProviderToken(bytes32)": EventFragment;
+        "StatusChanged(uint8)": EventFragment;
     };
     getEvent(nameOrSignatureOrTopic: "AddProviderToken"): EventFragment;
     getEvent(nameOrSignatureOrTopic: "NewAppCID"): EventFragment;
     getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
     getEvent(nameOrSignatureOrTopic: "RemoveProviderToken"): EventFragment;
+    getEvent(nameOrSignatureOrTopic: "StatusChanged"): EventFragment;
 }
 export interface AddProviderTokenEventObject {
     owner: string;
@@ -116,6 +115,11 @@ export type RemoveProviderTokenEvent = TypedEvent<[
     string
 ], RemoveProviderTokenEventObject>;
 export type RemoveProviderTokenEventFilter = TypedEventFilter<RemoveProviderTokenEvent>;
+export interface StatusChangedEventObject {
+    newStatus: number;
+}
+export type StatusChangedEvent = TypedEvent<[number], StatusChangedEventObject>;
+export type StatusChangedEventFilter = TypedEventFilter<StatusChangedEvent>;
 export interface Deal extends BaseContract {
     connect(signerOrProvider: Signer | Provider | string): this;
     attach(addressOrName: string): this;
@@ -131,19 +135,18 @@ export interface Deal extends BaseContract {
     once: OnEvent<this>;
     removeListener: OnEvent<this>;
     functions: {
-        PAYMENT_DURATION_IN_EPOCHS(overrides?: CallOverrides): Promise<[BigNumber]>;
         appCID(overrides?: CallOverrides): Promise<[string]>;
         core(overrides?: CallOverrides): Promise<[string]>;
         createProviderToken(salt: PromiseOrValue<BytesLike>, overrides?: Overrides & {
             from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
-        deposit(amount: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
+        depositToPaymentBalance(amount: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
             from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
         effectorWasmsCids(overrides?: CallOverrides): Promise<[string[]]>;
         fluenceToken(overrides?: CallOverrides): Promise<[string]>;
-        getBalance(overrides?: CallOverrides): Promise<[BigNumber]>;
         getPATOwner(id: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<[string]>;
+        getPaymentBalance(overrides?: CallOverrides): Promise<[BigNumber]>;
         getUnlockedCollateralBy(owner: PromiseOrValue<string>, timestamp: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<[BigNumber]>;
         maxWorkersPerProvider(overrides?: CallOverrides): Promise<[BigNumber]>;
         minWorkers(overrides?: CallOverrides): Promise<[BigNumber]>;
@@ -167,23 +170,22 @@ export interface Deal extends BaseContract {
         withdraw(token: PromiseOrValue<string>, overrides?: Overrides & {
             from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
-        withdrawPaymentBalance(token: PromiseOrValue<string>, amount: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
+        withdrawFromPaymentBalance(token: PromiseOrValue<string>, amount: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
             from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
     };
-    PAYMENT_DURATION_IN_EPOCHS(overrides?: CallOverrides): Promise<BigNumber>;
     appCID(overrides?: CallOverrides): Promise<string>;
     core(overrides?: CallOverrides): Promise<string>;
     createProviderToken(salt: PromiseOrValue<BytesLike>, overrides?: Overrides & {
         from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
-    deposit(amount: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
+    depositToPaymentBalance(amount: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
         from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
     effectorWasmsCids(overrides?: CallOverrides): Promise<string[]>;
     fluenceToken(overrides?: CallOverrides): Promise<string>;
-    getBalance(overrides?: CallOverrides): Promise<BigNumber>;
     getPATOwner(id: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<string>;
+    getPaymentBalance(overrides?: CallOverrides): Promise<BigNumber>;
     getUnlockedCollateralBy(owner: PromiseOrValue<string>, timestamp: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<BigNumber>;
     maxWorkersPerProvider(overrides?: CallOverrides): Promise<BigNumber>;
     minWorkers(overrides?: CallOverrides): Promise<BigNumber>;
@@ -207,19 +209,18 @@ export interface Deal extends BaseContract {
     withdraw(token: PromiseOrValue<string>, overrides?: Overrides & {
         from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
-    withdrawPaymentBalance(token: PromiseOrValue<string>, amount: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
+    withdrawFromPaymentBalance(token: PromiseOrValue<string>, amount: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
         from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
     callStatic: {
-        PAYMENT_DURATION_IN_EPOCHS(overrides?: CallOverrides): Promise<BigNumber>;
         appCID(overrides?: CallOverrides): Promise<string>;
         core(overrides?: CallOverrides): Promise<string>;
         createProviderToken(salt: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<void>;
-        deposit(amount: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<void>;
+        depositToPaymentBalance(amount: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<void>;
         effectorWasmsCids(overrides?: CallOverrides): Promise<string[]>;
         fluenceToken(overrides?: CallOverrides): Promise<string>;
-        getBalance(overrides?: CallOverrides): Promise<BigNumber>;
         getPATOwner(id: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<string>;
+        getPaymentBalance(overrides?: CallOverrides): Promise<BigNumber>;
         getUnlockedCollateralBy(owner: PromiseOrValue<string>, timestamp: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<BigNumber>;
         maxWorkersPerProvider(overrides?: CallOverrides): Promise<BigNumber>;
         minWorkers(overrides?: CallOverrides): Promise<BigNumber>;
@@ -233,7 +234,7 @@ export interface Deal extends BaseContract {
         targetWorkers(overrides?: CallOverrides): Promise<BigNumber>;
         transferOwnership(newOwner: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
         withdraw(token: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
-        withdrawPaymentBalance(token: PromiseOrValue<string>, amount: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<void>;
+        withdrawFromPaymentBalance(token: PromiseOrValue<string>, amount: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<void>;
     };
     filters: {
         "AddProviderToken(address,bytes32)"(owner?: PromiseOrValue<string> | null, id?: null): AddProviderTokenEventFilter;
@@ -244,21 +245,22 @@ export interface Deal extends BaseContract {
         OwnershipTransferred(previousOwner?: PromiseOrValue<string> | null, newOwner?: PromiseOrValue<string> | null): OwnershipTransferredEventFilter;
         "RemoveProviderToken(bytes32)"(id?: null): RemoveProviderTokenEventFilter;
         RemoveProviderToken(id?: null): RemoveProviderTokenEventFilter;
+        "StatusChanged(uint8)"(newStatus?: null): StatusChangedEventFilter;
+        StatusChanged(newStatus?: null): StatusChangedEventFilter;
     };
     estimateGas: {
-        PAYMENT_DURATION_IN_EPOCHS(overrides?: CallOverrides): Promise<BigNumber>;
         appCID(overrides?: CallOverrides): Promise<BigNumber>;
         core(overrides?: CallOverrides): Promise<BigNumber>;
         createProviderToken(salt: PromiseOrValue<BytesLike>, overrides?: Overrides & {
             from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
-        deposit(amount: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
+        depositToPaymentBalance(amount: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
             from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
         effectorWasmsCids(overrides?: CallOverrides): Promise<BigNumber>;
         fluenceToken(overrides?: CallOverrides): Promise<BigNumber>;
-        getBalance(overrides?: CallOverrides): Promise<BigNumber>;
         getPATOwner(id: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<BigNumber>;
+        getPaymentBalance(overrides?: CallOverrides): Promise<BigNumber>;
         getUnlockedCollateralBy(owner: PromiseOrValue<string>, timestamp: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<BigNumber>;
         maxWorkersPerProvider(overrides?: CallOverrides): Promise<BigNumber>;
         minWorkers(overrides?: CallOverrides): Promise<BigNumber>;
@@ -282,24 +284,23 @@ export interface Deal extends BaseContract {
         withdraw(token: PromiseOrValue<string>, overrides?: Overrides & {
             from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
-        withdrawPaymentBalance(token: PromiseOrValue<string>, amount: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
+        withdrawFromPaymentBalance(token: PromiseOrValue<string>, amount: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
             from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
     };
     populateTransaction: {
-        PAYMENT_DURATION_IN_EPOCHS(overrides?: CallOverrides): Promise<PopulatedTransaction>;
         appCID(overrides?: CallOverrides): Promise<PopulatedTransaction>;
         core(overrides?: CallOverrides): Promise<PopulatedTransaction>;
         createProviderToken(salt: PromiseOrValue<BytesLike>, overrides?: Overrides & {
             from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
-        deposit(amount: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
+        depositToPaymentBalance(amount: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
             from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
         effectorWasmsCids(overrides?: CallOverrides): Promise<PopulatedTransaction>;
         fluenceToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-        getBalance(overrides?: CallOverrides): Promise<PopulatedTransaction>;
         getPATOwner(id: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        getPaymentBalance(overrides?: CallOverrides): Promise<PopulatedTransaction>;
         getUnlockedCollateralBy(owner: PromiseOrValue<string>, timestamp: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<PopulatedTransaction>;
         maxWorkersPerProvider(overrides?: CallOverrides): Promise<PopulatedTransaction>;
         minWorkers(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -323,7 +324,7 @@ export interface Deal extends BaseContract {
         withdraw(token: PromiseOrValue<string>, overrides?: Overrides & {
             from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
-        withdrawPaymentBalance(token: PromiseOrValue<string>, amount: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
+        withdrawFromPaymentBalance(token: PromiseOrValue<string>, amount: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
             from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
     };

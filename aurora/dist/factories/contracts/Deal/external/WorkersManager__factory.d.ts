@@ -1,7 +1,7 @@
 import { Signer } from "ethers";
 import type { Provider } from "@ethersproject/providers";
-import type { IProviderManager, IProviderManagerInterface } from "../../../../../contracts/Deal/external/interfaces/IProviderManager";
-export declare class IProviderManager__factory {
+import type { WorkersManager, WorkersManagerInterface } from "../../../../contracts/Deal/external/WorkersManager";
+export declare class WorkersManager__factory {
     static readonly abi: readonly [{
         readonly anonymous: false;
         readonly inputs: readonly [{
@@ -11,7 +11,7 @@ export declare class IProviderManager__factory {
             readonly type: "address";
         }, {
             readonly indexed: false;
-            readonly internalType: "IProviderManager.PATId";
+            readonly internalType: "IWorkersManager.PATId";
             readonly name: "id";
             readonly type: "bytes32";
         }];
@@ -21,7 +21,7 @@ export declare class IProviderManager__factory {
         readonly anonymous: false;
         readonly inputs: readonly [{
             readonly indexed: false;
-            readonly internalType: "IProviderManager.PATId";
+            readonly internalType: "IWorkersManager.PATId";
             readonly name: "id";
             readonly type: "bytes32";
         }];
@@ -39,7 +39,7 @@ export declare class IProviderManager__factory {
         readonly type: "function";
     }, {
         readonly inputs: readonly [{
-            readonly internalType: "IProviderManager.PATId";
+            readonly internalType: "IWorkersManager.PATId";
             readonly name: "id";
             readonly type: "bytes32";
         }];
@@ -53,7 +53,7 @@ export declare class IProviderManager__factory {
         readonly type: "function";
     }, {
         readonly inputs: readonly [{
-            readonly internalType: "IProviderManager.PATId";
+            readonly internalType: "IWorkersManager.PATId";
             readonly name: "id";
             readonly type: "bytes32";
         }];
@@ -62,6 +62,6 @@ export declare class IProviderManager__factory {
         readonly stateMutability: "nonpayable";
         readonly type: "function";
     }];
-    static createInterface(): IProviderManagerInterface;
-    static connect(address: string, signerOrProvider: Signer | Provider): IProviderManager;
+    static createInterface(): WorkersManagerInterface;
+    static connect(address: string, signerOrProvider: Signer | Provider): WorkersManager;
 }

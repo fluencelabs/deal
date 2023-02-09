@@ -1,8 +1,8 @@
 import type { BaseContract, BigNumber, BytesLike, CallOverrides, ContractTransaction, Overrides, PopulatedTransaction, Signer, utils } from "ethers";
 import type { FunctionFragment, Result, EventFragment } from "@ethersproject/abi";
 import type { Listener, Provider } from "@ethersproject/providers";
-import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent, PromiseOrValue } from "../../../common";
-export interface ProviderManagerInterface extends utils.Interface {
+import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent, PromiseOrValue } from "../../../../common";
+export interface IWorkersManagerInterface extends utils.Interface {
     functions: {
         "createProviderToken(bytes32)": FunctionFragment;
         "getPATOwner(bytes32)": FunctionFragment;
@@ -38,11 +38,11 @@ export type RemoveProviderTokenEvent = TypedEvent<[
     string
 ], RemoveProviderTokenEventObject>;
 export type RemoveProviderTokenEventFilter = TypedEventFilter<RemoveProviderTokenEvent>;
-export interface ProviderManager extends BaseContract {
+export interface IWorkersManager extends BaseContract {
     connect(signerOrProvider: Signer | Provider | string): this;
     attach(addressOrName: string): this;
     deployed(): Promise<this>;
-    interface: ProviderManagerInterface;
+    interface: IWorkersManagerInterface;
     queryFilter<TEvent extends TypedEvent>(event: TypedEventFilter<TEvent>, fromBlockOrBlockhash?: string | number | undefined, toBlock?: string | number | undefined): Promise<Array<TEvent>>;
     listeners<TEvent extends TypedEvent>(eventFilter?: TypedEventFilter<TEvent>): Array<TypedListener<TEvent>>;
     listeners(eventName?: string): Array<Listener>;

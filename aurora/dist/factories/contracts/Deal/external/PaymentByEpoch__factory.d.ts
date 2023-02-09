@@ -1,7 +1,7 @@
 import { Signer } from "ethers";
 import type { Provider } from "@ethersproject/providers";
-import type { PaymentManager, PaymentManagerInterface } from "../../../../contracts/Deal/external/PaymentManager";
-export declare class PaymentManager__factory {
+import type { PaymentByEpoch, PaymentByEpochInterface } from "../../../../contracts/Deal/external/PaymentByEpoch";
+export declare class PaymentByEpoch__factory {
     static readonly abi: readonly [{
         readonly anonymous: false;
         readonly inputs: readonly [{
@@ -18,28 +18,18 @@ export declare class PaymentManager__factory {
         readonly name: "OwnershipTransferred";
         readonly type: "event";
     }, {
-        readonly inputs: readonly [];
-        readonly name: "PAYMENT_DURATION_IN_EPOCHS";
-        readonly outputs: readonly [{
-            readonly internalType: "uint256";
-            readonly name: "";
-            readonly type: "uint256";
-        }];
-        readonly stateMutability: "view";
-        readonly type: "function";
-    }, {
         readonly inputs: readonly [{
             readonly internalType: "uint256";
             readonly name: "amount";
             readonly type: "uint256";
         }];
-        readonly name: "deposit";
+        readonly name: "depositToPaymentBalance";
         readonly outputs: readonly [];
         readonly stateMutability: "nonpayable";
         readonly type: "function";
     }, {
         readonly inputs: readonly [];
-        readonly name: "getBalance";
+        readonly name: "getPaymentBalance";
         readonly outputs: readonly [{
             readonly internalType: "uint256";
             readonly name: "";
@@ -83,11 +73,11 @@ export declare class PaymentManager__factory {
             readonly name: "amount";
             readonly type: "uint256";
         }];
-        readonly name: "withdrawPaymentBalance";
+        readonly name: "withdrawFromPaymentBalance";
         readonly outputs: readonly [];
         readonly stateMutability: "nonpayable";
         readonly type: "function";
     }];
-    static createInterface(): PaymentManagerInterface;
-    static connect(address: string, signerOrProvider: Signer | Provider): PaymentManager;
+    static createInterface(): PaymentByEpochInterface;
+    static connect(address: string, signerOrProvider: Signer | Provider): PaymentByEpoch;
 }

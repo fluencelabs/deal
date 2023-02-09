@@ -14,14 +14,14 @@ const _abi = [
                 type: "uint256",
             },
         ],
-        name: "deposit",
+        name: "depositToPaymentBalance",
         outputs: [],
         stateMutability: "nonpayable",
         type: "function",
     },
     {
         inputs: [],
-        name: "getBalance",
+        name: "getPaymentBalance",
         outputs: [
             {
                 internalType: "uint256",
@@ -45,7 +45,7 @@ const _abi = [
                 type: "uint256",
             },
         ],
-        name: "withdrawPaymentBalance",
+        name: "withdrawFromPaymentBalance",
         outputs: [],
         stateMutability: "nonpayable",
         type: "function",

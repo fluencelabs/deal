@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.IProviderManager__factory = void 0;
+exports.WorkersManager__factory = void 0;
 const ethers_1 = require("ethers");
 const _abi = [
     {
@@ -17,7 +17,7 @@ const _abi = [
             },
             {
                 indexed: false,
-                internalType: "IProviderManager.PATId",
+                internalType: "IWorkersManager.PATId",
                 name: "id",
                 type: "bytes32",
             },
@@ -30,7 +30,7 @@ const _abi = [
         inputs: [
             {
                 indexed: false,
-                internalType: "IProviderManager.PATId",
+                internalType: "IWorkersManager.PATId",
                 name: "id",
                 type: "bytes32",
             },
@@ -54,7 +54,7 @@ const _abi = [
     {
         inputs: [
             {
-                internalType: "IProviderManager.PATId",
+                internalType: "IWorkersManager.PATId",
                 name: "id",
                 type: "bytes32",
             },
@@ -73,7 +73,7 @@ const _abi = [
     {
         inputs: [
             {
-                internalType: "IProviderManager.PATId",
+                internalType: "IWorkersManager.PATId",
                 name: "id",
                 type: "bytes32",
             },
@@ -84,7 +84,7 @@ const _abi = [
         type: "function",
     },
 ];
-class IProviderManager__factory {
+class WorkersManager__factory {
     static createInterface() {
         return new ethers_1.utils.Interface(_abi);
     }
@@ -92,5 +92,5 @@ class IProviderManager__factory {
         return new ethers_1.Contract(address, _abi, signerOrProvider);
     }
 }
-exports.IProviderManager__factory = IProviderManager__factory;
-IProviderManager__factory.abi = _abi;
+exports.WorkersManager__factory = WorkersManager__factory;
+WorkersManager__factory.abi = _abi;
