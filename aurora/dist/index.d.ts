@@ -31,6 +31,8 @@ export type { IERC20Metadata } from "./@openzeppelin/contracts/token/ERC20/exten
 export { IERC20Metadata__factory } from "./factories/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata__factory";
 export type { IERC20 } from "./@openzeppelin/contracts/token/ERC20/IERC20";
 export { IERC20__factory } from "./factories/@openzeppelin/contracts/token/ERC20/IERC20__factory";
+export type { Multicall } from "./@openzeppelin/contracts/utils/Multicall";
+export { Multicall__factory } from "./factories/@openzeppelin/contracts/utils/Multicall__factory";
 export type { AuroraSdk } from "./contracts/AuroraSDK/AuroraSdk";
 export { AuroraSdk__factory } from "./factories/contracts/AuroraSDK/AuroraSdk__factory";
 export type { Codec } from "./contracts/AuroraSDK/Codec";
@@ -67,6 +69,8 @@ export type { StatusControllerInternal } from "./contracts/Deal/internal/StatusC
 export { StatusControllerInternal__factory } from "./factories/contracts/Deal/internal/StatusControllerInternal__factory";
 export type { DeveloperFaucet } from "./contracts/Dev/DeveloperFaucet";
 export { DeveloperFaucet__factory } from "./factories/contracts/Dev/DeveloperFaucet__factory";
+export type { OwnableFaucet } from "./contracts/Dev/OwnableFaucet";
+export { OwnableFaucet__factory } from "./factories/contracts/Dev/OwnableFaucet__factory";
 export type { TestERC20 } from "./contracts/Dev/TestERC20";
 export { TestERC20__factory } from "./factories/contracts/Dev/TestERC20__factory";
 export type { DealFactory } from "./contracts/Factory/DealFactory";

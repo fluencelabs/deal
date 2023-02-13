@@ -63,20 +63,6 @@ export declare class PaymentByEpoch__factory {
         readonly outputs: readonly [];
         readonly stateMutability: "nonpayable";
         readonly type: "function";
-    }, {
-        readonly inputs: readonly [{
-            readonly internalType: "contract IERC20";
-            readonly name: "token";
-            readonly type: "address";
-        }, {
-            readonly internalType: "uint256";
-            readonly name: "amount";
-            readonly type: "uint256";
-        }];
-        readonly name: "withdrawFromPaymentBalance";
-        readonly outputs: readonly [];
-        readonly stateMutability: "nonpayable";
-        readonly type: "function";
     }];
     static createInterface(): PaymentByEpochInterface;
     static connect(address: string, signerOrProvider: Signer | Provider): PaymentByEpoch;
