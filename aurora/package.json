@@ -9,7 +9,7 @@
     "clean": "hardhat clean",
     "node": "hardhat node",
     "compile": "shx rm -rf dist && shx rm -rf artifacts && shx rm -rf cache && shx rm -rf typechain-types && hardhat compile && tsc -b",
-    "prepare": "husky install"
+    "prepare": "cd .. && husky install aurora/.husky"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.5",
