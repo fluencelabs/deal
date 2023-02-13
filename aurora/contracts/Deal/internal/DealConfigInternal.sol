@@ -2,9 +2,9 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "./interfaces/DCInternalInterface.sol";
+import "./interfaces/IDealConfigInternal.sol";
 
-abstract contract DealConfigInternal is DCInternalInterface {
+abstract contract DealConfigInternal is IDealConfigInternal {
     Core private immutable _coreAddr;
     IERC20 private immutable _fluenceToken_;
     IERC20 private immutable _paymentToken_;
@@ -13,7 +13,7 @@ abstract contract DealConfigInternal is DCInternalInterface {
     uint256 private _requiredStake_;
     string private _appCID_;
     uint256 private _minWorkers_;
-    uint256 private _maxWorkers_;
+    uint256 private _maxWorkersPerProvider_;
     uint256 private _targetWorkers_;
     string[] private _effectorWasmsCids_;
 
@@ -24,7 +24,7 @@ abstract contract DealConfigInternal is DCInternalInterface {
         uint256 pricePerEpoch_,
         uint256 requiredStake_,
         uint256 minWorkers_,
-        uint256 maxWorkers_,
+        uint256 maxWorkersPerProvider_,
         uint256 targetWorkers_,
         string memory appCID_,
         string[] memory effectorWasmsCids_
@@ -35,7 +35,7 @@ abstract contract DealConfigInternal is DCInternalInterface {
         _pricePerEpoch_ = pricePerEpoch_;
         _requiredStake_ = requiredStake_;
         _minWorkers_ = minWorkers_;
-        _maxWorkers_ = maxWorkers_;
+        _maxWorkersPerProvider_ = maxWorkersPerProvider_;
         _targetWorkers_ = targetWorkers_;
         _appCID_ = appCID_;
         _effectorWasmsCids_ = effectorWasmsCids_;
@@ -78,8 +78,8 @@ abstract contract DealConfigInternal is DCInternalInterface {
         return _minWorkers_;
     }
 
-    function _maxWorkers() internal view override returns (uint256) {
-        return _maxWorkers_;
+    function _maxWorkersPerProvider() internal view override returns (uint256) {
+        return _maxWorkersPerProvider_;
     }
 
     function _targetWorkers() internal view override returns (uint256) {
@@ -92,5 +92,9 @@ abstract contract DealConfigInternal is DCInternalInterface {
 
     function _setRequiredStake(uint256 requiredStake_) internal override {
         _requiredStake_ = requiredStake_;
+    }
+
+    function _setAppCID(string calldata appCID_) internal override {
+        _appCID_ = appCID_;
     }
 }

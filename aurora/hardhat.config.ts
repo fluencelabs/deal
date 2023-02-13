@@ -14,6 +14,8 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
+      deploy: ["deploy/localnet/"],
+      tags: ["localnet"],
       forking: {
         url: "https://endpoints.omniatech.io/v1/aurora/testnet/public",
       },
@@ -26,6 +28,8 @@ const config: HardhatUserConfig = {
       url: "http://localhost:8545",
     },
     aurora: {
+      deploy: ["deploy/testnet/"],
+      tags: ["testnet"],
       url: "https://endpoints.omniatech.io/v1/aurora/testnet/public",
       accounts: [
         process.env.AURORA_PRIVATE_KEY ??

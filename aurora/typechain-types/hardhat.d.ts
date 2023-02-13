@@ -69,6 +69,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC20__factory>;
     getContractFactory(
+      name: "Multicall",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Multicall__factory>;
+    getContractFactory(
       name: "AuroraSdk",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.AuroraSdk__factory>;
@@ -113,37 +117,37 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IPaymentManager__factory>;
     getContractFactory(
-      name: "IProviderManager",
+      name: "IWithdrawManager",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IProviderManager__factory>;
+    ): Promise<Contracts.IWithdrawManager__factory>;
     getContractFactory(
-      name: "IWithdrawCollateralManager",
+      name: "IWorkersManager",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IWithdrawCollateralManager__factory>;
+    ): Promise<Contracts.IWorkersManager__factory>;
     getContractFactory(
-      name: "PaymentManager",
+      name: "PaymentByEpoch",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.PaymentManager__factory>;
-    getContractFactory(
-      name: "ProviderManager",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.ProviderManager__factory>;
-    getContractFactory(
-      name: "RoleManager",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.RoleManager__factory>;
+    ): Promise<Contracts.PaymentByEpoch__factory>;
     getContractFactory(
       name: "WithdrawManager",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.WithdrawManager__factory>;
     getContractFactory(
-      name: "RoleManagerInternal",
+      name: "WorkersManager",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.RoleManagerInternal__factory>;
+    ): Promise<Contracts.WorkersManager__factory>;
+    getContractFactory(
+      name: "StatusControllerInternal",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.StatusControllerInternal__factory>;
     getContractFactory(
       name: "DeveloperFaucet",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.DeveloperFaucet__factory>;
+    getContractFactory(
+      name: "OwnableFaucet",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.OwnableFaucet__factory>;
     getContractFactory(
       name: "TestERC20",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -224,6 +228,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IERC20>;
     getContractAt(
+      name: "Multicall",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Multicall>;
+    getContractAt(
       name: "AuroraSdk",
       address: string,
       signer?: ethers.Signer
@@ -279,45 +288,45 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IPaymentManager>;
     getContractAt(
-      name: "IProviderManager",
+      name: "IWithdrawManager",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.IProviderManager>;
+    ): Promise<Contracts.IWithdrawManager>;
     getContractAt(
-      name: "IWithdrawCollateralManager",
+      name: "IWorkersManager",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.IWithdrawCollateralManager>;
+    ): Promise<Contracts.IWorkersManager>;
     getContractAt(
-      name: "PaymentManager",
+      name: "PaymentByEpoch",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.PaymentManager>;
-    getContractAt(
-      name: "ProviderManager",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.ProviderManager>;
-    getContractAt(
-      name: "RoleManager",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.RoleManager>;
+    ): Promise<Contracts.PaymentByEpoch>;
     getContractAt(
       name: "WithdrawManager",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.WithdrawManager>;
     getContractAt(
-      name: "RoleManagerInternal",
+      name: "WorkersManager",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.RoleManagerInternal>;
+    ): Promise<Contracts.WorkersManager>;
+    getContractAt(
+      name: "StatusControllerInternal",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.StatusControllerInternal>;
     getContractAt(
       name: "DeveloperFaucet",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.DeveloperFaucet>;
+    getContractAt(
+      name: "OwnableFaucet",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.OwnableFaucet>;
     getContractAt(
       name: "TestERC20",
       address: string,

@@ -3,6 +3,16 @@ import type { Provider } from "@ethersproject/providers";
 import type { DealConfig, DealConfigInterface } from "../../../../contracts/Deal/external/DealConfig";
 export declare class DealConfig__factory {
     static readonly abi: readonly [{
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: false;
+            readonly internalType: "string";
+            readonly name: "appCID";
+            readonly type: "string";
+        }];
+        readonly name: "NewAppCID";
+        readonly type: "event";
+    }, {
         readonly inputs: readonly [];
         readonly name: "appCID";
         readonly outputs: readonly [{
@@ -44,7 +54,7 @@ export declare class DealConfig__factory {
         readonly type: "function";
     }, {
         readonly inputs: readonly [];
-        readonly name: "maxWorkers";
+        readonly name: "maxWorkersPerProvider";
         readonly outputs: readonly [{
             readonly internalType: "uint256";
             readonly name: "";
@@ -91,6 +101,16 @@ export declare class DealConfig__factory {
             readonly type: "uint256";
         }];
         readonly stateMutability: "view";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "string";
+            readonly name: "appCID_";
+            readonly type: "string";
+        }];
+        readonly name: "setAppCID";
+        readonly outputs: readonly [];
+        readonly stateMutability: "nonpayable";
         readonly type: "function";
     }, {
         readonly inputs: readonly [];

@@ -8,13 +8,13 @@ export declare class IPaymentManager__factory {
             readonly name: "amount";
             readonly type: "uint256";
         }];
-        readonly name: "deposit";
+        readonly name: "depositToPaymentBalance";
         readonly outputs: readonly [];
         readonly stateMutability: "nonpayable";
         readonly type: "function";
     }, {
         readonly inputs: readonly [];
-        readonly name: "getBalance";
+        readonly name: "getPaymentBalance";
         readonly outputs: readonly [{
             readonly internalType: "uint256";
             readonly name: "";
@@ -32,7 +32,7 @@ export declare class IPaymentManager__factory {
             readonly name: "amount";
             readonly type: "uint256";
         }];
-        readonly name: "withdrawPaymentBalance";
+        readonly name: "withdrawFromPaymentBalance";
         readonly outputs: readonly [];
         readonly stateMutability: "nonpayable";
         readonly type: "function";

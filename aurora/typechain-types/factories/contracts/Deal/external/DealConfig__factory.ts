@@ -11,6 +11,19 @@ import type {
 
 const _abi = [
   {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "string",
+        name: "appCID",
+        type: "string",
+      },
+    ],
+    name: "NewAppCID",
+    type: "event",
+  },
+  {
     inputs: [],
     name: "appCID",
     outputs: [
@@ -64,7 +77,7 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "maxWorkers",
+    name: "maxWorkersPerProvider",
     outputs: [
       {
         internalType: "uint256",
@@ -125,6 +138,19 @@ const _abi = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "appCID_",
+        type: "string",
+      },
+    ],
+    name: "setAppCID",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {

@@ -5,6 +5,7 @@ import "../Deal/Deal.sol";
 
 contract DealFactory {
     Core public core;
+    address public defaultPaymentToken;
 
     event DealCreated(
         address deal,
@@ -12,33 +13,38 @@ contract DealFactory {
         uint256 pricePerEpoch,
         uint256 requiredStake,
         uint256 minWorkers,
-        uint256 maxWorkers,
+        uint256 maxWorkersPerProvider,
         uint256 targetWorkers,
         string appCID,
-        string[] effectorWasmsCids
+        string[] effectorWasmsCids,
+        uint256 epoch
     );
 
-    constructor(Core core_) {
+    constructor(Core core_, address defaultPaymentToken_) {
         core = core_;
+        defaultPaymentToken = defaultPaymentToken_;
     }
 
     function createDeal(
-        address paymentToken_,
-        uint256 pricePerEpoch_,
-        uint256 requiredStake_,
         uint256 minWorkers_,
-        uint256 maxWorkers_,
         uint256 targetWorkers_,
-        string memory appCID_,
-        string[] memory effectorWasmsCids_
+        string memory appCID_
     ) external {
+        //TODO: args varables
+        uint256 pricePerEpoch_ = 1 * 10**18;
+        uint256 requiredStake_ = 1 * 10**18;
+        uint256 maxWorkersPerProvider_ = 10000000;
+        address paymentToken_ = defaultPaymentToken;
+
+        string[] memory effectorWasmsCids_ = new string[](0);
+
         Deal deal = new Deal(
             core,
             paymentToken_,
             pricePerEpoch_,
             requiredStake_,
             minWorkers_,
-            maxWorkers_,
+            maxWorkersPerProvider_,
             targetWorkers_,
             appCID_,
             effectorWasmsCids_
@@ -52,10 +58,11 @@ contract DealFactory {
             pricePerEpoch_,
             requiredStake_,
             minWorkers_,
-            maxWorkers_,
+            maxWorkersPerProvider_,
             targetWorkers_,
             appCID_,
-            effectorWasmsCids_
+            effectorWasmsCids_,
+            core.epochManager().currentEpoch()
         );
     }
 }

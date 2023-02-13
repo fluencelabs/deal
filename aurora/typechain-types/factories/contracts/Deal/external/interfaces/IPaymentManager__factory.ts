@@ -18,14 +18,14 @@ const _abi = [
         type: "uint256",
       },
     ],
-    name: "deposit",
+    name: "depositToPaymentBalance",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
   },
   {
     inputs: [],
-    name: "getBalance",
+    name: "getPaymentBalance",
     outputs: [
       {
         internalType: "uint256",
@@ -34,24 +34,6 @@ const _abi = [
       },
     ],
     stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "contract IERC20",
-        name: "token",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
-    name: "withdrawPaymentBalance",
-    outputs: [],
-    stateMutability: "nonpayable",
     type: "function",
   },
 ] as const;

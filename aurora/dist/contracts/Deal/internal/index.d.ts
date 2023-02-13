@@ -1,1 +1,1 @@
-export type { RoleManagerInternal } from "./RoleManagerInternal";
+export type { StatusControllerInternal } from "./StatusControllerInternal";

@@ -20,7 +20,9 @@ interface IDealConfig {
 
     function minWorkers() external view returns (uint256);
 
-    function maxWorkers() external view returns (uint256);
+    function maxWorkersPerProvider() external view returns (uint256);
 
     function targetWorkers() external view returns (uint256);
+
+    function setAppCID(string calldata appCID_) external;
 }

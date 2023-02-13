@@ -3,10 +3,11 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IDealConfig.sol";
-import "../internal/interfaces/DCInternalInterface.sol";
+import "../internal/interfaces/IDealConfigInternal.sol";
 
-abstract contract DealConfig is IDealConfig, DCInternalInterface {
+abstract contract DealConfig is IDealConfig, IDealConfigInternal {
     using SafeERC20 for IERC20;
+    event NewAppCID(string appCID);
 
     function core() external view returns (Core) {
         return _core();
@@ -40,11 +41,17 @@ abstract contract DealConfig is IDealConfig, DCInternalInterface {
         return _minWorkers();
     }
 
-    function maxWorkers() external view returns (uint256) {
-        return _maxWorkers();
+    function maxWorkersPerProvider() external view returns (uint256) {
+        return _maxWorkersPerProvider();
     }
 
     function targetWorkers() external view returns (uint256) {
         return _targetWorkers();
+    }
+
+    function setAppCID(string calldata appCID_) external override {
+        _setAppCID(appCID_);
+
+        emit NewAppCID(appCID_);
     }
 }

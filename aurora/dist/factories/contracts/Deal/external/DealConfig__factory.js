@@ -7,6 +7,19 @@ exports.DealConfig__factory = void 0;
 const ethers_1 = require("ethers");
 const _abi = [
     {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: false,
+                internalType: "string",
+                name: "appCID",
+                type: "string",
+            },
+        ],
+        name: "NewAppCID",
+        type: "event",
+    },
+    {
         inputs: [],
         name: "appCID",
         outputs: [
@@ -60,7 +73,7 @@ const _abi = [
     },
     {
         inputs: [],
-        name: "maxWorkers",
+        name: "maxWorkersPerProvider",
         outputs: [
             {
                 internalType: "uint256",
@@ -121,6 +134,19 @@ const _abi = [
             },
         ],
         stateMutability: "view",
+        type: "function",
+    },
+    {
+        inputs: [
+            {
+                internalType: "string",
+                name: "appCID_",
+                type: "string",
+            },
+        ],
+        name: "setAppCID",
+        outputs: [],
+        stateMutability: "nonpayable",
         type: "function",
     },
     {

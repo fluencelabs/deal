@@ -1,25 +1,25 @@
 pragma solidity ^0.8.17;
 
 import "./external/DealConfig.sol";
-import "./external/PaymentManager.sol";
-import "./external/ProviderManager.sol";
-import "./external/RoleManager.sol";
+import "./external/PaymentByEpoch.sol";
+import "./external/WorkersManager.sol";
 import "./external/WithdrawManager.sol";
 
 import "./internal/DealConfigInternal.sol";
-import "./internal/ProviderManagerInternal.sol";
-import "./internal/RoleManagerInternal.sol";
+import "./internal/WorkersManagerInternal.sol";
 import "./internal/WithdrawManagerInternal.sol";
+import "./internal/PaymentManagers/PaymentByEpochInternal.sol";
+import "./internal/StatusControllerInternal.sol";
 
 contract Deal is
     DealConfig,
-    PaymentManager,
-    ProviderManager,
-    RoleManager,
+    PaymentByEpoch,
+    WorkersManager,
     WithdrawManager,
     DealConfigInternal,
-    ProviderManagerInternal,
-    RoleManagerInternal,
+    StatusControllerInternal,
+    PaymentByEpochInternal,
+    WorkersManagerInternal,
     WithdrawManagerInternal
 {
     constructor(

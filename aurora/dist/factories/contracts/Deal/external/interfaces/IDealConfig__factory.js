@@ -60,7 +60,7 @@ const _abi = [
     },
     {
         inputs: [],
-        name: "maxWorkers",
+        name: "maxWorkersPerProvider",
         outputs: [
             {
                 internalType: "uint256",
@@ -121,6 +121,19 @@ const _abi = [
             },
         ],
         stateMutability: "view",
+        type: "function",
+    },
+    {
+        inputs: [
+            {
+                internalType: "string",
+                name: "appCID_",
+                type: "string",
+            },
+        ],
+        name: "setAppCID",
+        outputs: [],
+        stateMutability: "nonpayable",
         type: "function",
     },
     {

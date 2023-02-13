@@ -44,7 +44,7 @@ export declare class IDealConfig__factory {
         readonly type: "function";
     }, {
         readonly inputs: readonly [];
-        readonly name: "maxWorkers";
+        readonly name: "maxWorkersPerProvider";
         readonly outputs: readonly [{
             readonly internalType: "uint256";
             readonly name: "";
@@ -91,6 +91,16 @@ export declare class IDealConfig__factory {
             readonly type: "uint256";
         }];
         readonly stateMutability: "view";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "string";
+            readonly name: "appCID_";
+            readonly type: "string";
+        }];
+        readonly name: "setAppCID";
+        readonly outputs: readonly [];
+        readonly stateMutability: "nonpayable";
         readonly type: "function";
     }, {
         readonly inputs: readonly [];

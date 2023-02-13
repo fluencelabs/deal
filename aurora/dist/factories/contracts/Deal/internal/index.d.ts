@@ -1,1 +1,1 @@
-export { RoleManagerInternal__factory } from "./RoleManagerInternal__factory";
+export { StatusControllerInternal__factory } from "./StatusControllerInternal__factory";
