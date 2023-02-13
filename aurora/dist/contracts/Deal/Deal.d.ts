@@ -25,9 +25,8 @@ export interface DealInterface extends utils.Interface {
         "targetWorkers()": FunctionFragment;
         "transferOwnership(address)": FunctionFragment;
         "withdraw(address)": FunctionFragment;
-        "withdrawFromPaymentBalance(address,uint256)": FunctionFragment;
     };
-    getFunction(nameOrSignatureOrTopic: "appCID" | "core" | "createProviderToken" | "depositToPaymentBalance" | "effectorWasmsCids" | "fluenceToken" | "getPATOwner" | "getPaymentBalance" | "getUnlockedCollateralBy" | "maxWorkersPerProvider" | "minWorkers" | "owner" | "paymentToken" | "pricePerEpoch" | "removeProviderToken" | "renounceOwnership" | "requiredStake" | "setAppCID" | "targetWorkers" | "transferOwnership" | "withdraw" | "withdrawFromPaymentBalance"): FunctionFragment;
+    getFunction(nameOrSignatureOrTopic: "appCID" | "core" | "createProviderToken" | "depositToPaymentBalance" | "effectorWasmsCids" | "fluenceToken" | "getPATOwner" | "getPaymentBalance" | "getUnlockedCollateralBy" | "maxWorkersPerProvider" | "minWorkers" | "owner" | "paymentToken" | "pricePerEpoch" | "removeProviderToken" | "renounceOwnership" | "requiredStake" | "setAppCID" | "targetWorkers" | "transferOwnership" | "withdraw"): FunctionFragment;
     encodeFunctionData(functionFragment: "appCID", values?: undefined): string;
     encodeFunctionData(functionFragment: "core", values?: undefined): string;
     encodeFunctionData(functionFragment: "createProviderToken", values: [PromiseOrValue<BytesLike>]): string;
@@ -49,7 +48,6 @@ export interface DealInterface extends utils.Interface {
     encodeFunctionData(functionFragment: "targetWorkers", values?: undefined): string;
     encodeFunctionData(functionFragment: "transferOwnership", values: [PromiseOrValue<string>]): string;
     encodeFunctionData(functionFragment: "withdraw", values: [PromiseOrValue<string>]): string;
-    encodeFunctionData(functionFragment: "withdrawFromPaymentBalance", values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]): string;
     decodeFunctionResult(functionFragment: "appCID", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "core", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "createProviderToken", data: BytesLike): Result;
@@ -71,7 +69,6 @@ export interface DealInterface extends utils.Interface {
     decodeFunctionResult(functionFragment: "targetWorkers", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "transferOwnership", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: "withdrawFromPaymentBalance", data: BytesLike): Result;
     events: {
         "AddProviderToken(address,bytes32)": EventFragment;
         "NewAppCID(string)": EventFragment;
@@ -170,9 +167,6 @@ export interface Deal extends BaseContract {
         withdraw(token: PromiseOrValue<string>, overrides?: Overrides & {
             from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
-        withdrawFromPaymentBalance(token: PromiseOrValue<string>, amount: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
-            from?: PromiseOrValue<string>;
-        }): Promise<ContractTransaction>;
     };
     appCID(overrides?: CallOverrides): Promise<string>;
     core(overrides?: CallOverrides): Promise<string>;
@@ -209,9 +203,6 @@ export interface Deal extends BaseContract {
     withdraw(token: PromiseOrValue<string>, overrides?: Overrides & {
         from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
-    withdrawFromPaymentBalance(token: PromiseOrValue<string>, amount: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
-        from?: PromiseOrValue<string>;
-    }): Promise<ContractTransaction>;
     callStatic: {
         appCID(overrides?: CallOverrides): Promise<string>;
         core(overrides?: CallOverrides): Promise<string>;
@@ -234,7 +225,6 @@ export interface Deal extends BaseContract {
         targetWorkers(overrides?: CallOverrides): Promise<BigNumber>;
         transferOwnership(newOwner: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
         withdraw(token: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
-        withdrawFromPaymentBalance(token: PromiseOrValue<string>, amount: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<void>;
     };
     filters: {
         "AddProviderToken(address,bytes32)"(owner?: PromiseOrValue<string> | null, id?: null): AddProviderTokenEventFilter;
@@ -284,9 +274,6 @@ export interface Deal extends BaseContract {
         withdraw(token: PromiseOrValue<string>, overrides?: Overrides & {
             from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
-        withdrawFromPaymentBalance(token: PromiseOrValue<string>, amount: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
-            from?: PromiseOrValue<string>;
-        }): Promise<BigNumber>;
     };
     populateTransaction: {
         appCID(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -322,9 +309,6 @@ export interface Deal extends BaseContract {
             from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
         withdraw(token: PromiseOrValue<string>, overrides?: Overrides & {
-            from?: PromiseOrValue<string>;
-        }): Promise<PopulatedTransaction>;
-        withdrawFromPaymentBalance(token: PromiseOrValue<string>, amount: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
             from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
     };

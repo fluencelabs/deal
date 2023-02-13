@@ -84,24 +84,6 @@ const _abi = [
         stateMutability: "nonpayable",
         type: "function",
     },
-    {
-        inputs: [
-            {
-                internalType: "contract IERC20",
-                name: "token",
-                type: "address",
-            },
-            {
-                internalType: "uint256",
-                name: "amount",
-                type: "uint256",
-            },
-        ],
-        name: "withdrawFromPaymentBalance",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function",
-    },
 ];
 class PaymentByEpoch__factory {
     static createInterface() {

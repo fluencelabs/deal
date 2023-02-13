@@ -23,7 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DealFactory__factory = exports.TestERC20__factory = exports.DeveloperFaucet__factory = exports.StatusControllerInternal__factory = exports.WorkersManager__factory = exports.WithdrawManager__factory = exports.PaymentByEpoch__factory = exports.IWorkersManager__factory = exports.IWithdrawManager__factory = exports.IPaymentManager__factory = exports.IDealConfig__factory = exports.DealConfig__factory = exports.Deal__factory = exports.EpochManager__factory = exports.CoreState__factory = exports.Core__factory = exports.AquaProxy__factory = exports.Utils__factory = exports.Codec__factory = exports.AuroraSdk__factory = exports.IERC20__factory = exports.IERC20Metadata__factory = exports.IERC20Permit__factory = exports.ERC20__factory = exports.UUPSUpgradeable__factory = exports.Proxy__factory = exports.ERC1967Upgrade__factory = exports.ERC1967Proxy__factory = exports.IBeacon__factory = exports.IERC1822Proxiable__factory = exports.Ownable__factory = exports.ContextUpgradeable__factory = exports.Initializable__factory = exports.OwnableUpgradeable__factory = exports.factories = void 0;
+exports.DealFactory__factory = exports.TestERC20__factory = exports.OwnableFaucet__factory = exports.DeveloperFaucet__factory = exports.StatusControllerInternal__factory = exports.WorkersManager__factory = exports.WithdrawManager__factory = exports.PaymentByEpoch__factory = exports.IWorkersManager__factory = exports.IWithdrawManager__factory = exports.IPaymentManager__factory = exports.IDealConfig__factory = exports.DealConfig__factory = exports.Deal__factory = exports.EpochManager__factory = exports.CoreState__factory = exports.Core__factory = exports.AquaProxy__factory = exports.Utils__factory = exports.Codec__factory = exports.AuroraSdk__factory = exports.Multicall__factory = exports.IERC20__factory = exports.IERC20Metadata__factory = exports.IERC20Permit__factory = exports.ERC20__factory = exports.UUPSUpgradeable__factory = exports.Proxy__factory = exports.ERC1967Upgrade__factory = exports.ERC1967Proxy__factory = exports.IBeacon__factory = exports.IERC1822Proxiable__factory = exports.Ownable__factory = exports.ContextUpgradeable__factory = exports.Initializable__factory = exports.OwnableUpgradeable__factory = exports.factories = void 0;
 exports.factories = __importStar(require("./factories"));
 var OwnableUpgradeable__factory_1 = require("./factories/@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable__factory");
 Object.defineProperty(exports, "OwnableUpgradeable__factory", { enumerable: true, get: function () { return OwnableUpgradeable__factory_1.OwnableUpgradeable__factory; } });
@@ -53,6 +53,8 @@ var IERC20Metadata__factory_1 = require("./factories/@openzeppelin/contracts/tok
 Object.defineProperty(exports, "IERC20Metadata__factory", { enumerable: true, get: function () { return IERC20Metadata__factory_1.IERC20Metadata__factory; } });
 var IERC20__factory_1 = require("./factories/@openzeppelin/contracts/token/ERC20/IERC20__factory");
 Object.defineProperty(exports, "IERC20__factory", { enumerable: true, get: function () { return IERC20__factory_1.IERC20__factory; } });
+var Multicall__factory_1 = require("./factories/@openzeppelin/contracts/utils/Multicall__factory");
+Object.defineProperty(exports, "Multicall__factory", { enumerable: true, get: function () { return Multicall__factory_1.Multicall__factory; } });
 var AuroraSdk__factory_1 = require("./factories/contracts/AuroraSDK/AuroraSdk__factory");
 Object.defineProperty(exports, "AuroraSdk__factory", { enumerable: true, get: function () { return AuroraSdk__factory_1.AuroraSdk__factory; } });
 var Codec__factory_1 = require("./factories/contracts/AuroraSDK/Codec__factory");
@@ -89,6 +91,8 @@ var StatusControllerInternal__factory_1 = require("./factories/contracts/Deal/in
 Object.defineProperty(exports, "StatusControllerInternal__factory", { enumerable: true, get: function () { return StatusControllerInternal__factory_1.StatusControllerInternal__factory; } });
 var DeveloperFaucet__factory_1 = require("./factories/contracts/Dev/DeveloperFaucet__factory");
 Object.defineProperty(exports, "DeveloperFaucet__factory", { enumerable: true, get: function () { return DeveloperFaucet__factory_1.DeveloperFaucet__factory; } });
+var OwnableFaucet__factory_1 = require("./factories/contracts/Dev/OwnableFaucet__factory");
+Object.defineProperty(exports, "OwnableFaucet__factory", { enumerable: true, get: function () { return OwnableFaucet__factory_1.OwnableFaucet__factory; } });
 var TestERC20__factory_1 = require("./factories/contracts/Dev/TestERC20__factory");
 Object.defineProperty(exports, "TestERC20__factory", { enumerable: true, get: function () { return TestERC20__factory_1.TestERC20__factory; } });
 var DealFactory__factory_1 = require("./factories/contracts/Factory/DealFactory__factory");

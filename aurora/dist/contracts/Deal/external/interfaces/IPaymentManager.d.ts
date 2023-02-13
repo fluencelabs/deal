@@ -6,15 +6,12 @@ export interface IPaymentManagerInterface extends utils.Interface {
     functions: {
         "depositToPaymentBalance(uint256)": FunctionFragment;
         "getPaymentBalance()": FunctionFragment;
-        "withdrawFromPaymentBalance(address,uint256)": FunctionFragment;
     };
-    getFunction(nameOrSignatureOrTopic: "depositToPaymentBalance" | "getPaymentBalance" | "withdrawFromPaymentBalance"): FunctionFragment;
+    getFunction(nameOrSignatureOrTopic: "depositToPaymentBalance" | "getPaymentBalance"): FunctionFragment;
     encodeFunctionData(functionFragment: "depositToPaymentBalance", values: [PromiseOrValue<BigNumberish>]): string;
     encodeFunctionData(functionFragment: "getPaymentBalance", values?: undefined): string;
-    encodeFunctionData(functionFragment: "withdrawFromPaymentBalance", values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]): string;
     decodeFunctionResult(functionFragment: "depositToPaymentBalance", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "getPaymentBalance", data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: "withdrawFromPaymentBalance", data: BytesLike): Result;
     events: {};
 }
 export interface IPaymentManager extends BaseContract {
@@ -36,21 +33,14 @@ export interface IPaymentManager extends BaseContract {
             from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
         getPaymentBalance(overrides?: CallOverrides): Promise<[BigNumber]>;
-        withdrawFromPaymentBalance(token: PromiseOrValue<string>, amount: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
-            from?: PromiseOrValue<string>;
-        }): Promise<ContractTransaction>;
     };
     depositToPaymentBalance(amount: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
         from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
     getPaymentBalance(overrides?: CallOverrides): Promise<BigNumber>;
-    withdrawFromPaymentBalance(token: PromiseOrValue<string>, amount: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
-        from?: PromiseOrValue<string>;
-    }): Promise<ContractTransaction>;
     callStatic: {
         depositToPaymentBalance(amount: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<void>;
         getPaymentBalance(overrides?: CallOverrides): Promise<BigNumber>;
-        withdrawFromPaymentBalance(token: PromiseOrValue<string>, amount: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<void>;
     };
     filters: {};
     estimateGas: {
@@ -58,17 +48,11 @@ export interface IPaymentManager extends BaseContract {
             from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
         getPaymentBalance(overrides?: CallOverrides): Promise<BigNumber>;
-        withdrawFromPaymentBalance(token: PromiseOrValue<string>, amount: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
-            from?: PromiseOrValue<string>;
-        }): Promise<BigNumber>;
     };
     populateTransaction: {
         depositToPaymentBalance(amount: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
             from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
         getPaymentBalance(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-        withdrawFromPaymentBalance(token: PromiseOrValue<string>, amount: PromiseOrValue<BigNumberish>, overrides?: Overrides & {
-            from?: PromiseOrValue<string>;
-        }): Promise<PopulatedTransaction>;
     };
 }
