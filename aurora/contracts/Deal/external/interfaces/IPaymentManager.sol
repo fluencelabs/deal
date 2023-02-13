@@ -7,5 +7,5 @@ interface IPaymentManager {
 
     function depositToPaymentBalance(uint256 amount) external;
 
-    function withdrawFromPaymentBalance(IERC20 token, uint256 amount) external;
+    //function withdrawFromPaymentBalance(IERC20 token, uint256 amount) external;
 }

@@ -37,14 +37,9 @@ const setupTestEnv = async (
     )) as DealFactory;
 
     const tx = await factory.createDeal(
-      faucet.usdToken(),
-      pricePerEpoch,
-      requiredStake,
       minWorkers,
-      maxWorkers,
       targetWorkers,
-      ethers.utils.keccak256(ethers.utils.toUtf8Bytes("testApp")),
-      [ethers.utils.keccak256(ethers.utils.toUtf8Bytes("testEffector"))]
+      ethers.utils.keccak256(ethers.utils.toUtf8Bytes("testApp"))
     );
 
     const eventTopic = factory.interface.getEventTopic("DealCreated");

@@ -7,9 +7,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const accounts = await hre.getUnnamedAccounts();
   const deployer = accounts[0];
 
-  await hre.deployments.deploy("EpochManager", {
+  console.log("Deploying account:", deployer);
+  console.log("Block number:", await hre.ethers.provider.getBlockNumber());
+
+  await hre.deployments.deploy("OwnableFaucet", {
     from: deployer,
-    args: [120],
+    args: [],
     log: true,
     autoMine: true,
     waitConfirmations: 1,
@@ -17,3 +20,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
+
+module.exports.tags = ["testnet"];

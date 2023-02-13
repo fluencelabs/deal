@@ -30,28 +30,34 @@ import type {
 export interface DealFactoryInterface extends utils.Interface {
   functions: {
     "core()": FunctionFragment;
-    "createDeal(address,uint256,uint256,uint256,uint256,uint256,string,string[])": FunctionFragment;
+    "createDeal(uint256,uint256,string)": FunctionFragment;
+    "defaultPaymentToken()": FunctionFragment;
   };
 
-  getFunction(nameOrSignatureOrTopic: "core" | "createDeal"): FunctionFragment;
+  getFunction(
+    nameOrSignatureOrTopic: "core" | "createDeal" | "defaultPaymentToken"
+  ): FunctionFragment;
 
   encodeFunctionData(functionFragment: "core", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "createDeal",
     values: [
-      PromiseOrValue<string>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<string>,
-      PromiseOrValue<string>[]
+      PromiseOrValue<string>
     ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "defaultPaymentToken",
+    values?: undefined
   ): string;
 
   decodeFunctionResult(functionFragment: "core", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "createDeal", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "defaultPaymentToken",
+    data: BytesLike
+  ): Result;
 
   events: {
     "DealCreated(address,address,uint256,uint256,uint256,uint256,uint256,string,string[],uint256)": EventFragment;
@@ -120,46 +126,37 @@ export interface DealFactory extends BaseContract {
     core(overrides?: CallOverrides): Promise<[string]>;
 
     createDeal(
-      paymentToken_: PromiseOrValue<string>,
-      pricePerEpoch_: PromiseOrValue<BigNumberish>,
-      requiredStake_: PromiseOrValue<BigNumberish>,
       minWorkers_: PromiseOrValue<BigNumberish>,
-      maxWorkersPerProvider_: PromiseOrValue<BigNumberish>,
       targetWorkers_: PromiseOrValue<BigNumberish>,
       appCID_: PromiseOrValue<string>,
-      effectorWasmsCids_: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
+
+    defaultPaymentToken(overrides?: CallOverrides): Promise<[string]>;
   };
 
   core(overrides?: CallOverrides): Promise<string>;
 
   createDeal(
-    paymentToken_: PromiseOrValue<string>,
-    pricePerEpoch_: PromiseOrValue<BigNumberish>,
-    requiredStake_: PromiseOrValue<BigNumberish>,
     minWorkers_: PromiseOrValue<BigNumberish>,
-    maxWorkersPerProvider_: PromiseOrValue<BigNumberish>,
     targetWorkers_: PromiseOrValue<BigNumberish>,
     appCID_: PromiseOrValue<string>,
-    effectorWasmsCids_: PromiseOrValue<string>[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
+
+  defaultPaymentToken(overrides?: CallOverrides): Promise<string>;
 
   callStatic: {
     core(overrides?: CallOverrides): Promise<string>;
 
     createDeal(
-      paymentToken_: PromiseOrValue<string>,
-      pricePerEpoch_: PromiseOrValue<BigNumberish>,
-      requiredStake_: PromiseOrValue<BigNumberish>,
       minWorkers_: PromiseOrValue<BigNumberish>,
-      maxWorkersPerProvider_: PromiseOrValue<BigNumberish>,
       targetWorkers_: PromiseOrValue<BigNumberish>,
       appCID_: PromiseOrValue<string>,
-      effectorWasmsCids_: PromiseOrValue<string>[],
       overrides?: CallOverrides
     ): Promise<void>;
+
+    defaultPaymentToken(overrides?: CallOverrides): Promise<string>;
   };
 
   filters: {
@@ -193,31 +190,27 @@ export interface DealFactory extends BaseContract {
     core(overrides?: CallOverrides): Promise<BigNumber>;
 
     createDeal(
-      paymentToken_: PromiseOrValue<string>,
-      pricePerEpoch_: PromiseOrValue<BigNumberish>,
-      requiredStake_: PromiseOrValue<BigNumberish>,
       minWorkers_: PromiseOrValue<BigNumberish>,
-      maxWorkersPerProvider_: PromiseOrValue<BigNumberish>,
       targetWorkers_: PromiseOrValue<BigNumberish>,
       appCID_: PromiseOrValue<string>,
-      effectorWasmsCids_: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
+
+    defaultPaymentToken(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
     core(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     createDeal(
-      paymentToken_: PromiseOrValue<string>,
-      pricePerEpoch_: PromiseOrValue<BigNumberish>,
-      requiredStake_: PromiseOrValue<BigNumberish>,
       minWorkers_: PromiseOrValue<BigNumberish>,
-      maxWorkersPerProvider_: PromiseOrValue<BigNumberish>,
       targetWorkers_: PromiseOrValue<BigNumberish>,
       appCID_: PromiseOrValue<string>,
-      effectorWasmsCids_: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    defaultPaymentToken(
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };
 }

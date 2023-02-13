@@ -3,16 +3,14 @@ import { DeployFunction } from "hardhat-deploy/types";
 import "hardhat-deploy";
 import "@nomiclabs/hardhat-ethers";
 
+const EPOCH_DURATION = 5 * 60;
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const accounts = await hre.getUnnamedAccounts();
   const deployer = accounts[0];
 
-  console.log("Deploying account:", deployer);
-  console.log("Block number:", await hre.ethers.provider.getBlockNumber());
-
-  await hre.deployments.deploy("DeveloperFaucet", {
+  await hre.deployments.deploy("EpochManager", {
     from: deployer,
-    args: [],
+    args: [EPOCH_DURATION],
     log: true,
     autoMine: true,
     waitConfirmations: 1,
@@ -20,3 +18,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
+
+module.exports.tags = ["testnet"];
+module.exports.dependencies = ["OwnableFaucet"];

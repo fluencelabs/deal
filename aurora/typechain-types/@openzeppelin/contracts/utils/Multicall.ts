@@ -4,7 +4,6 @@
 import type {
   BaseContract,
   BigNumber,
-  BigNumberish,
   BytesLike,
   CallOverrides,
   ContractTransaction,
@@ -21,45 +20,31 @@ import type {
   TypedListener,
   OnEvent,
   PromiseOrValue,
-} from "../../../../common";
+} from "../../../common";
 
-export interface IPaymentManagerInterface extends utils.Interface {
+export interface MulticallInterface extends utils.Interface {
   functions: {
-    "depositToPaymentBalance(uint256)": FunctionFragment;
-    "getPaymentBalance()": FunctionFragment;
+    "multicall(bytes[])": FunctionFragment;
   };
 
-  getFunction(
-    nameOrSignatureOrTopic: "depositToPaymentBalance" | "getPaymentBalance"
-  ): FunctionFragment;
+  getFunction(nameOrSignatureOrTopic: "multicall"): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "depositToPaymentBalance",
-    values: [PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getPaymentBalance",
-    values?: undefined
+    functionFragment: "multicall",
+    values: [PromiseOrValue<BytesLike>[]]
   ): string;
 
-  decodeFunctionResult(
-    functionFragment: "depositToPaymentBalance",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getPaymentBalance",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: "multicall", data: BytesLike): Result;
 
   events: {};
 }
 
-export interface IPaymentManager extends BaseContract {
+export interface Multicall extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: IPaymentManagerInterface;
+  interface: MulticallInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -81,47 +66,37 @@ export interface IPaymentManager extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    depositToPaymentBalance(
-      amount: PromiseOrValue<BigNumberish>,
+    multicall(
+      data: PromiseOrValue<BytesLike>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
-
-    getPaymentBalance(overrides?: CallOverrides): Promise<[BigNumber]>;
   };
 
-  depositToPaymentBalance(
-    amount: PromiseOrValue<BigNumberish>,
+  multicall(
+    data: PromiseOrValue<BytesLike>[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  getPaymentBalance(overrides?: CallOverrides): Promise<BigNumber>;
-
   callStatic: {
-    depositToPaymentBalance(
-      amount: PromiseOrValue<BigNumberish>,
+    multicall(
+      data: PromiseOrValue<BytesLike>[],
       overrides?: CallOverrides
-    ): Promise<void>;
-
-    getPaymentBalance(overrides?: CallOverrides): Promise<BigNumber>;
+    ): Promise<string[]>;
   };
 
   filters: {};
 
   estimateGas: {
-    depositToPaymentBalance(
-      amount: PromiseOrValue<BigNumberish>,
+    multicall(
+      data: PromiseOrValue<BytesLike>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
-
-    getPaymentBalance(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    depositToPaymentBalance(
-      amount: PromiseOrValue<BigNumberish>,
+    multicall(
+      data: PromiseOrValue<BytesLike>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
-
-    getPaymentBalance(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }

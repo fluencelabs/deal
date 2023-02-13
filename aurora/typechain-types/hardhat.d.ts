@@ -69,6 +69,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC20__factory>;
     getContractFactory(
+      name: "Multicall",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Multicall__factory>;
+    getContractFactory(
       name: "AuroraSdk",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.AuroraSdk__factory>;
@@ -140,6 +144,10 @@ declare module "hardhat/types/runtime" {
       name: "DeveloperFaucet",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.DeveloperFaucet__factory>;
+    getContractFactory(
+      name: "OwnableFaucet",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.OwnableFaucet__factory>;
     getContractFactory(
       name: "TestERC20",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -219,6 +227,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IERC20>;
+    getContractAt(
+      name: "Multicall",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Multicall>;
     getContractAt(
       name: "AuroraSdk",
       address: string,
@@ -309,6 +322,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.DeveloperFaucet>;
+    getContractAt(
+      name: "OwnableFaucet",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.OwnableFaucet>;
     getContractAt(
       name: "TestERC20",
       address: string,

@@ -18,8 +18,8 @@ abstract contract PaymentByEpoch is IPaymentManager, IPaymentInternal, Ownable {
     function depositToPaymentBalance(uint256 amount) public {
         _depositToPaymentBalance(amount);
     }
-
+    /*
     function withdrawFromPaymentBalance(IERC20 token, uint256 amount) public {
         _withdrawFromPaymentBalance(token, amount);
-    }
+    }*/
 }

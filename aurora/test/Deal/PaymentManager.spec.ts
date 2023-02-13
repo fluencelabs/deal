@@ -39,7 +39,7 @@ describe("PaymentManager", () => {
     expect(balanceAfter).to.be.equal(balanceBefore.add(value));
   });
 
-  it("withdraw", async () => {
+  /* it("withdraw", async () => {
     const value = ethers.utils.parseEther("1");
 
     await (await usdToken.approve(deal.address, value)).wait();
@@ -54,5 +54,5 @@ describe("PaymentManager", () => {
     const balanceAfter = await deal.getPaymentBalance();
 
     expect(balanceAfter).to.be.equal(balanceBefore.sub(withdrawValue));
-  });
+  });*/
 });

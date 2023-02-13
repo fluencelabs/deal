@@ -3,8 +3,8 @@ import { DeployFunction } from "hardhat-deploy/types";
 import "hardhat-deploy";
 import "@nomiclabs/hardhat-ethers";
 import { getContractAddress } from "ethers/lib/utils";
-import { ERC20__factory } from "../typechain-types";
-import { NEAR_AQUA_VM_ADDRESS, WNEAR_ADDRESS } from "../utils/consts";
+import { ERC20__factory } from "../../typechain-types";
+import { NEAR_AQUA_VM_ADDRESS, WNEAR_ADDRESS } from "../../utils/consts";
 import { BigNumber } from "ethers";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -88,3 +88,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
+
+module.exports.tags = ["localnet"];

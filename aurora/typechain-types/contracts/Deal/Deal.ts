@@ -50,7 +50,6 @@ export interface DealInterface extends utils.Interface {
     "targetWorkers()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "withdraw(address)": FunctionFragment;
-    "withdrawFromPaymentBalance(address,uint256)": FunctionFragment;
   };
 
   getFunction(
@@ -76,7 +75,6 @@ export interface DealInterface extends utils.Interface {
       | "targetWorkers"
       | "transferOwnership"
       | "withdraw"
-      | "withdrawFromPaymentBalance"
   ): FunctionFragment;
 
   encodeFunctionData(functionFragment: "appCID", values?: undefined): string;
@@ -154,10 +152,6 @@ export interface DealInterface extends utils.Interface {
     functionFragment: "withdraw",
     values: [PromiseOrValue<string>]
   ): string;
-  encodeFunctionData(
-    functionFragment: "withdrawFromPaymentBalance",
-    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
-  ): string;
 
   decodeFunctionResult(functionFragment: "appCID", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "core", data: BytesLike): Result;
@@ -225,10 +219,6 @@ export interface DealInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "withdrawFromPaymentBalance",
-    data: BytesLike
-  ): Result;
 
   events: {
     "AddProviderToken(address,bytes32)": EventFragment;
@@ -389,12 +379,6 @@ export interface Deal extends BaseContract {
       token: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
-
-    withdrawFromPaymentBalance(
-      token: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
   };
 
   appCID(overrides?: CallOverrides): Promise<string>;
@@ -466,12 +450,6 @@ export interface Deal extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  withdrawFromPaymentBalance(
-    token: PromiseOrValue<string>,
-    amount: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   callStatic: {
     appCID(overrides?: CallOverrides): Promise<string>;
 
@@ -537,12 +515,6 @@ export interface Deal extends BaseContract {
 
     withdraw(
       token: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    withdrawFromPaymentBalance(
-      token: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
   };
@@ -645,12 +617,6 @@ export interface Deal extends BaseContract {
       token: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
-
-    withdrawFromPaymentBalance(
-      token: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -722,12 +688,6 @@ export interface Deal extends BaseContract {
 
     withdraw(
       token: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    withdrawFromPaymentBalance(
-      token: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
   };
