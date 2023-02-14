@@ -69,6 +69,9 @@ jobs:
           cache-dependency-path: aurora/package-lock.json
           cache: "npm"
 
+      - run: npm i
+        working-directory: aurora
+
       - name: Publish to npm registry
         run: npm publish --access public
         working-directory: aurora
