@@ -15,7 +15,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   ).attach(developerFaucetDeploy.address);
 
   const fluenceToken = await developerFaucet.fluenceToken();
-  const aquaProxyDeploy = await hre.deployments.get("AquaProxy");
   const epochManagerDeploy = await hre.deployments.get("EpochManager");
 
   const coreImpl = await hre.deployments.deploy("CoreImpl", {
@@ -42,7 +41,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await coreContract.initialize(
     fluenceToken,
-    aquaProxyDeploy.address,
+    "0x0000000000000000000000000000000000000000",
     1,
     120,
     1,
