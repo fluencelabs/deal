@@ -2,21 +2,21 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 import "hardhat-deploy";
 import "@nomiclabs/hardhat-ethers";
-import { DeveloperFaucet__factory } from "../../typechain-types";
+import { DeveloperFaucet__factory } from "../typechain-types";
 
-const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+module.exports = async function (hre: HardhatRuntimeEnvironment) {
   const accounts = await hre.getUnnamedAccounts();
   const deployer = accounts[0];
 
   const coreDeploy = await hre.deployments.get("Core");
 
-  const faucetDeployFactory = await hre.deployments.get("OwnableFaucet");
+  const developerFaucetDeploy = await hre.deployments.get("Faucet");
 
-  const faucetDeploy = new DeveloperFaucet__factory(
+  const developerFaucet = new DeveloperFaucet__factory(
     await hre.ethers.getSigner(deployer)
-  ).attach(faucetDeployFactory.address);
+  ).attach(developerFaucetDeploy.address);
 
-  const paymentTokenAddress = await faucetDeploy.usdToken();
+  const paymentTokenAddress = await developerFaucet.usdToken();
 
   await hre.deployments.deploy("DealFactory", {
     from: deployer,
@@ -27,7 +27,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 
-export default func;
-
-module.exports.tags = ["testnet"];
-module.exports.dependencies = ["Core", "OwnableFaucet"];
+module.exports.dependencies = ["Core", "Faucet"];
+module.exports.tags = ["common"];

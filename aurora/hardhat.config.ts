@@ -14,23 +14,16 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
-      deploy: ["deploy/localnet/"],
-      tags: ["localnet"],
       forking: {
-        url: "https://endpoints.omniatech.io/v1/aurora/testnet/public",
+        url: "https://polygon-mumbai.blockpi.network/v1/rpc/public",
       },
       accounts: {
         passphrase:
           "test test test test claim trade stairs crew inspire obey veteran budget",
       },
     },
-    localhost: {
-      url: "http://localhost:8545",
-    },
-    aurora: {
-      deploy: ["deploy/testnet/"],
-      tags: ["testnet"],
-      url: "https://endpoints.omniatech.io/v1/aurora/testnet/public",
+    testnet: {
+      url: "https://polygon-mumbai.blockpi.network/v1/rpc/public",
       accounts: [
         process.env.AURORA_PRIVATE_KEY ??
           "0x0000000000000000000000000000000000000000000000000000000000000000",

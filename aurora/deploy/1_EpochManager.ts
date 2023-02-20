@@ -4,7 +4,7 @@ import "hardhat-deploy";
 import "@nomiclabs/hardhat-ethers";
 
 const EPOCH_DURATION = 5 * 60;
-const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+module.exports = async function (hre: HardhatRuntimeEnvironment) {
   const accounts = await hre.getUnnamedAccounts();
   const deployer = accounts[0];
 
@@ -17,7 +17,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 
-export default func;
-
-module.exports.tags = ["testnet"];
-module.exports.dependencies = ["OwnableFaucet"];
+module.exports.dependencies = ["Faucet"];
+module.exports.tags = ["common"];

@@ -4,10 +4,9 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "hardhat test",
-    "deploy": "hardhat deploy --network aurora",
-    "deploy:local": "hardhat deploy --network localhost",
+    "deploy:testnet": "hardhat deploy --network testnet --tags testnet,common",
     "clean": "hardhat clean",
-    "node": "hardhat node",
+    "node": "hardhat node --tags localnet,common",
     "compile": "shx rm -rf dist && shx rm -rf artifacts && shx rm -rf cache && shx rm -rf typechain-types && hardhat compile && tsc -b",
     "prepare": "cd .. && husky install aurora/.husky"
   },

@@ -38,6 +38,7 @@ contract DealFactory {
 
         string[] memory effectorWasmsCids_ = new string[](0);
 
+        // TODO: create2 function
         Deal deal = new Deal(
             core,
             paymentToken_,
