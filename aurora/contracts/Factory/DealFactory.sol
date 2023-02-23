@@ -31,7 +31,7 @@ contract DealFactory {
         string memory appCID_
     ) external {
         //TODO: args varables
-        uint256 pricePerEpoch_ = 1 * 10**18;
+        uint256 pricePerEpoch_ = 83 * 10**15;
         uint256 requiredStake_ = 1 * 10**18;
         uint256 maxWorkersPerProvider_ = 10000000;
         address paymentToken_ = defaultPaymentToken;
