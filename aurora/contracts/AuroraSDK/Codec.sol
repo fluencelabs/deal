@@ -41,16 +41,12 @@ library Codec {
     }
 
     /// Encode PromiseArgsVariant enum into borsh.
-    function encodePromise(
-        PromiseArgsVariant mode
-    ) public pure returns (bytes1) {
+    function encodePromise(PromiseArgsVariant mode) public pure returns (bytes1) {
         return bytes1(uint8(mode));
     }
 
     /// Encode base promise into borsh.
-    function encode(
-        PromiseCreateArgs memory nearPromise
-    ) public pure returns (bytes memory) {
+    function encode(PromiseCreateArgs memory nearPromise) public pure returns (bytes memory) {
         return
             abi.encodePacked(
                 encode(bytes(nearPromise.targetAccountId)),
@@ -62,48 +58,24 @@ library Codec {
     }
 
     /// Encode promise with callback into borsh.
-    function encode(
-        PromiseWithCallback memory nearPromise
-    ) public pure returns (bytes memory) {
-        return
-            abi.encodePacked(
-                encode(nearPromise.base),
-                encode(nearPromise.callback)
-            );
+    function encode(PromiseWithCallback memory nearPromise) public pure returns (bytes memory) {
+        return abi.encodePacked(encode(nearPromise.base), encode(nearPromise.callback));
     }
 
     /// Encode create promise using borsh. The encoded data
     /// uses the same format that the Cross Contract Call precompile expects.
-    function encodeCrossContractCallArgs(
-        PromiseCreateArgs memory nearPromise,
-        ExecutionMode mode
-    ) public pure returns (bytes memory) {
-        return
-            abi.encodePacked(
-                encodeEM(mode),
-                encodePromise(PromiseArgsVariant.Create),
-                encode(nearPromise)
-            );
+    function encodeCrossContractCallArgs(PromiseCreateArgs memory nearPromise, ExecutionMode mode) public pure returns (bytes memory) {
+        return abi.encodePacked(encodeEM(mode), encodePromise(PromiseArgsVariant.Create), encode(nearPromise));
     }
 
     /// Encode promise with callback using borsh. The encoded data
     /// uses the same format that the Cross Contract Call precompile expects.
-    function encodeCrossContractCallArgs(
-        PromiseWithCallback memory nearPromise,
-        ExecutionMode mode
-    ) public pure returns (bytes memory) {
-        return
-            abi.encodePacked(
-                encodeEM(mode),
-                encodePromise(PromiseArgsVariant.Callback),
-                encode(nearPromise)
-            );
+    function encodeCrossContractCallArgs(PromiseWithCallback memory nearPromise, ExecutionMode mode) public pure returns (bytes memory) {
+        return abi.encodePacked(encodeEM(mode), encodePromise(PromiseArgsVariant.Callback), encode(nearPromise));
     }
 
     /// Decode promise result using borsh.
-    function decodePromiseResult(
-        Borsh.Data memory data
-    ) public pure returns (PromiseResult memory result) {
+    function decodePromiseResult(Borsh.Data memory data) public pure returns (PromiseResult memory result) {
         result.status = PromiseResultStatus(data.decodeU8());
         if (result.status == PromiseResultStatus.Successful) {
             result.output = data.decodeBytes();
@@ -112,9 +84,7 @@ library Codec {
 
     /// Skip promise result from the buffer.
     function skipPromiseResult(Borsh.Data memory data) public pure {
-        PromiseResultStatus status = PromiseResultStatus(
-            uint8(data.decodeU8())
-        );
+        PromiseResultStatus status = PromiseResultStatus(uint8(data.decodeU8()));
         if (status == PromiseResultStatus.Successful) {
             data.skipBytes();
         }

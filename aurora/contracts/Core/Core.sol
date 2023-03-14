@@ -50,15 +50,11 @@ contract Core is OwnableUpgradeable, CoreState, UUPSUpgradeable {
         withdrawTimeout = withdrawTimeout_;
     }
 
-    function setEpochDelayForReward(
-        uint epochDelayForReward_
-    ) external onlyOwner {
+    function setEpochDelayForReward(uint epochDelayForReward_) external onlyOwner {
         epochDelayForReward = epochDelayForReward_;
     }
 
-    function setMinAmountOfEpochsForReward(
-        uint minAmountOfEpochsForReward_
-    ) external onlyOwner {
+    function setMinAmountOfEpochsForReward(uint minAmountOfEpochsForReward_) external onlyOwner {
         minAmountOfEpochsForReward = minAmountOfEpochsForReward_;
     }
 
@@ -66,9 +62,7 @@ contract Core is OwnableUpgradeable, CoreState, UUPSUpgradeable {
         slashFactor = slashFactor_;
     }
 
-    function setUpdateSettingsTimeout(
-        uint updateSettingsTimeout_
-    ) external onlyOwner {
+    function setUpdateSettingsTimeout(uint updateSettingsTimeout_) external onlyOwner {
         updateSettingsTimeout = updateSettingsTimeout_;
     }
 

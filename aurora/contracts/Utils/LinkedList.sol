@@ -75,20 +75,12 @@ library LinkedList {
         }
     }
 
-    function exist(Bytes32List storage self, bytes32 key)
-        internal
-        view
-        returns (bool)
-    {
+    function exist(Bytes32List storage self, bytes32 key) internal view returns (bool) {
         Element storage element = self._elements[key];
         return element.prev != NULL || element.next == NULL;
     }
 
-    function next(Bytes32List storage self, bytes32 key)
-        internal
-        view
-        returns (bytes32, bool isOk)
-    {
+    function next(Bytes32List storage self, bytes32 key) internal view returns (bytes32, bool isOk) {
         bytes32 nextElement = self._elements[key].next;
         if (nextElement == NULL) {
             return (NULL, false);
@@ -97,11 +89,7 @@ library LinkedList {
         return (nextElement, true);
     }
 
-    function prev(Bytes32List storage self, bytes32 key)
-        internal
-        view
-        returns (bytes32, bool isOk)
-    {
+    function prev(Bytes32List storage self, bytes32 key) internal view returns (bytes32, bool isOk) {
         bytes32 prevElement = self._elements[key].prev;
         if (prevElement == NULL) {
             return (NULL, false);

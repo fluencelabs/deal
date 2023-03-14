@@ -1,87 +1,60 @@
-import { BigNumber } from "ethers";
+import type { BigNumber } from "ethers";
 import { deployments, ethers } from "hardhat";
-import {
-  Core,
-  Deal,
-  DealFactory,
-  DeveloperFaucet,
-  IERC20,
-} from "../typechain-types";
+import type { Core, Deal, DealFactory, DeveloperFaucet, IERC20 } from "../typechain-types";
 
 const setupTestEnv = async (
-  account: string,
-  pricePerEpoch: BigNumber,
-  requiredStake: BigNumber,
-  minWorkers: BigNumber,
-  maxWorkers: BigNumber,
-  targetWorkers: BigNumber
+    account: string,
+    pricePerEpoch: BigNumber,
+    requiredStake: BigNumber,
+    minWorkers: BigNumber,
+    maxWorkers: BigNumber,
+    targetWorkers: BigNumber,
 ) =>
-  deployments.createFixture(async ({ deployments, ethers }) => {
-    await deployments.fixture();
+    deployments.createFixture(async ({ deployments, ethers }) => {
+        console.log("pricePerEpoch", pricePerEpoch);
+        console.log("requiredStake", requiredStake);
+        console.log("maxWorkers", maxWorkers);
 
-    const faucet = (await ethers.getContractAt(
-      "DeveloperFaucet",
-      (
-        await deployments.get("DeveloperFaucet")
-      ).address
-    )) as DeveloperFaucet;
+        await deployments.fixture();
 
-    faucet.receiveUSD(account, ethers.utils.parseEther("1000000"));
-    faucet.receiveFLT(account, ethers.utils.parseEther("1000000"));
+        const faucet = (await ethers.getContractAt(
+            "DeveloperFaucet",
+            (
+                await deployments.get("DeveloperFaucet")
+            ).address,
+        )) as DeveloperFaucet;
 
-    const factory = (await ethers.getContractAt(
-      "DealFactory",
-      (
-        await deployments.get("DealFactory")
-      ).address
-    )) as DealFactory;
+        faucet.receiveUSD(account, ethers.utils.parseEther("1000000"));
+        faucet.receiveFLT(account, ethers.utils.parseEther("1000000"));
 
-    const tx = await factory.createDeal(
-      minWorkers,
-      targetWorkers,
-      ethers.utils.keccak256(ethers.utils.toUtf8Bytes("testApp"))
-    );
+        const factory = (await ethers.getContractAt("DealFactory", (await deployments.get("DealFactory")).address)) as DealFactory;
 
-    const eventTopic = factory.interface.getEventTopic("DealCreated");
-    const log = (await tx.wait()).logs.find(
-      ({ topics }: any) => topics[0] === eventTopic
-    );
+        const tx = await factory.createDeal(minWorkers, targetWorkers, ethers.utils.keccak256(ethers.utils.toUtf8Bytes("testApp")));
 
-    const dealAddress: string = factory.interface.parseLog(log!).args["deal"];
+        const eventTopic = factory.interface.getEventTopic("DealCreated");
+        const log = (await tx.wait()).logs.find(({ topics }: any) => topics[0] === eventTopic);
 
-    const deal: Deal = (await ethers.getContractAt(
-      "Deal",
-      dealAddress
-    )) as Deal;
+        const dealAddress: string = factory.interface.parseLog(log!).args["deal"];
 
-    const usdToken = (await ethers.getContractAt(
-      "IERC20",
-      await faucet.usdToken()
-    )) as IERC20;
+        const deal: Deal = (await ethers.getContractAt("Deal", dealAddress)) as Deal;
 
-    const fltToken = (await ethers.getContractAt(
-      "IERC20",
-      await faucet.fluenceToken()
-    )) as IERC20;
+        const usdToken = (await ethers.getContractAt("IERC20", await faucet.usdToken())) as IERC20;
 
-    const core = (await ethers.getContractAt(
-      "Core",
-      (
-        await deployments.get("Core")
-      ).address
-    )) as Core;
+        const fltToken = (await ethers.getContractAt("IERC20", await faucet.fluenceToken())) as IERC20;
 
-    return {
-      deal: deal,
-      usdToken: usdToken,
-      fltToken: fltToken,
-      core: core,
-    };
-  })();
+        const core = (await ethers.getContractAt("Core", (await deployments.get("Core")).address)) as Core;
+
+        return {
+            deal: deal,
+            usdToken: usdToken,
+            fltToken: fltToken,
+            core: core,
+        };
+    })();
 
 const setTimeNextTime = async (time: number) => {
-  await ethers.provider.send("evm_setNextBlockTimestamp", [time]);
-  await ethers.provider.send("evm_mine", []);
+    await ethers.provider.send("evm_setNextBlockTimestamp", [time]);
+    await ethers.provider.send("evm_mine", []);
 };
 
 export { setupTestEnv, setTimeNextTime };

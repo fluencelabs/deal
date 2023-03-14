@@ -7,11 +7,7 @@ import "../../internal/interfaces/IStatusControllerInternal.sol";
 import "../../internal/interfaces/IPaymentInternal.sol";
 import "../../../Utils/Consts.sol";
 
-abstract contract PaymentByEpochInternal is
-    IDealConfigInternal,
-    IStatusControllerInternal,
-    IPaymentInternal
-{
+abstract contract PaymentByEpochInternal is IDealConfigInternal, IStatusControllerInternal, IPaymentInternal {
     using SafeERC20 for IERC20;
 
     uint256 private _balance;
@@ -26,14 +22,8 @@ abstract contract PaymentByEpochInternal is
         _balance += amount;
     }
 
-    function _withdrawFromPaymentBalance(IERC20 token, uint256 amount)
-        internal
-        override
-    {
-        require(
-            _getPaymentBalance() >= amount,
-            "PaymentByEpochInternal: Not enough balance"
-        );
+    function _withdrawFromPaymentBalance(IERC20 token, uint256 amount) internal override {
+        require(_getPaymentBalance() >= amount, "PaymentByEpochInternal: Not enough balance");
         _balance -= amount;
         token.safeTransfer(msg.sender, amount);
     }

@@ -6,23 +6,14 @@ import "./interfaces/IStatusControllerInternal.sol";
 import "./interfaces/IPaymentInternal.sol";
 import "./interfaces/IDealConfigInternal.sol";
 
-abstract contract StatusControllerInternal is
-    IDealConfigInternal,
-    IStatusControllerInternal,
-    IPaymentInternal
-{
+abstract contract StatusControllerInternal is IDealConfigInternal, IStatusControllerInternal, IPaymentInternal {
     event StatusChanged(IStatusControllerInternal.Status newStatus);
 
     IStatusControllerInternal.Status private _status_;
 
     uint256 private _startWorkingEpoch_;
 
-    function _status()
-        internal
-        view
-        override
-        returns (IStatusControllerInternal.Status)
-    {
+    function _status() internal view override returns (IStatusControllerInternal.Status) {
         return _status_;
     }
 
@@ -30,25 +21,16 @@ abstract contract StatusControllerInternal is
         return _startWorkingEpoch_;
     }
 
-    function _changeStatus(IStatusControllerInternal.Status status_)
-        internal
-        override
-    {
+    function _changeStatus(IStatusControllerInternal.Status status_) internal override {
         IStatusControllerInternal.Status oldStatus = _status_;
 
         if (oldStatus == status_) {
             return;
         }
 
-        if (
-            oldStatus != status_ &&
-            status_ == IStatusControllerInternal.Status.Working
-        ) {
+        if (oldStatus != status_ && status_ == IStatusControllerInternal.Status.Working) {
             _onStartWorking();
-        } else if (
-            oldStatus != status_ &&
-            status_ == IStatusControllerInternal.Status.WaitingForWorkers
-        ) {
+        } else if (oldStatus != status_ && status_ == IStatusControllerInternal.Status.WaitingForWorkers) {
             _onEndWorking();
         }
 

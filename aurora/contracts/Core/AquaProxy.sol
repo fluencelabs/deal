@@ -37,8 +37,7 @@ contract AquaProxy {
 
         near = AuroraSdk.initNear(wNEAR);
 
-        selfReprsentativeImplicitAddress = AuroraSdk
-            .nearRepresentitiveImplicitAddress(address(this));
+        selfReprsentativeImplicitAddress = AuroraSdk.nearRepresentitiveImplicitAddress(address(this));
     }
 
     function verifyParticle(Particle calldata particle) public {

@@ -16,11 +16,7 @@ abstract contract IDealConfigInternal {
 
     function _appCID() internal view virtual returns (string memory);
 
-    function _effectorWasmsCids()
-        internal
-        view
-        virtual
-        returns (string[] memory);
+    function _effectorWasmsCids() internal view virtual returns (string[] memory);
 
     function _minWorkers() internal view virtual returns (uint256);
 

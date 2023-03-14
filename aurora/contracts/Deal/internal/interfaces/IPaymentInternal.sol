@@ -11,9 +11,7 @@ abstract contract IPaymentInternal {
 
     function _depositToPaymentBalance(uint256 amount) internal virtual;
 
-    function _withdrawFromPaymentBalance(IERC20 token, uint256 amount)
-        internal
-        virtual;
+    function _withdrawFromPaymentBalance(IERC20 token, uint256 amount) internal virtual;
 
     function _spendReward() internal virtual;
 

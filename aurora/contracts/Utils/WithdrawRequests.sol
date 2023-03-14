@@ -13,11 +13,7 @@ library WithdrawRequests {
         uint224 _cumulative;
     }
 
-    function getAt(Requests storage self, uint256 index)
-        internal
-        view
-        returns (uint256 timestamp, uint256 amount)
-    {
+    function getAt(Requests storage self, uint256 index) internal view returns (uint256 timestamp, uint256 amount) {
         uint256 realLength = self._requests.length;
         uint256 realIndex = index + self._indexOffset;
 
@@ -40,11 +36,7 @@ library WithdrawRequests {
         return self._requests.length - self._indexOffset;
     }
 
-    function getAmountBy(Requests storage self, uint256 timestamp)
-        internal
-        view
-        returns (uint256)
-    {
+    function getAmountBy(Requests storage self, uint256 timestamp) internal view returns (uint256) {
         (, uint256 amount) = _getIndexAndAmountBy(self, timestamp);
         return amount;
     }
@@ -66,9 +58,7 @@ library WithdrawRequests {
                 last._cumulative += uint224Amount;
                 return;
             } else {
-                self._requests.push(
-                    Request(timestamp, last._cumulative + uint224Amount)
-                );
+                self._requests.push(Request(timestamp, last._cumulative + uint224Amount));
             }
         } else {
             self._requests.push(Request(timestamp, uint224Amount));
@@ -97,20 +87,13 @@ library WithdrawRequests {
         }
     }
 
-    function confirmBy(Requests storage self, uint256 timestamp)
-        internal
-        returns (uint256)
-    {
+    function confirmBy(Requests storage self, uint256 timestamp) internal returns (uint256) {
         (uint256 index, uint256 amount) = _getIndexAndAmountBy(self, timestamp);
         self._indexOffset = index + 1;
         return amount;
     }
 
-    function _getIndexAndAmountBy(Requests storage self, uint256 timestamp)
-        private
-        view
-        returns (uint256, uint256)
-    {
+    function _getIndexAndAmountBy(Requests storage self, uint256 timestamp) private view returns (uint256, uint256) {
         uint256 realLength = self._requests.length;
         uint256 indexOffset = self._indexOffset;
 
@@ -118,12 +101,7 @@ library WithdrawRequests {
 
         require(currentLength != 0, "Requests is empty");
 
-        (uint256 index, Request storage request) = _getIndexBy(
-            self,
-            indexOffset,
-            realLength - 1,
-            timestamp
-        );
+        (uint256 index, Request storage request) = _getIndexBy(self, indexOffset, realLength - 1, timestamp);
         uint256 amount = request._cumulative;
         if (indexOffset != 0) {
             amount -= self._requests[indexOffset - 1]._cumulative;

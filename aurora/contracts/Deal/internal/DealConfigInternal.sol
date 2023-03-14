@@ -65,12 +65,7 @@ abstract contract DealConfigInternal is IDealConfigInternal {
         return _appCID_;
     }
 
-    function _effectorWasmsCids()
-        internal
-        view
-        override
-        returns (string[] memory)
-    {
+    function _effectorWasmsCids() internal view override returns (string[] memory) {
         return _effectorWasmsCids_;
     }
 
