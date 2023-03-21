@@ -2,14 +2,15 @@ pragma solidity ^0.8.17;
 
 import "./external/DealConfig.sol";
 import "./external/PaymentByEpoch.sol";
-import "./external/WorkersManager.sol";
 import "./external/WithdrawManager.sol";
+import "./external/WorkersManager.sol";
 
 import "./internal/DealConfigInternal.sol";
-import "./internal/WorkersManagerInternal.sol";
-import "./internal/WithdrawManagerInternal.sol";
-import "./internal/PaymentManagers/PaymentByEpochInternal.sol";
+import "./internal/ParticleInternal.sol";
+import "./internal/PaymentInternal.sol";
 import "./internal/StatusControllerInternal.sol";
+import "./internal/WithdrawManagerInternal.sol";
+import "./internal/WorkersManagerInternal.sol";
 
 contract Deal is
     DealConfig,
@@ -17,10 +18,11 @@ contract Deal is
     WorkersManager,
     WithdrawManager,
     DealConfigInternal,
+    ParticleInternal,
+    PaymentInternal,
     StatusControllerInternal,
-    PaymentByEpochInternal,
-    WorkersManagerInternal,
-    WithdrawManagerInternal
+    WithdrawManagerInternal,
+    WorkersManagerInternal
 {
     constructor(
         Core core_,

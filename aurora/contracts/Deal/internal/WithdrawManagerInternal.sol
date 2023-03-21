@@ -6,7 +6,7 @@ import "./interfaces/IWithdrawManagerInternal.sol";
 import "./interfaces/IDealConfigInternal.sol";
 import "../../Utils/WithdrawRequests.sol";
 
-abstract contract WithdrawManagerInternal is IDealConfigInternal, IWithdrawManagerInternal {
+abstract contract WithdrawManagerInternal is IDealConfigInternal, IWithdrawManagerInternal, IWithdrawManagerMutableInternal {
     using WithdrawRequests for WithdrawRequests.Requests;
     using SafeERC20 for IERC20;
 

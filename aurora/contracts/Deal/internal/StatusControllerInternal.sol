@@ -5,15 +5,21 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IStatusControllerInternal.sol";
 import "./interfaces/IPaymentInternal.sol";
 import "./interfaces/IDealConfigInternal.sol";
+import { DealStatus } from "./Types.sol";
 
-abstract contract StatusControllerInternal is IDealConfigInternal, IStatusControllerInternal, IPaymentInternal {
-    event StatusChanged(IStatusControllerInternal.Status newStatus);
+abstract contract StatusControllerInternal is
+    IDealConfigInternal,
+    IStatusControllerInternal,
+    IStatusControllerMutableInternal,
+    IPaymentInternal
+{
+    event StatusChanged(DealStatus newStatus);
 
-    IStatusControllerInternal.Status private _status_;
+    DealStatus private _status_;
 
     uint256 private _startWorkingEpoch_;
 
-    function _status() internal view override returns (IStatusControllerInternal.Status) {
+    function _status() internal view override returns (DealStatus) {
         return _status_;
     }
 
@@ -21,16 +27,16 @@ abstract contract StatusControllerInternal is IDealConfigInternal, IStatusContro
         return _startWorkingEpoch_;
     }
 
-    function _changeStatus(IStatusControllerInternal.Status status_) internal override {
-        IStatusControllerInternal.Status oldStatus = _status_;
+    function _changeStatus(DealStatus status_) internal override {
+        DealStatus oldStatus = _status_;
 
         if (oldStatus == status_) {
             return;
         }
 
-        if (oldStatus != status_ && status_ == IStatusControllerInternal.Status.Working) {
+        if (oldStatus != status_ && status_ == DealStatus.Working) {
             _onStartWorking();
-        } else if (oldStatus != status_ && status_ == IStatusControllerInternal.Status.WaitingForWorkers) {
+        } else if (oldStatus != status_ && status_ == DealStatus.WaitingForWorkers) {
             _onEndWorking();
         }
 
@@ -43,7 +49,7 @@ abstract contract StatusControllerInternal is IDealConfigInternal, IStatusContro
     }
 
     function _onEndWorking() private {
-        _spendReward();
+        // spend reward? _spendReward();
         //TODO: transfer reward to workers
         _startWorkingEpoch_ = 0;
     }

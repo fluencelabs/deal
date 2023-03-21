@@ -2,16 +2,15 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "../../internal/interfaces/IDealConfigInternal.sol";
-import "../../../Utils/Consts.sol";
+import "../internal/interfaces/IDealConfigInternal.sol";
+import "../internal/interfaces/IParticleInternal.sol";
+import "../../Utils/Consts.sol";
 
-/*
-abstract contract PaymentWithGoldenInternal is IDealConfigInternal, Ownable {
+abstract contract PaymentInternal is IDealConfigInternal, IParticleInternal {
     using SafeERC20 for IERC20;
 
     uint256 public constant PAYMENT_DURATION_IN_EPOCHS = 3;
 
-    mapping(uint256 => bool) private _isExistGoldenParticleByEpoch;
     mapping(IERC20 => uint256) private _balance;
 
     function _getPaymentBalance() internal view returns (uint256) {
@@ -24,10 +23,8 @@ abstract contract PaymentWithGoldenInternal is IDealConfigInternal, Ownable {
         _balance[_paymentToken()] += amount;
     }
 
-    function _withdrawFromPaymentBalance(IERC20 token, uint256 amount)
-        internal
-    {
-        uint256 currentEpoch = _core().epochManager().getEpoch();
+    function _withdrawFromPaymentBalance(IERC20 token, uint256 amount) internal {
+        uint256 currentEpoch = _core().epochManager().currentEpoch();
         uint256 goldenParticleCount = 0;
 
         IERC20 paymentToken = _paymentToken();
@@ -36,20 +33,16 @@ abstract contract PaymentWithGoldenInternal is IDealConfigInternal, Ownable {
             return;
         }
 
-        for (
-            uint256 i = currentEpoch;
-            i < currentEpoch + PAYMENT_DURATION_IN_EPOCHS;
-            i++
-        ) {
-            if (!_isExistGoldenParticleByEpoch[i]) {
+        //TODO: отрезки
+        for (uint256 i = currentEpoch; i < currentEpoch + PAYMENT_DURATION_IN_EPOCHS; i++) {
+            if (!_existsGoldenParticlesInEpoch(i)) {
                 continue;
             }
 
             goldenParticleCount++;
         }
 
-        uint256 free = _balance[_paymentToken()] -
-            (_pricePerEpoch() * goldenParticleCount * 2);
+        uint256 free = _balance[_paymentToken()] - (_pricePerEpoch() * goldenParticleCount * 2);
 
         //TODO: if it's last amount in balance, golden particle receive sum without work confirmation
 
@@ -59,4 +52,3 @@ abstract contract PaymentWithGoldenInternal is IDealConfigInternal, Ownable {
         token.safeTransfer(msg.sender, amount);
     }
 }
-*/

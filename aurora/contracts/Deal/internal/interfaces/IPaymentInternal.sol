@@ -9,11 +9,13 @@ import "../../../Utils/Consts.sol";
 abstract contract IPaymentInternal {
     function _getPaymentBalance() internal view virtual returns (uint256);
 
+    function _getRewards() internal view virtual returns (uint256);
+}
+
+abstract contract IPaymentMutableInternal {
     function _depositToPaymentBalance(uint256 amount) internal virtual;
 
     function _withdrawFromPaymentBalance(IERC20 token, uint256 amount) internal virtual;
 
     function _spendReward() internal virtual;
-
-    function _getRewards() internal view virtual returns (uint256);
 }

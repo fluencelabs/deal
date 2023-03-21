@@ -7,6 +7,7 @@ import "../internal/interfaces/IDealConfigInternal.sol";
 
 abstract contract DealConfig is IDealConfig, IDealConfigInternal {
     using SafeERC20 for IERC20;
+
     event NewAppCID(string appCID);
 
     function core() external view returns (Core) {

@@ -6,7 +6,7 @@ import "./interfaces/IPaymentManager.sol";
 import "../internal/interfaces/IPaymentInternal.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-abstract contract PaymentByEpoch is IPaymentManager, IPaymentInternal, Ownable {
+abstract contract PaymentByEpoch is IPaymentManager, IPaymentInternal, IPaymentMutableInternal, Ownable {
     using SafeERC20 for IERC20;
 
     uint256 private _balance;

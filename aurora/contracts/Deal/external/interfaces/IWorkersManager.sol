@@ -1,10 +1,9 @@
 pragma solidity ^0.8.17;
 
 import "../../../Core/Core.sol";
+import { PATId } from "../../internal/Types.sol";
 
 interface IWorkersManager {
-    type PATId is bytes32;
-
     event AddProviderToken(address indexed owner, PATId id);
     event RemoveProviderToken(PATId id);
 

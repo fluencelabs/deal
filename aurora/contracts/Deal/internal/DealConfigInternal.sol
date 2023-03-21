@@ -1,10 +1,11 @@
 pragma solidity ^0.8.17;
 
+import "../../Core/Core.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IDealConfigInternal.sol";
 
-abstract contract DealConfigInternal is IDealConfigInternal {
+abstract contract DealConfigInternal is IDealConfigInternal, IDealConfigMutableInternal {
     Core private immutable _coreAddr;
     IERC20 private immutable _fluenceToken_;
     IERC20 private immutable _paymentToken_;

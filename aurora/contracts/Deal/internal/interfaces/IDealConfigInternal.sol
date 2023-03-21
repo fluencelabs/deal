@@ -23,7 +23,9 @@ abstract contract IDealConfigInternal {
     function _maxWorkersPerProvider() internal view virtual returns (uint256);
 
     function _targetWorkers() internal view virtual returns (uint256);
+}
 
+abstract contract IDealConfigMutableInternal {
     function _setPricePerEpoch(uint256 pricePerEpoch_) internal virtual;
 
     function _setRequiredStake(uint256 requiredStake_) internal virtual;
