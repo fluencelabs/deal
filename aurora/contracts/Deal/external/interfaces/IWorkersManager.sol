@@ -9,7 +9,7 @@ interface IWorkersManager {
 
     function getPATOwner(PATId id) external view returns (address);
 
-    function createProviderToken(bytes32 salt) external;
+    function createProviderToken(bytes32 salt, uint index) external;
 
     function removeProviderToken(PATId id) external;
 }

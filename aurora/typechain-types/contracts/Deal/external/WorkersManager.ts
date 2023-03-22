@@ -4,6 +4,7 @@
 import type {
   BaseContract,
   BigNumber,
+  BigNumberish,
   BytesLike,
   CallOverrides,
   ContractTransaction,
@@ -28,7 +29,7 @@ import type {
 
 export interface WorkersManagerInterface extends utils.Interface {
   functions: {
-    "createProviderToken(bytes32)": FunctionFragment;
+    "createProviderToken(bytes32,uint256)": FunctionFragment;
     "getPATOwner(bytes32)": FunctionFragment;
     "removeProviderToken(bytes32)": FunctionFragment;
   };
@@ -42,7 +43,7 @@ export interface WorkersManagerInterface extends utils.Interface {
 
   encodeFunctionData(
     functionFragment: "createProviderToken",
-    values: [PromiseOrValue<BytesLike>]
+    values: [PromiseOrValue<BytesLike>, PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
     functionFragment: "getPATOwner",
@@ -127,6 +128,7 @@ export interface WorkersManager extends BaseContract {
   functions: {
     createProviderToken(
       salt: PromiseOrValue<BytesLike>,
+      index: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -143,6 +145,7 @@ export interface WorkersManager extends BaseContract {
 
   createProviderToken(
     salt: PromiseOrValue<BytesLike>,
+    index: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -159,6 +162,7 @@ export interface WorkersManager extends BaseContract {
   callStatic: {
     createProviderToken(
       salt: PromiseOrValue<BytesLike>,
+      index: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -190,6 +194,7 @@ export interface WorkersManager extends BaseContract {
   estimateGas: {
     createProviderToken(
       salt: PromiseOrValue<BytesLike>,
+      index: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -207,6 +212,7 @@ export interface WorkersManager extends BaseContract {
   populateTransaction: {
     createProviderToken(
       salt: PromiseOrValue<BytesLike>,
+      index: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

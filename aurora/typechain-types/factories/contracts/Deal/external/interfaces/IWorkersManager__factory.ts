@@ -21,7 +21,7 @@ const _abi = [
       },
       {
         indexed: false,
-        internalType: "IWorkersManager.PATId",
+        internalType: "PATId",
         name: "id",
         type: "bytes32",
       },
@@ -34,7 +34,7 @@ const _abi = [
     inputs: [
       {
         indexed: false,
-        internalType: "IWorkersManager.PATId",
+        internalType: "PATId",
         name: "id",
         type: "bytes32",
       },
@@ -49,6 +49,11 @@ const _abi = [
         name: "salt",
         type: "bytes32",
       },
+      {
+        internalType: "uint256",
+        name: "index",
+        type: "uint256",
+      },
     ],
     name: "createProviderToken",
     outputs: [],
@@ -58,7 +63,7 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "IWorkersManager.PATId",
+        internalType: "PATId",
         name: "id",
         type: "bytes32",
       },
@@ -77,7 +82,7 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "IWorkersManager.PATId",
+        internalType: "PATId",
         name: "id",
         type: "bytes32",
       },

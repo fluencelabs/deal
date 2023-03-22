@@ -7,8 +7,6 @@ import { Particle } from "../Types.sol";
 abstract contract IParticleInternal {
     function _hasReward(bytes32 particleHash, bytes32 patId) internal view virtual returns (bool);
 
-    function _wasSlashed(bytes32 particleHash, bytes32 patId) internal view virtual returns (bool);
-
     function _existsGoldenParticlesInEpoch(uint256 epoch) internal view virtual returns (bool);
 }
 

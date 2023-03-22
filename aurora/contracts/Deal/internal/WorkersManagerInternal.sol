@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -35,16 +37,12 @@ abstract contract WorkersManagerInternal is
     uint256 private freeIndexesCount;
     mapping(uint256 => PATId) private _patIdByIndex;
 
-    function _getPAT(PATId id) internal view override returns (PAT storage pat) {
-        bytes32 bytes32Id = PATId.unwrap(id);
+    function _getPATIndex(PATId id) internal view override returns (uint256) {
+        return _getPAT(id).index;
+    }
 
-        bytes32 slot = bytes32(uint256(keccak256(abi.encodePacked(_PREFIX_PAT_SLOT, bytes32Id))) - 1);
-
-        assembly {
-            pat.slot := slot
-        }
-
-        require(pat.owner != address(0x00), "PAT not found");
+    function _getPATOwner(PATId id) internal view override returns (address) {
+        return _getPAT(id).owner;
     }
 
     function _getNextWorkerIndex() internal view override returns (uint256) {
@@ -103,6 +101,18 @@ abstract contract WorkersManagerInternal is
         _currentWorkers = currentWorkers;
         _patIdByIndex[pat.index] = PATId.wrap(bytes32(0));
         _clearPAT(pat);
+    }
+
+    function _getPAT(PATId id) private view returns (PAT storage pat) {
+        bytes32 bytes32Id = PATId.unwrap(id);
+
+        bytes32 slot = bytes32(uint256(keccak256(abi.encodePacked(_PREFIX_PAT_SLOT, bytes32Id))) - 1);
+
+        assembly {
+            pat.slot := slot
+        }
+
+        require(pat.owner != address(0x00), "PAT not found");
     }
 
     function _initPAT(PAT storage pat, address owner, uint index, uint collateral, uint created) private {

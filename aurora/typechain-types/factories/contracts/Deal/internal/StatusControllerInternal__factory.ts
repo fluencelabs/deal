@@ -15,7 +15,7 @@ const _abi = [
     inputs: [
       {
         indexed: false,
-        internalType: "enum IStatusControllerInternal.Status",
+        internalType: "enum DealStatus",
         name: "newStatus",
         type: "uint8",
       },

@@ -4,6 +4,7 @@
 import type {
   BaseContract,
   BigNumber,
+  BigNumberish,
   BytesLike,
   CallOverrides,
   ContractTransaction,
@@ -26,44 +27,64 @@ import type {
   PromiseOrValue,
 } from "../../../common";
 
-export interface DealConfigInterface extends utils.Interface {
+export interface DealInterface extends utils.Interface {
   functions: {
+    "PAYMENT_DURATION_IN_EPOCHS()": FunctionFragment;
     "appCID()": FunctionFragment;
     "core()": FunctionFragment;
+    "createProviderToken(bytes32,uint256)": FunctionFragment;
     "effectorWasmsCids()": FunctionFragment;
     "fluenceToken()": FunctionFragment;
+    "getPATOwner(bytes32)": FunctionFragment;
+    "getUnlockedCollateralBy(address,uint256)": FunctionFragment;
     "maxWorkersPerProvider()": FunctionFragment;
     "minWorkers()": FunctionFragment;
     "owner()": FunctionFragment;
     "paymentToken()": FunctionFragment;
     "pricePerEpoch()": FunctionFragment;
+    "removeProviderToken(bytes32)": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "requiredStake()": FunctionFragment;
     "setAppCID(string)": FunctionFragment;
     "targetWorkers()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
+    "withdraw(address)": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
+      | "PAYMENT_DURATION_IN_EPOCHS"
       | "appCID"
       | "core"
+      | "createProviderToken"
       | "effectorWasmsCids"
       | "fluenceToken"
+      | "getPATOwner"
+      | "getUnlockedCollateralBy"
       | "maxWorkersPerProvider"
       | "minWorkers"
       | "owner"
       | "paymentToken"
       | "pricePerEpoch"
+      | "removeProviderToken"
       | "renounceOwnership"
       | "requiredStake"
       | "setAppCID"
       | "targetWorkers"
       | "transferOwnership"
+      | "withdraw"
   ): FunctionFragment;
 
+  encodeFunctionData(
+    functionFragment: "PAYMENT_DURATION_IN_EPOCHS",
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: "appCID", values?: undefined): string;
   encodeFunctionData(functionFragment: "core", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "createProviderToken",
+    values: [PromiseOrValue<BytesLike>, PromiseOrValue<BigNumberish>]
+  ): string;
   encodeFunctionData(
     functionFragment: "effectorWasmsCids",
     values?: undefined
@@ -71,6 +92,14 @@ export interface DealConfigInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "fluenceToken",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getPATOwner",
+    values: [PromiseOrValue<BytesLike>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getUnlockedCollateralBy",
+    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
     functionFragment: "maxWorkersPerProvider",
@@ -88,6 +117,10 @@ export interface DealConfigInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "pricePerEpoch",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "removeProviderToken",
+    values: [PromiseOrValue<BytesLike>]
   ): string;
   encodeFunctionData(
     functionFragment: "renounceOwnership",
@@ -109,15 +142,35 @@ export interface DealConfigInterface extends utils.Interface {
     functionFragment: "transferOwnership",
     values: [PromiseOrValue<string>]
   ): string;
+  encodeFunctionData(
+    functionFragment: "withdraw",
+    values: [PromiseOrValue<string>]
+  ): string;
 
+  decodeFunctionResult(
+    functionFragment: "PAYMENT_DURATION_IN_EPOCHS",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "appCID", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "core", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "createProviderToken",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "effectorWasmsCids",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "fluenceToken",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getPATOwner",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getUnlockedCollateralBy",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -132,6 +185,10 @@ export interface DealConfigInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "pricePerEpoch",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "removeProviderToken",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -151,15 +208,34 @@ export interface DealConfigInterface extends utils.Interface {
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
 
   events: {
+    "AddProviderToken(address,bytes32)": EventFragment;
     "NewAppCID(string)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
+    "RemoveProviderToken(bytes32)": EventFragment;
+    "StatusChanged(uint8)": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "AddProviderToken"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "NewAppCID"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "RemoveProviderToken"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "StatusChanged"): EventFragment;
 }
+
+export interface AddProviderTokenEventObject {
+  owner: string;
+  id: string;
+}
+export type AddProviderTokenEvent = TypedEvent<
+  [string, string],
+  AddProviderTokenEventObject
+>;
+
+export type AddProviderTokenEventFilter =
+  TypedEventFilter<AddProviderTokenEvent>;
 
 export interface NewAppCIDEventObject {
   appCID: string;
@@ -180,12 +256,30 @@ export type OwnershipTransferredEvent = TypedEvent<
 export type OwnershipTransferredEventFilter =
   TypedEventFilter<OwnershipTransferredEvent>;
 
-export interface DealConfig extends BaseContract {
+export interface RemoveProviderTokenEventObject {
+  id: string;
+}
+export type RemoveProviderTokenEvent = TypedEvent<
+  [string],
+  RemoveProviderTokenEventObject
+>;
+
+export type RemoveProviderTokenEventFilter =
+  TypedEventFilter<RemoveProviderTokenEvent>;
+
+export interface StatusChangedEventObject {
+  newStatus: number;
+}
+export type StatusChangedEvent = TypedEvent<[number], StatusChangedEventObject>;
+
+export type StatusChangedEventFilter = TypedEventFilter<StatusChangedEvent>;
+
+export interface Deal extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: DealConfigInterface;
+  interface: DealInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -207,13 +301,32 @@ export interface DealConfig extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
+    PAYMENT_DURATION_IN_EPOCHS(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     appCID(overrides?: CallOverrides): Promise<[string]>;
 
     core(overrides?: CallOverrides): Promise<[string]>;
 
+    createProviderToken(
+      salt: PromiseOrValue<BytesLike>,
+      index: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     effectorWasmsCids(overrides?: CallOverrides): Promise<[string[]]>;
 
     fluenceToken(overrides?: CallOverrides): Promise<[string]>;
+
+    getPATOwner(
+      id: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
+    getUnlockedCollateralBy(
+      owner: PromiseOrValue<string>,
+      timestamp: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
 
     maxWorkersPerProvider(overrides?: CallOverrides): Promise<[BigNumber]>;
 
@@ -224,6 +337,11 @@ export interface DealConfig extends BaseContract {
     paymentToken(overrides?: CallOverrides): Promise<[string]>;
 
     pricePerEpoch(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    removeProviderToken(
+      id: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -242,15 +360,39 @@ export interface DealConfig extends BaseContract {
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
+
+    withdraw(
+      token: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
   };
+
+  PAYMENT_DURATION_IN_EPOCHS(overrides?: CallOverrides): Promise<BigNumber>;
 
   appCID(overrides?: CallOverrides): Promise<string>;
 
   core(overrides?: CallOverrides): Promise<string>;
 
+  createProviderToken(
+    salt: PromiseOrValue<BytesLike>,
+    index: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   effectorWasmsCids(overrides?: CallOverrides): Promise<string[]>;
 
   fluenceToken(overrides?: CallOverrides): Promise<string>;
+
+  getPATOwner(
+    id: PromiseOrValue<BytesLike>,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  getUnlockedCollateralBy(
+    owner: PromiseOrValue<string>,
+    timestamp: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
 
   maxWorkersPerProvider(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -261,6 +403,11 @@ export interface DealConfig extends BaseContract {
   paymentToken(overrides?: CallOverrides): Promise<string>;
 
   pricePerEpoch(overrides?: CallOverrides): Promise<BigNumber>;
+
+  removeProviderToken(
+    id: PromiseOrValue<BytesLike>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
 
   renounceOwnership(
     overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -280,14 +427,38 @@ export interface DealConfig extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  withdraw(
+    token: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   callStatic: {
+    PAYMENT_DURATION_IN_EPOCHS(overrides?: CallOverrides): Promise<BigNumber>;
+
     appCID(overrides?: CallOverrides): Promise<string>;
 
     core(overrides?: CallOverrides): Promise<string>;
 
+    createProviderToken(
+      salt: PromiseOrValue<BytesLike>,
+      index: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     effectorWasmsCids(overrides?: CallOverrides): Promise<string[]>;
 
     fluenceToken(overrides?: CallOverrides): Promise<string>;
+
+    getPATOwner(
+      id: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    getUnlockedCollateralBy(
+      owner: PromiseOrValue<string>,
+      timestamp: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     maxWorkersPerProvider(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -298,6 +469,11 @@ export interface DealConfig extends BaseContract {
     paymentToken(overrides?: CallOverrides): Promise<string>;
 
     pricePerEpoch(overrides?: CallOverrides): Promise<BigNumber>;
+
+    removeProviderToken(
+      id: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
@@ -314,9 +490,23 @@ export interface DealConfig extends BaseContract {
       newOwner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    withdraw(
+      token: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
   };
 
   filters: {
+    "AddProviderToken(address,bytes32)"(
+      owner?: PromiseOrValue<string> | null,
+      id?: null
+    ): AddProviderTokenEventFilter;
+    AddProviderToken(
+      owner?: PromiseOrValue<string> | null,
+      id?: null
+    ): AddProviderTokenEventFilter;
+
     "NewAppCID(string)"(appCID?: null): NewAppCIDEventFilter;
     NewAppCID(appCID?: null): NewAppCIDEventFilter;
 
@@ -328,16 +518,41 @@ export interface DealConfig extends BaseContract {
       previousOwner?: PromiseOrValue<string> | null,
       newOwner?: PromiseOrValue<string> | null
     ): OwnershipTransferredEventFilter;
+
+    "RemoveProviderToken(bytes32)"(id?: null): RemoveProviderTokenEventFilter;
+    RemoveProviderToken(id?: null): RemoveProviderTokenEventFilter;
+
+    "StatusChanged(uint8)"(newStatus?: null): StatusChangedEventFilter;
+    StatusChanged(newStatus?: null): StatusChangedEventFilter;
   };
 
   estimateGas: {
+    PAYMENT_DURATION_IN_EPOCHS(overrides?: CallOverrides): Promise<BigNumber>;
+
     appCID(overrides?: CallOverrides): Promise<BigNumber>;
 
     core(overrides?: CallOverrides): Promise<BigNumber>;
 
+    createProviderToken(
+      salt: PromiseOrValue<BytesLike>,
+      index: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     effectorWasmsCids(overrides?: CallOverrides): Promise<BigNumber>;
 
     fluenceToken(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getPATOwner(
+      id: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getUnlockedCollateralBy(
+      owner: PromiseOrValue<string>,
+      timestamp: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     maxWorkersPerProvider(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -348,6 +563,11 @@ export interface DealConfig extends BaseContract {
     paymentToken(overrides?: CallOverrides): Promise<BigNumber>;
 
     pricePerEpoch(overrides?: CallOverrides): Promise<BigNumber>;
+
+    removeProviderToken(
+      id: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -366,16 +586,42 @@ export interface DealConfig extends BaseContract {
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
+
+    withdraw(
+      token: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
+    PAYMENT_DURATION_IN_EPOCHS(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     appCID(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     core(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    createProviderToken(
+      salt: PromiseOrValue<BytesLike>,
+      index: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     effectorWasmsCids(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     fluenceToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getPATOwner(
+      id: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getUnlockedCollateralBy(
+      owner: PromiseOrValue<string>,
+      timestamp: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     maxWorkersPerProvider(
       overrides?: CallOverrides
@@ -388,6 +634,11 @@ export interface DealConfig extends BaseContract {
     paymentToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     pricePerEpoch(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    removeProviderToken(
+      id: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -404,6 +655,11 @@ export interface DealConfig extends BaseContract {
 
     transferOwnership(
       newOwner: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    withdraw(
+      token: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
   };

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 pragma solidity ^0.8.17;
 
 import "./interfaces/IParticleInternal.sol";
@@ -8,7 +10,7 @@ import { PATId, PAT, Particle } from "./Types.sol";
 
 uint constant WORKER_CONFIRMATIONS = 3; //TODO: move to config
 
-abstract contract ParticleInternal is IParticleInternal, IParticleMutableInternal, IDealConfigInternal, IWorkersManagerInternal {
+abstract contract ParticleInternal is IDealConfigInternal, IWorkersManagerInternal, IParticleInternal, IParticleMutableInternal {
     struct ParticleInfo {
         bool isValid;
         uint256 epoch;
@@ -40,8 +42,7 @@ abstract contract ParticleInternal is IParticleInternal, IParticleMutableInterna
         uint256[] memory workInfo = new uint256[](lastIndex >> 8);
 
         for (uint i = 0; i < patIds.length; i++) {
-            PAT storage pat = _getPAT(patIds[i]);
-            uint index = pat.index;
+            uint index = _getPATIndex(patIds[i]);
             uint256 bucket = index >> 8;
             uint256 mask = 1 << (index & 0xff);
             workInfo[bucket] |= mask;
@@ -56,12 +57,11 @@ abstract contract ParticleInternal is IParticleInternal, IParticleMutableInterna
         ParticleInfo storage particle = _particles[particleHash];
         require(particle.isValid, "Particle not valid");
 
-        PAT storage pat = _getPAT(PATId.wrap(patId));
         uint epoch = particle.epoch;
 
         uint confirmedEpoch = epoch + WORKER_CONFIRMATIONS;
         for (uint i = epoch; i < confirmedEpoch; i++) {
-            uint index = pat.index;
+            uint index = _getPATIndex(PATId.wrap(patId));
             uint256 bucket = index >> 8;
             uint256 mask = 1 << (index & 0xff);
             if (_workersByEpoch[epoch][bucket] & mask == 0) {

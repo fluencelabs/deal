@@ -4,8 +4,9 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IDealConfig.sol";
 import "../internal/interfaces/IDealConfigInternal.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-abstract contract DealConfig is IDealConfig, IDealConfigInternal {
+abstract contract DealConfig is IDealConfig, IDealConfigInternal, IDealConfigMutableInternal, Ownable {
     using SafeERC20 for IERC20;
 
     event NewAppCID(string appCID);

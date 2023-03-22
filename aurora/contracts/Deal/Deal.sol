@@ -1,7 +1,8 @@
+// SPDX-License-Identifier: Apache-2.0
+
 pragma solidity ^0.8.17;
 
 import "./external/DealConfig.sol";
-import "./external/PaymentByEpoch.sol";
 import "./external/WithdrawManager.sol";
 import "./external/WorkersManager.sol";
 
@@ -12,16 +13,20 @@ import "./internal/StatusControllerInternal.sol";
 import "./internal/WithdrawManagerInternal.sol";
 import "./internal/WorkersManagerInternal.sol";
 
-contract Deal is
-    DealConfig,
-    PaymentByEpoch,
-    WorkersManager,
-    WithdrawManager,
-    DealConfigInternal,
-    ParticleInternal,
+/*
     PaymentInternal,
+    ParticleInternal,
     StatusControllerInternal,
     WithdrawManagerInternal,
+    WorkersManagerInternal
+    */
+
+contract DealInternal is
+    DealConfigInternal,
+    StatusControllerInternal,
+    WithdrawManagerInternal,
+    ParticleInternal,
+    PaymentInternal,
     WorkersManagerInternal
 {
     constructor(
@@ -38,6 +43,34 @@ contract Deal is
         DealConfigInternal(
             core_,
             address(core_.fluenceToken()),
+            paymentToken_,
+            pricePerEpoch_,
+            requiredStake_,
+            minWorkers_,
+            maxWorkers_,
+            targetWorkers_,
+            appCID_,
+            effectorWasmsCids_
+        )
+    {}
+}
+
+abstract contract DealPublic is DealConfig, WithdrawManager, WorkersManager {}
+
+contract Deal is DealInternal, DealPublic {
+    constructor(
+        Core core_,
+        address paymentToken_,
+        uint256 pricePerEpoch_,
+        uint256 requiredStake_,
+        uint256 minWorkers_,
+        uint256 maxWorkers_,
+        uint256 targetWorkers_,
+        string memory appCID_,
+        string[] memory effectorWasmsCids_
+    )
+        DealInternal(
+            core_,
             paymentToken_,
             pricePerEpoch_,
             requiredStake_,

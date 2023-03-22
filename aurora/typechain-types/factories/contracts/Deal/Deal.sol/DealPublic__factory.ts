@@ -5,11 +5,30 @@
 import { Contract, Signer, utils } from "ethers";
 import type { Provider } from "@ethersproject/providers";
 import type {
-  DealConfig,
-  DealConfigInterface,
-} from "../../../../contracts/Deal/external/DealConfig";
+  DealPublic,
+  DealPublicInterface,
+} from "../../../../contracts/Deal/Deal.sol/DealPublic";
 
 const _abi = [
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "PATId",
+        name: "id",
+        type: "bytes32",
+      },
+    ],
+    name: "AddProviderToken",
+    type: "event",
+  },
   {
     anonymous: false,
     inputs: [
@@ -43,6 +62,19 @@ const _abi = [
     type: "event",
   },
   {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "PATId",
+        name: "id",
+        type: "bytes32",
+      },
+    ],
+    name: "RemoveProviderToken",
+    type: "event",
+  },
+  {
     inputs: [],
     name: "appCID",
     outputs: [
@@ -69,6 +101,24 @@ const _abi = [
     type: "function",
   },
   {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "salt",
+        type: "bytes32",
+      },
+      {
+        internalType: "uint256",
+        name: "index",
+        type: "uint256",
+      },
+    ],
+    name: "createProviderToken",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
     inputs: [],
     name: "effectorWasmsCids",
     outputs: [
@@ -89,6 +139,49 @@ const _abi = [
         internalType: "contract IERC20",
         name: "",
         type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "PATId",
+        name: "id",
+        type: "bytes32",
+      },
+    ],
+    name: "getPATOwner",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "timestamp",
+        type: "uint256",
+      },
+    ],
+    name: "getUnlockedCollateralBy",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
       },
     ],
     stateMutability: "view",
@@ -160,6 +253,19 @@ const _abi = [
     type: "function",
   },
   {
+    inputs: [
+      {
+        internalType: "PATId",
+        name: "id",
+        type: "bytes32",
+      },
+    ],
+    name: "removeProviderToken",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
     inputs: [],
     name: "renounceOwnership",
     outputs: [],
@@ -218,17 +324,30 @@ const _abi = [
     stateMutability: "nonpayable",
     type: "function",
   },
+  {
+    inputs: [
+      {
+        internalType: "contract IERC20",
+        name: "token",
+        type: "address",
+      },
+    ],
+    name: "withdraw",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
 ] as const;
 
-export class DealConfig__factory {
+export class DealPublic__factory {
   static readonly abi = _abi;
-  static createInterface(): DealConfigInterface {
-    return new utils.Interface(_abi) as DealConfigInterface;
+  static createInterface(): DealPublicInterface {
+    return new utils.Interface(_abi) as DealPublicInterface;
   }
   static connect(
     address: string,
     signerOrProvider: Signer | Provider
-  ): DealConfig {
-    return new Contract(address, _abi, signerOrProvider) as DealConfig;
+  ): DealPublic {
+    return new Contract(address, _abi, signerOrProvider) as DealPublic;
   }
 }

@@ -6,7 +6,7 @@ import "./interfaces/IWithdrawManager.sol";
 import "../internal/interfaces/IWithdrawManagerInternal.sol";
 import "../internal/interfaces/IDealConfigInternal.sol";
 
-abstract contract WithdrawManager is IWithdrawManager, IDealConfigInternal, IWithdrawManagerInternal {
+abstract contract WithdrawManager is IWithdrawManager, IDealConfigInternal, IWithdrawManagerInternal, IWithdrawManagerMutableInternal {
     function getUnlockedCollateralBy(address owner, uint256 timestamp) external view returns (uint256) {
         return _getUnlockedAmountBy(_fluenceToken(), owner, timestamp);
     }

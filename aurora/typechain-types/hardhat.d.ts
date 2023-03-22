@@ -105,6 +105,14 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Deal__factory>;
     getContractFactory(
+      name: "DealInternal",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.DealInternal__factory>;
+    getContractFactory(
+      name: "DealPublic",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.DealPublic__factory>;
+    getContractFactory(
       name: "DealConfig",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.DealConfig__factory>;
@@ -136,6 +144,10 @@ declare module "hardhat/types/runtime" {
       name: "WorkersManager",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.WorkersManager__factory>;
+    getContractFactory(
+      name: "PaymentInternal",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.PaymentInternal__factory>;
     getContractFactory(
       name: "StatusControllerInternal",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -273,6 +285,16 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Deal>;
     getContractAt(
+      name: "DealInternal",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.DealInternal>;
+    getContractAt(
+      name: "DealPublic",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.DealPublic>;
+    getContractAt(
       name: "DealConfig",
       address: string,
       signer?: ethers.Signer
@@ -312,6 +334,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.WorkersManager>;
+    getContractAt(
+      name: "PaymentInternal",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.PaymentInternal>;
     getContractAt(
       name: "StatusControllerInternal",
       address: string,
