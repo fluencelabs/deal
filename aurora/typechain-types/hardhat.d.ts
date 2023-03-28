@@ -125,6 +125,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IWorkersManager__factory>;
     getContractFactory(
+      name: "Payment",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Payment__factory>;
+    getContractFactory(
       name: "WithdrawManager",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.WithdrawManager__factory>;
@@ -164,6 +168,14 @@ declare module "hardhat/types/runtime" {
       name: "DealFactory",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.DealFactory__factory>;
+    getContractFactory(
+      name: "MockParticleVerifyer",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.MockParticleVerifyer__factory>;
+    getContractFactory(
+      name: "IParticleVerifyer",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IParticleVerifyer__factory>;
 
     getContractAt(
       name: "OwnableUpgradeable",
@@ -306,6 +318,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IWorkersManager>;
     getContractAt(
+      name: "Payment",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Payment>;
+    getContractAt(
       name: "WithdrawManager",
       address: string,
       signer?: ethers.Signer
@@ -355,6 +372,16 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.DealFactory>;
+    getContractAt(
+      name: "MockParticleVerifyer",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.MockParticleVerifyer>;
+    getContractAt(
+      name: "IParticleVerifyer",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IParticleVerifyer>;
 
     // default types
     getContractFactory(

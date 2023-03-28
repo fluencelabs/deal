@@ -62,6 +62,8 @@ export type { IWithdrawManager } from "./contracts/Deal/external/interfaces/IWit
 export { IWithdrawManager__factory } from "./factories/contracts/Deal/external/interfaces/IWithdrawManager__factory";
 export type { IWorkersManager } from "./contracts/Deal/external/interfaces/IWorkersManager";
 export { IWorkersManager__factory } from "./factories/contracts/Deal/external/interfaces/IWorkersManager__factory";
+export type { Payment } from "./contracts/Deal/external/Payment";
+export { Payment__factory } from "./factories/contracts/Deal/external/Payment__factory";
 export type { WithdrawManager } from "./contracts/Deal/external/WithdrawManager";
 export { WithdrawManager__factory } from "./factories/contracts/Deal/external/WithdrawManager__factory";
 export type { WorkersManager } from "./contracts/Deal/external/WorkersManager";
@@ -82,3 +84,7 @@ export type { TestERC20 } from "./contracts/Dev/TestERC20";
 export { TestERC20__factory } from "./factories/contracts/Dev/TestERC20__factory";
 export type { DealFactory } from "./contracts/Factory/DealFactory";
 export { DealFactory__factory } from "./factories/contracts/Factory/DealFactory__factory";
+export type { MockParticleVerifyer } from "./contracts/Mock/MockParticleVerifyer";
+export { MockParticleVerifyer__factory } from "./factories/contracts/Mock/MockParticleVerifyer__factory";
+export type { IParticleVerifyer } from "./contracts/ParticleVerifyer/IParticleVerifyer";
+export { IParticleVerifyer__factory } from "./factories/contracts/ParticleVerifyer/IParticleVerifyer__factory";

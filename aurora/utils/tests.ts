@@ -1,6 +1,6 @@
 import type { BigNumber } from "ethers";
 import { deployments, ethers } from "hardhat";
-import type { Core, Deal, DealFactory, DeveloperFaucet, IERC20 } from "../typechain-types";
+import type { Core, Deal, DealFactory, DeveloperFaucet, IERC20, MockParticleVerifyer } from "../typechain-types";
 
 const setupTestEnv = async (
     account: string,
@@ -11,18 +11,9 @@ const setupTestEnv = async (
     targetWorkers: BigNumber,
 ) =>
     deployments.createFixture(async ({ deployments, ethers }) => {
-        console.log("pricePerEpoch", pricePerEpoch);
-        console.log("requiredStake", requiredStake);
-        console.log("maxWorkers", maxWorkers);
-
         await deployments.fixture();
 
-        const faucet = (await ethers.getContractAt(
-            "DeveloperFaucet",
-            (
-                await deployments.get("DeveloperFaucet")
-            ).address,
-        )) as DeveloperFaucet;
+        const faucet = (await ethers.getContractAt("DeveloperFaucet", (await deployments.get("Faucet")).address)) as DeveloperFaucet;
 
         faucet.receiveUSD(account, ethers.utils.parseEther("1000000"));
         faucet.receiveFLT(account, ethers.utils.parseEther("1000000"));
@@ -44,11 +35,17 @@ const setupTestEnv = async (
 
         const core = (await ethers.getContractAt("Core", (await deployments.get("Core")).address)) as Core;
 
+        const mockParticleVerifyer = (await ethers.getContractAt(
+            "MockParticleVerifyer",
+            await factory.particleVerifyer(),
+        )) as MockParticleVerifyer;
+
         return {
             deal: deal,
             usdToken: usdToken,
             fltToken: fltToken,
             core: core,
+            mockParticleVerifyer: mockParticleVerifyer,
         };
     })();
 

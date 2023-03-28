@@ -32,6 +32,9 @@ const config: HardhatUserConfig = {
             polygonMumbai: process.env["ETHERSCAN_API_KEY"] ?? "",
         },
     },
+    gasReporter: {
+        enabled: true,
+    },
 };
 
 export default config;

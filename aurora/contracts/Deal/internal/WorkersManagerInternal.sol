@@ -79,6 +79,8 @@ abstract contract WorkersManagerInternal is DealConfigInternal, StatusController
         PAT storage pat = _getPAT(id);
         address owner = pat.owner;
 
+        require(owner != address(0x00), "PAT doesn't exist");
+
         _createWithdrawRequest(_fluenceToken(), owner, pat.collateral);
 
         uint256 currentWorkers = _currentWorkers - 1;
@@ -94,7 +96,7 @@ abstract contract WorkersManagerInternal is DealConfigInternal, StatusController
         _clearPAT(pat);
     }
 
-    function _getPAT(PATId id) private view returns (PAT storage pat) {
+    function _getPAT(PATId id) private pure returns (PAT storage pat) {
         bytes32 bytes32Id = PATId.unwrap(id);
 
         bytes32 slot = bytes32(uint256(keccak256(abi.encodePacked(_PREFIX_PAT_SLOT, bytes32Id))) - 1);
@@ -103,7 +105,7 @@ abstract contract WorkersManagerInternal is DealConfigInternal, StatusController
             pat.slot := slot
         }
 
-        require(pat.owner != address(0x00), "PAT not found");
+        return pat;
     }
 
     function _initPAT(PAT storage pat, address owner, uint index, uint collateral, uint created) private {

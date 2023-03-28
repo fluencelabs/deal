@@ -5,11 +5,12 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/utils/StorageSlot.sol";
 import "../Core/Core.sol";
 import "../Deal/Deal.sol";
+import "../Mock/MockParticleVerifyer.sol";
 
 contract DealFactory {
     Core public core;
     address public defaultPaymentToken;
-    Deal public dealImpl;
+    MockParticleVerifyer public particleVerifyer;
 
     bytes32 private constant _PREFIX_DEAL_SLOT = keccak256("network.fluence.DealFactory.deal.");
 
@@ -26,10 +27,10 @@ contract DealFactory {
         uint256 epoch
     );
 
-    constructor(Core core_, address defaultPaymentToken_, Deal dealImpl_) {
+    constructor(Core core_, address defaultPaymentToken_) {
         core = core_;
         defaultPaymentToken = defaultPaymentToken_;
-        dealImpl = dealImpl_;
+        particleVerifyer = new MockParticleVerifyer();
     }
 
     function createDeal(uint256 minWorkers_, uint256 targetWorkers_, string memory appCID_) external {
@@ -51,7 +52,8 @@ contract DealFactory {
             maxWorkersPerProvider_,
             targetWorkers_,
             appCID_,
-            effectorWasmsCids_
+            effectorWasmsCids_,
+            particleVerifyer
         );
 
         _setDeal(address(deal));

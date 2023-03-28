@@ -6,3 +6,5 @@ export * as core from "./Core";
 export * as deal from "./Deal";
 export * as dev from "./Dev";
 export * as factory from "./Factory";
+export * as mock from "./Mock";
+export * as particleVerifyer from "./ParticleVerifyer";

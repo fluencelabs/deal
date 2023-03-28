@@ -23,7 +23,7 @@ abstract contract PaymentInternal is DealConfigInternal, WorkersManagerInternal 
 
     mapping(uint => uint) private _goldenParticlesCountByEpoch;
     mapping(bytes32 => ParticleInfo) private _particles;
-    mapping(uint => uint256[]) private _workersByEpoch;
+    mapping(uint => mapping(uint => uint)) private _workersByEpoch;
     mapping(bytes32 => BitMaps.BitMap) private _paidWorkersByParticle;
 
     uint256 private _balance;
@@ -46,7 +46,7 @@ abstract contract PaymentInternal is DealConfigInternal, WorkersManagerInternal 
             return 0;
         }
 
-        return 0; //TODO
+        return particle.reward / particle.worketsCount;
     }
 
     function _depositToPaymentBalance(uint256 amount) internal {
@@ -55,42 +55,35 @@ abstract contract PaymentInternal is DealConfigInternal, WorkersManagerInternal 
         _balance += amount;
     }
 
-    function _withdrawFromPaymentBalance(IERC20 token, uint256 amount) internal {
+    function _withdrawFromPaymentBalance(uint256 amount) internal {
+        IERC20 token = _paymentToken();
         require(_balance - _locked >= amount, "Not enough free balance");
 
         _balance -= amount;
         token.safeTransfer(msg.sender, amount);
     }
 
-    function _sendParticle(Particle calldata particle) internal {
+    function _commitParticle(Particle calldata particle) internal {
         bytes32 hash = keccak256(abi.encode(particle.air, particle.prevData, particle.params, particle.callResults)); // TODO: refactoring
 
         require(_particles[hash].epoch == 0, "Particle already exists");
 
         uint epoch = _core().epochManager().currentEpoch();
 
-        // verify is golden particle in near
-        // return error type
-        // return if is invalid
-
-        PATId[] memory patIds;
-
-        uint lastIndex = _getNextWorkerIndex();
-        uint256[] memory workersInfo = new uint256[](lastIndex >> 8);
+        PATId[] memory patIds = _particleVerifyer().verifyParticle(particle);
 
         for (uint i = 0; i < patIds.length; i++) {
             uint index = _getPATIndex(patIds[i]);
             uint256 bucket = index >> 8;
             uint256 mask = 1 << (index & 0xff);
-            workersInfo[bucket] |= mask;
+            _workersByEpoch[epoch][bucket] |= mask; // TODO: gass optimization
         }
 
         uint goldenParticlesCountByEpoch = _goldenParticlesCountByEpoch[epoch];
         uint price = _pricePerEpoch();
 
-        uint reward = price / 2 ** goldenParticlesCountByEpoch;
+        uint reward = price / (2 ** (goldenParticlesCountByEpoch + 1));
 
-        _workersByEpoch[epoch] = workersInfo;
         _particles[hash] = ParticleInfo({ isValid: true, epoch: epoch, worketsCount: patIds.length, reward: reward });
         _goldenParticlesCountByEpoch[epoch] = goldenParticlesCountByEpoch + 1;
         _balance -= reward;

@@ -31,16 +31,16 @@ export interface DealFactoryInterface extends utils.Interface {
   functions: {
     "core()": FunctionFragment;
     "createDeal(uint256,uint256,string)": FunctionFragment;
-    "dealImpl()": FunctionFragment;
     "defaultPaymentToken()": FunctionFragment;
+    "particleVerifyer()": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
       | "core"
       | "createDeal"
-      | "dealImpl"
       | "defaultPaymentToken"
+      | "particleVerifyer"
   ): FunctionFragment;
 
   encodeFunctionData(functionFragment: "core", values?: undefined): string;
@@ -52,17 +52,23 @@ export interface DealFactoryInterface extends utils.Interface {
       PromiseOrValue<string>
     ]
   ): string;
-  encodeFunctionData(functionFragment: "dealImpl", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "defaultPaymentToken",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "particleVerifyer",
     values?: undefined
   ): string;
 
   decodeFunctionResult(functionFragment: "core", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "createDeal", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "dealImpl", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "defaultPaymentToken",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "particleVerifyer",
     data: BytesLike
   ): Result;
 
@@ -139,9 +145,9 @@ export interface DealFactory extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    dealImpl(overrides?: CallOverrides): Promise<[string]>;
-
     defaultPaymentToken(overrides?: CallOverrides): Promise<[string]>;
+
+    particleVerifyer(overrides?: CallOverrides): Promise<[string]>;
   };
 
   core(overrides?: CallOverrides): Promise<string>;
@@ -153,9 +159,9 @@ export interface DealFactory extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  dealImpl(overrides?: CallOverrides): Promise<string>;
-
   defaultPaymentToken(overrides?: CallOverrides): Promise<string>;
+
+  particleVerifyer(overrides?: CallOverrides): Promise<string>;
 
   callStatic: {
     core(overrides?: CallOverrides): Promise<string>;
@@ -167,9 +173,9 @@ export interface DealFactory extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    dealImpl(overrides?: CallOverrides): Promise<string>;
-
     defaultPaymentToken(overrides?: CallOverrides): Promise<string>;
+
+    particleVerifyer(overrides?: CallOverrides): Promise<string>;
   };
 
   filters: {
@@ -209,9 +215,9 @@ export interface DealFactory extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    dealImpl(overrides?: CallOverrides): Promise<BigNumber>;
-
     defaultPaymentToken(overrides?: CallOverrides): Promise<BigNumber>;
+
+    particleVerifyer(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -224,10 +230,10 @@ export interface DealFactory extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    dealImpl(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     defaultPaymentToken(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
+
+    particleVerifyer(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }

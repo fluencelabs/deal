@@ -23,7 +23,7 @@ describe("ProviderManager", () => {
             ethers.utils.parseEther("1"),
             BigNumber.from(1),
             BigNumber.from(1),
-            BigNumber.from(1),
+            BigNumber.from(10),
         );
         deal = config.deal;
         usdToken = config.usdToken;
@@ -35,7 +35,7 @@ describe("ProviderManager", () => {
         const requiredStake = await deal.requiredStake();
 
         await (await fltToken.approve(deal.address, requiredStake)).wait();
-        const tx = await deal.createProviderToken(ethers.utils.keccak256(ethers.utils.toUtf8Bytes("salt")));
+        const tx = await deal.createProviderToken(ethers.utils.keccak256(ethers.utils.toUtf8Bytes("salt")), 0);
 
         const eventTopic = deal.interface.getEventTopic("AddProviderToken");
         const log = (await tx.wait()).logs.find(({ topics }: any) => topics[0] === eventTopic);
@@ -49,23 +49,6 @@ describe("ProviderManager", () => {
 
         expect(owner).to.be.equal(await deal.getPATOwner(patId));
         expect(owner).to.be.equal(userAccount);
-    });
-
-    it("getRewards", async () => {
-        const value = ethers.utils.parseEther("100");
-
-        const price = await deal.pricePerEpoch();
-
-        await (await usdToken.approve(deal.address, value)).wait();
-        await (await deal.depositToPaymentBalance(value)).wait();
-
-        const balance = await deal.getPaymentBalance();
-
-        const block = await ethers.provider.getBlock("latest");
-
-        await setTimeNextTime(block.timestamp + 120 * 2); //TODO: change to epoches
-
-        expect(await deal.getPaymentBalance()).to.be.equal(balance.sub(price.mul(2)));
     });
 
     it("removeProviderToken", async () => {

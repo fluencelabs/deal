@@ -4,5 +4,6 @@
 import type * as interfaces from "./interfaces";
 export type { interfaces };
 export type { DealConfig } from "./DealConfig";
+export type { Payment } from "./Payment";
 export type { WithdrawManager } from "./WithdrawManager";
 export type { WorkersManager } from "./WorkersManager";

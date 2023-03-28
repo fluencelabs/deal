@@ -27,11 +27,27 @@ import type {
   PromiseOrValue,
 } from "../../common";
 
+export type ParticleStruct = {
+  air: PromiseOrValue<string>;
+  prevData: PromiseOrValue<string>;
+  params: PromiseOrValue<string>;
+  callResults: PromiseOrValue<string>;
+};
+
+export type ParticleStructOutput = [string, string, string, string] & {
+  air: string;
+  prevData: string;
+  params: string;
+  callResults: string;
+};
+
 export interface DealInterface extends utils.Interface {
   functions: {
     "appCID()": FunctionFragment;
+    "commitParticle((string,string,string,string))": FunctionFragment;
     "core()": FunctionFragment;
     "createProviderToken(bytes32,uint256)": FunctionFragment;
+    "depositToPaymentBalance(uint256)": FunctionFragment;
     "effectorWasmsCids()": FunctionFragment;
     "fluenceToken()": FunctionFragment;
     "getPATOwner(bytes32)": FunctionFragment;
@@ -39,6 +55,7 @@ export interface DealInterface extends utils.Interface {
     "maxWorkersPerProvider()": FunctionFragment;
     "minWorkers()": FunctionFragment;
     "owner()": FunctionFragment;
+    "paymentBalance()": FunctionFragment;
     "paymentToken()": FunctionFragment;
     "pricePerEpoch()": FunctionFragment;
     "removeProviderToken(bytes32)": FunctionFragment;
@@ -48,13 +65,16 @@ export interface DealInterface extends utils.Interface {
     "targetWorkers()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "withdraw(address)": FunctionFragment;
+    "withdrawFromPaymentBalance(uint256)": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
       | "appCID"
+      | "commitParticle"
       | "core"
       | "createProviderToken"
+      | "depositToPaymentBalance"
       | "effectorWasmsCids"
       | "fluenceToken"
       | "getPATOwner"
@@ -62,6 +82,7 @@ export interface DealInterface extends utils.Interface {
       | "maxWorkersPerProvider"
       | "minWorkers"
       | "owner"
+      | "paymentBalance"
       | "paymentToken"
       | "pricePerEpoch"
       | "removeProviderToken"
@@ -71,13 +92,22 @@ export interface DealInterface extends utils.Interface {
       | "targetWorkers"
       | "transferOwnership"
       | "withdraw"
+      | "withdrawFromPaymentBalance"
   ): FunctionFragment;
 
   encodeFunctionData(functionFragment: "appCID", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "commitParticle",
+    values: [ParticleStruct]
+  ): string;
   encodeFunctionData(functionFragment: "core", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "createProviderToken",
     values: [PromiseOrValue<BytesLike>, PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "depositToPaymentBalance",
+    values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
     functionFragment: "effectorWasmsCids",
@@ -104,6 +134,10 @@ export interface DealInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "paymentBalance",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "paymentToken",
     values?: undefined
@@ -140,11 +174,23 @@ export interface DealInterface extends utils.Interface {
     functionFragment: "withdraw",
     values: [PromiseOrValue<string>]
   ): string;
+  encodeFunctionData(
+    functionFragment: "withdrawFromPaymentBalance",
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
 
   decodeFunctionResult(functionFragment: "appCID", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "commitParticle",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "core", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "createProviderToken",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "depositToPaymentBalance",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -169,6 +215,10 @@ export interface DealInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "minWorkers", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "paymentBalance",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "paymentToken",
     data: BytesLike
@@ -199,6 +249,10 @@ export interface DealInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "withdrawFromPaymentBalance",
+    data: BytesLike
+  ): Result;
 
   events: {
     "AddProviderToken(address,bytes32)": EventFragment;
@@ -293,11 +347,21 @@ export interface Deal extends BaseContract {
   functions: {
     appCID(overrides?: CallOverrides): Promise<[string]>;
 
+    commitParticle(
+      particle: ParticleStruct,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     core(overrides?: CallOverrides): Promise<[string]>;
 
     createProviderToken(
       salt: PromiseOrValue<BytesLike>,
       index: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    depositToPaymentBalance(
+      amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -321,6 +385,8 @@ export interface Deal extends BaseContract {
     minWorkers(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
+
+    paymentBalance(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     paymentToken(overrides?: CallOverrides): Promise<[string]>;
 
@@ -353,15 +419,30 @@ export interface Deal extends BaseContract {
       token: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
+
+    withdrawFromPaymentBalance(
+      amount: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
   };
 
   appCID(overrides?: CallOverrides): Promise<string>;
+
+  commitParticle(
+    particle: ParticleStruct,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
 
   core(overrides?: CallOverrides): Promise<string>;
 
   createProviderToken(
     salt: PromiseOrValue<BytesLike>,
     index: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  depositToPaymentBalance(
+    amount: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -385,6 +466,8 @@ export interface Deal extends BaseContract {
   minWorkers(overrides?: CallOverrides): Promise<BigNumber>;
 
   owner(overrides?: CallOverrides): Promise<string>;
+
+  paymentBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
   paymentToken(overrides?: CallOverrides): Promise<string>;
 
@@ -418,14 +501,29 @@ export interface Deal extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  withdrawFromPaymentBalance(
+    amount: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   callStatic: {
     appCID(overrides?: CallOverrides): Promise<string>;
+
+    commitParticle(
+      particle: ParticleStruct,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     core(overrides?: CallOverrides): Promise<string>;
 
     createProviderToken(
       salt: PromiseOrValue<BytesLike>,
       index: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    depositToPaymentBalance(
+      amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -449,6 +547,8 @@ export interface Deal extends BaseContract {
     minWorkers(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<string>;
+
+    paymentBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
     paymentToken(overrides?: CallOverrides): Promise<string>;
 
@@ -477,6 +577,11 @@ export interface Deal extends BaseContract {
 
     withdraw(
       token: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    withdrawFromPaymentBalance(
+      amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
   };
@@ -513,11 +618,21 @@ export interface Deal extends BaseContract {
   estimateGas: {
     appCID(overrides?: CallOverrides): Promise<BigNumber>;
 
+    commitParticle(
+      particle: ParticleStruct,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     core(overrides?: CallOverrides): Promise<BigNumber>;
 
     createProviderToken(
       salt: PromiseOrValue<BytesLike>,
       index: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    depositToPaymentBalance(
+      amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -541,6 +656,8 @@ export interface Deal extends BaseContract {
     minWorkers(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    paymentBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
     paymentToken(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -573,16 +690,31 @@ export interface Deal extends BaseContract {
       token: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
+
+    withdrawFromPaymentBalance(
+      amount: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
     appCID(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    commitParticle(
+      particle: ParticleStruct,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
 
     core(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     createProviderToken(
       salt: PromiseOrValue<BytesLike>,
       index: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    depositToPaymentBalance(
+      amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -608,6 +740,8 @@ export interface Deal extends BaseContract {
     minWorkers(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    paymentBalance(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     paymentToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -638,6 +772,11 @@ export interface Deal extends BaseContract {
 
     withdraw(
       token: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    withdrawFromPaymentBalance(
+      amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
   };
