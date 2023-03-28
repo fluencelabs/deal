@@ -7,28 +7,12 @@ import "./external/WithdrawManager.sol";
 import "./external/WorkersManager.sol";
 
 import "./internal/DealConfigInternal.sol";
-import "./internal/ParticleInternal.sol";
 import "./internal/PaymentInternal.sol";
 import "./internal/StatusControllerInternal.sol";
 import "./internal/WithdrawManagerInternal.sol";
 import "./internal/WorkersManagerInternal.sol";
 
-/*
-    PaymentInternal,
-    ParticleInternal,
-    StatusControllerInternal,
-    WithdrawManagerInternal,
-    WorkersManagerInternal
-    */
-
-contract DealInternal is
-    DealConfigInternal,
-    StatusControllerInternal,
-    WithdrawManagerInternal,
-    ParticleInternal,
-    PaymentInternal,
-    WorkersManagerInternal
-{
+contract Deal is DealConfig, WithdrawManager, WorkersManager {
     constructor(
         Core core_,
         address paymentToken_,
@@ -41,35 +25,6 @@ contract DealInternal is
         string[] memory effectorWasmsCids_
     )
         DealConfigInternal(
-            core_,
-            address(core_.fluenceToken()),
-            paymentToken_,
-            pricePerEpoch_,
-            requiredStake_,
-            minWorkers_,
-            maxWorkers_,
-            targetWorkers_,
-            appCID_,
-            effectorWasmsCids_
-        )
-    {}
-}
-
-abstract contract DealPublic is DealConfig, WithdrawManager, WorkersManager {}
-
-contract Deal is DealInternal, DealPublic {
-    constructor(
-        Core core_,
-        address paymentToken_,
-        uint256 pricePerEpoch_,
-        uint256 requiredStake_,
-        uint256 minWorkers_,
-        uint256 maxWorkers_,
-        uint256 targetWorkers_,
-        string memory appCID_,
-        string[] memory effectorWasmsCids_
-    )
-        DealInternal(
             core_,
             paymentToken_,
             pricePerEpoch_,

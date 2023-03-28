@@ -2,7 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { BaseContract, Signer, utils } from "ethers";
-import type { EventFragment } from "@ethersproject/abi";
+
 import type { Listener, Provider } from "@ethersproject/providers";
 import type {
   TypedEventFilter,
@@ -12,29 +12,18 @@ import type {
   PromiseOrValue,
 } from "../../../common";
 
-export interface PaymentInternalInterface extends utils.Interface {
+export interface DealConfigInternalInterface extends utils.Interface {
   functions: {};
 
-  events: {
-    "StatusChanged(uint8)": EventFragment;
-  };
-
-  getEvent(nameOrSignatureOrTopic: "StatusChanged"): EventFragment;
+  events: {};
 }
 
-export interface StatusChangedEventObject {
-  newStatus: number;
-}
-export type StatusChangedEvent = TypedEvent<[number], StatusChangedEventObject>;
-
-export type StatusChangedEventFilter = TypedEventFilter<StatusChangedEvent>;
-
-export interface PaymentInternal extends BaseContract {
+export interface DealConfigInternal extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: PaymentInternalInterface;
+  interface: DealConfigInternalInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -59,10 +48,7 @@ export interface PaymentInternal extends BaseContract {
 
   callStatic: {};
 
-  filters: {
-    "StatusChanged(uint8)"(newStatus?: null): StatusChangedEventFilter;
-    StatusChanged(newStatus?: null): StatusChangedEventFilter;
-  };
+  filters: {};
 
   estimateGas: {};
 

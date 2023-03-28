@@ -43,6 +43,19 @@ const _abi = [
     type: "event",
   },
   {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "enum DealStatus",
+        name: "newStatus",
+        type: "uint8",
+      },
+    ],
+    name: "StatusChanged",
+    type: "event",
+  },
+  {
     inputs: [
       {
         internalType: "bytes32",

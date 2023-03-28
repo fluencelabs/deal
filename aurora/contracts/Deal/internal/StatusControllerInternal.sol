@@ -4,32 +4,25 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "./interfaces/IStatusControllerInternal.sol";
-import "./interfaces/IPaymentInternal.sol";
-import "./interfaces/IDealConfigInternal.sol";
+import "./DealConfigInternal.sol";
 import { DealStatus } from "./Types.sol";
 
-abstract contract StatusControllerInternal is
-    IDealConfigInternal,
-    IPaymentInternal,
-    IStatusControllerInternal,
-    IStatusControllerMutableInternal
-{
+abstract contract StatusControllerInternal is DealConfigInternal {
     event StatusChanged(DealStatus newStatus);
 
     DealStatus private _status_;
 
     uint256 private _startWorkingEpoch_;
 
-    function _status() internal view override returns (DealStatus) {
+    function _status() internal view returns (DealStatus) {
         return _status_;
     }
 
-    function _startWorkingEpoch() internal view override returns (uint256) {
+    function _startWorkingEpoch() internal view returns (uint256) {
         return _startWorkingEpoch_;
     }
 
-    function _changeStatus(DealStatus status_) internal override {
+    function _changeStatus(DealStatus status_) internal {
         DealStatus oldStatus = _status_;
 
         if (oldStatus == status_) {

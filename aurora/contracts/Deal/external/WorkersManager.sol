@@ -4,11 +4,11 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "../internal/interfaces/IWorkersManagerInternal.sol";
-import "../internal/interfaces/IDealConfigInternal.sol";
+import "../internal/WorkersManagerInternal.sol";
+import "../internal/DealConfigInternal.sol";
 import "./interfaces/IWorkersManager.sol";
 
-abstract contract WorkersManager is IWorkersManager, IDealConfigInternal, IWorkersManagerInternal, IWorkersManagerMutableInternal {
+abstract contract WorkersManager is IWorkersManager, DealConfigInternal, WorkersManagerInternal {
     using SafeERC20 for IERC20;
 
     function getPATOwner(PATId id) external view returns (address) {

@@ -5,9 +5,9 @@
 import { Contract, Signer, utils } from "ethers";
 import type { Provider } from "@ethersproject/providers";
 import type {
-  PaymentInternal,
-  PaymentInternalInterface,
-} from "../../../../contracts/Deal/internal/PaymentInternal";
+  WorkersManagerInternal,
+  WorkersManagerInternalInterface,
+} from "../../../../contracts/Deal/internal/WorkersManagerInternal";
 
 const _abi = [
   {
@@ -25,15 +25,19 @@ const _abi = [
   },
 ] as const;
 
-export class PaymentInternal__factory {
+export class WorkersManagerInternal__factory {
   static readonly abi = _abi;
-  static createInterface(): PaymentInternalInterface {
-    return new utils.Interface(_abi) as PaymentInternalInterface;
+  static createInterface(): WorkersManagerInternalInterface {
+    return new utils.Interface(_abi) as WorkersManagerInternalInterface;
   }
   static connect(
     address: string,
     signerOrProvider: Signer | Provider
-  ): PaymentInternal {
-    return new Contract(address, _abi, signerOrProvider) as PaymentInternal;
+  ): WorkersManagerInternal {
+    return new Contract(
+      address,
+      _abi,
+      signerOrProvider
+    ) as WorkersManagerInternal;
   }
 }

@@ -1,12 +1,14 @@
+// SPDX-License-Identifier: Apache-2.0
+
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IDealConfig.sol";
-import "../internal/interfaces/IDealConfigInternal.sol";
+import "../internal/DealConfigInternal.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-abstract contract DealConfig is IDealConfig, IDealConfigInternal, IDealConfigMutableInternal, Ownable {
+abstract contract DealConfig is IDealConfig, DealConfigInternal, Ownable {
     using SafeERC20 for IERC20;
 
     event NewAppCID(string appCID);

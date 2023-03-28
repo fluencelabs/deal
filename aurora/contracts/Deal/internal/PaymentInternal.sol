@@ -4,54 +4,125 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "../internal/interfaces/IDealConfigInternal.sol";
-import "../internal/interfaces/IPaymentInternal.sol";
-import "../internal/interfaces/IParticleInternal.sol";
+import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
+import "./DealConfigInternal.sol";
+import "./WorkersManagerInternal.sol";
+import "./Types.sol";
 import "../../Utils/Consts.sol";
 
-abstract contract PaymentInternal is IDealConfigInternal, IPaymentInternal, IPaymentMutableInternal, IParticleInternal {
+abstract contract PaymentInternal is DealConfigInternal, WorkersManagerInternal {
+    using BitMaps for BitMaps.BitMap;
     using SafeERC20 for IERC20;
 
-    uint256 public constant PAYMENT_DURATION_IN_EPOCHS = 3;
-
-    mapping(IERC20 => uint256) private _balance;
-
-    function _getPaymentBalance() internal view override returns (uint256) {
-        return _balance[_paymentToken()];
+    struct ParticleInfo {
+        bool isValid;
+        uint256 epoch;
+        uint256 worketsCount;
+        uint reward;
     }
 
-    function _depositToPaymentBalance(uint256 amount) internal override {
+    mapping(uint => uint) private _goldenParticlesCountByEpoch;
+    mapping(bytes32 => ParticleInfo) private _particles;
+    mapping(uint => uint256[]) private _workersByEpoch;
+    mapping(bytes32 => BitMaps.BitMap) private _paidWorkersByParticle;
+
+    uint256 private _balance;
+    uint256 private _locked;
+
+    function _getPaymentBalance() internal view returns (uint256) {
+        return _balance;
+    }
+
+    function _getReward(bytes32 particleHash, PATId patId) internal view returns (uint) {
+        ParticleInfo storage particle = _particles[particleHash];
+        require(particle.isValid, "Particle not valid");
+
+        uint currentEpoch = _core().epochManager().currentEpoch();
+        uint epoch = particle.epoch;
+
+        require(currentEpoch - 1 > epoch, "Particle not confirmed");
+
+        if (!_hasWorkerInEpoch(epoch, patId) || !_hasWorkerInEpoch(epoch - 1, patId)) {
+            return 0;
+        }
+
+        return 0; //TODO
+    }
+
+    function _depositToPaymentBalance(uint256 amount) internal {
         IERC20 token = _paymentToken();
         token.safeTransferFrom(msg.sender, address(this), amount);
-        _balance[_paymentToken()] += amount;
+        _balance += amount;
     }
 
-    function _withdrawFromPaymentBalance(IERC20 token, uint256 amount) internal override {
-        uint256 currentEpoch = _core().epochManager().currentEpoch();
-        uint256 goldenParticleCount = 0;
+    function _withdrawFromPaymentBalance(IERC20 token, uint256 amount) internal {
+        require(_balance - _locked >= amount, "Not enough free balance");
 
-        IERC20 paymentToken = _paymentToken();
-
-        if (token != paymentToken) {
-            return;
-        }
-
-        //TODO: отрезки
-        for (uint256 i = currentEpoch; i < currentEpoch + PAYMENT_DURATION_IN_EPOCHS; i++) {
-            if (!_existsGoldenParticlesInEpoch(i)) {
-                continue;
-            }
-
-            goldenParticleCount++;
-        }
-
-        uint256 free = _balance[_paymentToken()] - (_pricePerEpoch() * goldenParticleCount * 2);
-
-        //TODO: if it's last amount in balance, golden particle receive sum without work confirmation
-
-        require(amount <= free, "Not enough free balance");
-
-        _balance[_paymentToken()] -= amount;
+        _balance -= amount;
         token.safeTransfer(msg.sender, amount);
+    }
+
+    function _sendParticle(Particle calldata particle) internal {
+        bytes32 hash = keccak256(abi.encode(particle.air, particle.prevData, particle.params, particle.callResults)); // TODO: refactoring
+
+        require(_particles[hash].epoch == 0, "Particle already exists");
+
+        uint epoch = _core().epochManager().currentEpoch();
+
+        // verify is golden particle in near
+        // return error type
+        // return if is invalid
+
+        PATId[] memory patIds;
+
+        uint lastIndex = _getNextWorkerIndex();
+        uint256[] memory workersInfo = new uint256[](lastIndex >> 8);
+
+        for (uint i = 0; i < patIds.length; i++) {
+            uint index = _getPATIndex(patIds[i]);
+            uint256 bucket = index >> 8;
+            uint256 mask = 1 << (index & 0xff);
+            workersInfo[bucket] |= mask;
+        }
+
+        uint goldenParticlesCountByEpoch = _goldenParticlesCountByEpoch[epoch];
+        uint price = _pricePerEpoch();
+
+        uint reward = price / 2 ** goldenParticlesCountByEpoch;
+
+        _workersByEpoch[epoch] = workersInfo;
+        _particles[hash] = ParticleInfo({ isValid: true, epoch: epoch, worketsCount: patIds.length, reward: reward });
+        _goldenParticlesCountByEpoch[epoch] = goldenParticlesCountByEpoch + 1;
+        _balance -= reward;
+        _locked += reward;
+    }
+
+    function _withdrawForWorker(PATId patId, bytes32[] calldata particlesHashes) internal {
+        uint index = _getPATIndex(patId);
+
+        uint totalReward;
+        for (uint i = 0; i < particlesHashes.length; i++) {
+            bytes32 particleHash = particlesHashes[i];
+
+            require(!_paidWorkersByParticle[particleHash].get(index), "Already paid");
+
+            totalReward += _getReward(particleHash, patId);
+
+            _paidWorkersByParticle[particleHash].set(index);
+        }
+
+        _locked -= totalReward;
+        _paymentToken().safeTransfer(_getPATOwner(patId), totalReward);
+    }
+
+    function _hasWorkerInEpoch(uint epoch, PATId id) private view returns (bool) {
+        uint index = _getPATIndex(id);
+        uint256 bucket = index >> 8;
+        uint256 mask = 1 << (index & 0xff);
+        if (_workersByEpoch[epoch][bucket] & mask == 0) {
+            return false;
+        }
+
+        return true;
     }
 }

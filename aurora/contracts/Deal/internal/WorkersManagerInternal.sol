@@ -6,21 +6,12 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/StorageSlot.sol";
 import "../external/interfaces/IWorkersManager.sol";
-import "./interfaces/IWorkersManagerInternal.sol";
-import "./interfaces/IDealConfigInternal.sol";
-import "./interfaces/IWithdrawManagerInternal.sol";
-import "./interfaces/IStatusControllerInternal.sol";
-import { DealStatus } from "./Types.sol";
+import "./DealConfigInternal.sol";
+import "./StatusControllerInternal.sol";
+import "./WithdrawManagerInternal.sol";
+import "./Types.sol";
 
-abstract contract WorkersManagerInternal is
-    IDealConfigInternal,
-    IStatusControllerInternal,
-    IStatusControllerMutableInternal,
-    IWithdrawManagerInternal,
-    IWithdrawManagerMutableInternal,
-    IWorkersManagerInternal,
-    IWorkersManagerMutableInternal
-{
+abstract contract WorkersManagerInternal is DealConfigInternal, StatusControllerInternal, WithdrawManagerInternal {
     using SafeERC20 for IERC20;
 
     struct OwnerInfo {
@@ -37,19 +28,19 @@ abstract contract WorkersManagerInternal is
     uint256 private freeIndexesCount;
     mapping(uint256 => PATId) private _patIdByIndex;
 
-    function _getPATIndex(PATId id) internal view override returns (uint256) {
+    function _getPATIndex(PATId id) internal view returns (uint256) {
         return _getPAT(id).index;
     }
 
-    function _getPATOwner(PATId id) internal view override returns (address) {
+    function _getPATOwner(PATId id) internal view returns (address) {
         return _getPAT(id).owner;
     }
 
-    function _getNextWorkerIndex() internal view override returns (uint256) {
+    function _getNextWorkerIndex() internal view returns (uint256) {
         return nextWorkerIndex;
     }
 
-    function _createPAT(PATId id, address owner, uint index) internal override {
+    function _createPAT(PATId id, address owner, uint index) internal {
         uint256 patsCountByOwner = _ownersInfo[owner].patsCount;
         uint256 currentWorkers = _currentWorkers;
         PAT storage pat = _getPAT(id);
@@ -84,7 +75,7 @@ abstract contract WorkersManagerInternal is
         _currentWorkers = currentWorkers;
     }
 
-    function _removePAT(PATId id) internal override {
+    function _removePAT(PATId id) internal {
         PAT storage pat = _getPAT(id);
         address owner = pat.owner;
 

@@ -31,12 +31,10 @@ export interface DealInterface extends utils.Interface {
   functions: {
     "appCID()": FunctionFragment;
     "core()": FunctionFragment;
-    "createProviderToken(bytes32)": FunctionFragment;
-    "depositToPaymentBalance(uint256)": FunctionFragment;
+    "createProviderToken(bytes32,uint256)": FunctionFragment;
     "effectorWasmsCids()": FunctionFragment;
     "fluenceToken()": FunctionFragment;
     "getPATOwner(bytes32)": FunctionFragment;
-    "getPaymentBalance()": FunctionFragment;
     "getUnlockedCollateralBy(address,uint256)": FunctionFragment;
     "maxWorkersPerProvider()": FunctionFragment;
     "minWorkers()": FunctionFragment;
@@ -57,11 +55,9 @@ export interface DealInterface extends utils.Interface {
       | "appCID"
       | "core"
       | "createProviderToken"
-      | "depositToPaymentBalance"
       | "effectorWasmsCids"
       | "fluenceToken"
       | "getPATOwner"
-      | "getPaymentBalance"
       | "getUnlockedCollateralBy"
       | "maxWorkersPerProvider"
       | "minWorkers"
@@ -81,11 +77,7 @@ export interface DealInterface extends utils.Interface {
   encodeFunctionData(functionFragment: "core", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "createProviderToken",
-    values: [PromiseOrValue<BytesLike>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "depositToPaymentBalance",
-    values: [PromiseOrValue<BigNumberish>]
+    values: [PromiseOrValue<BytesLike>, PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
     functionFragment: "effectorWasmsCids",
@@ -98,10 +90,6 @@ export interface DealInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "getPATOwner",
     values: [PromiseOrValue<BytesLike>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getPaymentBalance",
-    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "getUnlockedCollateralBy",
@@ -160,10 +148,6 @@ export interface DealInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "depositToPaymentBalance",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "effectorWasmsCids",
     data: BytesLike
   ): Result;
@@ -173,10 +157,6 @@ export interface DealInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "getPATOwner",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getPaymentBalance",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -317,11 +297,7 @@ export interface Deal extends BaseContract {
 
     createProviderToken(
       salt: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    depositToPaymentBalance(
-      amount: PromiseOrValue<BigNumberish>,
+      index: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -333,8 +309,6 @@ export interface Deal extends BaseContract {
       id: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<[string]>;
-
-    getPaymentBalance(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     getUnlockedCollateralBy(
       owner: PromiseOrValue<string>,
@@ -387,11 +361,7 @@ export interface Deal extends BaseContract {
 
   createProviderToken(
     salt: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  depositToPaymentBalance(
-    amount: PromiseOrValue<BigNumberish>,
+    index: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -403,8 +373,6 @@ export interface Deal extends BaseContract {
     id: PromiseOrValue<BytesLike>,
     overrides?: CallOverrides
   ): Promise<string>;
-
-  getPaymentBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
   getUnlockedCollateralBy(
     owner: PromiseOrValue<string>,
@@ -457,11 +425,7 @@ export interface Deal extends BaseContract {
 
     createProviderToken(
       salt: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    depositToPaymentBalance(
-      amount: PromiseOrValue<BigNumberish>,
+      index: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -473,8 +437,6 @@ export interface Deal extends BaseContract {
       id: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<string>;
-
-    getPaymentBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
     getUnlockedCollateralBy(
       owner: PromiseOrValue<string>,
@@ -555,11 +517,7 @@ export interface Deal extends BaseContract {
 
     createProviderToken(
       salt: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    depositToPaymentBalance(
-      amount: PromiseOrValue<BigNumberish>,
+      index: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -571,8 +529,6 @@ export interface Deal extends BaseContract {
       id: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
-
-    getPaymentBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
     getUnlockedCollateralBy(
       owner: PromiseOrValue<string>,
@@ -626,11 +582,7 @@ export interface Deal extends BaseContract {
 
     createProviderToken(
       salt: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    depositToPaymentBalance(
-      amount: PromiseOrValue<BigNumberish>,
+      index: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -642,8 +594,6 @@ export interface Deal extends BaseContract {
       id: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
-
-    getPaymentBalance(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     getUnlockedCollateralBy(
       owner: PromiseOrValue<string>,

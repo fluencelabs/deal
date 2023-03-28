@@ -70,10 +70,12 @@ export interface WorkersManagerInterface extends utils.Interface {
   events: {
     "AddProviderToken(address,bytes32)": EventFragment;
     "RemoveProviderToken(bytes32)": EventFragment;
+    "StatusChanged(uint8)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "AddProviderToken"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RemoveProviderToken"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "StatusChanged"): EventFragment;
 }
 
 export interface AddProviderTokenEventObject {
@@ -98,6 +100,13 @@ export type RemoveProviderTokenEvent = TypedEvent<
 
 export type RemoveProviderTokenEventFilter =
   TypedEventFilter<RemoveProviderTokenEvent>;
+
+export interface StatusChangedEventObject {
+  newStatus: number;
+}
+export type StatusChangedEvent = TypedEvent<[number], StatusChangedEventObject>;
+
+export type StatusChangedEventFilter = TypedEventFilter<StatusChangedEvent>;
 
 export interface WorkersManager extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -189,6 +198,9 @@ export interface WorkersManager extends BaseContract {
 
     "RemoveProviderToken(bytes32)"(id?: null): RemoveProviderTokenEventFilter;
     RemoveProviderToken(id?: null): RemoveProviderTokenEventFilter;
+
+    "StatusChanged(uint8)"(newStatus?: null): StatusChangedEventFilter;
+    StatusChanged(newStatus?: null): StatusChangedEventFilter;
   };
 
   estimateGas: {

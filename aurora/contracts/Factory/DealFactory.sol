@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/utils/StorageSlot.sol";
@@ -7,6 +9,7 @@ import "../Deal/Deal.sol";
 contract DealFactory {
     Core public core;
     address public defaultPaymentToken;
+    Deal public dealImpl;
 
     bytes32 private constant _PREFIX_DEAL_SLOT = keccak256("network.fluence.DealFactory.deal.");
 
@@ -23,9 +26,10 @@ contract DealFactory {
         uint256 epoch
     );
 
-    constructor(Core core_, address defaultPaymentToken_) {
+    constructor(Core core_, address defaultPaymentToken_, Deal dealImpl_) {
         core = core_;
         defaultPaymentToken = defaultPaymentToken_;
+        dealImpl = dealImpl_;
     }
 
     function createDeal(uint256 minWorkers_, uint256 targetWorkers_, string memory appCID_) external {
