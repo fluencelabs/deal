@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Multicall.sol";
-import "../Core/AquaProxy.sol";
+import "../Global/AquaProxy.sol";
 import "./TestERC20.sol";
 
 contract OwnableFaucet is Ownable {

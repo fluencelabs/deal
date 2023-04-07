@@ -85,73 +85,25 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Utils__factory>;
     getContractFactory(
-      name: "AquaProxy",
+      name: "DealCore",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.AquaProxy__factory>;
+    ): Promise<Contracts.DealCore__factory>;
     getContractFactory(
-      name: "Core",
+      name: "DealProxy",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.Core__factory>;
-    getContractFactory(
-      name: "CoreState",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.CoreState__factory>;
-    getContractFactory(
-      name: "EpochManager",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.EpochManager__factory>;
-    getContractFactory(
-      name: "Deal",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.Deal__factory>;
-    getContractFactory(
-      name: "DealConfig",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.DealConfig__factory>;
-    getContractFactory(
-      name: "IDealConfig",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IDealConfig__factory>;
-    getContractFactory(
-      name: "IPaymentManager",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IPaymentManager__factory>;
-    getContractFactory(
-      name: "IWithdrawManager",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IWithdrawManager__factory>;
-    getContractFactory(
-      name: "IWorkersManager",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IWorkersManager__factory>;
+    ): Promise<Contracts.DealProxy__factory>;
     getContractFactory(
       name: "Payment",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Payment__factory>;
     getContractFactory(
-      name: "WithdrawManager",
+      name: "StatusController",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.WithdrawManager__factory>;
+    ): Promise<Contracts.StatusController__factory>;
     getContractFactory(
-      name: "WorkersManager",
+      name: "Workers",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.WorkersManager__factory>;
-    getContractFactory(
-      name: "DealConfigInternal",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.DealConfigInternal__factory>;
-    getContractFactory(
-      name: "PaymentInternal",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.PaymentInternal__factory>;
-    getContractFactory(
-      name: "StatusControllerInternal",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.StatusControllerInternal__factory>;
-    getContractFactory(
-      name: "WorkersManagerInternal",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.WorkersManagerInternal__factory>;
+    ): Promise<Contracts.Workers__factory>;
     getContractFactory(
       name: "DeveloperFaucet",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -165,9 +117,21 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TestERC20__factory>;
     getContractFactory(
-      name: "DealFactory",
+      name: "AquaProxy",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.DealFactory__factory>;
+    ): Promise<Contracts.AquaProxy__factory>;
+    getContractFactory(
+      name: "EpochManager",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.EpochManager__factory>;
+    getContractFactory(
+      name: "GlobalConfig",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.GlobalConfig__factory>;
+    getContractFactory(
+      name: "GlobalConfigState",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.GlobalConfigState__factory>;
     getContractFactory(
       name: "MockParticleVerifyer",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -268,90 +232,30 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Utils>;
     getContractAt(
-      name: "AquaProxy",
+      name: "DealCore",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.AquaProxy>;
+    ): Promise<Contracts.DealCore>;
     getContractAt(
-      name: "Core",
+      name: "DealProxy",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.Core>;
-    getContractAt(
-      name: "CoreState",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.CoreState>;
-    getContractAt(
-      name: "EpochManager",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.EpochManager>;
-    getContractAt(
-      name: "Deal",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.Deal>;
-    getContractAt(
-      name: "DealConfig",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.DealConfig>;
-    getContractAt(
-      name: "IDealConfig",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IDealConfig>;
-    getContractAt(
-      name: "IPaymentManager",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IPaymentManager>;
-    getContractAt(
-      name: "IWithdrawManager",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IWithdrawManager>;
-    getContractAt(
-      name: "IWorkersManager",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IWorkersManager>;
+    ): Promise<Contracts.DealProxy>;
     getContractAt(
       name: "Payment",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.Payment>;
     getContractAt(
-      name: "WithdrawManager",
+      name: "StatusController",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.WithdrawManager>;
+    ): Promise<Contracts.StatusController>;
     getContractAt(
-      name: "WorkersManager",
+      name: "Workers",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.WorkersManager>;
-    getContractAt(
-      name: "DealConfigInternal",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.DealConfigInternal>;
-    getContractAt(
-      name: "PaymentInternal",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.PaymentInternal>;
-    getContractAt(
-      name: "StatusControllerInternal",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.StatusControllerInternal>;
-    getContractAt(
-      name: "WorkersManagerInternal",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.WorkersManagerInternal>;
+    ): Promise<Contracts.Workers>;
     getContractAt(
       name: "DeveloperFaucet",
       address: string,
@@ -368,10 +272,25 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.TestERC20>;
     getContractAt(
-      name: "DealFactory",
+      name: "AquaProxy",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.DealFactory>;
+    ): Promise<Contracts.AquaProxy>;
+    getContractAt(
+      name: "EpochManager",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.EpochManager>;
+    getContractAt(
+      name: "GlobalConfig",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.GlobalConfig>;
+    getContractAt(
+      name: "GlobalConfigState",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.GlobalConfigState>;
     getContractAt(
       name: "MockParticleVerifyer",
       address: string,

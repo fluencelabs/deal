@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
-
+/*
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/utils/StorageSlot.sol";
-import "../Core/Core.sol";
+import "../Global/GlobalConfig.sol";
 import "../Deal/Deal.sol";
 import "../Mock/MockParticleVerifyer.sol";
 
@@ -88,3 +88,4 @@ contract DealFactory {
         return StorageSlot.getBooleanSlot(slot);
     }
 }
+*/

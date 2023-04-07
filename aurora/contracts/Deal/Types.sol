@@ -2,6 +2,14 @@
 
 pragma solidity ^0.8.17;
 
+enum Module {
+    None,
+    Workers,
+    Payment,
+    StatusController,
+    WithdrawManager
+}
+
 struct Particle {
     string air;
     string prevData;

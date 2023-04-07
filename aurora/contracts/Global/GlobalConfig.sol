@@ -6,7 +6,7 @@ import "../AuroraSDK/AuroraSdk.sol";
 import "./AquaProxy.sol";
 import "./EpochManager.sol";
 
-contract CoreState {
+contract GlobalConfigState {
     IERC20 public fluenceToken;
     AquaProxy public aquaProxy;
     uint public withdrawTimeout;
@@ -17,7 +17,7 @@ contract CoreState {
     EpochManager public epochManager;
 }
 
-contract Core is OwnableUpgradeable, CoreState, UUPSUpgradeable {
+contract GlobalConfig is OwnableUpgradeable, GlobalConfigState, UUPSUpgradeable {
     function initialize(
         IERC20 fluenceToken_,
         AquaProxy aquaProxy_,
