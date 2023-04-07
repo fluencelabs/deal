@@ -85,6 +85,18 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Utils__factory>;
     getContractFactory(
+      name: "Config",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Config__factory>;
+    getContractFactory(
+      name: "Controller",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Controller__factory>;
+    getContractFactory(
+      name: "Core",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Core__factory>;
+    getContractFactory(
       name: "DealCore",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.DealCore__factory>;
@@ -92,6 +104,30 @@ declare module "hardhat/types/runtime" {
       name: "DealProxy",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.DealProxy__factory>;
+    getContractFactory(
+      name: "IConfig",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IConfig__factory>;
+    getContractFactory(
+      name: "ICore",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ICore__factory>;
+    getContractFactory(
+      name: "IPayment",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IPayment__factory>;
+    getContractFactory(
+      name: "IStatusController",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IStatusController__factory>;
+    getContractFactory(
+      name: "IWorkers",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IWorkers__factory>;
+    getContractFactory(
+      name: "ModuleBase",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ModuleBase__factory>;
     getContractFactory(
       name: "Payment",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -116,6 +152,10 @@ declare module "hardhat/types/runtime" {
       name: "TestERC20",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TestERC20__factory>;
+    getContractFactory(
+      name: "DealFactory",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.DealFactory__factory>;
     getContractFactory(
       name: "AquaProxy",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -232,6 +272,21 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Utils>;
     getContractAt(
+      name: "Config",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Config>;
+    getContractAt(
+      name: "Controller",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Controller>;
+    getContractAt(
+      name: "Core",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Core>;
+    getContractAt(
       name: "DealCore",
       address: string,
       signer?: ethers.Signer
@@ -241,6 +296,36 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.DealProxy>;
+    getContractAt(
+      name: "IConfig",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IConfig>;
+    getContractAt(
+      name: "ICore",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ICore>;
+    getContractAt(
+      name: "IPayment",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IPayment>;
+    getContractAt(
+      name: "IStatusController",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IStatusController>;
+    getContractAt(
+      name: "IWorkers",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IWorkers>;
+    getContractAt(
+      name: "ModuleBase",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ModuleBase>;
     getContractAt(
       name: "Payment",
       address: string,
@@ -271,6 +356,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.TestERC20>;
+    getContractAt(
+      name: "DealFactory",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.DealFactory>;
     getContractAt(
       name: "AquaProxy",
       address: string,

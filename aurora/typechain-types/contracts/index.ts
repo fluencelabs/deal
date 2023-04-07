@@ -7,6 +7,8 @@ import type * as deal from "./Deal";
 export type { deal };
 import type * as dev from "./Dev";
 export type { dev };
+import type * as factory from "./Factory";
+export type { factory };
 import type * as global from "./Global";
 export type { global };
 import type * as mock from "./Mock";

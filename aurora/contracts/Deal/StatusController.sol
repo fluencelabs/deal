@@ -4,12 +4,12 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "./DealCore.sol";
+import "./Core.sol";
+import "./ModuleBase.sol";
+import "./interfaces/IStatusController.sol";
 import { DealStatus } from "./Types.sol";
 
-contract StatusController {
-    event StatusChanged(DealStatus newStatus);
-
+contract StatusController is ModuleBase, IStatusController {
     DealStatus private _status_;
 
     uint256 private _startWorkingEpoch_;
@@ -30,20 +30,20 @@ contract StatusController {
         }
 
         if (oldStatus != status_ && status_ == DealStatus.Working) {
-            onStartWorking();
+            _onStartWorking();
         } else if (oldStatus != status_ && status_ == DealStatus.WaitingForWorkers) {
-            onEndWorking();
+            _onEndWorking();
         }
 
         _status_ = status_;
         emit StatusChanged(status_);
     }
 
-    function onStartWorking() private {
-        _startWorkingEpoch_ = DealCore(msg.sender).globalConfig().epochManager().currentEpoch();
+    function _onStartWorking() private {
+        _startWorkingEpoch_ = _core().getConfig().globalConfig().epochManager().currentEpoch();
     }
 
-    function onEndWorking() private {
+    function _onEndWorking() private {
         // spend reward? _spendReward();
         //TODO: transfer reward to workers
         _startWorkingEpoch_ = 0;

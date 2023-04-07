@@ -4,10 +4,11 @@ pragma solidity ^0.8.17;
 
 enum Module {
     None,
-    Workers,
+    Config,
+    Controller,
     Payment,
     StatusController,
-    WithdrawManager
+    Workers
 }
 
 struct Particle {

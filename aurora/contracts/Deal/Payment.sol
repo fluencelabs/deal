@@ -5,11 +5,13 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
-import "./DealCore.sol";
-import "./Workers.sol";
+import "./interfaces/IPayment.sol";
+import "./interfaces/ICore.sol";
+import "./interfaces/IWorkers.sol";
 import "./Types.sol";
+import "./ModuleBase.sol";
 
-contract Payment {
+contract Payment is ModuleBase, IPayment {
     using BitMaps for BitMaps.BitMap;
     using SafeERC20 for IERC20;
 
@@ -33,7 +35,7 @@ contract Payment {
         ParticleInfo storage particle = _particles[particleHash];
         require(particle.isValid, "Particle not valid");
 
-        uint currentEpoch = DealCore(msg.sender).globalConfig().epochManager().currentEpoch();
+        uint currentEpoch = _core().getConfig().globalConfig().epochManager().currentEpoch();
         uint epoch = particle.epoch;
 
         require(currentEpoch - 1 > epoch, "Particle not confirmed");
@@ -46,17 +48,13 @@ contract Payment {
     }
 
     function depositToPaymentBalance(uint256 amount) external {
-        DealCore core = DealCore(msg.sender);
-
-        IERC20 token = core.paymentToken();
+        IERC20 token = _core().getConfig().paymentToken();
         token.safeTransferFrom(msg.sender, address(this), amount);
         balance += amount;
     }
 
     function withdrawFromPaymentBalance(uint256 amount) external {
-        DealCore core = DealCore(msg.sender);
-
-        IERC20 token = core.paymentToken();
+        IERC20 token = _core().getConfig().paymentToken();
         require(balance - _locked >= amount, "Not enough free balance");
 
         balance -= amount;
@@ -68,12 +66,13 @@ contract Payment {
 
         require(_particles[hash].epoch == 0, "Particle already exists");
 
-        DealCore core = DealCore(msg.sender);
-        Workers workers = Workers(core.modules(Module.Workers));
+        ICore core = _core();
+        IConfig config = core.getConfig();
+        IWorkers workers = core.getWorkers();
 
-        uint epoch = core.globalConfig().epochManager().currentEpoch();
+        uint epoch = config.globalConfig().epochManager().currentEpoch();
 
-        PATId[] memory patIds = core.particleVerifyer().verifyParticle(particle);
+        PATId[] memory patIds = config.particleVerifyer().verifyParticle(particle);
 
         for (uint i = 0; i < patIds.length; i++) {
             uint index = workers.getPATIndex(patIds[i]);
@@ -83,7 +82,7 @@ contract Payment {
         }
 
         uint goldenParticlesCountByEpoch = _goldenParticlesCountByEpoch[epoch];
-        uint price = core.pricePerEpoch();
+        uint price = config.pricePerEpoch();
 
         uint reward = price / (2 ** (goldenParticlesCountByEpoch + 1));
 
@@ -95,8 +94,10 @@ contract Payment {
     }
 
     function withdrawForWorker(PATId patId, bytes32[] calldata particlesHashes) external {
-        DealCore core = DealCore(msg.sender);
-        Workers workers = Workers(core.modules(Module.Workers));
+        ICore core = _core();
+        IConfig config = core.getConfig();
+
+        IWorkers workers = core.getWorkers();
 
         uint index = workers.getPATIndex(patId);
 
@@ -112,12 +113,11 @@ contract Payment {
         }
 
         _locked -= totalReward;
-        core.paymentToken().safeTransfer(workers.getPATOwner(patId), totalReward);
+        config.paymentToken().safeTransfer(workers.getPATOwner(patId), totalReward);
     }
 
     function _hasWorkerInEpoch(uint epoch, PATId id) private view returns (bool) {
-        DealCore core = DealCore(msg.sender);
-        Workers workers = Workers(core.modules(Module.Workers));
+        IWorkers workers = _core().getWorkers();
 
         uint index = workers.getPATIndex(id);
         uint256 bucket = index >> 8;

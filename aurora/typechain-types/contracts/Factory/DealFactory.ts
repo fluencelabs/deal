@@ -29,21 +29,57 @@ import type {
 
 export interface DealFactoryInterface extends utils.Interface {
   functions: {
-    "core()": FunctionFragment;
+    "MAX_WORKERS_PER_PROVIDER()": FunctionFragment;
+    "PRICE_PER_EPOCH()": FunctionFragment;
+    "REQUIRED_STAKE()": FunctionFragment;
+    "configImpl()": FunctionFragment;
+    "controllerImpl()": FunctionFragment;
+    "coreImpl()": FunctionFragment;
     "createDeal(uint256,uint256,string)": FunctionFragment;
+    "deals(address)": FunctionFragment;
     "defaultPaymentToken()": FunctionFragment;
-    "particleVerifyer()": FunctionFragment;
+    "paymentImpl()": FunctionFragment;
+    "statusControllerImpl()": FunctionFragment;
+    "workersImpl()": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "core"
+      | "MAX_WORKERS_PER_PROVIDER"
+      | "PRICE_PER_EPOCH"
+      | "REQUIRED_STAKE"
+      | "configImpl"
+      | "controllerImpl"
+      | "coreImpl"
       | "createDeal"
+      | "deals"
       | "defaultPaymentToken"
-      | "particleVerifyer"
+      | "paymentImpl"
+      | "statusControllerImpl"
+      | "workersImpl"
   ): FunctionFragment;
 
-  encodeFunctionData(functionFragment: "core", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "MAX_WORKERS_PER_PROVIDER",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "PRICE_PER_EPOCH",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "REQUIRED_STAKE",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "configImpl",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "controllerImpl",
+    values?: undefined
+  ): string;
+  encodeFunctionData(functionFragment: "coreImpl", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "createDeal",
     values: [
@@ -53,22 +89,60 @@ export interface DealFactoryInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
+    functionFragment: "deals",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
     functionFragment: "defaultPaymentToken",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "particleVerifyer",
+    functionFragment: "paymentImpl",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "statusControllerImpl",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "workersImpl",
     values?: undefined
   ): string;
 
-  decodeFunctionResult(functionFragment: "core", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "MAX_WORKERS_PER_PROVIDER",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "PRICE_PER_EPOCH",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "REQUIRED_STAKE",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "configImpl", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "controllerImpl",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "coreImpl", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "createDeal", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "deals", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "defaultPaymentToken",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "particleVerifyer",
+    functionFragment: "paymentImpl",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "statusControllerImpl",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "workersImpl",
     data: BytesLike
   ): Result;
 
@@ -136,7 +210,17 @@ export interface DealFactory extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    core(overrides?: CallOverrides): Promise<[string]>;
+    MAX_WORKERS_PER_PROVIDER(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    PRICE_PER_EPOCH(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    REQUIRED_STAKE(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    configImpl(overrides?: CallOverrides): Promise<[string]>;
+
+    controllerImpl(overrides?: CallOverrides): Promise<[string]>;
+
+    coreImpl(overrides?: CallOverrides): Promise<[string]>;
 
     createDeal(
       minWorkers_: PromiseOrValue<BigNumberish>,
@@ -145,12 +229,31 @@ export interface DealFactory extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    deals(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
     defaultPaymentToken(overrides?: CallOverrides): Promise<[string]>;
 
-    particleVerifyer(overrides?: CallOverrides): Promise<[string]>;
+    paymentImpl(overrides?: CallOverrides): Promise<[string]>;
+
+    statusControllerImpl(overrides?: CallOverrides): Promise<[string]>;
+
+    workersImpl(overrides?: CallOverrides): Promise<[string]>;
   };
 
-  core(overrides?: CallOverrides): Promise<string>;
+  MAX_WORKERS_PER_PROVIDER(overrides?: CallOverrides): Promise<BigNumber>;
+
+  PRICE_PER_EPOCH(overrides?: CallOverrides): Promise<BigNumber>;
+
+  REQUIRED_STAKE(overrides?: CallOverrides): Promise<BigNumber>;
+
+  configImpl(overrides?: CallOverrides): Promise<string>;
+
+  controllerImpl(overrides?: CallOverrides): Promise<string>;
+
+  coreImpl(overrides?: CallOverrides): Promise<string>;
 
   createDeal(
     minWorkers_: PromiseOrValue<BigNumberish>,
@@ -159,12 +262,31 @@ export interface DealFactory extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  deals(
+    arg0: PromiseOrValue<string>,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
   defaultPaymentToken(overrides?: CallOverrides): Promise<string>;
 
-  particleVerifyer(overrides?: CallOverrides): Promise<string>;
+  paymentImpl(overrides?: CallOverrides): Promise<string>;
+
+  statusControllerImpl(overrides?: CallOverrides): Promise<string>;
+
+  workersImpl(overrides?: CallOverrides): Promise<string>;
 
   callStatic: {
-    core(overrides?: CallOverrides): Promise<string>;
+    MAX_WORKERS_PER_PROVIDER(overrides?: CallOverrides): Promise<BigNumber>;
+
+    PRICE_PER_EPOCH(overrides?: CallOverrides): Promise<BigNumber>;
+
+    REQUIRED_STAKE(overrides?: CallOverrides): Promise<BigNumber>;
+
+    configImpl(overrides?: CallOverrides): Promise<string>;
+
+    controllerImpl(overrides?: CallOverrides): Promise<string>;
+
+    coreImpl(overrides?: CallOverrides): Promise<string>;
 
     createDeal(
       minWorkers_: PromiseOrValue<BigNumberish>,
@@ -173,9 +295,18 @@ export interface DealFactory extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    deals(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
     defaultPaymentToken(overrides?: CallOverrides): Promise<string>;
 
-    particleVerifyer(overrides?: CallOverrides): Promise<string>;
+    paymentImpl(overrides?: CallOverrides): Promise<string>;
+
+    statusControllerImpl(overrides?: CallOverrides): Promise<string>;
+
+    workersImpl(overrides?: CallOverrides): Promise<string>;
   };
 
   filters: {
@@ -206,7 +337,17 @@ export interface DealFactory extends BaseContract {
   };
 
   estimateGas: {
-    core(overrides?: CallOverrides): Promise<BigNumber>;
+    MAX_WORKERS_PER_PROVIDER(overrides?: CallOverrides): Promise<BigNumber>;
+
+    PRICE_PER_EPOCH(overrides?: CallOverrides): Promise<BigNumber>;
+
+    REQUIRED_STAKE(overrides?: CallOverrides): Promise<BigNumber>;
+
+    configImpl(overrides?: CallOverrides): Promise<BigNumber>;
+
+    controllerImpl(overrides?: CallOverrides): Promise<BigNumber>;
+
+    coreImpl(overrides?: CallOverrides): Promise<BigNumber>;
 
     createDeal(
       minWorkers_: PromiseOrValue<BigNumberish>,
@@ -215,13 +356,34 @@ export interface DealFactory extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    deals(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     defaultPaymentToken(overrides?: CallOverrides): Promise<BigNumber>;
 
-    particleVerifyer(overrides?: CallOverrides): Promise<BigNumber>;
+    paymentImpl(overrides?: CallOverrides): Promise<BigNumber>;
+
+    statusControllerImpl(overrides?: CallOverrides): Promise<BigNumber>;
+
+    workersImpl(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    core(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    MAX_WORKERS_PER_PROVIDER(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    PRICE_PER_EPOCH(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    REQUIRED_STAKE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    configImpl(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    controllerImpl(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    coreImpl(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     createDeal(
       minWorkers_: PromiseOrValue<BigNumberish>,
@@ -230,10 +392,21 @@ export interface DealFactory extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    deals(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     defaultPaymentToken(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    particleVerifyer(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    paymentImpl(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    statusControllerImpl(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    workersImpl(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }

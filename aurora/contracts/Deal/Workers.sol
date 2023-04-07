@@ -5,12 +5,16 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/StorageSlot.sol";
+import "../Global/GlobalConfig.sol";
+import "../Utils/WithdrawRequests.sol";
+import "./interfaces/IWorkers.sol";
+import "./interfaces/IConfig.sol";
+import "./interfaces/ICore.sol";
 import "./StatusController.sol";
-import "./WithdrawManager.sol";
-import "./DealCore.sol";
+import "./ModuleBase.sol";
 import "./Types.sol";
 
-contract Workers {
+contract Workers is ModuleBase, IWorkers {
     using WithdrawRequests for WithdrawRequests.Requests;
     using SafeERC20 for IERC20;
 
@@ -42,7 +46,7 @@ contract Workers {
     }
 
     function getUnlockedAmountBy(address owner, uint256 timestamp) external view returns (uint256) {
-        GlobalConfig globalConfig = DealCore(msg.sender).globalConfig();
+        GlobalConfig globalConfig = _core().getConfig().globalConfig();
         return _requests[owner].getAmountBy(timestamp - globalConfig.withdrawTimeout());
     }
 
@@ -51,21 +55,22 @@ contract Workers {
         uint256 currentWorkers = _currentWorkers;
         PAT storage pat = _getPAT(id);
 
-        DealCore core = DealCore(msg.sender);
+        ICore core = _core();
+        IConfig config = core.getConfig();
 
-        require(currentWorkers < core.targetWorkers(), "Target workers reached");
-        require(patsCountByOwner < core.maxWorkersPerProvider(), "Max workers per provider reached");
+        require(currentWorkers < config.targetWorkers(), "Target workers reached");
+        require(patsCountByOwner < config.maxWorkersPerProvider(), "Max workers per provider reached");
         require(pat.owner == address(0x00), "Id already used");
 
-        uint256 requiredStake = core.requiredStake();
-        core.fluenceToken().safeTransferFrom(owner, core.modules(Module.WithdrawManager), requiredStake);
+        uint256 requiredStake = config.requiredStake();
+        config.fluenceToken().safeTransferFrom(owner, address(this), requiredStake);
 
         currentWorkers++;
 
-        StatusController statusController = StatusController(core.modules(Module.StatusController));
+        IStatusController statusController = core.getStatusController();
 
         DealStatus status = statusController.status();
-        if (status == DealStatus.WaitingForWorkers && currentWorkers >= core.minWorkers()) {
+        if (status == DealStatus.WaitingForWorkers && currentWorkers >= config.minWorkers()) {
             status = DealStatus.Working;
             statusController.changeStatus(status);
         }
@@ -79,7 +84,7 @@ contract Workers {
             freeIndex = index;
         }
 
-        _initPAT(pat, owner, freeIndex, requiredStake, core.globalConfig().epochManager().currentEpoch());
+        _initPAT(pat, owner, freeIndex, requiredStake, config.globalConfig().epochManager().currentEpoch());
 
         _patIdByIndex[freeIndex] = id;
         _ownersInfo[owner].patsCount = patsCountByOwner + 1;
@@ -92,15 +97,16 @@ contract Workers {
 
         require(owner != address(0x00), "PAT doesn't exist");
 
-        DealCore core = DealCore(msg.sender);
+        ICore core = _core();
+        IConfig config = core.getConfig();
 
-        StatusController statusController = StatusController(core.modules(Module.StatusController));
+        IStatusController statusController = core.getStatusController();
 
         _createWithdrawRequest(owner, pat.collateral);
 
         uint256 currentWorkers = _currentWorkers - 1;
 
-        if (statusController.status() == DealStatus.Working && currentWorkers < core.minWorkers()) {
+        if (statusController.status() == DealStatus.Working && currentWorkers < config.minWorkers()) {
             statusController.changeStatus(DealStatus.WaitingForWorkers);
         }
 
@@ -112,7 +118,7 @@ contract Workers {
     }
 
     function withdraw(address owner) external {
-        GlobalConfig globalConfig = DealCore(msg.sender).globalConfig();
+        GlobalConfig globalConfig = _core().getConfig().globalConfig();
 
         uint256 amount = _requests[owner].confirmBy(block.timestamp - globalConfig.withdrawTimeout());
 
@@ -147,9 +153,5 @@ contract Workers {
         }
 
         return pat;
-    }
-
-    function _dealCore() private view returns (DealCore) {
-        return DealCore(msg.sender);
     }
 }

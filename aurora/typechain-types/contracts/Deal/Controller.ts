@@ -4,7 +4,6 @@
 import type {
   BaseContract,
   BigNumber,
-  BigNumberish,
   BytesLike,
   CallOverrides,
   ContractTransaction,
@@ -28,39 +27,21 @@ import type {
   PromiseOrValue,
 } from "../../common";
 
-export interface StatusControllerInterface extends utils.Interface {
+export interface ControllerInterface extends utils.Interface {
   functions: {
-    "changeStatus(uint8)": FunctionFragment;
     "proxiableUUID()": FunctionFragment;
-    "startWorkingEpoch()": FunctionFragment;
-    "status()": FunctionFragment;
     "upgradeTo(address)": FunctionFragment;
     "upgradeToAndCall(address,bytes)": FunctionFragment;
   };
 
   getFunction(
-    nameOrSignatureOrTopic:
-      | "changeStatus"
-      | "proxiableUUID"
-      | "startWorkingEpoch"
-      | "status"
-      | "upgradeTo"
-      | "upgradeToAndCall"
+    nameOrSignatureOrTopic: "proxiableUUID" | "upgradeTo" | "upgradeToAndCall"
   ): FunctionFragment;
 
-  encodeFunctionData(
-    functionFragment: "changeStatus",
-    values: [PromiseOrValue<BigNumberish>]
-  ): string;
   encodeFunctionData(
     functionFragment: "proxiableUUID",
     values?: undefined
   ): string;
-  encodeFunctionData(
-    functionFragment: "startWorkingEpoch",
-    values?: undefined
-  ): string;
-  encodeFunctionData(functionFragment: "status", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "upgradeTo",
     values: [PromiseOrValue<string>]
@@ -71,18 +52,9 @@ export interface StatusControllerInterface extends utils.Interface {
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "changeStatus",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "proxiableUUID",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "startWorkingEpoch",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "status", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "upgradeTo", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "upgradeToAndCall",
@@ -92,13 +64,11 @@ export interface StatusControllerInterface extends utils.Interface {
   events: {
     "AdminChanged(address,address)": EventFragment;
     "BeaconUpgraded(address)": EventFragment;
-    "StatusChanged(uint8)": EventFragment;
     "Upgraded(address)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "AdminChanged"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "BeaconUpgraded"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "StatusChanged"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Upgraded"): EventFragment;
 }
 
@@ -123,13 +93,6 @@ export type BeaconUpgradedEvent = TypedEvent<
 
 export type BeaconUpgradedEventFilter = TypedEventFilter<BeaconUpgradedEvent>;
 
-export interface StatusChangedEventObject {
-  newStatus: number;
-}
-export type StatusChangedEvent = TypedEvent<[number], StatusChangedEventObject>;
-
-export type StatusChangedEventFilter = TypedEventFilter<StatusChangedEvent>;
-
 export interface UpgradedEventObject {
   implementation: string;
 }
@@ -137,12 +100,12 @@ export type UpgradedEvent = TypedEvent<[string], UpgradedEventObject>;
 
 export type UpgradedEventFilter = TypedEventFilter<UpgradedEvent>;
 
-export interface StatusController extends BaseContract {
+export interface Controller extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: StatusControllerInterface;
+  interface: ControllerInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -164,16 +127,7 @@ export interface StatusController extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    changeStatus(
-      status_: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
     proxiableUUID(overrides?: CallOverrides): Promise<[string]>;
-
-    startWorkingEpoch(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    status(overrides?: CallOverrides): Promise<[number]>;
 
     upgradeTo(
       newImplementation: PromiseOrValue<string>,
@@ -187,16 +141,7 @@ export interface StatusController extends BaseContract {
     ): Promise<ContractTransaction>;
   };
 
-  changeStatus(
-    status_: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   proxiableUUID(overrides?: CallOverrides): Promise<string>;
-
-  startWorkingEpoch(overrides?: CallOverrides): Promise<BigNumber>;
-
-  status(overrides?: CallOverrides): Promise<number>;
 
   upgradeTo(
     newImplementation: PromiseOrValue<string>,
@@ -210,16 +155,7 @@ export interface StatusController extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    changeStatus(
-      status_: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     proxiableUUID(overrides?: CallOverrides): Promise<string>;
-
-    startWorkingEpoch(overrides?: CallOverrides): Promise<BigNumber>;
-
-    status(overrides?: CallOverrides): Promise<number>;
 
     upgradeTo(
       newImplementation: PromiseOrValue<string>,
@@ -250,9 +186,6 @@ export interface StatusController extends BaseContract {
       beacon?: PromiseOrValue<string> | null
     ): BeaconUpgradedEventFilter;
 
-    "StatusChanged(uint8)"(newStatus?: null): StatusChangedEventFilter;
-    StatusChanged(newStatus?: null): StatusChangedEventFilter;
-
     "Upgraded(address)"(
       implementation?: PromiseOrValue<string> | null
     ): UpgradedEventFilter;
@@ -262,16 +195,7 @@ export interface StatusController extends BaseContract {
   };
 
   estimateGas: {
-    changeStatus(
-      status_: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
     proxiableUUID(overrides?: CallOverrides): Promise<BigNumber>;
-
-    startWorkingEpoch(overrides?: CallOverrides): Promise<BigNumber>;
-
-    status(overrides?: CallOverrides): Promise<BigNumber>;
 
     upgradeTo(
       newImplementation: PromiseOrValue<string>,
@@ -286,16 +210,7 @@ export interface StatusController extends BaseContract {
   };
 
   populateTransaction: {
-    changeStatus(
-      status_: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
     proxiableUUID(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    startWorkingEpoch(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    status(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     upgradeTo(
       newImplementation: PromiseOrValue<string>,

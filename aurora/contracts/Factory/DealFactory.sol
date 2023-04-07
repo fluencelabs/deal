@@ -1,19 +1,21 @@
 // SPDX-License-Identifier: Apache-2.0
-/*
+
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts/utils/StorageSlot.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "../Global/GlobalConfig.sol";
-import "../Deal/Deal.sol";
 import "../Mock/MockParticleVerifyer.sol";
+import "../Deal/Core.sol";
+import "../Deal/Config.sol";
+import "../Deal/Controller.sol";
+import "../Deal/Payment.sol";
+import "../Deal/StatusController.sol";
+import "../Deal/Workers.sol";
+import "../Deal/DealProxy.sol";
+import "../ParticleVerifyer/IParticleVerifyer.sol";
 
 contract DealFactory {
-    Core public core;
-    address public defaultPaymentToken;
-    MockParticleVerifyer public particleVerifyer;
-
-    bytes32 private constant _PREFIX_DEAL_SLOT = keccak256("network.fluence.DealFactory.deal.");
-
     event DealCreated(
         address deal,
         address paymentToken,
@@ -27,65 +29,80 @@ contract DealFactory {
         uint256 epoch
     );
 
-    constructor(Core core_, address defaultPaymentToken_) {
-        core = core_;
+    uint256 public constant PRICE_PER_EPOCH = 83 * 10 ** 15;
+    uint256 public constant REQUIRED_STAKE = 1 * 10 ** 18;
+    uint256 public constant MAX_WORKERS_PER_PROVIDER = 10000000;
+
+    IERC20 public immutable defaultPaymentToken;
+
+    Core public immutable coreImpl;
+    Config public immutable configImpl;
+    Controller public immutable controllerImpl;
+    Payment public immutable paymentImpl;
+    StatusController public immutable statusControllerImpl;
+    Workers public immutable workersImpl;
+
+    mapping(address => bool) public deals;
+
+    constructor(GlobalConfig globalConfig_, IERC20 defaultPaymentToken_) {
         defaultPaymentToken = defaultPaymentToken_;
-        particleVerifyer = new MockParticleVerifyer();
+
+        coreImpl = new Core();
+        configImpl = new Config(globalConfig_, new MockParticleVerifyer());
+        controllerImpl = new Controller();
+        paymentImpl = new Payment();
+        statusControllerImpl = new StatusController();
+        workersImpl = new Workers();
     }
 
     function createDeal(uint256 minWorkers_, uint256 targetWorkers_, string memory appCID_) external {
-        //TODO: args varables
-        uint256 pricePerEpoch_ = 83 * 10 ** 15;
-        uint256 requiredStake_ = 1 * 10 ** 18;
-        uint256 maxWorkersPerProvider_ = 10000000;
-        address paymentToken_ = defaultPaymentToken;
-
         string[] memory effectorWasmsCids_ = new string[](0);
+        bytes memory emptyBytes;
 
-        // TODO: create2 function
-        Deal deal = new Deal(
-            core,
-            paymentToken_,
-            pricePerEpoch_,
-            requiredStake_,
-            minWorkers_,
-            maxWorkersPerProvider_,
-            targetWorkers_,
-            appCID_,
-            effectorWasmsCids_,
-            particleVerifyer
+        Core core = Core(address(new ERC1967Proxy(address(coreImpl), emptyBytes)));
+        Config config = Config(
+            address(
+                new DealProxy(
+                    address(configImpl),
+                    abi.encodeWithSelector(
+                        Config.initialize.selector,
+                        defaultPaymentToken,
+                        PRICE_PER_EPOCH,
+                        REQUIRED_STAKE,
+                        appCID_,
+                        minWorkers_,
+                        MAX_WORKERS_PER_PROVIDER,
+                        targetWorkers_,
+                        effectorWasmsCids_
+                    ),
+                    core
+                )
+            )
         );
+        {
+            Controller controller = Controller(address(new DealProxy(address(controllerImpl), emptyBytes, core)));
+            Payment payment = Payment(address(new DealProxy(address(paymentImpl), emptyBytes, core)));
+            StatusController statusController = StatusController(address(new DealProxy(address(statusControllerImpl), emptyBytes, core)));
+            Workers workers = Workers(address(new DealProxy(address(workersImpl), emptyBytes, core)));
 
-        _setDeal(address(deal));
+            core.initialize(config, controller, payment, statusController, workers);
 
-        deal.transferOwnership(msg.sender);
+            deals[address(core)] = true;
+
+            core.transferOwnership(msg.sender);
+        }
 
         emit DealCreated(
-            address(deal),
-            address(paymentToken_),
-            pricePerEpoch_,
-            requiredStake_,
+            address(core),
+            address(defaultPaymentToken),
+            PRICE_PER_EPOCH,
+            REQUIRED_STAKE,
             minWorkers_,
-            maxWorkersPerProvider_,
+            MAX_WORKERS_PER_PROVIDER,
             targetWorkers_,
             appCID_,
             effectorWasmsCids_,
-            core.epochManager().currentEpoch()
+            config.globalConfig().epochManager().currentEpoch()
         );
     }
-
-    function _setDeal(address deal) internal {
-        _getDealSlot(deal).value = true;
-    }
-
-    function _hasDeal(address deal) internal view returns (bool) {
-        return _getDealSlot(deal).value;
-    }
-
-    function _getDealSlot(address deal) private pure returns (StorageSlot.BooleanSlot storage) {
-        bytes32 slot = bytes32(uint256(keccak256(abi.encode(_PREFIX_DEAL_SLOT, deal))) - 1);
-
-        return StorageSlot.getBooleanSlot(slot);
-    }
 }
-*/
