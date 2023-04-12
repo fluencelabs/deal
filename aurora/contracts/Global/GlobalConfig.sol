@@ -70,5 +70,5 @@ contract GlobalConfig is OwnableUpgradeable, GlobalConfigState, UUPSUpgradeable 
         epochManager = epochManager_;
     }
 
-    function _authorizeUpgrade(address newImplementation) internal override {}
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 }
