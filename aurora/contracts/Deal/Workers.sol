@@ -11,30 +11,35 @@ import "./interfaces/IWorkers.sol";
 import "./interfaces/IConfig.sol";
 import "./interfaces/ICore.sol";
 import "./StatusController.sol";
-import "./ModuleBase.sol";
-import "./Types.sol";
+import "./base/ModuleBase.sol";
+import "./base/Types.sol";
 
-contract Workers is ModuleBase, IWorkers {
-    using WithdrawRequests for WithdrawRequests.Requests;
-    using SafeERC20 for IERC20;
-
+contract WorkersState {
     struct OwnerInfo {
         uint256 patsCount;
     }
 
-    bytes32 private constant _PREFIX_PAT_SLOT = keccak256("network.fluence.WorkersManager.pat");
+    bytes32 internal constant _PREFIX_PAT_SLOT = keccak256("network.fluence.WorkersManager.pat");
+    bytes32 internal constant _PAT_ID_PREFIX = keccak256("network.fluence.pat");
 
-    uint256 private _currentWorkers;
+    uint256 internal _currentWorkers;
 
-    mapping(address => OwnerInfo) private _ownersInfo;
-    mapping(address => WithdrawRequests.Requests) private _requests;
+    mapping(address => OwnerInfo) internal _ownersInfo;
+    mapping(address => WithdrawRequests.Requests) internal _requests;
 
-    uint256 private nextWorkerIndex;
-    uint256 private freeIndexesCount;
-    mapping(uint256 => PATId) private _patIdByIndex;
+    uint256 internal _nextWorkerIndex;
+    uint256[] internal _freeIndexes;
+    mapping(uint256 => PATId) internal _patIdByIndex;
+}
+
+contract Workers is WorkersState, ModuleBase, IWorkers {
+    using WithdrawRequests for WithdrawRequests.Requests;
+    using SafeERC20 for IERC20;
+
+    // ---- Public view ----
 
     function getNextWorkerIndex() external view returns (uint256) {
-        return nextWorkerIndex;
+        return _nextWorkerIndex;
     }
 
     function getPATIndex(PATId id) external view returns (uint256) {
@@ -50,17 +55,17 @@ contract Workers is ModuleBase, IWorkers {
         return _requests[owner].getAmountBy(timestamp - globalConfig.withdrawTimeout());
     }
 
-    function createPAT(PATId id, address owner, uint index) external {
+    // ---- Public mutables ----
+
+    function createPAT(address owner) external {
         uint256 patsCountByOwner = _ownersInfo[owner].patsCount;
         uint256 currentWorkers = _currentWorkers;
-        PAT storage pat = _getPAT(id);
 
         ICore core = _core();
         IConfig config = core.getConfig();
 
         require(currentWorkers < config.targetWorkers(), "Target workers reached");
         require(patsCountByOwner < config.maxWorkersPerProvider(), "Max workers per provider reached");
-        require(pat.owner == address(0x00), "Id already used");
 
         uint256 requiredStake = config.requiredStake();
         config.fluenceToken().safeTransferFrom(owner, address(this), requiredStake);
@@ -75,18 +80,22 @@ contract Workers is ModuleBase, IWorkers {
             statusController.changeStatus(status);
         }
 
-        uint freeIndex;
-        if (freeIndexesCount == 0) {
-            freeIndex = nextWorkerIndex;
-            nextWorkerIndex = freeIndex + 1;
+        uint index;
+        uint freeIndexLength = _freeIndexes.length;
+        if (freeIndexLength > 0) {
+            index = _freeIndexes[freeIndexLength - 1];
+            _freeIndexes.pop();
         } else {
-            require(PATId.unwrap(_patIdByIndex[index]) == bytes32(0), "Index isn't free");
-            freeIndex = index;
+            index = _nextWorkerIndex;
         }
 
-        _initPAT(pat, owner, freeIndex, requiredStake, config.globalConfig().epochManager().currentEpoch());
+        PATId id = keccak256(abi.encodePacked(_PAT_ID_PREFIX, owner, index));
+        PAT storage pat = _getPAT(id);
+        require(pat.owner == address(0x00), "Id already used");
 
-        _patIdByIndex[freeIndex] = id;
+        _initPAT(pat, owner, index, requiredStake, config.globalConfig().epochManager().currentEpoch());
+
+        _patIdByIndex[index] = id;
         _ownersInfo[owner].patsCount = patsCountByOwner + 1;
         _currentWorkers = currentWorkers;
     }
@@ -110,10 +119,12 @@ contract Workers is ModuleBase, IWorkers {
             statusController.changeStatus(DealStatus.WaitingForWorkers);
         }
 
-        freeIndexesCount++;
+        uint patIndex = pat.index;
+        _freeIndexes.push(patIndex);
+
         _ownersInfo[owner].patsCount--;
         _currentWorkers = currentWorkers;
-        _patIdByIndex[pat.index] = PATId.wrap(bytes32(0));
+        _patIdByIndex[patIndex] = PATId.wrap(bytes32(0));
         _clearPAT(pat);
     }
 
@@ -124,6 +135,8 @@ contract Workers is ModuleBase, IWorkers {
 
         globalConfig.fluenceToken().safeTransfer(owner, amount);
     }
+
+    // ---- Private functions ----
 
     function _initPAT(PAT storage pat, address owner, uint index, uint collateral, uint created) private {
         pat.owner = owner;

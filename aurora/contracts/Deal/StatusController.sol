@@ -5,9 +5,9 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./Core.sol";
-import "./ModuleBase.sol";
+import "./base/ModuleBase.sol";
 import "./interfaces/IStatusController.sol";
-import { DealStatus } from "./Types.sol";
+import "./base/Types.sol";
 
 contract StatusController is ModuleBase, IStatusController {
     DealStatus private _status_;

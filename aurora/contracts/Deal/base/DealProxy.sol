@@ -3,8 +3,8 @@
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import "./Core.sol";
-import "./Types.sol";
+import "../Core.sol";
+import "../Types.sol";
 
 contract DealProxy is ERC1967Proxy {
     bytes32 internal constant _CORE_SLOT = keccak256("network.fluence.deal.core");

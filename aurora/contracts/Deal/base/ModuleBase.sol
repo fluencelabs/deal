@@ -3,7 +3,7 @@
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
-import "./interfaces/ICore.sol";
+import "../interfaces/ICore.sol";
 
 contract ModuleBase is UUPSUpgradeable {
     function _authorizeUpgrade(address newImplementation) internal override {}

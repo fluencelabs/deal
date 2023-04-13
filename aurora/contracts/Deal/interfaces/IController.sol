@@ -2,4 +2,6 @@
 
 pragma solidity ^0.8.17;
 
-interface IController {}
+interface IController {
+    function owner() external view returns (address);
+}

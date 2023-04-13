@@ -2,7 +2,6 @@
 
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "./interfaces/ICore.sol";
 import "./interfaces/IConfig.sol";
@@ -10,11 +9,16 @@ import "./interfaces/IController.sol";
 import "./interfaces/IPayment.sol";
 import "./interfaces/IStatusController.sol";
 import "./interfaces/IWorkers.sol";
-import "./Types.sol";
+import "./base/Types.sol";
 
-contract Core is Initializable, OwnableUpgradeable, UUPSUpgradeable, ICore {
+contract Core is Initializable, UUPSUpgradeable, ICore {
     mapping(Module => address) public modules;
     mapping(address => Module) public moduleByAddress;
+
+    modifier onlyControllerOwner() {
+        require(msg.sender == getController().owner(), "Core: Only controller owner can call this function");
+        _;
+    }
 
     function initialize(
         IConfig config_,
@@ -34,8 +38,6 @@ contract Core is Initializable, OwnableUpgradeable, UUPSUpgradeable, ICore {
         moduleByAddress[address(payment_)] = Module.Payment;
         moduleByAddress[address(statusController_)] = Module.StatusController;
         moduleByAddress[address(workers_)] = Module.Workers;
-
-        __Ownable_init();
     }
 
     function getConfig() public view returns (IConfig) {
@@ -58,5 +60,5 @@ contract Core is Initializable, OwnableUpgradeable, UUPSUpgradeable, ICore {
         return IWorkers(modules[Module.Workers]);
     }
 
-    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+    function _authorizeUpgrade(address newImplementation) internal override onlyControllerOwner {}
 }

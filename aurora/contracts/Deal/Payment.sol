@@ -8,8 +8,8 @@ import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 import "./interfaces/IPayment.sol";
 import "./interfaces/ICore.sol";
 import "./interfaces/IWorkers.sol";
-import "./Types.sol";
-import "./ModuleBase.sol";
+import "./base/Types.sol";
+import "./base/ModuleBase.sol";
 
 contract Payment is ModuleBase, IPayment {
     using BitMaps for BitMaps.BitMap;

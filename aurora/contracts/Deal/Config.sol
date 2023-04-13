@@ -5,10 +5,10 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../ParticleVerifyer/IParticleVerifyer.sol";
 import "../Global/GlobalConfig.sol";
-import "./ModuleBase.sol";
+import "./base/ModuleBase.sol";
 import "./interfaces/IConfig.sol";
 
-contract Config is ModuleBase, Initializable, IConfig {
+contract ConfigState {
     GlobalConfig public immutable globalConfig;
     IERC20 public immutable fluenceToken;
     IParticleVerifyer public immutable particleVerifyer;
@@ -21,7 +21,9 @@ contract Config is ModuleBase, Initializable, IConfig {
     uint256 public maxWorkersPerProvider;
     uint256 public targetWorkers;
     string[] public effectorWasmsCids;
+}
 
+contract Config is ConfigState, ModuleBase, Initializable, IConfig {
     constructor(GlobalConfig globalConfig_, IParticleVerifyer particleVerifyer_) {
         globalConfig = globalConfig_;
         fluenceToken = globalConfig_.fluenceToken();
