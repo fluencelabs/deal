@@ -26,7 +26,14 @@ const config: HardhatUserConfig = {
     polygonMumbai: {
       url: "https://polygon-mumbai.blockpi.network/v1/rpc/public",
       accounts: [
-        process.env.AURORA_PRIVATE_KEY ??
+        process.env.RIVATE_KEY ??
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+      ],
+    },
+    auroraTestnet: {
+      url: "https://testnet.aurora.dev",
+      accounts: [
+        process.env.PRIVATE_KEY ??
           "0x0000000000000000000000000000000000000000000000000000000000000000",
       ],
     },

@@ -9,6 +9,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
 
   console.log("Deploying account:", deployer);
   console.log("Block number:", await hre.ethers.provider.getBlockNumber());
+  console.log("Testnet faucet");
 
   await hre.deployments.deploy("Faucet", {
     from: deployer,
