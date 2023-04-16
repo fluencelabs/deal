@@ -30,7 +30,7 @@ import type {
 
 export interface WorkersInterface extends utils.Interface {
   functions: {
-    "createPAT(bytes32,address,uint256)": FunctionFragment;
+    "createPAT(address)": FunctionFragment;
     "getNextWorkerIndex()": FunctionFragment;
     "getPATIndex(bytes32)": FunctionFragment;
     "getPATOwner(bytes32)": FunctionFragment;
@@ -58,11 +58,7 @@ export interface WorkersInterface extends utils.Interface {
 
   encodeFunctionData(
     functionFragment: "createPAT",
-    values: [
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>
-    ]
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "getNextWorkerIndex",
@@ -133,11 +129,13 @@ export interface WorkersInterface extends utils.Interface {
   events: {
     "AdminChanged(address,address)": EventFragment;
     "BeaconUpgraded(address)": EventFragment;
+    "PATCreated(bytes32,address)": EventFragment;
     "Upgraded(address)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "AdminChanged"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "BeaconUpgraded"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "PATCreated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Upgraded"): EventFragment;
 }
 
@@ -161,6 +159,17 @@ export type BeaconUpgradedEvent = TypedEvent<
 >;
 
 export type BeaconUpgradedEventFilter = TypedEventFilter<BeaconUpgradedEvent>;
+
+export interface PATCreatedEventObject {
+  id: string;
+  owner: string;
+}
+export type PATCreatedEvent = TypedEvent<
+  [string, string],
+  PATCreatedEventObject
+>;
+
+export type PATCreatedEventFilter = TypedEventFilter<PATCreatedEvent>;
 
 export interface UpgradedEventObject {
   implementation: string;
@@ -197,9 +206,7 @@ export interface Workers extends BaseContract {
 
   functions: {
     createPAT(
-      id: PromiseOrValue<BytesLike>,
       owner: PromiseOrValue<string>,
-      index: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -246,9 +253,7 @@ export interface Workers extends BaseContract {
   };
 
   createPAT(
-    id: PromiseOrValue<BytesLike>,
     owner: PromiseOrValue<string>,
-    index: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -295,9 +300,7 @@ export interface Workers extends BaseContract {
 
   callStatic: {
     createPAT(
-      id: PromiseOrValue<BytesLike>,
       owner: PromiseOrValue<string>,
-      index: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -360,6 +363,12 @@ export interface Workers extends BaseContract {
       beacon?: PromiseOrValue<string> | null
     ): BeaconUpgradedEventFilter;
 
+    "PATCreated(bytes32,address)"(
+      id?: null,
+      owner?: null
+    ): PATCreatedEventFilter;
+    PATCreated(id?: null, owner?: null): PATCreatedEventFilter;
+
     "Upgraded(address)"(
       implementation?: PromiseOrValue<string> | null
     ): UpgradedEventFilter;
@@ -370,9 +379,7 @@ export interface Workers extends BaseContract {
 
   estimateGas: {
     createPAT(
-      id: PromiseOrValue<BytesLike>,
       owner: PromiseOrValue<string>,
-      index: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -420,9 +427,7 @@ export interface Workers extends BaseContract {
 
   populateTransaction: {
     createPAT(
-      id: PromiseOrValue<BytesLike>,
       owner: PromiseOrValue<string>,
-      index: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

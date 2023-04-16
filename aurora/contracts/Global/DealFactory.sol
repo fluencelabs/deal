@@ -5,14 +5,14 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "../Global/GlobalConfig.sol";
-import "../Mock/MockParticleVerifyer.sol";
+import "../ParticleVerifyer/MockParticleVerifyer.sol";
 import "../Deal/Core.sol";
 import "../Deal/Config.sol";
 import "../Deal/Controller.sol";
 import "../Deal/Payment.sol";
 import "../Deal/StatusController.sol";
 import "../Deal/Workers.sol";
-import "../Deal/DealProxy.sol";
+import "../Deal/base/DealProxy.sol";
 import "../ParticleVerifyer/IParticleVerifyer.sol";
 
 contract DealFactory {
@@ -89,7 +89,7 @@ contract DealFactory {
 
             deals[address(core)] = true;
 
-            core.transferOwnership(msg.sender);
+            controller.transferOwnership(msg.sender);
         }
 
         emit DealCreated(

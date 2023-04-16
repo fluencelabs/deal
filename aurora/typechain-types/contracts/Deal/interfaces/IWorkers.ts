@@ -25,7 +25,7 @@ import type {
 
 export interface IWorkersInterface extends utils.Interface {
   functions: {
-    "createPAT(bytes32,address,uint256)": FunctionFragment;
+    "createPAT(address)": FunctionFragment;
     "getNextWorkerIndex()": FunctionFragment;
     "getPATIndex(bytes32)": FunctionFragment;
     "getPATOwner(bytes32)": FunctionFragment;
@@ -47,11 +47,7 @@ export interface IWorkersInterface extends utils.Interface {
 
   encodeFunctionData(
     functionFragment: "createPAT",
-    values: [
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>
-    ]
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "getNextWorkerIndex",
@@ -129,9 +125,7 @@ export interface IWorkers extends BaseContract {
 
   functions: {
     createPAT(
-      id: PromiseOrValue<BytesLike>,
       owner: PromiseOrValue<string>,
-      index: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -165,9 +159,7 @@ export interface IWorkers extends BaseContract {
   };
 
   createPAT(
-    id: PromiseOrValue<BytesLike>,
     owner: PromiseOrValue<string>,
-    index: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -201,9 +193,7 @@ export interface IWorkers extends BaseContract {
 
   callStatic: {
     createPAT(
-      id: PromiseOrValue<BytesLike>,
       owner: PromiseOrValue<string>,
-      index: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -240,9 +230,7 @@ export interface IWorkers extends BaseContract {
 
   estimateGas: {
     createPAT(
-      id: PromiseOrValue<BytesLike>,
       owner: PromiseOrValue<string>,
-      index: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -277,9 +265,7 @@ export interface IWorkers extends BaseContract {
 
   populateTransaction: {
     createPAT(
-      id: PromiseOrValue<BytesLike>,
       owner: PromiseOrValue<string>,
-      index: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

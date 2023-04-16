@@ -2,7 +2,7 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
-import "../Factory/DealFactory.sol";
+import "../Utils/AVLTree.sol";
 import { GlobalConfig } from "./GlobalConfig.sol";
 
 contract MatcherState {
@@ -11,20 +11,25 @@ contract MatcherState {
         uint maxCollateral;
     }
 
-    struct ResourceOwners {
-        address[] addresses;
+    struct ResouceByPrice {
+        bool exists;
+        address[] resourceOwners;
     }
 
     GlobalConfig public globalConfig;
-    Factory public factory;
+    address public factory;
 
     mapping(address => ResourceOwner) public resourceOwners;
 
     uint[] public minPrices;
-    mapping(uint => ResourceOwners) public resourceOwnersByMinPrice;
+    mapping(uint => ResouceByPrice) public resourceOwnersByMinPrice;
 }
 
 contract Matcher is MatcherState, Initializable, UUPSUpgradeable {
+    using AVLTree for AVLTree.Tree;
+
+    AVLTree.Tree tree;
+
     modifier onlyOwner() {
         require(msg.sender == globalConfig.owner(), "Only owner can call this function");
         _;
@@ -35,45 +40,34 @@ contract Matcher is MatcherState, Initializable, UUPSUpgradeable {
         _;
     }
 
-    function initialize(GlobalConfig globalConfig_, Factory factory_) public initializer {
+    function initialize(GlobalConfig globalConfig_, address factory_) public initializer {
         globalConfig = globalConfig_;
         factory = factory_;
     }
 
-    function register(uint minPriceByEpoch, uint maxCollateral) external onlyOwner {
+    function register(uint64 minPriceByEpoch, uint maxCollateral) external onlyOwner {
         globalConfig.fluenceToken().transferFrom(msg.sender, address(this), maxCollateral);
-        resourceOwners[msg.sender] = ResourceOwner(minPriceByEpoch, maxCollateral);
+        resourceOwners[msg.sender] = ResourceOwner(uint256(minPriceByEpoch), maxCollateral);
 
-        if (resourceOwnersByMinPrice[minPriceByEpoch].addresses.length == 0) {
-            minPrices.push(minPriceByEpoch);
+        if (resourceOwnersByMinPrice[minPriceByEpoch].exists) {
+            resourceOwnersByMinPrice[minPriceByEpoch].resourceOwners.push(msg.sender);
         } else {
-            uint index = _binarySearch(minPriceByEpoch);
-            minPrices[index] = minPriceByEpoch;
+            resourceOwnersByMinPrice[minPriceByEpoch] = ResouceByPrice(true, new address[](0));
+            tree.insert(minPriceByEpoch);
         }
     }
 
-    function unregister() external onlyOwner {
-        globalConfig.fluenceToken().transfer(msg.sender, resourceOwners[msg.sender].maxCollateral);
-        delete resourceOwners[msg.sender];
-    }
+    function matchWithDeal(uint collateral, uint priceByEpoch) external onlyFactory {
+        uint v = tree.searchGTE(priceByEpoch);
 
-    function matchWithDeal(uint collateral, uint priceByEpoch) external onlyFactory {}
+        require(v > 0, "No resource owners with min price >= priceByEpoch");
 
-    function _binarySearch(uint value) internal view returns (uint) {
-        uint left = 0;
-        uint right = minPrices.length - 1;
-
-        while (left < right) {
-            if (minPrices[mid] == value) {
-                return mid;
-            } else if (value > minPrices[mid]) {
-                right = mid;
-            } else {
-                left = mid;
+        for (uint i = 0; i < resourceOwnersByMinPrice[v].resourceOwners.length; i++) {
+            address resourceOwner = resourceOwnersByMinPrice[v].resourceOwners[i];
+            if (resourceOwners[resourceOwner].maxCollateral >= collateral) {
+                // match v
             }
         }
-
-        return left;
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}

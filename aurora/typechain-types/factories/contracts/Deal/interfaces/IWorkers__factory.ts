@@ -13,19 +13,9 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "PATId",
-        name: "id",
-        type: "bytes32",
-      },
-      {
         internalType: "address",
         name: "owner",
         type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "index",
-        type: "uint256",
       },
     ],
     name: "createPAT",

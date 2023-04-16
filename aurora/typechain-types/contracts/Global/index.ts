@@ -3,5 +3,7 @@
 /* eslint-disable */
 import type * as globalConfigSol from "./GlobalConfig.sol";
 export type { globalConfigSol };
+import type * as matcherSol from "./Matcher.sol";
+export type { matcherSol };
 export type { AquaProxy } from "./AquaProxy";
 export type { EpochManager } from "./EpochManager";

@@ -7,7 +7,7 @@ import "./IController.sol";
 import "./IPayment.sol";
 import "./IStatusController.sol";
 import "./IWorkers.sol";
-import "../Types.sol";
+import "../base/Types.sol";
 
 interface ICore {
     function modules(Module module) external view returns (address);

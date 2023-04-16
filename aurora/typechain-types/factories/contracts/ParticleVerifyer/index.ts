@@ -2,3 +2,4 @@
 /* tslint:disable */
 /* eslint-disable */
 export { IParticleVerifyer__factory } from "./IParticleVerifyer__factory";
+export { MockParticleVerifyer__factory } from "./MockParticleVerifyer__factory";

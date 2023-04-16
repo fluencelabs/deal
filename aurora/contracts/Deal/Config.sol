@@ -8,10 +8,16 @@ import "../Global/GlobalConfig.sol";
 import "./base/ModuleBase.sol";
 import "./interfaces/IConfig.sol";
 
-contract ConfigState {
+abstract contract ConfigState is IConfig {
     GlobalConfig public immutable globalConfig;
     IERC20 public immutable fluenceToken;
     IParticleVerifyer public immutable particleVerifyer;
+
+    constructor(GlobalConfig globalConfig_, IParticleVerifyer particleVerifyer_) {
+        globalConfig = globalConfig_;
+        fluenceToken = globalConfig_.fluenceToken();
+        particleVerifyer = particleVerifyer_;
+    }
 
     IERC20 public paymentToken;
     uint256 public pricePerEpoch;
@@ -23,12 +29,8 @@ contract ConfigState {
     string[] public effectorWasmsCids;
 }
 
-contract Config is ConfigState, ModuleBase, Initializable, IConfig {
-    constructor(GlobalConfig globalConfig_, IParticleVerifyer particleVerifyer_) {
-        globalConfig = globalConfig_;
-        fluenceToken = globalConfig_.fluenceToken();
-        particleVerifyer = particleVerifyer_;
-
+contract Config is ConfigState, ModuleBase, Initializable {
+    constructor(GlobalConfig globalConfig_, IParticleVerifyer particleVerifyer_) ConfigState(globalConfig_, particleVerifyer_) {
         _disableInitializers();
     }
 

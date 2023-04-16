@@ -36,6 +36,8 @@ contract Workers is WorkersState, ModuleBase, IWorkers {
     using WithdrawRequests for WithdrawRequests.Requests;
     using SafeERC20 for IERC20;
 
+    event PATCreated(PATId id, address owner);
+
     // ---- Public view ----
 
     function getNextWorkerIndex() external view returns (uint256) {
@@ -89,7 +91,7 @@ contract Workers is WorkersState, ModuleBase, IWorkers {
             index = _nextWorkerIndex;
         }
 
-        PATId id = keccak256(abi.encodePacked(_PAT_ID_PREFIX, owner, index));
+        PATId id = PATId.wrap(keccak256(abi.encodePacked(_PAT_ID_PREFIX, owner, index)));
         PAT storage pat = _getPAT(id);
         require(pat.owner == address(0x00), "Id already used");
 
@@ -98,6 +100,8 @@ contract Workers is WorkersState, ModuleBase, IWorkers {
         _patIdByIndex[index] = id;
         _ownersInfo[owner].patsCount = patsCountByOwner + 1;
         _currentWorkers = currentWorkers;
+
+        emit PATCreated(id, owner);
     }
 
     function removePAT(PATId id) external {

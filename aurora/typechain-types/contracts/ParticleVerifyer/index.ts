@@ -2,3 +2,4 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { IParticleVerifyer } from "./IParticleVerifyer";
+export type { MockParticleVerifyer } from "./MockParticleVerifyer";
