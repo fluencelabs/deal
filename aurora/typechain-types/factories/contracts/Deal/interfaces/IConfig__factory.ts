@@ -7,7 +7,7 @@ import type { Provider } from "@ethersproject/providers";
 import type {
   IConfig,
   IConfigInterface,
-} from "../../../../contracts/Deal/interfaces/IConfig";
+} from "../../../../contracts/deal/interfaces/IConfig";
 
 const _abi = [
   {

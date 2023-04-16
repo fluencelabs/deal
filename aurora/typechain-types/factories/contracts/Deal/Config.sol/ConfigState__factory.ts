@@ -7,7 +7,7 @@ import type { Provider } from "@ethersproject/providers";
 import type {
   ConfigState,
   ConfigStateInterface,
-} from "../../../../contracts/Deal/Config.sol/ConfigState";
+} from "../../../../contracts/deal/Config.sol/ConfigState";
 
 const _abi = [
   {

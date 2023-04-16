@@ -30,50 +30,45 @@ import type {
 
 export interface MatcherInterface extends utils.Interface {
   functions: {
-    "factory()": FunctionFragment;
+    "collateral(address)": FunctionFragment;
     "globalConfig()": FunctionFragment;
-    "initialize(address,address)": FunctionFragment;
-    "matchWithDeal(uint256,uint256)": FunctionFragment;
-    "minPrices(uint256)": FunctionFragment;
+    "initialize(address)": FunctionFragment;
+    "matchWithDeal(address,address[])": FunctionFragment;
     "proxiableUUID()": FunctionFragment;
-    "register(uint256,uint256)": FunctionFragment;
+    "register(uint64,uint256,uint256)": FunctionFragment;
     "resourceOwners(address)": FunctionFragment;
-    "resourceOwnersByMinPrice(uint256,uint256)": FunctionFragment;
     "upgradeTo(address)": FunctionFragment;
     "upgradeToAndCall(address,bytes)": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "factory"
+      | "collateral"
       | "globalConfig"
       | "initialize"
       | "matchWithDeal"
-      | "minPrices"
       | "proxiableUUID"
       | "register"
       | "resourceOwners"
-      | "resourceOwnersByMinPrice"
       | "upgradeTo"
       | "upgradeToAndCall"
   ): FunctionFragment;
 
-  encodeFunctionData(functionFragment: "factory", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "collateral",
+    values: [PromiseOrValue<string>]
+  ): string;
   encodeFunctionData(
     functionFragment: "globalConfig",
     values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "initialize",
-    values: [PromiseOrValue<string>, PromiseOrValue<string>]
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "matchWithDeal",
-    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "minPrices",
-    values: [PromiseOrValue<BigNumberish>]
+    values: [PromiseOrValue<string>, PromiseOrValue<string>[]]
   ): string;
   encodeFunctionData(
     functionFragment: "proxiableUUID",
@@ -81,15 +76,15 @@ export interface MatcherInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "register",
-    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "resourceOwners",
     values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "resourceOwnersByMinPrice",
-    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
     functionFragment: "upgradeTo",
@@ -100,7 +95,7 @@ export interface MatcherInterface extends utils.Interface {
     values: [PromiseOrValue<string>, PromiseOrValue<BytesLike>]
   ): string;
 
-  decodeFunctionResult(functionFragment: "factory", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "collateral", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "globalConfig",
     data: BytesLike
@@ -110,7 +105,6 @@ export interface MatcherInterface extends utils.Interface {
     functionFragment: "matchWithDeal",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "minPrices", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "proxiableUUID",
     data: BytesLike
@@ -118,10 +112,6 @@ export interface MatcherInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "register", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "resourceOwners",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "resourceOwnersByMinPrice",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "upgradeTo", data: BytesLike): Result;
@@ -205,32 +195,30 @@ export interface Matcher extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    factory(overrides?: CallOverrides): Promise<[string]>;
+    collateral(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
 
     globalConfig(overrides?: CallOverrides): Promise<[string]>;
 
     initialize(
       globalConfig_: PromiseOrValue<string>,
-      factory_: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
     matchWithDeal(
-      collateral: PromiseOrValue<BigNumberish>,
-      priceByEpoch: PromiseOrValue<BigNumberish>,
+      deal: PromiseOrValue<string>,
+      resources: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
-
-    minPrices(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
 
     proxiableUUID(overrides?: CallOverrides): Promise<[string]>;
 
     register(
       minPriceByEpoch: PromiseOrValue<BigNumberish>,
       maxCollateral: PromiseOrValue<BigNumberish>,
+      workersCount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -238,17 +226,12 @@ export interface Matcher extends BaseContract {
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<
-      [BigNumber, BigNumber] & {
+      [BigNumber, BigNumber, BigNumber] & {
         minPriceByEpoch: BigNumber;
         maxCollateral: BigNumber;
+        workersCount: BigNumber;
       }
     >;
-
-    resourceOwnersByMinPrice(
-      arg0: PromiseOrValue<BigNumberish>,
-      arg1: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
 
     upgradeTo(
       newImplementation: PromiseOrValue<string>,
@@ -262,32 +245,30 @@ export interface Matcher extends BaseContract {
     ): Promise<ContractTransaction>;
   };
 
-  factory(overrides?: CallOverrides): Promise<string>;
+  collateral(
+    arg0: PromiseOrValue<string>,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
 
   globalConfig(overrides?: CallOverrides): Promise<string>;
 
   initialize(
     globalConfig_: PromiseOrValue<string>,
-    factory_: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   matchWithDeal(
-    collateral: PromiseOrValue<BigNumberish>,
-    priceByEpoch: PromiseOrValue<BigNumberish>,
+    deal: PromiseOrValue<string>,
+    resources: PromiseOrValue<string>[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
-
-  minPrices(
-    arg0: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
 
   proxiableUUID(overrides?: CallOverrides): Promise<string>;
 
   register(
     minPriceByEpoch: PromiseOrValue<BigNumberish>,
     maxCollateral: PromiseOrValue<BigNumberish>,
+    workersCount: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -295,17 +276,12 @@ export interface Matcher extends BaseContract {
     arg0: PromiseOrValue<string>,
     overrides?: CallOverrides
   ): Promise<
-    [BigNumber, BigNumber] & {
+    [BigNumber, BigNumber, BigNumber] & {
       minPriceByEpoch: BigNumber;
       maxCollateral: BigNumber;
+      workersCount: BigNumber;
     }
   >;
-
-  resourceOwnersByMinPrice(
-    arg0: PromiseOrValue<BigNumberish>,
-    arg1: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides
-  ): Promise<string>;
 
   upgradeTo(
     newImplementation: PromiseOrValue<string>,
@@ -319,32 +295,30 @@ export interface Matcher extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    factory(overrides?: CallOverrides): Promise<string>;
+    collateral(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     globalConfig(overrides?: CallOverrides): Promise<string>;
 
     initialize(
       globalConfig_: PromiseOrValue<string>,
-      factory_: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
     matchWithDeal(
-      collateral: PromiseOrValue<BigNumberish>,
-      priceByEpoch: PromiseOrValue<BigNumberish>,
+      deal: PromiseOrValue<string>,
+      resources: PromiseOrValue<string>[],
       overrides?: CallOverrides
     ): Promise<void>;
-
-    minPrices(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
 
     proxiableUUID(overrides?: CallOverrides): Promise<string>;
 
     register(
       minPriceByEpoch: PromiseOrValue<BigNumberish>,
       maxCollateral: PromiseOrValue<BigNumberish>,
+      workersCount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -352,17 +326,12 @@ export interface Matcher extends BaseContract {
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<
-      [BigNumber, BigNumber] & {
+      [BigNumber, BigNumber, BigNumber] & {
         minPriceByEpoch: BigNumber;
         maxCollateral: BigNumber;
+        workersCount: BigNumber;
       }
     >;
-
-    resourceOwnersByMinPrice(
-      arg0: PromiseOrValue<BigNumberish>,
-      arg1: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<string>;
 
     upgradeTo(
       newImplementation: PromiseOrValue<string>,
@@ -405,25 +374,22 @@ export interface Matcher extends BaseContract {
   };
 
   estimateGas: {
-    factory(overrides?: CallOverrides): Promise<BigNumber>;
+    collateral(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     globalConfig(overrides?: CallOverrides): Promise<BigNumber>;
 
     initialize(
       globalConfig_: PromiseOrValue<string>,
-      factory_: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     matchWithDeal(
-      collateral: PromiseOrValue<BigNumberish>,
-      priceByEpoch: PromiseOrValue<BigNumberish>,
+      deal: PromiseOrValue<string>,
+      resources: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    minPrices(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     proxiableUUID(overrides?: CallOverrides): Promise<BigNumber>;
@@ -431,17 +397,12 @@ export interface Matcher extends BaseContract {
     register(
       minPriceByEpoch: PromiseOrValue<BigNumberish>,
       maxCollateral: PromiseOrValue<BigNumberish>,
+      workersCount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     resourceOwners(
       arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    resourceOwnersByMinPrice(
-      arg0: PromiseOrValue<BigNumberish>,
-      arg1: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -458,25 +419,22 @@ export interface Matcher extends BaseContract {
   };
 
   populateTransaction: {
-    factory(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    collateral(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     globalConfig(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     initialize(
       globalConfig_: PromiseOrValue<string>,
-      factory_: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     matchWithDeal(
-      collateral: PromiseOrValue<BigNumberish>,
-      priceByEpoch: PromiseOrValue<BigNumberish>,
+      deal: PromiseOrValue<string>,
+      resources: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    minPrices(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     proxiableUUID(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -484,17 +442,12 @@ export interface Matcher extends BaseContract {
     register(
       minPriceByEpoch: PromiseOrValue<BigNumberish>,
       maxCollateral: PromiseOrValue<BigNumberish>,
+      workersCount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     resourceOwners(
       arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    resourceOwnersByMinPrice(
-      arg0: PromiseOrValue<BigNumberish>,
-      arg1: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

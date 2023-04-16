@@ -49,10 +49,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Proxy__factory>;
     getContractFactory(
-      name: "Initializable",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.Initializable__factory>;
-    getContractFactory(
       name: "UUPSUpgradeable",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.UUPSUpgradeable__factory>;
@@ -161,13 +157,13 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TestERC20__factory>;
     getContractFactory(
-      name: "DealFactory",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.DealFactory__factory>;
-    getContractFactory(
       name: "AquaProxy",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.AquaProxy__factory>;
+    getContractFactory(
+      name: "DealFactory",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.DealFactory__factory>;
     getContractFactory(
       name: "EpochManager",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -181,6 +177,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.GlobalConfigState__factory>;
     getContractFactory(
+      name: "IParticleVerifyer",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IParticleVerifyer__factory>;
+    getContractFactory(
       name: "Matcher",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Matcher__factory>;
@@ -189,17 +189,13 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.MatcherState__factory>;
     getContractFactory(
-      name: "IParticleVerifyer",
+      name: "AVLMock",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IParticleVerifyer__factory>;
+    ): Promise<Contracts.AVLMock__factory>;
     getContractFactory(
       name: "MockParticleVerifyer",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.MockParticleVerifyer__factory>;
-    getContractFactory(
-      name: "AVLMock",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.AVLMock__factory>;
 
     getContractAt(
       name: "OwnableUpgradeable",
@@ -246,11 +242,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.Proxy>;
-    getContractAt(
-      name: "Initializable",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.Initializable>;
     getContractAt(
       name: "UUPSUpgradeable",
       address: string,
@@ -387,15 +378,15 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.TestERC20>;
     getContractAt(
-      name: "DealFactory",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.DealFactory>;
-    getContractAt(
       name: "AquaProxy",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.AquaProxy>;
+    getContractAt(
+      name: "DealFactory",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.DealFactory>;
     getContractAt(
       name: "EpochManager",
       address: string,
@@ -412,6 +403,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.GlobalConfigState>;
     getContractAt(
+      name: "IParticleVerifyer",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IParticleVerifyer>;
+    getContractAt(
       name: "Matcher",
       address: string,
       signer?: ethers.Signer
@@ -422,20 +418,15 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.MatcherState>;
     getContractAt(
-      name: "IParticleVerifyer",
+      name: "AVLMock",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.IParticleVerifyer>;
+    ): Promise<Contracts.AVLMock>;
     getContractAt(
       name: "MockParticleVerifyer",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.MockParticleVerifyer>;
-    getContractAt(
-      name: "AVLMock",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.AVLMock>;
 
     // default types
     getContractFactory(

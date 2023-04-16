@@ -5,8 +5,8 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/StorageSlot.sol";
-import "../Global/GlobalConfig.sol";
-import "../Utils/WithdrawRequests.sol";
+import "../global/GlobalConfig.sol";
+import "../utils/WithdrawRequests.sol";
 import "./interfaces/IWorkers.sol";
 import "./interfaces/IConfig.sol";
 import "./interfaces/ICore.sol";
@@ -70,7 +70,7 @@ contract Workers is WorkersState, ModuleBase, IWorkers {
         require(patsCountByOwner < config.maxWorkersPerProvider(), "Max workers per provider reached");
 
         uint256 requiredStake = config.requiredStake();
-        config.fluenceToken().safeTransferFrom(owner, address(this), requiredStake);
+        config.fluenceToken().safeTransferFrom(msg.sender, address(this), requiredStake);
 
         currentWorkers++;
 

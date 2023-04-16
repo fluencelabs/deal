@@ -7,7 +7,7 @@ import type { Provider } from "@ethersproject/providers";
 import type {
   IWorkers,
   IWorkersInterface,
-} from "../../../../contracts/Deal/interfaces/IWorkers";
+} from "../../../../contracts/deal/interfaces/IWorkers";
 
 const _abi = [
   {

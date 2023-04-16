@@ -1,6 +1,6 @@
 pragma solidity ^0.8.17;
 
-import "../AuroraSDK/AuroraSdk.sol";
+import "../auroraSDK/AuroraSdk.sol";
 
 contract AquaProxy {
     using AuroraSdk for NEAR;

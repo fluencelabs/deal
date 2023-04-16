@@ -4,7 +4,6 @@
 import type {
   BaseContract,
   BigNumber,
-  BigNumberish,
   BytesLike,
   CallOverrides,
   PopulatedTransaction,
@@ -23,52 +22,35 @@ import type {
 
 export interface MatcherStateInterface extends utils.Interface {
   functions: {
-    "factory()": FunctionFragment;
+    "collateral(address)": FunctionFragment;
     "globalConfig()": FunctionFragment;
-    "minPrices(uint256)": FunctionFragment;
     "resourceOwners(address)": FunctionFragment;
-    "resourceOwnersByMinPrice(uint256,uint256)": FunctionFragment;
   };
 
   getFunction(
-    nameOrSignatureOrTopic:
-      | "factory"
-      | "globalConfig"
-      | "minPrices"
-      | "resourceOwners"
-      | "resourceOwnersByMinPrice"
+    nameOrSignatureOrTopic: "collateral" | "globalConfig" | "resourceOwners"
   ): FunctionFragment;
 
-  encodeFunctionData(functionFragment: "factory", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "collateral",
+    values: [PromiseOrValue<string>]
+  ): string;
   encodeFunctionData(
     functionFragment: "globalConfig",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "minPrices",
-    values: [PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
     functionFragment: "resourceOwners",
     values: [PromiseOrValue<string>]
   ): string;
-  encodeFunctionData(
-    functionFragment: "resourceOwnersByMinPrice",
-    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
-  ): string;
 
-  decodeFunctionResult(functionFragment: "factory", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "collateral", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "globalConfig",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "minPrices", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "resourceOwners",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "resourceOwnersByMinPrice",
     data: BytesLike
   ): Result;
 
@@ -102,126 +84,89 @@ export interface MatcherState extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    factory(overrides?: CallOverrides): Promise<[string]>;
-
-    globalConfig(overrides?: CallOverrides): Promise<[string]>;
-
-    minPrices(
-      arg0: PromiseOrValue<BigNumberish>,
+    collateral(
+      arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
+
+    globalConfig(overrides?: CallOverrides): Promise<[string]>;
 
     resourceOwners(
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<
-      [BigNumber, BigNumber] & {
+      [BigNumber, BigNumber, BigNumber] & {
         minPriceByEpoch: BigNumber;
         maxCollateral: BigNumber;
+        workersCount: BigNumber;
       }
     >;
-
-    resourceOwnersByMinPrice(
-      arg0: PromiseOrValue<BigNumberish>,
-      arg1: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
   };
 
-  factory(overrides?: CallOverrides): Promise<string>;
-
-  globalConfig(overrides?: CallOverrides): Promise<string>;
-
-  minPrices(
-    arg0: PromiseOrValue<BigNumberish>,
+  collateral(
+    arg0: PromiseOrValue<string>,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
+
+  globalConfig(overrides?: CallOverrides): Promise<string>;
 
   resourceOwners(
     arg0: PromiseOrValue<string>,
     overrides?: CallOverrides
   ): Promise<
-    [BigNumber, BigNumber] & {
+    [BigNumber, BigNumber, BigNumber] & {
       minPriceByEpoch: BigNumber;
       maxCollateral: BigNumber;
+      workersCount: BigNumber;
     }
   >;
 
-  resourceOwnersByMinPrice(
-    arg0: PromiseOrValue<BigNumberish>,
-    arg1: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
   callStatic: {
-    factory(overrides?: CallOverrides): Promise<string>;
-
-    globalConfig(overrides?: CallOverrides): Promise<string>;
-
-    minPrices(
-      arg0: PromiseOrValue<BigNumberish>,
+    collateral(
+      arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    globalConfig(overrides?: CallOverrides): Promise<string>;
 
     resourceOwners(
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<
-      [BigNumber, BigNumber] & {
+      [BigNumber, BigNumber, BigNumber] & {
         minPriceByEpoch: BigNumber;
         maxCollateral: BigNumber;
+        workersCount: BigNumber;
       }
     >;
-
-    resourceOwnersByMinPrice(
-      arg0: PromiseOrValue<BigNumberish>,
-      arg1: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<string>;
   };
 
   filters: {};
 
   estimateGas: {
-    factory(overrides?: CallOverrides): Promise<BigNumber>;
-
-    globalConfig(overrides?: CallOverrides): Promise<BigNumber>;
-
-    minPrices(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    resourceOwners(
+    collateral(
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    resourceOwnersByMinPrice(
-      arg0: PromiseOrValue<BigNumberish>,
-      arg1: PromiseOrValue<BigNumberish>,
+    globalConfig(overrides?: CallOverrides): Promise<BigNumber>;
+
+    resourceOwners(
+      arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    factory(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    globalConfig(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    minPrices(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    resourceOwners(
+    collateral(
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    resourceOwnersByMinPrice(
-      arg0: PromiseOrValue<BigNumberish>,
-      arg1: PromiseOrValue<BigNumberish>,
+    globalConfig(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    resourceOwners(
+      arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };

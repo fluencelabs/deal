@@ -1,7 +1,7 @@
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "../Global/AquaProxy.sol";
+import "../global/AquaProxy.sol";
 import "./TestERC20.sol";
 
 contract DeveloperFaucet {

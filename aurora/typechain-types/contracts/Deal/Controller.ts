@@ -31,6 +31,7 @@ export interface ControllerInterface extends utils.Interface {
   functions: {
     "initialize()": FunctionFragment;
     "join()": FunctionFragment;
+    "joinViaMatcher(address)": FunctionFragment;
     "owner()": FunctionFragment;
     "proxiableUUID()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
@@ -44,6 +45,7 @@ export interface ControllerInterface extends utils.Interface {
     nameOrSignatureOrTopic:
       | "initialize"
       | "join"
+      | "joinViaMatcher"
       | "owner"
       | "proxiableUUID"
       | "renounceOwnership"
@@ -58,6 +60,10 @@ export interface ControllerInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "join", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "joinViaMatcher",
+    values: [PromiseOrValue<string>]
+  ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "proxiableUUID",
@@ -86,6 +92,10 @@ export interface ControllerInterface extends utils.Interface {
 
   decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "join", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "joinViaMatcher",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "proxiableUUID",
@@ -203,6 +213,11 @@ export interface Controller extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    joinViaMatcher(
+      resourceOwner: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     owner(overrides?: CallOverrides): Promise<[string]>;
 
     proxiableUUID(overrides?: CallOverrides): Promise<[string]>;
@@ -241,6 +256,11 @@ export interface Controller extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  joinViaMatcher(
+    resourceOwner: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   owner(overrides?: CallOverrides): Promise<string>;
 
   proxiableUUID(overrides?: CallOverrides): Promise<string>;
@@ -274,6 +294,11 @@ export interface Controller extends BaseContract {
     initialize(overrides?: CallOverrides): Promise<void>;
 
     join(overrides?: CallOverrides): Promise<void>;
+
+    joinViaMatcher(
+      resourceOwner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     owner(overrides?: CallOverrides): Promise<string>;
 
@@ -349,6 +374,11 @@ export interface Controller extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    joinViaMatcher(
+      resourceOwner: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
     proxiableUUID(overrides?: CallOverrides): Promise<BigNumber>;
@@ -385,6 +415,11 @@ export interface Controller extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     join(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    joinViaMatcher(
+      resourceOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

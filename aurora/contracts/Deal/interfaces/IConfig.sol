@@ -3,8 +3,8 @@
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../../ParticleVerifyer/IParticleVerifyer.sol";
-import "../../Global/GlobalConfig.sol";
+import "../../global/interfaces/IParticleVerifyer.sol";
+import "../../global/GlobalConfig.sol";
 
 interface IConfig {
     function initialize(

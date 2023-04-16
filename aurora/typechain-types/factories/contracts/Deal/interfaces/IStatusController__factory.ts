@@ -7,7 +7,7 @@ import type { Provider } from "@ethersproject/providers";
 import type {
   IStatusController,
   IStatusControllerInterface,
-} from "../../../../contracts/Deal/interfaces/IStatusController";
+} from "../../../../contracts/deal/interfaces/IStatusController";
 
 const _abi = [
   {

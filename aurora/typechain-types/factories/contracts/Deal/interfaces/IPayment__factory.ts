@@ -7,7 +7,7 @@ import type { Provider } from "@ethersproject/providers";
 import type {
   IPayment,
   IPaymentInterface,
-} from "../../../../contracts/Deal/interfaces/IPayment";
+} from "../../../../contracts/deal/interfaces/IPayment";
 
 const _abi = [
   {

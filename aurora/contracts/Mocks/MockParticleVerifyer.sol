@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.17;
 
-import "../ParticleVerifyer/IParticleVerifyer.sol";
-import { Particle, PATId } from "../Deal/base/Types.sol";
+import "../global/interfaces/IParticleVerifyer.sol";
+import { Particle, PATId } from "../deal/base/Types.sol";
 
 contract MockParticleVerifyer is IParticleVerifyer {
     mapping(bytes32 => PATId[]) public particlePATIds;

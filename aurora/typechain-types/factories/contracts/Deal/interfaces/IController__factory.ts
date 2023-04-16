@@ -7,9 +7,29 @@ import type { Provider } from "@ethersproject/providers";
 import type {
   IController,
   IControllerInterface,
-} from "../../../../contracts/Deal/interfaces/IController";
+} from "../../../../contracts/deal/interfaces/IController";
 
 const _abi = [
+  {
+    inputs: [],
+    name: "join",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "resourceOwner",
+        type: "address",
+      },
+    ],
+    name: "joinViaMatcher",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
   {
     inputs: [],
     name: "owner",
@@ -21,6 +41,19 @@ const _abi = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "cid",
+        type: "string",
+      },
+    ],
+    name: "setAppCID",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
 ] as const;

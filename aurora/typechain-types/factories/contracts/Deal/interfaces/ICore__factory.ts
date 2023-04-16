@@ -7,7 +7,7 @@ import type { Provider } from "@ethersproject/providers";
 import type {
   ICore,
   ICoreInterface,
-} from "../../../../contracts/Deal/interfaces/ICore";
+} from "../../../../contracts/deal/interfaces/ICore";
 
 const _abi = [
   {

@@ -24,4 +24,8 @@ contract Controller is ModuleBase, OwnableUpgradeable, IController {
     function join() external {
         _core().getWorkers().createPAT(msg.sender);
     }
+
+    function joinViaMatcher(address resourceOwner) external {
+        _core().getWorkers().createPAT(resourceOwner);
+    }
 }

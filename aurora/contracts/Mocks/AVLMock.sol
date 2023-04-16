@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.17;
 
-import "../Utils/AVLTree.sol";
+import "../utils/AVLTree.sol";
 
 contract AVLMock {
     AVLTree.Tree tree;

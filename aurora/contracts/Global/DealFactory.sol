@@ -4,16 +4,15 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import "../Global/GlobalConfig.sol";
-import "../ParticleVerifyer/MockParticleVerifyer.sol";
-import "../Deal/Core.sol";
-import "../Deal/Config.sol";
-import "../Deal/Controller.sol";
-import "../Deal/Payment.sol";
-import "../Deal/StatusController.sol";
-import "../Deal/Workers.sol";
-import "../Deal/base/DealProxy.sol";
-import "../ParticleVerifyer/IParticleVerifyer.sol";
+import "../global/GlobalConfig.sol";
+import "../mocks/MockParticleVerifyer.sol";
+import "../deal/Core.sol";
+import "../deal/Config.sol";
+import "../deal/Controller.sol";
+import "../deal/Payment.sol";
+import "../deal/StatusController.sol";
+import "../deal/Workers.sol";
+import "../deal/base/DealProxy.sol";
 
 contract DealFactory {
     event DealCreated(

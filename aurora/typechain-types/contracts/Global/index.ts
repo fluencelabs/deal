@@ -5,5 +5,8 @@ import type * as globalConfigSol from "./GlobalConfig.sol";
 export type { globalConfigSol };
 import type * as matcherSol from "./Matcher.sol";
 export type { matcherSol };
+import type * as interfaces from "./interfaces";
+export type { interfaces };
 export type { AquaProxy } from "./AquaProxy";
+export type { DealFactory } from "./DealFactory";
 export type { EpochManager } from "./EpochManager";
