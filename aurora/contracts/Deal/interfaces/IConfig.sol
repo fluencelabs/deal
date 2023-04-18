@@ -4,7 +4,7 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../../global/interfaces/IParticleVerifyer.sol";
-import "../../global/GlobalConfig.sol";
+import "../../global/interfaces/IGlobalConfig.sol";
 
 interface IConfig {
     function initialize(
@@ -18,7 +18,7 @@ interface IConfig {
         string[] memory effectorWasmsCids_
     ) external;
 
-    function globalConfig() external view returns (GlobalConfig);
+    function globalConfig() external view returns (IGlobalConfig);
 
     function fluenceToken() external view returns (IERC20);
 

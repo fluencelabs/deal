@@ -13,11 +13,7 @@ import type {
   Signer,
   utils,
 } from "ethers";
-import type {
-  FunctionFragment,
-  Result,
-  EventFragment,
-} from "@ethersproject/abi";
+import type { FunctionFragment, Result } from "@ethersproject/abi";
 import type { Listener, Provider } from "@ethersproject/providers";
 import type {
   TypedEventFilter,
@@ -25,9 +21,9 @@ import type {
   TypedListener,
   OnEvent,
   PromiseOrValue,
-} from "../../common";
+} from "../../../common";
 
-export interface DealFactoryInterface extends utils.Interface {
+export interface DealFactoryStateInterface extends utils.Interface {
   functions: {
     "MAX_WORKERS_PER_PROVIDER()": FunctionFragment;
     "PRICE_PER_EPOCH()": FunctionFragment;
@@ -36,8 +32,9 @@ export interface DealFactoryInterface extends utils.Interface {
     "controllerImpl()": FunctionFragment;
     "coreImpl()": FunctionFragment;
     "createDeal(uint256,uint256,string)": FunctionFragment;
-    "deals(address)": FunctionFragment;
     "defaultPaymentToken()": FunctionFragment;
+    "globalConfig()": FunctionFragment;
+    "isDeal(address)": FunctionFragment;
     "paymentImpl()": FunctionFragment;
     "statusControllerImpl()": FunctionFragment;
     "workersImpl()": FunctionFragment;
@@ -52,8 +49,9 @@ export interface DealFactoryInterface extends utils.Interface {
       | "controllerImpl"
       | "coreImpl"
       | "createDeal"
-      | "deals"
       | "defaultPaymentToken"
+      | "globalConfig"
+      | "isDeal"
       | "paymentImpl"
       | "statusControllerImpl"
       | "workersImpl"
@@ -89,12 +87,16 @@ export interface DealFactoryInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "deals",
-    values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
     functionFragment: "defaultPaymentToken",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "globalConfig",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isDeal",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "paymentImpl",
@@ -128,11 +130,15 @@ export interface DealFactoryInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "coreImpl", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "createDeal", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "deals", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "defaultPaymentToken",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "globalConfig",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "isDeal", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "paymentImpl",
     data: BytesLike
@@ -146,49 +152,15 @@ export interface DealFactoryInterface extends utils.Interface {
     data: BytesLike
   ): Result;
 
-  events: {
-    "DealCreated(address,address,uint256,uint256,uint256,uint256,uint256,string,string[],uint256)": EventFragment;
-  };
-
-  getEvent(nameOrSignatureOrTopic: "DealCreated"): EventFragment;
+  events: {};
 }
 
-export interface DealCreatedEventObject {
-  deal: string;
-  paymentToken: string;
-  pricePerEpoch: BigNumber;
-  requiredStake: BigNumber;
-  minWorkers: BigNumber;
-  maxWorkersPerProvider: BigNumber;
-  targetWorkers: BigNumber;
-  appCID: string;
-  effectorWasmsCids: string[];
-  epoch: BigNumber;
-}
-export type DealCreatedEvent = TypedEvent<
-  [
-    string,
-    string,
-    BigNumber,
-    BigNumber,
-    BigNumber,
-    BigNumber,
-    BigNumber,
-    string,
-    string[],
-    BigNumber
-  ],
-  DealCreatedEventObject
->;
-
-export type DealCreatedEventFilter = TypedEventFilter<DealCreatedEvent>;
-
-export interface DealFactory extends BaseContract {
+export interface DealFactoryState extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: DealFactoryInterface;
+  interface: DealFactoryStateInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -229,12 +201,14 @@ export interface DealFactory extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    deals(
+    defaultPaymentToken(overrides?: CallOverrides): Promise<[string]>;
+
+    globalConfig(overrides?: CallOverrides): Promise<[string]>;
+
+    isDeal(
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
-
-    defaultPaymentToken(overrides?: CallOverrides): Promise<[string]>;
 
     paymentImpl(overrides?: CallOverrides): Promise<[string]>;
 
@@ -262,12 +236,14 @@ export interface DealFactory extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  deals(
+  defaultPaymentToken(overrides?: CallOverrides): Promise<string>;
+
+  globalConfig(overrides?: CallOverrides): Promise<string>;
+
+  isDeal(
     arg0: PromiseOrValue<string>,
     overrides?: CallOverrides
   ): Promise<boolean>;
-
-  defaultPaymentToken(overrides?: CallOverrides): Promise<string>;
 
   paymentImpl(overrides?: CallOverrides): Promise<string>;
 
@@ -293,14 +269,16 @@ export interface DealFactory extends BaseContract {
       targetWorkers_: PromiseOrValue<BigNumberish>,
       appCID_: PromiseOrValue<string>,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<string>;
 
-    deals(
+    defaultPaymentToken(overrides?: CallOverrides): Promise<string>;
+
+    globalConfig(overrides?: CallOverrides): Promise<string>;
+
+    isDeal(
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<boolean>;
-
-    defaultPaymentToken(overrides?: CallOverrides): Promise<string>;
 
     paymentImpl(overrides?: CallOverrides): Promise<string>;
 
@@ -309,32 +287,7 @@ export interface DealFactory extends BaseContract {
     workersImpl(overrides?: CallOverrides): Promise<string>;
   };
 
-  filters: {
-    "DealCreated(address,address,uint256,uint256,uint256,uint256,uint256,string,string[],uint256)"(
-      deal?: null,
-      paymentToken?: null,
-      pricePerEpoch?: null,
-      requiredStake?: null,
-      minWorkers?: null,
-      maxWorkersPerProvider?: null,
-      targetWorkers?: null,
-      appCID?: null,
-      effectorWasmsCids?: null,
-      epoch?: null
-    ): DealCreatedEventFilter;
-    DealCreated(
-      deal?: null,
-      paymentToken?: null,
-      pricePerEpoch?: null,
-      requiredStake?: null,
-      minWorkers?: null,
-      maxWorkersPerProvider?: null,
-      targetWorkers?: null,
-      appCID?: null,
-      effectorWasmsCids?: null,
-      epoch?: null
-    ): DealCreatedEventFilter;
-  };
+  filters: {};
 
   estimateGas: {
     MAX_WORKERS_PER_PROVIDER(overrides?: CallOverrides): Promise<BigNumber>;
@@ -356,12 +309,14 @@ export interface DealFactory extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    deals(
+    defaultPaymentToken(overrides?: CallOverrides): Promise<BigNumber>;
+
+    globalConfig(overrides?: CallOverrides): Promise<BigNumber>;
+
+    isDeal(
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
-
-    defaultPaymentToken(overrides?: CallOverrides): Promise<BigNumber>;
 
     paymentImpl(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -392,12 +347,14 @@ export interface DealFactory extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    deals(
-      arg0: PromiseOrValue<string>,
+    defaultPaymentToken(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    defaultPaymentToken(
+    globalConfig(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    isDeal(
+      arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

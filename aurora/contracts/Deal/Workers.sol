@@ -5,13 +5,13 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/StorageSlot.sol";
-import "../global/GlobalConfig.sol";
+import "./base/ModuleBase.sol";
+import "../global/interfaces/IGlobalConfig.sol";
 import "../utils/WithdrawRequests.sol";
 import "./interfaces/IWorkers.sol";
 import "./interfaces/IConfig.sol";
 import "./interfaces/ICore.sol";
-import "./StatusController.sol";
-import "./base/ModuleBase.sol";
+import "./interfaces/IStatusController.sol";
 import "./base/Types.sol";
 
 contract WorkersState {
@@ -40,6 +40,10 @@ contract Workers is WorkersState, ModuleBase, IWorkers {
 
     // ---- Public view ----
 
+    function workersCount() external view returns (uint256) {
+        return _currentWorkers;
+    }
+
     function getNextWorkerIndex() external view returns (uint256) {
         return _nextWorkerIndex;
     }
@@ -53,13 +57,13 @@ contract Workers is WorkersState, ModuleBase, IWorkers {
     }
 
     function getUnlockedAmountBy(address owner, uint256 timestamp) external view returns (uint256) {
-        GlobalConfig globalConfig = _core().getConfig().globalConfig();
+        IGlobalConfig globalConfig = _core().getConfig().globalConfig();
         return _requests[owner].getAmountBy(timestamp - globalConfig.withdrawTimeout());
     }
 
     // ---- Public mutables ----
 
-    function createPAT(address owner) external {
+    function createPAT(address owner) external onlyModule(Module.Controller) {
         uint256 patsCountByOwner = _ownersInfo[owner].patsCount;
         uint256 currentWorkers = _currentWorkers;
 
@@ -104,7 +108,7 @@ contract Workers is WorkersState, ModuleBase, IWorkers {
         emit PATCreated(id, owner);
     }
 
-    function removePAT(PATId id) external {
+    function removePAT(PATId id) external onlyModule(Module.Controller) {
         PAT storage pat = _getPAT(id);
         address owner = pat.owner;
 
@@ -132,8 +136,8 @@ contract Workers is WorkersState, ModuleBase, IWorkers {
         _clearPAT(pat);
     }
 
-    function withdraw(address owner) external {
-        GlobalConfig globalConfig = _core().getConfig().globalConfig();
+    function withdraw(address owner) external onlyModule(Module.Controller) {
+        IGlobalConfig globalConfig = _core().getConfig().globalConfig();
 
         uint256 amount = _requests[owner].confirmBy(block.timestamp - globalConfig.withdrawTimeout());
 

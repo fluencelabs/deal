@@ -32,8 +32,7 @@ export interface MatcherInterface extends utils.Interface {
   functions: {
     "collateral(address)": FunctionFragment;
     "globalConfig()": FunctionFragment;
-    "initialize(address)": FunctionFragment;
-    "matchWithDeal(address,address[])": FunctionFragment;
+    "matchWithDeal(address,address[],uint256[])": FunctionFragment;
     "proxiableUUID()": FunctionFragment;
     "register(uint64,uint256,uint256)": FunctionFragment;
     "resourceOwners(address)": FunctionFragment;
@@ -45,7 +44,6 @@ export interface MatcherInterface extends utils.Interface {
     nameOrSignatureOrTopic:
       | "collateral"
       | "globalConfig"
-      | "initialize"
       | "matchWithDeal"
       | "proxiableUUID"
       | "register"
@@ -63,12 +61,12 @@ export interface MatcherInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "initialize",
-    values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
     functionFragment: "matchWithDeal",
-    values: [PromiseOrValue<string>, PromiseOrValue<string>[]]
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<string>[],
+      PromiseOrValue<BigNumberish>[]
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "proxiableUUID",
@@ -100,7 +98,6 @@ export interface MatcherInterface extends utils.Interface {
     functionFragment: "globalConfig",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "matchWithDeal",
     data: BytesLike
@@ -202,14 +199,10 @@ export interface Matcher extends BaseContract {
 
     globalConfig(overrides?: CallOverrides): Promise<[string]>;
 
-    initialize(
-      globalConfig_: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
     matchWithDeal(
       deal: PromiseOrValue<string>,
       resources: PromiseOrValue<string>[],
+      workersCount_: PromiseOrValue<BigNumberish>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -252,14 +245,10 @@ export interface Matcher extends BaseContract {
 
   globalConfig(overrides?: CallOverrides): Promise<string>;
 
-  initialize(
-    globalConfig_: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   matchWithDeal(
     deal: PromiseOrValue<string>,
     resources: PromiseOrValue<string>[],
+    workersCount_: PromiseOrValue<BigNumberish>[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -302,14 +291,10 @@ export interface Matcher extends BaseContract {
 
     globalConfig(overrides?: CallOverrides): Promise<string>;
 
-    initialize(
-      globalConfig_: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     matchWithDeal(
       deal: PromiseOrValue<string>,
       resources: PromiseOrValue<string>[],
+      workersCount_: PromiseOrValue<BigNumberish>[],
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -381,14 +366,10 @@ export interface Matcher extends BaseContract {
 
     globalConfig(overrides?: CallOverrides): Promise<BigNumber>;
 
-    initialize(
-      globalConfig_: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
     matchWithDeal(
       deal: PromiseOrValue<string>,
       resources: PromiseOrValue<string>[],
+      workersCount_: PromiseOrValue<BigNumberish>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -426,14 +407,10 @@ export interface Matcher extends BaseContract {
 
     globalConfig(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    initialize(
-      globalConfig_: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
     matchWithDeal(
       deal: PromiseOrValue<string>,
       resources: PromiseOrValue<string>[],
+      workersCount_: PromiseOrValue<BigNumberish>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

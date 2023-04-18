@@ -32,6 +32,7 @@ export interface IWorkersInterface extends utils.Interface {
     "getUnlockedAmountBy(address,uint256)": FunctionFragment;
     "removePAT(bytes32)": FunctionFragment;
     "withdraw(address)": FunctionFragment;
+    "workersCount()": FunctionFragment;
   };
 
   getFunction(
@@ -43,6 +44,7 @@ export interface IWorkersInterface extends utils.Interface {
       | "getUnlockedAmountBy"
       | "removePAT"
       | "withdraw"
+      | "workersCount"
   ): FunctionFragment;
 
   encodeFunctionData(
@@ -73,6 +75,10 @@ export interface IWorkersInterface extends utils.Interface {
     functionFragment: "withdraw",
     values: [PromiseOrValue<string>]
   ): string;
+  encodeFunctionData(
+    functionFragment: "workersCount",
+    values?: undefined
+  ): string;
 
   decodeFunctionResult(functionFragment: "createPAT", data: BytesLike): Result;
   decodeFunctionResult(
@@ -93,6 +99,10 @@ export interface IWorkersInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "removePAT", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "workersCount",
+    data: BytesLike
+  ): Result;
 
   events: {};
 }
@@ -156,6 +166,8 @@ export interface IWorkers extends BaseContract {
       owner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
+
+    workersCount(overrides?: CallOverrides): Promise<[BigNumber]>;
   };
 
   createPAT(
@@ -191,6 +203,8 @@ export interface IWorkers extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  workersCount(overrides?: CallOverrides): Promise<BigNumber>;
+
   callStatic: {
     createPAT(
       owner: PromiseOrValue<string>,
@@ -224,6 +238,8 @@ export interface IWorkers extends BaseContract {
       owner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    workersCount(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   filters: {};
@@ -261,6 +277,8 @@ export interface IWorkers extends BaseContract {
       owner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
+
+    workersCount(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -298,5 +316,7 @@ export interface IWorkers extends BaseContract {
       owner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
+
+    workersCount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }

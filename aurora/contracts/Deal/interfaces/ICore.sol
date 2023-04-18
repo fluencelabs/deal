@@ -10,6 +10,14 @@ import "./IWorkers.sol";
 import "../base/Types.sol";
 
 interface ICore {
+    function initialize(
+        IConfig config_,
+        IController controller_,
+        IPayment payment_,
+        IStatusController statusController_,
+        IWorkers workers_
+    ) external;
+
     function modules(Module module) external view returns (address);
 
     function moduleByAddress(address module) external view returns (Module);

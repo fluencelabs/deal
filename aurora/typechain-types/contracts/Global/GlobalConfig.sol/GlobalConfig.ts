@@ -30,26 +30,20 @@ import type {
 
 export interface GlobalConfigInterface extends utils.Interface {
   functions: {
-    "aquaProxy()": FunctionFragment;
-    "epochDelayForReward()": FunctionFragment;
     "epochManager()": FunctionFragment;
+    "factory()": FunctionFragment;
     "fluenceToken()": FunctionFragment;
-    "initialize(address,address,uint256,uint256,uint256,uint256,address)": FunctionFragment;
-    "minAmountOfEpochsForReward()": FunctionFragment;
+    "initialize(address,uint256,address)": FunctionFragment;
+    "matcher()": FunctionFragment;
     "owner()": FunctionFragment;
     "proxiableUUID()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
-    "setAquaProxy(address)": FunctionFragment;
-    "setEpochDelayForReward(uint256)": FunctionFragment;
     "setEpochManager(address)": FunctionFragment;
+    "setFactory(address)": FunctionFragment;
     "setFluenceToken(address)": FunctionFragment;
-    "setMinAmountOfEpochsForReward(uint256)": FunctionFragment;
-    "setSlashFactor(uint256)": FunctionFragment;
-    "setUpdateSettingsTimeout(uint256)": FunctionFragment;
+    "setMatcher(address)": FunctionFragment;
     "setWithdrawTimeout(uint256)": FunctionFragment;
-    "slashFactor()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
-    "updateSettingsTimeout()": FunctionFragment;
     "upgradeTo(address)": FunctionFragment;
     "upgradeToAndCall(address,bytes)": FunctionFragment;
     "withdrawTimeout()": FunctionFragment;
@@ -57,40 +51,30 @@ export interface GlobalConfigInterface extends utils.Interface {
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "aquaProxy"
-      | "epochDelayForReward"
       | "epochManager"
+      | "factory"
       | "fluenceToken"
       | "initialize"
-      | "minAmountOfEpochsForReward"
+      | "matcher"
       | "owner"
       | "proxiableUUID"
       | "renounceOwnership"
-      | "setAquaProxy"
-      | "setEpochDelayForReward"
       | "setEpochManager"
+      | "setFactory"
       | "setFluenceToken"
-      | "setMinAmountOfEpochsForReward"
-      | "setSlashFactor"
-      | "setUpdateSettingsTimeout"
+      | "setMatcher"
       | "setWithdrawTimeout"
-      | "slashFactor"
       | "transferOwnership"
-      | "updateSettingsTimeout"
       | "upgradeTo"
       | "upgradeToAndCall"
       | "withdrawTimeout"
   ): FunctionFragment;
 
-  encodeFunctionData(functionFragment: "aquaProxy", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "epochDelayForReward",
-    values?: undefined
-  ): string;
   encodeFunctionData(
     functionFragment: "epochManager",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "factory", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "fluenceToken",
     values?: undefined
@@ -99,18 +83,11 @@ export interface GlobalConfigInterface extends utils.Interface {
     functionFragment: "initialize",
     values: [
       PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<string>
     ]
   ): string;
-  encodeFunctionData(
-    functionFragment: "minAmountOfEpochsForReward",
-    values?: undefined
-  ): string;
+  encodeFunctionData(functionFragment: "matcher", values?: undefined): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "proxiableUUID",
@@ -121,15 +98,11 @@ export interface GlobalConfigInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "setAquaProxy",
+    functionFragment: "setEpochManager",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "setEpochDelayForReward",
-    values: [PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setEpochManager",
+    functionFragment: "setFactory",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
@@ -137,32 +110,16 @@ export interface GlobalConfigInterface extends utils.Interface {
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "setMinAmountOfEpochsForReward",
-    values: [PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setSlashFactor",
-    values: [PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setUpdateSettingsTimeout",
-    values: [PromiseOrValue<BigNumberish>]
+    functionFragment: "setMatcher",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "setWithdrawTimeout",
     values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
-    functionFragment: "slashFactor",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "updateSettingsTimeout",
-    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "upgradeTo",
@@ -177,24 +134,17 @@ export interface GlobalConfigInterface extends utils.Interface {
     values?: undefined
   ): string;
 
-  decodeFunctionResult(functionFragment: "aquaProxy", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "epochDelayForReward",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "epochManager",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "factory", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "fluenceToken",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "minAmountOfEpochsForReward",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: "matcher", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "proxiableUUID",
@@ -205,47 +155,21 @@ export interface GlobalConfigInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setAquaProxy",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setEpochDelayForReward",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "setEpochManager",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "setFactory", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "setFluenceToken",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "setMinAmountOfEpochsForReward",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setSlashFactor",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setUpdateSettingsTimeout",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: "setMatcher", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "setWithdrawTimeout",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "slashFactor",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "transferOwnership",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "updateSettingsTimeout",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "upgradeTo", data: BytesLike): Result;
@@ -347,26 +271,20 @@ export interface GlobalConfig extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    aquaProxy(overrides?: CallOverrides): Promise<[string]>;
-
-    epochDelayForReward(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     epochManager(overrides?: CallOverrides): Promise<[string]>;
+
+    factory(overrides?: CallOverrides): Promise<[string]>;
 
     fluenceToken(overrides?: CallOverrides): Promise<[string]>;
 
     initialize(
       fluenceToken_: PromiseOrValue<string>,
-      aquaProxy_: PromiseOrValue<string>,
       withdrawTimeout_: PromiseOrValue<BigNumberish>,
-      epochDelayForReward_: PromiseOrValue<BigNumberish>,
-      slashFactor_: PromiseOrValue<BigNumberish>,
-      updateSettingsTimeout_: PromiseOrValue<BigNumberish>,
       epochManager_: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    minAmountOfEpochsForReward(overrides?: CallOverrides): Promise<[BigNumber]>;
+    matcher(overrides?: CallOverrides): Promise<[string]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
@@ -376,18 +294,13 @@ export interface GlobalConfig extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    setAquaProxy(
-      aquaProxy_: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    setEpochDelayForReward(
-      epochDelayForReward_: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
     setEpochManager(
       epochManager_: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    setFactory(
+      factory_: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -396,18 +309,8 @@ export interface GlobalConfig extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    setMinAmountOfEpochsForReward(
-      minAmountOfEpochsForReward_: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    setSlashFactor(
-      slashFactor_: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    setUpdateSettingsTimeout(
-      updateSettingsTimeout_: PromiseOrValue<BigNumberish>,
+    setMatcher(
+      matcher_: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -416,14 +319,10 @@ export interface GlobalConfig extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    slashFactor(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
-
-    updateSettingsTimeout(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     upgradeTo(
       newImplementation: PromiseOrValue<string>,
@@ -439,26 +338,20 @@ export interface GlobalConfig extends BaseContract {
     withdrawTimeout(overrides?: CallOverrides): Promise<[BigNumber]>;
   };
 
-  aquaProxy(overrides?: CallOverrides): Promise<string>;
-
-  epochDelayForReward(overrides?: CallOverrides): Promise<BigNumber>;
-
   epochManager(overrides?: CallOverrides): Promise<string>;
+
+  factory(overrides?: CallOverrides): Promise<string>;
 
   fluenceToken(overrides?: CallOverrides): Promise<string>;
 
   initialize(
     fluenceToken_: PromiseOrValue<string>,
-    aquaProxy_: PromiseOrValue<string>,
     withdrawTimeout_: PromiseOrValue<BigNumberish>,
-    epochDelayForReward_: PromiseOrValue<BigNumberish>,
-    slashFactor_: PromiseOrValue<BigNumberish>,
-    updateSettingsTimeout_: PromiseOrValue<BigNumberish>,
     epochManager_: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  minAmountOfEpochsForReward(overrides?: CallOverrides): Promise<BigNumber>;
+  matcher(overrides?: CallOverrides): Promise<string>;
 
   owner(overrides?: CallOverrides): Promise<string>;
 
@@ -468,18 +361,13 @@ export interface GlobalConfig extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  setAquaProxy(
-    aquaProxy_: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  setEpochDelayForReward(
-    epochDelayForReward_: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   setEpochManager(
     epochManager_: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  setFactory(
+    factory_: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -488,18 +376,8 @@ export interface GlobalConfig extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  setMinAmountOfEpochsForReward(
-    minAmountOfEpochsForReward_: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  setSlashFactor(
-    slashFactor_: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  setUpdateSettingsTimeout(
-    updateSettingsTimeout_: PromiseOrValue<BigNumberish>,
+  setMatcher(
+    matcher_: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -508,14 +386,10 @@ export interface GlobalConfig extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  slashFactor(overrides?: CallOverrides): Promise<BigNumber>;
-
   transferOwnership(
     newOwner: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
-
-  updateSettingsTimeout(overrides?: CallOverrides): Promise<BigNumber>;
 
   upgradeTo(
     newImplementation: PromiseOrValue<string>,
@@ -531,26 +405,20 @@ export interface GlobalConfig extends BaseContract {
   withdrawTimeout(overrides?: CallOverrides): Promise<BigNumber>;
 
   callStatic: {
-    aquaProxy(overrides?: CallOverrides): Promise<string>;
-
-    epochDelayForReward(overrides?: CallOverrides): Promise<BigNumber>;
-
     epochManager(overrides?: CallOverrides): Promise<string>;
+
+    factory(overrides?: CallOverrides): Promise<string>;
 
     fluenceToken(overrides?: CallOverrides): Promise<string>;
 
     initialize(
       fluenceToken_: PromiseOrValue<string>,
-      aquaProxy_: PromiseOrValue<string>,
       withdrawTimeout_: PromiseOrValue<BigNumberish>,
-      epochDelayForReward_: PromiseOrValue<BigNumberish>,
-      slashFactor_: PromiseOrValue<BigNumberish>,
-      updateSettingsTimeout_: PromiseOrValue<BigNumberish>,
       epochManager_: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    minAmountOfEpochsForReward(overrides?: CallOverrides): Promise<BigNumber>;
+    matcher(overrides?: CallOverrides): Promise<string>;
 
     owner(overrides?: CallOverrides): Promise<string>;
 
@@ -558,18 +426,13 @@ export interface GlobalConfig extends BaseContract {
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
-    setAquaProxy(
-      aquaProxy_: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setEpochDelayForReward(
-      epochDelayForReward_: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     setEpochManager(
       epochManager_: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setFactory(
+      factory_: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -578,18 +441,8 @@ export interface GlobalConfig extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    setMinAmountOfEpochsForReward(
-      minAmountOfEpochsForReward_: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setSlashFactor(
-      slashFactor_: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setUpdateSettingsTimeout(
-      updateSettingsTimeout_: PromiseOrValue<BigNumberish>,
+    setMatcher(
+      matcher_: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -598,14 +451,10 @@ export interface GlobalConfig extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    slashFactor(overrides?: CallOverrides): Promise<BigNumber>;
-
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
-
-    updateSettingsTimeout(overrides?: CallOverrides): Promise<BigNumber>;
 
     upgradeTo(
       newImplementation: PromiseOrValue<string>,
@@ -659,26 +508,20 @@ export interface GlobalConfig extends BaseContract {
   };
 
   estimateGas: {
-    aquaProxy(overrides?: CallOverrides): Promise<BigNumber>;
-
-    epochDelayForReward(overrides?: CallOverrides): Promise<BigNumber>;
-
     epochManager(overrides?: CallOverrides): Promise<BigNumber>;
+
+    factory(overrides?: CallOverrides): Promise<BigNumber>;
 
     fluenceToken(overrides?: CallOverrides): Promise<BigNumber>;
 
     initialize(
       fluenceToken_: PromiseOrValue<string>,
-      aquaProxy_: PromiseOrValue<string>,
       withdrawTimeout_: PromiseOrValue<BigNumberish>,
-      epochDelayForReward_: PromiseOrValue<BigNumberish>,
-      slashFactor_: PromiseOrValue<BigNumberish>,
-      updateSettingsTimeout_: PromiseOrValue<BigNumberish>,
       epochManager_: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    minAmountOfEpochsForReward(overrides?: CallOverrides): Promise<BigNumber>;
+    matcher(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -688,18 +531,13 @@ export interface GlobalConfig extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    setAquaProxy(
-      aquaProxy_: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    setEpochDelayForReward(
-      epochDelayForReward_: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
     setEpochManager(
       epochManager_: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    setFactory(
+      factory_: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -708,18 +546,8 @@ export interface GlobalConfig extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    setMinAmountOfEpochsForReward(
-      minAmountOfEpochsForReward_: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    setSlashFactor(
-      slashFactor_: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    setUpdateSettingsTimeout(
-      updateSettingsTimeout_: PromiseOrValue<BigNumberish>,
+    setMatcher(
+      matcher_: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -728,14 +556,10 @@ export interface GlobalConfig extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    slashFactor(overrides?: CallOverrides): Promise<BigNumber>;
-
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
-
-    updateSettingsTimeout(overrides?: CallOverrides): Promise<BigNumber>;
 
     upgradeTo(
       newImplementation: PromiseOrValue<string>,
@@ -752,30 +576,20 @@ export interface GlobalConfig extends BaseContract {
   };
 
   populateTransaction: {
-    aquaProxy(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    epochDelayForReward(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     epochManager(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    factory(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     fluenceToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     initialize(
       fluenceToken_: PromiseOrValue<string>,
-      aquaProxy_: PromiseOrValue<string>,
       withdrawTimeout_: PromiseOrValue<BigNumberish>,
-      epochDelayForReward_: PromiseOrValue<BigNumberish>,
-      slashFactor_: PromiseOrValue<BigNumberish>,
-      updateSettingsTimeout_: PromiseOrValue<BigNumberish>,
       epochManager_: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    minAmountOfEpochsForReward(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    matcher(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -785,18 +599,13 @@ export interface GlobalConfig extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    setAquaProxy(
-      aquaProxy_: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setEpochDelayForReward(
-      epochDelayForReward_: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
     setEpochManager(
       epochManager_: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setFactory(
+      factory_: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -805,18 +614,8 @@ export interface GlobalConfig extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    setMinAmountOfEpochsForReward(
-      minAmountOfEpochsForReward_: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setSlashFactor(
-      slashFactor_: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setUpdateSettingsTimeout(
-      updateSettingsTimeout_: PromiseOrValue<BigNumberish>,
+    setMatcher(
+      matcher_: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -825,15 +624,9 @@ export interface GlobalConfig extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    slashFactor(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    updateSettingsTimeout(
-      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     upgradeTo(

@@ -15,9 +15,6 @@ const config: HardhatUserConfig = {
     },
     networks: {
         hardhat: {
-            forking: {
-                url: "https://polygon-mumbai.blockpi.network/v1/rpc/public",
-            },
             accounts: {
                 passphrase: "test test test test claim trade stairs crew inspire obey veteran budget",
             },

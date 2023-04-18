@@ -2,6 +2,7 @@
 
 pragma solidity ^0.8.17;
 
+import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "./interfaces/ICore.sol";
 import "./interfaces/IConfig.sol";
@@ -18,6 +19,10 @@ contract Core is Initializable, UUPSUpgradeable, ICore {
     modifier onlyControllerOwner() {
         require(msg.sender == getController().owner(), "Core: Only controller owner can call this function");
         _;
+    }
+
+    constructor() {
+        _disableInitializers();
     }
 
     function initialize(

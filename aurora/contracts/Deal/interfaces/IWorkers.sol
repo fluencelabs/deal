@@ -2,12 +2,11 @@
 
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/utils/StorageSlot.sol";
 import "../base/Types.sol";
 
 interface IWorkers {
+    function workersCount() external view returns (uint256);
+
     function getNextWorkerIndex() external view returns (uint256);
 
     function getPATIndex(PATId id) external view returns (uint256);

@@ -78,6 +78,39 @@ const _abi = [
   {
     inputs: [
       {
+        internalType: "contract IConfig",
+        name: "config_",
+        type: "address",
+      },
+      {
+        internalType: "contract IController",
+        name: "controller_",
+        type: "address",
+      },
+      {
+        internalType: "contract IPayment",
+        name: "payment_",
+        type: "address",
+      },
+      {
+        internalType: "contract IStatusController",
+        name: "statusController_",
+        type: "address",
+      },
+      {
+        internalType: "contract IWorkers",
+        name: "workers_",
+        type: "address",
+      },
+    ],
+    name: "initialize",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         internalType: "address",
         name: "module",
         type: "address",

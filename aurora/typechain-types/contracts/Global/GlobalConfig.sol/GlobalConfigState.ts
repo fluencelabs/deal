@@ -22,83 +22,51 @@ import type {
 
 export interface GlobalConfigStateInterface extends utils.Interface {
   functions: {
-    "aquaProxy()": FunctionFragment;
-    "epochDelayForReward()": FunctionFragment;
     "epochManager()": FunctionFragment;
+    "factory()": FunctionFragment;
     "fluenceToken()": FunctionFragment;
-    "minAmountOfEpochsForReward()": FunctionFragment;
-    "slashFactor()": FunctionFragment;
-    "updateSettingsTimeout()": FunctionFragment;
+    "matcher()": FunctionFragment;
+    "owner()": FunctionFragment;
     "withdrawTimeout()": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "aquaProxy"
-      | "epochDelayForReward"
       | "epochManager"
+      | "factory"
       | "fluenceToken"
-      | "minAmountOfEpochsForReward"
-      | "slashFactor"
-      | "updateSettingsTimeout"
+      | "matcher"
+      | "owner"
       | "withdrawTimeout"
   ): FunctionFragment;
 
-  encodeFunctionData(functionFragment: "aquaProxy", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "epochDelayForReward",
-    values?: undefined
-  ): string;
   encodeFunctionData(
     functionFragment: "epochManager",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "factory", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "fluenceToken",
     values?: undefined
   ): string;
-  encodeFunctionData(
-    functionFragment: "minAmountOfEpochsForReward",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "slashFactor",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "updateSettingsTimeout",
-    values?: undefined
-  ): string;
+  encodeFunctionData(functionFragment: "matcher", values?: undefined): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "withdrawTimeout",
     values?: undefined
   ): string;
 
-  decodeFunctionResult(functionFragment: "aquaProxy", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "epochDelayForReward",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "epochManager",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "factory", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "fluenceToken",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "minAmountOfEpochsForReward",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "slashFactor",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "updateSettingsTimeout",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: "matcher", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "withdrawTimeout",
     data: BytesLike
@@ -134,53 +102,41 @@ export interface GlobalConfigState extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    aquaProxy(overrides?: CallOverrides): Promise<[string]>;
-
-    epochDelayForReward(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     epochManager(overrides?: CallOverrides): Promise<[string]>;
+
+    factory(overrides?: CallOverrides): Promise<[string]>;
 
     fluenceToken(overrides?: CallOverrides): Promise<[string]>;
 
-    minAmountOfEpochsForReward(overrides?: CallOverrides): Promise<[BigNumber]>;
+    matcher(overrides?: CallOverrides): Promise<[string]>;
 
-    slashFactor(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    updateSettingsTimeout(overrides?: CallOverrides): Promise<[BigNumber]>;
+    owner(overrides?: CallOverrides): Promise<[string]>;
 
     withdrawTimeout(overrides?: CallOverrides): Promise<[BigNumber]>;
   };
 
-  aquaProxy(overrides?: CallOverrides): Promise<string>;
-
-  epochDelayForReward(overrides?: CallOverrides): Promise<BigNumber>;
-
   epochManager(overrides?: CallOverrides): Promise<string>;
+
+  factory(overrides?: CallOverrides): Promise<string>;
 
   fluenceToken(overrides?: CallOverrides): Promise<string>;
 
-  minAmountOfEpochsForReward(overrides?: CallOverrides): Promise<BigNumber>;
+  matcher(overrides?: CallOverrides): Promise<string>;
 
-  slashFactor(overrides?: CallOverrides): Promise<BigNumber>;
-
-  updateSettingsTimeout(overrides?: CallOverrides): Promise<BigNumber>;
+  owner(overrides?: CallOverrides): Promise<string>;
 
   withdrawTimeout(overrides?: CallOverrides): Promise<BigNumber>;
 
   callStatic: {
-    aquaProxy(overrides?: CallOverrides): Promise<string>;
-
-    epochDelayForReward(overrides?: CallOverrides): Promise<BigNumber>;
-
     epochManager(overrides?: CallOverrides): Promise<string>;
+
+    factory(overrides?: CallOverrides): Promise<string>;
 
     fluenceToken(overrides?: CallOverrides): Promise<string>;
 
-    minAmountOfEpochsForReward(overrides?: CallOverrides): Promise<BigNumber>;
+    matcher(overrides?: CallOverrides): Promise<string>;
 
-    slashFactor(overrides?: CallOverrides): Promise<BigNumber>;
-
-    updateSettingsTimeout(overrides?: CallOverrides): Promise<BigNumber>;
+    owner(overrides?: CallOverrides): Promise<string>;
 
     withdrawTimeout(overrides?: CallOverrides): Promise<BigNumber>;
   };
@@ -188,43 +144,29 @@ export interface GlobalConfigState extends BaseContract {
   filters: {};
 
   estimateGas: {
-    aquaProxy(overrides?: CallOverrides): Promise<BigNumber>;
-
-    epochDelayForReward(overrides?: CallOverrides): Promise<BigNumber>;
-
     epochManager(overrides?: CallOverrides): Promise<BigNumber>;
+
+    factory(overrides?: CallOverrides): Promise<BigNumber>;
 
     fluenceToken(overrides?: CallOverrides): Promise<BigNumber>;
 
-    minAmountOfEpochsForReward(overrides?: CallOverrides): Promise<BigNumber>;
+    matcher(overrides?: CallOverrides): Promise<BigNumber>;
 
-    slashFactor(overrides?: CallOverrides): Promise<BigNumber>;
-
-    updateSettingsTimeout(overrides?: CallOverrides): Promise<BigNumber>;
+    owner(overrides?: CallOverrides): Promise<BigNumber>;
 
     withdrawTimeout(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    aquaProxy(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    epochDelayForReward(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     epochManager(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    factory(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     fluenceToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    minAmountOfEpochsForReward(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    matcher(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    slashFactor(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    updateSettingsTimeout(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     withdrawTimeout(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };

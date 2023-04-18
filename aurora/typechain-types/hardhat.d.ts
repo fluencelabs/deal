@@ -17,9 +17,25 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.OwnableUpgradeable__factory>;
     getContractFactory(
+      name: "IERC1822ProxiableUpgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC1822ProxiableUpgradeable__factory>;
+    getContractFactory(
+      name: "IBeaconUpgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IBeaconUpgradeable__factory>;
+    getContractFactory(
+      name: "ERC1967UpgradeUpgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC1967UpgradeUpgradeable__factory>;
+    getContractFactory(
       name: "Initializable",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Initializable__factory>;
+    getContractFactory(
+      name: "UUPSUpgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.UUPSUpgradeable__factory>;
     getContractFactory(
       name: "ContextUpgradeable",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -48,6 +64,10 @@ declare module "hardhat/types/runtime" {
       name: "Proxy",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Proxy__factory>;
+    getContractFactory(
+      name: "Initializable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Initializable__factory>;
     getContractFactory(
       name: "UUPSUpgradeable",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -85,13 +105,13 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Utils__factory>;
     getContractFactory(
-      name: "DealProxy",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.DealProxy__factory>;
-    getContractFactory(
       name: "ModuleBase",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ModuleBase__factory>;
+    getContractFactory(
+      name: "ModuleProxy",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ModuleProxy__factory>;
     getContractFactory(
       name: "Config",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -117,9 +137,17 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IController__factory>;
     getContractFactory(
+      name: "IControllerInitializable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IControllerInitializable__factory>;
+    getContractFactory(
       name: "ICore",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ICore__factory>;
+    getContractFactory(
+      name: "ICoreInitializable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ICoreInitializable__factory>;
     getContractFactory(
       name: "IPayment",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -165,6 +193,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.DealFactory__factory>;
     getContractFactory(
+      name: "DealFactoryState",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.DealFactoryState__factory>;
+    getContractFactory(
       name: "EpochManager",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.EpochManager__factory>;
@@ -176,6 +208,22 @@ declare module "hardhat/types/runtime" {
       name: "GlobalConfigState",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.GlobalConfigState__factory>;
+    getContractFactory(
+      name: "IEpochManager",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IEpochManager__factory>;
+    getContractFactory(
+      name: "IFactory",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IFactory__factory>;
+    getContractFactory(
+      name: "IGlobalConfig",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IGlobalConfig__factory>;
+    getContractFactory(
+      name: "IMatcher",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IMatcher__factory>;
     getContractFactory(
       name: "IParticleVerifyer",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -203,10 +251,30 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.OwnableUpgradeable>;
     getContractAt(
+      name: "IERC1822ProxiableUpgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC1822ProxiableUpgradeable>;
+    getContractAt(
+      name: "IBeaconUpgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IBeaconUpgradeable>;
+    getContractAt(
+      name: "ERC1967UpgradeUpgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC1967UpgradeUpgradeable>;
+    getContractAt(
       name: "Initializable",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.Initializable>;
+    getContractAt(
+      name: "UUPSUpgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.UUPSUpgradeable>;
     getContractAt(
       name: "ContextUpgradeable",
       address: string,
@@ -242,6 +310,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.Proxy>;
+    getContractAt(
+      name: "Initializable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Initializable>;
     getContractAt(
       name: "UUPSUpgradeable",
       address: string,
@@ -288,15 +361,15 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Utils>;
     getContractAt(
-      name: "DealProxy",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.DealProxy>;
-    getContractAt(
       name: "ModuleBase",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.ModuleBase>;
+    getContractAt(
+      name: "ModuleProxy",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ModuleProxy>;
     getContractAt(
       name: "Config",
       address: string,
@@ -328,10 +401,20 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IController>;
     getContractAt(
+      name: "IControllerInitializable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IControllerInitializable>;
+    getContractAt(
       name: "ICore",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.ICore>;
+    getContractAt(
+      name: "ICoreInitializable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ICoreInitializable>;
     getContractAt(
       name: "IPayment",
       address: string,
@@ -388,6 +471,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.DealFactory>;
     getContractAt(
+      name: "DealFactoryState",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.DealFactoryState>;
+    getContractAt(
       name: "EpochManager",
       address: string,
       signer?: ethers.Signer
@@ -402,6 +490,26 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.GlobalConfigState>;
+    getContractAt(
+      name: "IEpochManager",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IEpochManager>;
+    getContractAt(
+      name: "IFactory",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IFactory>;
+    getContractAt(
+      name: "IGlobalConfig",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IGlobalConfig>;
+    getContractAt(
+      name: "IMatcher",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IMatcher>;
     getContractAt(
       name: "IParticleVerifyer",
       address: string,

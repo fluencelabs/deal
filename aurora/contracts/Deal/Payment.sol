@@ -47,13 +47,13 @@ contract Payment is ModuleBase, IPayment {
         return particle.reward / particle.worketsCount;
     }
 
-    function depositToPaymentBalance(uint256 amount) external {
+    function depositToPaymentBalance(uint256 amount) external onlyModule(Module.Controller) {
         IERC20 token = _core().getConfig().paymentToken();
         token.safeTransferFrom(msg.sender, address(this), amount);
         balance += amount;
     }
 
-    function withdrawFromPaymentBalance(uint256 amount) external {
+    function withdrawFromPaymentBalance(uint256 amount) external onlyModule(Module.Controller) {
         IERC20 token = _core().getConfig().paymentToken();
         require(balance - _locked >= amount, "Not enough free balance");
 
@@ -61,7 +61,7 @@ contract Payment is ModuleBase, IPayment {
         token.safeTransfer(msg.sender, amount);
     }
 
-    function commitParticle(Particle calldata particle) external {
+    function commitParticle(Particle calldata particle) external onlyModule(Module.Controller) {
         bytes32 hash = keccak256(abi.encode(particle.air, particle.prevData, particle.params, particle.callResults)); // TODO: refactoring
 
         require(_particles[hash].epoch == 0, "Particle already exists");
@@ -93,7 +93,7 @@ contract Payment is ModuleBase, IPayment {
         _locked += reward;
     }
 
-    function withdrawForWorker(PATId patId, bytes32[] calldata particlesHashes) external {
+    function withdrawForWorker(PATId patId, bytes32[] calldata particlesHashes) external onlyModule(Module.Controller) {
         ICore core = _core();
         IConfig config = core.getConfig();
 

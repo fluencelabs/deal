@@ -3,17 +3,18 @@
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../global/interfaces/IParticleVerifyer.sol";
-import "../global/GlobalConfig.sol";
-import "./base/ModuleBase.sol";
+import "../global/interfaces/IGlobalConfig.sol";
 import "./interfaces/IConfig.sol";
+import "./base/ModuleBase.sol";
 
 abstract contract ConfigState is IConfig {
-    GlobalConfig public immutable globalConfig;
+    IGlobalConfig public immutable globalConfig;
     IERC20 public immutable fluenceToken;
     IParticleVerifyer public immutable particleVerifyer;
 
-    constructor(GlobalConfig globalConfig_, IParticleVerifyer particleVerifyer_) {
+    constructor(IGlobalConfig globalConfig_, IParticleVerifyer particleVerifyer_) {
         globalConfig = globalConfig_;
         fluenceToken = globalConfig_.fluenceToken();
         particleVerifyer = particleVerifyer_;
@@ -30,9 +31,7 @@ abstract contract ConfigState is IConfig {
 }
 
 contract Config is ConfigState, ModuleBase, Initializable {
-    constructor(GlobalConfig globalConfig_, IParticleVerifyer particleVerifyer_) ConfigState(globalConfig_, particleVerifyer_) {
-        _disableInitializers();
-    }
+    constructor(IGlobalConfig globalConfig_, IParticleVerifyer particleVerifyer_) ConfigState(globalConfig_, particleVerifyer_) {}
 
     function initialize(
         IERC20 paymentToken_,
@@ -54,15 +53,15 @@ contract Config is ConfigState, ModuleBase, Initializable {
         effectorWasmsCids = effectorWasmsCids_;
     }
 
-    function setPricePerEpoch(uint256 pricePerEpoch_) external {
+    function setPricePerEpoch(uint256 pricePerEpoch_) external onlyModule(Module.Controller) {
         pricePerEpoch = pricePerEpoch_;
     }
 
-    function setRequiredStake(uint256 requiredStake_) external {
+    function setRequiredStake(uint256 requiredStake_) external onlyModule(Module.Controller) {
         requiredStake = requiredStake_;
     }
 
-    function setAppCID(string calldata appCID_) external {
+    function setAppCID(string calldata appCID_) external onlyModule(Module.Controller) {
         appCID = appCID_;
     }
 }

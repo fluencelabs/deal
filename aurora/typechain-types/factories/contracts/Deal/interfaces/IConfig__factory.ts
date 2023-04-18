@@ -60,7 +60,7 @@ const _abi = [
     name: "globalConfig",
     outputs: [
       {
-        internalType: "contract GlobalConfig",
+        internalType: "contract IGlobalConfig",
         name: "",
         type: "address",
       },

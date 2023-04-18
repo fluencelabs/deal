@@ -7,6 +7,8 @@ import type {
   BigNumberish,
   BytesLike,
   CallOverrides,
+  ContractTransaction,
+  Overrides,
   PopulatedTransaction,
   Signer,
   utils,
@@ -28,6 +30,7 @@ export interface ICoreInterface extends utils.Interface {
     "getPayment()": FunctionFragment;
     "getStatusController()": FunctionFragment;
     "getWorkers()": FunctionFragment;
+    "initialize(address,address,address,address,address)": FunctionFragment;
     "moduleByAddress(address)": FunctionFragment;
     "modules(uint8)": FunctionFragment;
   };
@@ -39,6 +42,7 @@ export interface ICoreInterface extends utils.Interface {
       | "getPayment"
       | "getStatusController"
       | "getWorkers"
+      | "initialize"
       | "moduleByAddress"
       | "modules"
   ): FunctionFragment;
@@ -61,6 +65,16 @@ export interface ICoreInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "initialize",
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<string>,
+      PromiseOrValue<string>,
+      PromiseOrValue<string>,
+      PromiseOrValue<string>
+    ]
+  ): string;
+  encodeFunctionData(
     functionFragment: "moduleByAddress",
     values: [PromiseOrValue<string>]
   ): string;
@@ -80,6 +94,7 @@ export interface ICoreInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "getWorkers", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "moduleByAddress",
     data: BytesLike
@@ -126,6 +141,15 @@ export interface ICore extends BaseContract {
 
     getWorkers(overrides?: CallOverrides): Promise<[string]>;
 
+    initialize(
+      config_: PromiseOrValue<string>,
+      controller_: PromiseOrValue<string>,
+      payment_: PromiseOrValue<string>,
+      statusController_: PromiseOrValue<string>,
+      workers_: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     moduleByAddress(
       module: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -147,6 +171,15 @@ export interface ICore extends BaseContract {
 
   getWorkers(overrides?: CallOverrides): Promise<string>;
 
+  initialize(
+    config_: PromiseOrValue<string>,
+    controller_: PromiseOrValue<string>,
+    payment_: PromiseOrValue<string>,
+    statusController_: PromiseOrValue<string>,
+    workers_: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   moduleByAddress(
     module: PromiseOrValue<string>,
     overrides?: CallOverrides
@@ -167,6 +200,15 @@ export interface ICore extends BaseContract {
     getStatusController(overrides?: CallOverrides): Promise<string>;
 
     getWorkers(overrides?: CallOverrides): Promise<string>;
+
+    initialize(
+      config_: PromiseOrValue<string>,
+      controller_: PromiseOrValue<string>,
+      payment_: PromiseOrValue<string>,
+      statusController_: PromiseOrValue<string>,
+      workers_: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     moduleByAddress(
       module: PromiseOrValue<string>,
@@ -192,6 +234,15 @@ export interface ICore extends BaseContract {
 
     getWorkers(overrides?: CallOverrides): Promise<BigNumber>;
 
+    initialize(
+      config_: PromiseOrValue<string>,
+      controller_: PromiseOrValue<string>,
+      payment_: PromiseOrValue<string>,
+      statusController_: PromiseOrValue<string>,
+      workers_: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     moduleByAddress(
       module: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -215,6 +266,15 @@ export interface ICore extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     getWorkers(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    initialize(
+      config_: PromiseOrValue<string>,
+      controller_: PromiseOrValue<string>,
+      payment_: PromiseOrValue<string>,
+      statusController_: PromiseOrValue<string>,
+      workers_: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
 
     moduleByAddress(
       module: PromiseOrValue<string>,

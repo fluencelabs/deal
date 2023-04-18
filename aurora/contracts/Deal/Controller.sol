@@ -2,11 +2,9 @@
 
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./interfaces/IController.sol";
 import "./base/ModuleBase.sol";
-
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 contract Controller is ModuleBase, OwnableUpgradeable, IController {
     function initialize() public initializer {
@@ -27,5 +25,9 @@ contract Controller is ModuleBase, OwnableUpgradeable, IController {
 
     function joinViaMatcher(address resourceOwner) external {
         _core().getWorkers().createPAT(resourceOwner);
+    }
+
+    function transferOwnership(address newOwner) public override(IController, OwnableUpgradeable) onlyOwner {
+        OwnableUpgradeable.transferOwnership(newOwner);
     }
 }

@@ -14,6 +14,7 @@ contract StatusController is ModuleBase, IStatusController {
 
     uint256 private _startWorkingEpoch_;
 
+    // ----------------- View -----------------
     function status() external view returns (DealStatus) {
         return _status_;
     }
@@ -22,7 +23,8 @@ contract StatusController is ModuleBase, IStatusController {
         return _startWorkingEpoch_;
     }
 
-    function changeStatus(DealStatus status_) external {
+    // ----------------- Mutable -----------------
+    function changeStatus(DealStatus status_) external onlyModule(Module.Controller) {
         DealStatus oldStatus = _status_;
 
         if (oldStatus == status_) {
@@ -38,6 +40,8 @@ contract StatusController is ModuleBase, IStatusController {
         _status_ = status_;
         emit StatusChanged(status_);
     }
+
+    // ----------------- Private -----------------
 
     function _onStartWorking() private {
         _startWorkingEpoch_ = _core().getConfig().globalConfig().epochManager().currentEpoch();

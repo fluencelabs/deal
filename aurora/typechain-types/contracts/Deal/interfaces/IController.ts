@@ -28,10 +28,16 @@ export interface IControllerInterface extends utils.Interface {
     "joinViaMatcher(address)": FunctionFragment;
     "owner()": FunctionFragment;
     "setAppCID(string)": FunctionFragment;
+    "transferOwnership(address)": FunctionFragment;
   };
 
   getFunction(
-    nameOrSignatureOrTopic: "join" | "joinViaMatcher" | "owner" | "setAppCID"
+    nameOrSignatureOrTopic:
+      | "join"
+      | "joinViaMatcher"
+      | "owner"
+      | "setAppCID"
+      | "transferOwnership"
   ): FunctionFragment;
 
   encodeFunctionData(functionFragment: "join", values?: undefined): string;
@@ -44,6 +50,10 @@ export interface IControllerInterface extends utils.Interface {
     functionFragment: "setAppCID",
     values: [PromiseOrValue<string>]
   ): string;
+  encodeFunctionData(
+    functionFragment: "transferOwnership",
+    values: [PromiseOrValue<string>]
+  ): string;
 
   decodeFunctionResult(functionFragment: "join", data: BytesLike): Result;
   decodeFunctionResult(
@@ -52,6 +62,10 @@ export interface IControllerInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "setAppCID", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "transferOwnership",
+    data: BytesLike
+  ): Result;
 
   events: {};
 }
@@ -98,6 +112,11 @@ export interface IController extends BaseContract {
       cid: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
+
+    transferOwnership(
+      newOwner: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
   };
 
   join(
@@ -116,6 +135,11 @@ export interface IController extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  transferOwnership(
+    newOwner: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   callStatic: {
     join(overrides?: CallOverrides): Promise<void>;
 
@@ -128,6 +152,11 @@ export interface IController extends BaseContract {
 
     setAppCID(
       cid: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    transferOwnership(
+      newOwner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
   };
@@ -150,6 +179,11 @@ export interface IController extends BaseContract {
       cid: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
+
+    transferOwnership(
+      newOwner: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -166,6 +200,11 @@ export interface IController extends BaseContract {
 
     setAppCID(
       cid: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    transferOwnership(
+      newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
   };
