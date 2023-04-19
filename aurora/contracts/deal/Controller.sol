@@ -20,11 +20,12 @@ contract Controller is ModuleBase, OwnableUpgradeable, IController {
     }
 
     function join() external {
-        _core().getWorkers().createPAT(msg.sender);
+        _core().getWorkers().createPAT(msg.sender, msg.sender);
     }
 
+    // TODO: only matcher
     function joinViaMatcher(address resourceOwner) external {
-        _core().getWorkers().createPAT(resourceOwner);
+        _core().getWorkers().createPAT(resourceOwner, msg.sender);
     }
 
     function transferOwnership(address newOwner) public override(IController, OwnableUpgradeable) onlyOwner {

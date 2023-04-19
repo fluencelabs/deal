@@ -15,7 +15,7 @@ interface IWorkers {
 
     function getUnlockedAmountBy(address owner, uint256 timestamp) external view returns (uint256);
 
-    function createPAT(address owner) external;
+    function createPAT(address owner, address payer) external;
 
     function removePAT(PATId id) external;
 

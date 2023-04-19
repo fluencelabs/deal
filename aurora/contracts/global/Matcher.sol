@@ -24,6 +24,9 @@ contract MatcherState {
 }
 
 contract Matcher is IMatcher, MatcherState, UUPSUpgradeable {
+    event ResourceOwnerRegistred(address owner, ResourceOwner info);
+    event ResourceOwnerRemoved(address owner);
+
     modifier onlyOwner() {
         require(msg.sender == globalConfig.owner(), "Only owner can call this function");
         _;
@@ -33,8 +36,21 @@ contract Matcher is IMatcher, MatcherState, UUPSUpgradeable {
 
     function register(uint64 minPriceByEpoch, uint maxCollateral, uint workersCount) external onlyOwner {
         uint amount = maxCollateral * workersCount;
-        globalConfig.fluenceToken().transferFrom(msg.sender, address(this), amount);
         resourceOwners[msg.sender] = ResourceOwner(uint256(minPriceByEpoch), maxCollateral, workersCount);
+
+        emit ResourceOwnerRegistred(msg.sender, ResourceOwner(uint256(minPriceByEpoch), maxCollateral, workersCount)); //TODO: memory or stack?
+
+        globalConfig.fluenceToken().transferFrom(msg.sender, address(this), amount);
+    }
+
+    function remove() external {
+        ResourceOwner memory resourceOwner = resourceOwners[msg.sender];
+        uint amount = resourceOwner.maxCollateral * resourceOwner.workersCount;
+        delete resourceOwners[msg.sender];
+
+        emit ResourceOwnerRemoved(msg.sender);
+
+        globalConfig.fluenceToken().transfer(msg.sender, amount);
     }
 
     function matchWithDeal(ICore deal, address[] calldata resources, uint[] calldata workersCount_) external {
@@ -51,7 +67,7 @@ contract Matcher is IMatcher, MatcherState, UUPSUpgradeable {
 
         uint totalJoinedWorkers = 0;
 
-        address dealAddress = address(deal);
+        IWorkers workers = deal.getWorkers();
         for (uint i = 0; i < resources.length; i++) {
             address resource = resources[i];
             uint joinedWorkers = workersCount_[i];
@@ -60,14 +76,14 @@ contract Matcher is IMatcher, MatcherState, UUPSUpgradeable {
             require(resourceOwner.minPriceByEpoch <= pricePerEpoch, "Price per epoch is too high");
             require(resourceOwner.maxCollateral >= requiredStake, "Required stake is too high");
             require(resourceOwner.workersCount >= joinedWorkers, "Required stake is too high");
-            require(maxWorkersPerProvider <= joinedWorkers, "Max workers per provider reached");
+            require(maxWorkersPerProvider >= joinedWorkers, "Max workers per provider reached");
 
             totalJoinedWorkers += joinedWorkers;
             require(totalJoinedWorkers <= free, "Max workers count reached");
 
             uint refoundByWorker = resourceOwner.maxCollateral - requiredStake;
             for (uint j = 0; j < joinedWorkers; j++) {
-                globalConfig.fluenceToken().approve(dealAddress, requiredStake);
+                globalConfig.fluenceToken().approve(address(workers), requiredStake);
                 controller.joinViaMatcher(resource);
             }
 

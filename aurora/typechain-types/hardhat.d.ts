@@ -137,17 +137,9 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IController__factory>;
     getContractFactory(
-      name: "IControllerInitializable",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IControllerInitializable__factory>;
-    getContractFactory(
       name: "ICore",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ICore__factory>;
-    getContractFactory(
-      name: "ICoreInitializable",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.ICoreInitializable__factory>;
     getContractFactory(
       name: "IPayment",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -401,20 +393,10 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IController>;
     getContractAt(
-      name: "IControllerInitializable",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IControllerInitializable>;
-    getContractAt(
       name: "ICore",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.ICore>;
-    getContractAt(
-      name: "ICoreInitializable",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.ICoreInitializable>;
     getContractAt(
       name: "IPayment",
       address: string,

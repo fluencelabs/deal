@@ -211,12 +211,14 @@ export interface ConfigInterface extends utils.Interface {
 
   events: {
     "AdminChanged(address,address)": EventFragment;
+    "AppCIDChanged(string)": EventFragment;
     "BeaconUpgraded(address)": EventFragment;
     "Initialized(uint8)": EventFragment;
     "Upgraded(address)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "AdminChanged"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "AppCIDChanged"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "BeaconUpgraded"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Upgraded"): EventFragment;
@@ -232,6 +234,13 @@ export type AdminChangedEvent = TypedEvent<
 >;
 
 export type AdminChangedEventFilter = TypedEventFilter<AdminChangedEvent>;
+
+export interface AppCIDChangedEventObject {
+  newAppCID: string;
+}
+export type AppCIDChangedEvent = TypedEvent<[string], AppCIDChangedEventObject>;
+
+export type AppCIDChangedEventFilter = TypedEventFilter<AppCIDChangedEvent>;
 
 export interface BeaconUpgradedEventObject {
   beacon: string;
@@ -491,6 +500,9 @@ export interface Config extends BaseContract {
       previousAdmin?: null,
       newAdmin?: null
     ): AdminChangedEventFilter;
+
+    "AppCIDChanged(string)"(newAppCID?: null): AppCIDChangedEventFilter;
+    AppCIDChanged(newAppCID?: null): AppCIDChangedEventFilter;
 
     "BeaconUpgraded(address)"(
       beacon?: PromiseOrValue<string> | null

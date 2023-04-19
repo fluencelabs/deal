@@ -63,7 +63,7 @@ contract Workers is WorkersState, ModuleBase, IWorkers {
 
     // ---- Public mutables ----
 
-    function createPAT(address owner) external onlyModule(Module.Controller) {
+    function createPAT(address owner, address payer) external onlyModule(Module.Controller) {
         uint256 patsCountByOwner = _ownersInfo[owner].patsCount;
         uint256 currentWorkers = _currentWorkers;
 
@@ -74,16 +74,18 @@ contract Workers is WorkersState, ModuleBase, IWorkers {
         require(patsCountByOwner < config.maxWorkersPerProvider(), "Max workers per provider reached");
 
         uint256 requiredStake = config.requiredStake();
-        config.fluenceToken().safeTransferFrom(msg.sender, address(this), requiredStake);
+        config.fluenceToken().safeTransferFrom(payer, address(this), requiredStake);
 
         currentWorkers++;
 
         IStatusController statusController = core.getStatusController();
 
-        DealStatus status = statusController.status();
-        if (status == DealStatus.WaitingForWorkers && currentWorkers >= config.minWorkers()) {
-            status = DealStatus.Working;
-            statusController.changeStatus(status);
+        {
+            DealStatus status = statusController.status();
+            if (status == DealStatus.WaitingForWorkers && currentWorkers >= config.minWorkers()) {
+                status = DealStatus.Working;
+                statusController.changeStatus(status);
+            }
         }
 
         uint index;
@@ -93,6 +95,7 @@ contract Workers is WorkersState, ModuleBase, IWorkers {
             _freeIndexes.pop();
         } else {
             index = _nextWorkerIndex;
+            _nextWorkerIndex++;
         }
 
         PATId id = PATId.wrap(keccak256(abi.encodePacked(_PAT_ID_PREFIX, owner, index)));

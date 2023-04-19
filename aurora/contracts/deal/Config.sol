@@ -31,6 +31,8 @@ abstract contract ConfigState is IConfig {
 }
 
 contract Config is ConfigState, ModuleBase, Initializable {
+    event AppCIDChanged(string newAppCID);
+
     constructor(IGlobalConfig globalConfig_, IParticleVerifyer particleVerifyer_) ConfigState(globalConfig_, particleVerifyer_) {}
 
     function initialize(
@@ -63,5 +65,7 @@ contract Config is ConfigState, ModuleBase, Initializable {
 
     function setAppCID(string calldata appCID_) external onlyModule(Module.Controller) {
         appCID = appCID_;
+
+        emit AppCIDChanged(appCID_);
     }
 }

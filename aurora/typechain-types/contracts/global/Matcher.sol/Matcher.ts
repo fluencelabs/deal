@@ -28,6 +28,20 @@ import type {
   PromiseOrValue,
 } from "../../../common";
 
+export declare namespace MatcherState {
+  export type ResourceOwnerStruct = {
+    minPriceByEpoch: PromiseOrValue<BigNumberish>;
+    maxCollateral: PromiseOrValue<BigNumberish>;
+    workersCount: PromiseOrValue<BigNumberish>;
+  };
+
+  export type ResourceOwnerStructOutput = [BigNumber, BigNumber, BigNumber] & {
+    minPriceByEpoch: BigNumber;
+    maxCollateral: BigNumber;
+    workersCount: BigNumber;
+  };
+}
+
 export interface MatcherInterface extends utils.Interface {
   functions: {
     "collateral(address)": FunctionFragment;
@@ -35,6 +49,7 @@ export interface MatcherInterface extends utils.Interface {
     "matchWithDeal(address,address[],uint256[])": FunctionFragment;
     "proxiableUUID()": FunctionFragment;
     "register(uint64,uint256,uint256)": FunctionFragment;
+    "remove()": FunctionFragment;
     "resourceOwners(address)": FunctionFragment;
     "upgradeTo(address)": FunctionFragment;
     "upgradeToAndCall(address,bytes)": FunctionFragment;
@@ -47,6 +62,7 @@ export interface MatcherInterface extends utils.Interface {
       | "matchWithDeal"
       | "proxiableUUID"
       | "register"
+      | "remove"
       | "resourceOwners"
       | "upgradeTo"
       | "upgradeToAndCall"
@@ -80,6 +96,7 @@ export interface MatcherInterface extends utils.Interface {
       PromiseOrValue<BigNumberish>
     ]
   ): string;
+  encodeFunctionData(functionFragment: "remove", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "resourceOwners",
     values: [PromiseOrValue<string>]
@@ -107,6 +124,7 @@ export interface MatcherInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "register", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "remove", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "resourceOwners",
     data: BytesLike
@@ -121,12 +139,16 @@ export interface MatcherInterface extends utils.Interface {
     "AdminChanged(address,address)": EventFragment;
     "BeaconUpgraded(address)": EventFragment;
     "Initialized(uint8)": EventFragment;
+    "ResourceOwnerRegistred(address,tuple)": EventFragment;
+    "ResourceOwnerRemoved(address)": EventFragment;
     "Upgraded(address)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "AdminChanged"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "BeaconUpgraded"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "ResourceOwnerRegistred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "ResourceOwnerRemoved"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Upgraded"): EventFragment;
 }
 
@@ -157,6 +179,29 @@ export interface InitializedEventObject {
 export type InitializedEvent = TypedEvent<[number], InitializedEventObject>;
 
 export type InitializedEventFilter = TypedEventFilter<InitializedEvent>;
+
+export interface ResourceOwnerRegistredEventObject {
+  owner: string;
+  info: MatcherState.ResourceOwnerStructOutput;
+}
+export type ResourceOwnerRegistredEvent = TypedEvent<
+  [string, MatcherState.ResourceOwnerStructOutput],
+  ResourceOwnerRegistredEventObject
+>;
+
+export type ResourceOwnerRegistredEventFilter =
+  TypedEventFilter<ResourceOwnerRegistredEvent>;
+
+export interface ResourceOwnerRemovedEventObject {
+  owner: string;
+}
+export type ResourceOwnerRemovedEvent = TypedEvent<
+  [string],
+  ResourceOwnerRemovedEventObject
+>;
+
+export type ResourceOwnerRemovedEventFilter =
+  TypedEventFilter<ResourceOwnerRemovedEvent>;
 
 export interface UpgradedEventObject {
   implementation: string;
@@ -215,6 +260,10 @@ export interface Matcher extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    remove(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     resourceOwners(
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -258,6 +307,10 @@ export interface Matcher extends BaseContract {
     minPriceByEpoch: PromiseOrValue<BigNumberish>,
     maxCollateral: PromiseOrValue<BigNumberish>,
     workersCount: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  remove(
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -307,6 +360,8 @@ export interface Matcher extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    remove(overrides?: CallOverrides): Promise<void>;
+
     resourceOwners(
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -350,6 +405,20 @@ export interface Matcher extends BaseContract {
     "Initialized(uint8)"(version?: null): InitializedEventFilter;
     Initialized(version?: null): InitializedEventFilter;
 
+    "ResourceOwnerRegistred(address,tuple)"(
+      owner?: null,
+      info?: null
+    ): ResourceOwnerRegistredEventFilter;
+    ResourceOwnerRegistred(
+      owner?: null,
+      info?: null
+    ): ResourceOwnerRegistredEventFilter;
+
+    "ResourceOwnerRemoved(address)"(
+      owner?: null
+    ): ResourceOwnerRemovedEventFilter;
+    ResourceOwnerRemoved(owner?: null): ResourceOwnerRemovedEventFilter;
+
     "Upgraded(address)"(
       implementation?: PromiseOrValue<string> | null
     ): UpgradedEventFilter;
@@ -379,6 +448,10 @@ export interface Matcher extends BaseContract {
       minPriceByEpoch: PromiseOrValue<BigNumberish>,
       maxCollateral: PromiseOrValue<BigNumberish>,
       workersCount: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    remove(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -420,6 +493,10 @@ export interface Matcher extends BaseContract {
       minPriceByEpoch: PromiseOrValue<BigNumberish>,
       maxCollateral: PromiseOrValue<BigNumberish>,
       workersCount: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    remove(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

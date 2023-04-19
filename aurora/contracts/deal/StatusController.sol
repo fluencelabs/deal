@@ -24,7 +24,7 @@ contract StatusController is ModuleBase, IStatusController {
     }
 
     // ----------------- Mutable -----------------
-    function changeStatus(DealStatus status_) external onlyModule(Module.Controller) {
+    function changeStatus(DealStatus status_) external onlyModule(Module.Workers) {
         DealStatus oldStatus = _status_;
 
         if (oldStatus == status_) {

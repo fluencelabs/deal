@@ -25,7 +25,7 @@ import type {
 
 export interface IWorkersInterface extends utils.Interface {
   functions: {
-    "createPAT(address)": FunctionFragment;
+    "createPAT(address,address)": FunctionFragment;
     "getNextWorkerIndex()": FunctionFragment;
     "getPATIndex(bytes32)": FunctionFragment;
     "getPATOwner(bytes32)": FunctionFragment;
@@ -49,7 +49,7 @@ export interface IWorkersInterface extends utils.Interface {
 
   encodeFunctionData(
     functionFragment: "createPAT",
-    values: [PromiseOrValue<string>]
+    values: [PromiseOrValue<string>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "getNextWorkerIndex",
@@ -136,6 +136,7 @@ export interface IWorkers extends BaseContract {
   functions: {
     createPAT(
       owner: PromiseOrValue<string>,
+      payer: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -172,6 +173,7 @@ export interface IWorkers extends BaseContract {
 
   createPAT(
     owner: PromiseOrValue<string>,
+    payer: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -208,6 +210,7 @@ export interface IWorkers extends BaseContract {
   callStatic: {
     createPAT(
       owner: PromiseOrValue<string>,
+      payer: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -247,6 +250,7 @@ export interface IWorkers extends BaseContract {
   estimateGas: {
     createPAT(
       owner: PromiseOrValue<string>,
+      payer: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -284,6 +288,7 @@ export interface IWorkers extends BaseContract {
   populateTransaction: {
     createPAT(
       owner: PromiseOrValue<string>,
+      payer: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

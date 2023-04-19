@@ -153,6 +153,10 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         autoMine: true,
         waitConfirmations: 1,
     });
+
+    const globalConfigContract = new GlobalConfig__factory(await ethers.getSigner(deployer)).attach(globalConfig.address);
+    await (await globalConfigContract.setFactory(factory.address)).wait();
+    await (await globalConfigContract.setMatcher(matcher.address)).wait();
 };
 
 module.exports.dependencies = ["Faucet"];
