@@ -2,7 +2,7 @@ import type { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "hardhat-deploy";
 import "@nomiclabs/hardhat-etherscan";
-import dotenv from "dotenv";
+import * as dotenv from "dotenv";
 
 dotenv.config();
 
@@ -25,12 +25,12 @@ const config: HardhatUserConfig = {
         },
         auroraTestnet: {
             url: "https://testnet.aurora.dev",
-            accounts: [process.env.PRIVATE_KEY ?? "0x0000000000000000000000000000000000000000000000000000000000000000"],
+            accounts: [process.env["PRIVATE_KEY"] ?? "0x0000000000000000000000000000000000000000000000000000000000000000"],
         },
     },
     etherscan: {
         apiKey: {
-            polygonMumbai: process.env.ETHERSCAN_API_KEY ?? "",
+            polygonMumbai: process.env["ETHERSCAN_API_KEY"] ?? "",
         },
     },
     gasReporter: {
