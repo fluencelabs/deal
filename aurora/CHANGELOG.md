@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.9](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.1.8...deal-aurora-v0.1.9) (2023-04-20)
+
+
+### Features
+
+* Mv to calls & add matching ([#34](https://github.com/fluencelabs/deal/issues/34)) ([6c89e06](https://github.com/fluencelabs/deal/commit/6c89e06ec73506835c0caa8a28f81a50408cb1dd))
+* update pate script ([#32](https://github.com/fluencelabs/deal/issues/32)) ([73354ab](https://github.com/fluencelabs/deal/commit/73354ab1eea686b95d3c64e311c43a2316ee6b72))
+
 ## [0.1.8](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.1.7...deal-aurora-v0.1.8) (2023-02-13)
 
 
