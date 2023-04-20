@@ -23,10 +23,14 @@ const config: HardhatUserConfig = {
             url: "https://polygon-mumbai.blockpi.network/v1/rpc/public",
             accounts: [process.env["AURORA_PRIVATE_KEY"] ?? "0x0000000000000000000000000000000000000000000000000000000000000000"],
         },
+        auroraTestnet: {
+            url: "https://testnet.aurora.dev",
+            accounts: [process.env.PRIVATE_KEY ?? "0x0000000000000000000000000000000000000000000000000000000000000000"],
+        },
     },
     etherscan: {
         apiKey: {
-            polygonMumbai: process.env["ETHERSCAN_API_KEY"] ?? "",
+            polygonMumbai: process.env.ETHERSCAN_API_KEY ?? "",
         },
     },
     gasReporter: {

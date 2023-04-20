@@ -3,12 +3,14 @@
   "version": "1.0.0",
   "description": "",
   "main": "src/pate.ts",
-  "author": "",
-  "license": "MIT",
   "scripts": {
     "lint": "eslint --ext .js,.ts .",
-    "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\""
+    "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\"",
+    "create-pate": "npx ts-node index.ts $*"
   },
+  "author": "",
+  "license": "MIT",
+  "scripts": {},
   "dependencies": {
     "endianness": "^8.0.2",
     "ethers": "^5.7.2",
