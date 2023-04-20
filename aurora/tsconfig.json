@@ -7,6 +7,7 @@
         "allowJs": false,
         "outDir": "dist",
         "strict": true,
+        "declaration": true,
         "noUnusedParameters": true,
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
