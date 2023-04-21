@@ -48,7 +48,7 @@ export interface MatcherInterface extends utils.Interface {
     "globalConfig()": FunctionFragment;
     "matchWithDeal(address,address[],uint256[])": FunctionFragment;
     "proxiableUUID()": FunctionFragment;
-    "register(uint64,uint256,uint256)": FunctionFragment;
+    "register(uint256,uint256,uint256)": FunctionFragment;
     "remove()": FunctionFragment;
     "resourceOwners(address)": FunctionFragment;
     "upgradeTo(address)": FunctionFragment;
@@ -139,6 +139,7 @@ export interface MatcherInterface extends utils.Interface {
     "AdminChanged(address,address)": EventFragment;
     "BeaconUpgraded(address)": EventFragment;
     "Initialized(uint8)": EventFragment;
+    "MatchedWithDeal(address,address[],uint256[])": EventFragment;
     "ResourceOwnerRegistred(address,tuple)": EventFragment;
     "ResourceOwnerRemoved(address)": EventFragment;
     "Upgraded(address)": EventFragment;
@@ -147,6 +148,7 @@ export interface MatcherInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "AdminChanged"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "BeaconUpgraded"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "MatchedWithDeal"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ResourceOwnerRegistred"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ResourceOwnerRemoved"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Upgraded"): EventFragment;
@@ -179,6 +181,18 @@ export interface InitializedEventObject {
 export type InitializedEvent = TypedEvent<[number], InitializedEventObject>;
 
 export type InitializedEventFilter = TypedEventFilter<InitializedEvent>;
+
+export interface MatchedWithDealEventObject {
+  deal: string;
+  resources: string[];
+  workersCount: BigNumber[];
+}
+export type MatchedWithDealEvent = TypedEvent<
+  [string, string[], BigNumber[]],
+  MatchedWithDealEventObject
+>;
+
+export type MatchedWithDealEventFilter = TypedEventFilter<MatchedWithDealEvent>;
 
 export interface ResourceOwnerRegistredEventObject {
   owner: string;
@@ -404,6 +418,17 @@ export interface Matcher extends BaseContract {
 
     "Initialized(uint8)"(version?: null): InitializedEventFilter;
     Initialized(version?: null): InitializedEventFilter;
+
+    "MatchedWithDeal(address,address[],uint256[])"(
+      deal?: null,
+      resources?: null,
+      workersCount?: null
+    ): MatchedWithDealEventFilter;
+    MatchedWithDeal(
+      deal?: null,
+      resources?: null,
+      workersCount?: null
+    ): MatchedWithDealEventFilter;
 
     "ResourceOwnerRegistred(address,tuple)"(
       owner?: null,

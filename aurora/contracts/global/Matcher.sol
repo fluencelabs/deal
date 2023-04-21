@@ -26,6 +26,7 @@ contract MatcherState {
 contract Matcher is IMatcher, MatcherState, UUPSUpgradeable {
     event ResourceOwnerRegistred(address owner, ResourceOwner info);
     event ResourceOwnerRemoved(address owner);
+    event MatchedWithDeal(address deal, address[] resources, uint[] workersCount);
 
     modifier onlyOwner() {
         require(msg.sender == globalConfig.owner(), "Only owner can call this function");
@@ -34,11 +35,11 @@ contract Matcher is IMatcher, MatcherState, UUPSUpgradeable {
 
     constructor(IGlobalConfig globalConfig_) MatcherState(globalConfig_) {}
 
-    function register(uint64 minPriceByEpoch, uint maxCollateral, uint workersCount) external onlyOwner {
+    function register(uint minPriceByEpoch, uint maxCollateral, uint workersCount) external {
         uint amount = maxCollateral * workersCount;
-        resourceOwners[msg.sender] = ResourceOwner(uint256(minPriceByEpoch), maxCollateral, workersCount);
+        resourceOwners[msg.sender] = ResourceOwner(minPriceByEpoch, maxCollateral, workersCount);
 
-        emit ResourceOwnerRegistred(msg.sender, ResourceOwner(uint256(minPriceByEpoch), maxCollateral, workersCount)); //TODO: memory or stack?
+        emit ResourceOwnerRegistred(msg.sender, ResourceOwner(minPriceByEpoch, maxCollateral, workersCount)); //TODO: memory or stack?
 
         globalConfig.fluenceToken().transferFrom(msg.sender, address(this), amount);
     }
@@ -94,10 +95,13 @@ contract Matcher is IMatcher, MatcherState, UUPSUpgradeable {
             uint newWorkersCount = resourceOwner.workersCount - joinedWorkers;
             if (newWorkersCount == 0) {
                 delete resourceOwners[resource];
+                emit ResourceOwnerRemoved(msg.sender);
             } else {
                 resourceOwner.workersCount = newWorkersCount;
             }
         }
+
+        emit MatchedWithDeal(address(deal), resources, workersCount_);
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
