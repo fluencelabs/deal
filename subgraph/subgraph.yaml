@@ -1,0 +1,33 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: Matcher
+    network: aurora-testnet
+    source:
+      address: "0xFf4F97f39297f4fc8b388d39e700BfF4c2b4970C"
+      abi: Matcher
+      startBlock: 124581595
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - AdminChanged
+        - BeaconUpgraded
+        - Initialized
+        - ResourceOwnerRegistred
+        - ResourceOwnerRemoved
+        - Upgraded
+      abis:
+        - name: Matcher
+          file: ./abis/Matcher.json
+      eventHandlers:
+        - event: ResourceOwnerRegistred(address,(uint256,uint256,uint256))
+          handler: handleResourceOwnerRegistred
+        - event: ResourceOwnerRemoved(address)
+          handler: handleResourceOwnerRemoved
+        - event: MatchedWithDeal(address,address[],uint256[])
+          handler: handleMatchedWithDeal
+      file: ./src/matcher.ts
