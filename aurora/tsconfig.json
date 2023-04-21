@@ -1,10 +1,13 @@
 {
     "compilerOptions": {
+        "outDir": "dist",
+        "rootDir": "typechain-types",
         "target": "es2020",
         "module": "commonjs",
         "allowJs": false,
         "outDir": "dist",
         "strict": true,
+        "declaration": true,
         "noUnusedParameters": true,
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
@@ -22,5 +25,6 @@
         "noUncheckedIndexedAccess": true,
         "noUnusedLocals": false
     },
+    "include": ["typechain-types/**/*"],
     "exclude": ["dist", "node_modules"]
 }
