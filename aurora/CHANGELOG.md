@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.11](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.1.10...deal-aurora-v0.1.11) (2023-04-20)
+
+
+### Bug Fixes
+
+* types in dist ([#37](https://github.com/fluencelabs/deal/issues/37)) ([b01a5f0](https://github.com/fluencelabs/deal/commit/b01a5f0b5b149e185ae02464748aa32166045fe4))
+
+## [0.1.10](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.1.9...deal-aurora-v0.1.10) (2023-04-20)
+
+
+### Bug Fixes
+
+* fix dist ([#35](https://github.com/fluencelabs/deal/issues/35)) ([06ebc80](https://github.com/fluencelabs/deal/commit/06ebc80050408126be1777350779ef513346d00c))
+
 ## [0.1.9](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.1.8...deal-aurora-v0.1.9) (2023-04-20)
 
 
