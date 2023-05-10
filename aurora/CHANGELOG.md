@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.12](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.1.11...deal-aurora-v0.1.12) (2023-04-21)
+
+
+### Bug Fixes
+
+* fix abi in matcher ([#39](https://github.com/fluencelabs/deal/issues/39)) ([2183995](https://github.com/fluencelabs/deal/commit/2183995efb75017f1d475ca01b18efac8b39a9e8))
+
 ## [0.1.11](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.1.10...deal-aurora-v0.1.11) (2023-04-20)
 
 
