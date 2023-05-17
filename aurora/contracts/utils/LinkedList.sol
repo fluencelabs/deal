@@ -21,30 +21,20 @@ library LinkedList {
         self._last = key;
     }
 
-    function pushToStart(Bytes32List storage self, bytes32 key) internal {
-        bytes32 old_first = self._first;
-
-        if (old_first == 0) {
-            _init(self, key);
-            return;
-        }
-
-        self._first = key;
-        self._elements[key].next = old_first;
-        self._elements[old_first].prev = key;
-    }
-
     function push(Bytes32List storage self, bytes32 key) internal {
-        bytes32 old_last = self._last;
+        bytes32 oldLast = self._last;
 
-        if (old_last == 0) {
+        require(key != NULL, "Key cannot be NULL");
+        require(!exist(self, key), "Key already exists");
+
+        if (oldLast == 0) {
             _init(self, key);
             return;
         }
 
         self._last = key;
-        self._elements[key].prev = old_last;
-        self._elements[old_last].next = key;
+        self._elements[key].prev = oldLast;
+        self._elements[oldLast].next = key;
     }
 
     function first(Bytes32List storage self) internal view returns (bytes32) {
@@ -79,24 +69,24 @@ library LinkedList {
 
     function exist(Bytes32List storage self, bytes32 key) internal view returns (bool) {
         Element storage element = self._elements[key];
-        return element.prev != NULL || element.next == NULL;
+        return element.prev != NULL || element.next != NULL;
     }
 
-    function next(Bytes32List storage self, bytes32 key) internal view returns (bytes32, bool isOk) {
+    function next(Bytes32List storage self, bytes32 key) internal view returns (bytes32) {
         bytes32 nextElement = self._elements[key].next;
         if (nextElement == NULL) {
-            return (NULL, false);
+            return NULL;
         }
 
-        return (nextElement, true);
+        return nextElement;
     }
 
-    function prev(Bytes32List storage self, bytes32 key) internal view returns (bytes32, bool isOk) {
+    function prev(Bytes32List storage self, bytes32 key) internal view returns (bytes32) {
         bytes32 prevElement = self._elements[key].prev;
         if (prevElement == NULL) {
-            return (NULL, false);
+            return (NULL);
         }
 
-        return (prevElement, true);
+        return prevElement;
     }
 }
