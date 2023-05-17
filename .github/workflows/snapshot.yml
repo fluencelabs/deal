@@ -35,8 +35,8 @@ jobs:
           jwtTtl: 300
           exportToken: false
           secrets: |
-            kv/hub.docker.com/fluencebot username | DOCKER_USERNAME ;
-            kv/hub.docker.com/fluencebot password | DOCKER_PASSWORD
+            kv/docker-registry/basicauth/ci username | DOCKER_USERNAME ;
+            kv/docker-registry/basicauth/ci password | DOCKER_PASSWORD
 
       - name: Generate snapshot version
         id: version
