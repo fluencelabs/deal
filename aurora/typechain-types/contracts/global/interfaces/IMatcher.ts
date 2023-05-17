@@ -4,7 +4,6 @@
 import type {
   BaseContract,
   BigNumber,
-  BigNumberish,
   BytesLike,
   CallOverrides,
   ContractTransaction,
@@ -25,18 +24,14 @@ import type {
 
 export interface IMatcherInterface extends utils.Interface {
   functions: {
-    "matchWithDeal(address,address[],uint256[])": FunctionFragment;
+    "matchWithDeal(address)": FunctionFragment;
   };
 
   getFunction(nameOrSignatureOrTopic: "matchWithDeal"): FunctionFragment;
 
   encodeFunctionData(
     functionFragment: "matchWithDeal",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<string>[],
-      PromiseOrValue<BigNumberish>[]
-    ]
+    values: [PromiseOrValue<string>]
   ): string;
 
   decodeFunctionResult(
@@ -76,24 +71,18 @@ export interface IMatcher extends BaseContract {
   functions: {
     matchWithDeal(
       deal: PromiseOrValue<string>,
-      resources: PromiseOrValue<string>[],
-      workersCount_: PromiseOrValue<BigNumberish>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
   };
 
   matchWithDeal(
     deal: PromiseOrValue<string>,
-    resources: PromiseOrValue<string>[],
-    workersCount_: PromiseOrValue<BigNumberish>[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   callStatic: {
     matchWithDeal(
       deal: PromiseOrValue<string>,
-      resources: PromiseOrValue<string>[],
-      workersCount_: PromiseOrValue<BigNumberish>[],
       overrides?: CallOverrides
     ): Promise<void>;
   };
@@ -103,8 +92,6 @@ export interface IMatcher extends BaseContract {
   estimateGas: {
     matchWithDeal(
       deal: PromiseOrValue<string>,
-      resources: PromiseOrValue<string>[],
-      workersCount_: PromiseOrValue<BigNumberish>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
   };
@@ -112,8 +99,6 @@ export interface IMatcher extends BaseContract {
   populateTransaction: {
     matchWithDeal(
       deal: PromiseOrValue<string>,
-      resources: PromiseOrValue<string>[],
-      workersCount_: PromiseOrValue<BigNumberish>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
   };

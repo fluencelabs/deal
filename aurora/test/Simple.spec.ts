@@ -55,7 +55,6 @@ describe("Factory", () => {
         const requiredStake = await config.requiredStake();
 
         const fltAddress = await faucet.fluenceToken();
-
         const flt = IERC20__factory.connect(fltAddress, ethers.provider.getSigner());
 
         await (await flt.approve(workers.address, requiredStake)).wait();
@@ -71,31 +70,43 @@ describe("Factory", () => {
     });
 
     it("register in matcher", async () => {
-        const requiredStake = await config.requiredStake();
+        const owner = ethers.provider.getSigner(0);
+        const resourceOwner = ethers.provider.getSigner(1);
+
+        const collateral = (await config.requiredStake()).mul(2);
+        const workersCount = 2;
+        const totalCollateral = collateral.mul(workersCount);
 
         const fltAddress = await faucet.fluenceToken();
 
         const flt = IERC20__factory.connect(fltAddress, ethers.provider.getSigner());
 
-        await (await flt.approve(matcher.address, requiredStake.mul(2))).wait();
+        await (await matcher.connect(owner).setWhiteList(await resourceOwner.getAddress(), true)).wait();
+        await (await flt.connect(resourceOwner).approve(matcher.address, totalCollateral)).wait();
 
-        const tx = await matcher.register(1, requiredStake, 2);
+        const tx = await matcher.connect(resourceOwner).register(factory.PRICE_PER_EPOCH(), collateral, workersCount, ["one", "two"]);
         const res = await tx.wait();
 
+        /*
         const eventTopic = matcher.interface.getEventTopic("ResourceOwnerRegistred");
         const log = res.logs.find(({ topics }: any) => topics[0] === eventTopic);
         const parsetLog = matcher.interface.parseLog(log!) as any;
 
         expect(parsetLog.args.owner).to.be.equal(await ethers.provider.getSigner().getAddress());
         expect(parsetLog.args.info.minPriceByEpoch).to.be.equal(1);
-        expect(parsetLog.args.info.maxCollateral).to.be.equal(requiredStake);
-        expect(parsetLog.args.info.workersCount).to.be.equal(2);
+        expect(parsetLog.args.info.maxCollateral).to.be.equal(collateral);
+        expect(parsetLog.args.info.workersCount).to.be.equal(2);*/
+
+        const resourceOwnerInfo = await matcher.resourceConfigs(await resourceOwner.getAddress());
+        expect(resourceOwnerInfo.minPriceByEpoch).to.be.equal(await factory.PRICE_PER_EPOCH());
+        expect(resourceOwnerInfo.maxCollateral).to.be.equal(collateral);
+        expect(resourceOwnerInfo.workersCount).to.be.equal(workersCount);
     });
 
     it("match", async () => {
-        const resourceOwner = await ethers.provider.getSigner().getAddress();
+        const resourceOwner = await ethers.provider.getSigner(1).getAddress();
 
-        const tx = await matcher.matchWithDeal(core.address, [resourceOwner], [2]);
+        const tx = await matcher.matchWithDeal(core.address);
         const res = await tx.wait();
 
         const eventTopic = workers.interface.getEventTopic("PATCreated");

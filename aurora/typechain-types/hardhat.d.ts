@@ -21,10 +21,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC1822ProxiableUpgradeable__factory>;
     getContractFactory(
-      name: "IERC1967Upgradeable",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IERC1967Upgradeable__factory>;
-    getContractFactory(
       name: "IBeaconUpgradeable",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IBeaconUpgradeable__factory>;
@@ -52,10 +48,6 @@ declare module "hardhat/types/runtime" {
       name: "IERC1822Proxiable",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC1822Proxiable__factory>;
-    getContractFactory(
-      name: "IERC1967",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IERC1967__factory>;
     getContractFactory(
       name: "IBeacon",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -233,13 +225,17 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Matcher__factory>;
     getContractFactory(
+      name: "MatcherInternal",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.MatcherInternal__factory>;
+    getContractFactory(
+      name: "MatcherOwnable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.MatcherOwnable__factory>;
+    getContractFactory(
       name: "MatcherState",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.MatcherState__factory>;
-    getContractFactory(
-      name: "AVLMock",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.AVLMock__factory>;
     getContractFactory(
       name: "MockParticleVerifyer",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -255,11 +251,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IERC1822ProxiableUpgradeable>;
-    getContractAt(
-      name: "IERC1967Upgradeable",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IERC1967Upgradeable>;
     getContractAt(
       name: "IBeaconUpgradeable",
       address: string,
@@ -295,11 +286,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IERC1822Proxiable>;
-    getContractAt(
-      name: "IERC1967",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IERC1967>;
     getContractAt(
       name: "IBeacon",
       address: string,
@@ -521,15 +507,20 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Matcher>;
     getContractAt(
+      name: "MatcherInternal",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.MatcherInternal>;
+    getContractAt(
+      name: "MatcherOwnable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.MatcherOwnable>;
+    getContractAt(
       name: "MatcherState",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.MatcherState>;
-    getContractAt(
-      name: "AVLMock",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.AVLMock>;
     getContractAt(
       name: "MockParticleVerifyer",
       address: string,

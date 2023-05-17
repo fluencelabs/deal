@@ -24,19 +24,13 @@ const _abi = [
     type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "index",
-        type: "uint256",
-      },
-    ],
-    name: "effectorWasmsCids",
+    inputs: [],
+    name: "effectors",
     outputs: [
       {
-        internalType: "string",
+        internalType: "string[]",
         name: "",
-        type: "string",
+        type: "string[]",
       },
     ],
     stateMutability: "view",

@@ -7,14 +7,6 @@ export declare class IMatcher__factory {
             readonly internalType: "contract ICore";
             readonly name: "deal";
             readonly type: "address";
-        }, {
-            readonly internalType: "address[]";
-            readonly name: "resources";
-            readonly type: "address[]";
-        }, {
-            readonly internalType: "uint256[]";
-            readonly name: "workersCount_";
-            readonly type: "uint256[]";
         }];
         readonly name: "matchWithDeal";
         readonly outputs: readonly [];

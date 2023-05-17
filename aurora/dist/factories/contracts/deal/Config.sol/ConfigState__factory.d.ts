@@ -13,16 +13,12 @@ export declare class ConfigState__factory {
         readonly stateMutability: "view";
         readonly type: "function";
     }, {
-        readonly inputs: readonly [{
-            readonly internalType: "uint256";
-            readonly name: "";
-            readonly type: "uint256";
-        }];
-        readonly name: "effectorWasmsCids";
+        readonly inputs: readonly [];
+        readonly name: "effectors";
         readonly outputs: readonly [{
-            readonly internalType: "string";
+            readonly internalType: "string[]";
             readonly name: "";
-            readonly type: "string";
+            readonly type: "string[]";
         }];
         readonly stateMutability: "view";
         readonly type: "function";

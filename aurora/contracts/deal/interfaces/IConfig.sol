@@ -38,7 +38,7 @@ interface IConfig {
 
     function targetWorkers() external view returns (uint256);
 
-    function effectorWasmsCids(uint index) external view returns (string memory);
+    function effectors() external view returns (string[] memory);
 
     function setPricePerEpoch(uint256 pricePerEpoch_) external;
 

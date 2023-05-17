@@ -27,7 +27,8 @@ abstract contract ConfigState is IConfig {
     uint256 public minWorkers;
     uint256 public maxWorkersPerProvider;
     uint256 public targetWorkers;
-    string[] public effectorWasmsCids;
+
+    string[] internal _effectors;
 }
 
 contract Config is ConfigState, ModuleBase, Initializable {
@@ -43,7 +44,7 @@ contract Config is ConfigState, ModuleBase, Initializable {
         uint256 minWorkers_,
         uint256 maxWorkersPerProvider_,
         uint256 targetWorkers_,
-        string[] memory effectorWasmsCids_
+        string[] memory effectors_
     ) public initializer {
         paymentToken = paymentToken_;
         pricePerEpoch = pricePerEpoch_;
@@ -52,7 +53,11 @@ contract Config is ConfigState, ModuleBase, Initializable {
         minWorkers = minWorkers_;
         maxWorkersPerProvider = maxWorkersPerProvider_;
         targetWorkers = targetWorkers_;
-        effectorWasmsCids = effectorWasmsCids_;
+        _effectors = effectors_;
+    }
+
+    function effectors() external view override returns (string[] memory) {
+        return _effectors;
     }
 
     function setPricePerEpoch(uint256 pricePerEpoch_) external onlyModule(Module.Controller) {

@@ -1,17 +1,13 @@
-import type { BaseContract, BigNumber, BigNumberish, BytesLike, CallOverrides, ContractTransaction, Overrides, PopulatedTransaction, Signer, utils } from "ethers";
+import type { BaseContract, BigNumber, BytesLike, CallOverrides, ContractTransaction, Overrides, PopulatedTransaction, Signer, utils } from "ethers";
 import type { FunctionFragment, Result } from "@ethersproject/abi";
 import type { Listener, Provider } from "@ethersproject/providers";
 import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent, PromiseOrValue } from "../../../common";
 export interface IMatcherInterface extends utils.Interface {
     functions: {
-        "matchWithDeal(address,address[],uint256[])": FunctionFragment;
+        "matchWithDeal(address)": FunctionFragment;
     };
     getFunction(nameOrSignatureOrTopic: "matchWithDeal"): FunctionFragment;
-    encodeFunctionData(functionFragment: "matchWithDeal", values: [
-        PromiseOrValue<string>,
-        PromiseOrValue<string>[],
-        PromiseOrValue<BigNumberish>[]
-    ]): string;
+    encodeFunctionData(functionFragment: "matchWithDeal", values: [PromiseOrValue<string>]): string;
     decodeFunctionResult(functionFragment: "matchWithDeal", data: BytesLike): Result;
     events: {};
 }
@@ -30,24 +26,24 @@ export interface IMatcher extends BaseContract {
     once: OnEvent<this>;
     removeListener: OnEvent<this>;
     functions: {
-        matchWithDeal(deal: PromiseOrValue<string>, resources: PromiseOrValue<string>[], workersCount_: PromiseOrValue<BigNumberish>[], overrides?: Overrides & {
+        matchWithDeal(deal: PromiseOrValue<string>, overrides?: Overrides & {
             from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
     };
-    matchWithDeal(deal: PromiseOrValue<string>, resources: PromiseOrValue<string>[], workersCount_: PromiseOrValue<BigNumberish>[], overrides?: Overrides & {
+    matchWithDeal(deal: PromiseOrValue<string>, overrides?: Overrides & {
         from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
     callStatic: {
-        matchWithDeal(deal: PromiseOrValue<string>, resources: PromiseOrValue<string>[], workersCount_: PromiseOrValue<BigNumberish>[], overrides?: CallOverrides): Promise<void>;
+        matchWithDeal(deal: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
     };
     filters: {};
     estimateGas: {
-        matchWithDeal(deal: PromiseOrValue<string>, resources: PromiseOrValue<string>[], workersCount_: PromiseOrValue<BigNumberish>[], overrides?: Overrides & {
+        matchWithDeal(deal: PromiseOrValue<string>, overrides?: Overrides & {
             from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
     };
     populateTransaction: {
-        matchWithDeal(deal: PromiseOrValue<string>, resources: PromiseOrValue<string>[], workersCount_: PromiseOrValue<BigNumberish>[], overrides?: Overrides & {
+        matchWithDeal(deal: PromiseOrValue<string>, overrides?: Overrides & {
             from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
     };

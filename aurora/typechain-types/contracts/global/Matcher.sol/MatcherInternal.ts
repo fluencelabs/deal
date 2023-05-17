@@ -4,7 +4,6 @@
 import type {
   BaseContract,
   BigNumber,
-  BigNumberish,
   BytesLike,
   CallOverrides,
   ContractTransaction,
@@ -28,16 +27,12 @@ import type {
   PromiseOrValue,
 } from "../../../common";
 
-export interface MatcherInterface extends utils.Interface {
+export interface MatcherInternalInterface extends utils.Interface {
   functions: {
     "globalConfig()": FunctionFragment;
-    "matchWithDeal(address)": FunctionFragment;
     "proxiableUUID()": FunctionFragment;
-    "register(uint256,uint256,uint256,string[])": FunctionFragment;
-    "remove()": FunctionFragment;
     "resourceConfigIds()": FunctionFragment;
     "resourceConfigs(address)": FunctionFragment;
-    "setWhiteList(address,bool)": FunctionFragment;
     "upgradeTo(address)": FunctionFragment;
     "upgradeToAndCall(address,bytes)": FunctionFragment;
     "whitelist(address)": FunctionFragment;
@@ -46,13 +41,9 @@ export interface MatcherInterface extends utils.Interface {
   getFunction(
     nameOrSignatureOrTopic:
       | "globalConfig"
-      | "matchWithDeal"
       | "proxiableUUID"
-      | "register"
-      | "remove"
       | "resourceConfigIds"
       | "resourceConfigs"
-      | "setWhiteList"
       | "upgradeTo"
       | "upgradeToAndCall"
       | "whitelist"
@@ -63,23 +54,9 @@ export interface MatcherInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "matchWithDeal",
-    values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
     functionFragment: "proxiableUUID",
     values?: undefined
   ): string;
-  encodeFunctionData(
-    functionFragment: "register",
-    values: [
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<string>[]
-    ]
-  ): string;
-  encodeFunctionData(functionFragment: "remove", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "resourceConfigIds",
     values?: undefined
@@ -87,10 +64,6 @@ export interface MatcherInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "resourceConfigs",
     values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setWhiteList",
-    values: [PromiseOrValue<string>, PromiseOrValue<boolean>]
   ): string;
   encodeFunctionData(
     functionFragment: "upgradeTo",
@@ -110,25 +83,15 @@ export interface MatcherInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "matchWithDeal",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "proxiableUUID",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "register", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "remove", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "resourceConfigIds",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "resourceConfigs",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setWhiteList",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "upgradeTo", data: BytesLike): Result;
@@ -186,12 +149,12 @@ export type UpgradedEvent = TypedEvent<[string], UpgradedEventObject>;
 
 export type UpgradedEventFilter = TypedEventFilter<UpgradedEvent>;
 
-export interface Matcher extends BaseContract {
+export interface MatcherInternal extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: MatcherInterface;
+  interface: MatcherInternalInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -215,24 +178,7 @@ export interface Matcher extends BaseContract {
   functions: {
     globalConfig(overrides?: CallOverrides): Promise<[string]>;
 
-    matchWithDeal(
-      deal: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
     proxiableUUID(overrides?: CallOverrides): Promise<[string]>;
-
-    register(
-      minPriceByEpoch: PromiseOrValue<BigNumberish>,
-      maxCollateral: PromiseOrValue<BigNumberish>,
-      workersCount: PromiseOrValue<BigNumberish>,
-      effectors: PromiseOrValue<string>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    remove(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
 
     resourceConfigIds(
       overrides?: CallOverrides
@@ -248,12 +194,6 @@ export interface Matcher extends BaseContract {
         workersCount: BigNumber;
       }
     >;
-
-    setWhiteList(
-      owner: PromiseOrValue<string>,
-      hasAccess: PromiseOrValue<boolean>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
 
     upgradeTo(
       newImplementation: PromiseOrValue<string>,
@@ -274,24 +214,7 @@ export interface Matcher extends BaseContract {
 
   globalConfig(overrides?: CallOverrides): Promise<string>;
 
-  matchWithDeal(
-    deal: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   proxiableUUID(overrides?: CallOverrides): Promise<string>;
-
-  register(
-    minPriceByEpoch: PromiseOrValue<BigNumberish>,
-    maxCollateral: PromiseOrValue<BigNumberish>,
-    workersCount: PromiseOrValue<BigNumberish>,
-    effectors: PromiseOrValue<string>[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  remove(
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
 
   resourceConfigIds(
     overrides?: CallOverrides
@@ -307,12 +230,6 @@ export interface Matcher extends BaseContract {
       workersCount: BigNumber;
     }
   >;
-
-  setWhiteList(
-    owner: PromiseOrValue<string>,
-    hasAccess: PromiseOrValue<boolean>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
 
   upgradeTo(
     newImplementation: PromiseOrValue<string>,
@@ -333,22 +250,7 @@ export interface Matcher extends BaseContract {
   callStatic: {
     globalConfig(overrides?: CallOverrides): Promise<string>;
 
-    matchWithDeal(
-      deal: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     proxiableUUID(overrides?: CallOverrides): Promise<string>;
-
-    register(
-      minPriceByEpoch: PromiseOrValue<BigNumberish>,
-      maxCollateral: PromiseOrValue<BigNumberish>,
-      workersCount: PromiseOrValue<BigNumberish>,
-      effectors: PromiseOrValue<string>[],
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    remove(overrides?: CallOverrides): Promise<void>;
 
     resourceConfigIds(
       overrides?: CallOverrides
@@ -364,12 +266,6 @@ export interface Matcher extends BaseContract {
         workersCount: BigNumber;
       }
     >;
-
-    setWhiteList(
-      owner: PromiseOrValue<string>,
-      hasAccess: PromiseOrValue<boolean>,
-      overrides?: CallOverrides
-    ): Promise<void>;
 
     upgradeTo(
       newImplementation: PromiseOrValue<string>,
@@ -419,36 +315,13 @@ export interface Matcher extends BaseContract {
   estimateGas: {
     globalConfig(overrides?: CallOverrides): Promise<BigNumber>;
 
-    matchWithDeal(
-      deal: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
     proxiableUUID(overrides?: CallOverrides): Promise<BigNumber>;
-
-    register(
-      minPriceByEpoch: PromiseOrValue<BigNumberish>,
-      maxCollateral: PromiseOrValue<BigNumberish>,
-      workersCount: PromiseOrValue<BigNumberish>,
-      effectors: PromiseOrValue<string>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    remove(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
 
     resourceConfigIds(overrides?: CallOverrides): Promise<BigNumber>;
 
     resourceConfigs(
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    setWhiteList(
-      owner: PromiseOrValue<string>,
-      hasAccess: PromiseOrValue<boolean>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     upgradeTo(
@@ -471,36 +344,13 @@ export interface Matcher extends BaseContract {
   populateTransaction: {
     globalConfig(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    matchWithDeal(
-      deal: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
     proxiableUUID(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    register(
-      minPriceByEpoch: PromiseOrValue<BigNumberish>,
-      maxCollateral: PromiseOrValue<BigNumberish>,
-      workersCount: PromiseOrValue<BigNumberish>,
-      effectors: PromiseOrValue<string>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    remove(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
 
     resourceConfigIds(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     resourceConfigs(
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    setWhiteList(
-      owner: PromiseOrValue<string>,
-      hasAccess: PromiseOrValue<boolean>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     upgradeTo(

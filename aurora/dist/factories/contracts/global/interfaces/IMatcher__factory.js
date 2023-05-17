@@ -13,16 +13,6 @@ const _abi = [
                 name: "deal",
                 type: "address",
             },
-            {
-                internalType: "address[]",
-                name: "resources",
-                type: "address[]",
-            },
-            {
-                internalType: "uint256[]",
-                name: "workersCount_",
-                type: "uint256[]",
-            },
         ],
         name: "matchWithDeal",
         outputs: [],

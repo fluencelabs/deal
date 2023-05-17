@@ -4,17 +4,20 @@ import type { Listener, Provider } from "@ethersproject/providers";
 import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent, PromiseOrValue } from "../../../common";
 export interface MatcherStateInterface extends utils.Interface {
     functions: {
-        "collateral(address)": FunctionFragment;
         "globalConfig()": FunctionFragment;
-        "resourceOwners(address)": FunctionFragment;
+        "resourceConfigIds()": FunctionFragment;
+        "resourceConfigs(address)": FunctionFragment;
+        "whitelist(address)": FunctionFragment;
     };
-    getFunction(nameOrSignatureOrTopic: "collateral" | "globalConfig" | "resourceOwners"): FunctionFragment;
-    encodeFunctionData(functionFragment: "collateral", values: [PromiseOrValue<string>]): string;
+    getFunction(nameOrSignatureOrTopic: "globalConfig" | "resourceConfigIds" | "resourceConfigs" | "whitelist"): FunctionFragment;
     encodeFunctionData(functionFragment: "globalConfig", values?: undefined): string;
-    encodeFunctionData(functionFragment: "resourceOwners", values: [PromiseOrValue<string>]): string;
-    decodeFunctionResult(functionFragment: "collateral", data: BytesLike): Result;
+    encodeFunctionData(functionFragment: "resourceConfigIds", values?: undefined): string;
+    encodeFunctionData(functionFragment: "resourceConfigs", values: [PromiseOrValue<string>]): string;
+    encodeFunctionData(functionFragment: "whitelist", values: [PromiseOrValue<string>]): string;
     decodeFunctionResult(functionFragment: "globalConfig", data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: "resourceOwners", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "resourceConfigIds", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "resourceConfigs", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "whitelist", data: BytesLike): Result;
     events: {};
 }
 export interface MatcherState extends BaseContract {
@@ -32,9 +35,12 @@ export interface MatcherState extends BaseContract {
     once: OnEvent<this>;
     removeListener: OnEvent<this>;
     functions: {
-        collateral(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<[BigNumber]>;
         globalConfig(overrides?: CallOverrides): Promise<[string]>;
-        resourceOwners(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<[
+        resourceConfigIds(overrides?: CallOverrides): Promise<[string, string] & {
+            _first: string;
+            _last: string;
+        }>;
+        resourceConfigs(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<[
             BigNumber,
             BigNumber,
             BigNumber
@@ -43,10 +49,14 @@ export interface MatcherState extends BaseContract {
             maxCollateral: BigNumber;
             workersCount: BigNumber;
         }>;
+        whitelist(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<[boolean]>;
     };
-    collateral(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<BigNumber>;
     globalConfig(overrides?: CallOverrides): Promise<string>;
-    resourceOwners(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<[
+    resourceConfigIds(overrides?: CallOverrides): Promise<[string, string] & {
+        _first: string;
+        _last: string;
+    }>;
+    resourceConfigs(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<[
         BigNumber,
         BigNumber,
         BigNumber
@@ -55,10 +65,14 @@ export interface MatcherState extends BaseContract {
         maxCollateral: BigNumber;
         workersCount: BigNumber;
     }>;
+    whitelist(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<boolean>;
     callStatic: {
-        collateral(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<BigNumber>;
         globalConfig(overrides?: CallOverrides): Promise<string>;
-        resourceOwners(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<[
+        resourceConfigIds(overrides?: CallOverrides): Promise<[string, string] & {
+            _first: string;
+            _last: string;
+        }>;
+        resourceConfigs(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<[
             BigNumber,
             BigNumber,
             BigNumber
@@ -67,16 +81,19 @@ export interface MatcherState extends BaseContract {
             maxCollateral: BigNumber;
             workersCount: BigNumber;
         }>;
+        whitelist(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<boolean>;
     };
     filters: {};
     estimateGas: {
-        collateral(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<BigNumber>;
         globalConfig(overrides?: CallOverrides): Promise<BigNumber>;
-        resourceOwners(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<BigNumber>;
+        resourceConfigIds(overrides?: CallOverrides): Promise<BigNumber>;
+        resourceConfigs(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<BigNumber>;
+        whitelist(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<BigNumber>;
     };
     populateTransaction: {
-        collateral(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<PopulatedTransaction>;
         globalConfig(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-        resourceOwners(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        resourceConfigIds(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        resourceConfigs(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        whitelist(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<PopulatedTransaction>;
     };
 }

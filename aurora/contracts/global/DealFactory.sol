@@ -65,6 +65,7 @@ contract DealFactory is DealFactoryState, UUPSUpgradeable {
         IStatusController statusController;
         IWorkers workers;
     }
+
     event DealCreated(
         Deal deal,
         address paymentToken,
@@ -107,10 +108,13 @@ contract DealFactory is DealFactoryState, UUPSUpgradeable {
         _;
     }
 
-    function createDeal(uint256 minWorkers_, uint256 targetWorkers_, string memory appCID_) external returns (address) {
-        string[] memory effectorWasmsCids_ = new string[](0);
-
-        Deal memory deal = _deployDeal(minWorkers_, targetWorkers_, appCID_, effectorWasmsCids_);
+    function createDeal(
+        uint256 minWorkers_,
+        uint256 targetWorkers_,
+        string calldata appCID_,
+        string[] calldata effectors
+    ) external returns (address) {
+        Deal memory deal = _deployDeal(minWorkers_, targetWorkers_, appCID_, effectors);
 
         emit DealCreated(
             deal,
@@ -121,7 +125,7 @@ contract DealFactory is DealFactoryState, UUPSUpgradeable {
             MAX_WORKERS_PER_PROVIDER,
             targetWorkers_,
             appCID_,
-            effectorWasmsCids_,
+            effectors,
             deal.config.globalConfig().epochManager().currentEpoch()
         );
 

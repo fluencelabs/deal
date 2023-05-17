@@ -10,10 +10,13 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract MatcherState {
     struct ResourceConfig {
-        address owner;
         uint minPriceByEpoch;
         uint maxCollateral;
         uint workersCount;
+    }
+
+    struct Effectors {
+        mapping(string => bool) effectors;
     }
 
     IGlobalConfig public immutable globalConfig;
@@ -22,12 +25,14 @@ contract MatcherState {
     mapping(address => ResourceConfig) public resourceConfigs;
     mapping(address => bool) public whitelist;
 
+    mapping(address => Effectors) effectorsByOwner;
+
     constructor(IGlobalConfig globalConfig_) {
         globalConfig = globalConfig_;
     }
 }
 
-contract Matcher is IMatcher, MatcherState, UUPSUpgradeable {
+abstract contract MatcherInternal is MatcherState, UUPSUpgradeable {
     using LinkedList for LinkedList.Bytes32List;
 
     modifier onlyOwner() {
@@ -35,26 +40,94 @@ contract Matcher is IMatcher, MatcherState, UUPSUpgradeable {
         _;
     }
 
-    constructor(IGlobalConfig globalConfig_) MatcherState(globalConfig_) {}
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
+    function _isEffectorsMatched(IConfig dealConfig, address resourceOwner) internal view returns (bool) {
+        string[] memory dealEffectors = dealConfig.effectors();
+
+        for (uint i = 0; i < dealEffectors.length; i++) {
+            if (!effectorsByOwner[resourceOwner].effectors[dealEffectors[i]]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    function _joinDeal(
+        IController controller,
+        IWorkers workersController,
+        address resourceOwner,
+        uint maxCollateral,
+        uint workersCount,
+        uint requiredStake,
+        uint maxWorkersPerProvider,
+        uint freeWorkerSlots
+    ) internal returns (uint) {
+        uint joinedWorkers;
+        if (maxWorkersPerProvider > workersCount) {
+            joinedWorkers = workersCount;
+        } else {
+            joinedWorkers = maxWorkersPerProvider;
+        }
+
+        if (joinedWorkers > freeWorkerSlots) {
+            joinedWorkers = freeWorkerSlots;
+        }
+
+        uint newWorkersCount = workersCount - joinedWorkers;
+        if (newWorkersCount == 0) {
+            delete resourceConfigs[resourceOwner];
+            resourceConfigIds.remove(bytes32(bytes20(resourceOwner)));
+        } else {
+            workersCount = newWorkersCount;
+        }
+
+        globalConfig.fluenceToken().approve(address(workersController), requiredStake * joinedWorkers);
+        for (uint j = 0; j < joinedWorkers; j++) {
+            controller.joinViaMatcher(resourceOwner);
+        }
+
+        uint refoundByWorker = maxCollateral - requiredStake;
+        if (refoundByWorker > 0) {
+            globalConfig.fluenceToken().transfer(resourceOwner, refoundByWorker * joinedWorkers);
+        }
+
+        return joinedWorkers;
+    }
+}
+
+abstract contract MatcherOwnable is MatcherInternal {
     function setWhiteList(address owner, bool hasAccess) external onlyOwner {
         whitelist[owner] = hasAccess;
     }
+}
 
-    function setConfig(uint minPriceByEpoch, uint maxCollateral, uint workersCount) external {
+contract Matcher is IMatcher, MatcherOwnable {
+    using LinkedList for LinkedList.Bytes32List;
+
+    constructor(IGlobalConfig globalConfig_) MatcherState(globalConfig_) {}
+
+    function register(uint minPriceByEpoch, uint maxCollateral, uint workersCount, string[] calldata effectors) external {
         address owner = msg.sender;
-        require(resourceConfigs[owner].owner == address(0x00), "Only owner can call this function");
         require(whitelist[owner], "Only whitelisted can call this function");
+        require(workersCount > 0, "Workers count should be greater than 0");
+        require(maxCollateral > 0, "Max collateral should be greater than 0");
+        require(resourceConfigs[owner].workersCount == 0, "Config already exists");
 
         uint amount = maxCollateral * workersCount;
         ResourceConfig memory config = ResourceConfig({
-            owner: owner,
             minPriceByEpoch: minPriceByEpoch,
             maxCollateral: maxCollateral,
             workersCount: workersCount
         });
 
+        for (uint i = 0; i < effectors.length; i++) {
+            effectorsByOwner[owner].effectors[effectors[i]] = true;
+        }
+
         resourceConfigIds.push(bytes32(bytes20(owner)));
+
         resourceConfigs[owner] = config;
 
         globalConfig.fluenceToken().transferFrom(owner, address(this), amount);
@@ -62,15 +135,15 @@ contract Matcher is IMatcher, MatcherState, UUPSUpgradeable {
 
     function remove() external {
         address owner = msg.sender;
-        ResourceConfig storage resourceConfig = resourceConfigs[msg.sender];
+        ResourceConfig storage resourceConfig = resourceConfigs[owner];
 
-        require(resourceConfig.owner != address(0x00), "Only owner can call this function");
+        require(resourceConfig.workersCount != 0, "Config doesn't exist");
 
         uint amount = resourceConfig.maxCollateral * resourceConfig.workersCount;
-        delete resourceConfigs[msg.sender];
+        delete resourceConfigs[owner];
         resourceConfigIds.remove(bytes32(bytes20(owner)));
 
-        globalConfig.fluenceToken().transfer(msg.sender, amount);
+        globalConfig.fluenceToken().transfer(owner, amount);
     }
 
     function matchWithDeal(ICore deal) external {
@@ -83,56 +156,38 @@ contract Matcher is IMatcher, MatcherState, UUPSUpgradeable {
         uint pricePerEpoch = config.pricePerEpoch();
         uint maxWorkersPerProvider = config.maxWorkersPerProvider();
 
-        uint free = config.targetWorkers() - deal.getWorkers().workersCount();
-
-        uint totalJoinedWorkers = 0;
+        IWorkers workersController = deal.getWorkers();
+        uint freeWorkerSlots = config.targetWorkers() - workersController.workersCount();
 
         bytes32 currentId = resourceConfigIds.first();
-        while (currentId != NULL) {
-            IWorkers workers = deal.getWorkers();
-            ResourceConfig storage resourceConfig = resourceConfigs[address(bytes20(currentId))];
-            uint workersCount = resourceConfig.workersCount;
+        while (currentId != ZERO && freeWorkerSlots > 0) {
+            address resourceOwner = address(bytes20(currentId));
+
+            ResourceConfig storage resourceConfig = resourceConfigs[resourceOwner];
             uint maxCollateral = resourceConfig.maxCollateral;
-            address resourceOwner = resourceConfig.owner;
 
-            require(resourceConfig.minPriceByEpoch <= pricePerEpoch, "Price per epoch is too high");
-            require(maxCollateral >= requiredStake, "Required stake is too high");
-
-            uint joinedWorkers;
-
-            if (maxWorkersPerProvider > workersCount) {
-                joinedWorkers = workersCount;
-            } else {
-                joinedWorkers = maxWorkersPerProvider;
+            if (
+                resourceConfig.minPriceByEpoch > pricePerEpoch ||
+                maxCollateral < requiredStake ||
+                !_isEffectorsMatched(config, resourceOwner)
+            ) {
+                currentId = resourceConfigIds.next(currentId);
+                continue;
             }
 
-            uint currentFree = free - totalJoinedWorkers;
-            if (joinedWorkers > currentFree) {
-                joinedWorkers = currentFree;
-            }
-            totalJoinedWorkers += joinedWorkers;
-
-            uint refoundByWorker = maxCollateral - requiredStake;
-            for (uint j = 0; j < joinedWorkers; j++) {
-                globalConfig.fluenceToken().approve(address(workers), requiredStake);
-                controller.joinViaMatcher(resourceOwner);
-
-                if (refoundByWorker > 0) {
-                    globalConfig.fluenceToken().transfer(resourceOwner, refoundByWorker * joinedWorkers);
-                }
-            }
-
-            uint newWorkersCount = workersCount - joinedWorkers;
-            if (newWorkersCount == 0) {
-                delete resourceConfigs[resourceOwner];
-                resourceConfigIds.remove(bytes32(bytes20(resourceOwner)));
-            } else {
-                workersCount = newWorkersCount;
-            }
+            uint totalJoinedWorkers = _joinDeal(
+                controller,
+                workersController,
+                resourceOwner,
+                maxCollateral,
+                resourceConfig.workersCount,
+                requiredStake,
+                maxWorkersPerProvider,
+                freeWorkerSlots
+            );
+            freeWorkerSlots -= totalJoinedWorkers;
 
             currentId = resourceConfigIds.next(currentId);
         }
     }
-
-    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 }

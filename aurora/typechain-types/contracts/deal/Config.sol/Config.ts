@@ -31,7 +31,7 @@ import type {
 export interface ConfigInterface extends utils.Interface {
   functions: {
     "appCID()": FunctionFragment;
-    "effectorWasmsCids(uint256)": FunctionFragment;
+    "effectors()": FunctionFragment;
     "fluenceToken()": FunctionFragment;
     "globalConfig()": FunctionFragment;
     "initialize(address,uint256,uint256,string,uint256,uint256,uint256,string[])": FunctionFragment;
@@ -53,7 +53,7 @@ export interface ConfigInterface extends utils.Interface {
   getFunction(
     nameOrSignatureOrTopic:
       | "appCID"
-      | "effectorWasmsCids"
+      | "effectors"
       | "fluenceToken"
       | "globalConfig"
       | "initialize"
@@ -73,10 +73,7 @@ export interface ConfigInterface extends utils.Interface {
   ): FunctionFragment;
 
   encodeFunctionData(functionFragment: "appCID", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "effectorWasmsCids",
-    values: [PromiseOrValue<BigNumberish>]
-  ): string;
+  encodeFunctionData(functionFragment: "effectors", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "fluenceToken",
     values?: undefined
@@ -152,10 +149,7 @@ export interface ConfigInterface extends utils.Interface {
   ): string;
 
   decodeFunctionResult(functionFragment: "appCID", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "effectorWasmsCids",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: "effectors", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "fluenceToken",
     data: BytesLike
@@ -295,10 +289,7 @@ export interface Config extends BaseContract {
   functions: {
     appCID(overrides?: CallOverrides): Promise<[string]>;
 
-    effectorWasmsCids(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
+    effectors(overrides?: CallOverrides): Promise<[string[]]>;
 
     fluenceToken(overrides?: CallOverrides): Promise<[string]>;
 
@@ -312,7 +303,7 @@ export interface Config extends BaseContract {
       minWorkers_: PromiseOrValue<BigNumberish>,
       maxWorkersPerProvider_: PromiseOrValue<BigNumberish>,
       targetWorkers_: PromiseOrValue<BigNumberish>,
-      effectorWasmsCids_: PromiseOrValue<string>[],
+      effectors_: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -361,10 +352,7 @@ export interface Config extends BaseContract {
 
   appCID(overrides?: CallOverrides): Promise<string>;
 
-  effectorWasmsCids(
-    arg0: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides
-  ): Promise<string>;
+  effectors(overrides?: CallOverrides): Promise<string[]>;
 
   fluenceToken(overrides?: CallOverrides): Promise<string>;
 
@@ -378,7 +366,7 @@ export interface Config extends BaseContract {
     minWorkers_: PromiseOrValue<BigNumberish>,
     maxWorkersPerProvider_: PromiseOrValue<BigNumberish>,
     targetWorkers_: PromiseOrValue<BigNumberish>,
-    effectorWasmsCids_: PromiseOrValue<string>[],
+    effectors_: PromiseOrValue<string>[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -427,10 +415,7 @@ export interface Config extends BaseContract {
   callStatic: {
     appCID(overrides?: CallOverrides): Promise<string>;
 
-    effectorWasmsCids(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<string>;
+    effectors(overrides?: CallOverrides): Promise<string[]>;
 
     fluenceToken(overrides?: CallOverrides): Promise<string>;
 
@@ -444,7 +429,7 @@ export interface Config extends BaseContract {
       minWorkers_: PromiseOrValue<BigNumberish>,
       maxWorkersPerProvider_: PromiseOrValue<BigNumberish>,
       targetWorkers_: PromiseOrValue<BigNumberish>,
-      effectorWasmsCids_: PromiseOrValue<string>[],
+      effectors_: PromiseOrValue<string>[],
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -525,10 +510,7 @@ export interface Config extends BaseContract {
   estimateGas: {
     appCID(overrides?: CallOverrides): Promise<BigNumber>;
 
-    effectorWasmsCids(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    effectors(overrides?: CallOverrides): Promise<BigNumber>;
 
     fluenceToken(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -542,7 +524,7 @@ export interface Config extends BaseContract {
       minWorkers_: PromiseOrValue<BigNumberish>,
       maxWorkersPerProvider_: PromiseOrValue<BigNumberish>,
       targetWorkers_: PromiseOrValue<BigNumberish>,
-      effectorWasmsCids_: PromiseOrValue<string>[],
+      effectors_: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -592,10 +574,7 @@ export interface Config extends BaseContract {
   populateTransaction: {
     appCID(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    effectorWasmsCids(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    effectors(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     fluenceToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -609,7 +588,7 @@ export interface Config extends BaseContract {
       minWorkers_: PromiseOrValue<BigNumberish>,
       maxWorkersPerProvider_: PromiseOrValue<BigNumberish>,
       targetWorkers_: PromiseOrValue<BigNumberish>,
-      effectorWasmsCids_: PromiseOrValue<string>[],
+      effectors_: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

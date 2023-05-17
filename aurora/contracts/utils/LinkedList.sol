@@ -24,7 +24,8 @@ library LinkedList {
     function push(Bytes32List storage self, bytes32 key) internal {
         bytes32 oldLast = self._last;
 
-        require(key != NULL, "Key cannot be NULL");
+        require(key != ZERO, "Key cannot be ZERO");
+
         require(!exist(self, key), "Key already exists");
 
         if (oldLast == 0) {
@@ -48,19 +49,17 @@ library LinkedList {
     function remove(Bytes32List storage self, bytes32 key) internal {
         Element memory element = self._elements[key];
 
-        if (!exist(self, key)) {
-            return; //TODO: error?
-        }
+        require(_exist(self, element, key), "Key does not exist");
 
         delete self._elements[key];
 
-        if (element.prev != NULL) {
+        if (element.prev != ZERO) {
             self._elements[element.prev].next = element.next;
         } else {
             self._first = element.next;
         }
 
-        if (element.next != NULL) {
+        if (element.next != ZERO) {
             self._elements[element.next].prev = element.prev;
         } else {
             self._last = element.prev;
@@ -68,25 +67,18 @@ library LinkedList {
     }
 
     function exist(Bytes32List storage self, bytes32 key) internal view returns (bool) {
-        Element storage element = self._elements[key];
-        return element.prev != NULL || element.next != NULL;
+        return _exist(self, self._elements[key], key);
+    }
+
+    function _exist(Bytes32List storage self, Element memory element, bytes32 key) private view returns (bool) {
+        return element.prev != ZERO || element.next != ZERO || key == self._first || key == self._last;
     }
 
     function next(Bytes32List storage self, bytes32 key) internal view returns (bytes32) {
-        bytes32 nextElement = self._elements[key].next;
-        if (nextElement == NULL) {
-            return NULL;
-        }
-
-        return nextElement;
+        return self._elements[key].next;
     }
 
     function prev(Bytes32List storage self, bytes32 key) internal view returns (bytes32) {
-        bytes32 prevElement = self._elements[key].prev;
-        if (prevElement == NULL) {
-            return (NULL);
-        }
-
-        return prevElement;
+        return self._elements[key].prev;
     }
 }

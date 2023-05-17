@@ -5,7 +5,7 @@ import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent, PromiseOrVal
 export interface ConfigStateInterface extends utils.Interface {
     functions: {
         "appCID()": FunctionFragment;
-        "effectorWasmsCids(uint256)": FunctionFragment;
+        "effectors()": FunctionFragment;
         "fluenceToken()": FunctionFragment;
         "globalConfig()": FunctionFragment;
         "initialize(address,uint256,uint256,string,uint256,uint256,uint256,string[])": FunctionFragment;
@@ -20,9 +20,9 @@ export interface ConfigStateInterface extends utils.Interface {
         "setRequiredStake(uint256)": FunctionFragment;
         "targetWorkers()": FunctionFragment;
     };
-    getFunction(nameOrSignatureOrTopic: "appCID" | "effectorWasmsCids" | "fluenceToken" | "globalConfig" | "initialize" | "maxWorkersPerProvider" | "minWorkers" | "particleVerifyer" | "paymentToken" | "pricePerEpoch" | "requiredStake" | "setAppCID" | "setPricePerEpoch" | "setRequiredStake" | "targetWorkers"): FunctionFragment;
+    getFunction(nameOrSignatureOrTopic: "appCID" | "effectors" | "fluenceToken" | "globalConfig" | "initialize" | "maxWorkersPerProvider" | "minWorkers" | "particleVerifyer" | "paymentToken" | "pricePerEpoch" | "requiredStake" | "setAppCID" | "setPricePerEpoch" | "setRequiredStake" | "targetWorkers"): FunctionFragment;
     encodeFunctionData(functionFragment: "appCID", values?: undefined): string;
-    encodeFunctionData(functionFragment: "effectorWasmsCids", values: [PromiseOrValue<BigNumberish>]): string;
+    encodeFunctionData(functionFragment: "effectors", values?: undefined): string;
     encodeFunctionData(functionFragment: "fluenceToken", values?: undefined): string;
     encodeFunctionData(functionFragment: "globalConfig", values?: undefined): string;
     encodeFunctionData(functionFragment: "initialize", values: [
@@ -46,7 +46,7 @@ export interface ConfigStateInterface extends utils.Interface {
     encodeFunctionData(functionFragment: "setRequiredStake", values: [PromiseOrValue<BigNumberish>]): string;
     encodeFunctionData(functionFragment: "targetWorkers", values?: undefined): string;
     decodeFunctionResult(functionFragment: "appCID", data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: "effectorWasmsCids", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "effectors", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "fluenceToken", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "globalConfig", data: BytesLike): Result;
     decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
@@ -78,7 +78,7 @@ export interface ConfigState extends BaseContract {
     removeListener: OnEvent<this>;
     functions: {
         appCID(overrides?: CallOverrides): Promise<[string]>;
-        effectorWasmsCids(arg0: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<[string]>;
+        effectors(overrides?: CallOverrides): Promise<[string[]]>;
         fluenceToken(overrides?: CallOverrides): Promise<[string]>;
         globalConfig(overrides?: CallOverrides): Promise<[string]>;
         initialize(paymentToken_: PromiseOrValue<string>, pricePerEpoch_: PromiseOrValue<BigNumberish>, requiredStake_: PromiseOrValue<BigNumberish>, appCID_: PromiseOrValue<string>, minWorkers_: PromiseOrValue<BigNumberish>, maxWorkersPerProvider_: PromiseOrValue<BigNumberish>, targetWorkers_: PromiseOrValue<BigNumberish>, effectorWasmsCids_: PromiseOrValue<string>[], overrides?: Overrides & {
@@ -102,7 +102,7 @@ export interface ConfigState extends BaseContract {
         targetWorkers(overrides?: CallOverrides): Promise<[BigNumber]>;
     };
     appCID(overrides?: CallOverrides): Promise<string>;
-    effectorWasmsCids(arg0: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<string>;
+    effectors(overrides?: CallOverrides): Promise<string[]>;
     fluenceToken(overrides?: CallOverrides): Promise<string>;
     globalConfig(overrides?: CallOverrides): Promise<string>;
     initialize(paymentToken_: PromiseOrValue<string>, pricePerEpoch_: PromiseOrValue<BigNumberish>, requiredStake_: PromiseOrValue<BigNumberish>, appCID_: PromiseOrValue<string>, minWorkers_: PromiseOrValue<BigNumberish>, maxWorkersPerProvider_: PromiseOrValue<BigNumberish>, targetWorkers_: PromiseOrValue<BigNumberish>, effectorWasmsCids_: PromiseOrValue<string>[], overrides?: Overrides & {
@@ -126,7 +126,7 @@ export interface ConfigState extends BaseContract {
     targetWorkers(overrides?: CallOverrides): Promise<BigNumber>;
     callStatic: {
         appCID(overrides?: CallOverrides): Promise<string>;
-        effectorWasmsCids(arg0: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<string>;
+        effectors(overrides?: CallOverrides): Promise<string[]>;
         fluenceToken(overrides?: CallOverrides): Promise<string>;
         globalConfig(overrides?: CallOverrides): Promise<string>;
         initialize(paymentToken_: PromiseOrValue<string>, pricePerEpoch_: PromiseOrValue<BigNumberish>, requiredStake_: PromiseOrValue<BigNumberish>, appCID_: PromiseOrValue<string>, minWorkers_: PromiseOrValue<BigNumberish>, maxWorkersPerProvider_: PromiseOrValue<BigNumberish>, targetWorkers_: PromiseOrValue<BigNumberish>, effectorWasmsCids_: PromiseOrValue<string>[], overrides?: CallOverrides): Promise<void>;
@@ -144,7 +144,7 @@ export interface ConfigState extends BaseContract {
     filters: {};
     estimateGas: {
         appCID(overrides?: CallOverrides): Promise<BigNumber>;
-        effectorWasmsCids(arg0: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<BigNumber>;
+        effectors(overrides?: CallOverrides): Promise<BigNumber>;
         fluenceToken(overrides?: CallOverrides): Promise<BigNumber>;
         globalConfig(overrides?: CallOverrides): Promise<BigNumber>;
         initialize(paymentToken_: PromiseOrValue<string>, pricePerEpoch_: PromiseOrValue<BigNumberish>, requiredStake_: PromiseOrValue<BigNumberish>, appCID_: PromiseOrValue<string>, minWorkers_: PromiseOrValue<BigNumberish>, maxWorkersPerProvider_: PromiseOrValue<BigNumberish>, targetWorkers_: PromiseOrValue<BigNumberish>, effectorWasmsCids_: PromiseOrValue<string>[], overrides?: Overrides & {
@@ -169,7 +169,7 @@ export interface ConfigState extends BaseContract {
     };
     populateTransaction: {
         appCID(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-        effectorWasmsCids(arg0: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        effectors(overrides?: CallOverrides): Promise<PopulatedTransaction>;
         fluenceToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
         globalConfig(overrides?: CallOverrides): Promise<PopulatedTransaction>;
         initialize(paymentToken_: PromiseOrValue<string>, pricePerEpoch_: PromiseOrValue<BigNumberish>, requiredStake_: PromiseOrValue<BigNumberish>, appCID_: PromiseOrValue<string>, minWorkers_: PromiseOrValue<BigNumberish>, maxWorkersPerProvider_: PromiseOrValue<BigNumberish>, targetWorkers_: PromiseOrValue<BigNumberish>, effectorWasmsCids_: PromiseOrValue<string>[], overrides?: Overrides & {
