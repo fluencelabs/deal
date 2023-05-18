@@ -59,7 +59,9 @@ jobs:
           jwtTtl: 300
           exportToken: false
           secrets: |
-            kv/npmjs/fluencebot token | NODE_AUTH_TOKEN
+            kv/npmjs/fluencebot token | NODE_AUTH_TOKEN ;
+            kv/docker-registry/basicauth/ci username | DOCKER_USERNAME ;
+            kv/docker-registry/basicauth/ci password | DOCKER_PASSWORD
 
       - name: Setup node
         uses: actions/setup-node@v3
@@ -72,9 +74,34 @@ jobs:
       - run: npm i
         working-directory: aurora
 
+      - run: npm run compile
+        working-directory: aurora
+
       - name: Publish to npm registry
         run: npm publish --access public
         working-directory: aurora
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to DockerHub
+        if: inputs.release
+        uses: docker/login-action@v2
+        with:
+          registry: "docker.fluence.dev"
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+
+      - name: Build and push aurora container
+        uses: docker/build-push-action@v3
+        with:
+          context: aurora
+          push: true
+          tags: |
+            docker.fluence.dev/aurora:${{ need.release-please.outputs.aurora-tag-name }}
+            docker.fluence.dev/aurora:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   slack:
     if: always()
