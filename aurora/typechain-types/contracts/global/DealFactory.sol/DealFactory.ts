@@ -63,7 +63,7 @@ export interface DealFactoryInterface extends utils.Interface {
     "configImpl()": FunctionFragment;
     "controllerImpl()": FunctionFragment;
     "coreImpl()": FunctionFragment;
-    "createDeal(uint256,uint256,string)": FunctionFragment;
+    "createDeal(uint256,uint256,string,string[])": FunctionFragment;
     "defaultPaymentToken()": FunctionFragment;
     "globalConfig()": FunctionFragment;
     "isDeal(address)": FunctionFragment;
@@ -121,7 +121,8 @@ export interface DealFactoryInterface extends utils.Interface {
     values: [
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
-      PromiseOrValue<string>
+      PromiseOrValue<string>,
+      PromiseOrValue<string>[]
     ]
   ): string;
   encodeFunctionData(
@@ -334,6 +335,7 @@ export interface DealFactory extends BaseContract {
       minWorkers_: PromiseOrValue<BigNumberish>,
       targetWorkers_: PromiseOrValue<BigNumberish>,
       appCID_: PromiseOrValue<string>,
+      effectors: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -382,6 +384,7 @@ export interface DealFactory extends BaseContract {
     minWorkers_: PromiseOrValue<BigNumberish>,
     targetWorkers_: PromiseOrValue<BigNumberish>,
     appCID_: PromiseOrValue<string>,
+    effectors: PromiseOrValue<string>[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -430,6 +433,7 @@ export interface DealFactory extends BaseContract {
       minWorkers_: PromiseOrValue<BigNumberish>,
       targetWorkers_: PromiseOrValue<BigNumberish>,
       appCID_: PromiseOrValue<string>,
+      effectors: PromiseOrValue<string>[],
       overrides?: CallOverrides
     ): Promise<string>;
 
@@ -532,6 +536,7 @@ export interface DealFactory extends BaseContract {
       minWorkers_: PromiseOrValue<BigNumberish>,
       targetWorkers_: PromiseOrValue<BigNumberish>,
       appCID_: PromiseOrValue<string>,
+      effectors: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -583,6 +588,7 @@ export interface DealFactory extends BaseContract {
       minWorkers_: PromiseOrValue<BigNumberish>,
       targetWorkers_: PromiseOrValue<BigNumberish>,
       appCID_: PromiseOrValue<string>,
+      effectors: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

@@ -25,7 +25,7 @@ import type {
 
 export interface IFactoryInterface extends utils.Interface {
   functions: {
-    "createDeal(uint256,uint256,string)": FunctionFragment;
+    "createDeal(uint256,uint256,string,string[])": FunctionFragment;
     "isDeal(address)": FunctionFragment;
   };
 
@@ -38,7 +38,8 @@ export interface IFactoryInterface extends utils.Interface {
     values: [
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
-      PromiseOrValue<string>
+      PromiseOrValue<string>,
+      PromiseOrValue<string>[]
     ]
   ): string;
   encodeFunctionData(
@@ -83,6 +84,7 @@ export interface IFactory extends BaseContract {
       minWorkers_: PromiseOrValue<BigNumberish>,
       targetWorkers_: PromiseOrValue<BigNumberish>,
       appCID_: PromiseOrValue<string>,
+      effectors: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -96,6 +98,7 @@ export interface IFactory extends BaseContract {
     minWorkers_: PromiseOrValue<BigNumberish>,
     targetWorkers_: PromiseOrValue<BigNumberish>,
     appCID_: PromiseOrValue<string>,
+    effectors: PromiseOrValue<string>[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -109,6 +112,7 @@ export interface IFactory extends BaseContract {
       minWorkers_: PromiseOrValue<BigNumberish>,
       targetWorkers_: PromiseOrValue<BigNumberish>,
       appCID_: PromiseOrValue<string>,
+      effectors: PromiseOrValue<string>[],
       overrides?: CallOverrides
     ): Promise<string>;
 
@@ -125,6 +129,7 @@ export interface IFactory extends BaseContract {
       minWorkers_: PromiseOrValue<BigNumberish>,
       targetWorkers_: PromiseOrValue<BigNumberish>,
       appCID_: PromiseOrValue<string>,
+      effectors: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -139,6 +144,7 @@ export interface IFactory extends BaseContract {
       minWorkers_: PromiseOrValue<BigNumberish>,
       targetWorkers_: PromiseOrValue<BigNumberish>,
       appCID_: PromiseOrValue<string>,
+      effectors: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
