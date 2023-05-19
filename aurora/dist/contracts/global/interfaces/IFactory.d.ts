@@ -4,14 +4,15 @@ import type { Listener, Provider } from "@ethersproject/providers";
 import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent, PromiseOrValue } from "../../../common";
 export interface IFactoryInterface extends utils.Interface {
     functions: {
-        "createDeal(uint256,uint256,string)": FunctionFragment;
+        "createDeal(uint256,uint256,string,string[])": FunctionFragment;
         "isDeal(address)": FunctionFragment;
     };
     getFunction(nameOrSignatureOrTopic: "createDeal" | "isDeal"): FunctionFragment;
     encodeFunctionData(functionFragment: "createDeal", values: [
         PromiseOrValue<BigNumberish>,
         PromiseOrValue<BigNumberish>,
-        PromiseOrValue<string>
+        PromiseOrValue<string>,
+        PromiseOrValue<string>[]
     ]): string;
     encodeFunctionData(functionFragment: "isDeal", values: [PromiseOrValue<string>]): string;
     decodeFunctionResult(functionFragment: "createDeal", data: BytesLike): Result;
@@ -33,28 +34,28 @@ export interface IFactory extends BaseContract {
     once: OnEvent<this>;
     removeListener: OnEvent<this>;
     functions: {
-        createDeal(minWorkers_: PromiseOrValue<BigNumberish>, targetWorkers_: PromiseOrValue<BigNumberish>, appCID_: PromiseOrValue<string>, overrides?: Overrides & {
+        createDeal(minWorkers_: PromiseOrValue<BigNumberish>, targetWorkers_: PromiseOrValue<BigNumberish>, appCID_: PromiseOrValue<string>, effectors: PromiseOrValue<string>[], overrides?: Overrides & {
             from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
         isDeal(addr: PromiseOrValue<string>, overrides?: CallOverrides): Promise<[boolean]>;
     };
-    createDeal(minWorkers_: PromiseOrValue<BigNumberish>, targetWorkers_: PromiseOrValue<BigNumberish>, appCID_: PromiseOrValue<string>, overrides?: Overrides & {
+    createDeal(minWorkers_: PromiseOrValue<BigNumberish>, targetWorkers_: PromiseOrValue<BigNumberish>, appCID_: PromiseOrValue<string>, effectors: PromiseOrValue<string>[], overrides?: Overrides & {
         from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
     isDeal(addr: PromiseOrValue<string>, overrides?: CallOverrides): Promise<boolean>;
     callStatic: {
-        createDeal(minWorkers_: PromiseOrValue<BigNumberish>, targetWorkers_: PromiseOrValue<BigNumberish>, appCID_: PromiseOrValue<string>, overrides?: CallOverrides): Promise<string>;
+        createDeal(minWorkers_: PromiseOrValue<BigNumberish>, targetWorkers_: PromiseOrValue<BigNumberish>, appCID_: PromiseOrValue<string>, effectors: PromiseOrValue<string>[], overrides?: CallOverrides): Promise<string>;
         isDeal(addr: PromiseOrValue<string>, overrides?: CallOverrides): Promise<boolean>;
     };
     filters: {};
     estimateGas: {
-        createDeal(minWorkers_: PromiseOrValue<BigNumberish>, targetWorkers_: PromiseOrValue<BigNumberish>, appCID_: PromiseOrValue<string>, overrides?: Overrides & {
+        createDeal(minWorkers_: PromiseOrValue<BigNumberish>, targetWorkers_: PromiseOrValue<BigNumberish>, appCID_: PromiseOrValue<string>, effectors: PromiseOrValue<string>[], overrides?: Overrides & {
             from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
         isDeal(addr: PromiseOrValue<string>, overrides?: CallOverrides): Promise<BigNumber>;
     };
     populateTransaction: {
-        createDeal(minWorkers_: PromiseOrValue<BigNumberish>, targetWorkers_: PromiseOrValue<BigNumberish>, appCID_: PromiseOrValue<string>, overrides?: Overrides & {
+        createDeal(minWorkers_: PromiseOrValue<BigNumberish>, targetWorkers_: PromiseOrValue<BigNumberish>, appCID_: PromiseOrValue<string>, effectors: PromiseOrValue<string>[], overrides?: Overrides & {
             from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
         isDeal(addr: PromiseOrValue<string>, overrides?: CallOverrides): Promise<PopulatedTransaction>;

@@ -15,6 +15,10 @@ export declare class IFactory__factory {
             readonly internalType: "string";
             readonly name: "appCID_";
             readonly type: "string";
+        }, {
+            readonly internalType: "string[]";
+            readonly name: "effectors";
+            readonly type: "string[]";
         }];
         readonly name: "createDeal";
         readonly outputs: readonly [{

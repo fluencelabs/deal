@@ -23,6 +23,11 @@ const _abi = [
                 name: "appCID_",
                 type: "string",
             },
+            {
+                internalType: "string[]",
+                name: "effectors",
+                type: "string[]",
+            },
         ],
         name: "createDeal",
         outputs: [

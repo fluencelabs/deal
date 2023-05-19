@@ -10,7 +10,7 @@ export interface DealFactoryStateInterface extends utils.Interface {
         "configImpl()": FunctionFragment;
         "controllerImpl()": FunctionFragment;
         "coreImpl()": FunctionFragment;
-        "createDeal(uint256,uint256,string)": FunctionFragment;
+        "createDeal(uint256,uint256,string,string[])": FunctionFragment;
         "defaultPaymentToken()": FunctionFragment;
         "globalConfig()": FunctionFragment;
         "isDeal(address)": FunctionFragment;
@@ -28,7 +28,8 @@ export interface DealFactoryStateInterface extends utils.Interface {
     encodeFunctionData(functionFragment: "createDeal", values: [
         PromiseOrValue<BigNumberish>,
         PromiseOrValue<BigNumberish>,
-        PromiseOrValue<string>
+        PromiseOrValue<string>,
+        PromiseOrValue<string>[]
     ]): string;
     encodeFunctionData(functionFragment: "defaultPaymentToken", values?: undefined): string;
     encodeFunctionData(functionFragment: "globalConfig", values?: undefined): string;
@@ -72,7 +73,7 @@ export interface DealFactoryState extends BaseContract {
         configImpl(overrides?: CallOverrides): Promise<[string]>;
         controllerImpl(overrides?: CallOverrides): Promise<[string]>;
         coreImpl(overrides?: CallOverrides): Promise<[string]>;
-        createDeal(minWorkers_: PromiseOrValue<BigNumberish>, targetWorkers_: PromiseOrValue<BigNumberish>, appCID_: PromiseOrValue<string>, overrides?: Overrides & {
+        createDeal(minWorkers_: PromiseOrValue<BigNumberish>, targetWorkers_: PromiseOrValue<BigNumberish>, appCID_: PromiseOrValue<string>, effectors: PromiseOrValue<string>[], overrides?: Overrides & {
             from?: PromiseOrValue<string>;
         }): Promise<ContractTransaction>;
         defaultPaymentToken(overrides?: CallOverrides): Promise<[string]>;
@@ -88,7 +89,7 @@ export interface DealFactoryState extends BaseContract {
     configImpl(overrides?: CallOverrides): Promise<string>;
     controllerImpl(overrides?: CallOverrides): Promise<string>;
     coreImpl(overrides?: CallOverrides): Promise<string>;
-    createDeal(minWorkers_: PromiseOrValue<BigNumberish>, targetWorkers_: PromiseOrValue<BigNumberish>, appCID_: PromiseOrValue<string>, overrides?: Overrides & {
+    createDeal(minWorkers_: PromiseOrValue<BigNumberish>, targetWorkers_: PromiseOrValue<BigNumberish>, appCID_: PromiseOrValue<string>, effectors: PromiseOrValue<string>[], overrides?: Overrides & {
         from?: PromiseOrValue<string>;
     }): Promise<ContractTransaction>;
     defaultPaymentToken(overrides?: CallOverrides): Promise<string>;
@@ -104,7 +105,7 @@ export interface DealFactoryState extends BaseContract {
         configImpl(overrides?: CallOverrides): Promise<string>;
         controllerImpl(overrides?: CallOverrides): Promise<string>;
         coreImpl(overrides?: CallOverrides): Promise<string>;
-        createDeal(minWorkers_: PromiseOrValue<BigNumberish>, targetWorkers_: PromiseOrValue<BigNumberish>, appCID_: PromiseOrValue<string>, overrides?: CallOverrides): Promise<string>;
+        createDeal(minWorkers_: PromiseOrValue<BigNumberish>, targetWorkers_: PromiseOrValue<BigNumberish>, appCID_: PromiseOrValue<string>, effectors: PromiseOrValue<string>[], overrides?: CallOverrides): Promise<string>;
         defaultPaymentToken(overrides?: CallOverrides): Promise<string>;
         globalConfig(overrides?: CallOverrides): Promise<string>;
         isDeal(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<boolean>;
@@ -120,7 +121,7 @@ export interface DealFactoryState extends BaseContract {
         configImpl(overrides?: CallOverrides): Promise<BigNumber>;
         controllerImpl(overrides?: CallOverrides): Promise<BigNumber>;
         coreImpl(overrides?: CallOverrides): Promise<BigNumber>;
-        createDeal(minWorkers_: PromiseOrValue<BigNumberish>, targetWorkers_: PromiseOrValue<BigNumberish>, appCID_: PromiseOrValue<string>, overrides?: Overrides & {
+        createDeal(minWorkers_: PromiseOrValue<BigNumberish>, targetWorkers_: PromiseOrValue<BigNumberish>, appCID_: PromiseOrValue<string>, effectors: PromiseOrValue<string>[], overrides?: Overrides & {
             from?: PromiseOrValue<string>;
         }): Promise<BigNumber>;
         defaultPaymentToken(overrides?: CallOverrides): Promise<BigNumber>;
@@ -137,7 +138,7 @@ export interface DealFactoryState extends BaseContract {
         configImpl(overrides?: CallOverrides): Promise<PopulatedTransaction>;
         controllerImpl(overrides?: CallOverrides): Promise<PopulatedTransaction>;
         coreImpl(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-        createDeal(minWorkers_: PromiseOrValue<BigNumberish>, targetWorkers_: PromiseOrValue<BigNumberish>, appCID_: PromiseOrValue<string>, overrides?: Overrides & {
+        createDeal(minWorkers_: PromiseOrValue<BigNumberish>, targetWorkers_: PromiseOrValue<BigNumberish>, appCID_: PromiseOrValue<string>, effectors: PromiseOrValue<string>[], overrides?: Overrides & {
             from?: PromiseOrValue<string>;
         }): Promise<PopulatedTransaction>;
         defaultPaymentToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
