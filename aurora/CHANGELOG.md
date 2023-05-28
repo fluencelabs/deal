@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.2.0](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.1.12...deal-aurora-v0.2.0) (2023-05-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* complete refactor #10
+
+### Features
+
+* complete refactor [#10](https://github.com/fluencelabs/deal/issues/10) ([0c62427](https://github.com/fluencelabs/deal/commit/0c624276b3357bcee538f1829f30aeb1a60b38fc))
+* matching mechanism ([#43](https://github.com/fluencelabs/deal/issues/43)) ([50a8e4c](https://github.com/fluencelabs/deal/commit/50a8e4c423f672c994893f0cda3c38a4de537264))
+* new features ([#25](https://github.com/fluencelabs/deal/issues/25)) ([a8983d2](https://github.com/fluencelabs/deal/commit/a8983d29d342fef2f7ca0612b0d6a8370b562b13))
+* **npm-package:** add npm package for typechain [DXJ-220] ([ffc2a19](https://github.com/fluencelabs/deal/commit/ffc2a19d844c6af9864e8118cc55671bf24183e6))
+* **npm:** add explanation of how to publish to README ([f306824](https://github.com/fluencelabs/deal/commit/f306824ca4c46bdb3ec45ec0ae8dd6ea46f46397))
+* update DealConfig ([#18](https://github.com/fluencelabs/deal/issues/18)) ([d0a3ce6](https://github.com/fluencelabs/deal/commit/d0a3ce6ace96e62e2dc43daffb0138e45574f990))
+
+
+### Bug Fixes
+
+* change type in DealCreated event ([#20](https://github.com/fluencelabs/deal/issues/20)) ([60968fa](https://github.com/fluencelabs/deal/commit/60968fa43379e6a5baa117f467eee58a6be970cc))
+* change type in DealCredted event  ([#23](https://github.com/fluencelabs/deal/issues/23)) ([a523e4b](https://github.com/fluencelabs/deal/commit/a523e4b8786a1c8022238bd19c8374cb59a5fee7))
+* fix dist ([#28](https://github.com/fluencelabs/deal/issues/28)) ([3570f31](https://github.com/fluencelabs/deal/commit/3570f3197a1f9bc56f6e978c08dee1ae28ee2fa3))
+* fix npm pkgs ([#16](https://github.com/fluencelabs/deal/issues/16)) ([f750279](https://github.com/fluencelabs/deal/commit/f750279a2f2be8d8c0972916489845de88c81758))
+* fix npmignore ([#14](https://github.com/fluencelabs/deal/issues/14)) ([1898a16](https://github.com/fluencelabs/deal/commit/1898a164dfefbd2415c75c940305f7b6c89cbf38))
+* remove typechain-types from gitignore ([#12](https://github.com/fluencelabs/deal/issues/12)) ([29f1243](https://github.com/fluencelabs/deal/commit/29f12433cd717f3e7e5149b0e636be9ffcce50b4))
+
 ## [0.1.12](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.1.11...deal-aurora-v0.1.12) (2023-04-21)
 
 
