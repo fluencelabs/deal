@@ -29,7 +29,7 @@ Exploring The Code
 1. The smart-contract code lives in the `/contract` folder. See the README there for
    more info. In blockchain apps the smart contract is the "backend" of your app.
 2. The frontend code lives in the `/frontend` folder. `/frontend/index.html` is a great
-   place to start exploring. Note that it loads in `/frontend/index.js`,
+   place to start exploring. Note that it loads in `/frontend/pate.ts`,
    this is your entrypoint to learn how the frontend connects to the NEAR blockchain.
 3. Test your contract: `npm test`, this will run the tests in `integration-tests` directory.
 

@@ -1,5 +1,5 @@
-export * as auroraSdk from "./AuroraSDK";
-export * as core from "./Core";
-export * as deal from "./Deal";
-export * as dev from "./Dev";
-export * as factory from "./Factory";
+export * as auroraSdk from "./auroraSDK";
+export * as deal from "./deal";
+export * as dev from "./dev";
+export * as global from "./global";
+export * as mocks from "./mocks";

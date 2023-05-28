@@ -1,10 +1,10 @@
-import type * as auroraSdk from "./AuroraSDK";
+import type * as auroraSdk from "./auroraSDK";
 export type { auroraSdk };
-import type * as core from "./Core";
-export type { core };
-import type * as deal from "./Deal";
+import type * as deal from "./deal";
 export type { deal };
-import type * as dev from "./Dev";
+import type * as dev from "./dev";
 export type { dev };
-import type * as factory from "./Factory";
-export type { factory };
+import type * as global from "./global";
+export type { global };
+import type * as mocks from "./mocks";
+export type { mocks };
