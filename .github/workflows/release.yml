@@ -98,7 +98,7 @@ jobs:
           context: aurora
           push: true
           tags: |
-            docker.fluence.dev/aurora:${{ need.release-please.outputs.aurora-tag-name }}
+            docker.fluence.dev/aurora:${{ needs.release-please.outputs.aurora-tag-name }}
             docker.fluence.dev/aurora:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
