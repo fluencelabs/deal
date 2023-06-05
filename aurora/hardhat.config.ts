@@ -7,6 +7,9 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 const config: HardhatUserConfig = {
+    localhost: {
+      url: "http://0.0.0.0:8545"
+    },
     solidity: {
         version: "0.8.17",
         settings: {
