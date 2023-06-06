@@ -6,7 +6,7 @@
         "test": "hardhat test",
         "deploy:testnet": "hardhat deploy --network testnet --tags testnet,common",
         "clean": "hardhat clean",
-        "node": "hardhat node --tags localnet,common",
+        "node": "hardhat node --tags localnet,common --hostname 0.0.0.0",
         "compile": "shx rm -rf dist && shx rm -rf artifacts && shx rm -rf cache && shx rm -rf typechain-types && hardhat compile && tsc -b",
         "prepare": "cd .. && husky install aurora/.husky",
         "lint:sol": "solhint 'contracts/**/*.sol'",
