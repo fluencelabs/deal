@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.0...deal-aurora-v0.2.1) (2023-06-06)
+
+
+### Bug Fixes
+
+* Make hardhat listen on 0.0.0.0 ([#47](https://github.com/fluencelabs/deal/issues/47)) ([2664b4c](https://github.com/fluencelabs/deal/commit/2664b4cb64754bb3ec2517fc6837a4ee57b92615))
+
 ## [0.2.0](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.1.12...deal-aurora-v0.2.0) (2023-05-28)
 
 
