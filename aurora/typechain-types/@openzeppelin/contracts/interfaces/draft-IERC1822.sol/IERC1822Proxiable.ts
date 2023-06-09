@@ -17,7 +17,6 @@ import type {
   TypedEvent,
   TypedListener,
   OnEvent,
-  PromiseOrValue,
 } from "../../../../common";
 
 export interface IERC1822ProxiableInterface extends utils.Interface {

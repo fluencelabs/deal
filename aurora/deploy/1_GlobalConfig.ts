@@ -15,6 +15,10 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
 
     const fluenceToken = await developerFaucet.fluenceToken();
     const usdToken = await developerFaucet.usdToken();
+
+    console.log("Fluence token address: ", fluenceToken);
+    console.log("USD token address: ", usdToken);
+
     const epochManager = await hre.deployments.deploy("EpochManager", {
         from: deployer,
         args: [EPOCH_DURATION],

@@ -21,7 +21,7 @@ import type {
   TypedListener,
   OnEvent,
   PromiseOrValue,
-} from "../../../../../../common";
+} from "../../../../../common";
 
 export interface IERC20PermitInterface extends utils.Interface {
   functions: {

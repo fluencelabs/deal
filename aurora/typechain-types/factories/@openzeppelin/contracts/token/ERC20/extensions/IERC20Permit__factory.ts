@@ -7,7 +7,7 @@ import type { Provider } from "@ethersproject/providers";
 import type {
   IERC20Permit,
   IERC20PermitInterface,
-} from "../../../../../../../@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol/IERC20Permit";
+} from "../../../../../../@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit";
 
 const _abi = [
   {

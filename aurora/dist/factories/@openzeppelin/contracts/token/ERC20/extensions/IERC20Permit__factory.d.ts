@@ -1,6 +1,6 @@
 import { Signer } from "ethers";
 import type { Provider } from "@ethersproject/providers";
-import type { IERC20Permit, IERC20PermitInterface } from "../../../../../../../@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol/IERC20Permit";
+import type { IERC20Permit, IERC20PermitInterface } from "../../../../../../@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit";
 export declare class IERC20Permit__factory {
     static readonly abi: readonly [{
         readonly inputs: readonly [];
