@@ -1,0 +1,14 @@
+{
+  "name": "@fluencelabs/deal-client",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "rimraf ./build && tsc "
+  },
+  "dependencies": {
+    "@tsconfig/node16-strictest-esm": "^1.0.3",
+    "@fluencelabs/deal-contracts": "*",
+    "ethers": "^6.5.1"
+  }
+}
