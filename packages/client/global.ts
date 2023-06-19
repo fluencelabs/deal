@@ -1,5 +1,5 @@
 import type { ethers } from "ethers";
-import { DEAL_CONFIG, type ChainNetwork } from "./config";
+import { DEAL_CONFIG, type ChainNetwork } from "./config.js";
 import {
   GlobalConfig__factory,
   type DealFactory,
@@ -9,41 +9,44 @@ import {
   type GlobalConfig,
   type Matcher,
   Matcher__factory,
-} from "@fluencelabs/deal-contracts";
+} from "@fluencelabs/deal-types";
 
 export class GlobalContracts {
-  constructor(private signer: ethers.Signer, private network: ChainNetwork) {}
+  constructor(
+    private provider: ethers.ContractRunner,
+    private network: ChainNetwork
+  ) {}
 
   getGlobalConfig(): GlobalConfig {
     return GlobalConfig__factory.connect(
       DEAL_CONFIG[this.network].globalConfig,
-      this.signer
+      this.provider
     );
   }
 
   getFactory(): DealFactory {
     return DealFactory__factory.connect(
       DEAL_CONFIG[this.network].dealFactoryAddress,
-      this.signer
+      this.provider
     );
   }
 
   async getMatcher(): Promise<Matcher> {
     const config = this.getGlobalConfig();
-    return Matcher__factory.connect(await config.matcher(), this.signer);
+    return Matcher__factory.connect(await config.matcher(), this.provider);
   }
 
   async getTUSD(): Promise<ERC20> {
     return ERC20__factory.connect(
       DEAL_CONFIG[this.network].testUSDToken,
-      this.signer
+      this.provider
     );
   }
 
   async getFLT(): Promise<ERC20> {
     return ERC20__factory.connect(
       DEAL_CONFIG[this.network].fltToken,
-      this.signer
+      this.provider
     );
   }
 }

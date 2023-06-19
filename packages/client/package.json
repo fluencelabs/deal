@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "build": "rimraf ./build && tsc "
+    "build": "shx rm -rf ./build && tsc "
   },
   "dependencies": {
+    "@fluencelabs/deal-types": "*",
     "@tsconfig/node16-strictest-esm": "^1.0.3",
-    "@fluencelabs/deal-contracts": "*",
     "ethers": "^6.5.1"
   }
 }

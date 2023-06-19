@@ -5,14 +5,13 @@ import {
   Core__factory,
   WorkersModule,
   WorkersModule__factory,
-} from "@fluencelabs/deal-contracts";
-
-import type { ethers } from "ethers";
+} from "@fluencelabs/deal-types";
+import { ethers } from "ethers";
 
 export class Deal {
   private core: Core;
 
-  constructor(dealAddress: string, private signer: ethers.Signer) {
+  constructor(dealAddress: string, private signer: ethers.ContractRunner) {
     this.core = Core__factory.connect(dealAddress, this.signer);
   }
 

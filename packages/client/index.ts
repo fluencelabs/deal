@@ -1,7 +1,7 @@
 import type { ethers } from "ethers";
-import { GlobalContracts } from "./global";
-import { Deal } from "./deal";
-import type { ChainNetwork } from "./config";
+import { GlobalContracts } from "./global.js";
+import { Deal } from "./deal.js";
+import type { ChainNetwork } from "./config.js";
 
 export class DealClient {
   private globalContracts: GlobalContracts;

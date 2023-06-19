@@ -7,7 +7,7 @@
         "deploy:testnet": "hardhat deploy --network testnet --tags testnet,common",
         "clean": "hardhat clean",
         "node": "hardhat node --tags localnet,common --hostname 0.0.0.0",
-        "compile": "shx rm -rf dist && shx rm -rf artifacts && shx rm -rf cache && shx rm -rf typechain-types && hardhat compile && tsc -b",
+        "compile": "hardhat clean && shx rm -rf typechain-types && hardhat compile && shx rm -rf ../types/src/* && shx mv typechain-types/* ../types/src",
         "lint:sol": "solhint 'contracts/**/*.sol'",
         "lint:ts": "eslint 'deploy/**/*.ts' 'test/**/*.ts' --max-warnings 0 --fix",
         "fmt:sol": "prettier 'contracts/**/*.sol' -w",

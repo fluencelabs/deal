@@ -4,11 +4,11 @@
     "declaration": true,
     "importHelpers": true,
     "outDir": "dist",
-    "rootDir": ".",
     "moduleResolution": "nodenext",
     "module": "nodenext",
     "resolveJsonModule": true,
     "importsNotUsedAsValues": "remove",
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "exactOptionalPropertyTypes": true
   }
 }
