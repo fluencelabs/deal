@@ -8,8 +8,7 @@
     "build": "shx rm -rf ./build && tsc "
   },
   "dependencies": {
-    "@fluencelabs/deal-types": "*",
     "@tsconfig/node16-strictest-esm": "^1.0.3",
-    "ethers": "^6.5.1"
+    "ethers": "6.6.0"
   }
 }

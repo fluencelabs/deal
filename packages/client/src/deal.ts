@@ -5,7 +5,7 @@ import {
   Core__factory,
   WorkersModule,
   WorkersModule__factory,
-} from "@fluencelabs/deal-types";
+} from "./types";
 import { ethers } from "ethers";
 
 export class Deal {

@@ -1,14 +1,15 @@
 {
   "extends": "@tsconfig/node16-strictest-esm/tsconfig.json",
   "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "target": "es2018",
+    "module": "NodeNext",
     "declaration": true,
     "importHelpers": true,
-    "outDir": "dist",
-    "moduleResolution": "nodenext",
-    "module": "nodenext",
     "resolveJsonModule": true,
     "importsNotUsedAsValues": "remove",
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "exactOptionalPropertyTypes": true
   }
 }

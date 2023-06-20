@@ -9,7 +9,7 @@ import {
   type GlobalConfig,
   type Matcher,
   Matcher__factory,
-} from "@fluencelabs/deal-types";
+} from "./types";
 
 export class GlobalContracts {
   constructor(
