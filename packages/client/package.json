@@ -2,10 +2,11 @@
   "name": "@fluencelabs/deal-client",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
-    "build": "shx rm -rf ./build && tsc "
+    "build": "shx rm -rf ./build && tsc -b"
   },
   "dependencies": {
     "@tsconfig/node16-strictest-esm": "^1.0.3",
