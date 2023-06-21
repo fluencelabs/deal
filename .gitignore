@@ -37,3 +37,13 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+
+node_modules
+.env
+coverage
+coverage.json
+
+#Hardhat files
+cache
+artifacts
+deployments

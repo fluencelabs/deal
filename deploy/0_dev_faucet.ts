@@ -22,7 +22,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
             { from: deployer, log: true, waitConfirmations: 1 },
             "receiveUSD",
             account,
-            hre.ethers.utils.parseEther("100"),
+            hre.ethers.parseEther("100"),
         );
 
         await hre.deployments.execute(
@@ -30,7 +30,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
             { from: deployer, log: true, waitConfirmations: 1 },
             "receiveFLT",
             account,
-            hre.ethers.utils.parseEther("100"),
+            hre.ethers.parseEther("100"),
         );
     }
 };

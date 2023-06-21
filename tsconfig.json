@@ -1,8 +1,7 @@
 {
     "compilerOptions": {
         "outDir": "dist",
-        "rootDir": "typechain-types",
-        "target": "es2020",
+        "target": "es2018",
         "module": "commonjs",
         "allowJs": false,
         "strict": true,

@@ -11,7 +11,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
 
     const developerFaucetDeploy = await hre.deployments.get("Faucet");
 
-    const developerFaucet = new DeveloperFaucet__factory(await hre.ethers.getSigner(deployer)).attach(developerFaucetDeploy.address);
+    const developerFaucet = DeveloperFaucet__factory.connect(developerFaucetDeploy.address, await hre.ethers.getSigner(deployer));
 
     const fluenceToken = await developerFaucet.fluenceToken();
     const usdToken = await developerFaucet.usdToken();
@@ -36,14 +36,14 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         waitConfirmations: 1,
     });
 
-    const populateGlobalContract = new GlobalConfig__factory(await ethers.getSigner(deployer)).attach(globalConfigImpl.address);
+    const populateGlobalContract = GlobalConfig__factory.connect(globalConfigImpl.address, await ethers.getSigner(deployer));
 
     const globalConfig = await hre.deployments.deploy("GlobalConfig", {
         from: deployer,
         contract: "ERC1967Proxy",
         args: [
             globalConfigImpl.address,
-            (await populateGlobalContract.populateTransaction.initialize(fluenceToken, WITHDRAWAL_PERIOD, epochManager.address)).data,
+            (await populateGlobalContract.initialize.populateTransaction(fluenceToken, WITHDRAWAL_PERIOD, epochManager.address)).data,
         ],
         log: true,
         autoMine: true,
@@ -68,45 +68,36 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         waitConfirmations: 1,
     });
 
-    const configImpl = await hre.deployments.deploy("ConfigImpl", {
+    const configImpl = await hre.deployments.deploy("ConfigModuleImpl", {
         from: deployer,
-        contract: "Config",
+        contract: "ConfigModule",
         args: [globalConfig.address, particleVerifyer.address],
         log: true,
         autoMine: true,
         waitConfirmations: 1,
     });
 
-    const controllerImpl = await hre.deployments.deploy("ControllerImpl", {
+    const paymentImpl = await hre.deployments.deploy("PaymentModuleImpl", {
         from: deployer,
-        contract: "Controller",
+        contract: "PaymentModule",
         args: [],
         log: true,
         autoMine: true,
         waitConfirmations: 1,
     });
 
-    const paymentImpl = await hre.deployments.deploy("PaymentImpl", {
+    const statusControllerImpl = await hre.deployments.deploy("StatusModuleImpl", {
         from: deployer,
-        contract: "Payment",
+        contract: "StatusModule",
         args: [],
         log: true,
         autoMine: true,
         waitConfirmations: 1,
     });
 
-    const statusControllerImpl = await hre.deployments.deploy("StatusControllerImpl", {
+    const workersImpl = await hre.deployments.deploy("WorkersModuleImpl", {
         from: deployer,
-        contract: "StatusController",
-        args: [],
-        log: true,
-        autoMine: true,
-        waitConfirmations: 1,
-    });
-
-    const workersImpl = await hre.deployments.deploy("WorkersImpl", {
-        from: deployer,
-        contract: "Workers",
+        contract: "WorkersModule",
         args: [],
         log: true,
         autoMine: true,
@@ -121,7 +112,6 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
             usdToken,
             coreImpl.address,
             configImpl.address,
-            controllerImpl.address,
             paymentImpl.address,
             statusControllerImpl.address,
             workersImpl.address,
@@ -158,7 +148,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         waitConfirmations: 1,
     });
 
-    const globalConfigContract = new GlobalConfig__factory(await ethers.getSigner(deployer)).attach(globalConfig.address);
+    const globalConfigContract = GlobalConfig__factory.connect(globalConfig.address, await ethers.getSigner(deployer));
     await (await globalConfigContract.setFactory(factory.address)).wait();
     await (await globalConfigContract.setMatcher(matcher.address)).wait();
 };
