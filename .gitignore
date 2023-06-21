@@ -47,3 +47,5 @@ coverage.json
 cache
 artifacts
 deployments
+
+typechain-types
