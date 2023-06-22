@@ -23,6 +23,6 @@
         "noUncheckedIndexedAccess": true,
         "noUnusedLocals": false
     },
-    "include": ["typechain-types/**/*"],
+    "include": ["src/**/*"],
     "exclude": ["dist", "node_modules"]
 }

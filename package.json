@@ -1,8 +1,8 @@
 {
     "name": "@fluencelabs/deal-contracts",
     "version": "0.2.0",
-    "main": "./src/index.ts",
-    "types": "module",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "scripts": {
         "test": "hardhat test",
         "deploy:testnet": "hardhat deploy --network testnet --tags testnet,common",

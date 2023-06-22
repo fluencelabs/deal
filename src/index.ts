@@ -1,2 +1,2 @@
-export * from './client/client';
-export * from '../typechain-types';
+export { DealClient } from "./client/client";
+export * from "./typechain-types";

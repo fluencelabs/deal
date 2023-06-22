@@ -1,4 +1,4 @@
-import { ConfigModule, ConfigModule__factory, Core, Core__factory, WorkersModule, WorkersModule__factory } from "./types";
+import { ConfigModule, ConfigModule__factory, Core, Core__factory, WorkersModule, WorkersModule__factory } from "../typechain-types";
 import { ethers } from "ethers";
 
 export class Deal {

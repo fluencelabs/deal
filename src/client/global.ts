@@ -9,7 +9,7 @@ import {
     type GlobalConfig,
     type Matcher,
     Matcher__factory,
-} from "./types/index.js";
+} from "../typechain-types";
 
 export class GlobalContracts {
     constructor(private provider: ethers.ContractRunner, private network: ChainNetwork) {}
