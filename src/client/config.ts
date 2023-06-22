@@ -23,10 +23,10 @@ export const DEAL_CONFIG: Record<ChainNetwork, ChainConfig> = {
         chainId: 31_337,
     },
     testnet: {
-        globalConfig: "0xc4B7478c185a9CdEfAF7FeF20219de223a07B4a7",
-        dealFactoryAddress: "0x3F73c440e067a2BcF7E65145A3C6546FF6467571",
-        fltToken: "0xDDb7EC6d96fA8179D13Ab3aeaB1170Fa20f9f2D3",
-        testUSDToken: "0x4B9006eD00b37fe5D13A0890740B80aBd0Dbd8df",
+        globalConfig: "0x146fc71dB2A7BCd236eC92bf7DE3Bfb555881670",
+        dealFactoryAddress: "0x1b9a769Ff179F8bb487FBd3A00BDbF80dd002c5e",
+        fltToken: "0x9076297aAD6374CB2A4CA252708839713B7179ae",
+        testUSDToken: "0xa11c3F0f2DF07d1f0d32124Dc80EF21638D90FAb",
         chainId: 1313161555,
     },
 };

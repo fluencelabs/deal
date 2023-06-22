@@ -149,6 +149,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
     });
 
     const globalConfigContract = GlobalConfig__factory.connect(globalConfig.address, await ethers.getSigner(deployer));
+
     await (await globalConfigContract.setFactory(factory.address)).wait();
     await (await globalConfigContract.setMatcher(matcher.address)).wait();
 };
