@@ -1,6 +1,0 @@
-type ResourceOwnerRequest @entity {
-  id: Bytes!
-  minPriceByEpoch: BigInt! # uint256
-  maxCollateral: BigInt! # uint256
-  workersCount: BigInt! # uint256
-}

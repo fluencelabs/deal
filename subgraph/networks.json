@@ -1,8 +1,0 @@
-{
-  "aurora-testnet": {
-    "Matcher": {
-      "address": "0x805d6253A30860486D4F096B9B62085D11d9F7FD",
-      "startBlock": 0
-    }
-  }
-}
