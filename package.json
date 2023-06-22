@@ -1,5 +1,5 @@
 {
-    "name": "@fluencelabs/deal-contracts",
+    "name": "@fluencelabs/deal-aurora",
     "version": "0.2.0",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
@@ -7,7 +7,7 @@
         "test": "hardhat test",
         "deploy:testnet": "hardhat deploy --network testnet --tags testnet,common",
         "contracts:clean": "hardhat clean",
-        "contracts:node": "hardhat node --tags localnet,common --hostname 0.0.0.0",
+        "contracts:localnet": "hardhat node --tags localnet,common --hostname 0.0.0.0",
         "compile": "hardhat clean && shx rm -rf dist && shx rm -rf typechain-types && hardhat compile && tsc -b",
         "lint:sol": "solhint 'contracts/**/*.sol'",
         "lint:ts": "eslint 'deploy/**/*.ts' 'test/**/*.ts' --max-warnings 0 --fix",

@@ -1,5 +1,5 @@
 import type { HardhatRuntimeEnvironment } from "hardhat/types";
-import { DeveloperFaucet__factory, GlobalConfig__factory } from "../typechain-types";
+import { DeveloperFaucet__factory, GlobalConfig__factory } from "../src/typechain-types";
 import { ethers } from "hardhat";
 
 const WITHDRAWAL_PERIOD = 60;
