@@ -68,18 +68,18 @@ jobs:
         with:
           node-version: "16"
           registry-url: "https://registry.npmjs.org"
-          cache-dependency-path: aurora/package-lock.json
+          cache-dependency-path: package-lock.json
           cache: "npm"
 
       - run: npm i
-        working-directory: aurora
+        working-directory: .
 
       - run: npm run compile
-        working-directory: aurora
+        working-directory: .
 
       - name: Publish to npm registry
         run: npm publish --access public
-        working-directory: aurora
+        working-directory: .
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -94,7 +94,7 @@ jobs:
       - name: Build and push aurora container
         uses: docker/build-push-action@v3
         with:
-          context: aurora
+          context: .
           push: true
           tags: |
             docker.fluence.dev/aurora:${{ needs.release-please.outputs.aurora-tag-name }}
