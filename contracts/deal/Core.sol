@@ -34,6 +34,8 @@ contract Core is UUPSUpgradeable, OwnableUpgradeable, ICore {
         moduleByAddress[address(paymentModule_)] = Module.Payment;
         moduleByAddress[address(statusModule_)] = Module.Status;
         moduleByAddress[address(workersModule_)] = Module.Workers;
+
+        __Ownable_init();
     }
 
     function owner() public view override(OwnableUpgradeable, ICore) returns (address) {
