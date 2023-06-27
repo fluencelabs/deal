@@ -113,7 +113,7 @@ contract Matcher is IMatcher, MatcherOwnable {
 
     function register(uint minPriceByEpoch, uint maxCollateral, uint workersCount, string[] calldata effectors) external {
         address owner = msg.sender;
-        require(whitelist[owner], "Only whitelisted can call this function");
+        //TODO: require(whitelist[owner], "Only whitelisted can call this function");
         require(workersCount > 0, "Workers count should be greater than 0");
         require(maxCollateral > 0, "Max collateral should be greater than 0");
         require(resourceConfigs[owner].workersCount == 0, "Config already exists");

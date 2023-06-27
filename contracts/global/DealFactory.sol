@@ -55,10 +55,10 @@ abstract contract DealFactoryState is IFactory {
 contract DealFactory is DealFactoryState, UUPSUpgradeable {
     struct Deal {
         ICore core;
-        IConfigModule config;
-        IPaymentModule payment;
-        IStatusModule statusController;
-        IWorkersModule workers;
+        IConfigModule configModule;
+        IPaymentModule paymentModule;
+        IStatusModule statusModule;
+        IWorkersModule workersModule;
     }
 
     event DealCreated(
@@ -109,7 +109,7 @@ contract DealFactory is DealFactoryState, UUPSUpgradeable {
             targetWorkers_,
             appCID_,
             effectors,
-            deal.config.globalConfig().epochManager().currentEpoch()
+            deal.configModule.globalConfig().epochManager().currentEpoch()
         );
 
         isDeal[address(deal.core)] = true;
@@ -126,7 +126,7 @@ contract DealFactory is DealFactoryState, UUPSUpgradeable {
         bytes memory emptyBytes;
 
         ICore core = ICore(address(new ERC1967Proxy(address(coreImpl), emptyBytes)));
-        IConfigModule config = IConfigModule(
+        IConfigModule configModule = IConfigModule(
             address(
                 new ModuleProxy(
                     address(configImpl),
@@ -146,18 +146,18 @@ contract DealFactory is DealFactoryState, UUPSUpgradeable {
             )
         );
 
-        IPaymentModule payment = IPaymentModule(address(new ModuleProxy(address(paymentImpl), emptyBytes, address(core))));
-        IStatusModule statusController = IStatusModule(address(new ModuleProxy(address(statusImpl), emptyBytes, address(core))));
-        IWorkersModule workers = IWorkersModule(address(new ModuleProxy(address(workersImpl), emptyBytes, address(core))));
+        IPaymentModule paymentModule = IPaymentModule(address(new ModuleProxy(address(paymentImpl), emptyBytes, address(core))));
+        IStatusModule statusModule = IStatusModule(address(new ModuleProxy(address(statusImpl), emptyBytes, address(core))));
+        IWorkersModule workersModule = IWorkersModule(address(new ModuleProxy(address(workersImpl), emptyBytes, address(core))));
 
-        core.initialize(config, payment, statusController, workers);
+        core.initialize(configModule, paymentModule, statusModule, workersModule);
         core.transferOwnership(msg.sender);
 
         deal.core = core;
-        deal.config = config;
-        deal.payment = payment;
-        deal.statusController = statusController;
-        deal.workers = workers;
+        deal.configModule = configModule;
+        deal.paymentModule = paymentModule;
+        deal.statusModule = statusModule;
+        deal.workersModule = workersModule;
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
