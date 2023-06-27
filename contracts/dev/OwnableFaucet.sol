@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/utils/Multicall.sol";
 import "../global/AquaProxy.sol";
 import "./TestERC20.sol";
 
-contract OwnableFaucet is Ownable {
+contract OwnableFaucet is Ownable, Multicall {
     IERC20 public immutable fluenceToken;
     IERC20 public immutable usdToken;
 

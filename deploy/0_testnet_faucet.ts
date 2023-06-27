@@ -4,9 +4,6 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
     const accounts = await hre.getUnnamedAccounts();
     const deployer = accounts[0]!;
 
-    if (hre.network.name === "hardhat") {
-        return;
-    }
     console.log("Deploying account:", deployer);
     console.log("Block number:", await hre.ethers.provider.getBlockNumber());
     console.log("Testnet faucet");
