@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.2](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.1...deal-aurora-v0.2.2) (2023-06-27)
+
+
+### Features
+
+* add lib for interaction with the deal contract system ([#51](https://github.com/fluencelabs/deal/issues/51)) ([0911822](https://github.com/fluencelabs/deal/commit/0911822d02ea32df0fd0acd94d3421fd9a752e92))
+* add networks to client (kras, stage, testnet) ([#55](https://github.com/fluencelabs/deal/issues/55)) ([8e899e6](https://github.com/fluencelabs/deal/commit/8e899e6996273d30b79db99b58a71c71c69e9891))
+
 ## [0.2.1](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.0...deal-aurora-v0.2.1) (2023-06-06)
 
 
