@@ -1,9 +1,9 @@
 {
-  "bootstrap-sha": "1c0e0156c33d2d097451d7e8e1041e3ef6603a65",
+  "bootstrap-sha": "ebba07a443b3682c9016f2f999d073c9a230037f",
   "release-type": "node",
   "bump-minor-pre-major": true,
   "bump-patch-for-minor-pre-major": true,
   "packages": {
-    "aurora": {}
+    ".": {}
   }
 }
