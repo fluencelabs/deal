@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.2...deal-aurora-v0.2.3) (2023-07-05)
+
+
+### Bug Fixes
+
+* fix the matching event, migrate cid from string to struct, fix tests ([#60](https://github.com/fluencelabs/deal/issues/60)) ([f2e87a8](https://github.com/fluencelabs/deal/commit/f2e87a8cf711e90266c760985d1e4eac3be3e9ce))
+
 ## [0.2.2](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.1...deal-aurora-v0.2.2) (2023-06-28)
 
 
