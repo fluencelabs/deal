@@ -8,6 +8,7 @@ import "../global/interfaces/IParticleVerifyer.sol";
 import "../global/interfaces/IGlobalConfig.sol";
 import "./interfaces/IConfigModule.sol";
 import "./base/ModuleBase.sol";
+import "./base/Types.sol";
 
 abstract contract ConfigState is IConfigModule {
     IGlobalConfig public immutable globalConfig;
@@ -23,16 +24,18 @@ abstract contract ConfigState is IConfigModule {
     IERC20 public paymentToken;
     uint256 public pricePerEpoch;
     uint256 public requiredCollateral;
-    string public appCID;
+
     uint256 public minWorkers;
     uint256 public maxWorkersPerProvider;
     uint256 public targetWorkers;
+    uint256 public creationBlock;
 
-    string[] internal _effectors;
+    CIDV1 internal _appCID;
+    CIDV1[] internal _effectors;
 }
 
 contract ConfigModule is ConfigState, ModuleBase, Initializable {
-    event AppCIDChanged(string newAppCID);
+    event AppCIDChanged(CIDV1 newAppCID);
 
     constructor(IGlobalConfig globalConfig_, IParticleVerifyer particleVerifyer_) ConfigState(globalConfig_, particleVerifyer_) {}
 
@@ -40,28 +43,38 @@ contract ConfigModule is ConfigState, ModuleBase, Initializable {
         IERC20 paymentToken_,
         uint256 pricePerEpoch_,
         uint256 requiredCollateral_,
-        string memory appCID_,
+        CIDV1 calldata appCID_,
         uint256 minWorkers_,
         uint256 maxWorkersPerProvider_,
         uint256 targetWorkers_,
-        string[] memory effectors_
+        CIDV1[] memory effectors_
     ) public initializer {
         paymentToken = paymentToken_;
         pricePerEpoch = pricePerEpoch_;
         requiredCollateral = requiredCollateral_;
-        appCID = appCID_;
+        _appCID = appCID_;
         minWorkers = minWorkers_;
         maxWorkersPerProvider = maxWorkersPerProvider_;
         targetWorkers = targetWorkers_;
-        _effectors = effectors_;
+
+        uint256 length = effectors_.length;
+        for (uint256 i = 0; i < length; i++) {
+            _effectors.push(effectors_[i]);
+        }
+
+        creationBlock = block.number;
     }
 
-    function effectors() external view override returns (string[] memory) {
+    function effectors() external view override returns (CIDV1[] memory) {
         return _effectors;
     }
 
-    function setAppCID(string calldata appCID_) external onlyOwner {
-        appCID = appCID_;
+    function appCID() external view override returns (CIDV1 memory) {
+        return _appCID;
+    }
+
+    function setAppCID(CIDV1 calldata appCID_) external onlyOwner {
+        _appCID = appCID_;
 
         emit AppCIDChanged(appCID_);
     }

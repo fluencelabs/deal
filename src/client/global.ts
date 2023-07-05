@@ -1,5 +1,5 @@
 import type { ethers } from "ethers";
-import { DEAL_CONFIG, type ChainNetwork } from "./config.js";
+import { DEAL_CONFIG, type ChainNetwork } from "./config";
 import {
     GlobalConfig__factory,
     type DealFactory,

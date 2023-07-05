@@ -6,6 +6,7 @@ import "../deal/interfaces/ICore.sol";
 import "./interfaces/IGlobalConfig.sol";
 import "./interfaces/IMatcher.sol";
 import "../utils/LinkedList.sol";
+import "../deal/base/Types.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract MatcherState {
@@ -16,7 +17,7 @@ contract MatcherState {
     }
 
     struct Effectors {
-        mapping(string => bool) effectors;
+        mapping(bytes32 => bool) effectors;
     }
 
     IGlobalConfig public immutable globalConfig;
@@ -25,7 +26,7 @@ contract MatcherState {
     mapping(address => ResourceConfig) public resourceConfigs;
     mapping(address => bool) public whitelist;
 
-    mapping(address => Effectors) effectorsByOwner;
+    mapping(address => Effectors) internal _effectorsByOwner;
 
     constructor(IGlobalConfig globalConfig_) {
         globalConfig = globalConfig_;
@@ -35,7 +36,7 @@ contract MatcherState {
 abstract contract MatcherInternal is MatcherState, UUPSUpgradeable {
     using LinkedList for LinkedList.Bytes32List;
 
-    event Matched(address indexed resourceOwner, address deal, uint joinedWorkers);
+    event Matched(address indexed computeProvider, address deal, uint joinedWorkers, uint dealCreationBlock, CIDV1 appCID);
 
     modifier onlyOwner() {
         require(msg.sender == globalConfig.owner(), "Only owner can call this function");
@@ -44,59 +45,17 @@ abstract contract MatcherInternal is MatcherState, UUPSUpgradeable {
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
-    function _isEffectorsMatched(IConfigModule dealConfig, address resourceOwner) internal view returns (bool) {
-        string[] memory dealEffectors = dealConfig.effectors();
+    function _isEffectorsMatched(IConfigModule dealConfig, address computeProvider) internal view returns (bool) {
+        CIDV1[] memory dealEffectors = dealConfig.effectors();
 
         for (uint i = 0; i < dealEffectors.length; i++) {
-            if (!effectorsByOwner[resourceOwner].effectors[dealEffectors[i]]) {
+            bytes32 dealEffector = keccak256(abi.encodePacked(dealEffectors[i].prefixes, dealEffectors[i].hash));
+            if (!_effectorsByOwner[computeProvider].effectors[dealEffector]) {
                 return false;
             }
         }
 
         return true;
-    }
-
-    function _joinDeal(
-        ICore core,
-        IWorkersModule workersModule,
-        address resourceOwner,
-        uint maxCollateral,
-        uint workersCount,
-        uint requiredCollateral,
-        uint maxWorkersPerProvider,
-        uint freeWorkerSlots
-    ) internal returns (uint) {
-        uint joinedWorkers;
-        if (maxWorkersPerProvider > workersCount) {
-            joinedWorkers = workersCount;
-        } else {
-            joinedWorkers = maxWorkersPerProvider;
-        }
-
-        if (joinedWorkers > freeWorkerSlots) {
-            joinedWorkers = freeWorkerSlots;
-        }
-
-        uint newWorkersCount = workersCount - joinedWorkers;
-        if (newWorkersCount == 0) {
-            delete resourceConfigs[resourceOwner];
-            resourceConfigIds.remove(bytes32(bytes20(resourceOwner)));
-        } else {
-            workersCount = newWorkersCount;
-        }
-
-        globalConfig.fluenceToken().approve(address(workersModule), requiredCollateral * joinedWorkers);
-        for (uint j = 0; j < joinedWorkers; j++) {
-            workersModule.joinViaMatcher(resourceOwner);
-        }
-
-        uint refoundByWorker = maxCollateral - requiredCollateral;
-        if (refoundByWorker > 0) {
-            globalConfig.fluenceToken().transfer(resourceOwner, refoundByWorker * joinedWorkers);
-        }
-
-        emit Matched(resourceOwner, address(core), joinedWorkers);
-        return joinedWorkers;
     }
 }
 
@@ -109,9 +68,17 @@ abstract contract MatcherOwnable is MatcherInternal {
 contract Matcher is IMatcher, MatcherOwnable {
     using LinkedList for LinkedList.Bytes32List;
 
+    event ComputeProviderRegistered(
+        address computeProvider,
+        uint minPriceByEpoch,
+        uint maxCollateral,
+        uint workersCount,
+        CIDV1[] effectors
+    );
+
     constructor(IGlobalConfig globalConfig_) MatcherState(globalConfig_) {}
 
-    function register(uint minPriceByEpoch, uint maxCollateral, uint workersCount, string[] calldata effectors) external {
+    function register(uint minPriceByEpoch, uint maxCollateral, uint workersCount, CIDV1[] calldata effectors) external {
         address owner = msg.sender;
         //TODO: require(whitelist[owner], "Only whitelisted can call this function");
         require(workersCount > 0, "Workers count should be greater than 0");
@@ -126,7 +93,8 @@ contract Matcher is IMatcher, MatcherOwnable {
         });
 
         for (uint i = 0; i < effectors.length; i++) {
-            effectorsByOwner[owner].effectors[effectors[i]] = true;
+            bytes32 dealEffector = keccak256(abi.encodePacked(effectors[i].prefixes, effectors[i].hash));
+            _effectorsByOwner[owner].effectors[dealEffector] = true;
         }
 
         resourceConfigIds.push(bytes32(bytes20(owner)));
@@ -134,6 +102,8 @@ contract Matcher is IMatcher, MatcherOwnable {
         resourceConfigs[owner] = config;
 
         globalConfig.fluenceToken().transferFrom(owner, address(this), amount);
+
+        emit ComputeProviderRegistered(owner, minPriceByEpoch, maxCollateral, workersCount, effectors);
     }
 
     function remove() external {
@@ -153,43 +123,65 @@ contract Matcher is IMatcher, MatcherOwnable {
         require(globalConfig.factory().isDeal(address(deal)), "Deal is not from factory");
 
         IConfigModule config = deal.configModule();
-
         uint requiredCollateral = config.requiredCollateral();
         uint pricePerEpoch = config.pricePerEpoch();
         uint maxWorkersPerProvider = config.maxWorkersPerProvider();
+        uint creationBlock = config.creationBlock();
+        CIDV1 memory appCID = config.appCID();
 
         IWorkersModule workersModule = deal.workersModule();
         uint freeWorkerSlots = config.targetWorkers() - workersModule.workersCount();
 
         bytes32 currentId = resourceConfigIds.first();
-        while (currentId != ZERO && freeWorkerSlots > 0) {
-            address resourceOwner = address(bytes20(currentId));
+        while (currentId != bytes32(0x00) && freeWorkerSlots > 0) {
+            address computeProvider = address(bytes20(currentId));
 
-            ResourceConfig storage resourceConfig = resourceConfigs[resourceOwner];
+            ResourceConfig storage resourceConfig = resourceConfigs[computeProvider];
             uint maxCollateral = resourceConfig.maxCollateral;
+            uint workersCount = resourceConfig.workersCount;
 
             if (
                 resourceConfig.minPriceByEpoch > pricePerEpoch ||
                 maxCollateral < requiredCollateral ||
-                !_isEffectorsMatched(config, resourceOwner)
+                !_isEffectorsMatched(config, computeProvider)
             ) {
                 currentId = resourceConfigIds.next(currentId);
                 continue;
             }
 
-            uint totalJoinedWorkers = _joinDeal(
-                deal,
-                workersModule,
-                resourceOwner,
-                maxCollateral,
-                resourceConfig.workersCount,
-                requiredCollateral,
-                maxWorkersPerProvider,
-                freeWorkerSlots
-            );
-            freeWorkerSlots -= totalJoinedWorkers;
+            uint joinedWorkers;
+            if (maxWorkersPerProvider > workersCount) {
+                joinedWorkers = workersCount;
+            } else {
+                joinedWorkers = maxWorkersPerProvider;
+            }
 
+            if (joinedWorkers > freeWorkerSlots) {
+                joinedWorkers = freeWorkerSlots;
+            }
+
+            uint newWorkersCount = workersCount - joinedWorkers;
+            if (newWorkersCount == 0) {
+                delete resourceConfigs[computeProvider];
+                resourceConfigIds.remove(bytes32(bytes20(computeProvider)));
+            } else {
+                workersCount = newWorkersCount;
+            }
+
+            globalConfig.fluenceToken().approve(address(workersModule), requiredCollateral * joinedWorkers);
+            for (uint j = 0; j < joinedWorkers; j++) {
+                workersModule.joinViaMatcher(computeProvider);
+            }
+
+            uint refoundByWorker = maxCollateral - requiredCollateral;
+            if (refoundByWorker > 0) {
+                globalConfig.fluenceToken().transfer(computeProvider, refoundByWorker * joinedWorkers);
+            }
+
+            freeWorkerSlots -= joinedWorkers;
             currentId = resourceConfigIds.next(currentId);
+
+            emit Matched(computeProvider, address(deal), joinedWorkers, creationBlock, appCID);
         }
     }
 }

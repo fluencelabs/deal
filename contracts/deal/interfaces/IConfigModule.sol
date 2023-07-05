@@ -3,6 +3,7 @@
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "../base/Types.sol";
 import "../../global/interfaces/IParticleVerifyer.sol";
 import "../../global/interfaces/IGlobalConfig.sol";
 
@@ -11,11 +12,11 @@ interface IConfigModule {
         IERC20 paymentToken_,
         uint256 pricePerEpoch_,
         uint256 requiredCollateral_,
-        string memory appCID_,
+        CIDV1 calldata appCID_,
         uint256 minWorkers_,
         uint256 maxWorkersPerProvider_,
         uint256 targetWorkers_,
-        string[] memory effectorWasmsCids_
+        CIDV1[] calldata effectorWasmsCids_
     ) external;
 
     function globalConfig() external view returns (IGlobalConfig);
@@ -30,7 +31,7 @@ interface IConfigModule {
 
     function requiredCollateral() external view returns (uint256);
 
-    function appCID() external view returns (string memory);
+    function appCID() external view returns (CIDV1 memory);
 
     function minWorkers() external view returns (uint256);
 
@@ -38,7 +39,9 @@ interface IConfigModule {
 
     function targetWorkers() external view returns (uint256);
 
-    function effectors() external view returns (string[] memory);
+    function creationBlock() external view returns (uint256);
 
-    function setAppCID(string calldata appCID_) external;
+    function effectors() external view returns (CIDV1[] memory);
+
+    function setAppCID(CIDV1 calldata appCID_) external;
 }
