@@ -2,8 +2,6 @@
 
 pragma solidity ^0.8.17;
 
-import "./Consts.sol";
-
 library WithdrawRequests {
     struct Requests {
         Request[] _requests;

@@ -29,6 +29,11 @@ struct PDT {
     string workerId;
 }
 
+struct CIDV1 {
+    bytes4 prefixes;
+    bytes32 hash;
+}
+
 enum DealStatus {
     WaitingForWorkers,
     Working

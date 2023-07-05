@@ -17,4 +17,8 @@ export class Deal {
         const configAddress = await this.core.configModule();
         return ConfigModule__factory.connect(configAddress, this.signer);
     }
+
+    async getCore(): Promise<Core> {
+        return this.core;
+    }
 }

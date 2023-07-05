@@ -2,13 +2,15 @@
 
 pragma solidity ^0.8.17;
 
+import "../../deal/base/Types.sol";
+
 interface IFactory {
     function isDeal(address addr) external view returns (bool);
 
     function createDeal(
         uint256 minWorkers_,
         uint256 targetWorkers_,
-        string calldata appCID_,
-        string[] calldata effectors
+        CIDV1 calldata appCID_,
+        CIDV1[] calldata effectors
     ) external returns (address);
 }

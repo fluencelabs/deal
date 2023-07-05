@@ -2,8 +2,6 @@
 
 pragma solidity ^0.8.17;
 
-import "./Consts.sol";
-
 library LinkedList {
     struct Element {
         bytes32 prev;
@@ -24,7 +22,7 @@ library LinkedList {
     function push(Bytes32List storage self, bytes32 key) internal {
         bytes32 oldLast = self._last;
 
-        require(key != ZERO, "Key cannot be ZERO");
+        require(key != bytes32(0x00), "Key cannot be ZERO");
 
         require(!exist(self, key), "Key already exists");
 
@@ -53,13 +51,13 @@ library LinkedList {
 
         delete self._elements[key];
 
-        if (element.prev != ZERO) {
+        if (element.prev != bytes32(0x00)) {
             self._elements[element.prev].next = element.next;
         } else {
             self._first = element.next;
         }
 
-        if (element.next != ZERO) {
+        if (element.next != bytes32(0x00)) {
             self._elements[element.next].prev = element.prev;
         } else {
             self._last = element.prev;
@@ -71,7 +69,7 @@ library LinkedList {
     }
 
     function _exist(Bytes32List storage self, Element memory element, bytes32 key) private view returns (bool) {
-        return element.prev != ZERO || element.next != ZERO || key == self._first || key == self._last;
+        return element.prev != bytes32(0x00) || element.next != bytes32(0x00) || key == self._first || key == self._last;
     }
 
     function next(Bytes32List storage self, bytes32 key) internal view returns (bytes32) {

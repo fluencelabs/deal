@@ -69,8 +69,8 @@ contract DealFactory is DealFactoryState, UUPSUpgradeable {
         uint256 minWorkers,
         uint256 maxWorkersPerProvider,
         uint256 targetWorkers,
-        string appCID,
-        string[] effectorWasmsCids,
+        CIDV1 appCID,
+        CIDV1[] effectorWasmsCids,
         uint256 epoch
     );
 
@@ -94,8 +94,8 @@ contract DealFactory is DealFactoryState, UUPSUpgradeable {
     function createDeal(
         uint256 minWorkers_,
         uint256 targetWorkers_,
-        string calldata appCID_,
-        string[] calldata effectors
+        CIDV1 calldata appCID_,
+        CIDV1[] calldata effectors
     ) external returns (address) {
         Deal memory deal = _deployDeal(minWorkers_, targetWorkers_, appCID_, effectors);
 
@@ -120,8 +120,8 @@ contract DealFactory is DealFactoryState, UUPSUpgradeable {
     function _deployDeal(
         uint256 minWorkers_,
         uint256 targetWorkers_,
-        string memory appCID_,
-        string[] memory effectorWasmsCids_
+        CIDV1 calldata appCID_,
+        CIDV1[] calldata effectorWasmsCids_
     ) private returns (Deal memory deal) {
         bytes memory emptyBytes;
 

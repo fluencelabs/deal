@@ -1,121 +1,168 @@
 import { expect } from "chai";
-import { Config, Controller, Core, DealFactory, DeveloperFaucet, IERC20__factory, Matcher, Workers } from "../typechain-types";
+import {
+    DealClient,
+    DealFactory,
+    DealFactory__factory,
+    DeveloperFaucet,
+    DeveloperFaucet__factory,
+    IERC20__factory,
+    Matcher,
+    Matcher__factory,
+} from "../src/index";
 import { deployments, ethers } from "hardhat";
-import { BigNumber } from "ethers";
+import { Deal } from "../src/client/deal";
 
 describe("Factory", () => {
+    const effectors = Array.from({ length: 10 }, () => ({
+        prefixes: ethers.randomBytes(4),
+        hash: ethers.randomBytes(32),
+    }));
+
     let faucet: DeveloperFaucet;
     let factory: DealFactory;
-    let core: Core;
-    let controller: Controller;
-    let config: Config;
-    let workers: Workers;
     let matcher: Matcher;
+    let deal: Deal;
 
     before(async () => {
-        await deployments.fixture();
-        factory = (await ethers.getContractAt("DealFactory", (await deployments.get("Factory")).address)) as DealFactory;
-        faucet = (await ethers.getContractAt("DeveloperFaucet", (await deployments.get("Faucet")).address)) as DeveloperFaucet;
-        matcher = (await ethers.getContractAt("Matcher", (await deployments.get("Matcher")).address)) as Matcher;
+        await deployments.fixture(["common", "localnet"]);
+
+        const signer = await ethers.provider.getSigner();
+        factory = DealFactory__factory.connect((await deployments.get("Factory")).address, signer);
+        faucet = DeveloperFaucet__factory.connect((await deployments.get("Faucet")).address, signer);
+        matcher = Matcher__factory.connect((await deployments.get("Matcher")).address, signer);
     });
 
     it("deploy deal", async () => {
         const params = {
-            minWorkers_: BigNumber.from(1),
-            targetWorkers_: BigNumber.from(100),
-            appCID_: "testtesttest",
+            minWorkers_: 1n,
+            targetWorkers_: 100n,
+            appCID_: {
+                prefixes: ethers.randomBytes(4),
+                hash: ethers.randomBytes(32),
+            },
+            effectors: effectors,
         };
-        const tx = await factory.createDeal(params.minWorkers_, params.targetWorkers_, params.appCID_);
+
+        const tx = await factory.createDeal(params.minWorkers_, params.targetWorkers_, params.appCID_, params.effectors);
         const res = await tx.wait();
 
-        const eventTopic = factory.interface.getEventTopic("DealCreated");
-        const log = res.logs.find(({ topics }: any) => topics[0] === eventTopic);
-        const deal = (factory.interface.parseLog(log!) as any).args.deal;
+        const eventTopic = factory.interface.getEvent("DealCreated").topicHash;
+        const log = res.logs.find(({ topics }) => {
+            return topics[0] === eventTopic;
+        });
 
-        core = (await ethers.getContractAt("Core", deal.core)) as Core;
-        controller = (await ethers.getContractAt("Controller", deal.controller)) as Controller;
-        config = (await ethers.getContractAt("Config", deal.config)) as Config;
-        workers = (await ethers.getContractAt("Workers", deal.workers)) as Workers;
-        expect(await factory.isDeal(deal.core)).to.be.true;
+        const dealEvent = factory.interface.parseLog({
+            data: log.data,
+            topics: [...log.topics],
+        }).args.deal;
+
+        deal = new DealClient(await ethers.provider.getSigner(), "local").getDeal(dealEvent.core);
+
+        expect(await factory.isDeal(dealEvent.core)).to.be.true;
     });
 
-    it("setCID", async () => {
-        const tx = await controller.setAppCID("newCID");
+    it("setAppCID", async () => {
+        const config = await deal.getConfigModule();
+        const newCID = {
+            prefixes: ethers.randomBytes(4),
+            hash: ethers.randomBytes(32),
+        };
+
+        const tx = await config.setAppCID(newCID);
         const res = await tx.wait();
 
-        const eventTopic = config.interface.getEventTopic("AppCIDChanged");
+        const eventTopic = config.interface.getEvent("AppCIDChanged").topicHash;
 
         const log = res.logs.find(({ topics }: any) => topics[0] === eventTopic);
-        const newCID = (config.interface.parseLog(log!) as any).args.newAppCID;
+        const newCIDFromContract = config.interface.parseLog({
+            data: log.data,
+            topics: [...log.topics],
+        }).args.newAppCID;
 
-        expect(newCID).to.be.equal("newCID");
+        expect(newCIDFromContract[0]).to.be.equal(ethers.hexlify(newCID.prefixes));
+        expect(newCIDFromContract[1]).to.be.equal(ethers.hexlify(newCID.hash));
     });
 
     it("join", async () => {
-        const requiredStake = await config.requiredStake();
+        const configModule = await deal.getConfigModule();
+        const workersModule = await deal.getWorkersModule();
+
+        const requiredCollateral = await configModule.requiredCollateral();
 
         const fltAddress = await faucet.fluenceToken();
-        const flt = IERC20__factory.connect(fltAddress, ethers.provider.getSigner());
+        const flt = IERC20__factory.connect(fltAddress, await ethers.provider.getSigner());
 
-        await (await flt.approve(workers.address, requiredStake)).wait();
+        await (await flt.approve(await workersModule.getAddress(), requiredCollateral)).wait();
 
-        const tx = await controller.join();
+        const tx = await workersModule.join();
         const res = await tx.wait();
 
-        const eventTopic = workers.interface.getEventTopic("PATCreated");
+        const eventTopic = workersModule.interface.getEvent("PATCreated").topicHash;
         const log = res.logs.find(({ topics }: any) => topics[0] === eventTopic);
-        const parsetLog = workers.interface.parseLog(log!) as any;
+        const parsetLog = workersModule.interface.parseLog({
+            data: log.data,
+            topics: [...log.topics],
+        });
 
-        expect(parsetLog.args.owner).to.be.equal(await ethers.provider.getSigner().getAddress());
+        expect(parsetLog.args.owner).to.be.equal(await (await ethers.provider.getSigner()).getAddress());
     });
 
     it("register in matcher", async () => {
-        const owner = ethers.provider.getSigner(0);
-        const resourceOwner = ethers.provider.getSigner(1);
+        const owner = await ethers.provider.getSigner(0);
+        const computeProvider = await ethers.provider.getSigner(1);
 
-        const collateral = (await config.requiredStake()).mul(2);
-        const workersCount = 2;
-        const totalCollateral = collateral.mul(workersCount);
+        const pricePerEpoch = await factory.PRICE_PER_EPOCH();
+        const configModule = await deal.getConfigModule();
+        const maxCollateral = await configModule.requiredCollateral();
+        const workersCount = 2n;
+        const totalCollateral = maxCollateral * workersCount;
 
         const fltAddress = await faucet.fluenceToken();
 
-        const flt = IERC20__factory.connect(fltAddress, ethers.provider.getSigner());
+        const flt = IERC20__factory.connect(fltAddress, await ethers.provider.getSigner());
 
-        await (await matcher.connect(owner).setWhiteList(await resourceOwner.getAddress(), true)).wait();
-        await (await flt.connect(resourceOwner).approve(matcher.address, totalCollateral)).wait();
+        await (await matcher.connect(owner).setWhiteList(await computeProvider.getAddress(), true)).wait();
+        await (await flt.connect(computeProvider).approve(await matcher.getAddress(), totalCollateral)).wait();
 
-        const tx = await matcher.connect(resourceOwner).register(factory.PRICE_PER_EPOCH(), collateral, workersCount, ["one", "two"]);
+        const tx = await matcher.connect(computeProvider).register(pricePerEpoch, maxCollateral, workersCount, effectors);
         const res = await tx.wait();
 
-        /*
-        const eventTopic = matcher.interface.getEventTopic("ResourceOwnerRegistred");
-        const log = res.logs.find(({ topics }: any) => topics[0] === eventTopic);
-        const parsetLog = matcher.interface.parseLog(log!) as any;
+        const eventTopic = matcher.interface.getEvent("ComputeProviderRegistered").topicHash;
+        const log = res.logs.find(({ topics }) => topics[0] === eventTopic);
+        const parsetLog = matcher.interface.parseLog({
+            data: log.data,
+            topics: [...log.topics],
+        });
 
-        expect(parsetLog.args.owner).to.be.equal(await ethers.provider.getSigner().getAddress());
-        expect(parsetLog.args.info.minPriceByEpoch).to.be.equal(1);
-        expect(parsetLog.args.info.maxCollateral).to.be.equal(collateral);
-        expect(parsetLog.args.info.workersCount).to.be.equal(2);*/
+        expect(parsetLog.args.computeProvider).to.be.equal(await computeProvider.getAddress());
+        expect(parsetLog.args.minPriceByEpoch).to.be.equal(pricePerEpoch);
+        expect(parsetLog.args.maxCollateral).to.be.equal(maxCollateral);
+        expect(parsetLog.args.workersCount).to.be.equal(workersCount);
 
-        const resourceOwnerInfo = await matcher.resourceConfigs(await resourceOwner.getAddress());
-        expect(resourceOwnerInfo.minPriceByEpoch).to.be.equal(await factory.PRICE_PER_EPOCH());
-        expect(resourceOwnerInfo.maxCollateral).to.be.equal(collateral);
-        expect(resourceOwnerInfo.workersCount).to.be.equal(workersCount);
+        const computeProviderInfo = await matcher.resourceConfigs(await computeProvider.getAddress());
+        expect(computeProviderInfo.minPriceByEpoch).to.be.equal(pricePerEpoch);
+        expect(computeProviderInfo.maxCollateral).to.be.equal(maxCollateral);
+        expect(computeProviderInfo.workersCount).to.be.equal(workersCount);
     });
 
     it("match", async () => {
-        const resourceOwner = await ethers.provider.getSigner(1).getAddress();
+        const computeProvider = await (await ethers.provider.getSigner(1)).getAddress();
+        const dealAddress = await (await deal.getCore()).getAddress();
+        const workersModule = await deal.getWorkersModule();
 
-        const tx = await matcher.matchWithDeal(core.address);
+        const tx = await matcher.matchWithDeal(dealAddress);
         const res = await tx.wait();
 
-        const eventTopic = workers.interface.getEventTopic("PATCreated");
+        const eventTopic = workersModule.interface.getEvent("PATCreated").topicHash;
 
         let patCount = 0;
         for (const log of res.logs) {
             if (log.topics[0] === eventTopic) {
-                const parsetLog = workers.interface.parseLog(log) as any;
-                expect(parsetLog.args.owner).to.be.equal(resourceOwner);
+                const parsetLog = workersModule.interface.parseLog({
+                    data: log.data,
+                    topics: [...log.topics],
+                });
+                expect(parsetLog.args.owner).to.be.equal(computeProvider);
                 patCount++;
             }
         }
