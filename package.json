@@ -8,6 +8,7 @@
         "deploy:testnet": "hardhat deploy --network testnet --tags testnet,common",
         "contracts:clean": "hardhat clean",
         "contracts:localnet": "hardhat node --tags localnet,common --hostname 0.0.0.0",
+        "deploy:token": "hardhat node --tags localnet,common --hostname 0.0.0.0",
         "compile": "hardhat clean && shx rm -rf dist && shx rm -rf typechain-types && hardhat compile && tsc -b",
         "lint:sol": "solhint 'contracts/**/*.sol'",
         "lint:ts": "eslint 'deploy/**/*.ts' 'test/**/*.ts' --max-warnings 0 --fix",

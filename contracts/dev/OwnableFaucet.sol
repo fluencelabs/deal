@@ -12,14 +12,9 @@ contract OwnableFaucet is Ownable, Multicall {
     IERC20 public immutable fluenceToken;
     IERC20 public immutable usdToken;
 
-    constructor() {
-        uint256 v = 0;
-        unchecked {
-            v--;
-        }
-
-        fluenceToken = new TestERC20("Fluence Test Token", "FLT", v);
-        usdToken = new TestERC20("USD Test Token", "USD", v);
+    constructor(IERC20 fluenceToken_, IERC20 usdToken_) {
+        fluenceToken = fluenceToken_;
+        usdToken = usdToken_;
     }
 
     function sendUSD(address addr, uint256 value) external onlyOwner {
