@@ -19,3 +19,6 @@ jobs:
 
       - name: Build and run
         uses: isbang/compose-action@v1.4.1
+
+      - name: Ping
+        run: curl localhost:8545 --data '{"jsonrpc": "2.0", "id": 1, "method": "eth_accounts"}' | jq
