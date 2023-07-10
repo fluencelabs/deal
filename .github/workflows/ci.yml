@@ -22,4 +22,4 @@ jobs:
 
       - name: Ping
         run: |
-          curl localhost:8545 --data '{"jsonrpc": "2.0", "id": 1, "method": "eth_accounts"}' | jq
+          curl localhost:8545 --data '{"jsonrpc": "2.0", "id": 1, "method": "eth_accounts"}'
