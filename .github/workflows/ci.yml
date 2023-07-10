@@ -17,9 +17,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Build and run
-        uses: isbang/compose-action@v1.4.1
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+          registry-url: "https://registry.npmjs.org"
+          cache: "npm"
 
-      - name: Ping
-        run: |
-          curl localhost:8545 --data '{"jsonrpc": "2.0", "id": 1, "method": "eth_accounts"}'
+      - run: npm i
+      - run: npm run compile
