@@ -1,7 +1,11 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:base"],
-  "enabledManagers": ["npm", "github-actions", "docker"],
+  "enabledManagers": [
+    "npm",
+    "github-actions",
+    "dockerfile"
+  ],
   "semanticCommitType": "chore",
   "semanticCommitScope": "deps"
 }
