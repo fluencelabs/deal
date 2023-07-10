@@ -17,6 +17,7 @@ jobs:
 
       release-created: ${{ steps.release.outputs['release_created'] }}
       tag-name: ${{ steps.release.outputs['tag_name'] }}
+      version: ${{ steps.release.outputs['version'] }}
 
     steps:
       - name: Run release-please
@@ -97,7 +98,7 @@ jobs:
           context: .
           push: true
           tags: |
-            docker.fluence.dev/aurora:${{ needs.release-please.outputs.tag-name }}
+            docker.fluence.dev/aurora:${{ needs.release-please.outputs.version }}
             docker.fluence.dev/aurora:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
