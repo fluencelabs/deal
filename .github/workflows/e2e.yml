@@ -40,8 +40,7 @@ jobs:
   flox:
     needs:
       - deal-aurora
-    uses: fluencelabs/flox/.github/workflows/tests.yml@FLU-365
+    uses: fluencelabs/flox/.github/workflows/tests.yml@main
     with:
-      ref: FLU-365
       deal-aurora-image: "${{ needs.deal-aurora.outputs.image }}"
       deal-aurora-version: "${{ needs.deal-aurora.outputs.version }}"
