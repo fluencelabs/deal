@@ -37,7 +37,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          repository: fluencelabs/deal-aurora
+          repository: fluencelabs/deal
           ref: ${{ inputs.ref }}
 
       - name: Import secrets
