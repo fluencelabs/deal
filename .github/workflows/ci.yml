@@ -17,13 +17,5 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: "16"
-          registry-url: "https://registry.npmjs.org"
-          cache: "npm"
-
-      - run: npm i
-      - run: npm run compile
-      # - run: npm run test
+      - name: Build and run
+        uses: isbang/compose-action@v1.4.1
