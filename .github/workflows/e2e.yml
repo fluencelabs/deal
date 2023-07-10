@@ -1,0 +1,47 @@
+name: "e2e"
+
+on:
+  pull_request:
+    paths-ignore:
+      - "**.md"
+      - ".github/**"
+      - "!.github/workflows/e2e.yml"
+      - "!.github/workflows/snapshot.yml"
+    types:
+      - "labeled"
+      - "synchronize"
+      - "opened"
+      - "reopened"
+  push:
+    branches:
+      - "main"
+    paths-ignore:
+      - "**.md"
+      - ".github/**"
+      - "!.github/workflows/e2e.yml"
+      - "!.github/workflows/snapshot.yml"
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  deal-aurora:
+    if: >
+      github.event_name == 'push' ||
+      (
+        contains(github.event.pull_request.labels.*.name, 'e2e') &&
+        !github.event.pull_request.head.repo.fork
+      )
+    uses: ./.github/workflows/snapshot.yml
+    with:
+      ref: ${{ github.ref }}
+
+  flox:
+    needs:
+      - deal-aurora
+    uses: fluencelabs/flox/.github/workflows/tests.yml@FLU-365
+    with:
+      ref: FLU-365
+      deal-aurora-image: "${{ needs.deal-aurora.outputs.image }}"
+      deal-aurora-version: "${{ needs.deal-aurora.outputs.version }}"
