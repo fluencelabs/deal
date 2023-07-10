@@ -27,10 +27,6 @@ export class GlobalContracts {
         return Matcher__factory.connect(await config.matcher(), this.provider);
     }
 
-    async getTUSD(): Promise<ERC20> {
-        return ERC20__factory.connect(DEAL_CONFIG[this.env].testUSDToken, this.provider);
-    }
-
     async getFLT(): Promise<ERC20> {
         return ERC20__factory.connect(DEAL_CONFIG[this.env].fltToken, this.provider);
     }

@@ -1,0 +1,179 @@
+{
+  "address": "0x80d9a785D7771d7e28314D5A2a7D36591603D1E2",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "particlePATIds",
+      "outputs": [
+        {
+          "internalType": "PATId",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "air",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "prevData",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "params",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "callResults",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct Particle",
+          "name": "particle",
+          "type": "tuple"
+        },
+        {
+          "internalType": "PATId[]",
+          "name": "patIds",
+          "type": "bytes32[]"
+        }
+      ],
+      "name": "setPATIds",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "air",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "prevData",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "params",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "callResults",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct Particle",
+          "name": "particle",
+          "type": "tuple"
+        }
+      ],
+      "name": "verifyParticle",
+      "outputs": [
+        {
+          "internalType": "PATId[]",
+          "name": "",
+          "type": "bytes32[]"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xeff28f6ab41636929cc4ddb92174f86f5afc956c6e7cc0613f4276c891ed522c",
+  "receipt": {
+    "to": null,
+    "from": "0x627e730fd1361E6FFcee236DAc08F82EAa8ac7cD",
+    "contractAddress": "0x80d9a785D7771d7e28314D5A2a7D36591603D1E2",
+    "transactionIndex": 0,
+    "gasUsed": "337035",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x35fa75401f18356779f99c6c778947db4dc5be55a2caf95966d591036558e79a",
+    "transactionHash": "0xeff28f6ab41636929cc4ddb92174f86f5afc956c6e7cc0613f4276c891ed522c",
+    "logs": [],
+    "blockNumber": 21,
+    "cumulativeGasUsed": "337035",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "09b042013a0e7f52f00b8304d2e32516",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.17+commit.8df45f5f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"particlePATIds\",\"outputs\":[{\"internalType\":\"PATId\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"string\",\"name\":\"air\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"prevData\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"params\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"callResults\",\"type\":\"string\"}],\"internalType\":\"struct Particle\",\"name\":\"particle\",\"type\":\"tuple\"},{\"internalType\":\"PATId[]\",\"name\":\"patIds\",\"type\":\"bytes32[]\"}],\"name\":\"setPATIds\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"string\",\"name\":\"air\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"prevData\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"params\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"callResults\",\"type\":\"string\"}],\"internalType\":\"struct Particle\",\"name\":\"particle\",\"type\":\"tuple\"}],\"name\":\"verifyParticle\",\"outputs\":[{\"internalType\":\"PATId[]\",\"name\":\"\",\"type\":\"bytes32[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/mocks/MockParticleVerifyer.sol\":\"MockParticleVerifyer\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":10000},\"remappings\":[],\"viaIR\":true},\"sources\":{\"contracts/deal/base/Types.sol\":{\"content\":\"// SPDX-License-Identifier: Apache-2.0\\n\\npragma solidity ^0.8.17;\\n\\nenum Module {\\n    None,\\n    Config,\\n    Payment,\\n    Status,\\n    Workers\\n}\\n\\nstruct Particle {\\n    string air;\\n    string prevData;\\n    string params;\\n    string callResults;\\n}\\n\\nstruct PAT {\\n    uint256 index;\\n    address owner;\\n    uint256 collateral;\\n    uint256 created;\\n}\\n\\nstruct PDT {\\n    string peerId;\\n    string workerId;\\n}\\n\\nstruct CIDV1 {\\n    bytes4 prefixes;\\n    bytes32 hash;\\n}\\n\\nenum DealStatus {\\n    WaitingForWorkers,\\n    Working\\n}\\n\\ntype PATId is bytes32;\\n\",\"keccak256\":\"0xd32e425ecf1ce5ca9bb538b95a0a86308dd27255469d4c945b39752c30227cfa\",\"license\":\"Apache-2.0\"},\"contracts/global/interfaces/IParticleVerifyer.sol\":{\"content\":\"// SPDX-License-Identifier: Apache-2.0\\n\\npragma solidity ^0.8.17;\\n\\nimport { Particle, PATId } from \\\"../../deal/base/Types.sol\\\";\\n\\ninterface IParticleVerifyer {\\n    function verifyParticle(Particle calldata particle) external returns (PATId[] memory);\\n}\\n\",\"keccak256\":\"0x412b05804fad54d070e405c6992e463cccf486a12858f4332659a5e3fc69055b\",\"license\":\"Apache-2.0\"},\"contracts/mocks/MockParticleVerifyer.sol\":{\"content\":\"// SPDX-License-Identifier: Apache-2.0\\n\\npragma solidity ^0.8.17;\\n\\nimport \\\"../global/interfaces/IParticleVerifyer.sol\\\";\\nimport { Particle, PATId } from \\\"../deal/base/Types.sol\\\";\\n\\ncontract MockParticleVerifyer is IParticleVerifyer {\\n    mapping(bytes32 => PATId[]) public particlePATIds;\\n\\n    function verifyParticle(Particle calldata particle) external returns (PATId[] memory) {\\n        bytes32 hash = keccak256(abi.encodePacked(particle.air, particle.prevData, particle.params, particle.callResults));\\n\\n        return particlePATIds[hash];\\n    }\\n\\n    function setPATIds(Particle calldata particle, PATId[] memory patIds) external {\\n        bytes32 hash = keccak256(abi.encodePacked(particle.air, particle.prevData, particle.params, particle.callResults));\\n\\n        particlePATIds[hash] = patIds;\\n    }\\n}\\n\",\"keccak256\":\"0x15e26fffe7d2f19724e6ba5cf529f70da84f892b588abd7ce2f55f1df631f4de\",\"license\":\"Apache-2.0\"}},\"version\":1}",
+  "bytecode": "0x6080806040523461001657610525908161001c8239f35b600080fdfe608060408181526004908136101561001657600080fd5b600092833560e01c90816311898d5f146103d357508063a689408c1461026f5763d94b854e1461004557600080fd5b3461026b577ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc81813601126102675782359067ffffffffffffffff938483116102635760808382019284360301126102635760249081359486861161025f573660238701121561025f578582013594878611610234578560051b948251976020976100d28989018b610429565b8952878901868198830101913683116102305790878a939201905b82821061022057505050818b85610105838596610499565b93878b86949399016101179083610499565b8091604484016101279086610499565b956064879592960161013891610499565b9a8b999198519e8f9d8e01378b01918c83018a815237019189830187815237019286840190815237018b8382015203808352016101759082610429565b8581519101208852878552872094519586116101f6576801000000000000000086116101f657505082548484558085106101d1575b5091845280842090845b8481106101bf578580f35b835183820155928101926001016101b4565b8386528483872091820191015b8181106101eb57506101aa565b8681556001016101de565b604187917f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b813581528a9391820191016100ed565b8c80fd5b83896041857f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b8780fd5b8580fd5b8380fd5b8280fd5b5091346103d0576020917ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc838136011261026b5781359167ffffffffffffffff831161026757826080910191833603011261026b579283856102d382849897610499565b9485929193602482016102e69082610499565b9290836102f66044840185610499565b946064869492950161030791610499565b9889979198519c8d9b8d8d01378a01918d8c84019081523701918883018b81523701918583018881523701848382015203808352016103469082610429565b8381519101208152808352818120908251808584549182815201908194845286842090845b8181106103bc5750505081610381910382610429565b83519485948186019282875251809352850193925b8281106103a557505050500390f35b835185528695509381019392810192600101610396565b82548452928801926001928301920161036b565b80fd5b929190503461026757807ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc3601126102675760243591358452836020528320805482101561026757835260209283902001548152f35b90601f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0910116810190811067ffffffffffffffff82111761046a57604052565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b9035907fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe1813603018212156104ea570180359067ffffffffffffffff82116104ea576020019181360383136104ea57565b600080fdfea2646970667358221220a93e9b820da9fcf5cf4b433af0c96d4913ac4e49d19c93229cf3ca6f7adb376464736f6c63430008110033",
+  "deployedBytecode": "0x608060408181526004908136101561001657600080fd5b600092833560e01c90816311898d5f146103d357508063a689408c1461026f5763d94b854e1461004557600080fd5b3461026b577ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc81813601126102675782359067ffffffffffffffff938483116102635760808382019284360301126102635760249081359486861161025f573660238701121561025f578582013594878611610234578560051b948251976020976100d28989018b610429565b8952878901868198830101913683116102305790878a939201905b82821061022057505050818b85610105838596610499565b93878b86949399016101179083610499565b8091604484016101279086610499565b956064879592960161013891610499565b9a8b999198519e8f9d8e01378b01918c83018a815237019189830187815237019286840190815237018b8382015203808352016101759082610429565b8581519101208852878552872094519586116101f6576801000000000000000086116101f657505082548484558085106101d1575b5091845280842090845b8481106101bf578580f35b835183820155928101926001016101b4565b8386528483872091820191015b8181106101eb57506101aa565b8681556001016101de565b604187917f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b813581528a9391820191016100ed565b8c80fd5b83896041857f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b8780fd5b8580fd5b8380fd5b8280fd5b5091346103d0576020917ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc838136011261026b5781359167ffffffffffffffff831161026757826080910191833603011261026b579283856102d382849897610499565b9485929193602482016102e69082610499565b9290836102f66044840185610499565b946064869492950161030791610499565b9889979198519c8d9b8d8d01378a01918d8c84019081523701918883018b81523701918583018881523701848382015203808352016103469082610429565b8381519101208152808352818120908251808584549182815201908194845286842090845b8181106103bc5750505081610381910382610429565b83519485948186019282875251809352850193925b8281106103a557505050500390f35b835185528695509381019392810192600101610396565b82548452928801926001928301920161036b565b80fd5b929190503461026757807ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc3601126102675760243591358452836020528320805482101561026757835260209283902001548152f35b90601f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0910116810190811067ffffffffffffffff82111761046a57604052565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b9035907fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe1813603018212156104ea570180359067ffffffffffffffff82116104ea576020019181360383136104ea57565b600080fdfea2646970667358221220a93e9b820da9fcf5cf4b433af0c96d4913ac4e49d19c93229cf3ca6f7adb376464736f6c63430008110033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 9681,
+        "contract": "contracts/mocks/MockParticleVerifyer.sol:MockParticleVerifyer",
+        "label": "particlePATIds",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_bytes32,t_array(t_userDefinedValueType(PATId)7648)dyn_storage)"
+      }
+    ],
+    "types": {
+      "t_array(t_userDefinedValueType(PATId)7648)dyn_storage": {
+        "base": "t_userDefinedValueType(PATId)7648",
+        "encoding": "dynamic_array",
+        "label": "PATId[]",
+        "numberOfBytes": "32"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_mapping(t_bytes32,t_array(t_userDefinedValueType(PATId)7648)dyn_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => PATId[])",
+        "numberOfBytes": "32",
+        "value": "t_array(t_userDefinedValueType(PATId)7648)dyn_storage"
+      },
+      "t_userDefinedValueType(PATId)7648": {
+        "encoding": "inplace",
+        "label": "PATId",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}

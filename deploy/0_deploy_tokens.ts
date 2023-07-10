@@ -8,7 +8,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
     console.log("Deploying account:", deployer);
     console.log("Block number:", await hre.ethers.provider.getBlockNumber());
 
-    await hre.deployments.deploy("FLT", {
+    const flt = await hre.deployments.deploy("FLT", {
         from: deployer,
         contract: "TestERC20",
         args: ["Fluence Token", "FLT"],
@@ -17,7 +17,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         waitConfirmations: 1,
     });
 
-    await hre.deployments.deploy("TestUSD", {
+    const testUSD = await hre.deployments.deploy("TestUSD", {
         from: deployer,
         contract: "TestERC20",
         args: ["Test USD", "tUSD"],
@@ -26,31 +26,35 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         waitConfirmations: 1,
     });
 
-    await hre.deployments.execute(
-        "FLT",
-        {
-            from: deployer,
-            log: true,
-            waitConfirmations: 1,
-            autoMine: true,
-        },
-        "transfer",
-        deployer,
-        ethers.toBeHex(10n ** 30n * 10n ** 18n),
-    );
+    if (flt.newlyDeployed) {
+        await hre.deployments.execute(
+            "FLT",
+            {
+                from: deployer,
+                log: true,
+                waitConfirmations: 1,
+                autoMine: true,
+            },
+            "transfer",
+            deployer,
+            ethers.toBeHex(10n ** 30n * 10n ** 18n),
+        );
+    }
 
-    await hre.deployments.execute(
-        "TestUSD",
-        {
-            from: deployer,
-            log: true,
-            waitConfirmations: 1,
-            autoMine: true,
-        },
-        "transfer",
-        deployer,
-        ethers.toBeHex(10n ** 30n * 10n ** 18n),
-    );
+    if (testUSD.newlyDeployed) {
+        await hre.deployments.execute(
+            "TestUSD",
+            {
+                from: deployer,
+                log: true,
+                waitConfirmations: 1,
+                autoMine: true,
+            },
+            "transfer",
+            deployer,
+            ethers.toBeHex(10n ** 30n * 10n ** 18n),
+        );
+    }
 };
 
 module.exports.tags = ["tokens"];
