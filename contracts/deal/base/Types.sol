@@ -34,6 +34,12 @@ struct CIDV1 {
     bytes32 hash;
 }
 
+struct Multihash {
+    bytes1 hashCode;
+    bytes1 length;
+    bytes32 value;
+}
+
 enum DealStatus {
     WaitingForWorkers,
     Working

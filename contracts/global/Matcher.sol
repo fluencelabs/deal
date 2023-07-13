@@ -10,23 +10,28 @@ import "../deal/base/Types.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract MatcherState {
-    struct ResourceConfig {
+    struct ComputeProvider {
         uint minPriceByEpoch;
         uint maxCollateral;
-        uint workersCount;
+        address paymentToken;
+        uint totalFreeWorkerSlots;
     }
 
-    struct Effectors {
-        mapping(bytes32 => bool) effectors;
+    struct ComputePeer {
+        uint freeWorkerSlots;
     }
 
     IGlobalConfig public immutable globalConfig;
 
-    LinkedList.Bytes32List public resourceConfigIds;
-    mapping(address => ResourceConfig) public resourceConfigs;
+    LinkedList.Bytes32List public computeProvidersList;
+    LinkedList.Bytes32List public computePeersList;
+
+    mapping(address => ComputeProvider) public computeProviders;
+    mapping(Multihash => ComputePeer) public computePeers;
+
     mapping(address => bool) public whitelist;
 
-    mapping(address => Effectors) internal _effectorsByOwner;
+    mapping(address => CIDV1[]) internal _effectorsByOwner;
 
     constructor(IGlobalConfig globalConfig_) {
         globalConfig = globalConfig_;

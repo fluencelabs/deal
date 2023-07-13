@@ -11,6 +11,7 @@ import {
 } from "../src/index";
 import { deployments, ethers } from "hardhat";
 import { Deal } from "../src/client/deal";
+import { ethers } from "ethers";
 
 describe("Factory", () => {
     const effectors = Array.from({ length: 10 }, () => ({
@@ -127,6 +128,20 @@ describe("Factory", () => {
         const tx = await matcher.connect(computeProvider).register(pricePerEpoch, maxCollateral, workersCount, effectors);
         const res = await tx.wait();
 
+        const rpc = new ethers.JsonRpcProvider("http://0.0.0.0:8545");
+
+        const rpcLog = await rpc.getLogs({
+            fromBlock: "0x0",
+            topics: [
+                "0x8a2ecab128faa476aff507c7f34da3348b5c56e4a0401825f6919b4cc7b249f1",
+                `0x000000000000000000000000${computeProvider.address}`,
+            ],
+        });
+
+        for (const log of rpcLog) {
+            console.log(log);
+        }
+
         const eventTopic = matcher.interface.getEvent("ComputeProviderRegistered").topicHash;
         const log = res.logs.find(({ topics }) => topics[0] === eventTopic);
         const parsetLog = matcher.interface.parseLog({
@@ -152,6 +167,12 @@ describe("Factory", () => {
 
         const tx = await matcher.matchWithDeal(dealAddress);
         const res = await tx.wait();
+
+        for (const log of res.logs) {
+            if (log.topics[0] == matcher.interface.getEvent("Matched").topicHash) {
+                console.log(log);
+            }
+        }
 
         const eventTopic = workersModule.interface.getEvent("PATCreated").topicHash;
 
