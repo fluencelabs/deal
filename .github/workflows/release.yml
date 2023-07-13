@@ -75,7 +75,7 @@ jobs:
       - run: npm i
         working-directory: .
 
-      - run: npm run ci
+      - run: npm run build
         working-directory: .
 
       - name: Publish to npm registry

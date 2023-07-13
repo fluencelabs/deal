@@ -63,7 +63,7 @@ jobs:
           cache: "npm"
 
       - run: npm i
-      - run: npm run ci
+      - run: npm run build
 
       - name: Generate snapshot version
         id: version
