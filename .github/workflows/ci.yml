@@ -26,3 +26,5 @@ jobs:
 
       - run: npm i
       - run: npm run build
+        env:
+          PRIVATE_KEY: ${{ secrets.DEAL_TESNET_PRIVATE_KEY }}
