@@ -17,8 +17,7 @@ on:
     secrets:
       PRIVATE_KEY:
         description: "testnet private key"
-        type: string
-
+        required: true
 
 env:
   FORCE_COLOR: true
