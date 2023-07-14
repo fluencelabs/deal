@@ -14,6 +14,10 @@ on:
       image:
         description: "deal-aurora image"
         value: ${{ jobs.snapshot.outputs.image }}
+    secrets:
+      PRIVATE_KEY:
+        description: "testnet private key"
+        type: string
 
 
 env:
@@ -65,7 +69,7 @@ jobs:
       - run: npm i
       - run: npm run build
         env:
-          PRIVATE_KEY: ${{ secrets.DEAL_TESNET_PRIVATE_KEY }}
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
 
       - name: Generate snapshot version
         id: version
