@@ -32,7 +32,7 @@ contract PaymentModuleInternal is ModuleBase, PaymentModuleState {
     function _hasWorkerInEpoch(uint epoch, PATId id) internal view returns (bool) {
         IWorkersModule workers = _core().workersModule();
 
-        uint index = workers.getPATIndex(id);
+        uint index = 0; //TODO: fix
         uint256 bucket = index >> 8;
         uint256 mask = 1 << (index & 0xff);
         if (_workersByEpoch[epoch][bucket] & mask == 0) {
@@ -104,7 +104,7 @@ contract PaymentModule is PaymentModuleOwnable {
         PATId[] memory patIds = config.particleVerifyer().verifyParticle(particle);
 
         for (uint i = 0; i < patIds.length; i++) {
-            uint index = workers.getPATIndex(patIds[i]);
+            uint index = 0; // TODO: fix
             uint256 bucket = index >> 8;
             uint256 mask = 1 << (index & 0xff);
             _workersByEpoch[epoch][bucket] |= mask; // TODO: gass optimization
@@ -130,7 +130,7 @@ contract PaymentModule is PaymentModuleOwnable {
 
         IWorkersModule workers = core.workersModule();
 
-        uint index = workers.getPATIndex(patId);
+        uint index = 0; //todo: workers.getPATIndex(patId);
 
         uint totalReward;
         for (uint i = 0; i < particlesHashes.length; i++) {
@@ -144,7 +144,7 @@ contract PaymentModule is PaymentModuleOwnable {
         }
 
         _locked -= totalReward;
-        config.paymentToken().safeTransfer(workers.getPATOwner(patId), totalReward);
+        config.paymentToken().safeTransfer(workers.getPAT(patId).owner, totalReward);
 
         //TODO: event
     }

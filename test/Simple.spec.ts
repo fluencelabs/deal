@@ -84,63 +84,19 @@ describe("Factory", () => {
         expect(newCIDFromContract[1]).to.be.equal(ethers.hexlify(newCID.hash));
     });
 
-    it("join", async () => {
-        const configModule = await deal.getConfigModule();
-        const workersModule = await deal.getWorkersModule();
-
-        const requiredCollateral = await configModule.requiredCollateral();
-
-        const fltAddress = await faucet.fluenceToken();
-        const flt = IERC20__factory.connect(fltAddress, await ethers.provider.getSigner());
-
-        await (await flt.approve(await workersModule.getAddress(), requiredCollateral)).wait();
-
-        const tx = await workersModule.join();
-        const res = await tx.wait();
-
-        const eventTopic = workersModule.interface.getEvent("PATCreated").topicHash;
-        const log = res.logs.find(({ topics }: any) => topics[0] === eventTopic);
-        const parsetLog = workersModule.interface.parseLog({
-            data: log.data,
-            topics: [...log.topics],
-        });
-
-        expect(parsetLog.args.owner).to.be.equal(await (await ethers.provider.getSigner()).getAddress());
-    });
-
-    it("register in matcher", async () => {
+    it("registerComputeProvider in matcher", async () => {
         const owner = await ethers.provider.getSigner(0);
         const computeProvider = await ethers.provider.getSigner(1);
 
         const pricePerEpoch = await factory.PRICE_PER_EPOCH();
         const configModule = await deal.getConfigModule();
         const maxCollateral = await configModule.requiredCollateral();
-        const workersCount = 2n;
-        const totalCollateral = maxCollateral * workersCount;
-
         const fltAddress = await faucet.fluenceToken();
 
-        const flt = IERC20__factory.connect(fltAddress, await ethers.provider.getSigner());
-
         await (await matcher.connect(owner).setWhiteList(await computeProvider.getAddress(), true)).wait();
-        await (await flt.connect(computeProvider).approve(await matcher.getAddress(), totalCollateral)).wait();
 
-        const tx = await matcher.connect(computeProvider).register(pricePerEpoch, maxCollateral, workersCount, effectors);
+        const tx = await matcher.connect(computeProvider).registerComputeProvider(pricePerEpoch, maxCollateral, fltAddress, effectors);
         const res = await tx.wait();
-
-        const rpc = new ethers.JsonRpcProvider("http://0.0.0.0:8545");
-
-        const rpcLog = await rpc.getLogs({
-            fromBlock: "0x0",
-            topics: [
-                "0x8a2ecab128faa476aff507c7f34da3348b5c56e4a0401825f6919b4cc7b249f1",
-                `0x000000000000000000000000${computeProvider.address}`,
-            ],
-        });
-
-        for (const log of rpcLog) {
-            console.log(log);
-        }
 
         const eventTopic = matcher.interface.getEvent("ComputeProviderRegistered").topicHash;
         const log = res.logs.find(({ topics }) => topics[0] === eventTopic);
@@ -149,15 +105,50 @@ describe("Factory", () => {
             topics: [...log.topics],
         });
 
-        expect(parsetLog.args.computeProvider).to.be.equal(await computeProvider.getAddress());
-        expect(parsetLog.args.minPriceByEpoch).to.be.equal(pricePerEpoch);
-        expect(parsetLog.args.maxCollateral).to.be.equal(maxCollateral);
-        expect(parsetLog.args.workersCount).to.be.equal(workersCount);
+        expect(parsetLog.args[0]).to.be.equal(await computeProvider.getAddress());
+        expect(parsetLog.args[1]).to.be.equal(pricePerEpoch);
+        expect(parsetLog.args[2]).to.be.equal(maxCollateral);
+        expect(parsetLog.args[3]).to.be.equal(fltAddress);
+        // expect(parsetLog.args[4]).to.be.equal(effectors);
 
-        const computeProviderInfo = await matcher.resourceConfigs(await computeProvider.getAddress());
-        expect(computeProviderInfo.minPriceByEpoch).to.be.equal(pricePerEpoch);
+        const computeProviderInfo = await matcher.computeProviderByOwner(await computeProvider.getAddress());
+        expect(computeProviderInfo.minPricePerEpoch).to.be.equal(pricePerEpoch);
         expect(computeProviderInfo.maxCollateral).to.be.equal(maxCollateral);
-        expect(computeProviderInfo.workersCount).to.be.equal(workersCount);
+    });
+
+    it("registerComputePeer in matcher", async () => {
+        const owner = await ethers.provider.getSigner(0);
+        const computeProvider = await ethers.provider.getSigner(1);
+
+        const configModule = await deal.getConfigModule();
+        const maxCollateral = await configModule.requiredCollateral();
+        const workersCount = 2n;
+        const peerId = {
+            hashCode: "0x00",
+            length: "0x20",
+            value: ethers.randomBytes(32),
+        };
+        const totalCollateral = maxCollateral * workersCount;
+
+        const flt = IERC20__factory.connect(await faucet.fluenceToken(), await ethers.provider.getSigner());
+
+        await (await matcher.connect(owner).setWhiteList(await computeProvider.getAddress(), true)).wait();
+        await (await flt.connect(computeProvider).approve(await matcher.getAddress(), totalCollateral)).wait();
+
+        const tx = await matcher.connect(computeProvider).addWorkersSlots(peerId, workersCount);
+        const res = await tx.wait();
+
+        const eventTopic = matcher.interface.getEvent("ComputePeerWorkerSlotsChanged").topicHash;
+        const log = res.logs.find(({ topics }) => topics[0] === eventTopic);
+        const parsetLog = matcher.interface.parseLog({
+            data: log.data,
+            topics: [...log.topics],
+        });
+
+        expect(parsetLog.args[0]).to.be.equal(peerId);
+        expect(parsetLog.args[1]).to.be.equal(workersCount);
+
+        expect(await matcher.getFreeWorkersSolts(await computeProvider.getAddress(), peerId)).to.be.equal(workersCount);
     });
 
     it("match", async () => {

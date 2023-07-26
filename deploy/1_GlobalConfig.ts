@@ -153,23 +153,6 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
 
     await (await globalConfigContract.setFactory(factory.address)).wait();
     await (await globalConfigContract.setMatcher(matcher.address)).wait();
-
-    const chainId = await hre.getChainId();
-    writeFileSync(
-        `./deployments/addresses=${chainId}.json`,
-        JSON.stringify(
-            {
-                globalConfig: await globalConfigContract.getAddress(),
-                dealFactoryAddress: factory.address,
-                fltToken: fluenceToken,
-                testUSDToken: usdToken,
-                faucet: (await hre.deployments.get("Faucet")).address,
-                chainId: chainId,
-            },
-            null,
-            2,
-        ),
-    );
 };
 
 module.exports.dependencies = ["Faucet"];

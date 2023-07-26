@@ -17,18 +17,6 @@ struct Particle {
     string callResults;
 }
 
-struct PAT {
-    uint256 index;
-    address owner;
-    uint256 collateral;
-    uint256 created;
-}
-
-struct PDT {
-    string peerId;
-    string workerId;
-}
-
 struct CIDV1 {
     bytes4 prefixes;
     bytes32 hash;
