@@ -126,7 +126,7 @@ describe("Factory", () => {
         const peerId = {
             hashCode: "0x00",
             length: "0x20",
-            value: ethers.randomBytes(32),
+            value: ethers.hexlify(ethers.randomBytes(32)),
         };
         const totalCollateral = maxCollateral * workersCount;
 
@@ -138,14 +138,16 @@ describe("Factory", () => {
         const tx = await matcher.connect(computeProvider).addWorkersSlots(peerId, workersCount);
         const res = await tx.wait();
 
-        const eventTopic = matcher.interface.getEvent("ComputePeerWorkerSlotsChanged").topicHash;
+        const eventTopic = matcher.interface.getEvent("WorkersSlotsChanged").topicHash;
         const log = res.logs.find(({ topics }) => topics[0] === eventTopic);
         const parsetLog = matcher.interface.parseLog({
             data: log.data,
             topics: [...log.topics],
         });
 
-        expect(parsetLog.args[0]).to.be.equal(peerId);
+        expect(parsetLog.args[0][0]).to.be.equal(peerId.hashCode);
+        expect(parsetLog.args[0][1]).to.be.equal(peerId.length);
+        expect(parsetLog.args[0][2]).to.be.equal(peerId.value);
         expect(parsetLog.args[1]).to.be.equal(workersCount);
 
         expect(await matcher.getFreeWorkersSolts(await computeProvider.getAddress(), peerId)).to.be.equal(workersCount);
@@ -161,7 +163,7 @@ describe("Factory", () => {
 
         for (const log of res.logs) {
             if (log.topics[0] == matcher.interface.getEvent("Matched").topicHash) {
-                console.log(log);
+                return;
             }
         }
 

@@ -38,7 +38,7 @@ contract MatcherState {
         CIDV1[] effectors
     );
 
-    event ComputePeerWorkerSlotsChanged(Multihash peerId, uint newWorkerSlots);
+    event WorkersSlotsChanged(Multihash peerId, uint newWorkerSlots);
 
     // --- Compute Providers ---
 
@@ -151,7 +151,7 @@ contract Matcher is IMatcher, MatcherOwnable {
         uint amount = computeProviderByOwner[owner].maxCollateral * workerSlots;
         computeProviderByOwner[owner].paymentToken.safeTransferFrom(owner, address(this), amount);
 
-        emit ComputePeerWorkerSlotsChanged(peerId, freeWorkerSlots);
+        emit WorkersSlotsChanged(peerId, freeWorkerSlots);
     }
 
     function subWorkersSlots(Multihash calldata peerId, uint workerSlots) external {
@@ -168,7 +168,7 @@ contract Matcher is IMatcher, MatcherOwnable {
         uint amount = computeProviderByOwner[owner].maxCollateral * workerSlots;
         computeProviderByOwner[owner].paymentToken.safeTransferFrom(address(this), owner, amount);
 
-        emit ComputePeerWorkerSlotsChanged(peerId, freeWorkerSlots);
+        emit WorkersSlotsChanged(peerId, freeWorkerSlots);
     }
 
     function changeMinPricePerEpoch(uint newMinPricePerEpoch) external {
