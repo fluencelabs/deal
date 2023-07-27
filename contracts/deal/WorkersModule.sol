@@ -24,11 +24,11 @@ contract WorkersModuleState {
     }
 
     // ---- Events ----
-    event PATCreated(PATId id, address owner);
-    event PATRemoved(PATId id);
+    event PATCreated(bytes32 id, address owner);
+    event PATRemoved(bytes32 id);
 
-    event WorkerRegistred(PATId id, Multihash workerId);
-    event WorkerUnregistred(PATId id);
+    event WorkerRegistred(bytes32 patId, bytes32 workerId);
+    event WorkerUnregistred(bytes32 patId);
 
     event CollateralWithdrawn(address owner, uint256 amount);
 
@@ -40,7 +40,7 @@ contract WorkersModuleState {
     uint256 internal _patCount;
 
     mapping(address => OwnerInfo) internal _ownersInfo;
-    mapping(PATId => PAT) internal _patByPATId;
+    mapping(bytes32 => PAT) internal _patByPATId;
 
     LinkedList.Bytes32List _patsIdsList;
 
@@ -56,7 +56,7 @@ contract WorkersModuleInternal is WorkersModuleState, ModuleBase {
         _requests[owner].push(amount);
     }
 
-    function _createPAT(Multihash calldata peerId, address owner, address collateralPayer) internal {
+    function _createPAT(bytes32 peerId, address owner, address collateralPayer) internal {
         uint256 patCountByOwner = _ownersInfo[owner].patCount;
         uint256 patCount = _patCount;
 
@@ -81,16 +81,14 @@ contract WorkersModuleInternal is WorkersModuleState, ModuleBase {
             }
         }
 
-        PATId id = PATId.wrap(
-            keccak256(abi.encodePacked(_PAT_PREFIX, owner, peerId.hashCode, peerId.length, peerId.value, patCountByOwner))
-        );
+        bytes32 id = keccak256(abi.encodePacked(_PAT_PREFIX, owner, peerId, patCountByOwner));
 
         require(_patByPATId[id].owner == address(0x00), "Id already used");
 
         _patByPATId[id] = PAT({
             id: id,
             peerId: peerId,
-            workerId: Multihash({ hashCode: 0, length: 0, value: bytes32(0) }),
+            workerId: bytes32(0),
             owner: owner,
             collateral: requiredCollateral,
             created: config.globalConfig().epochManager().currentEpoch()
@@ -99,7 +97,7 @@ contract WorkersModuleInternal is WorkersModuleState, ModuleBase {
         _ownersInfo[owner].patCount = patCountByOwner + 1;
         _patCount = patCount;
 
-        _patsIdsList.push(PATId.unwrap(id));
+        _patsIdsList.push(id);
 
         emit PATCreated(id, owner);
     }
@@ -110,7 +108,7 @@ contract WorkersModule is WorkersModuleInternal, IWorkersModule {
     using WithdrawRequests for WithdrawRequests.Requests;
     using SafeERC20 for IERC20;
 
-    function getPAT(PATId id) external view returns (PAT memory) {
+    function getPAT(bytes32 id) external view returns (PAT memory) {
         return _patByPATId[id];
     }
 
@@ -125,7 +123,7 @@ contract WorkersModule is WorkersModuleInternal, IWorkersModule {
         uint256 index = 0;
         bytes32 patId = _patsIdsList.first();
         while (patId != bytes32(0)) {
-            pats[index] = _patByPATId[PATId.wrap(patId)];
+            pats[index] = _patByPATId[patId];
             index++;
 
             patId = _patsIdsList.next(patId);
@@ -141,26 +139,26 @@ contract WorkersModule is WorkersModuleInternal, IWorkersModule {
 
     // ---- Public mutables ----
 
-    function createPAT(address computeProvider, Multihash calldata peerId) external {
+    function createPAT(address computeProvider, bytes32 peerId) external {
         require(address(_core().configModule().globalConfig().matcher()) == msg.sender, "Only matcher can call this method");
 
         _createPAT(peerId, computeProvider, msg.sender);
     }
 
-    function setWorker(PATId id, Multihash calldata workerId) external {
-        PAT storage pat = _patByPATId[id];
+    function setWorker(bytes32 patId, bytes32 workerId) external {
+        PAT storage pat = _patByPATId[patId];
 
-        if (pat.workerId.hashCode != 0 && pat.workerId.length != 0 && pat.workerId.value != bytes32(0)) {
-            emit WorkerUnregistred(id);
+        if (pat.workerId != bytes32(0)) {
+            emit WorkerUnregistred(patId);
         }
 
-        pat.workerId = Multihash({ hashCode: workerId.hashCode, length: workerId.length, value: workerId.value });
+        pat.workerId = workerId;
 
-        emit WorkerRegistred(id, workerId);
+        emit WorkerRegistred(patId, workerId);
     }
 
-    function exit(PATId id) external {
-        PAT storage pat = _patByPATId[id];
+    function exit(bytes32 patId) external {
+        PAT storage pat = _patByPATId[patId];
         address owner = pat.owner;
 
         require(owner == msg.sender, "PAT doesn't exist");
@@ -181,11 +179,11 @@ contract WorkersModule is WorkersModuleInternal, IWorkersModule {
         _ownersInfo[owner].patCount--;
         _patCount = newPatCount;
 
-        delete _patByPATId[id];
+        delete _patByPATId[patId];
 
-        _patsIdsList.remove(PATId.unwrap(id));
+        _patsIdsList.remove(patId);
 
-        emit PATRemoved(id);
+        emit PATRemoved(patId);
     }
 
     function withdrawCollateral(address owner) external {

@@ -24,11 +24,7 @@ describe("Factory", () => {
     let matcher: Matcher;
     let deal: Deal;
 
-    const peerId = {
-        hashCode: "0x00",
-        length: "0x20",
-        value: ethers.hexlify(ethers.randomBytes(32)),
-    };
+    const peerId = ethers.hexlify(ethers.randomBytes(32));
 
     before(async () => {
         await deployments.fixture(["common", "localnet"]);
@@ -123,7 +119,6 @@ describe("Factory", () => {
     });
 
     it("registerComputePeer in matcher", async () => {
-        const owner = await ethers.provider.getSigner(0);
         const computeProvider = await ethers.provider.getSigner(1);
 
         const configModule = await deal.getConfigModule();
@@ -147,9 +142,7 @@ describe("Factory", () => {
             topics: [...log.topics],
         });
 
-        expect(parsetLog.args[0][0]).to.be.equal(peerId.hashCode);
-        expect(parsetLog.args[0][1]).to.be.equal(peerId.length);
-        expect(parsetLog.args[0][2]).to.be.equal(peerId.value);
+        expect(parsetLog.args[0]).to.be.equal(peerId);
         expect(parsetLog.args[1]).to.be.equal(workersCount);
 
         expect(await matcher.getFreeWorkersSolts(await computeProvider.getAddress(), peerId)).to.be.equal(workersCount);
@@ -223,22 +216,17 @@ describe("Factory", () => {
 
         const expectedPatIds: Record<string, boolean> = {};
 
-        console.log(computePeers[0].patIds);
         computePeers[0].patIds.map((patId) => {
             expectedPatIds[patId] = true;
         });
         pats.map((pat) => {
-            console.log(pat);
             expect(expectedPatIds[pat.id]).to.be.equal(true);
         });
 
         for (const pat of pats) {
-            const workerId = {
-                hashCode: "0x00",
-                length: "0x20",
-                value: ethers.hexlify(ethers.randomBytes(32)),
-            };
+            const workerId = ethers.hexlify(ethers.randomBytes(32));
 
+            console.log("setWorker", pat.id, workerId);
             const res = await (await workersModule.setWorker(pat.id, workerId)).wait();
 
             const workerRegistredEvent = workersModule.interface.getEvent("WorkerRegistred").topicHash;
@@ -254,9 +242,7 @@ describe("Factory", () => {
             };
 
             expect(workerRegistred.id).to.be.equal(pat.id);
-            expect(workerRegistred.workerId[0]).to.be.equal(workerId.hashCode);
-            expect(workerRegistred.workerId[1]).to.be.equal(workerId.length);
-            expect(workerRegistred.workerId[2]).to.be.equal(workerId.value);
+            expect(workerRegistred.workerId).to.be.equal(workerId);
         }
     });
 });

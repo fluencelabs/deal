@@ -6,7 +6,7 @@ import "../../deal/interfaces/ICore.sol";
 import "../../deal/base/Types.sol";
 
 interface IMatcher {
-    function getFreeWorkersSolts(address computeProvider, Multihash calldata peerId) external view returns (uint);
+    function getFreeWorkersSolts(address computeProvider, bytes32 peerId) external view returns (uint);
 
     function matchWithDeal(ICore deal) external;
 }

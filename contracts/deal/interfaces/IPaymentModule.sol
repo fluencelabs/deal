@@ -10,7 +10,7 @@ import "../base/Types.sol";
 interface IPaymentModule {
     function balance() external view returns (uint256);
 
-    function rewardAmount(bytes32 particleHash, PATId patId) external view returns (uint);
+    function rewardAmount(bytes32 particleHash, bytes32 patId) external view returns (uint);
 
     function depositToPaymentBalance(uint256 amount) external;
 
@@ -18,5 +18,5 @@ interface IPaymentModule {
 
     function commitParticle(Particle calldata particle) external;
 
-    function withdrawReward(PATId patId, bytes32[] calldata particlesHashes) external;
+    function withdrawReward(bytes32 patId, bytes32[] calldata particlesHashes) external;
 }

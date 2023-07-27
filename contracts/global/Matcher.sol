@@ -20,7 +20,7 @@ contract MatcherState {
     }
 
     struct ComputePeer {
-        Multihash peerId;
+        bytes32 peerId;
         uint freeWorkerSlots;
     }
 
@@ -30,7 +30,7 @@ contract MatcherState {
 
     event ComputeProviderMatched(address indexed computeProvider, address deal, uint dealCreationBlock, CIDV1 appCID);
 
-    event ComputePeerMatched(Multihash indexed peerId, address deal, PATId[] patIds, uint dealCreationBlock, CIDV1 appCID);
+    event ComputePeerMatched(bytes32 indexed peerId, address deal, bytes32[] patIds, uint dealCreationBlock, CIDV1 appCID);
 
     event ComputeProviderRegistered(
         address computeProvider,
@@ -40,7 +40,7 @@ contract MatcherState {
         CIDV1[] effectors
     );
 
-    event WorkersSlotsChanged(Multihash peerId, uint newWorkerSlots);
+    event WorkersSlotsChanged(bytes32 peerId, uint newWorkerSlots);
 
     // --- Compute Providers ---
 
@@ -104,10 +104,8 @@ contract Matcher is IMatcher, MatcherOwnable {
 
     constructor(IGlobalConfig globalConfig_) MatcherState(globalConfig_) {}
 
-    function getFreeWorkersSolts(address computeProvider, Multihash calldata peerId) external view returns (uint) {
-        bytes32 peerIdHash = keccak256(abi.encodePacked(peerId.hashCode, peerId.length, peerId.value));
-
-        return computePeerByPeerIdHash[peerIdHash].freeWorkerSlots;
+    function getFreeWorkersSolts(address computeProvider, bytes32 peerId) external view returns (uint) {
+        return computePeerByPeerIdHash[peerId].freeWorkerSlots;
     }
 
     function registerComputeProvider(uint minPricePerEpoch, uint maxCollateral, IERC20 paymentToken, CIDV1[] calldata effectors) external {
@@ -137,17 +135,16 @@ contract Matcher is IMatcher, MatcherOwnable {
         emit ComputeProviderRegistered(owner, minPricePerEpoch, maxCollateral, paymentToken, effectors);
     }
 
-    function addWorkersSlots(Multihash calldata peerId, uint workerSlots) external {
+    function addWorkersSlots(bytes32 peerId, uint workerSlots) external {
         address owner = msg.sender;
-        bytes32 peerIdHash = keccak256(abi.encodePacked(peerId.hashCode, peerId.length, peerId.value));
 
         require(workerSlots > 0, "Worker slots should be greater than 0");
 
-        uint256 freeWorkerSlots = computePeerByPeerIdHash[peerIdHash].freeWorkerSlots + workerSlots;
-        computePeerByPeerIdHash[peerIdHash].freeWorkerSlots = freeWorkerSlots;
+        uint256 freeWorkerSlots = computePeerByPeerIdHash[peerId].freeWorkerSlots + workerSlots;
+        computePeerByPeerIdHash[peerId].freeWorkerSlots = freeWorkerSlots;
 
         if (freeWorkerSlots == workerSlots) {
-            _computePeersListByProvider[owner].push(peerIdHash);
+            _computePeersListByProvider[owner].push(peerId);
         }
 
         uint amount = computeProviderByOwner[owner].maxCollateral * workerSlots;
@@ -156,15 +153,14 @@ contract Matcher is IMatcher, MatcherOwnable {
         emit WorkersSlotsChanged(peerId, freeWorkerSlots);
     }
 
-    function subWorkersSlots(Multihash calldata peerId, uint workerSlots) external {
+    function subWorkersSlots(bytes32 peerId, uint workerSlots) external {
         address owner = msg.sender;
-        bytes32 peerIdHash = keccak256(abi.encodePacked(peerId.hashCode, peerId.length, peerId.value));
 
-        uint256 freeWorkerSlots = computePeerByPeerIdHash[peerIdHash].freeWorkerSlots - workerSlots;
-        computePeerByPeerIdHash[peerIdHash].freeWorkerSlots = freeWorkerSlots;
+        uint256 freeWorkerSlots = computePeerByPeerIdHash[peerId].freeWorkerSlots - workerSlots;
+        computePeerByPeerIdHash[peerId].freeWorkerSlots = freeWorkerSlots;
 
         if (freeWorkerSlots == 0) {
-            _computePeersListByProvider[owner].remove(peerIdHash);
+            _computePeersListByProvider[owner].remove(peerId);
         }
 
         uint amount = computeProviderByOwner[owner].maxCollateral * workerSlots;
@@ -329,7 +325,7 @@ contract Matcher is IMatcher, MatcherOwnable {
         bytes32 hashOfPeerId = _computePeersListByProvider[computeProvider].first();
 
         while (hashOfPeerId != bytes32(0x00)) {
-            Multihash memory peerId = computePeerByPeerIdHash[hashOfPeerId].peerId;
+            bytes32 peerId = computePeerByPeerIdHash[hashOfPeerId].peerId;
             uint freeWorkerSlots = computePeerByPeerIdHash[hashOfPeerId].freeWorkerSlots;
 
             uint receivedWorkersSlots;
@@ -363,7 +359,7 @@ contract Matcher is IMatcher, MatcherOwnable {
             hashOfPeerId = _computePeersListByProvider[computeProvider].next(hashOfPeerId);
 
             PAT[] memory pats = workersModule.getPATs();
-            PATId[] memory patIds = new PATId[](pats.length);
+            bytes32[] memory patIds = new bytes32[](pats.length);
 
             uint patLength = pats.length;
             for (uint i = 0; i < patLength; i++) {

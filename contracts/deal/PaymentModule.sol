@@ -29,7 +29,7 @@ contract PaymentModuleState {
 }
 
 contract PaymentModuleInternal is ModuleBase, PaymentModuleState {
-    function _hasWorkerInEpoch(uint epoch, PATId id) internal view returns (bool) {
+    function _hasWorkerInEpoch(uint epoch, bytes32 id) internal view returns (bool) {
         IWorkersModule workers = _core().workersModule();
 
         uint index = 0; //TODO: fix
@@ -70,7 +70,7 @@ contract PaymentModule is PaymentModuleOwnable {
     using BitMaps for BitMaps.BitMap;
     using SafeERC20 for IERC20;
 
-    function rewardAmount(bytes32 particleHash, PATId patId) public view returns (uint) {
+    function rewardAmount(bytes32 particleHash, bytes32 patId) public view returns (uint) {
         ParticleInfo storage particle = _particles[particleHash];
         require(particle.isValid, "Particle not valid");
 
@@ -101,7 +101,7 @@ contract PaymentModule is PaymentModuleOwnable {
 
         uint epoch = config.globalConfig().epochManager().currentEpoch();
 
-        PATId[] memory patIds = config.particleVerifyer().verifyParticle(particle);
+        bytes32[] memory patIds = config.particleVerifyer().verifyParticle(particle);
 
         for (uint i = 0; i < patIds.length; i++) {
             uint index = 0; // TODO: fix
@@ -124,7 +124,7 @@ contract PaymentModule is PaymentModuleOwnable {
         //TODO: event
     }
 
-    function withdrawReward(PATId patId, bytes32[] calldata particlesHashes) external {
+    function withdrawReward(bytes32 patId, bytes32[] calldata particlesHashes) external {
         ICore core = _core();
         IConfigModule config = core.configModule();
 
