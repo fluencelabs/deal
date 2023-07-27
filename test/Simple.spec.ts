@@ -134,7 +134,7 @@ describe("Factory", () => {
 
         const flt = IERC20__factory.connect(await faucet.fluenceToken(), await ethers.provider.getSigner());
 
-        await (await matcher.connect(owner).setWhiteList(await computeProvider.getAddress(), true)).wait();
+        // await (await matcher.connect(owner).setWhiteList(await computeProvider.getAddress(), true)).wait();
         await (await flt.connect(computeProvider).approve(await matcher.getAddress(), totalCollateral)).wait();
 
         const tx = await matcher.connect(computeProvider).addWorkersSlots(peerId, workersCount);
@@ -190,9 +190,11 @@ describe("Factory", () => {
                 }).args;
 
                 return {
-                    deal: args[0],
-                    peerId: args[1],
-                    reservedWorkersSlots: args[2],
+                    peerId: args[0],
+                    deal: args[1],
+                    patIds: args[2],
+                    dealCreationBlock: args[3],
+                    appCID: args[4],
                 };
             });
 
@@ -216,8 +218,19 @@ describe("Factory", () => {
         expect(computeProviders[0].deal).to.be.equal(dealAddress);
         expect(computePeers.length).to.be.equal(1);
         expect(computePeers[0].deal).to.be.equal(dealAddress);
-        expect(computePeers[0].reservedWorkersSlots).to.be.equal(2n);
+        expect(computePeers[0].patIds.length).to.be.equal(2n);
         expect(pats.length).to.be.equal(2);
+
+        const expectedPatIds: Record<string, boolean> = {};
+
+        console.log(computePeers[0].patIds);
+        computePeers[0].patIds.map((patId) => {
+            expectedPatIds[patId] = true;
+        });
+        pats.map((pat) => {
+            console.log(pat);
+            expect(expectedPatIds[pat.id]).to.be.equal(true);
+        });
 
         for (const pat of pats) {
             const workerId = {

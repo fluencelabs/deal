@@ -30,7 +30,7 @@ contract MatcherState {
 
     event ComputeProviderMatched(address indexed computeProvider, address deal, uint dealCreationBlock, CIDV1 appCID);
 
-    event ComputePeerMatched(address deal, Multihash peerId, uint reservedWorkersSlots);
+    event ComputePeerMatched(Multihash indexed peerId, address deal, PATId[] patIds, uint dealCreationBlock, CIDV1 appCID);
 
     event ComputeProviderRegistered(
         address computeProvider,
@@ -279,7 +279,7 @@ contract Matcher is IMatcher, MatcherOwnable {
         CIDV1 memory appCID = config.appCID();
 
         IWorkersModule workersModule = deal.workersModule();
-        uint freeWorkerSlotsInDeal = config.targetWorkers() - workersModule.patsCount();
+        uint freeWorkerSlotsInDeal = config.targetWorkers() - workersModule.patCount();
 
         bytes32 currentId = _computeProvidersList.first();
         while (currentId != bytes32(0x00) && freeWorkerSlotsInDeal > 0) {
@@ -304,7 +304,9 @@ contract Matcher is IMatcher, MatcherOwnable {
                 maxCollateral,
                 requiredCollateral,
                 address(deal),
-                workersModule
+                workersModule,
+                creationBlock,
+                appCID
             );
 
             currentId = _computeProvidersList.next(currentId);
@@ -320,7 +322,9 @@ contract Matcher is IMatcher, MatcherOwnable {
         uint maxCollateral,
         uint requiredCollateral,
         address deal,
-        IWorkersModule workersModule
+        IWorkersModule workersModule,
+        uint dealCreationBlock,
+        CIDV1 memory appCID
     ) internal {
         bytes32 hashOfPeerId = _computePeersListByProvider[computeProvider].first();
 
@@ -358,7 +362,15 @@ contract Matcher is IMatcher, MatcherOwnable {
 
             hashOfPeerId = _computePeersListByProvider[computeProvider].next(hashOfPeerId);
 
-            emit ComputePeerMatched(deal, peerId, receivedWorkersSlots);
+            PAT[] memory pats = workersModule.getPATs();
+            PATId[] memory patIds = new PATId[](pats.length);
+
+            uint patLength = pats.length;
+            for (uint i = 0; i < patLength; i++) {
+                patIds[i] = pats[i].id;
+            }
+
+            emit ComputePeerMatched(peerId, deal, patIds, dealCreationBlock, appCID);
         }
     }
 }

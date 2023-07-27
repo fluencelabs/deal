@@ -19,7 +19,7 @@ contract WorkersModuleState {
     using LinkedList for LinkedList.Bytes32List;
 
     struct OwnerInfo {
-        uint256 patsCount;
+        uint256 patCount;
         LinkedList.Bytes32List patsIds;
     }
 
@@ -37,7 +37,7 @@ contract WorkersModuleState {
     bytes32 internal constant _PAT_PREFIX = keccak256("fluence.pat");
 
     // ---- Storage ----
-    uint256 internal _patsCount;
+    uint256 internal _patCount;
 
     mapping(address => OwnerInfo) internal _ownersInfo;
     mapping(PATId => PAT) internal _patByPATId;
@@ -48,6 +48,7 @@ contract WorkersModuleState {
 }
 
 contract WorkersModuleInternal is WorkersModuleState, ModuleBase {
+    using LinkedList for LinkedList.Bytes32List;
     using WithdrawRequests for WithdrawRequests.Requests;
     using SafeERC20 for IERC20;
 
@@ -56,37 +57,38 @@ contract WorkersModuleInternal is WorkersModuleState, ModuleBase {
     }
 
     function _createPAT(Multihash calldata peerId, address owner, address collateralPayer) internal {
-        uint256 patsCountByOwner = _ownersInfo[owner].patsCount;
-        uint256 patsCount = _patsCount;
+        uint256 patCountByOwner = _ownersInfo[owner].patCount;
+        uint256 patCount = _patCount;
 
         ICore core = _core();
         IConfigModule config = core.configModule();
 
-        require(patsCount < config.targetWorkers(), "Target workers reached");
-        require(patsCountByOwner < config.maxWorkersPerProvider(), "Max workers per provider reached");
+        require(patCount < config.targetWorkers(), "Target workers reached");
+        require(patCountByOwner < config.maxWorkersPerProvider(), "Max workers per provider reached");
 
         uint256 requiredCollateral = config.requiredCollateral();
         config.fluenceToken().safeTransferFrom(collateralPayer, address(this), requiredCollateral);
 
-        patsCount++;
+        patCount++;
 
         IStatusModule statusController = core.statusModule();
 
         {
             DealStatus status = statusController.status();
-            if (status == DealStatus.WaitingForWorkers && patsCount >= config.minWorkers()) {
+            if (status == DealStatus.WaitingForWorkers && patCount >= config.minWorkers()) {
                 status = DealStatus.Working;
                 statusController.changeStatus(status);
             }
         }
 
         PATId id = PATId.wrap(
-            keccak256(abi.encodePacked(_PAT_PREFIX, owner, peerId.hashCode, peerId.length, peerId.value, patsCountByOwner))
+            keccak256(abi.encodePacked(_PAT_PREFIX, owner, peerId.hashCode, peerId.length, peerId.value, patCountByOwner))
         );
 
         require(_patByPATId[id].owner == address(0x00), "Id already used");
 
         _patByPATId[id] = PAT({
+            id: id,
             peerId: peerId,
             workerId: Multihash({ hashCode: 0, length: 0, value: bytes32(0) }),
             owner: owner,
@@ -94,8 +96,10 @@ contract WorkersModuleInternal is WorkersModuleState, ModuleBase {
             created: config.globalConfig().epochManager().currentEpoch()
         });
 
-        _ownersInfo[owner].patsCount = patsCountByOwner + 1;
-        _patsCount = patsCount;
+        _ownersInfo[owner].patCount = patCountByOwner + 1;
+        _patCount = patCount;
+
+        _patsIdsList.push(PATId.unwrap(id));
 
         emit PATCreated(id, owner);
     }
@@ -110,22 +114,24 @@ contract WorkersModule is WorkersModuleInternal, IWorkersModule {
         return _patByPATId[id];
     }
 
-    function patsCount() external view returns (uint256) {
-        return _patsCount;
+    function patCount() external view returns (uint256) {
+        return _patCount;
     }
 
     // only for reading from frontend
-    function getPATs() public view returns (address[] memory) {
-        address[] memory array = new address[](_patsCount);
+    function getPATs() public view returns (PAT[] memory) {
+        PAT[] memory pats = new PAT[](_patCount);
 
         uint256 index = 0;
         bytes32 patId = _patsIdsList.first();
         while (patId != bytes32(0)) {
-            array[index] = _patByPATId[PATId.wrap(patId)].owner;
+            pats[index] = _patByPATId[PATId.wrap(patId)];
             index++;
+
+            patId = _patsIdsList.next(patId);
         }
 
-        return array;
+        return pats;
     }
 
     function getUnlockedAmountBy(address owner, uint256 timestamp) external view returns (uint256) {
@@ -166,16 +172,18 @@ contract WorkersModule is WorkersModuleInternal, IWorkersModule {
 
         _createWithdrawRequest(owner, pat.collateral);
 
-        uint256 patsCount = _patsCount - 1;
+        uint256 newPatCount = _patCount - 1;
 
-        if (statusController.status() == DealStatus.Working && patsCount < config.minWorkers()) {
+        if (statusController.status() == DealStatus.Working && newPatCount < config.minWorkers()) {
             statusController.changeStatus(DealStatus.WaitingForWorkers);
         }
 
-        _ownersInfo[owner].patsCount--;
-        _patsCount = patsCount;
+        _ownersInfo[owner].patCount--;
+        _patCount = newPatCount;
 
         delete _patByPATId[id];
+
+        _patsIdsList.remove(PATId.unwrap(id));
 
         emit PATRemoved(id);
     }

@@ -5,6 +5,7 @@ pragma solidity ^0.8.17;
 import "../base/Types.sol";
 
 struct PAT {
+    PATId id;
     Multihash peerId;
     Multihash workerId;
     address owner;
@@ -13,7 +14,9 @@ struct PAT {
 }
 
 interface IWorkersModule {
-    function patsCount() external view returns (uint256);
+    function getPATs() external view returns (PAT[] memory);
+
+    function patCount() external view returns (uint256);
 
     function getPAT(PATId id) external view returns (PAT memory);
 
