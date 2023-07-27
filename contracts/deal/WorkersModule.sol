@@ -37,11 +37,12 @@ contract WorkersModuleState {
     bytes32 internal constant _PAT_PREFIX = keccak256("fluence.pat");
 
     // ---- Storage ----
-    uint256 internal _currentWorkers;
+    uint256 internal _patsCount;
 
-    LinkedList.Bytes32List _owners;
     mapping(address => OwnerInfo) internal _ownersInfo;
     mapping(PATId => PAT) internal _patByPATId;
+
+    LinkedList.Bytes32List _patsIdsList;
 
     mapping(address => WithdrawRequests.Requests) internal _requests;
 }
@@ -56,24 +57,24 @@ contract WorkersModuleInternal is WorkersModuleState, ModuleBase {
 
     function _createPAT(Multihash calldata peerId, address owner, address collateralPayer) internal {
         uint256 patsCountByOwner = _ownersInfo[owner].patsCount;
-        uint256 currentWorkers = _currentWorkers;
+        uint256 patsCount = _patsCount;
 
         ICore core = _core();
         IConfigModule config = core.configModule();
 
-        require(currentWorkers < config.targetWorkers(), "Target workers reached");
+        require(patsCount < config.targetWorkers(), "Target workers reached");
         require(patsCountByOwner < config.maxWorkersPerProvider(), "Max workers per provider reached");
 
         uint256 requiredCollateral = config.requiredCollateral();
         config.fluenceToken().safeTransferFrom(collateralPayer, address(this), requiredCollateral);
 
-        currentWorkers++;
+        patsCount++;
 
         IStatusModule statusController = core.statusModule();
 
         {
             DealStatus status = statusController.status();
-            if (status == DealStatus.WaitingForWorkers && currentWorkers >= config.minWorkers()) {
+            if (status == DealStatus.WaitingForWorkers && patsCount >= config.minWorkers()) {
                 status = DealStatus.Working;
                 statusController.changeStatus(status);
             }
@@ -94,28 +95,38 @@ contract WorkersModuleInternal is WorkersModuleState, ModuleBase {
         });
 
         _ownersInfo[owner].patsCount = patsCountByOwner + 1;
-        _currentWorkers = currentWorkers;
+        _patsCount = patsCount;
 
         emit PATCreated(id, owner);
     }
 }
 
 contract WorkersModule is WorkersModuleInternal, IWorkersModule {
+    using LinkedList for LinkedList.Bytes32List;
     using WithdrawRequests for WithdrawRequests.Requests;
     using SafeERC20 for IERC20;
-
-    function workersCount() external view returns (uint256) {
-        return _currentWorkers;
-    }
 
     function getPAT(PATId id) external view returns (PAT memory) {
         return _patByPATId[id];
     }
 
-    /*
-    function getWorkerIdByPATId(PATId id) external view returns (Multihash memory) {
-        return _pat[id].workerId;
-    }*/
+    function patsCount() external view returns (uint256) {
+        return _patsCount;
+    }
+
+    // only for reading from frontend
+    function getPATs() public view returns (address[] memory) {
+        address[] memory array = new address[](_patsCount);
+
+        uint256 index = 0;
+        bytes32 patId = _patsIdsList.first();
+        while (patId != bytes32(0)) {
+            array[index] = _patByPATId[PATId.wrap(patId)].owner;
+            index++;
+        }
+
+        return array;
+    }
 
     function getUnlockedAmountBy(address owner, uint256 timestamp) external view returns (uint256) {
         IGlobalConfig globalConfig = _core().configModule().globalConfig();
@@ -155,14 +166,14 @@ contract WorkersModule is WorkersModuleInternal, IWorkersModule {
 
         _createWithdrawRequest(owner, pat.collateral);
 
-        uint256 currentWorkers = _currentWorkers - 1;
+        uint256 patsCount = _patsCount - 1;
 
-        if (statusController.status() == DealStatus.Working && currentWorkers < config.minWorkers()) {
+        if (statusController.status() == DealStatus.Working && patsCount < config.minWorkers()) {
             statusController.changeStatus(DealStatus.WaitingForWorkers);
         }
 
         _ownersInfo[owner].patsCount--;
-        _currentWorkers = currentWorkers;
+        _patsCount = patsCount;
 
         delete _patByPATId[id];
 

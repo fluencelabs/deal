@@ -13,7 +13,7 @@ struct PAT {
 }
 
 interface IWorkersModule {
-    function workersCount() external view returns (uint256);
+    function patsCount() external view returns (uint256);
 
     function getPAT(PATId id) external view returns (PAT memory);
 

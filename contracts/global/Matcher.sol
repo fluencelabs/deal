@@ -28,7 +28,9 @@ contract MatcherState {
 
     // --- Events ---
 
-    event Matched(address indexed computeProvider, address deal, uint dealCreationBlock, CIDV1 appCID);
+    event ComputeProviderMatched(address indexed computeProvider, address deal, uint dealCreationBlock, CIDV1 appCID);
+
+    event ComputePeerMatched(address deal, Multihash peerId, uint reservedWorkersSlots);
 
     event ComputeProviderRegistered(
         address computeProvider,
@@ -277,7 +279,7 @@ contract Matcher is IMatcher, MatcherOwnable {
         CIDV1 memory appCID = config.appCID();
 
         IWorkersModule workersModule = deal.workersModule();
-        uint freeWorkerSlotsInDeal = config.targetWorkers() - workersModule.workersCount();
+        uint freeWorkerSlotsInDeal = config.targetWorkers() - workersModule.patsCount();
 
         bytes32 currentId = _computeProvidersList.first();
         while (currentId != bytes32(0x00) && freeWorkerSlotsInDeal > 0) {
@@ -301,12 +303,13 @@ contract Matcher is IMatcher, MatcherOwnable {
                 freeWorkerSlotsInDeal,
                 maxCollateral,
                 requiredCollateral,
+                address(deal),
                 workersModule
             );
 
             currentId = _computeProvidersList.next(currentId);
 
-            emit Matched(computeProviderAddress, address(deal), creationBlock, appCID);
+            emit ComputeProviderMatched(computeProviderAddress, address(deal), creationBlock, appCID);
         }
     }
 
@@ -316,6 +319,7 @@ contract Matcher is IMatcher, MatcherOwnable {
         uint freeWorkerSlotsInDeal,
         uint maxCollateral,
         uint requiredCollateral,
+        address deal,
         IWorkersModule workersModule
     ) internal {
         bytes32 hashOfPeerId = _computePeersListByProvider[computeProvider].first();
@@ -324,35 +328,37 @@ contract Matcher is IMatcher, MatcherOwnable {
             Multihash memory peerId = computePeerByPeerIdHash[hashOfPeerId].peerId;
             uint freeWorkerSlots = computePeerByPeerIdHash[hashOfPeerId].freeWorkerSlots;
 
-            uint busyWorkersSlots;
+            uint receivedWorkersSlots;
             if (maxWorkersPerProvider > freeWorkerSlots) {
-                busyWorkersSlots = freeWorkerSlots;
+                receivedWorkersSlots = freeWorkerSlots;
             } else {
-                busyWorkersSlots = maxWorkersPerProvider;
+                receivedWorkersSlots = maxWorkersPerProvider;
             }
 
-            if (busyWorkersSlots > freeWorkerSlotsInDeal) {
-                busyWorkersSlots = freeWorkerSlotsInDeal;
+            if (receivedWorkersSlots > freeWorkerSlotsInDeal) {
+                receivedWorkersSlots = freeWorkerSlotsInDeal;
             }
 
-            if (busyWorkersSlots == freeWorkerSlots) {
+            if (receivedWorkersSlots == freeWorkerSlots) {
                 delete computePeerByPeerIdHash[hashOfPeerId];
                 _computePeersListByProvider[computeProvider].remove(hashOfPeerId);
             } else {
-                computePeerByPeerIdHash[hashOfPeerId].freeWorkerSlots = freeWorkerSlots - busyWorkersSlots;
+                computePeerByPeerIdHash[hashOfPeerId].freeWorkerSlots = freeWorkerSlots - receivedWorkersSlots;
             }
 
-            globalConfig.fluenceToken().approve(address(workersModule), requiredCollateral * busyWorkersSlots);
-            for (uint j = 0; j < busyWorkersSlots; j++) {
+            globalConfig.fluenceToken().approve(address(workersModule), requiredCollateral * receivedWorkersSlots);
+            for (uint j = 0; j < receivedWorkersSlots; j++) {
                 workersModule.createPAT(computeProvider, peerId);
             }
 
             uint refoundByWorker = maxCollateral - requiredCollateral;
             if (refoundByWorker > 0) {
-                globalConfig.fluenceToken().transfer(computeProvider, refoundByWorker * busyWorkersSlots);
+                globalConfig.fluenceToken().transfer(computeProvider, refoundByWorker * receivedWorkersSlots);
             }
 
             hashOfPeerId = _computePeersListByProvider[computeProvider].next(hashOfPeerId);
+
+            emit ComputePeerMatched(deal, peerId, receivedWorkersSlots);
         }
     }
 }

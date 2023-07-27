@@ -24,6 +24,12 @@ describe("Factory", () => {
     let matcher: Matcher;
     let deal: Deal;
 
+    const peerId = {
+        hashCode: "0x00",
+        length: "0x20",
+        value: ethers.hexlify(ethers.randomBytes(32)),
+    };
+
     before(async () => {
         await deployments.fixture(["common", "localnet"]);
 
@@ -123,11 +129,7 @@ describe("Factory", () => {
         const configModule = await deal.getConfigModule();
         const maxCollateral = await configModule.requiredCollateral();
         const workersCount = 2n;
-        const peerId = {
-            hashCode: "0x00",
-            length: "0x20",
-            value: ethers.hexlify(ethers.randomBytes(32)),
-        };
+
         const totalCollateral = maxCollateral * workersCount;
 
         const flt = IERC20__factory.connect(await faucet.fluenceToken(), await ethers.provider.getSigner());
@@ -153,7 +155,7 @@ describe("Factory", () => {
         expect(await matcher.getFreeWorkersSolts(await computeProvider.getAddress(), peerId)).to.be.equal(workersCount);
     });
 
-    it("match", async () => {
+    it("match and set workers", async () => {
         const computeProvider = await (await ethers.provider.getSigner(1)).getAddress();
         const dealAddress = await (await deal.getCore()).getAddress();
         const workersModule = await deal.getWorkersModule();
@@ -161,26 +163,87 @@ describe("Factory", () => {
         const tx = await matcher.matchWithDeal(dealAddress);
         const res = await tx.wait();
 
-        for (const log of res.logs) {
-            if (log.topics[0] == matcher.interface.getEvent("Matched").topicHash) {
-                return;
-            }
-        }
-
-        const eventTopic = workersModule.interface.getEvent("PATCreated").topicHash;
-
-        let patCount = 0;
-        for (const log of res.logs) {
-            if (log.topics[0] === eventTopic) {
-                const parsetLog = workersModule.interface.parseLog({
+        const computeProviderMatchedEvent = matcher.interface.getEvent("ComputeProviderMatched").topicHash;
+        const computeProviders = res!.logs
+            .filter((x) => x.topics[0] == computeProviderMatchedEvent)
+            .map((log) => {
+                const args = matcher.interface.parseLog({
                     data: log.data,
                     topics: [...log.topics],
-                });
-                expect(parsetLog.args.owner).to.be.equal(computeProvider);
-                patCount++;
-            }
-        }
+                }).args;
 
-        expect(patCount).to.be.equal(2);
+                return {
+                    computeProvider: args[0],
+                    deal: args[1],
+                    dealCreationBlock: args[2],
+                    appCID: args[3],
+                };
+            });
+
+        const computePeerMatchedEvent = matcher.interface.getEvent("ComputePeerMatched").topicHash;
+        const computePeers = res!.logs
+            .filter((x) => x.topics[0] == computePeerMatchedEvent)
+            .map((log) => {
+                const args = matcher.interface.parseLog({
+                    data: log.data,
+                    topics: [...log.topics],
+                }).args;
+
+                return {
+                    deal: args[0],
+                    peerId: args[1],
+                    reservedWorkersSlots: args[2],
+                };
+            });
+
+        const patCreatedEvent = workersModule.interface.getEvent("PATCreated").topicHash;
+        const pats = res!.logs
+            .filter((x) => x.topics[0] == patCreatedEvent)
+            .map((log) => {
+                const args = workersModule.interface.parseLog({
+                    data: log.data,
+                    topics: [...log.topics],
+                }).args;
+
+                return {
+                    id: args[0],
+                    owner: args[1],
+                };
+            });
+
+        expect(computeProviders.length).to.be.equal(1);
+        expect(computeProviders[0].computeProvider).to.be.equal(computeProvider);
+        expect(computeProviders[0].deal).to.be.equal(dealAddress);
+        expect(computePeers.length).to.be.equal(1);
+        expect(computePeers[0].deal).to.be.equal(dealAddress);
+        expect(computePeers[0].reservedWorkersSlots).to.be.equal(2n);
+        expect(pats.length).to.be.equal(2);
+
+        for (const pat of pats) {
+            const workerId = {
+                hashCode: "0x00",
+                length: "0x20",
+                value: ethers.hexlify(ethers.randomBytes(32)),
+            };
+
+            const res = await (await workersModule.setWorker(pat.id, workerId)).wait();
+
+            const workerRegistredEvent = workersModule.interface.getEvent("WorkerRegistred").topicHash;
+            const workerRegistredLog = res!.logs.find((x) => x.topics[0] == workerRegistredEvent);
+            const args = workersModule.interface.parseLog({
+                data: workerRegistredLog.data,
+                topics: [...workerRegistredLog.topics],
+            }).args;
+
+            const workerRegistred = {
+                id: args[0],
+                workerId: args[1],
+            };
+
+            expect(workerRegistred.id).to.be.equal(pat.id);
+            expect(workerRegistred.workerId[0]).to.be.equal(workerId.hashCode);
+            expect(workerRegistred.workerId[1]).to.be.equal(workerId.length);
+            expect(workerRegistred.workerId[2]).to.be.equal(workerId.value);
+        }
     });
 });
