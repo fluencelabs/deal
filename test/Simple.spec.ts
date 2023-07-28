@@ -153,6 +153,12 @@ describe("Factory", () => {
         const tx = await matcher.matchWithDeal(dealAddress);
         const res = await tx.wait();
 
+        for (const log of res.logs) {
+            if (log.topics[0] == matcher.interface.getEvent("Matched").topicHash) {
+                console.log(log);
+            }
+        }
+
         const eventTopic = workersModule.interface.getEvent("PATCreated").topicHash;
 
         let patCount = 0;
