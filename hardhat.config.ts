@@ -35,6 +35,9 @@ const config: HardhatUserConfig = {
     gasReporter: {
         enabled: true,
     },
+    paths: {
+        deployments: "src/deployments",
+    },
     typechain: {
         outDir: "src/typechain-types",
     },
