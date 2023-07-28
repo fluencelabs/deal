@@ -1,13 +1,13 @@
 import type { ethers } from "ethers";
 import { GlobalContracts } from "./global";
 import { Deal } from "./deal";
-import type { ChainNetwork } from "./config";
+import type { ContractsENV } from "./config";
 
 export class DealClient {
     private globalContracts: GlobalContracts;
 
-    constructor(private signer: ethers.Signer, private network: ChainNetwork) {
-        this.globalContracts = new GlobalContracts(this.signer, this.network);
+    constructor(private signer: ethers.Signer, private env: ContractsENV) {
+        this.globalContracts = new GlobalContracts(this.signer, this.env);
     }
 
     getDeal(address: string): Deal {

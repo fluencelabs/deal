@@ -1,7 +1,6 @@
 import type { HardhatRuntimeEnvironment } from "hardhat/types";
-import { DeveloperFaucet__factory, GlobalConfig__factory } from "../src/typechain-types";
+import { GlobalConfig__factory } from "../src/typechain-types";
 import { ethers } from "hardhat";
-import { writeFileSync } from "fs";
 
 const WITHDRAWAL_PERIOD = 60;
 const EPOCH_DURATION = 60;
@@ -10,12 +9,8 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
     const accounts = await hre.getUnnamedAccounts();
     const deployer = accounts[0]!;
 
-    const developerFaucetDeploy = await hre.deployments.get("Faucet");
-
-    const developerFaucet = DeveloperFaucet__factory.connect(developerFaucetDeploy.address, await hre.ethers.getSigner(deployer));
-
-    const fluenceToken = await developerFaucet.fluenceToken();
-    const usdToken = await developerFaucet.usdToken();
+    const fluenceToken = (await hre.deployments.get("FLT")).address;
+    const usdToken = (await hre.deployments.get("TestUSD")).address;
 
     console.log("Fluence token address: ", fluenceToken);
     console.log("USD token address: ", usdToken);
@@ -151,8 +146,10 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
 
     const globalConfigContract = GlobalConfig__factory.connect(globalConfig.address, await ethers.getSigner(deployer));
 
-    await (await globalConfigContract.setFactory(factory.address)).wait();
-    await (await globalConfigContract.setMatcher(matcher.address)).wait();
+    if (globalConfig.newlyDeployed) {
+        await (await globalConfigContract.setFactory(factory.address)).wait();
+        await (await globalConfigContract.setMatcher(matcher.address)).wait();
+    }
 };
 
 module.exports.dependencies = ["Faucet"];
