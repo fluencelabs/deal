@@ -1,14 +1,5 @@
 import { expect } from "chai";
-import {
-    DealClient,
-    DealFactory,
-    DealFactory__factory,
-    DeveloperFaucet,
-    DeveloperFaucet__factory,
-    IERC20__factory,
-    Matcher,
-    Matcher__factory,
-} from "../src/index";
+import { DealClient, DealFactory, DealFactory__factory, IERC20, IERC20__factory, Matcher, Matcher__factory } from "../src/index";
 import { deployments, ethers } from "hardhat";
 import { Deal } from "../src/client/deal";
 import { ethers } from "ethers";
@@ -19,19 +10,19 @@ describe("Factory", () => {
         hash: ethers.randomBytes(32),
     }));
 
-    let faucet: DeveloperFaucet;
     let factory: DealFactory;
+    let flt: IERC20;
     let matcher: Matcher;
     let deal: Deal;
 
     const peerId = ethers.hexlify(ethers.randomBytes(32));
 
     before(async () => {
-        await deployments.fixture(["common", "localnet"]);
+        await deployments.fixture(["tokens", "common", "localnet"]);
 
         const signer = await ethers.provider.getSigner();
         factory = DealFactory__factory.connect((await deployments.get("Factory")).address, signer);
-        faucet = DeveloperFaucet__factory.connect((await deployments.get("Faucet")).address, signer);
+        flt = IERC20__factory.connect((await deployments.get("FLT")).address, signer);
         matcher = Matcher__factory.connect((await deployments.get("Matcher")).address, signer);
     });
 
@@ -93,7 +84,7 @@ describe("Factory", () => {
         const pricePerEpoch = await factory.PRICE_PER_EPOCH();
         const configModule = await deal.getConfigModule();
         const maxCollateral = await configModule.requiredCollateral();
-        const fltAddress = await faucet.fluenceToken();
+        const fltAddress = await flt.getAddress();
 
         await (await matcher.connect(owner).setWhiteList(await computeProvider.getAddress(), true)).wait();
 
@@ -126,8 +117,6 @@ describe("Factory", () => {
         const workersCount = 2n;
 
         const totalCollateral = maxCollateral * workersCount;
-
-        const flt = IERC20__factory.connect(await faucet.fluenceToken(), await ethers.provider.getSigner());
 
         // await (await matcher.connect(owner).setWhiteList(await computeProvider.getAddress(), true)).wait();
         await (await flt.connect(computeProvider).approve(await matcher.getAddress(), totalCollateral)).wait();
