@@ -20,7 +20,6 @@ contract MatcherState {
     }
 
     struct ComputePeer {
-        bytes32 peerId;
         uint freeWorkerSlots;
     }
 
@@ -45,7 +44,7 @@ contract MatcherState {
     // --- Compute Providers ---
 
     mapping(address => ComputeProvider) public computeProviderByOwner;
-    mapping(bytes32 => ComputePeer) public computePeerByPeerIdHash;
+    mapping(bytes32 => ComputePeer) public computePeerByPeerId;
 
     LinkedList.Bytes32List internal _computeProvidersList;
     mapping(address => LinkedList.Bytes32List) internal _computePeersListByProvider;
@@ -105,7 +104,7 @@ contract Matcher is IMatcher, MatcherOwnable {
     constructor(IGlobalConfig globalConfig_) MatcherState(globalConfig_) {}
 
     function getFreeWorkersSolts(address computeProvider, bytes32 peerId) external view returns (uint) {
-        return computePeerByPeerIdHash[peerId].freeWorkerSlots;
+        return computePeerByPeerId[peerId].freeWorkerSlots;
     }
 
     function registerComputeProvider(uint minPricePerEpoch, uint maxCollateral, IERC20 paymentToken, CIDV1[] calldata effectors) external {
@@ -140,8 +139,8 @@ contract Matcher is IMatcher, MatcherOwnable {
 
         require(workerSlots > 0, "Worker slots should be greater than 0");
 
-        uint256 freeWorkerSlots = computePeerByPeerIdHash[peerId].freeWorkerSlots + workerSlots;
-        computePeerByPeerIdHash[peerId].freeWorkerSlots = freeWorkerSlots;
+        uint256 freeWorkerSlots = computePeerByPeerId[peerId].freeWorkerSlots + workerSlots;
+        computePeerByPeerId[peerId].freeWorkerSlots = freeWorkerSlots;
 
         if (freeWorkerSlots == workerSlots) {
             _computePeersListByProvider[owner].push(peerId);
@@ -156,8 +155,8 @@ contract Matcher is IMatcher, MatcherOwnable {
     function subWorkersSlots(bytes32 peerId, uint workerSlots) external {
         address owner = msg.sender;
 
-        uint256 freeWorkerSlots = computePeerByPeerIdHash[peerId].freeWorkerSlots - workerSlots;
-        computePeerByPeerIdHash[peerId].freeWorkerSlots = freeWorkerSlots;
+        uint256 freeWorkerSlots = computePeerByPeerId[peerId].freeWorkerSlots - workerSlots;
+        computePeerByPeerId[peerId].freeWorkerSlots = freeWorkerSlots;
 
         if (freeWorkerSlots == 0) {
             _computePeersListByProvider[owner].remove(peerId);
@@ -322,11 +321,10 @@ contract Matcher is IMatcher, MatcherOwnable {
         uint dealCreationBlock,
         CIDV1 memory appCID
     ) internal {
-        bytes32 hashOfPeerId = _computePeersListByProvider[computeProvider].first();
+        bytes32 peerId = _computePeersListByProvider[computeProvider].first();
 
-        while (hashOfPeerId != bytes32(0x00)) {
-            bytes32 peerId = computePeerByPeerIdHash[hashOfPeerId].peerId;
-            uint freeWorkerSlots = computePeerByPeerIdHash[hashOfPeerId].freeWorkerSlots;
+        while (peerId != bytes32(0x00)) {
+            uint freeWorkerSlots = computePeerByPeerId[peerId].freeWorkerSlots;
 
             uint receivedWorkersSlots;
             if (maxWorkersPerProvider > freeWorkerSlots) {
@@ -340,10 +338,10 @@ contract Matcher is IMatcher, MatcherOwnable {
             }
 
             if (receivedWorkersSlots == freeWorkerSlots) {
-                delete computePeerByPeerIdHash[hashOfPeerId];
-                _computePeersListByProvider[computeProvider].remove(hashOfPeerId);
+                delete computePeerByPeerId[peerId];
+                _computePeersListByProvider[computeProvider].remove(peerId);
             } else {
-                computePeerByPeerIdHash[hashOfPeerId].freeWorkerSlots = freeWorkerSlots - receivedWorkersSlots;
+                computePeerByPeerId[peerId].freeWorkerSlots = freeWorkerSlots - receivedWorkersSlots;
             }
 
             globalConfig.fluenceToken().approve(address(workersModule), requiredCollateral * receivedWorkersSlots);
@@ -356,8 +354,6 @@ contract Matcher is IMatcher, MatcherOwnable {
                 globalConfig.fluenceToken().transfer(computeProvider, refoundByWorker * receivedWorkersSlots);
             }
 
-            hashOfPeerId = _computePeersListByProvider[computeProvider].next(hashOfPeerId);
-
             PAT[] memory pats = workersModule.getPATs();
             bytes32[] memory patIds = new bytes32[](pats.length);
 
@@ -367,6 +363,8 @@ contract Matcher is IMatcher, MatcherOwnable {
             }
 
             emit ComputePeerMatched(peerId, deal, patIds, dealCreationBlock, appCID);
+
+            peerId = _computePeersListByProvider[computeProvider].next(peerId);
         }
     }
 }

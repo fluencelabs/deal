@@ -199,6 +199,7 @@ describe("Factory", () => {
         expect(computeProviders[0].computeProvider).to.be.equal(computeProvider);
         expect(computeProviders[0].deal).to.be.equal(dealAddress);
         expect(computePeers.length).to.be.equal(1);
+        expect(computePeers[0].peerId).to.be.equal(peerId);
         expect(computePeers[0].deal).to.be.equal(dealAddress);
         expect(computePeers[0].patIds.length).to.be.equal(2n);
         expect(pats.length).to.be.equal(2);
@@ -209,6 +210,7 @@ describe("Factory", () => {
             expectedPatIds[patId] = true;
         });
         pats.map((pat) => {
+            expect(pat.id).to.not.equal(ethers.AddressZero);
             expect(expectedPatIds[pat.id]).to.be.equal(true);
         });
 
