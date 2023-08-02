@@ -18,10 +18,15 @@ import "./base/Types.sol";
 contract WorkersModuleState {
     using LinkedList for LinkedList.Bytes32List;
 
+    // ---- Structs ----
+
     struct OwnerInfo {
         uint256 patCount;
         LinkedList.Bytes32List patsIds;
     }
+
+    // ---- Constants ----
+    bytes32 internal constant _PAT_PREFIX = keccak256("fluence.pat");
 
     // ---- Events ----
     event PATCreated(bytes32 id, address owner);
@@ -32,98 +37,39 @@ contract WorkersModuleState {
 
     event CollateralWithdrawn(address owner, uint256 amount);
 
-    // ---- Constants ----
-
-    bytes32 internal constant _PAT_PREFIX = keccak256("fluence.pat");
-
     // ---- Storage ----
     uint256 internal _patCount;
 
     mapping(address => OwnerInfo) internal _ownersInfo;
-    mapping(bytes32 => PAT) internal _patByPATId;
+    mapping(bytes32 => PAT) internal _patById;
 
     LinkedList.Bytes32List _patsIdsList;
 
-    mapping(address => WithdrawRequests.Requests) internal _requests;
+    mapping(address => WithdrawRequests.Requests) internal _withdrawRequests;
 }
 
-contract WorkersModuleInternal is WorkersModuleState, ModuleBase {
+contract WorkersModule is WorkersModuleState, ModuleBase, IWorkersModule {
     using LinkedList for LinkedList.Bytes32List;
     using WithdrawRequests for WithdrawRequests.Requests;
     using SafeERC20 for IERC20;
 
-    function _createWithdrawRequest(address owner, uint256 amount) internal {
-        _requests[owner].push(amount);
-    }
-
-    function _createPAT(bytes32 peerId, address owner, address collateralPayer) internal {
-        uint256 patCountByOwner = _ownersInfo[owner].patCount;
-        uint256 patCount = _patCount;
-
-        ICore core = _core();
-        IConfigModule config = core.configModule();
-
-        require(patCount < config.targetWorkers(), "Target workers reached");
-        require(patCountByOwner < config.maxWorkersPerProvider(), "Max workers per provider reached");
-
-        uint256 requiredCollateral = config.requiredCollateral();
-        config.fluenceToken().safeTransferFrom(collateralPayer, address(this), requiredCollateral);
-
-        patCount++;
-
-        IStatusModule statusController = core.statusModule();
-
-        {
-            DealStatus status = statusController.status();
-            if (status == DealStatus.WaitingForWorkers && patCount >= config.minWorkers()) {
-                status = DealStatus.Working;
-                statusController.changeStatus(status);
-            }
-        }
-
-        bytes32 id = keccak256(abi.encodePacked(_PAT_PREFIX, owner, peerId, patCountByOwner));
-
-        require(_patByPATId[id].owner == address(0x00), "Id already used");
-
-        _patByPATId[id] = PAT({
-            id: id,
-            peerId: peerId,
-            workerId: bytes32(0),
-            owner: owner,
-            collateral: requiredCollateral,
-            created: config.globalConfig().epochManager().currentEpoch()
-        });
-
-        _ownersInfo[owner].patCount = patCountByOwner + 1;
-        _patCount = patCount;
-
-        _patsIdsList.push(id);
-
-        emit PATCreated(id, owner);
-    }
-}
-
-contract WorkersModule is WorkersModuleInternal, IWorkersModule {
-    using LinkedList for LinkedList.Bytes32List;
-    using WithdrawRequests for WithdrawRequests.Requests;
-    using SafeERC20 for IERC20;
+    // ---- Public view ----
 
     function getPAT(bytes32 id) external view returns (PAT memory) {
-        return _patByPATId[id];
+        return _patById[id];
     }
 
-    function patCount() external view returns (uint256) {
+    function getPATCount() external view returns (uint256) {
         return _patCount;
     }
 
-    // only for reading from frontend
     function getPATs() public view returns (PAT[] memory) {
         PAT[] memory pats = new PAT[](_patCount);
 
         uint256 index = 0;
         bytes32 patId = _patsIdsList.first();
         while (patId != bytes32(0)) {
-            pats[index] = _patByPATId[patId];
+            pats[index] = _patById[patId];
             index++;
 
             patId = _patsIdsList.next(patId);
@@ -134,19 +80,59 @@ contract WorkersModule is WorkersModuleInternal, IWorkersModule {
 
     function getUnlockedAmountBy(address owner, uint256 timestamp) external view returns (uint256) {
         IGlobalConfig globalConfig = _core().configModule().globalConfig();
-        return _requests[owner].getAmountBy(timestamp - globalConfig.withdrawTimeout());
+        return _withdrawRequests[owner].getAmountBy(timestamp - globalConfig.withdrawTimeout());
     }
 
     // ---- Public mutables ----
-
     function createPAT(address computeProvider, bytes32 peerId) external {
-        require(address(_core().configModule().globalConfig().matcher()) == msg.sender, "Only matcher can call this method");
+        ICore core = _core();
 
-        _createPAT(peerId, computeProvider, msg.sender);
+        // check params and limits
+        IConfigModule config = core.configModule();
+
+        uint256 globalPATCount = _patCount;
+        require(globalPATCount < config.targetWorkers(), "Target workers reached");
+
+        uint256 patCountByOwner = _ownersInfo[computeProvider].patCount;
+        require(patCountByOwner < config.maxWorkersPerProvider(), "Max workers per provider reached");
+
+        // transfer collateral
+        uint256 requiredCollateral = config.requiredCollateral();
+        config.fluenceToken().safeTransferFrom(msg.sender, address(this), requiredCollateral);
+
+        // create PAT
+        bytes32 id = keccak256(abi.encodePacked(_PAT_PREFIX, computeProvider, peerId, patCountByOwner));
+        require(_patById[id].owner == address(0x00), "Id already used");
+
+        _patById[id] = PAT({
+            id: id,
+            peerId: peerId,
+            workerId: bytes32(0),
+            owner: computeProvider,
+            collateral: requiredCollateral,
+            created: block.number
+        });
+
+        _ownersInfo[computeProvider].patCount = ++patCountByOwner;
+        _patCount = ++globalPATCount;
+
+        _patsIdsList.push(id);
+
+        // change status
+        IStatusModule statusController = core.statusModule();
+        {
+            DealStatus status = statusController.status();
+            if (status == DealStatus.WaitingForWorkers && globalPATCount >= config.minWorkers()) {
+                status = DealStatus.Working;
+                statusController.changeStatus(status);
+            }
+        }
+
+        emit PATCreated(id, computeProvider);
     }
 
     function setWorker(bytes32 patId, bytes32 workerId) external {
-        PAT storage pat = _patByPATId[patId];
+        PAT storage pat = _patById[patId];
 
         if (pat.workerId != bytes32(0)) {
             emit WorkerUnregistred(patId);
@@ -158,29 +144,23 @@ contract WorkersModule is WorkersModuleInternal, IWorkersModule {
     }
 
     function exit(bytes32 patId) external {
-        PAT storage pat = _patByPATId[patId];
-        address owner = pat.owner;
-
+        address owner = _patById[patId].owner;
         require(owner == msg.sender, "PAT doesn't exist");
+
+        _withdrawRequests[owner].push(_patById[patId].collateral);
+
+        uint256 newPatCount = _patCount - 1;
+        _ownersInfo[owner].patCount--;
+        _patCount = newPatCount;
 
         ICore core = _core();
         IConfigModule config = core.configModule();
-
         IStatusModule statusController = core.statusModule();
-
-        _createWithdrawRequest(owner, pat.collateral);
-
-        uint256 newPatCount = _patCount - 1;
-
         if (statusController.status() == DealStatus.Working && newPatCount < config.minWorkers()) {
             statusController.changeStatus(DealStatus.WaitingForWorkers);
         }
 
-        _ownersInfo[owner].patCount--;
-        _patCount = newPatCount;
-
-        delete _patByPATId[patId];
-
+        delete _patById[patId];
         _patsIdsList.remove(patId);
 
         emit PATRemoved(patId);
@@ -189,7 +169,7 @@ contract WorkersModule is WorkersModuleInternal, IWorkersModule {
     function withdrawCollateral(address owner) external {
         IGlobalConfig globalConfig = _core().configModule().globalConfig();
 
-        uint256 amount = _requests[owner].confirmBy(block.timestamp - globalConfig.withdrawTimeout());
+        uint256 amount = _withdrawRequests[owner].confirmBy(block.timestamp - globalConfig.withdrawTimeout());
 
         globalConfig.fluenceToken().safeTransfer(owner, amount);
 

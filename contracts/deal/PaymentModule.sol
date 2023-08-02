@@ -12,15 +12,24 @@ import "./base/Types.sol";
 import "./base/ModuleBase.sol";
 
 contract PaymentModuleState {
-    struct ParticleInfo {
+    // ----------------- Types -----------------
+    struct Particle {
+        string air;
+        string prevData;
+        string params;
+        string callResults;
+    }
+
+    struct ParticleResult {
         bool isValid;
         uint256 epoch;
         uint256 worketsCount;
         uint reward;
     }
 
-    uint256 internal _balance;
-    uint256 internal _locked;
+    // ----------------- Internal Vars -----------------
+    uint256 internal _totalBalance;
+    uint256 internal _lockedBalance;
 
     mapping(uint => uint) internal _goldenParticlesCountByEpoch;
     mapping(bytes32 => ParticleInfo) internal _particles;
@@ -29,7 +38,7 @@ contract PaymentModuleState {
 }
 
 contract PaymentModuleInternal is ModuleBase, PaymentModuleState {
-    function _hasWorkerInEpoch(uint epoch, bytes32 id) internal view returns (bool) {
+    function _hasWorkerInEpoch(uint epoch, bytes32 workerId) internal view returns (bool) {
         IWorkersModule workers = _core().workersModule();
 
         uint index = 0; //TODO: fix

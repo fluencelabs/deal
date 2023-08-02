@@ -17,6 +17,47 @@ import "./interfaces/IFactory.sol";
 import "../deal/base/ModuleProxy.sol";
 
 abstract contract DealFactoryState is IFactory {
+    // ----------------- Types -----------------
+    struct Deal {
+        ICore core;
+        IConfigModule configModule;
+        IPaymentModule paymentModule;
+        IStatusModule statusModule;
+        IWorkersModule workersModule;
+    }
+
+    // ----------------- Events -----------------
+    event DealCreated(
+        Deal deal,
+        address paymentToken,
+        uint256 pricePerEpoch,
+        uint256 requiredCollateral,
+        uint256 minWorkers,
+        uint256 maxWorkersPerProvider,
+        uint256 targetWorkers,
+        CIDV1 appCID,
+        CIDV1[] effectorWasmsCids,
+        uint256 epoch
+    );
+
+    // ----------------- Constants -----------------
+    uint256 public constant PRICE_PER_EPOCH = 83 * 10 ** 15;
+    uint256 public constant REQUIRED_COLLATERAL = 1 * 10 ** 18;
+    uint256 public constant MAX_WORKERS_PER_PROVIDER = 10000000;
+
+    // ----------------- Immutables -----------------
+    IGlobalConfig public immutable globalConfig;
+    IERC20 public immutable defaultPaymentToken;
+
+    ICore public immutable coreImpl;
+    IConfigModule public immutable configImpl;
+    IPaymentModule public immutable paymentImpl;
+    IStatusModule public immutable statusImpl;
+    IWorkersModule public immutable workersImpl;
+
+    // ----------------- Vars -----------------
+    mapping(address => bool) public isDeal;
+
     constructor(
         IGlobalConfig globalConfig_,
         IERC20 defaultPaymentToken_,
@@ -35,44 +76,13 @@ abstract contract DealFactoryState is IFactory {
         statusImpl = statusImpl_;
         workersImpl = workersImpl_;
     }
-
-    uint256 public constant PRICE_PER_EPOCH = 83 * 10 ** 15;
-    uint256 public constant REQUIRED_COLLATERAL = 1 * 10 ** 18;
-    uint256 public constant MAX_WORKERS_PER_PROVIDER = 10000000;
-
-    IGlobalConfig public immutable globalConfig;
-    IERC20 public immutable defaultPaymentToken;
-
-    ICore public immutable coreImpl;
-    IConfigModule public immutable configImpl;
-    IPaymentModule public immutable paymentImpl;
-    IStatusModule public immutable statusImpl;
-    IWorkersModule public immutable workersImpl;
-
-    mapping(address => bool) public isDeal;
 }
 
 contract DealFactory is DealFactoryState, UUPSUpgradeable {
-    struct Deal {
-        ICore core;
-        IConfigModule configModule;
-        IPaymentModule paymentModule;
-        IStatusModule statusModule;
-        IWorkersModule workersModule;
+    modifier onlyOwner() {
+        require(msg.sender == globalConfig.owner(), "Only owner can call this function");
+        _;
     }
-
-    event DealCreated(
-        Deal deal,
-        address paymentToken,
-        uint256 pricePerEpoch,
-        uint256 requiredCollateral,
-        uint256 minWorkers,
-        uint256 maxWorkersPerProvider,
-        uint256 targetWorkers,
-        CIDV1 appCID,
-        CIDV1[] effectorWasmsCids,
-        uint256 epoch
-    );
 
     constructor(
         IGlobalConfig globalConfig_,
@@ -86,45 +96,18 @@ contract DealFactory is DealFactoryState, UUPSUpgradeable {
         _disableInitializers();
     }
 
-    modifier onlyOwner() {
-        require(msg.sender == globalConfig.owner(), "Only owner can call this function");
-        _;
-    }
-
+    // ----------------- Mutables -----------------
     function createDeal(
         uint256 minWorkers_,
         uint256 targetWorkers_,
         CIDV1 calldata appCID_,
         CIDV1[] calldata effectors
     ) external returns (address) {
-        Deal memory deal = _deployDeal(minWorkers_, targetWorkers_, appCID_, effectors);
+        Deal memory deal;
 
-        emit DealCreated(
-            deal,
-            address(defaultPaymentToken),
-            PRICE_PER_EPOCH,
-            REQUIRED_COLLATERAL,
-            minWorkers_,
-            MAX_WORKERS_PER_PROVIDER,
-            targetWorkers_,
-            appCID_,
-            effectors,
-            deal.configModule.globalConfig().epochManager().currentEpoch()
-        );
-
-        isDeal[address(deal.core)] = true;
-
-        return address(deal.core);
-    }
-
-    function _deployDeal(
-        uint256 minWorkers_,
-        uint256 targetWorkers_,
-        CIDV1 calldata appCID_,
-        CIDV1[] calldata effectorWasmsCids_
-    ) private returns (Deal memory deal) {
         bytes memory emptyBytes;
 
+        // Create deal system
         ICore core = ICore(address(new ERC1967Proxy(address(coreImpl), emptyBytes)));
         IConfigModule configModule = IConfigModule(
             address(
@@ -139,25 +122,43 @@ contract DealFactory is DealFactoryState, UUPSUpgradeable {
                         minWorkers_,
                         MAX_WORKERS_PER_PROVIDER,
                         targetWorkers_,
-                        effectorWasmsCids_
+                        effectors
                     ),
                     address(core)
                 )
             )
         );
-
         IPaymentModule paymentModule = IPaymentModule(address(new ModuleProxy(address(paymentImpl), emptyBytes, address(core))));
         IStatusModule statusModule = IStatusModule(address(new ModuleProxy(address(statusImpl), emptyBytes, address(core))));
         IWorkersModule workersModule = IWorkersModule(address(new ModuleProxy(address(workersImpl), emptyBytes, address(core))));
 
+        // Initialize deal system
         core.initialize(configModule, paymentModule, statusModule, workersModule);
         core.transferOwnership(msg.sender);
 
+        // throw event
         deal.core = core;
         deal.configModule = configModule;
         deal.paymentModule = paymentModule;
         deal.statusModule = statusModule;
         deal.workersModule = workersModule;
+
+        isDeal[address(deal.core)] = true;
+
+        emit DealCreated(
+            deal,
+            address(defaultPaymentToken),
+            PRICE_PER_EPOCH,
+            REQUIRED_COLLATERAL,
+            minWorkers_,
+            MAX_WORKERS_PER_PROVIDER,
+            targetWorkers_,
+            appCID_,
+            effectors,
+            deal.configModule.globalConfig().epochManager().currentEpoch()
+        );
+
+        return address(deal.core);
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
