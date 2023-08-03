@@ -26,7 +26,7 @@ contract StatusModuleInternal is ModuleBase, StatusModuleState {
     }
 }
 
-contract StatusModule is StatusModuleInternal {
+contract StatusModule is StatusModuleInternal, IStatusModule {
     // ----------------- View -----------------
     function status() external view returns (DealStatus) {
         return _status_;
@@ -51,6 +51,7 @@ contract StatusModule is StatusModuleInternal {
         }
 
         _status_ = status_;
+
         emit StatusChanged(status_);
     }
 }

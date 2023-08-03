@@ -39,6 +39,7 @@ contract WorkersModuleState {
 
     // ---- Storage ----
     uint256 internal _patCount;
+    LinkedList.Bytes32List _freeIndexes;
 
     mapping(address => OwnerInfo) internal _ownersInfo;
     mapping(bytes32 => PAT) internal _patById;
@@ -83,7 +84,7 @@ contract WorkersModule is WorkersModuleState, ModuleBase, IWorkersModule {
         return _withdrawRequests[owner].getAmountBy(timestamp - globalConfig.withdrawTimeout());
     }
 
-    // ---- Public mutables ----
+    // ---- Public Mutable ----
     function createPAT(address computeProvider, bytes32 peerId) external {
         ICore core = _core();
 
@@ -104,17 +105,23 @@ contract WorkersModule is WorkersModuleState, ModuleBase, IWorkersModule {
         bytes32 id = keccak256(abi.encodePacked(_PAT_PREFIX, computeProvider, peerId, patCountByOwner));
         require(_patById[id].owner == address(0x00), "Id already used");
 
+        _ownersInfo[computeProvider].patCount = ++patCountByOwner;
+        _patCount = ++globalPATCount;
+
+        uint index = uint(_freeIndexes.first());
+        if (index == 0) {
+            index = globalPATCount;
+        }
+
         _patById[id] = PAT({
             id: id,
             peerId: peerId,
+            index: index,
             workerId: bytes32(0),
             owner: computeProvider,
             collateral: requiredCollateral,
             created: block.number
         });
-
-        _ownersInfo[computeProvider].patCount = ++patCountByOwner;
-        _patCount = ++globalPATCount;
 
         _patsIdsList.push(id);
 
@@ -144,22 +151,32 @@ contract WorkersModule is WorkersModuleState, ModuleBase, IWorkersModule {
     }
 
     function exit(bytes32 patId) external {
-        address owner = _patById[patId].owner;
+        PAT storage pat = _patById[patId];
+
+        // check owner
+        address owner = pat.owner;
         require(owner == msg.sender, "PAT doesn't exist");
 
-        _withdrawRequests[owner].push(_patById[patId].collateral);
-
-        uint256 newPatCount = _patCount - 1;
+        // change pat count
+        uint256 newPatCount = _patCount;
         _ownersInfo[owner].patCount--;
-        _patCount = newPatCount;
+        _patCount = --newPatCount;
 
+        // load modules
         ICore core = _core();
         IConfigModule config = core.configModule();
         IStatusModule statusController = core.statusModule();
+
+        // change status
         if (statusController.status() == DealStatus.Working && newPatCount < config.minWorkers()) {
             statusController.changeStatus(DealStatus.WaitingForWorkers);
         }
 
+        // return collateral and index
+        _freeIndexes.push(bytes32(pat.index));
+        _withdrawRequests[owner].push(pat.collateral);
+
+        // remove PAT
         delete _patById[patId];
         _patsIdsList.remove(patId);
 
@@ -170,7 +187,6 @@ contract WorkersModule is WorkersModuleState, ModuleBase, IWorkersModule {
         IGlobalConfig globalConfig = _core().configModule().globalConfig();
 
         uint256 amount = _withdrawRequests[owner].confirmBy(block.timestamp - globalConfig.withdrawTimeout());
-
         globalConfig.fluenceToken().safeTransfer(owner, amount);
 
         emit CollateralWithdrawn(owner, amount);

@@ -25,8 +25,8 @@ contract MatcherState {
     }
 
     // ----------------- Events -----------------
-    event ComputeProviderMatched(address indexed computeProvider, address deal, uint dealCreationBlock, CIDV1 appCID);
-    event ComputePeerMatched(bytes32 indexed peerId, address deal, bytes32[] patIds, uint dealCreationBlock, CIDV1 appCID);
+    event ComputeProviderMatched(address indexed computeProvider, ICore deal, uint dealCreationBlock, CIDV1 appCID);
+    event ComputePeerMatched(bytes32 indexed peerId, ICore deal, bytes32[] patIds, uint dealCreationBlock, CIDV1 appCID);
     event ComputeProviderRegistered(
         address computeProvider,
         uint minPricePerEpoch,
@@ -34,7 +34,14 @@ contract MatcherState {
         IERC20 paymentToken,
         CIDV1[] effectors
     );
+    event ComputeProviderRemoved(address computeProvider);
     event WorkersSlotsChanged(bytes32 peerId, uint newWorkerSlots);
+
+    event MaxCollateralChanged(address computeProvider, uint newMaxCollateral);
+    event MinPricePerEpochChanged(address computeProvider, uint newMinPricePerEpoch);
+    event PaymentTokenChanged(address computeProvider, IERC20 newPaymentToken);
+    event EffectorAdded(address computeProvider, CIDV1 effector);
+    event EffectorRemoved(address computeProvider, CIDV1 effector);
 
     // ----------------- Immutable -----------------
     IGlobalConfig public immutable globalConfig;
@@ -92,16 +99,20 @@ abstract contract MatcherOwnable is MatcherInternal {
     }
 }
 
-abstract contract MatcherComputeProviderSettings is MatcherInternal {
+abstract contract MatcherComputeProviderSettings is MatcherInternal, IMatcher {
+    using LinkedList for LinkedList.Bytes32List;
+    using SafeERC20 for IERC20;
+
     // ----------------- View -----------------
     function getFreeWorkersSolts(address computeProvider, bytes32 peerId) external view returns (uint) {
         return computePeerByPeerId[peerId].freeWorkerSlots;
     }
 
-    // ----------------- Mutables -----------------
+    // ----------------- Mutable -----------------
     function registerComputeProvider(uint minPricePerEpoch, uint maxCollateral, IERC20 paymentToken, CIDV1[] calldata effectors) external {
         //TODO: require(whitelist[owner], "Only whitelisted can call this function");
 
+        // validate input
         require(minPricePerEpoch > 0, "Min price per epoch should be greater than 0");
         require(maxCollateral > 0, "Max collateral should be greater than 0");
         require(address(paymentToken) != address(0x00), "Compute provider already");
@@ -109,19 +120,20 @@ abstract contract MatcherComputeProviderSettings is MatcherInternal {
         address owner = msg.sender;
         require(address(computeProviderByOwner[owner].paymentToken) == address(0x00), "Compute provider already");
 
+        // register compute provider
         computeProviderByOwner[owner] = ComputeProvider({
             minPricePerEpoch: minPricePerEpoch,
             maxCollateral: maxCollateral,
             paymentToken: paymentToken,
             totalFreeWorkerSlots: 0
         });
+        _computeProvidersList.push(bytes32(bytes20(owner)));
 
+        // register effectors
         for (uint i = 0; i < effectors.length; i++) {
             bytes32 dealEffector = keccak256(abi.encodePacked(effectors[i].prefixes, effectors[i].hash));
             _effectorsByComputePeerOwner[owner][dealEffector] = true;
         }
-
-        _computeProvidersList.push(bytes32(bytes20(owner)));
 
         emit ComputeProviderRegistered(owner, minPricePerEpoch, maxCollateral, paymentToken, effectors);
     }
@@ -131,13 +143,16 @@ abstract contract MatcherComputeProviderSettings is MatcherInternal {
 
         require(workerSlots > 0, "Worker slots should be greater than 0");
 
+        // calculate new free worker slots
         uint256 freeWorkerSlots = computePeerByPeerId[peerId].freeWorkerSlots + workerSlots;
         computePeerByPeerId[peerId].freeWorkerSlots = freeWorkerSlots;
 
+        // add peer to compute provider list if it's not there
         if (freeWorkerSlots == workerSlots) {
             _computePeersListByProvider[owner].push(peerId);
         }
 
+        // put collateral
         uint amount = computeProviderByOwner[owner].maxCollateral * workerSlots;
         computeProviderByOwner[owner].paymentToken.safeTransferFrom(owner, address(this), amount);
 
@@ -147,13 +162,16 @@ abstract contract MatcherComputeProviderSettings is MatcherInternal {
     function subWorkersSlots(bytes32 peerId, uint workerSlots) external {
         address owner = msg.sender;
 
+        // validate input
         uint256 freeWorkerSlots = computePeerByPeerId[peerId].freeWorkerSlots - workerSlots;
         computePeerByPeerId[peerId].freeWorkerSlots = freeWorkerSlots;
 
+        // remove peer from compute provider list if it has no free worker slots
         if (freeWorkerSlots == 0) {
             _computePeersListByProvider[owner].remove(peerId);
         }
 
+        // retrun collateral
         uint amount = computeProviderByOwner[owner].maxCollateral * workerSlots;
         computeProviderByOwner[owner].paymentToken.safeTransferFrom(address(this), owner, amount);
 
@@ -167,7 +185,7 @@ abstract contract MatcherComputeProviderSettings is MatcherInternal {
 
         computeProvider.minPricePerEpoch = newMinPricePerEpoch;
 
-        // event
+        emit MinPricePerEpochChanged(msg.sender, newMinPricePerEpoch);
     }
 
     function changeMaxCollateral(uint newMaxCollateral) external {
@@ -177,12 +195,16 @@ abstract contract MatcherComputeProviderSettings is MatcherInternal {
         ComputeProvider storage computeProvider = _getComputeProvider(owner);
 
         uint oldMaxCollateral = computeProvider.maxCollateral;
+
+        require(oldMaxCollateral != newMaxCollateral, "Max collateral is the same");
         computeProvider.maxCollateral = newMaxCollateral;
 
-        if (computeProvider.totalFreeWorkerSlots == 0 || oldMaxCollateral == newMaxCollateral) {
+        // if compute provider has no free worker slots. Do nothing.
+        if (computeProvider.totalFreeWorkerSlots == 0) {
             return;
         }
 
+        // calculate new collateral
         if (oldMaxCollateral > newMaxCollateral) {
             uint amount = (oldMaxCollateral - newMaxCollateral) * computeProvider.totalFreeWorkerSlots;
 
@@ -193,7 +215,7 @@ abstract contract MatcherComputeProviderSettings is MatcherInternal {
             computeProvider.paymentToken.safeTransferFrom(owner, address(this), amount);
         }
 
-        // event
+        emit MaxCollateralChanged(owner, newMaxCollateral);
     }
 
     function changePaymentToken(IERC20 newPaymentToken, uint newMaxCollateral) external {
@@ -211,7 +233,7 @@ abstract contract MatcherComputeProviderSettings is MatcherInternal {
         uint newAmount = newMaxCollateral * computeProvider.totalFreeWorkerSlots;
         newPaymentToken.safeTransferFrom(owner, address(this), newAmount);
 
-        // event
+        emit PaymentTokenChanged(owner, newPaymentToken);
     }
 
     function addEffector(CIDV1 calldata effector) external {
@@ -221,6 +243,8 @@ abstract contract MatcherComputeProviderSettings is MatcherInternal {
 
         require(_effectorsByComputePeerOwner[owner][effectorCIDHash] == false, "Effector already exists");
         _effectorsByComputePeerOwner[owner][effectorCIDHash] = true;
+
+        emit EffectorAdded(owner, effector);
     }
 
     function removeEffector(CIDV1 calldata effector) external {
@@ -230,6 +254,8 @@ abstract contract MatcherComputeProviderSettings is MatcherInternal {
 
         require(_effectorsByComputePeerOwner[owner][effectorCIDHash] == true, "Effector doesn't exist");
         _effectorsByComputePeerOwner[owner][effectorCIDHash] = false;
+
+        emit EffectorRemoved(owner, effector);
     }
 
     function removeComputeProvider() external {
@@ -250,17 +276,17 @@ abstract contract MatcherComputeProviderSettings is MatcherInternal {
 
         _computeProvidersList.remove(bytes32(bytes20(owner)));
 
-        // event
+        emit ComputeProviderRemoved(owner);
     }
 }
 
-contract Matcher is MatcherComputeProviderSettings, MatcherOwnable, IMatcher {
+contract Matcher is MatcherComputeProviderSettings, MatcherOwnable {
     using SafeERC20 for IERC20;
     using LinkedList for LinkedList.Bytes32List;
 
     constructor(IGlobalConfig globalConfig_) MatcherState(globalConfig_) {}
 
-    // ----------------- Mutables -----------------
+    // ----------------- Mutable -----------------
 
     // extra bad solution - temp solution
     function matchWithDeal(ICore deal) external {
@@ -276,7 +302,7 @@ contract Matcher is MatcherComputeProviderSettings, MatcherOwnable, IMatcher {
         uint dealPricePerEpoch = config.pricePerEpoch();
         uint dealMaxWorkersPerProvider = config.maxWorkersPerProvider();
         uint dealCreationBlock = config.creationBlock();
-        uint freeWorkerSlotsInDeal = config.targetWorkers() - workersModule.patCount();
+        uint freeWorkerSlotsInDeal = config.targetWorkers() - workersModule.getPATCount();
 
         // go through the compute providers list
         bytes32 currentId = _computeProvidersList.first();
@@ -354,7 +380,7 @@ contract Matcher is MatcherComputeProviderSettings, MatcherOwnable, IMatcher {
             // get next compute provider
             currentId = _computeProvidersList.next(currentId);
 
-            emit ComputeProviderMatched(computeProviderAddress, address(deal), dealCreationBlock, dealAppCID);
+            emit ComputeProviderMatched(computeProviderAddress, deal, dealCreationBlock, dealAppCID);
         }
     }
 }

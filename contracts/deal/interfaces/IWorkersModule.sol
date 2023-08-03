@@ -6,6 +6,7 @@ import "../base/Types.sol";
 
 struct PAT {
     bytes32 id;
+    uint256 index;
     bytes32 peerId;
     bytes32 workerId;
     address owner;

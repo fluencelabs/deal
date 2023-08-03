@@ -7,7 +7,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "../global/interfaces/IGlobalConfig.sol";
-import "../mocks/MockParticleVerifyer.sol";
 import "../deal/interfaces/ICore.sol";
 import "../deal/interfaces/IConfigModule.sol";
 import "../deal/interfaces/IPaymentModule.sol";
@@ -45,7 +44,7 @@ abstract contract DealFactoryState is IFactory {
     uint256 public constant REQUIRED_COLLATERAL = 1 * 10 ** 18;
     uint256 public constant MAX_WORKERS_PER_PROVIDER = 10000000;
 
-    // ----------------- Immutables -----------------
+    // ----------------- ImMutable -----------------
     IGlobalConfig public immutable globalConfig;
     IERC20 public immutable defaultPaymentToken;
 
@@ -96,7 +95,7 @@ contract DealFactory is DealFactoryState, UUPSUpgradeable {
         _disableInitializers();
     }
 
-    // ----------------- Mutables -----------------
+    // ----------------- Mutable -----------------
     function createDeal(
         uint256 minWorkers_,
         uint256 targetWorkers_,
