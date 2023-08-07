@@ -292,7 +292,7 @@ contract Matcher is IMatcher, MatcherOwnable {
                 continue;
             }
 
-            _findPeersForMatching(
+            uint totalReservedWorkersSlots = _findPeersForMatching(
                 computeProviderAddress,
                 maxWorkersPerProvider,
                 freeWorkerSlotsInDeal,
@@ -303,6 +303,8 @@ contract Matcher is IMatcher, MatcherOwnable {
                 creationBlock,
                 appCID
             );
+
+            freeWorkerSlotsInDeal -= totalReservedWorkersSlots;
 
             currentId = _computeProvidersList.next(currentId);
 
@@ -320,7 +322,7 @@ contract Matcher is IMatcher, MatcherOwnable {
         IWorkersModule workersModule,
         uint dealCreationBlock,
         CIDV1 memory appCID
-    ) internal {
+    ) internal returns (uint totalReservedWorkersSlots) {
         bytes32 peerId = _computePeersListByProvider[computeProvider].first();
 
         while (peerId != bytes32(0x00)) {
@@ -361,6 +363,8 @@ contract Matcher is IMatcher, MatcherOwnable {
             for (uint i = 0; i < patLength; i++) {
                 patIds[i] = pats[i].id;
             }
+
+            totalReservedWorkersSlots += patLength;
 
             emit ComputePeerMatched(peerId, deal, patIds, dealCreationBlock, appCID);
 

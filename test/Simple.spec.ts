@@ -29,7 +29,7 @@ describe("Factory", () => {
     it("deploy deal", async () => {
         const params = {
             minWorkers_: 1n,
-            targetWorkers_: 100n,
+            targetWorkers_: 2n,
             appCID_: {
                 prefixes: ethers.randomBytes(4),
                 hash: ethers.randomBytes(32),
@@ -114,7 +114,7 @@ describe("Factory", () => {
 
         const configModule = await deal.getConfigModule();
         const maxCollateral = await configModule.requiredCollateral();
-        const workersCount = 2n;
+        const workersCount = 5n;
 
         const totalCollateral = maxCollateral * workersCount;
 
