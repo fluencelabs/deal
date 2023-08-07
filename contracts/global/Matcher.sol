@@ -329,36 +329,36 @@ contract Matcher is MatcherComputeProviderSettings, MatcherOwnable {
                 while (peerId != bytes32(0x00)) {
                     uint freeWorkerSlots = computePeerByPeerId[peerId].freeWorkerSlots;
 
-                    // calculate received workers slots for this compute peer
-                    uint receivedWorkersSlots;
+                    // calculate reserved workers slots for this compute peer
+                    uint reservedWorkersSlots;
                     if (dealMaxWorkersPerProvider > freeWorkerSlots) {
-                        receivedWorkersSlots = freeWorkerSlots;
+                        reservedWorkersSlots = freeWorkerSlots;
                     } else {
-                        receivedWorkersSlots = dealMaxWorkersPerProvider;
+                        reservedWorkersSlots = dealMaxWorkersPerProvider;
                     }
 
-                    if (receivedWorkersSlots > freeWorkerSlotsInDeal) {
-                        receivedWorkersSlots = freeWorkerSlotsInDeal;
+                    if (reservedWorkersSlots > freeWorkerSlotsInDeal) {
+                        reservedWorkersSlots = freeWorkerSlotsInDeal;
                     }
 
                     // update free worker slots
-                    if (receivedWorkersSlots == freeWorkerSlots) {
+                    if (reservedWorkersSlots == freeWorkerSlots) {
                         delete computePeerByPeerId[peerId];
                         computePeersList.remove(peerId);
                     } else {
-                        computePeerByPeerId[peerId].freeWorkerSlots = freeWorkerSlots - receivedWorkersSlots;
+                        computePeerByPeerId[peerId].freeWorkerSlots = freeWorkerSlots - reservedWorkersSlots;
                     }
 
                     // create PATs
-                    globalConfig.fluenceToken().approve(address(workersModule), dealRequiredCollateral * receivedWorkersSlots);
-                    for (uint j = 0; j < receivedWorkersSlots; j++) {
+                    globalConfig.fluenceToken().approve(address(workersModule), dealRequiredCollateral * reservedWorkersSlots);
+                    for (uint j = 0; j < reservedWorkersSlots; j++) {
                         workersModule.createPAT(computeProviderAddress, peerId);
                     }
 
                     // refound collateral
                     uint refoundByWorker = maxCollateral - dealRequiredCollateral;
                     if (refoundByWorker > 0) {
-                        globalConfig.fluenceToken().transfer(computeProviderAddress, refoundByWorker * receivedWorkersSlots);
+                        globalConfig.fluenceToken().transfer(computeProviderAddress, refoundByWorker * reservedWorkersSlots);
                     }
 
                     // extra bad solution - temp solution - get PATs and put them to the deal
@@ -369,6 +369,8 @@ contract Matcher is MatcherComputeProviderSettings, MatcherOwnable {
                     for (uint i = 0; i < patLength; i++) {
                         patIds[i] = pats[i].id;
                     }
+
+                    freeWorkerSlotsInDeal -= reservedWorkersSlots;
 
                     emit ComputePeerMatched(peerId, deal, patIds, dealCreationBlock, dealAppCID);
 
