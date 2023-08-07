@@ -49,4 +49,4 @@ artifacts
 
 typechain-types
 
-src/deployments
+src/deployments/localhost
