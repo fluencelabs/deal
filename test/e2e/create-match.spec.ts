@@ -35,8 +35,8 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         matcher = Matcher__factory.connect((await deployments.get("Matcher")).address, signer);
     });
 
-    // 0. Create deal
-    it("deploy deal", async () => {
+    // 1. Create deal
+    it("1.1. deploy deal", async () => {
         const createDealParams = {
             minWorkers: dealParams.minWorkers,
             targetWorkers: dealParams.targetWorkers,
@@ -81,7 +81,7 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
             createDealParams.effectors.map((effector) => [effector.prefixes, effector.hash]),
         );
     });
-    it("update appCID", async () => {
+    it("1.2. update appCID", async () => {
         const newCID = {
             prefixes: ethers.randomBytes(4),
             hash: ethers.randomBytes(32),
@@ -106,8 +106,8 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         expect(newCIDFromContract[1]).to.be.equal(ethers.hexlify(newCID.hash));
     });
 
-    // 1. Register compute provider and workers
-    it("register compute provider", async () => {
+    // 2. Register compute provider and workers
+    it("2.1 register compute provider", async () => {
         // get compute provider
         const computeProvider = await hardhatEthers.provider.getSigner(1);
 
@@ -144,7 +144,7 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         expect(computeProviderInfo.paymentToken).to.be.equal(fltAddress);
         expect(computeProviderInfo.totalFreeWorkerSlots).to.be.equal(0);
     });
-    it("register compute peer", async () => {
+    it("2.2 register compute peer", async () => {
         // get compute provider
         const computeProvider = await hardhatEthers.provider.getSigner(1);
 
@@ -177,8 +177,8 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         expect(await matcher.getFreeWorkersSolts(peerId)).to.be.equal(workerSlotCount);
     });
 
-    // 2. Match deal
-    it("Match deal with compute providers", async () => {
+    // 3. Match deal
+    it("3. Match deal with compute providers", async () => {
         // get addresses
         const computeProviderAddress = await (await hardhatEthers.provider.getSigner(1)).getAddress();
         const dealAddress = await (await deal.getCore()).getAddress();
@@ -275,8 +275,8 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         });
     });
 
-    // 3. Set workers in deal
-    it("Set workers in Deal", async () => {
+    // 4. Set workers in deal
+    it("4. Set workers in Deal", async () => {
         // load modules
         const workersModule = await deal.getWorkersModule();
 
