@@ -70,7 +70,7 @@ abstract contract MatcherInternal is MatcherState, UUPSUpgradeable {
         _;
     }
 
-    function _getComputeProvider(address owner) internal returns (ComputeProvider storage) {
+    function _getComputeProvider(address owner) internal view returns (ComputeProvider storage) {
         ComputeProvider storage computeProvider = computeProviderByOwner[owner];
         require(address(computeProvider.paymentToken) != address(0x00), "Compute provider doesn't exist");
 
@@ -104,7 +104,7 @@ abstract contract MatcherComputeProviderSettings is MatcherInternal, IMatcher {
     using SafeERC20 for IERC20;
 
     // ----------------- View -----------------
-    function getFreeWorkersSolts(address computeProvider, bytes32 peerId) external view returns (uint) {
+    function getFreeWorkersSolts(bytes32 peerId) external view returns (uint) {
         return computePeerByPeerId[peerId].freeWorkerSlots;
     }
 

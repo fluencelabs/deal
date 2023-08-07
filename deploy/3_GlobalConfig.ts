@@ -46,15 +46,6 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         waitConfirmations: 1,
     });
 
-    const particleVerifyer = await hre.deployments.deploy("ParticleVerifyer", {
-        from: deployer,
-        contract: "MockParticleVerifyer",
-        args: [],
-        log: true,
-        autoMine: true,
-        waitConfirmations: 1,
-    });
-
     const coreImpl = await hre.deployments.deploy("CoreImpl", {
         from: deployer,
         contract: "Core",
@@ -67,7 +58,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
     const configImpl = await hre.deployments.deploy("ConfigModuleImpl", {
         from: deployer,
         contract: "ConfigModule",
-        args: [globalConfig.address, particleVerifyer.address],
+        args: [globalConfig.address],
         log: true,
         autoMine: true,
         waitConfirmations: 1,

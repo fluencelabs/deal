@@ -16,6 +16,10 @@ const config: HardhatUserConfig = {
             },
         },
     },
+    mocha: {
+        parallel: false,
+        asyncOnly: true,
+    },
     networks: {
         hardhat: {
             accounts: {
