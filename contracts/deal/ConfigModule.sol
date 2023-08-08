@@ -4,7 +4,6 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "../global/interfaces/IParticleVerifyer.sol";
 import "../global/interfaces/IGlobalConfig.sol";
 import "./interfaces/IConfigModule.sol";
 import "./base/ModuleBase.sol";
@@ -13,12 +12,10 @@ import "./base/Types.sol";
 abstract contract ConfigState is IConfigModule {
     IGlobalConfig public immutable globalConfig;
     IERC20 public immutable fluenceToken;
-    IParticleVerifyer public immutable particleVerifyer;
 
-    constructor(IGlobalConfig globalConfig_, IParticleVerifyer particleVerifyer_) {
+    constructor(IGlobalConfig globalConfig_) {
         globalConfig = globalConfig_;
         fluenceToken = globalConfig_.fluenceToken();
-        particleVerifyer = particleVerifyer_;
     }
 
     IERC20 public paymentToken;
@@ -37,7 +34,7 @@ abstract contract ConfigState is IConfigModule {
 contract ConfigModule is ConfigState, ModuleBase, Initializable {
     event AppCIDChanged(CIDV1 newAppCID);
 
-    constructor(IGlobalConfig globalConfig_, IParticleVerifyer particleVerifyer_) ConfigState(globalConfig_, particleVerifyer_) {}
+    constructor(IGlobalConfig globalConfig_) ConfigState(globalConfig_) {}
 
     function initialize(
         IERC20 paymentToken_,

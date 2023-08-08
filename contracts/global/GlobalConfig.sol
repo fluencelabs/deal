@@ -3,8 +3,6 @@
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "../auroraSDK/AuroraSdk.sol";
-import "./AquaProxy.sol";
 import "./DealFactory.sol";
 import "./interfaces/IGlobalConfig.sol";
 import "./interfaces/IMatcher.sol";

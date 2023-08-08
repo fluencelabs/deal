@@ -4,7 +4,6 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../base/Types.sol";
-import "../../global/interfaces/IParticleVerifyer.sol";
 import "../../global/interfaces/IGlobalConfig.sol";
 
 interface IConfigModule {
@@ -22,8 +21,6 @@ interface IConfigModule {
     function globalConfig() external view returns (IGlobalConfig);
 
     function fluenceToken() external view returns (IERC20);
-
-    function particleVerifyer() external view returns (IParticleVerifyer);
 
     function paymentToken() external view returns (IERC20);
 

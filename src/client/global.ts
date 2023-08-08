@@ -1,5 +1,5 @@
 import type { ethers } from "ethers";
-import { DEAL_CONFIG, ContractsENV } from "./config";
+import { DEAL_CONFIG, ContractsENV, ChainConfig } from "./config";
 import {
     GlobalConfig__factory,
     type DealFactory,
@@ -12,22 +12,26 @@ import {
 } from "../typechain-types";
 
 export class GlobalContracts {
-    constructor(private provider: ethers.ContractRunner, private env: ContractsENV) {}
+    private chainConfig: Promise<ChainConfig>;
 
-    getGlobalConfig(): GlobalConfig {
-        return GlobalConfig__factory.connect(DEAL_CONFIG[this.env].globalConfig, this.provider);
+    constructor(private provider: ethers.ContractRunner, private env: ContractsENV) {
+        this.chainConfig = DEAL_CONFIG[this.env]();
     }
 
-    getFactory(): DealFactory {
-        return DealFactory__factory.connect(DEAL_CONFIG[this.env].dealFactoryAddress, this.provider);
+    async getGlobalConfig(): Promise<GlobalConfig> {
+        return GlobalConfig__factory.connect((await this.chainConfig).globalConfig, this.provider);
+    }
+
+    async getFactory(): Promise<DealFactory> {
+        return DealFactory__factory.connect((await this.chainConfig).dealFactoryAddress, this.provider);
     }
 
     async getMatcher(): Promise<Matcher> {
-        const config = this.getGlobalConfig();
+        const config = await this.getGlobalConfig();
         return Matcher__factory.connect(await config.matcher(), this.provider);
     }
 
     async getFLT(): Promise<ERC20> {
-        return ERC20__factory.connect(DEAL_CONFIG[this.env].fltToken, this.provider);
+        return ERC20__factory.connect((await this.chainConfig).fltToken, this.provider);
     }
 }

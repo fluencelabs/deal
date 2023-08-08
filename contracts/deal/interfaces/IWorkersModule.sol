@@ -6,6 +6,7 @@ import "../base/Types.sol";
 
 struct PAT {
     bytes32 id;
+    uint256 index;
     bytes32 peerId;
     bytes32 workerId;
     address owner;
@@ -14,14 +15,16 @@ struct PAT {
 }
 
 interface IWorkersModule {
-    function getPATs() external view returns (PAT[] memory);
-
-    function patCount() external view returns (uint256);
-
+    // ----------------- View -----------------
     function getPAT(bytes32 id) external view returns (PAT memory);
+
+    function getPATCount() external view returns (uint256);
+
+    function getPATs() external view returns (PAT[] memory);
 
     function getUnlockedAmountBy(address owner, uint256 timestamp) external view returns (uint256);
 
+    // ----------------- View -----------------
     function createPAT(address owner, bytes32 peerId) external;
 
     function exit(bytes32 id) external;
