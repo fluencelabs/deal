@@ -18,6 +18,9 @@ const config: HardhatUserConfig = {
     },
     networks: {
         hardhat: {
+            mining: {
+              auto: true,
+            }
             accounts: {
                 passphrase: "test test test test claim trade stairs crew inspire obey veteran budget",
             },
