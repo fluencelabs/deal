@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.5](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.4...deal-aurora-v0.2.5) (2023-08-14)
+
+
+### Features
+
+* auto deploy ([#76](https://github.com/fluencelabs/deal/issues/76)) ([de45ca3](https://github.com/fluencelabs/deal/commit/de45ca3c32955c62beae983de68d0d9344f1c5a9))
+* subnets update ([#83](https://github.com/fluencelabs/deal/issues/83)) ([39b5700](https://github.com/fluencelabs/deal/commit/39b5700e0774d9415656eb56bad4dbb06c6e9509))
+
 ## [0.2.4](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.3...deal-aurora-v0.2.4) (2023-07-05)
 
 
