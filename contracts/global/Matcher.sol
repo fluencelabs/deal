@@ -7,26 +7,54 @@ import "./interfaces/IGlobalConfig.sol";
 import "./interfaces/IMatcher.sol";
 import "../utils/LinkedList.sol";
 import "../deal/base/Types.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract MatcherState {
-    struct ResourceConfig {
-        uint minPriceByEpoch;
+    // ----------------- Types -----------------
+    struct ComputeProvider {
+        uint minPricePerEpoch;
         uint maxCollateral;
-        uint workersCount;
+        IERC20 paymentToken;
+        uint totalFreeWorkerSlots;
     }
 
-    struct Effectors {
-        mapping(bytes32 => bool) effectors;
+    struct ComputePeer {
+        uint freeWorkerSlots;
     }
 
+    // ----------------- Events -----------------
+    event ComputeProviderMatched(address indexed computeProvider, ICore deal, uint dealCreationBlock, CIDV1 appCID);
+    event ComputePeerMatched(bytes32 indexed peerId, ICore deal, bytes32[] patIds, uint dealCreationBlock, CIDV1 appCID);
+    event ComputeProviderRegistered(
+        address computeProvider,
+        uint minPricePerEpoch,
+        uint maxCollateral,
+        IERC20 paymentToken,
+        CIDV1[] effectors
+    );
+    event ComputeProviderRemoved(address computeProvider);
+    event WorkersSlotsChanged(bytes32 peerId, uint newWorkerSlots);
+
+    event MaxCollateralChanged(address computeProvider, uint newMaxCollateral);
+    event MinPricePerEpochChanged(address computeProvider, uint newMinPricePerEpoch);
+    event PaymentTokenChanged(address computeProvider, IERC20 newPaymentToken);
+    event EffectorAdded(address computeProvider, CIDV1 effector);
+    event EffectorRemoved(address computeProvider, CIDV1 effector);
+
+    // ----------------- Immutable -----------------
     IGlobalConfig public immutable globalConfig;
 
-    LinkedList.Bytes32List public resourceConfigIds;
-    mapping(address => ResourceConfig) public resourceConfigs;
+    // ----------------- Public Vars -----------------
+    mapping(address => ComputeProvider) public computeProviderByOwner;
+    mapping(bytes32 => ComputePeer) public computePeerByPeerId;
     mapping(address => bool) public whitelist;
 
-    mapping(address => Effectors) internal _effectorsByOwner;
+    // ----------------- Internal Vars -----------------
+    LinkedList.Bytes32List internal _computeProvidersList;
+    mapping(address => LinkedList.Bytes32List) internal _computePeersListByProvider;
+    mapping(address => mapping(bytes32 => bool)) internal _effectorsByComputePeerOwner;
 
     constructor(IGlobalConfig globalConfig_) {
         globalConfig = globalConfig_;
@@ -34,13 +62,19 @@ contract MatcherState {
 }
 
 abstract contract MatcherInternal is MatcherState, UUPSUpgradeable {
+    using SafeERC20 for IERC20;
     using LinkedList for LinkedList.Bytes32List;
-
-    event Matched(address indexed computeProvider, address deal, uint joinedWorkers, uint dealCreationBlock, CIDV1 appCID);
 
     modifier onlyOwner() {
         require(msg.sender == globalConfig.owner(), "Only owner can call this function");
         _;
+    }
+
+    function _getComputeProvider(address owner) internal view returns (ComputeProvider storage) {
+        ComputeProvider storage computeProvider = computeProviderByOwner[owner];
+        require(address(computeProvider.paymentToken) != address(0x00), "Compute provider doesn't exist");
+
+        return computeProvider;
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
@@ -50,7 +84,7 @@ abstract contract MatcherInternal is MatcherState, UUPSUpgradeable {
 
         for (uint i = 0; i < dealEffectors.length; i++) {
             bytes32 dealEffector = keccak256(abi.encodePacked(dealEffectors[i].prefixes, dealEffectors[i].hash));
-            if (!_effectorsByOwner[computeProvider].effectors[dealEffector]) {
+            if (!_effectorsByComputePeerOwner[computeProvider][dealEffector]) {
                 return false;
             }
         }
@@ -65,123 +99,291 @@ abstract contract MatcherOwnable is MatcherInternal {
     }
 }
 
-contract Matcher is IMatcher, MatcherOwnable {
+abstract contract MatcherComputeProviderSettings is MatcherInternal, IMatcher {
     using LinkedList for LinkedList.Bytes32List;
+    using SafeERC20 for IERC20;
 
-    event ComputeProviderRegistered(
-        address computeProvider,
-        uint minPriceByEpoch,
-        uint maxCollateral,
-        uint workersCount,
-        CIDV1[] effectors
-    );
+    // ----------------- View -----------------
+    function getFreeWorkersSolts(bytes32 peerId) external view returns (uint) {
+        return computePeerByPeerId[peerId].freeWorkerSlots;
+    }
+
+    // ----------------- Mutable -----------------
+    function registerComputeProvider(uint minPricePerEpoch, uint maxCollateral, IERC20 paymentToken, CIDV1[] calldata effectors) external {
+        //TODO: require(whitelist[owner], "Only whitelisted can call this function");
+
+        // validate input
+        require(minPricePerEpoch > 0, "Min price per epoch should be greater than 0");
+        require(maxCollateral > 0, "Max collateral should be greater than 0");
+        require(address(paymentToken) != address(0x00), "Compute provider already");
+
+        address owner = msg.sender;
+        require(address(computeProviderByOwner[owner].paymentToken) == address(0x00), "Compute provider already");
+
+        // register compute provider
+        computeProviderByOwner[owner] = ComputeProvider({
+            minPricePerEpoch: minPricePerEpoch,
+            maxCollateral: maxCollateral,
+            paymentToken: paymentToken,
+            totalFreeWorkerSlots: 0
+        });
+        _computeProvidersList.push(bytes32(bytes20(owner)));
+
+        // register effectors
+        for (uint i = 0; i < effectors.length; i++) {
+            bytes32 dealEffector = keccak256(abi.encodePacked(effectors[i].prefixes, effectors[i].hash));
+            _effectorsByComputePeerOwner[owner][dealEffector] = true;
+        }
+
+        emit ComputeProviderRegistered(owner, minPricePerEpoch, maxCollateral, paymentToken, effectors);
+    }
+
+    function addWorkersSlots(bytes32 peerId, uint workerSlots) external {
+        address owner = msg.sender;
+
+        require(workerSlots > 0, "Worker slots should be greater than 0");
+
+        // calculate new free worker slots
+        uint256 freeWorkerSlots = computePeerByPeerId[peerId].freeWorkerSlots + workerSlots;
+        computePeerByPeerId[peerId].freeWorkerSlots = freeWorkerSlots;
+
+        // add peer to compute provider list if it's not there
+        if (freeWorkerSlots == workerSlots) {
+            _computePeersListByProvider[owner].push(peerId);
+        }
+
+        // put collateral
+        uint amount = computeProviderByOwner[owner].maxCollateral * workerSlots;
+        computeProviderByOwner[owner].paymentToken.safeTransferFrom(owner, address(this), amount);
+
+        emit WorkersSlotsChanged(peerId, freeWorkerSlots);
+    }
+
+    function subWorkersSlots(bytes32 peerId, uint workerSlots) external {
+        address owner = msg.sender;
+
+        // validate input
+        uint256 freeWorkerSlots = computePeerByPeerId[peerId].freeWorkerSlots - workerSlots;
+        computePeerByPeerId[peerId].freeWorkerSlots = freeWorkerSlots;
+
+        // remove peer from compute provider list if it has no free worker slots
+        if (freeWorkerSlots == 0) {
+            _computePeersListByProvider[owner].remove(peerId);
+        }
+
+        // retrun collateral
+        uint amount = computeProviderByOwner[owner].maxCollateral * workerSlots;
+        computeProviderByOwner[owner].paymentToken.safeTransferFrom(address(this), owner, amount);
+
+        emit WorkersSlotsChanged(peerId, freeWorkerSlots);
+    }
+
+    function changeMinPricePerEpoch(uint newMinPricePerEpoch) external {
+        require(newMinPricePerEpoch > 0, "Min price per epoch should be greater than 0");
+
+        ComputeProvider storage computeProvider = _getComputeProvider(msg.sender);
+
+        computeProvider.minPricePerEpoch = newMinPricePerEpoch;
+
+        emit MinPricePerEpochChanged(msg.sender, newMinPricePerEpoch);
+    }
+
+    function changeMaxCollateral(uint newMaxCollateral) external {
+        require(newMaxCollateral > 0, "Max collateral should be greater than 0");
+
+        address owner = msg.sender;
+        ComputeProvider storage computeProvider = _getComputeProvider(owner);
+
+        uint oldMaxCollateral = computeProvider.maxCollateral;
+
+        require(oldMaxCollateral != newMaxCollateral, "Max collateral is the same");
+        computeProvider.maxCollateral = newMaxCollateral;
+
+        // if compute provider has no free worker slots. Do nothing.
+        if (computeProvider.totalFreeWorkerSlots == 0) {
+            return;
+        }
+
+        // calculate new collateral
+        if (oldMaxCollateral > newMaxCollateral) {
+            uint amount = (oldMaxCollateral - newMaxCollateral) * computeProvider.totalFreeWorkerSlots;
+
+            computeProvider.paymentToken.safeTransfer(owner, amount);
+        } else {
+            uint amount = (newMaxCollateral - oldMaxCollateral) * computeProvider.totalFreeWorkerSlots;
+
+            computeProvider.paymentToken.safeTransferFrom(owner, address(this), amount);
+        }
+
+        emit MaxCollateralChanged(owner, newMaxCollateral);
+    }
+
+    function changePaymentToken(IERC20 newPaymentToken, uint newMaxCollateral) external {
+        require(address(newPaymentToken) != address(0x00), "Payment token should be not zero address");
+
+        address owner = msg.sender;
+        ComputeProvider storage computeProvider = _getComputeProvider(owner);
+
+        IERC20 oldPaymentToken = computeProvider.paymentToken;
+        computeProvider.paymentToken = newPaymentToken;
+
+        uint oldAmount = computeProvider.maxCollateral * computeProvider.totalFreeWorkerSlots;
+        oldPaymentToken.safeTransfer(owner, oldAmount);
+
+        uint newAmount = newMaxCollateral * computeProvider.totalFreeWorkerSlots;
+        newPaymentToken.safeTransferFrom(owner, address(this), newAmount);
+
+        emit PaymentTokenChanged(owner, newPaymentToken);
+    }
+
+    function addEffector(CIDV1 calldata effector) external {
+        address owner = msg.sender;
+
+        bytes32 effectorCIDHash = keccak256(abi.encodePacked(effector.prefixes, effector.hash));
+
+        require(_effectorsByComputePeerOwner[owner][effectorCIDHash] == false, "Effector already exists");
+        _effectorsByComputePeerOwner[owner][effectorCIDHash] = true;
+
+        emit EffectorAdded(owner, effector);
+    }
+
+    function removeEffector(CIDV1 calldata effector) external {
+        address owner = msg.sender;
+
+        bytes32 effectorCIDHash = keccak256(abi.encodePacked(effector.prefixes, effector.hash));
+
+        require(_effectorsByComputePeerOwner[owner][effectorCIDHash] == true, "Effector doesn't exist");
+        _effectorsByComputePeerOwner[owner][effectorCIDHash] = false;
+
+        emit EffectorRemoved(owner, effector);
+    }
+
+    function removeComputeProvider() external {
+        address owner = msg.sender;
+        ComputeProvider storage computeProvider = _getComputeProvider(owner);
+
+        require(address(computeProvider.paymentToken) != address(0x00), "Compute provider doesn't exist");
+
+        IERC20 paymentToken = computeProvider.paymentToken;
+        uint amount = computeProvider.maxCollateral * computeProvider.totalFreeWorkerSlots;
+
+        delete computeProvider.minPricePerEpoch;
+        delete computeProvider.maxCollateral;
+        delete computeProvider.paymentToken;
+        delete computeProvider.totalFreeWorkerSlots;
+
+        paymentToken.safeTransfer(owner, amount);
+
+        _computeProvidersList.remove(bytes32(bytes20(owner)));
+
+        emit ComputeProviderRemoved(owner);
+    }
+}
+
+contract Matcher is MatcherComputeProviderSettings, MatcherOwnable {
+    using SafeERC20 for IERC20;
+    using LinkedList for LinkedList.Bytes32List;
 
     constructor(IGlobalConfig globalConfig_) MatcherState(globalConfig_) {}
 
-    function register(uint minPriceByEpoch, uint maxCollateral, uint workersCount, CIDV1[] calldata effectors) external {
-        address owner = msg.sender;
-        //TODO: require(whitelist[owner], "Only whitelisted can call this function");
-        require(workersCount > 0, "Workers count should be greater than 0");
-        require(maxCollateral > 0, "Max collateral should be greater than 0");
-        require(resourceConfigs[owner].workersCount == 0, "Config already exists");
+    // ----------------- Mutable -----------------
 
-        uint amount = maxCollateral * workersCount;
-        ResourceConfig memory config = ResourceConfig({
-            minPriceByEpoch: minPriceByEpoch,
-            maxCollateral: maxCollateral,
-            workersCount: workersCount
-        });
-
-        for (uint i = 0; i < effectors.length; i++) {
-            bytes32 dealEffector = keccak256(abi.encodePacked(effectors[i].prefixes, effectors[i].hash));
-            _effectorsByOwner[owner].effectors[dealEffector] = true;
-        }
-
-        resourceConfigIds.push(bytes32(bytes20(owner)));
-
-        resourceConfigs[owner] = config;
-
-        globalConfig.fluenceToken().transferFrom(owner, address(this), amount);
-
-        emit ComputeProviderRegistered(owner, minPriceByEpoch, maxCollateral, workersCount, effectors);
-    }
-
-    function remove() external {
-        address owner = msg.sender;
-        ResourceConfig storage resourceConfig = resourceConfigs[owner];
-
-        require(resourceConfig.workersCount != 0, "Config doesn't exist");
-
-        uint amount = resourceConfig.maxCollateral * resourceConfig.workersCount;
-        delete resourceConfigs[owner];
-        resourceConfigIds.remove(bytes32(bytes20(owner)));
-
-        globalConfig.fluenceToken().transfer(owner, amount);
-    }
-
+    // extra bad solution - temp solution
     function matchWithDeal(ICore deal) external {
         require(globalConfig.factory().isDeal(address(deal)), "Deal is not from factory");
 
+        // load deal modules
         IConfigModule config = deal.configModule();
-        uint requiredCollateral = config.requiredCollateral();
-        uint pricePerEpoch = config.pricePerEpoch();
-        uint maxWorkersPerProvider = config.maxWorkersPerProvider();
-        uint creationBlock = config.creationBlock();
-        CIDV1 memory appCID = config.appCID();
-
         IWorkersModule workersModule = deal.workersModule();
-        uint freeWorkerSlots = config.targetWorkers() - workersModule.workersCount();
 
-        bytes32 currentId = resourceConfigIds.first();
-        while (currentId != bytes32(0x00) && freeWorkerSlots > 0) {
-            address computeProvider = address(bytes20(currentId));
+        // load deal config
+        CIDV1 memory dealAppCID = config.appCID();
+        uint dealRequiredCollateral = config.requiredCollateral();
+        uint dealPricePerEpoch = config.pricePerEpoch();
+        uint dealMaxWorkersPerProvider = config.maxWorkersPerProvider();
+        uint dealCreationBlock = config.creationBlock();
+        uint freeWorkerSlotsInDeal = config.targetWorkers() - workersModule.getPATCount();
 
-            ResourceConfig storage resourceConfig = resourceConfigs[computeProvider];
-            uint maxCollateral = resourceConfig.maxCollateral;
-            uint workersCount = resourceConfig.workersCount;
+        // go through the compute providers list
+        bytes32 currentId = _computeProvidersList.first();
+        while (currentId != bytes32(0x00) && freeWorkerSlotsInDeal > 0) {
+            address computeProviderAddress = address(bytes20(currentId));
+
+            uint maxCollateral = computeProviderByOwner[computeProviderAddress].maxCollateral;
+            uint minPricePerEpoch = computeProviderByOwner[computeProviderAddress].minPricePerEpoch;
 
             if (
-                resourceConfig.minPriceByEpoch > pricePerEpoch ||
-                maxCollateral < requiredCollateral ||
-                !_isEffectorsMatched(config, computeProvider)
+                minPricePerEpoch > dealPricePerEpoch ||
+                maxCollateral < dealRequiredCollateral ||
+                !_isEffectorsMatched(config, computeProviderAddress)
             ) {
-                currentId = resourceConfigIds.next(currentId);
+                currentId = _computeProvidersList.next(currentId);
                 continue;
             }
 
-            uint joinedWorkers;
-            if (maxWorkersPerProvider > workersCount) {
-                joinedWorkers = workersCount;
-            } else {
-                joinedWorkers = maxWorkersPerProvider;
+            LinkedList.Bytes32List storage computePeersList = _computePeersListByProvider[computeProviderAddress];
+
+            // go through the compute peers list by compute provider
+            {
+                bytes32 peerId = computePeersList.first();
+
+                while (peerId != bytes32(0x00)) {
+                    uint freeWorkerSlots = computePeerByPeerId[peerId].freeWorkerSlots;
+
+                    // calculate reserved workers slots for this compute peer
+                    uint reservedWorkersSlots;
+                    if (dealMaxWorkersPerProvider > freeWorkerSlots) {
+                        reservedWorkersSlots = freeWorkerSlots;
+                    } else {
+                        reservedWorkersSlots = dealMaxWorkersPerProvider;
+                    }
+
+                    if (reservedWorkersSlots > freeWorkerSlotsInDeal) {
+                        reservedWorkersSlots = freeWorkerSlotsInDeal;
+                    }
+
+                    // update free worker slots
+                    if (reservedWorkersSlots == freeWorkerSlots) {
+                        delete computePeerByPeerId[peerId];
+                        computePeersList.remove(peerId);
+                    } else {
+                        computePeerByPeerId[peerId].freeWorkerSlots = freeWorkerSlots - reservedWorkersSlots;
+                    }
+
+                    // create PATs
+                    globalConfig.fluenceToken().approve(address(workersModule), dealRequiredCollateral * reservedWorkersSlots);
+                    for (uint j = 0; j < reservedWorkersSlots; j++) {
+                        workersModule.createPAT(computeProviderAddress, peerId);
+                    }
+
+                    // refound collateral
+                    uint refoundByWorker = maxCollateral - dealRequiredCollateral;
+                    if (refoundByWorker > 0) {
+                        globalConfig.fluenceToken().transfer(computeProviderAddress, refoundByWorker * reservedWorkersSlots);
+                    }
+
+                    // extra bad solution - temp solution - get PATs and put them to the deal
+                    PAT[] memory pats = workersModule.getPATs();
+                    bytes32[] memory patIds = new bytes32[](pats.length);
+
+                    uint patLength = pats.length;
+                    for (uint i = 0; i < patLength; i++) {
+                        patIds[i] = pats[i].id;
+                    }
+
+                    freeWorkerSlotsInDeal -= reservedWorkersSlots;
+
+                    emit ComputePeerMatched(peerId, deal, patIds, dealCreationBlock, dealAppCID);
+
+                    // get next compute peer
+                    peerId = _computePeersListByProvider[computeProviderAddress].next(peerId);
+                }
             }
 
-            if (joinedWorkers > freeWorkerSlots) {
-                joinedWorkers = freeWorkerSlots;
-            }
+            // get next compute provider
+            currentId = _computeProvidersList.next(currentId);
 
-            uint newWorkersCount = workersCount - joinedWorkers;
-            if (newWorkersCount == 0) {
-                delete resourceConfigs[computeProvider];
-                resourceConfigIds.remove(bytes32(bytes20(computeProvider)));
-            } else {
-                workersCount = newWorkersCount;
-            }
-
-            globalConfig.fluenceToken().approve(address(workersModule), requiredCollateral * joinedWorkers);
-            for (uint j = 0; j < joinedWorkers; j++) {
-                workersModule.joinViaMatcher(computeProvider);
-            }
-
-            uint refoundByWorker = maxCollateral - requiredCollateral;
-            if (refoundByWorker > 0) {
-                globalConfig.fluenceToken().transfer(computeProvider, refoundByWorker * joinedWorkers);
-            }
-
-            freeWorkerSlots -= joinedWorkers;
-            currentId = resourceConfigIds.next(currentId);
-
-            emit Matched(computeProvider, address(deal), joinedWorkers, creationBlock, appCID);
+            emit ComputeProviderMatched(computeProviderAddress, deal, dealCreationBlock, dealAppCID);
         }
     }
 }

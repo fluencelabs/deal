@@ -8,6 +8,7 @@
         "compile": "hardhat clean && hardhat compile",
         "clean": "hardhat clean",
         "contracts:localnet": "hardhat node --tags tokens,localnet,common --hostname 0.0.0.0",
+        "update-local-deployment": "cp -r ./src/deployments/localhost/* ./src/deployments/localnet",
         "deploy": "hardhat deploy --network testnet --tags tokens,testnet,common",
         "pack": "shx rm -rf dist && tsc -b",
         "test": "hardhat test",

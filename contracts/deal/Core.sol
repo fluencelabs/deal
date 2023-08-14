@@ -65,4 +65,12 @@ contract Core is UUPSUpgradeable, OwnableUpgradeable, ICore {
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {
         //TODO: check that new implementation from DAO
     }
+
+    function getPATs() public view returns (PAT[] memory) {
+        return workersModule().getPATs();
+    }
+
+    function setWorker(bytes32 patId, bytes32 workerId) external {
+        workersModule().setWorker(patId, workerId);
+    }
 }

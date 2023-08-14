@@ -16,18 +16,22 @@ const config: HardhatUserConfig = {
             },
         },
     },
+    mocha: {
+        parallel: false,
+        asyncOnly: true,
+    },
     networks: {
         hardhat: {
             mining: {
-              auto: true,
-              interval: 1000,
+                auto: true,
+                interval: 1000,
             },
             accounts: {
                 passphrase: "test test test test claim trade stairs crew inspire obey veteran budget",
             },
         },
         testnet: {
-            url: "https://testnet.aurora.dev",
+            url: "https://rpc.ankr.com/polygon_mumbai",
             accounts: [process.env["PRIVATE_KEY"] ?? "0x0000000000000000000000000000000000000000000000000000000000000000"],
         },
     },
@@ -38,6 +42,9 @@ const config: HardhatUserConfig = {
     },
     gasReporter: {
         enabled: true,
+    },
+    paths: {
+        deployments: "src/deployments",
     },
     typechain: {
         outDir: "src/typechain-types",

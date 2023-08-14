@@ -1,0 +1,111 @@
+{
+  "address": "0xF47F31d7C54f2F7ABF2019682fA28cC2c07A6E1b",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "epochDuration_",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "currentEpoch",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "epochDuration",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x8d24af65c89e53575a5bf51763b488e65652ea4b4a18a2182f71d8f4e4c019c8",
+  "receipt": {
+    "to": null,
+    "from": "0x306543FC9eA9bd49CE047C7cD4Ba10b2a98B507c",
+    "contractAddress": "0xF47F31d7C54f2F7ABF2019682fA28cC2c07A6E1b",
+    "transactionIndex": 1,
+    "gasUsed": "136586",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000010000000000000000000000020000000000002000000008000000000000000000000010000000000000000000000000000000000800000000000080000000100000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000004000000000000000000001000000000000000000000000000000100000001000000000000000000000000000000000000000000000000000000000000000100000",
+    "blockHash": "0x2b90cd302b5c3c264f0598ecf7e26d6e4913db12cd6518c77cc0a625ffa5f94f",
+    "transactionHash": "0x8d24af65c89e53575a5bf51763b488e65652ea4b4a18a2182f71d8f4e4c019c8",
+    "logs": [
+      {
+        "transactionIndex": 1,
+        "blockNumber": 38993245,
+        "transactionHash": "0x8d24af65c89e53575a5bf51763b488e65652ea4b4a18a2182f71d8f4e4c019c8",
+        "address": "0x0000000000000000000000000000000000001010",
+        "topics": [
+          "0x4dfe1bbbcf077ddc3e01291eea2d5c70c2b422b415d95645b9adcfd678cb1d63",
+          "0x0000000000000000000000000000000000000000000000000000000000001010",
+          "0x000000000000000000000000306543fc9ea9bd49ce047c7cd4ba10b2a98b507c",
+          "0x000000000000000000000000f903ba9e006193c1527bfbe65fe2123704ea3f99"
+        ],
+        "data": "0x0000000000000000000000000000000000000000000000000001368f84073a0000000000000000000000000000000000000000000000000009b765e719812b77000000000000000000000000000000000000000000001062e704e693e177faa100000000000000000000000000000000000000000000000009b62f579579f177000000000000000000000000000000000000000000001062e7061d23657f34a1",
+        "logIndex": 2,
+        "blockHash": "0x2b90cd302b5c3c264f0598ecf7e26d6e4913db12cd6518c77cc0a625ffa5f94f"
+      }
+    ],
+    "blockNumber": 38993245,
+    "cumulativeGasUsed": "157586",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    60
+  ],
+  "numDeployments": 1,
+  "solcInputHash": "9aa805292f646e79c2fd4915f738aa67",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.17+commit.8df45f5f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"epochDuration_\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"currentEpoch\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"epochDuration\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/global/EpochManager.sol\":\"EpochManager\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":10000},\"remappings\":[],\"viaIR\":true},\"sources\":{\"contracts/global/EpochManager.sol\":{\"content\":\"// SPDX-License-Identifier: Apache-2.0\\n\\npragma solidity ^0.8.17;\\n\\nimport \\\"./interfaces/IEpochManager.sol\\\";\\n\\ncontract EpochManager is IEpochManager {\\n    uint256 public epochDuration;\\n\\n    constructor(uint256 epochDuration_) {\\n        epochDuration = epochDuration_;\\n    }\\n\\n    function currentEpoch() external view returns (uint256) {\\n        return block.timestamp / epochDuration;\\n    }\\n}\\n\",\"keccak256\":\"0x5d5ddad1f12bed9d99923a6fea25df5e93c5e5f6ab2227c9887131821335bbf8\",\"license\":\"Apache-2.0\"},\"contracts/global/interfaces/IEpochManager.sol\":{\"content\":\"// SPDX-License-Identifier: Apache-2.0\\n\\npragma solidity ^0.8.17;\\n\\ninterface IEpochManager {\\n    function epochDuration() external view returns (uint256);\\n\\n    function currentEpoch() external view returns (uint256);\\n}\\n\",\"keccak256\":\"0x2dce187734fef8462cf222ec53569253aae570020578c7d470545b476ac3e87d\",\"license\":\"Apache-2.0\"}},\"version\":1}",
+  "bytecode": "0x60803461005157601f61018238819003918201601f19168301916001600160401b03831184841017610056578084926020946040528339810103126100515751600055604051610115908161006d8239f35b600080fd5b634e487b7160e01b600052604160045260246000fdfe6080806040526004361015601257600080fd5b600090813560e01c9081634ff0876a1460a55750637667180814603457600080fd5b3460a257807ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011260a25780549081156075576020826040519042048152f35b807f4e487b7100000000000000000000000000000000000000000000000000000000602492526012600452fd5b80fd5b90503460db57817ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011260db57602091548152f35b5080fdfea26469706673582212209e2363954819cd8d6d3a645e5c30daad9810491d449f860e69b6f7f9fc3a633b64736f6c63430008110033",
+  "deployedBytecode": "0x6080806040526004361015601257600080fd5b600090813560e01c9081634ff0876a1460a55750637667180814603457600080fd5b3460a257807ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011260a25780549081156075576020826040519042048152f35b807f4e487b7100000000000000000000000000000000000000000000000000000000602492526012600452fd5b80fd5b90503460db57817ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011260db57602091548152f35b5080fdfea26469706673582212209e2363954819cd8d6d3a645e5c30daad9810491d449f860e69b6f7f9fc3a633b64736f6c63430008110033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 6603,
+        "contract": "contracts/global/EpochManager.sol:EpochManager",
+        "label": "epochDuration",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_uint256"
+      }
+    ],
+    "types": {
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}

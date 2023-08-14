@@ -14,7 +14,19 @@ contract StatusModuleState {
     uint256 internal _startWorkingEpoch_;
 }
 
-contract StatusModule is ModuleBase, StatusModuleState, IStatusModule {
+contract StatusModuleInternal is ModuleBase, StatusModuleState {
+    // ----------------- Private -----------------
+
+    function _onStartWorking() internal {
+        _startWorkingEpoch_ = _core().configModule().globalConfig().epochManager().currentEpoch();
+    }
+
+    function _onEndWorking() internal {
+        _startWorkingEpoch_ = 0;
+    }
+}
+
+contract StatusModule is StatusModuleInternal, IStatusModule {
     // ----------------- View -----------------
     function status() external view returns (DealStatus) {
         return _status_;
@@ -39,16 +51,7 @@ contract StatusModule is ModuleBase, StatusModuleState, IStatusModule {
         }
 
         _status_ = status_;
+
         emit StatusChanged(status_);
-    }
-
-    // ----------------- Private -----------------
-
-    function _onStartWorking() private {
-        _startWorkingEpoch_ = _core().configModule().globalConfig().epochManager().currentEpoch();
-    }
-
-    function _onEndWorking() private {
-        _startWorkingEpoch_ = 0;
     }
 }

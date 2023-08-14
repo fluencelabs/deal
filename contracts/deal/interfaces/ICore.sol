@@ -6,7 +6,14 @@ import "./IConfigModule.sol";
 import "./IPaymentModule.sol";
 import "./IStatusModule.sol";
 import "./IWorkersModule.sol";
-import "../base/Types.sol";
+
+enum Module {
+    None,
+    Config,
+    Payment,
+    Status,
+    Workers
+}
 
 interface ICore {
     function initialize(IConfigModule config_, IPaymentModule payment_, IStatusModule statys_, IWorkersModule workers_) external;
