@@ -27,7 +27,7 @@ const config: HardhatUserConfig = {
             },
         },
         testnet: {
-            url: "https://testnet.aurora.dev",
+            url: "https://rpc.ankr.com/polygon_mumbai",
             accounts: [process.env["PRIVATE_KEY"] ?? "0x0000000000000000000000000000000000000000000000000000000000000000"],
         },
     },

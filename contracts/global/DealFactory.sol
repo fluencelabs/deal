@@ -44,7 +44,7 @@ abstract contract DealFactoryState is IFactory {
     uint256 public constant REQUIRED_COLLATERAL = 1 * 10 ** 18;
     uint256 public constant MAX_WORKERS_PER_PROVIDER = 10000000;
 
-    // ----------------- ImMutable -----------------
+    // ----------------- Immutable -----------------
     IGlobalConfig public immutable globalConfig;
     IERC20 public immutable defaultPaymentToken;
 
