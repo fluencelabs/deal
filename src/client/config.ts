@@ -23,9 +23,9 @@ export const DEAL_CONFIG: Record<ContractsENV, () => Promise<ChainConfig>> = {
         };
     },
     local: async (): Promise<ChainConfig> => {
-        const globalConfig = await import("../deployments/localhost/GlobalConfig.json");
-        const factory = await import("../deployments/localhost/Factory.json");
-        const flt = await import("../deployments/localhost/FLT.json");
+        const globalConfig = await import("../deployments/localnet/GlobalConfig.json");
+        const factory = await import("../deployments/localnet/Factory.json");
+        const flt = await import("../deployments/localnet/FLT.json");
 
         return {
             globalConfig: globalConfig.address,
