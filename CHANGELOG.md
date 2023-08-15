@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.6](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.5...deal-aurora-v0.2.6) (2023-08-15)
+
+
+### Bug Fixes
+
+* update deployment for mumbai ([#84](https://github.com/fluencelabs/deal/issues/84)) ([2a331a5](https://github.com/fluencelabs/deal/commit/2a331a5e863fa521fca705699fb51f92a5056ac0))
+
 ## [0.2.5](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.4...deal-aurora-v0.2.5) (2023-08-14)
 
 
