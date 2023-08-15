@@ -14,7 +14,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         args: [fluenceTokenAddress, testUSDAddress],
         log: true,
         autoMine: true,
-        waitConfirmations: 1,
+        waitConfirmations: 5,
     });
 
     if (faucet.newlyDeployed) {
@@ -23,7 +23,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
             {
                 from: deployer,
                 log: true,
-                waitConfirmations: 1,
+                waitConfirmations: 5,
                 autoMine: true,
             },
             "transfer",
@@ -35,7 +35,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
             {
                 from: deployer,
                 log: true,
-                waitConfirmations: 1,
+                waitConfirmations: 5,
                 autoMine: true,
             },
             "transfer",

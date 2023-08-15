@@ -20,7 +20,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         args: [EPOCH_DURATION],
         log: true,
         autoMine: true,
-        waitConfirmations: 1,
+        waitConfirmations: 5,
     });
 
     const globalConfigImpl = await hre.deployments.deploy("GlobalConfigImpl", {
@@ -29,7 +29,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         args: [],
         log: true,
         autoMine: true,
-        waitConfirmations: 1,
+        waitConfirmations: 5,
     });
 
     const populateGlobalContract = GlobalConfig__factory.connect(globalConfigImpl.address, await ethers.getSigner(deployer));
@@ -43,7 +43,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         ],
         log: true,
         autoMine: true,
-        waitConfirmations: 1,
+        waitConfirmations: 5,
     });
 
     const coreImpl = await hre.deployments.deploy("CoreImpl", {
@@ -52,7 +52,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         args: [],
         log: true,
         autoMine: true,
-        waitConfirmations: 1,
+        waitConfirmations: 5,
     });
 
     const configImpl = await hre.deployments.deploy("ConfigModuleImpl", {
@@ -61,7 +61,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         args: [globalConfig.address],
         log: true,
         autoMine: true,
-        waitConfirmations: 1,
+        waitConfirmations: 5,
     });
 
     const paymentImpl = await hre.deployments.deploy("PaymentModuleImpl", {
@@ -70,7 +70,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         args: [],
         log: true,
         autoMine: true,
-        waitConfirmations: 1,
+        waitConfirmations: 5,
     });
 
     const statusControllerImpl = await hre.deployments.deploy("StatusModuleImpl", {
@@ -79,7 +79,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         args: [],
         log: true,
         autoMine: true,
-        waitConfirmations: 1,
+        waitConfirmations: 5,
     });
 
     const workersImpl = await hre.deployments.deploy("WorkersModuleImpl", {
@@ -88,7 +88,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         args: [],
         log: true,
         autoMine: true,
-        waitConfirmations: 1,
+        waitConfirmations: 5,
     });
 
     const factoryImpl = await hre.deployments.deploy("FactoryImpl", {
@@ -105,7 +105,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         ],
         log: true,
         autoMine: true,
-        waitConfirmations: 1,
+        waitConfirmations: 5,
     });
 
     const factory = await hre.deployments.deploy("Factory", {
@@ -114,7 +114,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         args: [factoryImpl.address, "0x"],
         log: true,
         autoMine: true,
-        waitConfirmations: 1,
+        waitConfirmations: 5,
     });
 
     const matcherImpl = await hre.deployments.deploy("MatcherImpl", {
@@ -123,7 +123,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         args: [globalConfig.address],
         log: true,
         autoMine: true,
-        waitConfirmations: 1,
+        waitConfirmations: 5,
     });
 
     const matcher = await hre.deployments.deploy("Matcher", {
@@ -132,7 +132,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         args: [matcherImpl.address, "0x"],
         log: true,
         autoMine: true,
-        waitConfirmations: 1,
+        waitConfirmations: 5,
     });
 
     const globalConfigContract = GlobalConfig__factory.connect(globalConfig.address, await ethers.getSigner(deployer));
