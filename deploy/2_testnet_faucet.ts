@@ -30,8 +30,9 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
             faucet.address,
             hre.ethers.parseEther(String(10n ** 9n)),
         );
+
         await hre.deployments.execute(
-            "FLT",
+            "TestUSD",
             {
                 from: deployer,
                 log: true,
