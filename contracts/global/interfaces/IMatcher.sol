@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.21;
 
 import "../../deal/interfaces/ICore.sol";
 import "../../deal/base/Types.sol";

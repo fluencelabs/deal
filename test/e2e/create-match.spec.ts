@@ -5,14 +5,25 @@ import { Deal } from "../../src/client/deal";
 import { ethers } from "ethers";
 import { PATStructOutput } from "../../src/typechain-types/contracts/deal/WorkersModule.sol/WorkersModule";
 
+type Peer = {
+    peerId: string;
+    workerSlots: number;
+};
+
+type ComputeProvider = {
+    signer: ethers.Signer;
+    peers: Array<Peer>;
+};
+
 describe("Create deal -> Register CPs -> Match -> Set workers", () => {
     // deal params
     const effectors = Array.from({ length: 10 }, () => ({
         prefixes: ethers.hexlify(ethers.randomBytes(4)),
         hash: ethers.hexlify(ethers.randomBytes(32)),
     }));
-    const peerId = ethers.hexlify(ethers.randomBytes(32));
-    const computePeerWorkerSlotCount = 1n;
+
+    const computeProviders: Record<string, ComputeProvider> = {};
+
     const dealParams = {
         minWorkers: 1n,
         targetWorkers: 100n,
@@ -34,6 +45,22 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         factory = DealFactory__factory.connect((await deployments.get("Factory")).address, signer);
         flt = IERC20__factory.connect((await deployments.get("FLT")).address, signer);
         matcher = Matcher__factory.connect((await deployments.get("Matcher")).address, signer);
+
+        const signers = await hardhatEthers.getSigners();
+
+        let counter = 0;
+        [signers[0]].map((signer) => {
+            computeProviders[signer.address] = {
+                signer: signer,
+                peers: new Array(3).fill(0).map(() => {
+                    counter++;
+                    return {
+                        peerId: "0x000000000000000000000000000000000000000000000000000000000000000" + counter,
+                        workerSlots: 2,
+                    };
+                }),
+            };
+        });
     });
 
     // 1. Create deal
@@ -110,79 +137,81 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
 
     // 2. Register compute provider and workers
     it("2.1 register compute provider", async () => {
-        // get compute provider
-        const computeProvider = await hardhatEthers.provider.getSigner(1);
-
         // load configs
         const minPricePerEpoch = await factory.PRICE_PER_EPOCH();
         const configModule = await deal.getConfigModule();
         const maxCollateral = await configModule.requiredCollateral();
         const fltAddress = await flt.getAddress();
 
-        // register compute provider
-        const registerComputeProviderTx = await matcher
-            .connect(computeProvider)
-            .registerComputeProvider(minPricePerEpoch, maxCollateral, fltAddress, effectors);
-        const resOfRegisterComputeProvider = await registerComputeProviderTx.wait();
+        Object.values(computeProviders).map(async (provider) => {
+            const computeProviderSigner = provider.signer;
 
-        const computeProviderRegisteredEventTopic = matcher.interface.getEvent("ComputeProviderRegistered").topicHash;
-        const log = resOfRegisterComputeProvider.logs.find(({ topics }) => topics[0] === computeProviderRegisteredEventTopic);
-        const parsedLog: ethers.Result = matcher.interface.parseLog({
-            data: log.data,
-            topics: [...log.topics],
-        })?.args;
+            // register compute provider
+            const registerComputeProviderTx = await matcher
+                .connect(computeProviderSigner)
+                .registerComputeProvider(minPricePerEpoch, maxCollateral, fltAddress, effectors);
+            const resOfRegisterComputeProvider = await registerComputeProviderTx.wait();
 
-        // verify register result
-        // a. verify event
-        expect(parsedLog.computeProvider).to.be.equal(await computeProvider.getAddress());
-        expect(parsedLog.minPricePerEpoch).to.be.equal(minPricePerEpoch);
-        expect(parsedLog.maxCollateral).to.be.equal(maxCollateral);
-        expect(parsedLog.paymentToken).to.be.equal(fltAddress);
-        expect(parsedLog.effectors).to.deep.equal(effectors.map((effector) => [effector.prefixes, effector.hash]));
-        // b. verify contract state
-        const computeProviderInfo = await matcher.computeProviderByOwner(await computeProvider.getAddress());
-        expect(computeProviderInfo.minPricePerEpoch).to.be.equal(minPricePerEpoch);
-        expect(computeProviderInfo.maxCollateral).to.be.equal(maxCollateral);
-        expect(computeProviderInfo.paymentToken).to.be.equal(fltAddress);
-        expect(computeProviderInfo.totalFreeWorkerSlots).to.be.equal(0);
+            const computeProviderRegisteredEventTopic = matcher.interface.getEvent("ComputeProviderRegistered").topicHash;
+            const log = resOfRegisterComputeProvider.logs.find(({ topics }) => topics[0] === computeProviderRegisteredEventTopic);
+            const parsedLog: ethers.Result = matcher.interface.parseLog({
+                data: log.data,
+                topics: [...log.topics],
+            })?.args;
+
+            // verify register result
+            // a. verify event
+            expect(parsedLog.computeProvider).to.be.equal(await computeProviderSigner.getAddress());
+            expect(parsedLog.minPricePerEpoch).to.be.equal(minPricePerEpoch);
+            expect(parsedLog.maxCollateral).to.be.equal(maxCollateral);
+            expect(parsedLog.paymentToken).to.be.equal(fltAddress);
+            expect(parsedLog.effectors).to.deep.equal(effectors.map((effector) => [effector.prefixes, effector.hash]));
+            // b. verify contract state
+            const computeProviderInfo = await matcher.computeProviderByOwner(await computeProviderSigner.getAddress());
+            expect(computeProviderInfo.minPricePerEpoch).to.be.equal(minPricePerEpoch);
+            expect(computeProviderInfo.maxCollateral).to.be.equal(maxCollateral);
+            expect(computeProviderInfo.paymentToken).to.be.equal(fltAddress);
+            expect(computeProviderInfo.totalFreeWorkerSlots).to.be.equal(0);
+        });
     });
+
     it("2.2 register compute peer", async () => {
-        // get compute provider
-        const computeProvider = await hardhatEthers.provider.getSigner(1);
+        Object.values(computeProviders).map(async (provider) => {
+            provider.peers.map(async (peer) => {
+                // get compute provider
 
-        // load configs
-        const configModule = await deal.getConfigModule();
-        const maxCollateral = await configModule.requiredCollateral();
-        const workerSlotCount = computePeerWorkerSlotCount;
-        const totalCollateral = maxCollateral * workerSlotCount;
+                // load configs
+                const configModule = await deal.getConfigModule();
+                const maxCollateral = await configModule.requiredCollateral();
+                const totalCollateral = maxCollateral * BigInt(peer.workerSlots);
 
-        // approve token for collateral
-        await (await flt.connect(computeProvider).approve(await matcher.getAddress(), totalCollateral)).wait();
+                // approve token for collateral
+                await (await flt.connect(provider.signer).approve(await matcher.getAddress(), totalCollateral)).wait();
 
-        // register compute peer
-        const addWorkersSlotsTx = await matcher.connect(computeProvider).addWorkersSlots(peerId, workerSlotCount);
-        const resOfAddWorkersSlots = await addWorkersSlotsTx.wait();
+                // register compute peer
+                const addWorkersSlotsTx = await matcher.connect(provider.signer).addWorkersSlots(peer.peerId, peer.workerSlots);
+                const resOfAddWorkersSlots = await addWorkersSlotsTx.wait();
 
-        // parse event
-        const workersSlotsChangedEventTopic = matcher.interface.getEvent("WorkersSlotsChanged").topicHash;
-        const log = resOfAddWorkersSlots.logs.find(({ topics }) => topics[0] === workersSlotsChangedEventTopic);
-        const parsedLog: ethers.Result = matcher.interface.parseLog({
-            data: log.data,
-            topics: [...log.topics],
-        })?.args;
+                // parse event
+                const workersSlotsChangedEventTopic = matcher.interface.getEvent("WorkersSlotsChanged").topicHash;
+                const log = resOfAddWorkersSlots.logs.find(({ topics }) => topics[0] === workersSlotsChangedEventTopic);
+                const parsedLog: ethers.Result = matcher.interface.parseLog({
+                    data: log.data,
+                    topics: [...log.topics],
+                })?.args;
 
-        // verify event results
-        expect(parsedLog.peerId).to.be.equal(peerId);
-        expect(parsedLog.newWorkerSlots).to.be.equal(workerSlotCount);
+                // verify event results
+                expect(parsedLog.peerId).to.be.equal(peer.peerId);
+                expect(parsedLog.newWorkerSlots).to.be.equal(peer.workerSlots);
 
-        // verify contract state
-        expect(await matcher.getFreeWorkersSolts(peerId)).to.be.equal(workerSlotCount);
+                // verify contract state
+                expect(await matcher.getFreeWorkersSolts(peer.peerId)).to.be.equal(peer.workerSlots);
+            });
+        });
     });
 
     // 3. Match deal
     it("3. Match deal with compute providers", async () => {
-        // get addresses
-        const computeProviderAddress = await (await hardhatEthers.provider.getSigner(1)).getAddress();
         const dealAddress = await (await deal.getCore()).getAddress();
 
         // load modules
@@ -192,9 +221,9 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         const matchTx = await matcher.matchWithDeal(dealAddress);
         const resOfMatchTx = await matchTx.wait();
 
-        // parse ComputeProviderMatched event
+        // check ComputeProviderMatched event
         const computeProviderMatchedEventTopic = matcher.interface.getEvent("ComputeProviderMatched").topicHash;
-        const computeProviders = resOfMatchTx.logs
+        const computeProvidersMatchedEvents = resOfMatchTx.logs
             .filter((x) => x.topics[0] == computeProviderMatchedEventTopic)
             .map((log) => {
                 const args: ethers.Result = matcher.interface.parseLog({
@@ -210,9 +239,21 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
                 };
             });
 
-        // parse ComputePeerMatched event
+        expect(computeProvidersMatchedEvents.length).to.be.equal(Object.values(computeProviders).length);
+
+        computeProvidersMatchedEvents.map(async (cpMatchedEvent) => {
+            const computeProvider = computeProviders[cpMatchedEvent.computeProvider];
+            // verify compute providers
+            expect(computeProvider).to.not.be.equals(undefined);
+            expect(cpMatchedEvent.deal).to.be.equal(dealAddress);
+            //TODO: expect(computeProviders[0].dealCreationBlock).to.be.equal(0);
+            //TODO: expect(computeProviders[0].appCID).to.be.equal(appCID);
+        });
+
+        // check ComputePeerMatched event
+        const computePeersMatchedEventsMap: Record<string, any> = {};
         const computePeerMatchedEventTopic = matcher.interface.getEvent("ComputePeerMatched").topicHash;
-        const computePeers = resOfMatchTx.logs
+        resOfMatchTx.logs
             .filter((x) => x.topics[0] == computePeerMatchedEventTopic)
             .map((log) => {
                 const args: ethers.Result = matcher.interface.parseLog({
@@ -220,18 +261,32 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
                     topics: [...log.topics],
                 }).args;
 
-                return {
+                computePeersMatchedEventsMap[args.peerId] = {
                     peerId: args.peerId,
                     deal: args.deal,
-                    patIds: args.patIds,
+                    patId: args.patId,
                     dealCreationBlock: args.dealCreationBlock,
                     appCID: args.appCID,
                 };
             });
 
+        // verify compute peers
+        expect(Object.keys(computePeersMatchedEventsMap).length).to.be.equal(
+            Object.values(computeProviders).reduce((accumulator, computeProvider) => {
+                return accumulator + computeProvider.peers.length;
+            }, 0),
+        );
+
+        Object.values(computeProviders).map((computeProvider) => {
+            computeProvider.peers.map((peer) => {
+                expect(computePeersMatchedEventsMap[peer.peerId]).not.to.be.equal(undefined);
+                expect(computePeersMatchedEventsMap[peer.peerId].deal).to.be.equal(dealAddress);
+            });
+        });
+
         // parse PATCreated events
         const patCreatedEventTopic = workersModule.interface.getEvent("PATCreated").topicHash;
-        const pats = resOfMatchTx.logs
+        const patCreatedEvents = resOfMatchTx.logs
             .filter((x) => x.topics[0] == patCreatedEventTopic)
             .map((log) => {
                 const args = workersModule.interface.parseLog({
@@ -245,38 +300,25 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
                 };
             });
 
-        // verify compute providers
-        expect(computeProviders.length).to.be.equal(1);
-        expect(computeProviders[0].computeProvider).to.be.equal(computeProviderAddress);
-        expect(computeProviders[0].deal).to.be.equal(dealAddress);
-        //TODO: expect(computeProviders[0].dealCreationBlock).to.be.equal(0);
-        //TODO: expect(computeProviders[0].appCID).to.be.equal(appCID);
-
-        // verify compute peers
-        expect(computePeers.length).to.be.equal(1);
-        expect(computePeers[0].peerId).to.be.equal(peerId);
-        expect(computePeers[0].deal).to.be.equal(dealAddress);
-        expect(computePeers[0].patIds.length).to.be.equal(computePeerWorkerSlotCount);
-        //TODO: expect(computePeers[0].dealCreationBlock).to.be.equal(0);
-        //TODO: expect(computePeers[0].appCID).to.be.equal(appCID);
-
         // verify pats
-        expect(pats.length).to.be.equal(1);
+        expect(patCreatedEvents.length).to.be.equal(Object.keys(computePeersMatchedEventsMap).length);
 
         const expectedPatIds: Record<string, boolean> = {};
-        computePeers[0].patIds.map((patId) => {
-            expectedPatIds[patId] = true;
+
+        Object.values(computePeersMatchedEventsMap).map((event) => {
+            expectedPatIds[event.peerId] = true;
         });
-        pats.map((pat) => {
+
+        patCreatedEvents.map((pat) => {
             expect(pat.id).to.not.equal(ethers.ZeroAddress);
-            expect(pat.owner).to.be.equal(computeProviderAddress);
+            // expect(pat.owner).to.be.equal(computePeersMatchedEventsMap[pat.id].); TODO
             expect(expectedPatIds[pat.id]).to.be.equal(true);
             globalPATs.push(pat.id);
         });
 
         const statePATs = await workersModule.getPATs();
 
-        expect(statePATs.length).to.be.equal(pats.length);
+        expect(statePATs.length).to.be.equal(patCreatedEvents.length);
         statePATs.map((pat: PATStructOutput) => {
             expect(expectedPatIds[pat.id]).to.be.true;
         });
@@ -307,12 +349,10 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
             expect(argsOfWorkerRegistredEvent.patId).to.be.equal(patId);
             expect(argsOfWorkerRegistredEvent.workerId).to.be.equal(workerId);
 
-            console.log(patId);
             workerIdByPATId[patId] = workerId;
             console.log(workerIdByPATId[patId]);
         }
 
-        console.log(workerIdByPATId);
         const statePATs = await workersModule.getPATs();
         statePATs.map((pat: PATStructOutput) => {
             console.log(pat);

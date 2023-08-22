@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.21;
+import "hardhat/console.sol";
 
 library LinkedList {
     struct Element {
@@ -14,26 +15,41 @@ library LinkedList {
         mapping(bytes32 => Element) _elements;
     }
 
-    function _init(Bytes32List storage self, bytes32 key) private {
-        self._first = key;
-        self._last = key;
-    }
-
     function push(Bytes32List storage self, bytes32 key) internal {
-        bytes32 oldLast = self._last;
-
         require(key != bytes32(0x00), "Key cannot be ZERO");
-
         require(!exist(self, key), "Key already exists");
 
+        bytes32 oldLast = self._last;
+
         if (oldLast == 0) {
-            _init(self, key);
+            self._first = key;
+            self._last = key;
+
+            console.logString("First element");
+            console.logBytes32(self._first);
+            console.logBytes32(self._last);
             return;
         }
 
-        self._last = key;
+        console.logString("Prev last");
+        console.logBytes32(self._last);
+
         self._elements[key].prev = oldLast;
         self._elements[oldLast].next = key;
+        self._last = blockhash(block.number - 1);
+
+        console.logString("New last");
+        console.logBytes32(self._last);
+
+        console.logString("Prev element");
+        console.logBytes32(oldLast);
+        console.logBytes32(self._elements[oldLast].prev);
+        console.logBytes32(self._elements[oldLast].next);
+
+        console.logString("New element");
+        console.logBytes32(key);
+        console.logBytes32(self._elements[key].prev);
+        console.logBytes32(self._elements[key].next);
     }
 
     function first(Bytes32List storage self) internal view returns (bytes32) {

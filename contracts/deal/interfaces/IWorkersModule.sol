@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.21;
 
 import "../base/Types.sol";
 
@@ -25,7 +25,7 @@ interface IWorkersModule {
     function getUnlockedAmountBy(address owner, uint256 timestamp) external view returns (uint256);
 
     // ----------------- View -----------------
-    function createPAT(address owner, bytes32 peerId) external;
+    function createPAT(address computeProvider, bytes32 peerId) external returns (bytes32);
 
     function exit(bytes32 id) external;
 

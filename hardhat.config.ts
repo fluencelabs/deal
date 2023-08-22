@@ -7,9 +7,8 @@ dotenv.config();
 
 const config: HardhatUserConfig = {
     solidity: {
-        version: "0.8.17",
+        version: "0.8.21",
         settings: {
-            viaIR: true,
             optimizer: {
                 enabled: true,
                 runs: 10000,

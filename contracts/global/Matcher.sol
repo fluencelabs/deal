@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.21;
 
 import "../deal/interfaces/ICore.sol";
 import "./interfaces/IGlobalConfig.sol";
@@ -26,7 +26,7 @@ contract MatcherState {
 
     // ----------------- Events -----------------
     event ComputeProviderMatched(address indexed computeProvider, ICore deal, uint dealCreationBlock, CIDV1 appCID);
-    event ComputePeerMatched(bytes32 indexed peerId, ICore deal, bytes32[] patIds, uint dealCreationBlock, CIDV1 appCID);
+    event ComputePeerMatched(bytes32 indexed peerId, ICore deal, bytes32 patId, uint dealCreationBlock, CIDV1 appCID);
     event ComputeProviderRegistered(
         address computeProvider,
         uint minPricePerEpoch,
@@ -144,13 +144,16 @@ abstract contract MatcherComputeProviderSettings is MatcherInternal, IMatcher {
         require(workerSlots > 0, "Worker slots should be greater than 0");
 
         // calculate new free worker slots
-        uint256 freeWorkerSlots = computePeerByPeerId[peerId].freeWorkerSlots + workerSlots;
-        computePeerByPeerId[peerId].freeWorkerSlots = freeWorkerSlots;
+        uint256 freeWorkerSlots = computePeerByPeerId[peerId].freeWorkerSlots;
 
         // add peer to compute provider list if it's not there
-        if (freeWorkerSlots == workerSlots) {
+        if (freeWorkerSlots == 0) {
             _computePeersListByProvider[owner].push(peerId);
         }
+
+        freeWorkerSlots += workerSlots;
+
+        computePeerByPeerId[peerId].freeWorkerSlots = freeWorkerSlots;
 
         // put collateral
         uint amount = computeProviderByOwner[owner].maxCollateral * workerSlots;
@@ -309,15 +312,17 @@ contract Matcher is MatcherComputeProviderSettings, MatcherOwnable {
             address computeProviderAddress = address(bytes20(currentId));
 
             uint maxCollateral = computeProviderByOwner[computeProviderAddress].maxCollateral;
-            uint minPricePerEpoch = computeProviderByOwner[computeProviderAddress].minPricePerEpoch;
+            {
+                uint minPricePerEpoch = computeProviderByOwner[computeProviderAddress].minPricePerEpoch;
 
-            if (
-                minPricePerEpoch > dealPricePerEpoch ||
-                maxCollateral < dealRequiredCollateral ||
-                !_isEffectorsMatched(config, computeProviderAddress)
-            ) {
-                currentId = _computeProvidersList.next(currentId);
-                continue;
+                if (
+                    minPricePerEpoch > dealPricePerEpoch ||
+                    maxCollateral < dealRequiredCollateral ||
+                    !_isEffectorsMatched(config, computeProviderAddress)
+                ) {
+                    currentId = _computeProvidersList.next(currentId);
+                    continue;
+                }
             }
 
             LinkedList.Bytes32List storage computePeersList = _computePeersListByProvider[computeProviderAddress];
@@ -327,42 +332,37 @@ contract Matcher is MatcherComputeProviderSettings, MatcherOwnable {
                 bytes32 peerId = computePeersList.first();
 
                 while (peerId != bytes32(0x00)) {
-                    uint freeWorkerSlots = computePeerByPeerId[peerId].freeWorkerSlots;
+                    {
+                        uint freeWorkerSlots = computePeerByPeerId[peerId].freeWorkerSlots;
 
-                    freeWorkerSlots--;
-                    // update free worker slots
-                    if (freeWorkerSlots == 0) {
-                        delete computePeerByPeerId[peerId];
-                        computePeersList.remove(peerId);
-                    } else {
-                        computePeerByPeerId[peerId].freeWorkerSlots = freeWorkerSlots;
+                        freeWorkerSlots--;
+                        // update free worker slots
+                        if (freeWorkerSlots == 0) {
+                            delete computePeerByPeerId[peerId];
+                            computePeersList.remove(peerId);
+                        } else {
+                            computePeerByPeerId[peerId].freeWorkerSlots = freeWorkerSlots;
+                        }
                     }
 
                     // create PATs
                     globalConfig.fluenceToken().approve(address(workersModule), dealRequiredCollateral);
-                    workersModule.createPAT(computeProviderAddress, peerId);
+                    bytes32 patId = workersModule.createPAT(computeProviderAddress, peerId);
 
-                    // refound collateral
-                    uint refoundByWorker = maxCollateral - dealRequiredCollateral;
-                    if (refoundByWorker > 0) {
-                        globalConfig.fluenceToken().transfer(computeProviderAddress, refoundByWorker);
+                    {
+                        // refound collateral
+                        uint refoundByWorker = maxCollateral - dealRequiredCollateral;
+                        if (refoundByWorker > 0) {
+                            globalConfig.fluenceToken().transfer(computeProviderAddress, refoundByWorker);
+                        }
+
+                        freeWorkerSlotsInDeal--;
                     }
 
-                    // extra bad solution - temp solution - get PATs and put them to the deal
-                    PAT[] memory pats = workersModule.getPATs();
-                    bytes32[] memory patIds = new bytes32[](pats.length);
-
-                    uint patLength = pats.length;
-                    for (uint i = 0; i < patLength; i++) {
-                        patIds[i] = pats[i].id;
-                    }
-
-                    freeWorkerSlotsInDeal--;
-
-                    emit ComputePeerMatched(peerId, deal, patIds, dealCreationBlock, dealAppCID);
+                    emit ComputePeerMatched(peerId, deal, patId, dealCreationBlock, dealAppCID);
 
                     // get next compute peer
-                    peerId = _computePeersListByProvider[computeProviderAddress].next(peerId);
+                    peerId = computePeersList.next(peerId);
                 }
             }
 
