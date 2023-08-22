@@ -32,7 +32,6 @@ abstract contract DealFactoryState is IFactory {
         uint256 pricePerEpoch,
         uint256 requiredCollateral,
         uint256 minWorkers,
-        uint256 maxWorkersPerProvider,
         uint256 targetWorkers,
         CIDV1 appCID,
         CIDV1[] effectorWasmsCids,
@@ -42,7 +41,6 @@ abstract contract DealFactoryState is IFactory {
     // ----------------- Constants -----------------
     uint256 public constant PRICE_PER_EPOCH = 83 * 10 ** 15;
     uint256 public constant REQUIRED_COLLATERAL = 1 * 10 ** 18;
-    uint256 public constant MAX_WORKERS_PER_PROVIDER = 10000000;
 
     // ----------------- Immutable -----------------
     IGlobalConfig public immutable globalConfig;
@@ -119,7 +117,6 @@ contract DealFactory is DealFactoryState, UUPSUpgradeable {
                         REQUIRED_COLLATERAL,
                         appCID_,
                         minWorkers_,
-                        MAX_WORKERS_PER_PROVIDER,
                         targetWorkers_,
                         effectors
                     ),
@@ -150,7 +147,6 @@ contract DealFactory is DealFactoryState, UUPSUpgradeable {
             PRICE_PER_EPOCH,
             REQUIRED_COLLATERAL,
             minWorkers_,
-            MAX_WORKERS_PER_PROVIDER,
             targetWorkers_,
             appCID_,
             effectors,

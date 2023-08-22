@@ -94,16 +94,15 @@ contract WorkersModule is WorkersModuleState, ModuleBase, IWorkersModule {
         uint256 globalPATCount = _patCount;
         require(globalPATCount < config.targetWorkers(), "Target workers reached");
 
-        uint256 patCountByOwner = _ownersInfo[computeProvider].patCount;
-        require(patCountByOwner < config.maxWorkersPerProvider(), "Max workers per provider reached");
-
         // transfer collateral
         uint256 requiredCollateral = config.requiredCollateral();
         config.fluenceToken().safeTransferFrom(msg.sender, address(this), requiredCollateral);
 
         // create PAT
-        bytes32 id = keccak256(abi.encodePacked(_PAT_PREFIX, computeProvider, peerId, patCountByOwner));
+        bytes32 id = keccak256(abi.encodePacked(_PAT_PREFIX, computeProvider, peerId));
         require(_patById[id].owner == address(0x00), "Id already used");
+
+        uint256 patCountByOwner = _ownersInfo[computeProvider].patCount;
 
         _ownersInfo[computeProvider].patCount = ++patCountByOwner;
         _patCount = ++globalPATCount;

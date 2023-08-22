@@ -3,6 +3,7 @@ import { DealClient, DealFactory, DealFactory__factory, IERC20, IERC20__factory,
 import { deployments, ethers as hardhatEthers } from "hardhat";
 import { Deal } from "../../src/client/deal";
 import { ethers } from "ethers";
+import { PATStructOutput } from "../../src/typechain-types/contracts/deal/WorkersModule.sol/WorkersModule";
 
 describe("Create deal -> Register CPs -> Match -> Set workers", () => {
     // deal params
@@ -11,7 +12,7 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         hash: ethers.hexlify(ethers.randomBytes(32)),
     }));
     const peerId = ethers.hexlify(ethers.randomBytes(32));
-    const computePeerWorkerSlotCount = 2n;
+    const computePeerWorkerSlotCount = 1n;
     const dealParams = {
         minWorkers: 1n,
         targetWorkers: 100n,
@@ -24,7 +25,7 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
 
     // test data
     let deal: Deal;
-    const pats: string[] = [];
+    const globalPATs: string[] = [];
 
     before(async () => {
         await deployments.fixture(["tokens", "common", "localnet"]);
@@ -80,7 +81,8 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         expect(await configModule.effectors()).to.deep.equal(
             createDealParams.effectors.map((effector) => [effector.prefixes, effector.hash]),
         );
-    });
+    }).timeout(100000);
+
     it("1.2. update appCID", async () => {
         const newCID = {
             prefixes: ethers.randomBytes(4),
@@ -259,7 +261,7 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         //TODO: expect(computePeers[0].appCID).to.be.equal(appCID);
 
         // verify pats
-        expect(pats.length).to.be.equal(2);
+        expect(pats.length).to.be.equal(1);
 
         const expectedPatIds: Record<string, boolean> = {};
         computePeers[0].patIds.map((patId) => {
@@ -269,9 +271,14 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
             expect(pat.id).to.not.equal(ethers.ZeroAddress);
             expect(pat.owner).to.be.equal(computeProviderAddress);
             expect(expectedPatIds[pat.id]).to.be.equal(true);
+            globalPATs.push(pat.id);
+        });
 
-            // push pat id to result
-            pats.push(pat.id);
+        const statePATs = await workersModule.getPATs();
+
+        expect(statePATs.length).to.be.equal(pats.length);
+        statePATs.map((pat: PATStructOutput) => {
+            expect(expectedPatIds[pat.id]).to.be.true;
         });
     });
 
@@ -280,7 +287,8 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         // load modules
         const workersModule = await deal.getWorkersModule();
 
-        for (const patId of pats) {
+        const workerIdByPATId: Record<string, string> = {};
+        for (const patId of globalPATs) {
             // generate worker id
             const workerId = ethers.hexlify(ethers.randomBytes(32));
 
@@ -298,6 +306,18 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
             // verify event
             expect(argsOfWorkerRegistredEvent.patId).to.be.equal(patId);
             expect(argsOfWorkerRegistredEvent.workerId).to.be.equal(workerId);
+
+            console.log(patId);
+            workerIdByPATId[patId] = workerId;
+            console.log(workerIdByPATId[patId]);
         }
+
+        console.log(workerIdByPATId);
+        const statePATs = await workersModule.getPATs();
+        statePATs.map((pat: PATStructOutput) => {
+            console.log(pat);
+            console.log(workerIdByPATId[pat.id]);
+            expect(workerIdByPATId[pat.id]).to.be.eq(pat.workerId);
+        });
     });
 });

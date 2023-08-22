@@ -13,7 +13,6 @@ interface IConfigModule {
         uint256 requiredCollateral_,
         CIDV1 calldata appCID_,
         uint256 minWorkers_,
-        uint256 maxWorkersPerProvider_,
         uint256 targetWorkers_,
         CIDV1[] calldata effectorWasmsCids_
     ) external;
@@ -31,8 +30,6 @@ interface IConfigModule {
     function appCID() external view returns (CIDV1 memory);
 
     function minWorkers() external view returns (uint256);
-
-    function maxWorkersPerProvider() external view returns (uint256);
 
     function targetWorkers() external view returns (uint256);
 

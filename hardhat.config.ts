@@ -19,6 +19,7 @@ const config: HardhatUserConfig = {
     mocha: {
         parallel: false,
         asyncOnly: true,
+        timeout: 100000,
     },
     networks: {
         hardhat: {

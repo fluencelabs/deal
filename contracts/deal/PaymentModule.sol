@@ -163,10 +163,12 @@ contract PaymentModule is PaymentModuleOwnable {
 
             require(!paidWorkers.get(index), "Already paid");
 
-            totalReward += getRewardAmount(particleHash, patId);
+            uint256 reward = getRewardAmount(particleHash, patId);
+            totalReward += reward;
+
             paidWorkers.set(index);
 
-            emit RewardWithdrawn(patId, particleHash, totalReward);
+            emit RewardWithdrawn(patId, particleHash, reward);
         }
 
         _lockedBalance -= totalReward;
