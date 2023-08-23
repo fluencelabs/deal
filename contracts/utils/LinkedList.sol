@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity ^0.8.21;
+pragma solidity ^0.8.19;
 import "hardhat/console.sol";
 
 library LinkedList {
@@ -24,32 +24,12 @@ library LinkedList {
         if (oldLast == 0) {
             self._first = key;
             self._last = key;
-
-            console.logString("First element");
-            console.logBytes32(self._first);
-            console.logBytes32(self._last);
             return;
         }
 
-        console.logString("Prev last");
-        console.logBytes32(self._last);
-
+        self._last = key;
         self._elements[key].prev = oldLast;
         self._elements[oldLast].next = key;
-        self._last = blockhash(block.number - 1);
-
-        console.logString("New last");
-        console.logBytes32(self._last);
-
-        console.logString("Prev element");
-        console.logBytes32(oldLast);
-        console.logBytes32(self._elements[oldLast].prev);
-        console.logBytes32(self._elements[oldLast].next);
-
-        console.logString("New element");
-        console.logBytes32(key);
-        console.logBytes32(self._elements[key].prev);
-        console.logBytes32(self._elements[key].next);
     }
 
     function first(Bytes32List storage self) internal view returns (bytes32) {

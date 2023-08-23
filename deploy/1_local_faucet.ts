@@ -7,7 +7,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
     for (const account of accounts) {
         await hre.deployments.execute(
             "FLT",
-            { from: deployer, log: true, waitConfirmations: 2 },
+            { from: deployer, log: true, waitConfirmations: 1 },
             "transfer",
             account,
             hre.ethers.parseEther("100"),
@@ -15,7 +15,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
 
         await hre.deployments.execute(
             "TestUSD",
-            { from: deployer, log: true, waitConfirmations: 2 },
+            { from: deployer, log: true, waitConfirmations: 1 },
             "transfer",
             account,
             hre.ethers.parseEther("100"),

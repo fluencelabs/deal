@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity ^0.8.21;
+pragma solidity ^0.8.19;
 
 import "../deal/interfaces/ICore.sol";
 import "./interfaces/IGlobalConfig.sol";
@@ -158,6 +158,12 @@ abstract contract MatcherComputeProviderSettings is MatcherInternal, IMatcher {
         // put collateral
         uint amount = computeProviderByOwner[owner].maxCollateral * workerSlots;
         computeProviderByOwner[owner].paymentToken.safeTransferFrom(owner, address(this), amount);
+
+        // -------------------
+        bytes32 rPeerId = _computePeersListByProvider[owner].first();
+        while (rPeerId != bytes32(0)) {
+            rPeerId = _computePeersListByProvider[owner].next(rPeerId);
+        }
 
         emit WorkersSlotsChanged(peerId, freeWorkerSlots);
     }

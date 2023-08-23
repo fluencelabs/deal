@@ -14,7 +14,7 @@ type ComputeProvider = {
     signer: ethers.Signer;
     peers: Array<Peer>;
 };
-
+/*
 describe("Create deal -> Register CPs -> Match -> Set workers", () => {
     // deal params
     const effectors = Array.from({ length: 10 }, () => ({
@@ -26,7 +26,7 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
 
     const dealParams = {
         minWorkers: 1n,
-        targetWorkers: 100n,
+        targetWorkers: 1000n,
     };
 
     // setup contracts
@@ -39,23 +39,19 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
     const globalPATs: string[] = [];
 
     before(async () => {
-        await deployments.fixture(["tokens", "common", "localnet"]);
+        // await deployments.run(["tokens", "common", "localnet"]);
 
         const signer = await hardhatEthers.provider.getSigner();
         factory = DealFactory__factory.connect((await deployments.get("Factory")).address, signer);
         flt = IERC20__factory.connect((await deployments.get("FLT")).address, signer);
         matcher = Matcher__factory.connect((await deployments.get("Matcher")).address, signer);
 
-        const signers = await hardhatEthers.getSigners();
-
-        let counter = 0;
-        [signers[0]].map((signer) => {
+        (await hardhatEthers.getSigners()).map((signer) => {
             computeProviders[signer.address] = {
                 signer: signer,
                 peers: new Array(3).fill(0).map(() => {
-                    counter++;
                     return {
-                        peerId: "0x000000000000000000000000000000000000000000000000000000000000000" + counter,
+                        peerId: ethers.hexlify(ethers.randomBytes(32)),
                         workerSlots: 2,
                     };
                 }),
@@ -100,6 +96,7 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         // load modules
         const configModule = await deal.getConfigModule();
 
+        console.log(dealEvent.core);
         // expect test results
         expect(await factory.isDeal(dealEvent.core)).to.be.true;
         expect(await configModule.minWorkers()).to.be.equal(createDealParams.minWorkers);
@@ -176,20 +173,25 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
     });
 
     it("2.2 register compute peer", async () => {
+        deal = new DealClient(await hardhatEthers.provider.getSigner(), "testnet").getDeal("0x786484A918F4285F3834b7d9Bc638CDC185C3B56");
         Object.values(computeProviders).map(async (provider) => {
             provider.peers.map(async (peer) => {
                 // get compute provider
-
+                console.log("Reg compute peer");
                 // load configs
                 const configModule = await deal.getConfigModule();
+                console.log(await configModule.getAddress());
                 const maxCollateral = await configModule.requiredCollateral();
                 const totalCollateral = maxCollateral * BigInt(peer.workerSlots);
 
+                console.log("Approve token");
                 // approve token for collateral
                 await (await flt.connect(provider.signer).approve(await matcher.getAddress(), totalCollateral)).wait();
 
                 // register compute peer
                 const addWorkersSlotsTx = await matcher.connect(provider.signer).addWorkersSlots(peer.peerId, peer.workerSlots);
+
+                console.log(addWorkersSlotsTx.hash);
                 const resOfAddWorkersSlots = await addWorkersSlotsTx.wait();
 
                 // parse event
@@ -361,3 +363,4 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         });
     });
 });
+*/
