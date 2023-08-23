@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -32,7 +32,6 @@ abstract contract DealFactoryState is IFactory {
         uint256 pricePerEpoch,
         uint256 requiredCollateral,
         uint256 minWorkers,
-        uint256 maxWorkersPerProvider,
         uint256 targetWorkers,
         CIDV1 appCID,
         CIDV1[] effectorWasmsCids,
@@ -42,7 +41,6 @@ abstract contract DealFactoryState is IFactory {
     // ----------------- Constants -----------------
     uint256 public constant PRICE_PER_EPOCH = 83 * 10 ** 15;
     uint256 public constant REQUIRED_COLLATERAL = 1 * 10 ** 18;
-    uint256 public constant MAX_WORKERS_PER_PROVIDER = 10000000;
 
     // ----------------- Immutable -----------------
     IGlobalConfig public immutable globalConfig;
@@ -106,41 +104,43 @@ contract DealFactory is DealFactoryState, UUPSUpgradeable {
 
         bytes memory emptyBytes;
 
-        // Create deal system
-        ICore core = ICore(address(new ERC1967Proxy(address(coreImpl), emptyBytes)));
-        IConfigModule configModule = IConfigModule(
-            address(
-                new ModuleProxy(
-                    address(configImpl),
-                    abi.encodeWithSelector(
-                        IConfigModule.initialize.selector,
-                        defaultPaymentToken,
-                        PRICE_PER_EPOCH,
-                        REQUIRED_COLLATERAL,
-                        appCID_,
-                        minWorkers_,
-                        MAX_WORKERS_PER_PROVIDER,
-                        targetWorkers_,
-                        effectors
-                    ),
-                    address(core)
+        {
+            // Create deal system
+            ICore core = ICore(address(new ERC1967Proxy(address(coreImpl), emptyBytes)));
+            IConfigModule configModule = IConfigModule(
+                address(
+                    new ModuleProxy(
+                        address(configImpl),
+                        abi.encodeWithSelector(
+                            IConfigModule.initialize.selector,
+                            defaultPaymentToken,
+                            PRICE_PER_EPOCH,
+                            REQUIRED_COLLATERAL,
+                            appCID_,
+                            minWorkers_,
+                            targetWorkers_,
+                            effectors
+                        ),
+                        address(core)
+                    )
                 )
-            )
-        );
-        IPaymentModule paymentModule = IPaymentModule(address(new ModuleProxy(address(paymentImpl), emptyBytes, address(core))));
-        IStatusModule statusModule = IStatusModule(address(new ModuleProxy(address(statusImpl), emptyBytes, address(core))));
-        IWorkersModule workersModule = IWorkersModule(address(new ModuleProxy(address(workersImpl), emptyBytes, address(core))));
+            );
 
-        // Initialize deal system
-        core.initialize(configModule, paymentModule, statusModule, workersModule);
-        core.transferOwnership(msg.sender);
+            IPaymentModule paymentModule = IPaymentModule(address(new ModuleProxy(address(paymentImpl), emptyBytes, address(core))));
+            IStatusModule statusModule = IStatusModule(address(new ModuleProxy(address(statusImpl), emptyBytes, address(core))));
+            IWorkersModule workersModule = IWorkersModule(address(new ModuleProxy(address(workersImpl), emptyBytes, address(core))));
 
-        // throw event
-        deal.core = core;
-        deal.configModule = configModule;
-        deal.paymentModule = paymentModule;
-        deal.statusModule = statusModule;
-        deal.workersModule = workersModule;
+            // Initialize deal system
+            core.initialize(configModule, paymentModule, statusModule, workersModule);
+            core.transferOwnership(msg.sender);
+
+            // throw event
+            deal.core = core;
+            deal.configModule = configModule;
+            deal.paymentModule = paymentModule;
+            deal.statusModule = statusModule;
+            deal.workersModule = workersModule;
+        }
 
         isDeal[address(deal.core)] = true;
 
@@ -150,7 +150,6 @@ contract DealFactory is DealFactoryState, UUPSUpgradeable {
             PRICE_PER_EPOCH,
             REQUIRED_COLLATERAL,
             minWorkers_,
-            MAX_WORKERS_PER_PROVIDER,
             targetWorkers_,
             appCID_,
             effectors,

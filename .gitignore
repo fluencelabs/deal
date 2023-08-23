@@ -50,3 +50,4 @@ artifacts
 typechain-types
 
 src/deployments/localhost
+src/deployments/local

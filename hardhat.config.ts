@@ -1,13 +1,14 @@
 import type { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "hardhat-deploy";
+import "@nomiclabs/hardhat-ganache";
 import * as dotenv from "dotenv";
 
 dotenv.config();
 
 const config: HardhatUserConfig = {
     solidity: {
-        version: "0.8.17",
+        version: "0.8.19",
         settings: {
             viaIR: true,
             optimizer: {
@@ -19,6 +20,7 @@ const config: HardhatUserConfig = {
     mocha: {
         parallel: false,
         asyncOnly: true,
+        timeout: 100000,
     },
     networks: {
         hardhat: {
@@ -27,8 +29,11 @@ const config: HardhatUserConfig = {
                 interval: 1000,
             },
             accounts: {
-                passphrase: "test test test test claim trade stairs crew inspire obey veteran budget",
+                mnemonic: "test test test test claim trade stairs crew inspire obey veteran budget",
             },
+        },
+        local: {
+            url: "http://127.0.0.1:8545",
         },
         testnet: {
             url: "https://rpc.ankr.com/polygon_mumbai",

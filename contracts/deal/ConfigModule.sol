@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -23,7 +23,6 @@ abstract contract ConfigState is IConfigModule {
     uint256 public requiredCollateral;
 
     uint256 public minWorkers;
-    uint256 public maxWorkersPerProvider;
     uint256 public targetWorkers;
     uint256 public creationBlock;
 
@@ -42,7 +41,6 @@ contract ConfigModule is ConfigState, ModuleBase, Initializable {
         uint256 requiredCollateral_,
         CIDV1 calldata appCID_,
         uint256 minWorkers_,
-        uint256 maxWorkersPerProvider_,
         uint256 targetWorkers_,
         CIDV1[] memory effectors_
     ) public initializer {
@@ -51,7 +49,6 @@ contract ConfigModule is ConfigState, ModuleBase, Initializable {
         requiredCollateral = requiredCollateral_;
         _appCID = appCID_;
         minWorkers = minWorkers_;
-        maxWorkersPerProvider = maxWorkersPerProvider_;
         targetWorkers = targetWorkers_;
 
         uint256 length = effectors_.length;

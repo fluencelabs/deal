@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.19;
+import "hardhat/console.sol";
 
 library LinkedList {
     struct Element {
@@ -14,20 +15,15 @@ library LinkedList {
         mapping(bytes32 => Element) _elements;
     }
 
-    function _init(Bytes32List storage self, bytes32 key) private {
-        self._first = key;
-        self._last = key;
-    }
-
     function push(Bytes32List storage self, bytes32 key) internal {
-        bytes32 oldLast = self._last;
-
         require(key != bytes32(0x00), "Key cannot be ZERO");
-
         require(!exist(self, key), "Key already exists");
 
+        bytes32 oldLast = self._last;
+
         if (oldLast == 0) {
-            _init(self, key);
+            self._first = key;
+            self._last = key;
             return;
         }
 

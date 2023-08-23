@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -85,7 +85,7 @@ contract WorkersModule is WorkersModuleState, ModuleBase, IWorkersModule {
     }
 
     // ---- Public Mutable ----
-    function createPAT(address computeProvider, bytes32 peerId) external {
+    function createPAT(address computeProvider, bytes32 peerId) external returns (bytes32) {
         ICore core = _core();
 
         // check params and limits
@@ -94,16 +94,15 @@ contract WorkersModule is WorkersModuleState, ModuleBase, IWorkersModule {
         uint256 globalPATCount = _patCount;
         require(globalPATCount < config.targetWorkers(), "Target workers reached");
 
-        uint256 patCountByOwner = _ownersInfo[computeProvider].patCount;
-        require(patCountByOwner < config.maxWorkersPerProvider(), "Max workers per provider reached");
-
         // transfer collateral
         uint256 requiredCollateral = config.requiredCollateral();
         config.fluenceToken().safeTransferFrom(msg.sender, address(this), requiredCollateral);
 
         // create PAT
-        bytes32 id = keccak256(abi.encodePacked(_PAT_PREFIX, computeProvider, peerId, patCountByOwner));
+        bytes32 id = keccak256(abi.encodePacked(_PAT_PREFIX, computeProvider, peerId));
         require(_patById[id].owner == address(0x00), "Id already used");
+
+        uint256 patCountByOwner = _ownersInfo[computeProvider].patCount;
 
         _ownersInfo[computeProvider].patCount = ++patCountByOwner;
         _patCount = ++globalPATCount;
@@ -136,6 +135,8 @@ contract WorkersModule is WorkersModuleState, ModuleBase, IWorkersModule {
         }
 
         emit PATCreated(id, computeProvider);
+
+        return id;
     }
 
     function setWorker(bytes32 patId, bytes32 workerId) external {

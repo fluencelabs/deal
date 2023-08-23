@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -163,10 +163,12 @@ contract PaymentModule is PaymentModuleOwnable {
 
             require(!paidWorkers.get(index), "Already paid");
 
-            totalReward += getRewardAmount(particleHash, patId);
+            uint256 reward = getRewardAmount(particleHash, patId);
+            totalReward += reward;
+
             paidWorkers.set(index);
 
-            emit RewardWithdrawn(patId, particleHash, totalReward);
+            emit RewardWithdrawn(patId, particleHash, reward);
         }
 
         _lockedBalance -= totalReward;
