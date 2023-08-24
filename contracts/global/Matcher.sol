@@ -101,6 +101,7 @@ abstract contract MatcherOwnable is MatcherInternal {
 
 abstract contract MatcherComputeProviderSettings is MatcherInternal, IMatcher {
     using LinkedList for LinkedList.Bytes32List;
+
     using SafeERC20 for IERC20;
 
     // ----------------- View -----------------
@@ -158,12 +159,6 @@ abstract contract MatcherComputeProviderSettings is MatcherInternal, IMatcher {
         // put collateral
         uint amount = computeProviderByOwner[owner].maxCollateral * workerSlots;
         computeProviderByOwner[owner].paymentToken.safeTransferFrom(owner, address(this), amount);
-
-        // -------------------
-        bytes32 rPeerId = _computePeersListByProvider[owner].first();
-        while (rPeerId != bytes32(0)) {
-            rPeerId = _computePeersListByProvider[owner].next(rPeerId);
-        }
 
         emit WorkersSlotsChanged(peerId, freeWorkerSlots);
     }
@@ -314,6 +309,7 @@ contract Matcher is MatcherComputeProviderSettings, MatcherOwnable {
 
         // go through the compute providers list
         bytes32 currentId = _computeProvidersList.first();
+
         while (currentId != bytes32(0x00) && freeWorkerSlotsInDeal > 0) {
             address computeProviderAddress = address(bytes20(currentId));
 
@@ -331,13 +327,12 @@ contract Matcher is MatcherComputeProviderSettings, MatcherOwnable {
                 }
             }
 
-            LinkedList.Bytes32List storage computePeersList = _computePeersListByProvider[computeProviderAddress];
-
             // go through the compute peers list by compute provider
             {
-                bytes32 peerId = computePeersList.first();
+                LinkedList.Bytes32List storage computePeersList = _computePeersListByProvider[computeProviderAddress];
 
-                while (peerId != bytes32(0x00)) {
+                bytes32 peerId = computePeersList.first();
+                while (peerId != bytes32(0x00) && freeWorkerSlotsInDeal > 0) {
                     {
                         uint freeWorkerSlots = computePeerByPeerId[peerId].freeWorkerSlots;
 
@@ -367,15 +362,14 @@ contract Matcher is MatcherComputeProviderSettings, MatcherOwnable {
 
                     emit ComputePeerMatched(peerId, deal, patId, dealCreationBlock, dealAppCID);
 
-                    // get next compute peer
                     peerId = computePeersList.next(peerId);
                 }
             }
 
+            emit ComputeProviderMatched(computeProviderAddress, deal, dealCreationBlock, dealAppCID);
+
             // get next compute provider
             currentId = _computeProvidersList.next(currentId);
-
-            emit ComputeProviderMatched(computeProviderAddress, deal, dealCreationBlock, dealAppCID);
         }
     }
 }
