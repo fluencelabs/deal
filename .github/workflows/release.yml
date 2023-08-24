@@ -72,7 +72,7 @@ jobs:
           cache-dependency-path: package-lock.json
           cache: "npm"
 
-      - run: npm i
+      - run: npm install --f
         working-directory: .
 
       - run: npm run build

@@ -65,7 +65,7 @@ jobs:
           registry-url: "https://npm.fluence.dev"
           cache: "npm"
 
-      - run: npm i
+      - run: npm install --f
       - run: npm run build
         env:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
