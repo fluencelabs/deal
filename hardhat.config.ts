@@ -20,6 +20,7 @@ const config: HardhatUserConfig = {
     mocha: {
         parallel: false,
         asyncOnly: true,
+        bail: true,
         timeout: 100000,
     },
     networks: {
@@ -34,6 +35,9 @@ const config: HardhatUserConfig = {
         },
         local: {
             url: "http://127.0.0.1:8545",
+            accounts: {
+                mnemonic: "test test test test claim trade stairs crew inspire obey veteran budget",
+            },
         },
         testnet: {
             url: "https://rpc.ankr.com/polygon_mumbai",
