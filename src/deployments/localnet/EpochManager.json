@@ -1,0 +1,95 @@
+{
+  "address": "0x697a5B22C4F5eC5142198c330168aC15Be3Cf825",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "epochDuration_",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "currentEpoch",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "epochDuration",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xdc48280c02df7f939893c94451459b282a1c54b3321f461aeeb52245cb560c76",
+  "receipt": {
+    "to": null,
+    "from": "0x141B0502b290923c2B4575A1dCcf3756eB3f680a",
+    "contractAddress": "0x697a5B22C4F5eC5142198c330168aC15Be3Cf825",
+    "transactionIndex": 0,
+    "gasUsed": "136614",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0xe090afb16b7bb320ec3a2424544ce9fe6ee3cc5bf445457963c9905a6fa1f0e8",
+    "transactionHash": "0xdc48280c02df7f939893c94451459b282a1c54b3321f461aeeb52245cb560c76",
+    "logs": [],
+    "blockNumber": 50,
+    "cumulativeGasUsed": "136614",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    60
+  ],
+  "numDeployments": 1,
+  "solcInputHash": "953af638ac13880ce2b824dac348bba6",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.19+commit.7dd6d404\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"epochDuration_\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"currentEpoch\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"epochDuration\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/global/EpochManager.sol\":\"EpochManager\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":10000},\"remappings\":[],\"viaIR\":true},\"sources\":{\"contracts/global/EpochManager.sol\":{\"content\":\"// SPDX-License-Identifier: Apache-2.0\\n\\npragma solidity ^0.8.19;\\n\\nimport \\\"./interfaces/IEpochManager.sol\\\";\\n\\ncontract EpochManager is IEpochManager {\\n    uint256 public epochDuration;\\n\\n    constructor(uint256 epochDuration_) {\\n        epochDuration = epochDuration_;\\n    }\\n\\n    function currentEpoch() external view returns (uint256) {\\n        return block.timestamp / epochDuration;\\n    }\\n}\\n\",\"keccak256\":\"0xa5eabf2de609d57f0d8c82a003ea1926f9f805acc5c2253b72d21f9b12f791ae\",\"license\":\"Apache-2.0\"},\"contracts/global/interfaces/IEpochManager.sol\":{\"content\":\"// SPDX-License-Identifier: Apache-2.0\\n\\npragma solidity ^0.8.19;\\n\\ninterface IEpochManager {\\n    function epochDuration() external view returns (uint256);\\n\\n    function currentEpoch() external view returns (uint256);\\n}\\n\",\"keccak256\":\"0x63cdc21c2c66a80f2d881f527aeaccc85af47241bdb81858e653c80ba94e58a8\",\"license\":\"Apache-2.0\"}},\"version\":1}",
+  "bytecode": "0x60803461005157601f61018238819003918201601f19168301916001600160401b03831184841017610056578084926020946040528339810103126100515751600055604051610115908161006d8239f35b600080fd5b634e487b7160e01b600052604160045260246000fdfe6080806040526004361015601257600080fd5b600090813560e01c9081634ff0876a1460a55750637667180814603457600080fd5b3460a257807ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011260a25780549081156075576020826040519042048152f35b807f4e487b7100000000000000000000000000000000000000000000000000000000602492526012600452fd5b80fd5b90503460db57817ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011260db57602091548152f35b5080fdfea2646970667358221220ff305e3bb39a85c6ac1590833a46ea7e26fe3f3e167705da0b19386938a56e5864736f6c63430008130033",
+  "deployedBytecode": "0x6080806040526004361015601257600080fd5b600090813560e01c9081634ff0876a1460a55750637667180814603457600080fd5b3460a257807ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011260a25780549081156075576020826040519042048152f35b807f4e487b7100000000000000000000000000000000000000000000000000000000602492526012600452fd5b80fd5b90503460db57817ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011260db57602091548152f35b5080fdfea2646970667358221220ff305e3bb39a85c6ac1590833a46ea7e26fe3f3e167705da0b19386938a56e5864736f6c63430008130033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 6582,
+        "contract": "contracts/global/EpochManager.sol:EpochManager",
+        "label": "epochDuration",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_uint256"
+      }
+    ],
+    "types": {
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}
