@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.2.8](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.7...deal-aurora-v0.2.8) (2023-08-24)
+
+
+### Bug Fixes
+
+* build ([#88](https://github.com/fluencelabs/deal/issues/88)) ([7bab4f7](https://github.com/fluencelabs/deal/commit/7bab4f76b45748d84e523152f477e8f3e9af7f38))
+
+## [0.2.7](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.6...deal-aurora-v0.2.7) (2023-08-23)
+
+
+### Bug Fixes
+
+* add verify in deploy ([f266365](https://github.com/fluencelabs/deal/commit/f26636559402f5f2c6c6d277c7ccfe569744b2d5))
+* fix bugs and update cp peers logic ([#87](https://github.com/fluencelabs/deal/issues/87)) ([56f5141](https://github.com/fluencelabs/deal/commit/56f5141bc95826349e267d3f2d6982aa9394152a))
+
 ## [0.2.6](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.5...deal-aurora-v0.2.6) (2023-08-15)
 
 

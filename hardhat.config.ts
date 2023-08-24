@@ -39,6 +39,9 @@ const config: HardhatUserConfig = {
                 mnemonic: "test test test test claim trade stairs crew inspire obey veteran budget",
             },
         },
+        local: {
+            url: "http://127.0.0.1:8545",
+        },
         testnet: {
             url: "https://rpc.ankr.com/polygon_mumbai",
             accounts: [process.env["PRIVATE_KEY"] ?? "0x0000000000000000000000000000000000000000000000000000000000000000"],

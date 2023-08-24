@@ -1,6 +1,6 @@
 {
     "name": "@fluencelabs/deal-aurora",
-    "version": "0.2.6",
+    "version": "0.2.8",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "scripts": {
