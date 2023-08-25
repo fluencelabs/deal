@@ -333,19 +333,6 @@ contract Matcher is MatcherComputeProviderSettings, MatcherOwnable {
 
                 bytes32 peerId = computePeersList.first();
                 while (peerId != bytes32(0x00) && freeWorkerSlotsInDeal > 0) {
-                    {
-                        uint freeWorkerSlots = computePeerByPeerId[peerId].freeWorkerSlots;
-
-                        freeWorkerSlots--;
-                        // update free worker slots
-                        if (freeWorkerSlots == 0) {
-                            delete computePeerByPeerId[peerId];
-                            computePeersList.remove(peerId);
-                        } else {
-                            computePeerByPeerId[peerId].freeWorkerSlots = freeWorkerSlots;
-                        }
-                    }
-
                     // create PATs
                     globalConfig.fluenceToken().approve(address(workersModule), dealRequiredCollateral);
                     bytes32 patId = workersModule.createPAT(computeProviderAddress, peerId);
@@ -362,7 +349,20 @@ contract Matcher is MatcherComputeProviderSettings, MatcherOwnable {
 
                     emit ComputePeerMatched(peerId, deal, patId, dealCreationBlock, dealAppCID);
 
+                    bytes32 prevPeerId = peerId;
                     peerId = computePeersList.next(peerId);
+                    {
+                        uint freeWorkerSlots = computePeerByPeerId[prevPeerId].freeWorkerSlots;
+
+                        freeWorkerSlots--;
+                        // update free worker slots
+                        if (freeWorkerSlots == 0) {
+                            delete computePeerByPeerId[prevPeerId];
+                            computePeersList.remove(prevPeerId);
+                        } else {
+                            computePeerByPeerId[prevPeerId].freeWorkerSlots = freeWorkerSlots;
+                        }
+                    }
                 }
             }
 

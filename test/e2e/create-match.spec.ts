@@ -25,8 +25,8 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
     const computeProviders: Record<string, ComputeProvider> = {};
 
     const dealParams = {
-        minWorkers: 1n,
-        targetWorkers: 1000n,
+        minWorkers: 3n,
+        targetWorkers: 3n,
     };
 
     // setup contracts
@@ -46,13 +46,14 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         flt = IERC20__factory.connect((await deployments.get("FLT")).address, signer);
         matcher = Matcher__factory.connect((await deployments.get("Matcher")).address, signer);
 
-        (await hardhatEthers.getSigners()).map((signer) => {
+        const one = (await hardhatEthers.getSigners())[0];
+        [one].map((signer) => {
             computeProviders[signer.address] = {
                 signer: signer,
-                peers: new Array(5).fill(0).map(() => {
+                peers: new Array(3).fill(0).map(() => {
                     return {
                         peerId: ethers.hexlify(ethers.randomBytes(32)),
-                        workerSlots: 2,
+                        workerSlots: 1,
                     };
                 }),
             };

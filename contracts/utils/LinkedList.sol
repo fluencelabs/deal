@@ -44,19 +44,23 @@ library LinkedList {
 
         require(_exist(self, element, key), "Key does not exist");
 
-        delete self._elements[key];
+        if (element.prev == bytes32(0x00)) {
+            self._first = element.next;
+        }
+
+        if (element.next == bytes32(0x00)) {
+            self._last = element.prev;
+        }
 
         if (element.prev != bytes32(0x00)) {
             self._elements[element.prev].next = element.next;
-        } else {
-            self._first = element.next;
         }
 
         if (element.next != bytes32(0x00)) {
             self._elements[element.next].prev = element.prev;
-        } else {
-            self._last = element.prev;
         }
+
+        delete self._elements[key];
     }
 
     function exist(Bytes32List storage self, bytes32 key) internal view returns (bool) {
