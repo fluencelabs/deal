@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.10](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.9...deal-aurora-v0.2.10) (2023-08-25)
+
+
+### Bug Fixes
+
+* fix phassphrase ([a656a42](https://github.com/fluencelabs/deal/commit/a656a426a9c4b432f41b59041b392f81bc922485))
+
 ## [0.2.9](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.8...deal-aurora-v0.2.9) (2023-08-25)
 
 
