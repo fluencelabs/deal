@@ -30,17 +30,8 @@ const config: HardhatUserConfig = {
                 interval: 1000,
             },
             accounts: {
-                mnemonic: "test test test test claim trade stairs crew inspire obey veteran budget",
+                passphrase: "test test test test claim trade stairs crew inspire obey veteran budget",
             },
-        },
-        local: {
-            url: "http://127.0.0.1:8545",
-            accounts: {
-                mnemonic: "test test test test claim trade stairs crew inspire obey veteran budget",
-            },
-        },
-        local: {
-            url: "http://127.0.0.1:8545",
         },
         testnet: {
             url: "https://rpc.ankr.com/polygon_mumbai",
