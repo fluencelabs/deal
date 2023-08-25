@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.11](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.10...deal-aurora-v0.2.11) (2023-08-25)
+
+
+### Bug Fixes
+
+* remove peer fix ([8cff584](https://github.com/fluencelabs/deal/commit/8cff5843899fa12e597263b36708b1c5bb128a2f))
+
 ## [0.2.10](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.9...deal-aurora-v0.2.10) (2023-08-25)
 
 
