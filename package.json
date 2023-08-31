@@ -4,7 +4,7 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "scripts": {
-        "build": "npm run compile && npm run deploy && npm run pack",
+        "build": "npm run compile && npm run pack",
         "compile": "hardhat clean && hardhat compile",
         "clean": "hardhat clean",
         "contracts:localnet": "hardhat node --tags tokens,localnet,common --hostname 0.0.0.0",
