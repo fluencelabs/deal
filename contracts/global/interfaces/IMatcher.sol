@@ -6,7 +6,15 @@ import "../../deal/interfaces/ICore.sol";
 import "../../deal/base/Types.sol";
 
 interface IMatcher {
-    function getFreeWorkersSolts(bytes32 peerId) external view returns (uint);
+    function findComputePeers(
+        uint requiredCollateral,
+        uint pricePerEpoch,
+        uint freeWorkerSlots,
+        CIDV1[] calldata effectors
+    ) external view returns (address[] memory computeProviders, bytes32[][] memory computePeers);
 
-    function matchWithDeal(ICore deal) external;
+    // ----------------- Mutable -----------------
+
+    // extra bad solution - temp solution
+    function matchDeal(ICore deal, address[] calldata providers, bytes32[][] calldata peers) external;
 }

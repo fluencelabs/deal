@@ -2,27 +2,27 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/utils/StorageSlot.sol";
-import "./base/ModuleBase.sol";
 import "../global/interfaces/IGlobalConfig.sol";
-import "../utils/LinkedList.sol";
+import "./base/ModuleBase.sol";
+import "../utils/LinkedListWithUniqueKeys.sol";
 import "../utils/WithdrawRequests.sol";
 import "./interfaces/IWorkersModule.sol";
 import "./interfaces/IConfigModule.sol";
 import "./interfaces/ICore.sol";
 import "./interfaces/IStatusModule.sol";
 import "./base/Types.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/StorageSlot.sol";
 
 contract WorkersModuleState {
-    using LinkedList for LinkedList.Bytes32List;
+    using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
 
     // ---- Structs ----
 
     struct OwnerInfo {
         uint256 patCount;
-        LinkedList.Bytes32List patsIds;
+        LinkedListWithUniqueKeys.Bytes32List patsIds;
     }
 
     // ---- Constants ----
@@ -39,18 +39,18 @@ contract WorkersModuleState {
 
     // ---- Storage ----
     uint256 internal _patCount;
-    LinkedList.Bytes32List _freeIndexes;
+    LinkedListWithUniqueKeys.Bytes32List _freeIndexes;
 
     mapping(address => OwnerInfo) internal _ownersInfo;
     mapping(bytes32 => PAT) internal _patById;
 
-    LinkedList.Bytes32List _patsIdsList;
+    LinkedListWithUniqueKeys.Bytes32List _patsIdsList;
 
     mapping(address => WithdrawRequests.Requests) internal _withdrawRequests;
 }
 
 contract WorkersModule is WorkersModuleState, ModuleBase, IWorkersModule {
-    using LinkedList for LinkedList.Bytes32List;
+    using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
     using WithdrawRequests for WithdrawRequests.Requests;
     using SafeERC20 for IERC20;
 

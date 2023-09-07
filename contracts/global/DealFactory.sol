@@ -98,7 +98,9 @@ contract DealFactory is DealFactoryState, UUPSUpgradeable {
         uint256 minWorkers_,
         uint256 targetWorkers_,
         CIDV1 calldata appCID_,
-        CIDV1[] calldata effectors
+        CIDV1[] calldata effectors,
+        IConfigModule.AccessType accessType_,
+        address[] calldata accessList_
     ) external returns (address) {
         Deal memory deal;
 
@@ -119,7 +121,9 @@ contract DealFactory is DealFactoryState, UUPSUpgradeable {
                             appCID_,
                             minWorkers_,
                             targetWorkers_,
-                            effectors
+                            effectors,
+                            accessType_,
+                            accessList_
                         ),
                         address(core)
                     )
