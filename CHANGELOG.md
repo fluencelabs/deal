@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.13](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.12...deal-aurora-v0.2.13) (2023-09-07)
+
+
+### Features
+
+* whitelist & blacklist ([#98](https://github.com/fluencelabs/deal/issues/98)) ([c6d9589](https://github.com/fluencelabs/deal/commit/c6d9589e1fda42ce3b73461f1704235a6c4fefa0))
+
 ## [0.2.12](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.11...deal-aurora-v0.2.12) (2023-08-31)
 
 
