@@ -12,7 +12,7 @@ on:
         description: "@fluencelabs/deal-aurora version"
         value: ${{ jobs.snapshot.outputs.version }}
       image:
-        description: "deal-aurora image"
+        description: "chain RPC image"
         value: ${{ jobs.snapshot.outputs.image }}
     secrets:
       PRIVATE_KEY:
@@ -103,6 +103,6 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
-            docker.fluence.dev/deal-aurora:${{ steps.version.outputs.id }}
+            docker.fluence.dev/chain-rpc:${{ steps.version.outputs.id }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

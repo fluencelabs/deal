@@ -26,7 +26,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deal-aurora:
+  deal:
     if: >
       github.event_name == 'push' ||
       (
@@ -39,10 +39,10 @@ jobs:
     secrets:
       PRIVATE_KEY: ${{ secrets.DEAL_TESNET_PRIVATE_KEY }}
 
-  flox:
+  cli:
     needs:
-      - deal-aurora
-    uses: fluencelabs/flox/.github/workflows/tests.yml@main
+      - deal
+    uses: fluencelabs/cli/.github/workflows/tests.yml@main
     with:
-      deal-aurora-image: "${{ needs.deal-aurora.outputs.image }}"
-      deal-aurora-version: "${{ needs.deal-aurora.outputs.version }}"
+      deal-aurora-image: "${{ needs.deal.outputs.image }}"
+      deal-aurora-version: "${{ needs.deal.outputs.version }}"

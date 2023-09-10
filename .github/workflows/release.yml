@@ -35,7 +35,7 @@ jobs:
           RELEASE_PLEASE_OUTPUT: ${{ toJSON(steps.release.outputs) }}
         run: echo "${RELEASE_PLEASE_OUTPUT}" | jq
 
-  deal-aurora:
+  deal:
     if: needs.release-please.outputs.release-created
     runs-on: ubuntu-latest
     needs:
@@ -61,8 +61,8 @@ jobs:
           exportToken: false
           secrets: |
             kv/npmjs/fluencebot token | NODE_AUTH_TOKEN ;
-            kv/docker-registry/basicauth/ci username | DOCKER_USERNAME ;
-            kv/docker-registry/basicauth/ci password | DOCKER_PASSWORD
+            kv/hub.docker.com/fluencebot username | DOCKER_USERNAME ;
+            kv/hub.docker.com/fluencebot password | DOCKER_PASSWORD
 
       - name: Setup node
         uses: actions/setup-node@v3
@@ -90,18 +90,17 @@ jobs:
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
-          registry: "docker.fluence.dev"
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
 
-      - name: Build and push aurora container
+      - name: Build and push container
         uses: docker/build-push-action@v3
         with:
           context: .
           push: true
           tags: |
-            docker.fluence.dev/aurora:${{ needs.release-please.outputs.version }}
-            docker.fluence.dev/aurora:latest
+            fluencelabs/chain-rpc:${{ needs.release-please.outputs.version }}
+            fluencelabs/chain-rpc:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -112,7 +111,7 @@ jobs:
 
     needs:
       - release-please
-      - deal-aurora
+      - deal
 
     permissions:
       contents: read
