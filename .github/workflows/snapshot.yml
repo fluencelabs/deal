@@ -30,7 +30,7 @@ jobs:
 
     outputs:
       version: "${{ steps.snapshot.outputs.version }}"
-      image: "docker.fluence.dev/deal-aurora@${{ steps.docker.outputs.digest }}"
+      image: "docker.fluence.dev/chain-rpc@${{ steps.docker.outputs.digest }}"
 
     permissions:
       contents: read
