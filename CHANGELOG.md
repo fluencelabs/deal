@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.14](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.13...deal-aurora-v0.2.14) (2023-09-19)
+
+
+### Features
+
+* deploy to filecoin env ([#105](https://github.com/fluencelabs/deal/issues/105)) ([fb55199](https://github.com/fluencelabs/deal/commit/fb55199a98d09705a269bd1a6a975d280d85c034))
+
 ## [0.2.13](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.14...deal-aurora-v0.2.13) (2023-09-19)
 
 ### Features
