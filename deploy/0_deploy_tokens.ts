@@ -1,6 +1,8 @@
 import { ethers } from "ethers";
 import type { HardhatRuntimeEnvironment } from "hardhat/types";
 
+const WAIT_CONFIRMATIONS = process.env["WAIT_CONFIRMATIONS"] ? parseInt(process.env["WAIT_CONFIRMATIONS"]) : 0;
+
 module.exports = async function (hre: HardhatRuntimeEnvironment) {
     const accounts = await hre.getUnnamedAccounts();
     const deployer = accounts[0]!;
@@ -14,7 +16,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         args: ["Fluence Token", "FLT"],
         log: true,
         autoMine: true,
-        waitConfirmations: 1,
+        waitConfirmations: WAIT_CONFIRMATIONS,
     });
 
     const testUSD = await hre.deployments.deploy("TestUSD", {
@@ -23,7 +25,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         args: ["Test USD", "tUSD"],
         log: true,
         autoMine: true,
-        waitConfirmations: 1,
+        waitConfirmations: WAIT_CONFIRMATIONS,
     });
 
     if (flt.newlyDeployed) {
@@ -32,7 +34,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
             {
                 from: deployer,
                 log: true,
-                waitConfirmations: 1,
+                waitConfirmations: WAIT_CONFIRMATIONS,
                 autoMine: true,
             },
             "transfer",
@@ -47,7 +49,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
             {
                 from: deployer,
                 log: true,
-                waitConfirmations: 1,
+                waitConfirmations: WAIT_CONFIRMATIONS,
                 autoMine: true,
             },
             "transfer",
