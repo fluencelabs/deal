@@ -25,9 +25,8 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
     const computeProviders: Record<string, ComputeProvider> = {};
 
     const dealParams = {
-        minWorkers: 60n,
-        targetWorkers: 60n,
-        whitelistCount: 2,
+        minWorkers: 3n,
+        targetWorkers: 3n,
     };
 
     // setup contracts
@@ -47,7 +46,8 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         flt = IERC20__factory.connect((await deployments.get("FLT")).address, signer);
         matcher = Matcher__factory.connect((await deployments.get("Matcher")).address, signer);
 
-        (await hardhatEthers.getSigners()).slice(0, dealParams.whitelistCount).map((signer) => {
+        const one = (await hardhatEthers.getSigners())[0];
+        [one].map((signer) => {
             computeProviders[signer.address] = {
                 signer: signer,
                 peers: new Array(3).fill(0).map(() => {
@@ -70,8 +70,6 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
                 hash: hardhatEthers.hexlify(hardhatEthers.randomBytes(32)),
             },
             effectors: effectors,
-            accessType: 1, // 1 - whitelist, 2 - blacklist
-            accessList: Object.keys(computeProviders),
         };
 
         // create deal
@@ -80,8 +78,6 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
             createDealParams.targetWorkers,
             createDealParams.appCID,
             createDealParams.effectors,
-            createDealParams.accessType,
-            createDealParams.accessList,
         );
 
         // parse result from event
@@ -109,9 +105,6 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         expect(await configModule.effectors()).to.deep.equal(
             createDealParams.effectors.map((effector) => [effector.prefixes, effector.hash]),
         );
-
-        expect(await configModule.accessType()).to.be.equal(createDealParams.accessType);
-        expect(await configModule.getAccessList()).to.deep.equal(createDealParams.accessList.map((x) => x));
     }).timeout(100000);
 
     it("1.2. update appCID", async () => {
@@ -140,7 +133,7 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
     });
 
     // 2. Register compute provider and workers
-    it("2.1 register compute provider (whitlist)", async () => {
+    it("2.1 register compute provider", async () => {
         // load configs
         const minPricePerEpoch = await factory.PRICE_PER_EPOCH();
         const configModule = await deal.getConfigModule();
@@ -176,25 +169,6 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
             expect(computeProviderInfo.maxCollateral).to.be.equal(maxCollateral);
             expect(computeProviderInfo.paymentToken).to.be.equal(fltAddress);
             expect(computeProviderInfo.totalFreeWorkerSlots).to.be.equal(0);
-        });
-    });
-
-    it("2.1 try to register compute provider (not in whitlist)", async () => {
-        // load configs
-        const minPricePerEpoch = await factory.PRICE_PER_EPOCH();
-        const configModule = await deal.getConfigModule();
-        const maxCollateral = await configModule.requiredCollateral();
-        const fltAddress = await flt.getAddress();
-
-        (await hardhatEthers.getSigners()).slice(dealParams.whitelistCount).map(async (signer) => {
-            const computeProviderSigner = signer;
-
-            // register compute provider
-            await expect(
-                await matcher
-                    .connect(computeProviderSigner)
-                    .registerComputeProvider(minPricePerEpoch, maxCollateral, fltAddress, effectors),
-            ).to.be.revertedWith("Compute provider is not in whitelist");
         });
     });
 
@@ -242,14 +216,7 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         const workersModule = await deal.getWorkersModule();
 
         // match deal
-        const findingResult = await matcher.findComputePeers(dealAddress);
-
-        const matchTx = await matcher.matchDeal(
-            dealAddress,
-            findingResult.computeProviders.map((x) => x),
-            findingResult.computePeers.map((x) => x.map((y) => y)),
-        );
-
+        const matchTx = await matcher.matchWithDeal(dealAddress);
         const resOfMatchTx = await matchTx.wait();
 
         // check ComputeProviderMatched event
