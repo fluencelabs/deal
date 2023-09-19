@@ -33,8 +33,12 @@ const config: HardhatUserConfig = {
                 passphrase: "test test test test claim trade stairs crew inspire obey veteran budget",
             },
         },
-        testnet: {
+        stage: {
             url: "https://rpc.ankr.com/polygon_mumbai",
+            accounts: [process.env["PRIVATE_KEY"] ?? "0x0000000000000000000000000000000000000000000000000000000000000000"],
+        },
+        testnet: {
+            url: "https://rpc.ankr.com/filecoin_testnet",
             accounts: [process.env["PRIVATE_KEY"] ?? "0x0000000000000000000000000000000000000000000000000000000000000000"],
         },
     },
