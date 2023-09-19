@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.2.14](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.12...deal-aurora-v0.2.14) (2023-09-19)
+## [0.2.13](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.12...deal-aurora-v0.2.13) (2023-09-19)
 
 ### Features
 
