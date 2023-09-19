@@ -12,7 +12,7 @@ on:
         description: "@fluencelabs/deal-aurora version"
         value: ${{ jobs.snapshot.outputs.version }}
       image:
-        description: "deal-aurora image"
+        description: "chain RPC image"
         value: ${{ jobs.snapshot.outputs.image }}
     secrets:
       PRIVATE_KEY:
@@ -30,7 +30,7 @@ jobs:
 
     outputs:
       version: "${{ steps.snapshot.outputs.version }}"
-      image: "docker.fluence.dev/deal-aurora@${{ steps.docker.outputs.digest }}"
+      image: "docker.fluence.dev/chain-rpc@${{ steps.docker.outputs.digest }}"
 
     permissions:
       contents: read
@@ -38,13 +38,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: fluencelabs/deal
           ref: ${{ inputs.ref }}
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.7.2
+        uses: hashicorp/vault-action@v2.7.3
         with:
           url: https://vault.fluence.dev
           path: jwt/github
@@ -103,6 +103,6 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
-            docker.fluence.dev/deal-aurora:${{ steps.version.outputs.id }}
+            docker.fluence.dev/chain-rpc:${{ steps.version.outputs.id }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
