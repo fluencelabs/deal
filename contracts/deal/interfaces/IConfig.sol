@@ -2,32 +2,21 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../base/Types.sol";
 import "../../global/interfaces/IGlobalConfig.sol";
 
-interface IConfigModule {
+interface IConfig {
+    // ------------------ Types ------------------
     enum AccessType {
         NONE,
         WHITELIST,
         BLACKLIST
     }
 
+    // ------------------ Events ------------------
     event AppCIDChanged(CIDV1 newAppCID);
 
-    function initialize(
-        IERC20 paymentToken_,
-        uint256 pricePerEpoch_,
-        uint256 requiredCollateral_,
-        CIDV1 calldata appCID_,
-        uint256 minWorkers_,
-        uint256 targetWorkers_,
-        CIDV1[] calldata effectors_,
-        AccessType accessType_,
-        address[] calldata accessList_
-    ) external;
-
-    // ------------------ VIEWS ---------------------
+    // ------------------ View Functions ---------------------
     function globalConfig() external view returns (IGlobalConfig);
 
     function paymentToken() external view returns (IERC20);
@@ -36,11 +25,11 @@ interface IConfigModule {
 
     function creationBlock() external view returns (uint256);
 
-    function pricePerEpoch() external view returns (uint256);
+    function pricePerWorkerEpoch() external view returns (uint256);
 
     function targetWorkers() external view returns (uint256);
 
-    function requiredCollateral() external view returns (uint256);
+    function collateralPerWorker() external view returns (uint256);
 
     function minWorkers() external view returns (uint256);
 
@@ -54,7 +43,7 @@ interface IConfigModule {
 
     function appCID() external view returns (CIDV1 memory);
 
-    // ------------------ MUTABLES ------------------
+    // ------------------ Mutable Functions ------------------
     function setAppCID(CIDV1 calldata appCID_) external;
 
     function changeAccessType(AccessType accessType_) external;

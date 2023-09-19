@@ -28,7 +28,7 @@ contract MatcherState {
 
     // ----------------- Events -----------------
     event ComputeProviderMatched(address indexed computeProvider, ICore deal, uint dealCreationBlock, CIDV1 appCID);
-    event ComputePeerMatched(bytes32 indexed peerId, ICore deal, bytes32 patId, uint dealCreationBlock, CIDV1 appCID);
+    event ComputePeerMatched(bytes32 indexed peerId, ICore deal, bytes32 computeUnitId, uint dealCreationBlock, CIDV1 appCID);
     event ComputeProviderRegistered(
         address computeProvider,
         uint minPricePerEpoch,
@@ -297,9 +297,9 @@ contract Matcher is MatcherComputeProviderSettings, MatcherOwnable {
     // TODO: move this logic to offchain. Temp solution
     function findComputePeers(ICore deal) external view returns (address[] memory computeProviders, bytes32[][] memory computePeers) {
         IConfigModule config = deal.configModule();
-        uint pricePerEpoch = config.pricePerEpoch();
-        uint requiredCollateral = config.requiredCollateral();
-        uint freeWorkerSlots = config.targetWorkers() - deal.workersModule().getPATCount();
+        uint pricePerWorkerEpoch = config.pricePerWorkerEpoch();
+        uint collateralPerWorker = config.collateralPerWorker();
+        uint freeWorkerSlots = config.targetWorkers() - deal.workersModule().getComputeUnitCount();
         CIDV1[] memory effectors = config.effectors();
 
         IConfigModule.AccessType accessType = config.accessType();
@@ -315,8 +315,8 @@ contract Matcher is MatcherComputeProviderSettings, MatcherOwnable {
             if (
                 (accessType == IConfigModule.AccessType.BLACKLIST && config.isInAccessList(computeProviderAddress)) ||
                 (accessType == IConfigModule.AccessType.WHITELIST && !config.isInAccessList(computeProviderAddress)) ||
-                computeProviderByOwner[computeProviderAddress].minPricePerEpoch > pricePerEpoch ||
-                computeProviderByOwner[computeProviderAddress].maxCollateral < requiredCollateral ||
+                computeProviderByOwner[computeProviderAddress].minPricePerEpoch > pricePerWorkerEpoch ||
+                computeProviderByOwner[computeProviderAddress].maxCollateral < collateralPerWorker ||
                 !_doComputeProviderHasEffectors(computeProviderAddress, effectors)
             ) {
                 currentId = _computeProvidersList.next(currentId);
@@ -359,10 +359,10 @@ contract Matcher is MatcherComputeProviderSettings, MatcherOwnable {
         CIDV1 memory dealAppCID = config.appCID(); //TODO: temp solution for peers. Remove from event in future.
         CIDV1[] memory effectors = config.effectors();
 
-        uint dealRequiredCollateral = config.requiredCollateral();
-        uint dealPricePerEpoch = config.pricePerEpoch();
+        uint dealRequiredCollateral = config.collateralPerWorker();
+        uint dealPricePerEpoch = config.pricePerWorkerEpoch();
         uint dealCreationBlock = config.creationBlock(); //TODO: temp solution for peers. Remove from event in future.
-        uint freeWorkerSlotsInDeal = config.targetWorkers() - workersModule.getPATCount();
+        uint freeWorkerSlotsInDeal = config.targetWorkers() - workersModule.getComputeUnitCount();
 
         IConfigModule.AccessType accessType = config.accessType();
 
@@ -393,9 +393,9 @@ contract Matcher is MatcherComputeProviderSettings, MatcherOwnable {
             for (uint j = 0; j < peersLength; j++) {
                 bytes32 peerId = peers[i][j];
 
-                // create PATs
+                // create ComputeUnits
                 globalConfig.fluenceToken().approve(address(workersModule), dealRequiredCollateral);
-                bytes32 patId = workersModule.createPAT(computeProviderAddress, peerId);
+                bytes32 computeUnitId = workersModule.createComputeUnit(computeProviderAddress, peerId);
 
                 // refound collateral
                 uint refoundByWorker = maxCollateral - dealRequiredCollateral;
@@ -416,7 +416,7 @@ contract Matcher is MatcherComputeProviderSettings, MatcherOwnable {
                     computePeerByPeerId[peerId].freeWorkerSlots = freeWorkerSlots;
                 }
 
-                emit ComputePeerMatched(peerId, deal, patId, dealCreationBlock, dealAppCID);
+                emit ComputePeerMatched(peerId, deal, computeUnitId, dealCreationBlock, dealAppCID);
 
                 if (!isCPMatched) {
                     emit ComputeProviderMatched(computeProviderAddress, deal, dealCreationBlock, dealAppCID);

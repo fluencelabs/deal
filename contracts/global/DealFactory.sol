@@ -15,33 +15,7 @@ import "../deal/interfaces/IWorkersModule.sol";
 import "./interfaces/IFactory.sol";
 import "../deal/base/ModuleProxy.sol";
 
-abstract contract DealFactoryState is IFactory {
-    // ----------------- Types -----------------
-    struct Deal {
-        ICore core;
-        IConfigModule configModule;
-        IPaymentModule paymentModule;
-        IStatusModule statusModule;
-        IWorkersModule workersModule;
-    }
-
-    // ----------------- Events -----------------
-    event DealCreated(
-        Deal deal,
-        address paymentToken,
-        uint256 pricePerEpoch,
-        uint256 requiredCollateral,
-        uint256 minWorkers,
-        uint256 targetWorkers,
-        CIDV1 appCID,
-        CIDV1[] effectorWasmsCids,
-        uint256 epoch
-    );
-
-    // ----------------- Constants -----------------
-    uint256 public constant PRICE_PER_EPOCH = 83 * 10 ** 15;
-    uint256 public constant REQUIRED_COLLATERAL = 1 * 10 ** 18;
-
+contract DealFactory is DealFactoryState, UUPSUpgradeable, IDealFactory {
     // ----------------- Immutable -----------------
     IGlobalConfig public immutable globalConfig;
     IERC20 public immutable defaultPaymentToken;
@@ -73,9 +47,7 @@ abstract contract DealFactoryState is IFactory {
         statusImpl = statusImpl_;
         workersImpl = workersImpl_;
     }
-}
 
-contract DealFactory is DealFactoryState, UUPSUpgradeable {
     modifier onlyOwner() {
         require(msg.sender == globalConfig.owner(), "Only owner can call this function");
         _;
@@ -102,12 +74,8 @@ contract DealFactory is DealFactoryState, UUPSUpgradeable {
         IConfigModule.AccessType accessType_,
         address[] calldata accessList_
     ) external returns (address) {
-        Deal memory deal;
-
         bytes memory emptyBytes;
-
         {
-            // Create deal system
             ICore core = ICore(address(new ERC1967Proxy(address(coreImpl), emptyBytes)));
             IConfigModule configModule = IConfigModule(
                 address(
