@@ -8,7 +8,6 @@ interface IWorkerManager {
     // ------------------ Types ------------------
     struct ComputeUnit {
         bytes32 id;
-        uint256 index;
         bytes32 peerId;
         bytes32 workerId;
         address owner;
@@ -16,17 +15,12 @@ interface IWorkerManager {
         uint256 created;
     }
 
-    struct OwnerInfo {
-        uint256 computeUnitCount;
-        LinkedListWithUniqueKeys.Bytes32List computeUnitsIds;
-    }
-
     // ------------------ Events ------------------
     event ComputeUnitCreated(bytes32 id, address owner);
     event ComputeUnitRemoved(bytes32 id);
 
-    event WorkerRegistred(bytes32 computeUnitId, bytes32 workerId);
-    event WorkerUnregistred(bytes32 computeUnitId);
+    event WorkerIdUpdated(bytes32 computeUnitId, bytes32 workerId);
+    event WorkerRemoved(bytes32 computeUnitId);
 
     event CollateralWithdrawn(address owner, uint256 amount);
 
@@ -37,14 +31,14 @@ interface IWorkerManager {
 
     function getComputeUnits() external view returns (ComputeUnit[] memory);
 
-    function getUnlockedAmountBy(address owner, uint256 timestamp) external view returns (uint256);
+    function getUnlockCollateralEpoch(bytes32 computeUnitId) external view returns (uint256);
 
     // ------------------ Public Mutable Functions ---------------------
     function createComputeUnit(address computeProvider, bytes32 peerId) external returns (bytes32);
 
     function setWorker(bytes32 computeUnitId, bytes32 workerId) external;
 
-    function exit(bytes32 computeUnitId) external;
+    function removeWorker(bytes32 computeUnitId) external;
 
-    function withdrawCollateral(address owner) external;
+    function withdrawCollateral(bytes32 computeUnitId) external;
 }

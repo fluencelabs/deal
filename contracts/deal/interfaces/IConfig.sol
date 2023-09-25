@@ -3,7 +3,7 @@
 pragma solidity ^0.8.19;
 
 import "../base/Types.sol";
-import "../../global/interfaces/IGlobalConfig.sol";
+import "../../global/interfaces/IGlobalCore.sol";
 
 interface IConfig {
     // ------------------ Types ------------------
@@ -17,7 +17,7 @@ interface IConfig {
     event AppCIDChanged(CIDV1 newAppCID);
 
     // ------------------ View Functions ---------------------
-    function globalConfig() external view returns (IGlobalConfig);
+    function globalCore() external view returns (IGlobalCore);
 
     function paymentToken() external view returns (IERC20);
 
@@ -42,6 +42,8 @@ interface IConfig {
     function getAccessList() external view returns (address[] memory);
 
     function appCID() external view returns (CIDV1 memory);
+
+    function maxWorkersPerProvider() external view returns (uint256);
 
     // ------------------ Mutable Functions ------------------
     function setAppCID(CIDV1 calldata appCID_) external;

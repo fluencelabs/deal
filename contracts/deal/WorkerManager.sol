@@ -4,142 +4,181 @@ pragma solidity ^0.8.19;
 
 import "./Config.sol";
 import "./interfaces/IWorkerManager.sol";
-import "./WorkerInfoInternal.sol";
-import "../utils/WithdrawRequests.sol";
+import "./StatusController.sol";
+import "../utils/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-abstract contract WorkerManager is Config, WorkerInfoInternal, IWorkerManager {
+abstract contract WorkerManager is Config, StatusController, Ownable, IWorkerManager {
     using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
-    using WithdrawRequests for WithdrawRequests.Requests;
     using SafeERC20 for IERC20;
 
-    // ------------------ Constants ------------------
-    bytes32 private constant _COMPUTE_UNIT_ID_PREFIX = keccak256("fluence.computeUnit");
-
-    // ------------------ Private Vars ------------------
-    uint256 private _computeUnitCount;
-    LinkedListWithUniqueKeys.Bytes32List private _freeIndexes;
-    mapping(address => OwnerInfo) private _ownersInfo;
-    mapping(bytes32 => ComputeUnit) private _computeUnitById;
-    LinkedListWithUniqueKeys.Bytes32List private _computeUnitsIdsList;
-    mapping(address => WithdrawRequests.Requests) private _withdrawRequests;
-
-    // ------------------ Internal View Functions ---------------------
-    function _getComputeUnit(bytes32 id) internal view override returns (ComputeUnit memory) {
-        return _computeUnitById[id];
+    // ------------------ Types ------------------
+    struct ComputeProviderInfo {
+        uint256 computeUnitCount;
+        LinkedListWithUniqueKeys.Bytes32List computeUnitsIds;
     }
+
+    // ------------------ Storage ------------------
+    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.deal.storage.v1.workerManager")) - 1);
+
+    struct WorkerManagerStorage {
+        // global area
+        uint256 computeUnitCount;
+        mapping(address => ComputeProviderInfo) computeProviderInfo;
+        // compute units area
+        mapping(bytes32 => ComputeUnit) computeUnitById;
+        LinkedListWithUniqueKeys.Bytes32List computeUnitsIdsList;
+        mapping(bytes32 => uint256) collateralWithdrawEpochByComputeUnitId;
+    }
+
+    WorkerManagerStorage private _storage;
+
+    function _getWorkerManagerStorage() private pure returns (WorkerManagerStorage storage s) {
+        bytes32 storageSlot = _STORAGE_SLOT;
+
+        assembly {
+            s.slot := storageSlot
+        }
+    }
+
+    // ------------------ Constants ------------------
+    bytes32 private constant _COMPUTE_UNIT_ID_PREFIX = keccak256("fluence.computeUnit.");
+    uint256 private constant _WITHDRAW_EPOCH_TIMEOUT = 1;
 
     // ------------------ Public View Functions ---------------------
-    function getComputeUnit(bytes32 id) external view returns (ComputeUnit memory) {
-        return _getComputeUnit(id);
+    function getComputeUnit(bytes32 id) public view returns (ComputeUnit memory) {
+        return _getWorkerManagerStorage().computeUnitById[id];
     }
 
-    function getComputeUnitCount() external view returns (uint256) {
-        return _computeUnitCount;
+    function getComputeUnitCount() public view returns (uint256) {
+        return _getWorkerManagerStorage().computeUnitCount;
     }
 
     function getComputeUnits() public view returns (ComputeUnit[] memory) {
-        ComputeUnit[] memory computeUnits = new ComputeUnit[](_computeUnitCount);
+        WorkerManagerStorage storage workerStorage = _getWorkerManagerStorage();
+
+        ComputeUnit[] memory computeUnits = new ComputeUnit[](workerStorage.computeUnitCount);
 
         uint256 index = 0;
-        bytes32 computeUnitId = _computeUnitsIdsList.first();
+        bytes32 computeUnitId = workerStorage.computeUnitsIdsList.first();
         while (computeUnitId != bytes32(0)) {
-            computeUnits[index] = _computeUnitById[computeUnitId];
+            computeUnits[index] = workerStorage.computeUnitById[computeUnitId];
             index++;
 
-            computeUnitId = _computeUnitsIdsList.next(computeUnitId);
+            computeUnitId = workerStorage.computeUnitsIdsList.next(computeUnitId);
         }
 
         return computeUnits;
     }
 
-    function getUnlockedAmountBy(address owner, uint256 timestamp) external view returns (uint256) {
-        return _withdrawRequests[owner].getAmountBy(timestamp - globalConfig().withdrawTimeout());
+    function getUnlockCollateralEpoch(bytes32 computeUnitId) external view returns (uint256) {
+        return _getWorkerManagerStorage().collateralWithdrawEpochByComputeUnitId[computeUnitId];
     }
 
     // ------------------ Public Mutable Functions ---------------------
-    function createComputeUnit(address computeProvider, bytes32 peerId) external returns (bytes32) {
-        uint256 globalComputeUnitCount = _computeUnitCount;
+    function createComputeUnit(address computeProvider, bytes32 peerId) public virtual returns (bytes32) {
+        WorkerManagerStorage storage workerStorage = _getWorkerManagerStorage();
+
+        // check target workers count
+        uint256 globalComputeUnitCount = workerStorage.computeUnitCount;
         require(globalComputeUnitCount < targetWorkers(), "Target workers reached");
 
-        // transfer collateral
-        uint256 collateral = collateralPerWorker();
-        fluenceToken().safeTransferFrom(msg.sender, address(this), collateral);
-
-        // create ComputeUnit
+        // check peerId isn't exist
         bytes32 id = keccak256(abi.encodePacked(_COMPUTE_UNIT_ID_PREFIX, computeProvider, peerId));
-        require(_computeUnitById[id].owner == address(0x00), "Id already used");
+        require(workerStorage.computeUnitById[id].owner == address(0x00), "Id already used");
 
-        uint256 computeUnitCountByOwner = _ownersInfo[computeProvider].computeUnitCount;
+        // check max workers per compute provider
+        uint256 computeUnitCountByCP = workerStorage.computeProviderInfo[computeProvider].computeUnitCount;
+        require(computeUnitCountByCP < maxWorkersPerProvider(), "Max workers per compute provider reached");
 
-        _ownersInfo[computeProvider].computeUnitCount = ++computeUnitCountByOwner;
-        _computeUnitCount = ++globalComputeUnitCount;
+        // increase computeUnit count
+        workerStorage.computeProviderInfo[computeProvider].computeUnitCount = ++computeUnitCountByCP;
+        workerStorage.computeUnitCount = ++globalComputeUnitCount;
 
-        uint index = uint(_freeIndexes.first());
-        if (index == 0) {
-            index = globalComputeUnitCount;
+        // change status
+        if (getStatus() == Status.INACTIVE && globalComputeUnitCount > minWorkers()) {
+            _setStatus(Status.ACTIVE);
         }
 
-        _computeUnitById[id] = ComputeUnit({
+        // get required collateral
+        uint256 collateral = collateralPerWorker();
+
+        // create ComputeUnit
+        workerStorage.computeUnitById[id] = ComputeUnit({
             id: id,
             peerId: peerId,
-            index: index,
             workerId: bytes32(0),
             owner: computeProvider,
             collateral: collateral,
-            created: block.number
+            created: globalCore().currentEpoch()
         });
 
-        _computeUnitsIdsList.push(id);
+        // add ComputeUnit to list
+        workerStorage.computeUnitsIdsList.push(id);
 
         emit ComputeUnitCreated(id, computeProvider);
+
+        // transfer collateral
+        fluenceToken().safeTransferFrom(msg.sender, address(this), collateral);
 
         return id;
     }
 
     function setWorker(bytes32 computeUnitId, bytes32 workerId) external {
-        ComputeUnit storage computeUnit = _computeUnitById[computeUnitId];
+        require(workerId != bytes32(0), "WorkerId can't be empty");
 
-        if (computeUnit.workerId != bytes32(0)) {
-            emit WorkerUnregistred(computeUnitId);
-        }
+        _getWorkerManagerStorage().computeUnitById[computeUnitId].workerId = workerId;
 
-        computeUnit.workerId = workerId;
-
-        emit WorkerRegistred(computeUnitId, workerId);
+        emit WorkerIdUpdated(computeUnitId, workerId);
     }
 
-    function exit(bytes32 computeUnitId) external {
-        ComputeUnit storage computeUnit = _computeUnitById[computeUnitId];
+    function removeWorker(bytes32 computeUnitId) public virtual {
+        WorkerManagerStorage storage workerStorage = _getWorkerManagerStorage();
 
         // check owner
-        address owner = computeUnit.owner;
-        require(owner == msg.sender, "ComputeUnit doesn't exist");
+        address computeProvider = workerStorage.computeUnitById[computeUnitId].owner;
+        require(computeProvider != address(0x00), "ComputeUnit not found");
+        require(computeProvider == msg.sender || msg.sender == owner(), "Only provider or deal owner can remove worker");
 
         // change computeUnit count
-        uint256 newPatCount = _computeUnitCount;
-        _ownersInfo[owner].computeUnitCount--;
-        _computeUnitCount = --newPatCount;
+        uint256 newComputeUnitCount = workerStorage.computeUnitCount;
+        workerStorage.computeProviderInfo[computeProvider].computeUnitCount--;
+        workerStorage.computeUnitCount = --newComputeUnitCount;
 
-        // load modules
+        if (getStatus() == Status.ACTIVE && newComputeUnitCount < minWorkers()) {
+            _setStatus(Status.INACTIVE);
+        }
 
-        // return collateral and index
-        _freeIndexes.push(bytes32(computeUnit.index));
-        _withdrawRequests[owner].push(computeUnit.collateral);
+        // return collateral
+        workerStorage.collateralWithdrawEpochByComputeUnitId[computeUnitId] = globalCore().currentEpoch() + _WITHDRAW_EPOCH_TIMEOUT;
 
         // remove ComputeUnit
-        delete _computeUnitById[computeUnitId];
-        _computeUnitsIdsList.remove(computeUnitId);
+        delete workerStorage.computeUnitById[computeUnitId];
+        workerStorage.computeUnitsIdsList.remove(computeUnitId);
 
         emit ComputeUnitRemoved(computeUnitId);
     }
 
-    function withdrawCollateral(address owner) external {
-        IGlobalConfig gConfig = globalConfig();
+    function withdrawCollateral(bytes32 computeUnitId) external {
+        WorkerManagerStorage storage workerStorage = _getWorkerManagerStorage();
 
-        uint256 amount = _withdrawRequests[owner].confirmBy(block.timestamp - gConfig.withdrawTimeout());
-        gConfig.fluenceToken().safeTransfer(owner, amount);
+        require(
+            workerStorage.collateralWithdrawEpochByComputeUnitId[computeUnitId] <= globalCore().currentEpoch(),
+            "Collateral not available"
+        );
 
-        emit CollateralWithdrawn(owner, amount);
+        // get collateral and compute provider
+        uint256 amount = workerStorage.computeUnitById[computeUnitId].collateral;
+        address computeProvider = workerStorage.computeUnitById[computeUnitId].owner;
+
+        // reset collateral withdraw info
+        workerStorage.collateralWithdrawEpochByComputeUnitId[computeUnitId] = 0;
+
+        emit CollateralWithdrawn(computeProvider, amount);
+
+        // transfer collateral
+        fluenceToken().safeTransfer(computeProvider, amount);
+
+        emit CollateralWithdrawn(computeProvider, amount);
     }
 }

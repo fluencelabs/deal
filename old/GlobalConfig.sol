@@ -7,22 +7,25 @@ import "./DealFactory.sol";
 import "./interfaces/IGlobalConfig.sol";
 import "./interfaces/IMatcher.sol";
 import "./interfaces/IFactory.sol";
-import "./interfaces/IEpochManager.sol";
 
 abstract contract GlobalConfigState is IGlobalConfig {
     IERC20 public fluenceToken;
     uint public withdrawTimeout;
-    IEpochManager public epochManager;
+    uint256 public epochDuration;
     IMatcher public matcher;
     IFactory public factory;
 }
 
-contract GlobalConfig is OwnableUpgradeable, GlobalConfigState, UUPSUpgradeable {
+contract GlobalCore is OwnableUpgradeable, GlobalConfigState, UUPSUpgradeable {
     constructor() {
         _disableInitializers();
     }
 
-    function initialize(IERC20 fluenceToken_, uint withdrawTimeout_, IEpochManager epochManager_) public initializer {
+    function currentEpoch() external view returns (uint256) {
+        return block.timestamp / epochDuration;
+    }
+
+    function initialize(IERC20 fluenceToken_, uint withdrawTimeout_, IEpochManager epochDuration_) public initializer {
         fluenceToken = fluenceToken_;
         withdrawTimeout = withdrawTimeout_;
         epochManager = epochManager_;
