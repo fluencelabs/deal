@@ -4,7 +4,10 @@ import { ethers } from "ethers";
 export class Deal {
     private core: Core;
 
-    constructor(dealAddress: string, private signer: ethers.ContractRunner) {
+    constructor(
+        dealAddress: string,
+        private signer: ethers.ContractRunner,
+    ) {
         this.core = Core__factory.connect(dealAddress, this.signer);
     }
 

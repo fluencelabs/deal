@@ -1,4 +1,4 @@
-export const CONTRACTS_ENV = ["testnet", "stage", "local"] as const;
+export const CONTRACTS_ENV = ["kras", "testnet", "stage", "local"] as const;
 
 export type ContractsENV = (typeof CONTRACTS_ENV)[number];
 
@@ -10,6 +10,18 @@ export type ChainConfig = {
 };
 
 export const DEAL_CONFIG: Record<ContractsENV, () => Promise<ChainConfig>> = {
+    kras: async (): Promise<ChainConfig> => {
+        const globalConfig = await import("../deployments/kras/GlobalConfig.json");
+        const factory = await import("../deployments/kras/Factory.json");
+        const flt = await import("../deployments/kras/FLT.json");
+
+        return {
+            globalConfig: globalConfig.address,
+            dealFactoryAddress: factory.address,
+            fltToken: flt.address,
+            chainId: 137,
+        };
+    },
     testnet: async (): Promise<ChainConfig> => {
         const globalConfig = await import("../deployments/testnet/GlobalConfig.json");
         const factory = await import("../deployments/testnet/Factory.json");

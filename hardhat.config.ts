@@ -41,6 +41,10 @@ const config: HardhatUserConfig = {
             url: "https://rpc.ankr.com/polygon_mumbai",
             accounts: [process.env["PRIVATE_KEY"] ?? "0x0000000000000000000000000000000000000000000000000000000000000000"],
         },
+        kras: {
+            url: "https://rpc.ankr.com/polygon_mumbai",
+            accounts: [process.env["PRIVATE_KEY"] ?? "0x0000000000000000000000000000000000000000000000000000000000000000"],
+        },
     },
     etherscan: {
         apiKey: {

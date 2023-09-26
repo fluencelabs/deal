@@ -11,6 +11,7 @@
         "update-local-deployment": "cp -r ./src/deployments/localhost/* ./src/deployments/localnet",
         "deploy:stage": "hardhat deploy --network stage --tags tokens,testnet,common",
         "deploy:testnet": "hardhat deploy --network testnet --tags tokens,testnet,common",
+        "deploy:kras": "hardhat deploy --network kras --tags tokens,testnet,common",
         "compile-ts": "shx rm -rf dist && tsc -b",
         "test": "hardhat test",
         "lint:sol": "solhint 'contracts/**/*.sol'",
