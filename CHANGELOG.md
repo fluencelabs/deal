@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.15](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.14...deal-aurora-v0.2.15) (2023-09-26)
+
+
+### Bug Fixes
+
+* add kras deployment ([11b6741](https://github.com/fluencelabs/deal/commit/11b6741397f370f325425c877f1606f88add7079))
+* update deployments ([6b50ff6](https://github.com/fluencelabs/deal/commit/6b50ff68c951f16968b5762b151fc2a46803f526))
+
 ## [0.2.14](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.13...deal-aurora-v0.2.14) (2023-09-19)
 
 
