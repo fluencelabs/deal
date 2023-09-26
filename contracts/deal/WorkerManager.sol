@@ -145,12 +145,17 @@ abstract contract WorkerManager is Config, StatusController, Ownable, IWorkerMan
         workerStorage.computeProviderInfo[computeProvider].computeUnitCount--;
         workerStorage.computeUnitCount = --newComputeUnitCount;
 
-        if (getStatus() == Status.ACTIVE && newComputeUnitCount < minWorkers()) {
+        Status status = getStatus();
+        if (status == Status.ACTIVE && newComputeUnitCount < minWorkers()) {
             _setStatus(Status.INACTIVE);
         }
 
-        // return collateral
-        workerStorage.collateralWithdrawEpochByComputeUnitId[computeUnitId] = globalCore().currentEpoch() + _WITHDRAW_EPOCH_TIMEOUT;
+        if (status == Status.ENDED) {
+            workerStorage.collateralWithdrawEpochByComputeUnitId[computeUnitId] = endedEpoch() + _WITHDRAW_EPOCH_TIMEOUT;
+        } else {
+            // return collateral
+            workerStorage.collateralWithdrawEpochByComputeUnitId[computeUnitId] = globalCore().currentEpoch() + _WITHDRAW_EPOCH_TIMEOUT;
+        }
 
         // remove ComputeUnit
         delete workerStorage.computeUnitById[computeUnitId];

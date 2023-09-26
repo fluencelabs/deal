@@ -15,7 +15,7 @@ interface IDeal is IConfig, IStatusController, IWorkerManager {
     event RewardWithdrawn(bytes32 computeUnitId, uint256 reward);
 
     // ------------------ Init ------------------
-    function init(
+    function initialize(
         IERC20 paymentToken_,
         uint256 collateralPerWorker_,
         uint256 minWorkers_,

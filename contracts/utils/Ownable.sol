@@ -21,6 +21,8 @@ contract Ownable is Initializable {
         }
     }
 
+    // ------------------ Other ------------------
+
     /**
      * @dev The caller account is not authorized to perform an operation.
      */

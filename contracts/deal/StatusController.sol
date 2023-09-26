@@ -16,6 +16,7 @@ abstract contract StatusController is Config, IStatusController {
     struct StatusControllerStorage {
         Status status;
         uint startedEpoch;
+        uint endedEpoch;
     }
 
     StatusControllerStorage private _storage;
@@ -36,13 +37,20 @@ abstract contract StatusController is Config, IStatusController {
         return _getStatusControllerStorage().startedEpoch;
     }
 
+    function endedEpoch() public view returns (uint) {
+        return _getStatusControllerStorage().endedEpoch;
+    }
+
     // ------------------ Internal Mutable Functions ------------------
     function _setStatus(Status status) internal {
         StatusControllerStorage storage statusControllerStorage = _getStatusControllerStorage();
+
         statusControllerStorage.status = status;
 
-        if (statusControllerStorage.startedEpoch == 0 && status == Status.ACTIVE) {
+        if (status == Status.ACTIVE && statusControllerStorage.startedEpoch == 0) {
             statusControllerStorage.startedEpoch = globalCore().currentEpoch();
+        } else if (status == Status.ENDED && statusControllerStorage.endedEpoch == 0) {
+            statusControllerStorage.endedEpoch = globalCore().currentEpoch();
         }
     }
 }

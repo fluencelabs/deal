@@ -3,17 +3,25 @@
 pragma solidity ^0.8.19;
 
 import "../../deal/base/Types.sol";
-import "../../deal/interfaces/IConfig.sol";
+import "../../deal/interfaces/IDeal.sol";
 
 interface IDealFactory {
-    function isDeal(address addr) external view returns (bool);
+    // ----------------- Events -----------------
+    event DealCreated(address indexed owner, IDeal deal, uint createdAtEpoch);
 
-    function createDeal(
+    // ----------------- View -----------------
+    function hasDeal(IDeal deal) external view returns (bool);
+
+    // ----------------- Mutable -----------------
+    function deployDeal(
+        IERC20 paymentToken_,
+        uint256 collateralPerWorker_,
         uint256 minWorkers_,
         uint256 targetWorkers_,
-        CIDV1 calldata appCID_,
-        CIDV1[] calldata effectors,
-        IConfig.AccessType accessType_,
+        uint256 maxWorkersPerProvider_,
+        uint256 pricePerWorkerEpoch_,
+        CIDV1[] calldata effectors_,
+        IDeal.AccessType accessType_,
         address[] calldata accessList_
-    ) external returns (address);
+    ) external returns (IDeal);
 }

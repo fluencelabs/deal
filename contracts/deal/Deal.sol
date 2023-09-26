@@ -15,6 +15,7 @@ contract Deal is IDeal, WorkerManager {
 
     // ------------------ Constants ------------------
     uint256 private constant _MIN_EPOCH_FOR_BALANCE_AMOUNT = 2;
+    uint256 private constant _EPOCH_FOR_ENDING = 2;
 
     // ------------------ Types ------------------
     struct ComputeUnitPaymentInfo {
@@ -47,7 +48,7 @@ contract Deal is IDeal, WorkerManager {
     constructor(IGlobalCore globalCore_) Config(globalCore_) {}
 
     // ------------------ Init ------------------
-    function init(
+    function initialize(
         IERC20 paymentToken_,
         uint256 collateralPerWorker_,
         uint256 minWorkers_,
@@ -84,12 +85,12 @@ contract Deal is IDeal, WorkerManager {
         return currentEpoch + totalBalance / (pricePerWorkerEpoch_ * workerCount);
     }
 
-    function _fixPeriod(Status currentStatus, uint currentEpoch, uint workerCount) private {
+    function _commitPeriod(Status currentStatus, uint currentEpoch, uint workerCount) private returns (uint256 totalBalance) {
         DealStorage storage dealStorage = _getDealStorage();
 
         uint lastFixedEpoch = dealStorage.lastFixedEpoch;
         uint maxActiveEpoch = dealStorage.maxActiveEpoch;
-        uint totalBalance = dealStorage.totalBalance;
+        totalBalance = dealStorage.totalBalance;
         uint _pricePerWorkerEpoch = pricePerWorkerEpoch();
         if (currentEpoch <= maxActiveEpoch && currentStatus == IStatusController.Status.ACTIVE) {
             uint amount = (currentEpoch - lastFixedEpoch) * _pricePerWorkerEpoch * workerCount;
@@ -97,7 +98,6 @@ contract Deal is IDeal, WorkerManager {
             totalBalance -= amount;
             dealStorage.totalBalance = totalBalance;
             dealStorage.lockedBalance += amount;
-            return;
         } else if (lastFixedEpoch < maxActiveEpoch && currentStatus == IStatusController.Status.ACTIVE) {
             uint amount = (currentEpoch - maxActiveEpoch) * _pricePerWorkerEpoch * workerCount;
 
@@ -151,7 +151,9 @@ contract Deal is IDeal, WorkerManager {
         }
 
         IStatusController.Status status = getStatus();
-        if (status == IStatusController.Status.INACTIVE) {}
+        if (status == IStatusController.Status.INACTIVE) {
+            return 0;
+        }
 
         uint reward = ((globalCore().currentEpoch() - startedWorkerEpoch) -
             (dealStorage.gapsEpochCount - computeUnitPaymentInfo.gapsDelta)) * pricePerWorkerEpoch();
@@ -160,38 +162,48 @@ contract Deal is IDeal, WorkerManager {
     }
 
     // ------------------ Public Mutable Functions ------------------
-    function depositToPaymentBalance(uint256 amount) external /*TODO: onlyOwner*/ {
+    function depositToPaymentBalance(uint256 amount) external onlyOwner {
         DealStorage storage dealStorage = _getDealStorage();
 
         IStatusController.Status status = getStatus();
         uint currentEpoch = globalCore().currentEpoch();
         uint workerCount = getComputeUnitCount();
 
-        _fixPeriod(status, currentEpoch, workerCount);
+        uint totalBalance = _commitPeriod(status, currentEpoch, workerCount);
+        totalBalance += amount;
 
-        dealStorage.totalBalance += amount;
-        dealStorage.maxActiveEpoch = _calculateMaxActiveEpoch(currentEpoch, dealStorage.totalBalance, pricePerWorkerEpoch(), workerCount);
+        dealStorage.totalBalance = totalBalance;
+        dealStorage.maxActiveEpoch = _calculateMaxActiveEpoch(currentEpoch, totalBalance, pricePerWorkerEpoch(), workerCount);
 
         paymentToken().safeTransferFrom(msg.sender, address(this), amount);
 
         emit DepositedToPaymentBalance(amount);
     }
 
-    function withdrawFromPaymentBalance(uint256 amount) external /*TODO: onlyOwner*/ {
+    function withdrawFromPaymentBalance(uint256 amount) external onlyOwner {
         DealStorage storage dealStorage = _getDealStorage();
-
-        uint workerCount = getComputeUnitCount();
         IStatusController.Status status = getStatus();
         uint currentEpoch = globalCore().currentEpoch();
 
-        _fixPeriod(status, currentEpoch, workerCount);
+        if (status == IStatusController.Status.ENDED) {
+            require(currentEpoch > endedEpoch() + _EPOCH_FOR_ENDING, "Can't withdraw before 2 epochs after deal end");
+        }
 
-        dealStorage.totalBalance -= amount;
-        uint maxActiveEpoch = _calculateMaxActiveEpoch(currentEpoch, dealStorage.totalBalance, pricePerWorkerEpoch(), workerCount);
+        uint pricePerWorkerEpoch_ = pricePerWorkerEpoch();
+        uint targetWorkers_ = targetWorkers();
 
-        require(maxActiveEpoch - currentEpoch >= _MIN_EPOCH_FOR_BALANCE_AMOUNT, "Free balance needs to cover minimum 2 epochs");
+        if (status != IStatusController.Status.ENDED) {
+            uint minBalance = _MIN_EPOCH_FOR_BALANCE_AMOUNT * pricePerWorkerEpoch_ * targetWorkers_;
+            require(minBalance >= _MIN_EPOCH_FOR_BALANCE_AMOUNT, "Free balance needs to cover minimum 2 epochs");
+        }
 
-        dealStorage.maxActiveEpoch = maxActiveEpoch;
+        uint workerCount = getComputeUnitCount();
+
+        uint totalBalance = _commitPeriod(status, currentEpoch, workerCount);
+        totalBalance -= amount;
+
+        dealStorage.totalBalance = totalBalance;
+        dealStorage.maxActiveEpoch = _calculateMaxActiveEpoch(currentEpoch, totalBalance, pricePerWorkerEpoch_, workerCount);
 
         paymentToken().safeTransfer(msg.sender, amount);
 
@@ -206,8 +218,8 @@ contract Deal is IDeal, WorkerManager {
         IStatusController.Status status = getStatus();
         uint currentEpoch = globalCore().currentEpoch();
 
-        //TODO: using _fixPeriod() in this method we have to get storage value again
-        _fixPeriod(status, currentEpoch, workerCount);
+        //TODO: using _commitPeriod() in this method we have to get storage value again
+        _commitPeriod(status, currentEpoch, workerCount);
 
         //TODO: globalGapsEpoch we need to get from storage again = 100 GAS
         uint globalGapsEpochCount = dealStorage.gapsEpochCount;
@@ -234,8 +246,8 @@ contract Deal is IDeal, WorkerManager {
         uint currentEpoch = globalCore().currentEpoch();
         uint workerCount = getComputeUnitCount();
 
-        //TODO: using _fixPeriod() in this method we have to get storage value again
-        _fixPeriod(status, currentEpoch, workerCount);
+        //TODO: using _commitPeriod() in this method we have to get storage value again
+        _commitPeriod(status, currentEpoch, workerCount);
         bytes32 computeUnitId = super.createComputeUnit(computeProvider, peerId);
 
         dealStorage.maxActiveEpoch = _calculateMaxActiveEpoch(currentEpoch, dealStorage.totalBalance, pricePerWorkerEpoch(), workerCount);
@@ -250,10 +262,23 @@ contract Deal is IDeal, WorkerManager {
         uint currentEpoch = globalCore().currentEpoch();
         uint workerCount = getComputeUnitCount();
 
-        //TODO: using _fixPeriod() in this method we have to get storage value again
-        _fixPeriod(status, currentEpoch, workerCount);
+        //TODO: using _commitPeriod() in this method we have to get storage value again
+        _commitPeriod(status, currentEpoch, workerCount);
         super.removeWorker(computeUnitId);
 
         dealStorage.maxActiveEpoch = _calculateMaxActiveEpoch(currentEpoch, dealStorage.totalBalance, pricePerWorkerEpoch(), workerCount);
+    }
+
+    function stop() external onlyOwner {
+        IStatusController.Status status = getStatus();
+        uint currentEpoch = globalCore().currentEpoch();
+        uint workerCount = getComputeUnitCount();
+
+        _commitPeriod(status, currentEpoch, workerCount);
+
+        DealStorage storage dealStorage = _getDealStorage();
+        dealStorage.maxActiveEpoch = currentEpoch;
+
+        _setStatus(IStatusController.Status.ENDED);
     }
 }
