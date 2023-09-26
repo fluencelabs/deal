@@ -1,4 +1,4 @@
-FROM node:16-alpine
+FROM node:20-alpine
 COPY ./ /aurora
 WORKDIR /aurora
 RUN npm install --f && npm run compile
