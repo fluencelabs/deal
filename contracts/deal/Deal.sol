@@ -9,7 +9,7 @@ import "../global/interfaces/IGlobalCore.sol";
 import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract Deal is IDeal, WorkerManager {
+contract Deal is WorkerManager, IDeal {
     using BitMaps for BitMaps.BitMap;
     using SafeERC20 for IERC20;
 
@@ -60,8 +60,6 @@ contract Deal is IDeal, WorkerManager {
         address[] calldata accessList_,
         address owner_
     ) public initializer {
-        __Ownable_init(owner_);
-
         __Config_init(
             paymentToken_,
             collateralPerWorker_,
@@ -71,7 +69,8 @@ contract Deal is IDeal, WorkerManager {
             pricePerWorkerEpoch_,
             effectors_,
             accessType_,
-            accessList_
+            accessList_,
+            owner_
         );
     }
 
@@ -117,20 +116,12 @@ contract Deal is IDeal, WorkerManager {
     function getFreeBalance() public view returns (uint256) {
         DealStorage storage dealStorage = _getDealStorage();
 
-        uint pricePerWorkerEpoch_ = pricePerWorkerEpoch();
-        uint currentEpoch = globalCore().currentEpoch();
-
+        uint currentEpoch = _globalCore().currentEpoch();
         if (currentEpoch > dealStorage.maxActiveEpoch) {
             return 0;
         }
 
-        IStatusController.Status status = getStatus();
-        if (status == IStatusController.Status.ACTIVE) {
-            uint workersCount;
-            return (currentEpoch - dealStorage.lastFixedEpoch) * pricePerWorkerEpoch_ * workersCount;
-        } else {
-            return dealStorage.totalBalance;
-        }
+        return (currentEpoch - dealStorage.lastFixedEpoch) * pricePerWorkerEpoch() * getComputeUnitCount();
     }
 
     function getRewardAmount(bytes32 computeUnitId) public view returns (uint) {
@@ -150,13 +141,14 @@ contract Deal is IDeal, WorkerManager {
             startedWorkerEpoch = globalStartedEpoch;
         }
 
-        IStatusController.Status status = getStatus();
-        if (status == IStatusController.Status.INACTIVE) {
-            return 0;
+        uint currentEpoch = _globalCore().currentEpoch();
+        uint maxEpoch = dealStorage.maxActiveEpoch;
+        if (maxEpoch > currentEpoch) {
+            maxEpoch = currentEpoch;
         }
 
-        uint reward = ((globalCore().currentEpoch() - startedWorkerEpoch) -
-            (dealStorage.gapsEpochCount - computeUnitPaymentInfo.gapsDelta)) * pricePerWorkerEpoch();
+        uint reward = ((maxEpoch - startedWorkerEpoch) - (dealStorage.gapsEpochCount - computeUnitPaymentInfo.gapsDelta)) *
+            pricePerWorkerEpoch();
 
         return reward;
     }
@@ -166,7 +158,7 @@ contract Deal is IDeal, WorkerManager {
         DealStorage storage dealStorage = _getDealStorage();
 
         IStatusController.Status status = getStatus();
-        uint currentEpoch = globalCore().currentEpoch();
+        uint currentEpoch = _globalCore().currentEpoch();
         uint workerCount = getComputeUnitCount();
 
         uint totalBalance = _commitPeriod(status, currentEpoch, workerCount);
@@ -183,7 +175,7 @@ contract Deal is IDeal, WorkerManager {
     function withdrawFromPaymentBalance(uint256 amount) external onlyOwner {
         DealStorage storage dealStorage = _getDealStorage();
         IStatusController.Status status = getStatus();
-        uint currentEpoch = globalCore().currentEpoch();
+        uint currentEpoch = _globalCore().currentEpoch();
 
         if (status == IStatusController.Status.ENDED) {
             require(currentEpoch > endedEpoch() + _EPOCH_FOR_ENDING, "Can't withdraw before 2 epochs after deal end");
@@ -216,7 +208,7 @@ contract Deal is IDeal, WorkerManager {
 
         uint workerCount = getComputeUnitCount();
         IStatusController.Status status = getStatus();
-        uint currentEpoch = globalCore().currentEpoch();
+        uint currentEpoch = _globalCore().currentEpoch();
 
         //TODO: using _commitPeriod() in this method we have to get storage value again
         _commitPeriod(status, currentEpoch, workerCount);
@@ -243,7 +235,7 @@ contract Deal is IDeal, WorkerManager {
         DealStorage storage dealStorage = _getDealStorage();
 
         IStatusController.Status status = getStatus();
-        uint currentEpoch = globalCore().currentEpoch();
+        uint currentEpoch = _globalCore().currentEpoch();
         uint workerCount = getComputeUnitCount();
 
         //TODO: using _commitPeriod() in this method we have to get storage value again
@@ -259,7 +251,7 @@ contract Deal is IDeal, WorkerManager {
         DealStorage storage dealStorage = _getDealStorage();
 
         IStatusController.Status status = getStatus();
-        uint currentEpoch = globalCore().currentEpoch();
+        uint currentEpoch = _globalCore().currentEpoch();
         uint workerCount = getComputeUnitCount();
 
         //TODO: using _commitPeriod() in this method we have to get storage value again
@@ -271,7 +263,7 @@ contract Deal is IDeal, WorkerManager {
 
     function stop() external onlyOwner {
         IStatusController.Status status = getStatus();
-        uint currentEpoch = globalCore().currentEpoch();
+        uint currentEpoch = _globalCore().currentEpoch();
         uint workerCount = getComputeUnitCount();
 
         _commitPeriod(status, currentEpoch, workerCount);

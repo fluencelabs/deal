@@ -2,10 +2,10 @@
 
 pragma solidity ^0.8.19;
 
-import "./IWorkerManager.sol";
-import "./IConfig.sol";
-import "./IStatusController.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./IConfig.sol";
+import "./IWorkerManager.sol";
+import "./IStatusController.sol";
 
 interface IDeal is IConfig, IStatusController, IWorkerManager {
     // ----------------- Events -----------------

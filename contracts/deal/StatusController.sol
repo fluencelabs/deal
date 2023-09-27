@@ -4,9 +4,9 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "./Config.sol";
 import "../utils/LinkedListWithUniqueKeys.sol";
 import "./interfaces/IStatusController.sol";
-import "./Config.sol";
 import "../global/interfaces/IGlobalCore.sol";
 
 abstract contract StatusController is Config, IStatusController {
@@ -48,9 +48,9 @@ abstract contract StatusController is Config, IStatusController {
         statusControllerStorage.status = status;
 
         if (status == Status.ACTIVE && statusControllerStorage.startedEpoch == 0) {
-            statusControllerStorage.startedEpoch = globalCore().currentEpoch();
+            statusControllerStorage.startedEpoch = _globalCore().currentEpoch();
         } else if (status == Status.ENDED && statusControllerStorage.endedEpoch == 0) {
-            statusControllerStorage.endedEpoch = globalCore().currentEpoch();
+            statusControllerStorage.endedEpoch = _globalCore().currentEpoch();
         }
     }
 }

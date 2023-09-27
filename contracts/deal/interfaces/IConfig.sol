@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.19;
 
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../base/Types.sol";
-import "../../global/interfaces/IGlobalCore.sol";
 
 interface IConfig {
     // ------------------ Types ------------------
@@ -17,7 +17,7 @@ interface IConfig {
     event AppCIDChanged(CIDV1 newAppCID);
 
     // ------------------ View Functions ---------------------
-    function globalCore() external view returns (IGlobalCore);
+    // function globalCore() external view returns (address);
 
     function paymentToken() external view returns (IERC20);
 

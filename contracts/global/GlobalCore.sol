@@ -5,6 +5,8 @@ pragma solidity ^0.8.19;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "../utils/Ownable.sol";
 import "./interfaces/IGlobalCore.sol";
+import "./interfaces/IDealFactory.sol";
+import "./matcher/interfaces/IMatcher.sol";
 
 contract GlobalCore is UUPSUpgradeable, Ownable, IGlobalCore {
     // ------------------ Storage ------------------
@@ -13,8 +15,8 @@ contract GlobalCore is UUPSUpgradeable, Ownable, IGlobalCore {
     struct GlobalCoreStorage {
         IERC20 fluenceToken;
         uint256 epochDuration;
-        address matcher; // TODO
-        address factory; //TODO
+        IMatcher matcher;
+        IDealFactory factory;
     }
 
     GlobalCoreStorage private _storage;
@@ -57,20 +59,20 @@ contract GlobalCore is UUPSUpgradeable, Ownable, IGlobalCore {
         return _getGlobalCoreStorage().fluenceToken;
     }
 
-    function matcher() external view returns (address) {
+    function matcher() external view returns (IMatcher) {
         return _getGlobalCoreStorage().matcher;
     }
 
-    function factory() external view returns (address) {
+    function factory() external view returns (IDealFactory) {
         return _getGlobalCoreStorage().factory;
     }
 
     // ------------------ external Mutable Functions ------------------
-    function setMatcher(address matcher_) external onlyOwner {
+    function setMatcher(IMatcher matcher_) external onlyOwner {
         _getGlobalCoreStorage().matcher = matcher_;
     }
 
-    function setFactory(address factory_) external onlyOwner {
+    function setFactory(IDealFactory factory_) external onlyOwner {
         _getGlobalCoreStorage().factory = factory_;
     }
 }

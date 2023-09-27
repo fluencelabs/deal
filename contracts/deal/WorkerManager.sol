@@ -8,7 +8,7 @@ import "./StatusController.sol";
 import "../utils/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-abstract contract WorkerManager is Config, StatusController, Ownable, IWorkerManager {
+abstract contract WorkerManager is Config, StatusController, IWorkerManager {
     using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
     using SafeERC20 for IERC20;
 
@@ -110,7 +110,7 @@ abstract contract WorkerManager is Config, StatusController, Ownable, IWorkerMan
             workerId: bytes32(0),
             owner: computeProvider,
             collateral: collateral,
-            created: globalCore().currentEpoch()
+            created: _globalCore().currentEpoch()
         });
 
         // add ComputeUnit to list
@@ -154,7 +154,7 @@ abstract contract WorkerManager is Config, StatusController, Ownable, IWorkerMan
             workerStorage.collateralWithdrawEpochByComputeUnitId[computeUnitId] = endedEpoch() + _WITHDRAW_EPOCH_TIMEOUT;
         } else {
             // return collateral
-            workerStorage.collateralWithdrawEpochByComputeUnitId[computeUnitId] = globalCore().currentEpoch() + _WITHDRAW_EPOCH_TIMEOUT;
+            workerStorage.collateralWithdrawEpochByComputeUnitId[computeUnitId] = _globalCore().currentEpoch() + _WITHDRAW_EPOCH_TIMEOUT;
         }
 
         // remove ComputeUnit
@@ -168,7 +168,7 @@ abstract contract WorkerManager is Config, StatusController, Ownable, IWorkerMan
         WorkerManagerStorage storage workerStorage = _getWorkerManagerStorage();
 
         require(
-            workerStorage.collateralWithdrawEpochByComputeUnitId[computeUnitId] <= globalCore().currentEpoch(),
+            workerStorage.collateralWithdrawEpochByComputeUnitId[computeUnitId] <= _globalCore().currentEpoch(),
             "Collateral not available"
         );
 

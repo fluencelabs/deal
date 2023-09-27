@@ -7,8 +7,9 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../utils/LinkedListWithUniqueKeys.sol";
 import "./interfaces/IConfig.sol";
 import "../global/interfaces/IGlobalCore.sol";
+import "../utils/Ownable.sol";
 
-contract Config is Initializable, IConfig {
+contract Config is Initializable, IConfig, Ownable {
     using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
 
     // ------------------ Storage ------------------
@@ -41,16 +42,43 @@ contract Config is Initializable, IConfig {
 
     // ------------------ Immutable ------------------
     IERC20 private immutable _fluenceToken;
-    IGlobalCore private immutable _globalCore;
+    IGlobalCore private immutable _globalCore_;
 
     // ------------------ Constructor ------------------
     constructor(IGlobalCore globalCore_) {
-        _globalCore = globalCore_;
+        _globalCore_ = globalCore_;
         _fluenceToken = globalCore_.fluenceToken();
     }
 
     // ------------------ Initializer ------------------
     function __Config_init(
+        IERC20 paymentToken_,
+        uint256 collateralPerWorker_,
+        uint256 minWorkers_,
+        uint256 targetWorkers_,
+        uint256 maxWorkersPerProvider_,
+        uint256 pricePerWorkerEpoch_,
+        CIDV1[] calldata effectors_,
+        AccessType accessType_,
+        address[] calldata accessList_,
+        address owner_
+    ) internal onlyInitializing {
+        __Ownable_init(owner_);
+
+        __Config_init_unchained(
+            paymentToken_,
+            collateralPerWorker_,
+            minWorkers_,
+            targetWorkers_,
+            maxWorkersPerProvider_,
+            pricePerWorkerEpoch_,
+            effectors_,
+            accessType_,
+            accessList_
+        );
+    }
+
+    function __Config_init_unchained(
         IERC20 paymentToken_,
         uint256 collateralPerWorker_,
         uint256 minWorkers_,
@@ -84,11 +112,12 @@ contract Config is Initializable, IConfig {
         }
     }
 
-    // ------------------ View Functions ---------------------
-    function globalCore() public view returns (IGlobalCore) {
-        return _globalCore;
+    // ------------------ View Internal Functions ------------------
+    function _globalCore() internal view returns (IGlobalCore) {
+        return _globalCore_;
     }
 
+    // ------------------ View Functions ---------------------
     function paymentToken() public view returns (IERC20) {
         return _getConfigStorage().paymentToken;
     }
@@ -133,12 +162,12 @@ contract Config is Initializable, IConfig {
         bytes32[] memory result = _getConfigStorage().accessList.toArray();
 
         /*
+        TODO: mv to assembly
         uint256 length = result.length;
         assembly ("memory-safe") {
             return(result, mul(length, 32))
         }*/
 
-        // TOD: mv to assembly
         address[] memory result2 = new address[](result.length);
         for (uint256 i = 0; i < result.length; i++) {
             result2[i] = address(bytes20(result[i]));
@@ -156,17 +185,17 @@ contract Config is Initializable, IConfig {
     }
 
     // ------------------ Mutable Functions ------------------
-    function setAppCID(CIDV1 calldata appCID_) external /*TODO: onlyOwner */ {
+    function setAppCID(CIDV1 calldata appCID_) external onlyOwner {
         _getConfigStorage().appCID = appCID_;
 
         emit AppCIDChanged(appCID_);
     }
 
-    function changeAccessType(AccessType accessType_) external /*TODO: onlyOwner*/ {
+    function changeAccessType(AccessType accessType_) external onlyOwner {
         _getConfigStorage().accessType = accessType_;
     }
 
-    function removeFromAccessList(address addr) external /*TODO: onlyOwner*/ {
+    function removeFromAccessList(address addr) external onlyOwner {
         _getConfigStorage().accessList.remove(bytes32(bytes20(addr)));
     }
 }
