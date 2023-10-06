@@ -9,8 +9,8 @@ import "./IStatusController.sol";
 
 interface IDeal is IConfig, IStatusController, IWorkerManager {
     // ----------------- Events -----------------
-    event DepositedToPaymentBalance(uint256 amount);
-    event WithdrawnFromPaymentBalance(uint256 amount);
+    event Deposited(uint256 amount);
+    event Withdrawn(uint256 amount);
 
     event RewardWithdrawn(bytes32 computeUnitId, uint256 reward);
 
@@ -29,9 +29,9 @@ interface IDeal is IConfig, IStatusController, IWorkerManager {
     ) external;
 
     // ------------------ Public Ownable Functions ------------------
-    function depositToPaymentBalance(uint256 amount) external;
+    function deposit(uint256 amount) external;
 
-    function withdrawFromPaymentBalance(uint256 amount) external;
+    function withdraw(uint256 amount) external;
 
     // ------------------ Public View Functions ------------------
     function getFreeBalance() external view returns (uint256);
@@ -39,5 +39,5 @@ interface IDeal is IConfig, IStatusController, IWorkerManager {
     function getRewardAmount(bytes32 computeUnitId) external view returns (uint);
 
     // ------------------ Public Mutable Functions ------------------
-    function withdrawReward(bytes32 computeUnitId) external;
+    function withdrawRewards(bytes32 computeUnitId) external;
 }
