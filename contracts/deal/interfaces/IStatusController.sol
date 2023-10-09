@@ -11,7 +11,7 @@ interface IStatusController {
     }
 
     // ------------------ Views ------------------
-    function getStatus() external view returns (Status);
+    function getCommittedStatus() external view returns (Status);
 
     function startedEpoch() external view returns (uint);
 }

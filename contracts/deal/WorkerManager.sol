@@ -148,11 +148,18 @@ abstract contract WorkerManager is Config, StatusController, IWorkerManager {
     }
 
     // ------------------ Public Mutable Functions ---------------------
-
     function setWorker(bytes32 computeUnitId, bytes32 workerId) external {
+        WorkerManagerStorage storage workerStorage = _getWorkerManagerStorage();
+        ComputeUnit storage computeUnit = workerStorage.computeUnitById[computeUnitId];
+
         require(workerId != bytes32(0), "WorkerId can't be empty");
 
-        _getWorkerManagerStorage().computeUnitById[computeUnitId].workerId = workerId;
+        // check owner
+        address computeProvider = computeUnit.owner;
+        require(computeProvider != address(0x00), "ComputeUnit not found");
+        require(computeProvider == msg.sender, "Only provider or deal owner can remove worker");
+
+        computeUnit.workerId = workerId;
 
         emit WorkerIdUpdated(computeUnitId, workerId);
     }

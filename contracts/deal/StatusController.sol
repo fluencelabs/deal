@@ -29,7 +29,7 @@ abstract contract StatusController is Config, IStatusController {
     }
 
     // ------------------ Public Mutable Functions ---------------------
-    function getStatus() public view returns (Status) {
+    function getCommittedStatus() public view returns (Status) {
         return _getStatusControllerStorage().status;
     }
 

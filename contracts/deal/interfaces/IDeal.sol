@@ -34,6 +34,8 @@ interface IDeal is IConfig, IStatusController, IWorkerManager {
     function withdraw(uint256 amount) external;
 
     // ------------------ Public View Functions ------------------
+    function getStatus() external view returns (Status);
+
     function getFreeBalance() external view returns (uint256);
 
     function getRewardAmount(bytes32 computeUnitId) external view returns (uint);

@@ -102,7 +102,7 @@ contract Deal is WorkerManager, IDeal {
             balance.setTotalBalance(balance.getTotalBalance() - amount);
             balance.setLockedBalance(balance.getLockedBalance() + amount);
         } else if (
-            (currentStatus == newStatus && newStatus == IStatusController.Status.ACTIVE) ||
+            (currentStatus == newStatus && newStatus == IStatusController.Status.INACTIVE) ||
             (currentStatus == IStatusController.Status.INACTIVE && newStatus == IStatusController.Status.ACTIVE)
         ) {
             balance.setGapsEpochCount(balance.getGapsEpochCount() + (currentEpoch - lastCommitedEpoch));
@@ -121,10 +121,31 @@ contract Deal is WorkerManager, IDeal {
         balance.commitToStorage(dealStorage);
         dealStorage.lastCommitedEpoch = currentEpoch;
 
-        //TODO: change status
+        if (currentStatus != newStatus) {
+            _setStatus(newStatus);
+        }
     }
 
     // ------------------ Public View Functions ------------------
+    function getStatus() public view returns (IStatusController.Status) {
+        IStatusController.Status currentStatus = getCommittedStatus();
+
+        if (currentStatus == IStatusController.Status.ENDED || currentStatus == IStatusController.Status.INACTIVE) {
+            return currentStatus;
+        }
+
+        uint currentEpoch = _globalCore().currentEpoch();
+        uint maxPaidEpoch = _getDealStorage().maxPaidEpoch;
+
+        if (currentEpoch > maxPaidEpoch) {
+            return IStatusController.Status.INACTIVE;
+        } else if (currentEpoch > maxPaidEpoch) {
+            return IStatusController.Status.INACTIVE;
+        } else {
+            return IStatusController.Status.ACTIVE;
+        }
+    }
+
     function getFreeBalance() public view returns (uint256) {
         DealStorage storage dealStorage = _getDealStorage();
 
@@ -140,8 +161,8 @@ contract Deal is WorkerManager, IDeal {
         DealStorage storage dealStorage = _getDealStorage();
         ComputeUnitPaymentInfo storage computeUnitPaymentInfo = dealStorage.cUnitPaymentInfo[computeUnitId];
 
-        IStatusController.Status currentStatus = getStatus(); //TODO
-        IStatusController.Status newStatus = getStatus(); //TODO
+        IStatusController.Status currentStatus = getCommittedStatus();
+        IStatusController.Status newStatus = getStatus();
 
         uint currentEpoch = _globalCore().currentEpoch();
         uint workerCount = getComputeUnitCount();
@@ -170,8 +191,8 @@ contract Deal is WorkerManager, IDeal {
     function deposit(uint256 amount) external onlyOwner {
         DealStorage storage dealStorage = _getDealStorage();
 
-        IStatusController.Status currentStatus = getStatus(); //TODO
-        IStatusController.Status newStatus = getStatus(); //TODO
+        IStatusController.Status currentStatus = getCommittedStatus();
+        IStatusController.Status newStatus = getStatus();
 
         uint currentEpoch = _globalCore().currentEpoch();
         uint workerCount = getComputeUnitCount();
@@ -203,7 +224,7 @@ contract Deal is WorkerManager, IDeal {
     function withdraw(uint256 amount) external onlyOwner {
         DealStorage storage dealStorage = _getDealStorage();
 
-        IStatusController.Status currentStatus = getStatus(); //TODO
+        IStatusController.Status currentStatus = getCommittedStatus();
         IStatusController.Status newStatus = getStatus(); //TODO
 
         uint currentEpoch = _globalCore().currentEpoch();
@@ -244,7 +265,7 @@ contract Deal is WorkerManager, IDeal {
         DealStorage storage dealStorage = _getDealStorage();
         ComputeUnitPaymentInfo storage computeUnitPaymentInfo = dealStorage.cUnitPaymentInfo[computeUnitId];
 
-        IStatusController.Status currentStatus = getStatus(); //TODO
+        IStatusController.Status currentStatus = getCommittedStatus();
         IStatusController.Status newStatus = getStatus(); //TODO
 
         uint currentEpoch = _globalCore().currentEpoch();
@@ -286,7 +307,7 @@ contract Deal is WorkerManager, IDeal {
     function createComputeUnit(address computeProvider, bytes32 peerId) public returns (bytes32) {
         DealStorage storage dealStorage = _getDealStorage();
 
-        IStatusController.Status currentStatus = getStatus(); //TODO
+        IStatusController.Status currentStatus = getCommittedStatus();
         IStatusController.Status newStatus = getStatus(); //TODO
 
         uint currentEpoch = _globalCore().currentEpoch();
@@ -328,7 +349,7 @@ contract Deal is WorkerManager, IDeal {
     function removeWorker(bytes32 computeUnitId) public {
         DealStorage storage dealStorage = _getDealStorage();
 
-        IStatusController.Status currentStatus = getStatus(); //TODO
+        IStatusController.Status currentStatus = getCommittedStatus();
         IStatusController.Status newStatus = getStatus(); //TODO
 
         uint currentEpoch = _globalCore().currentEpoch();
@@ -363,7 +384,7 @@ contract Deal is WorkerManager, IDeal {
     function stop() external onlyOwner {
         DealStorage storage dealStorage = _getDealStorage();
 
-        IStatusController.Status currentStatus = getStatus(); //TODO
+        IStatusController.Status currentStatus = getCommittedStatus();
         IStatusController.Status newStatus = getStatus(); //TODO
 
         DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
