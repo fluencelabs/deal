@@ -1,6 +1,8 @@
 import { ethers } from "ethers";
 import type { HardhatRuntimeEnvironment } from "hardhat/types";
 
+const TEST_TOKEN_AMOUNT = 10n ** 30n * 10n ** 18n;
+
 module.exports = async function (hre: HardhatRuntimeEnvironment) {
     const accounts = await hre.getUnnamedAccounts();
     const deployer = accounts[0]!;
@@ -37,7 +39,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
             },
             "transfer",
             deployer,
-            ethers.toBeHex(10n ** 30n * 10n ** 18n),
+            ethers.toBeHex(TEST_TOKEN_AMOUNT),
         );
     }
 
@@ -52,7 +54,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
             },
             "transfer",
             deployer,
-            ethers.toBeHex(10n ** 30n * 10n ** 18n),
+            ethers.toBeHex(TEST_TOKEN_AMOUNT),
         );
     }
 };

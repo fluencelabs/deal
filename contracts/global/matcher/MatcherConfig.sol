@@ -15,18 +15,6 @@ contract MatcherConfig is IMatcherConfig {
     using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
     using SafeERC20 for IERC20;
 
-    // ----------------- Types -----------------
-    struct ComputeProvider {
-        uint minPricePerEpoch;
-        uint maxCollateral;
-        IERC20 paymentToken;
-        uint totalFreeWorkerSlots;
-    }
-
-    struct ComputePeer {
-        uint freeWorkerSlots;
-    }
-
     // ----------------- Immutable -----------------
     IGlobalCore public immutable _globalCore;
 
@@ -82,8 +70,12 @@ contract MatcherConfig is IMatcherConfig {
     }
 
     // ----------------- Public View -----------------
-    function getFreeWorkersSolts(bytes32 peerId) external view returns (uint) {
-        return _getConfigStorage().computePeerByPeerId[peerId].freeWorkerSlots;
+    function getComputeProviderInfo(address provider) external view returns (ComputeProvider memory) {
+        return _getConfigStorage().computeProviderByOwner[provider];
+    }
+
+    function getComputePeerInfo(bytes32 peerId) external view returns (ComputePeer memory) {
+        return _getConfigStorage().computePeerByPeerId[peerId];
     }
 
     // ----------------- Public Mutable -----------------

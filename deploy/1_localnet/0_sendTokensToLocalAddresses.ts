@@ -1,4 +1,7 @@
+import { ethers } from "ethers";
 import type { HardhatRuntimeEnvironment } from "hardhat/types";
+
+const TEST_LOCAL_TEST_TOKEN_AMOUNT = ethers.parseEther("100");
 
 module.exports = async function (hre: HardhatRuntimeEnvironment) {
     const accounts = await hre.getUnnamedAccounts();
@@ -10,7 +13,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
             { from: deployer, log: true, waitConfirmations: 1 },
             "transfer",
             account,
-            hre.ethers.parseEther("100"),
+            TEST_LOCAL_TEST_TOKEN_AMOUNT,
         );
 
         await hre.deployments.execute(
@@ -18,7 +21,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
             { from: deployer, log: true, waitConfirmations: 1 },
             "transfer",
             account,
-            hre.ethers.parseEther("100"),
+            TEST_LOCAL_TEST_TOKEN_AMOUNT,
         );
     }
 };

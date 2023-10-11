@@ -52,6 +52,7 @@ contract DealFactory is UUPSUpgradeable, IDealFactory {
 
     // ----------------- Mutable -----------------
     function deployDeal(
+        CIDV1 calldata appCID_,
         IERC20 paymentToken_,
         uint256 collateralPerWorker_,
         uint256 minWorkers_,
@@ -68,6 +69,7 @@ contract DealFactory is UUPSUpgradeable, IDealFactory {
                     address(dealImpl),
                     abi.encodeWithSelector(
                         IDeal.initialize.selector,
+                        appCID_,
                         paymentToken_,
                         collateralPerWorker_,
                         minWorkers_,

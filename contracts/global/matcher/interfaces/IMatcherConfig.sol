@@ -7,6 +7,18 @@ import "../../../deal/base/Types.sol";
 import "../../../deal/interfaces/IDeal.sol";
 
 interface IMatcherConfig {
+    // ----------------- Types -----------------
+    struct ComputeProvider {
+        uint minPricePerEpoch;
+        uint maxCollateral;
+        IERC20 paymentToken;
+        uint totalFreeWorkerSlots;
+    }
+
+    struct ComputePeer {
+        uint freeWorkerSlots;
+    }
+
     // ----------------- Events -----------------
     event ComputeProviderRegistered(
         address computeProvider,
@@ -25,7 +37,9 @@ interface IMatcherConfig {
     event EffectorRemoved(address computeProvider, CIDV1 effector);
 
     // ----------------- View -----------------
-    function getFreeWorkersSolts(bytes32 peerId) external view returns (uint);
+    function getComputeProviderInfo(address provider) external view returns (ComputeProvider memory);
+
+    function getComputePeerInfo(bytes32 peerId) external view returns (ComputePeer memory);
 
     // ----------------- Mutable -----------------
     function registerComputeProvider(uint minPricePerEpoch, uint maxCollateral, IERC20 paymentToken, CIDV1[] calldata effectors) external;

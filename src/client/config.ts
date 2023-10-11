@@ -3,7 +3,7 @@ export const CONTRACTS_ENV = ["testnet", "local"] as const;
 export type ContractsENV = (typeof CONTRACTS_ENV)[number];
 
 export type ChainConfig = {
-    globalConfig: string;
+    globalCore: string;
     dealFactoryAddress: string;
     fltToken: string;
     chainId: number;
@@ -11,24 +11,24 @@ export type ChainConfig = {
 
 export const DEAL_CONFIG: Record<ContractsENV, () => Promise<ChainConfig>> = {
     testnet: async (): Promise<ChainConfig> => {
-        const globalConfig = await import("../deployments/testnet/GlobalConfig.json");
+        const globalCore = await import("../deployments/testnet/GlobalCore.json");
         const factory = await import("../deployments/testnet/Factory.json");
         const flt = await import("../deployments/testnet/FLT.json");
 
         return {
-            globalConfig: globalConfig.address,
+            globalCore: globalCore.address,
             dealFactoryAddress: factory.address,
             fltToken: flt.address,
             chainId: 80001,
         };
     },
     local: async (): Promise<ChainConfig> => {
-        const globalConfig = await import("../deployments/localnet/GlobalConfig.json");
+        const globalCore = await import("../deployments/localnet/GlobalCore.json");
         const factory = await import("../deployments/localnet/Factory.json");
         const flt = await import("../deployments/localnet/FLT.json");
 
         return {
-            globalConfig: globalConfig.address,
+            globalCore: globalCore.address,
             dealFactoryAddress: factory.address,
             fltToken: flt.address,
             chainId: 31337,

@@ -36,9 +36,9 @@ interface IWorkerManager {
     // ------------------ Public Mutable Functions ---------------------
     function createComputeUnit(address computeProvider, bytes32 peerId) external returns (bytes32);
 
-    function setWorker(bytes32 computeUnitId, bytes32 workerId) external;
+    function removeComputeUnit(bytes32 computeUnitId) external;
 
-    function removeWorker(bytes32 computeUnitId) external;
+    function setWorker(bytes32 computeUnitId, bytes32 workerId) external;
 
     function withdrawCollateral(bytes32 computeUnitId) external;
 }

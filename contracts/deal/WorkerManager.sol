@@ -4,11 +4,11 @@ pragma solidity ^0.8.19;
 
 import "./Config.sol";
 import "./interfaces/IWorkerManager.sol";
-import "./StatusController.sol";
 import "../utils/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "hardhat/console.sol";
 
-abstract contract WorkerManager is Config, StatusController, IWorkerManager {
+abstract contract WorkerManager is Config, IWorkerManager {
     using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
     using SafeERC20 for IERC20;
 
@@ -43,7 +43,7 @@ abstract contract WorkerManager is Config, StatusController, IWorkerManager {
 
     // ------------------ Constants ------------------
     bytes32 private constant _COMPUTE_UNIT_ID_PREFIX = keccak256("fluence.computeUnit.");
-    uint256 private constant _WITHDRAW_EPOCH_TIMEOUT = 1;
+    uint256 private constant _WITHDRAW_EPOCH_TIMEOUT = 2;
 
     // ------------------ Internal Mutable Functions ------------------
     function _createComputeUnit(
@@ -109,7 +109,6 @@ abstract contract WorkerManager is Config, StatusController, IWorkerManager {
         workerStorage.collateralWithdrawEpochByComputeUnitId[computeUnitId] = lastWorkedEpoch + _WITHDRAW_EPOCH_TIMEOUT;
 
         // remove ComputeUnit
-        delete workerStorage.computeUnitById[computeUnitId];
         workerStorage.computeUnitsIdsList.remove(computeUnitId);
 
         emit ComputeUnitRemoved(computeUnitId);
@@ -157,7 +156,7 @@ abstract contract WorkerManager is Config, StatusController, IWorkerManager {
         // check owner
         address computeProvider = computeUnit.owner;
         require(computeProvider != address(0x00), "ComputeUnit not found");
-        require(computeProvider == msg.sender, "Only provider or deal owner can remove worker");
+        require(computeProvider == msg.sender, "Only provider can set worker");
 
         computeUnit.workerId = workerId;
 
@@ -179,10 +178,10 @@ abstract contract WorkerManager is Config, StatusController, IWorkerManager {
         // reset collateral withdraw info
         workerStorage.collateralWithdrawEpochByComputeUnitId[computeUnitId] = 0;
 
-        emit CollateralWithdrawn(computeProvider, amount);
-
         // transfer collateral
         fluenceToken().safeTransfer(computeProvider, amount);
+
+        delete workerStorage.computeUnitById[computeUnitId];
 
         emit CollateralWithdrawn(computeProvider, amount);
     }

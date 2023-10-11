@@ -14,6 +14,7 @@ interface IDealFactory {
 
     // ----------------- Mutable -----------------
     function deployDeal(
+        CIDV1 calldata appCID_,
         IERC20 paymentToken_,
         uint256 collateralPerWorker_,
         uint256 minWorkers_,

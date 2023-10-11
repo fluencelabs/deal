@@ -43,8 +43,8 @@ contract Matcher is MatcherConfig, IMatcher {
             if (
                 (accessType == IConfig.AccessType.BLACKLIST && deal.isInAccessList(computeProviderAddress)) ||
                 (accessType == IConfig.AccessType.WHITELIST && !deal.isInAccessList(computeProviderAddress)) ||
-                configStorage.computeProviderByOwner[computeProviderAddress].minPricePerEpoch > pricePerWorkerEpoch ||
-                configStorage.computeProviderByOwner[computeProviderAddress].maxCollateral < collateralPerWorker ||
+                pricePerWorkerEpoch < configStorage.computeProviderByOwner[computeProviderAddress].minPricePerEpoch ||
+                collateralPerWorker > configStorage.computeProviderByOwner[computeProviderAddress].maxCollateral ||
                 !_doComputeProviderHasEffectors(computeProviderAddress, effectors)
             ) {
                 currentId = configStorage.computeProvidersList.next(currentId);

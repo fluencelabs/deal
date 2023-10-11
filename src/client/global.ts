@@ -1,12 +1,12 @@
 import type { ethers } from "ethers";
 import { DEAL_CONFIG, ContractsENV, ChainConfig } from "./config";
 import {
-    GlobalConfig__factory,
+    GlobalCore__factory,
     type DealFactory,
     DealFactory__factory,
     type ERC20,
     ERC20__factory,
-    type GlobalConfig,
+    type GlobalCore,
     type Matcher,
     Matcher__factory,
 } from "../typechain-types";
@@ -14,12 +14,15 @@ import {
 export class GlobalContracts {
     private chainConfig: Promise<ChainConfig>;
 
-    constructor(private provider: ethers.ContractRunner, private env: ContractsENV) {
+    constructor(
+        private provider: ethers.ContractRunner,
+        private env: ContractsENV,
+    ) {
         this.chainConfig = DEAL_CONFIG[this.env]();
     }
 
-    async getGlobalConfig(): Promise<GlobalConfig> {
-        return GlobalConfig__factory.connect((await this.chainConfig).globalConfig, this.provider);
+    async getGlobalCore(): Promise<GlobalCore> {
+        return GlobalCore__factory.connect((await this.chainConfig).globalCore, this.provider);
     }
 
     async getFactory(): Promise<DealFactory> {
@@ -27,7 +30,7 @@ export class GlobalContracts {
     }
 
     async getMatcher(): Promise<Matcher> {
-        const config = await this.getGlobalConfig();
+        const config = await this.getGlobalCore();
         return Matcher__factory.connect(await config.matcher(), this.provider);
     }
 

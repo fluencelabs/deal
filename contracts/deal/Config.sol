@@ -52,6 +52,7 @@ contract Config is Initializable, IConfig, Ownable {
 
     // ------------------ Initializer ------------------
     function __Config_init(
+        CIDV1 calldata appCID_,
         IERC20 paymentToken_,
         uint256 collateralPerWorker_,
         uint256 minWorkers_,
@@ -76,6 +77,8 @@ contract Config is Initializable, IConfig, Ownable {
             accessType_,
             accessList_
         );
+
+        _setAppCID(appCID_);
     }
 
     function __Config_init_unchained(
@@ -115,6 +118,13 @@ contract Config is Initializable, IConfig, Ownable {
     // ------------------ View Internal Functions ------------------
     function _globalCore() internal view returns (IGlobalCore) {
         return _globalCore_;
+    }
+
+    // ------------------ Mutable Internal Functions ------------------
+    function _setAppCID(CIDV1 calldata appCID_) internal {
+        _getConfigStorage().appCID = appCID_;
+
+        emit AppCIDChanged(appCID_);
     }
 
     // ------------------ View Functions ---------------------
@@ -185,10 +195,8 @@ contract Config is Initializable, IConfig, Ownable {
     }
 
     // ------------------ Mutable Functions ------------------
-    function setAppCID(CIDV1 calldata appCID_) external onlyOwner {
-        _getConfigStorage().appCID = appCID_;
-
-        emit AppCIDChanged(appCID_);
+    function setAppCID(CIDV1 calldata appCID_) public onlyOwner {
+        _setAppCID(appCID_);
     }
 
     function changeAccessType(AccessType accessType_) external onlyOwner {

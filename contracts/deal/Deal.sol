@@ -35,6 +35,8 @@ contract Deal is WorkerManager, IDeal {
         uint256 maxPaidEpoch;
         uint256 lastCommitedEpoch;
         mapping(bytes32 => ComputeUnitPaymentInfo) cUnitPaymentInfo;
+        bool isEnded;
+        uint endedEpoch;
     }
 
     DealStorage private _storage;
@@ -47,10 +49,13 @@ contract Deal is WorkerManager, IDeal {
     }
 
     // ------------------ Constructor ---------------------
-    constructor(IGlobalCore globalCore_) Config(globalCore_) {}
+    constructor(IGlobalCore globalCore_) Config(globalCore_) {
+        _disableInitializers();
+    }
 
     // ------------------ Init ------------------
     function initialize(
+        CIDV1 calldata appCID_,
         IERC20 paymentToken_,
         uint256 collateralPerWorker_,
         uint256 minWorkers_,
@@ -63,6 +68,7 @@ contract Deal is WorkerManager, IDeal {
         address owner_
     ) public initializer {
         __Config_init(
+            appCID_,
             paymentToken_,
             collateralPerWorker_,
             minWorkers_,
@@ -87,8 +93,6 @@ contract Deal is WorkerManager, IDeal {
     }
 
     function _preCommitPeriod(
-        Status currentStatus,
-        Status newStatus,
         DealStorageUtils.Balance memory balance,
         uint currentEpoch,
         uint maxPaidEpoch,
@@ -96,53 +100,44 @@ contract Deal is WorkerManager, IDeal {
         uint currentWorkerCount,
         uint pricePerWorkerEpoch_
     ) private pure {
-        if (currentStatus == newStatus && currentStatus == Status.ACTIVE) {
-            uint amount = (currentEpoch - lastCommitedEpoch) * pricePerWorkerEpoch_ * currentWorkerCount;
-
-            balance.setTotalBalance(balance.getTotalBalance() - amount);
-            balance.setLockedBalance(balance.getLockedBalance() + amount);
-        } else if (
-            (currentStatus == newStatus && newStatus == IStatusController.Status.INACTIVE) ||
-            (currentStatus == IStatusController.Status.INACTIVE && newStatus == IStatusController.Status.ACTIVE)
-        ) {
-            balance.setGapsEpochCount(balance.getGapsEpochCount() + (currentEpoch - lastCommitedEpoch));
-        } else if (currentStatus == Status.ACTIVE && newStatus == Status.INACTIVE) {
+        if (currentEpoch > maxPaidEpoch && maxPaidEpoch > lastCommitedEpoch) {
             uint amount = (maxPaidEpoch - lastCommitedEpoch) * pricePerWorkerEpoch_ * currentWorkerCount;
 
             balance.setTotalBalance(balance.getTotalBalance() - amount);
             balance.setLockedBalance(balance.getLockedBalance() + amount);
+            balance.setGapsEpochCount(balance.getGapsEpochCount() + (currentEpoch - maxPaidEpoch));
+        } else if (currentEpoch > maxPaidEpoch && lastCommitedEpoch >= maxPaidEpoch) {
             balance.setGapsEpochCount(balance.getGapsEpochCount() + (currentEpoch - lastCommitedEpoch));
+        } else if (currentEpoch <= maxPaidEpoch) {
+            uint amount = (currentEpoch - lastCommitedEpoch) * pricePerWorkerEpoch_ * currentWorkerCount;
+
+            balance.setTotalBalance(balance.getTotalBalance() - amount);
+            balance.setLockedBalance(balance.getLockedBalance() + amount);
         }
     }
 
-    function _postCommitPeriod(DealStorageUtils.Balance memory balance, Status currentStatus, Status newStatus, uint currentEpoch) private {
+    function _postCommitPeriod(DealStorageUtils.Balance memory balance, uint currentEpoch) private {
         DealStorage storage dealStorage = _getDealStorage();
 
         balance.commitToStorage(dealStorage);
         dealStorage.lastCommitedEpoch = currentEpoch;
-
-        if (currentStatus != newStatus) {
-            _setStatus(newStatus);
-        }
     }
 
     // ------------------ Public View Functions ------------------
-    function getStatus() public view returns (IStatusController.Status) {
-        IStatusController.Status currentStatus = getCommittedStatus();
-
-        if (currentStatus == IStatusController.Status.ENDED || currentStatus == IStatusController.Status.INACTIVE) {
-            return currentStatus;
+    function getStatus() public view returns (Status) {
+        if (_getDealStorage().isEnded) {
+            return Status.ENDED;
         }
 
         uint currentEpoch = _globalCore().currentEpoch();
         uint maxPaidEpoch = _getDealStorage().maxPaidEpoch;
 
-        if (currentEpoch > maxPaidEpoch) {
-            return IStatusController.Status.INACTIVE;
+        if (getComputeUnitCount() < minWorkers()) {
+            return Status.INACTIVE;
         } else if (currentEpoch > maxPaidEpoch) {
-            return IStatusController.Status.INACTIVE;
+            return Status.INACTIVE;
         } else {
-            return IStatusController.Status.ACTIVE;
+            return Status.ACTIVE;
         }
     }
 
@@ -153,68 +148,46 @@ contract Deal is WorkerManager, IDeal {
         if (currentEpoch > dealStorage.maxPaidEpoch) {
             return 0;
         }
-
-        return (currentEpoch - dealStorage.lastCommitedEpoch) * pricePerWorkerEpoch() * getComputeUnitCount();
+        return dealStorage.totalBalance - ((currentEpoch - dealStorage.lastCommitedEpoch) * pricePerWorkerEpoch() * getComputeUnitCount());
     }
 
     function getRewardAmount(bytes32 computeUnitId) public view returns (uint) {
         DealStorage storage dealStorage = _getDealStorage();
         ComputeUnitPaymentInfo storage computeUnitPaymentInfo = dealStorage.cUnitPaymentInfo[computeUnitId];
 
-        IStatusController.Status currentStatus = getCommittedStatus();
-        IStatusController.Status newStatus = getStatus();
-
         uint currentEpoch = _globalCore().currentEpoch();
         uint workerCount = getComputeUnitCount();
         uint pricePerWorkerEpoch_ = pricePerWorkerEpoch();
 
         DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
-        _preCommitPeriod(
-            currentStatus,
-            newStatus,
-            balance,
-            currentEpoch,
-            dealStorage.maxPaidEpoch,
-            dealStorage.lastCommitedEpoch,
-            workerCount,
-            pricePerWorkerEpoch_
-        );
+        _preCommitPeriod(balance, currentEpoch, dealStorage.maxPaidEpoch, dealStorage.lastCommitedEpoch, workerCount, pricePerWorkerEpoch_);
 
-        uint reward = (currentEpoch - computeUnitPaymentInfo.startedEpoch) -
-            (balance.getGapsEpochCount() - computeUnitPaymentInfo.gapsDelta) *
-            pricePerWorkerEpoch_;
+        uint reward = ((currentEpoch - computeUnitPaymentInfo.startedEpoch) -
+            (balance.getGapsEpochCount() - computeUnitPaymentInfo.gapsDelta)) * pricePerWorkerEpoch_;
 
         return reward;
+    }
+
+    function getMaxPaidEpoch() public view returns (uint256) {
+        return _getDealStorage().maxPaidEpoch;
     }
 
     // ------------------ Public Mutable Functions ------------------
     function deposit(uint256 amount) external onlyOwner {
         DealStorage storage dealStorage = _getDealStorage();
 
-        IStatusController.Status currentStatus = getCommittedStatus();
-        IStatusController.Status newStatus = getStatus();
-
         uint currentEpoch = _globalCore().currentEpoch();
         uint workerCount = getComputeUnitCount();
         uint pricePerWorkerEpoch_ = pricePerWorkerEpoch();
 
         DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
-        _preCommitPeriod(
-            currentStatus,
-            newStatus,
-            balance,
-            currentEpoch,
-            dealStorage.maxPaidEpoch,
-            dealStorage.lastCommitedEpoch,
-            workerCount,
-            pricePerWorkerEpoch_
-        );
+        _preCommitPeriod(balance, currentEpoch, dealStorage.maxPaidEpoch, dealStorage.lastCommitedEpoch, workerCount, pricePerWorkerEpoch_);
 
         balance.setTotalBalance(balance.getTotalBalance() + amount);
 
         dealStorage.maxPaidEpoch = _calculateMaxPaidEpoch(currentEpoch, balance.getTotalBalance(), pricePerWorkerEpoch_, workerCount);
 
-        _postCommitPeriod(balance, currentStatus, newStatus, currentEpoch);
+        _postCommitPeriod(balance, currentEpoch);
 
         paymentToken().safeTransferFrom(msg.sender, address(this), amount);
 
@@ -224,21 +197,16 @@ contract Deal is WorkerManager, IDeal {
     function withdraw(uint256 amount) external onlyOwner {
         DealStorage storage dealStorage = _getDealStorage();
 
-        IStatusController.Status currentStatus = getCommittedStatus();
-        IStatusController.Status newStatus = getStatus(); //TODO
-
         uint currentEpoch = _globalCore().currentEpoch();
         uint workerCount = getComputeUnitCount();
         uint pricePerWorkerEpoch_ = pricePerWorkerEpoch();
 
-        if (currentStatus == IStatusController.Status.ENDED) {
-            require(currentEpoch > endedEpoch() + _EPOCH_FOR_ENDING, "Can't withdraw before 2 epochs after deal end");
+        if (dealStorage.isEnded) {
+            require(currentEpoch > dealStorage.endedEpoch + _EPOCH_FOR_ENDING, "Can't withdraw before 2 epochs after deal end");
             dealStorage.totalBalance -= amount;
         } else {
             DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
             _preCommitPeriod(
-                currentStatus,
-                newStatus,
                 balance,
                 currentEpoch,
                 dealStorage.maxPaidEpoch,
@@ -253,7 +221,7 @@ contract Deal is WorkerManager, IDeal {
             require(balance.getTotalBalance() >= minBalance, "Free balance needs to cover minimum 2 epochs");
 
             dealStorage.maxPaidEpoch = _calculateMaxPaidEpoch(currentEpoch, balance.getTotalBalance(), pricePerWorkerEpoch_, workerCount);
-            _postCommitPeriod(balance, currentStatus, newStatus, currentEpoch);
+            _postCommitPeriod(balance, currentEpoch);
         }
 
         paymentToken().safeTransfer(msg.sender, amount);
@@ -265,29 +233,16 @@ contract Deal is WorkerManager, IDeal {
         DealStorage storage dealStorage = _getDealStorage();
         ComputeUnitPaymentInfo storage computeUnitPaymentInfo = dealStorage.cUnitPaymentInfo[computeUnitId];
 
-        IStatusController.Status currentStatus = getCommittedStatus();
-        IStatusController.Status newStatus = getStatus(); //TODO
-
         uint currentEpoch = _globalCore().currentEpoch();
         uint workerCount = getComputeUnitCount();
         uint pricePerWorkerEpoch_ = pricePerWorkerEpoch();
 
         DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
-        _preCommitPeriod(
-            currentStatus,
-            newStatus,
-            balance,
-            currentEpoch,
-            dealStorage.maxPaidEpoch,
-            dealStorage.lastCommitedEpoch,
-            workerCount,
-            pricePerWorkerEpoch_
-        );
+        _preCommitPeriod(balance, currentEpoch, dealStorage.maxPaidEpoch, dealStorage.lastCommitedEpoch, workerCount, pricePerWorkerEpoch_);
 
         uint globalGapsEpochCount = balance.getGapsEpochCount();
 
-        uint reward = (currentEpoch - computeUnitPaymentInfo.startedEpoch) -
-            (globalGapsEpochCount - computeUnitPaymentInfo.gapsDelta) *
+        uint reward = ((currentEpoch - computeUnitPaymentInfo.startedEpoch) - (globalGapsEpochCount - computeUnitPaymentInfo.gapsDelta)) *
             pricePerWorkerEpoch_;
 
         require(reward > 0, "No rewards");
@@ -297,7 +252,7 @@ contract Deal is WorkerManager, IDeal {
 
         balance.setLockedBalance(balance.getLockedBalance() - reward);
 
-        _postCommitPeriod(balance, currentStatus, newStatus, currentEpoch);
+        _postCommitPeriod(balance, currentEpoch);
 
         paymentToken().safeTransfer(msg.sender, reward);
 
@@ -307,38 +262,26 @@ contract Deal is WorkerManager, IDeal {
     function createComputeUnit(address computeProvider, bytes32 peerId) public returns (bytes32) {
         DealStorage storage dealStorage = _getDealStorage();
 
-        IStatusController.Status currentStatus = getCommittedStatus();
-        IStatusController.Status newStatus = getStatus(); //TODO
-
         uint currentEpoch = _globalCore().currentEpoch();
         (bytes32 computeUnitId, uint newComputeUnitCount) = _createComputeUnit(currentEpoch, computeProvider, peerId);
         uint pricePerWorkerEpoch_ = pricePerWorkerEpoch();
 
         ComputeUnitPaymentInfo storage computeUnitPaymentInfo = dealStorage.cUnitPaymentInfo[computeUnitId];
 
+        uint maxPaidEpoch = dealStorage.maxPaidEpoch;
         DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
-        _preCommitPeriod(
-            currentStatus,
-            newStatus,
-            balance,
-            currentEpoch,
-            dealStorage.maxPaidEpoch,
-            dealStorage.lastCommitedEpoch,
-            newComputeUnitCount - 1,
-            pricePerWorkerEpoch_
-        );
+        _preCommitPeriod(balance, currentEpoch, maxPaidEpoch, dealStorage.lastCommitedEpoch, newComputeUnitCount - 1, pricePerWorkerEpoch_);
 
-        if (currentStatus == Status.INACTIVE && newComputeUnitCount > minWorkers()) {
-            _setStatus(Status.ACTIVE); //TODO: verify other rules
+        if (newComputeUnitCount >= minWorkers() && maxPaidEpoch > currentEpoch) {
+            dealStorage.maxPaidEpoch = _calculateMaxPaidEpoch(
+                currentEpoch,
+                balance.getTotalBalance(),
+                pricePerWorkerEpoch_,
+                newComputeUnitCount
+            );
         }
 
-        dealStorage.maxPaidEpoch = _calculateMaxPaidEpoch(
-            currentEpoch,
-            balance.getTotalBalance(),
-            pricePerWorkerEpoch_,
-            newComputeUnitCount
-        );
-        _postCommitPeriod(balance, currentStatus, newStatus, currentEpoch);
+        _postCommitPeriod(balance, currentEpoch);
 
         computeUnitPaymentInfo.startedEpoch = currentEpoch;
         computeUnitPaymentInfo.gapsDelta = balance.getGapsEpochCount();
@@ -346,62 +289,46 @@ contract Deal is WorkerManager, IDeal {
         return computeUnitId;
     }
 
-    function removeWorker(bytes32 computeUnitId) public {
+    function removeComputeUnit(bytes32 computeUnitId) public {
         DealStorage storage dealStorage = _getDealStorage();
 
-        IStatusController.Status currentStatus = getCommittedStatus();
-        IStatusController.Status newStatus = getStatus(); //TODO
-
         uint currentEpoch = _globalCore().currentEpoch();
-        uint newComputeUnitCount = _removeComputeUnit(computeUnitId, currentStatus == Status.ENDED ? endedEpoch() : currentEpoch);
+        uint newComputeUnitCount = _removeComputeUnit(computeUnitId, dealStorage.isEnded ? dealStorage.endedEpoch : currentEpoch);
         uint pricePerWorkerEpoch_ = pricePerWorkerEpoch();
+        uint maxPaidEpoch = _getDealStorage().maxPaidEpoch;
 
         DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
-        _preCommitPeriod(
-            currentStatus,
-            newStatus,
-            balance,
-            currentEpoch,
-            dealStorage.maxPaidEpoch,
-            dealStorage.lastCommitedEpoch,
-            newComputeUnitCount + 1,
-            pricePerWorkerEpoch_
-        );
+        _preCommitPeriod(balance, currentEpoch, maxPaidEpoch, dealStorage.lastCommitedEpoch, newComputeUnitCount + 1, pricePerWorkerEpoch_);
 
-        if (currentStatus == IStatusController.Status.ACTIVE && newComputeUnitCount < minWorkers()) {
-            _setStatus(IStatusController.Status.INACTIVE); //TODO: verify other rules
+        uint minWorkers_ = minWorkers();
+        if (newComputeUnitCount < minWorkers_ && maxPaidEpoch > currentEpoch) {
+            dealStorage.maxPaidEpoch = currentEpoch;
+        } else if (newComputeUnitCount >= minWorkers_) {
+            dealStorage.maxPaidEpoch = _calculateMaxPaidEpoch(
+                currentEpoch,
+                balance.getTotalBalance(),
+                pricePerWorkerEpoch_,
+                newComputeUnitCount
+            );
         }
 
-        dealStorage.maxPaidEpoch = _calculateMaxPaidEpoch(
-            currentEpoch,
-            balance.getTotalBalance(),
-            pricePerWorkerEpoch_,
-            newComputeUnitCount
-        );
-        _postCommitPeriod(balance, currentStatus, newStatus, currentEpoch);
+        _postCommitPeriod(balance, currentEpoch);
     }
 
     function stop() external onlyOwner {
         DealStorage storage dealStorage = _getDealStorage();
 
-        IStatusController.Status currentStatus = getCommittedStatus();
-        IStatusController.Status newStatus = getStatus(); //TODO
-
         DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
         uint currentEpoch = _globalCore().currentEpoch();
-        _preCommitPeriod(
-            currentStatus,
-            newStatus,
-            balance,
-            currentEpoch,
-            dealStorage.maxPaidEpoch,
-            dealStorage.lastCommitedEpoch,
-            getComputeUnitCount(),
-            pricePerWorkerEpoch()
-        );
-        _postCommitPeriod(balance, currentStatus, newStatus, currentEpoch);
+        uint maxPaidEpoch = _getDealStorage().maxPaidEpoch;
 
-        dealStorage.maxPaidEpoch = currentEpoch;
-        _setStatus(IStatusController.Status.ENDED);
+        _preCommitPeriod(balance, currentEpoch, maxPaidEpoch, dealStorage.lastCommitedEpoch, getComputeUnitCount(), pricePerWorkerEpoch());
+        _postCommitPeriod(balance, currentEpoch);
+        if (maxPaidEpoch > currentEpoch) {
+            dealStorage.maxPaidEpoch = currentEpoch;
+        }
+
+        dealStorage.isEnded = true;
+        dealStorage.endedEpoch = currentEpoch;
     }
 }
