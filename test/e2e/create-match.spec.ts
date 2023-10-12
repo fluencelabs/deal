@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import {
     Deal,
+    DealClient,
     DealFactory,
     DealFactory__factory,
     Deal__factory,

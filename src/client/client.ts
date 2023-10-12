@@ -7,14 +7,14 @@ export class DealClient {
     private globalContracts: GlobalContracts;
 
     constructor(
-        private signer: ethers.Signer,
         private env: ContractsENV,
+        private signerOrProvider: ethers.Signer | ethers.Provider,
     ) {
-        this.globalContracts = new GlobalContracts(this.signer, this.env);
+        this.globalContracts = new GlobalContracts(this.signerOrProvider, this.env);
     }
 
     getDeal(address: string): Deal {
-        return Deal__factory.connect(address, this.signer);
+        return Deal__factory.connect(address, this.signerOrProvider);
     }
 
     getGlobalContracts(): GlobalContracts {

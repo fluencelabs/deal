@@ -39,6 +39,8 @@ interface IMatcherConfig {
     // ----------------- View -----------------
     function getComputeProviderInfo(address provider) external view returns (ComputeProvider memory);
 
+    function getPeersByComputeProvider(address provider) external view returns (bytes32[] memory peerIds, ComputePeer[] memory);
+
     function getComputePeerInfo(bytes32 peerId) external view returns (ComputePeer memory);
 
     // ----------------- Mutable -----------------

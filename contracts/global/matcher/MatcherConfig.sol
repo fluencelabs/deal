@@ -74,6 +74,27 @@ contract MatcherConfig is IMatcherConfig {
         return _getConfigStorage().computeProviderByOwner[provider];
     }
 
+    function getPeersByComputeProvider(address provider) external view returns (bytes32[] memory peerIds, ComputePeer[] memory) {
+        ConfigStorage storage configStorage = _getConfigStorage();
+
+        LinkedListWithUniqueKeys.Bytes32List storage peersList = configStorage.computePeersListByProvider[provider];
+        ComputePeer[] memory result = new ComputePeer[](peersList.length());
+        bytes32[] memory ids = new bytes32[](peersList.length());
+
+        uint i = 0;
+        bytes32 peerId = peersList.first();
+        while (peerId != bytes32(0x00)) {
+            result[i] = configStorage.computePeerByPeerId[peerId];
+            ids[i] = peerId;
+
+            i++;
+
+            peerId = peersList.next(peerId);
+        }
+
+        return (ids, result);
+    }
+
     function getComputePeerInfo(bytes32 peerId) external view returns (ComputePeer memory) {
         return _getConfigStorage().computePeerByPeerId[peerId];
     }

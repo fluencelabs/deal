@@ -6,7 +6,6 @@ import "./Config.sol";
 import "./interfaces/IWorkerManager.sol";
 import "../utils/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "hardhat/console.sol";
 
 abstract contract WorkerManager is Config, IWorkerManager {
     using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
@@ -152,11 +151,6 @@ abstract contract WorkerManager is Config, IWorkerManager {
         ComputeUnit storage computeUnit = workerStorage.computeUnitById[computeUnitId];
 
         require(workerId != bytes32(0), "WorkerId can't be empty");
-
-        // check owner
-        address computeProvider = computeUnit.owner;
-        require(computeProvider != address(0x00), "ComputeUnit not found");
-        require(computeProvider == msg.sender, "Only provider can set worker");
 
         computeUnit.workerId = workerId;
 
