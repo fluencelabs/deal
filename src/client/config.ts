@@ -24,7 +24,7 @@ export const DEAL_CONFIG: Record<ContractsENV, () => Promise<ChainConfig>> = {
             globalCore: globalCore.address,
             dealFactoryAddress: factory.address,
             fltToken: flt.address,
-            chainId: 80001,
+            chainId: 314159,
         };
     },
     local: async (): Promise<ChainConfig> => {

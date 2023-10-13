@@ -14,7 +14,7 @@ import { deployments, ethers as hardhatEthers } from "hardhat";
 import { ethers } from "ethers";
 import { IWorkerManager } from "../../src/typechain-types/contracts/deal/interfaces/IWorkerManager";
 
-const EPOCH_DURATION = 60;
+const EPOCH_DURATION = 15;
 const WITHDRAW_EPOCH_TIMEOUT = 2n;
 
 enum DealStatus {
@@ -161,7 +161,7 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
     });
 
     // 2. Register compute provider and workers
-    it("2.1 register compute provider (whitlist)", async () => {
+    it("2.1 register compute provider", async () => {
         // load configs
         const maxCollateral = await deal.collateralPerWorker();
         const fltAddress = await flt.getAddress();

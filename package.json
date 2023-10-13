@@ -1,6 +1,6 @@
 {
     "name": "@fluencelabs/deal-aurora",
-    "version": "0.2.13",
+    "version": "0.2.15",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "scripts": {
@@ -9,7 +9,9 @@
         "clean": "hardhat clean",
         "contracts:localnet": "hardhat node --tags tokens,localnet,common --hostname 0.0.0.0",
         "update-local-deployment": "cp -r ./src/deployments/localhost/* ./src/deployments/localnet",
-        "deploy": "hardhat deploy --network testnet --tags tokens,testnet,common",
+        "deploy:stage": "hardhat deploy --network stage --tags tokens,testnet,common",
+        "deploy:testnet": "hardhat deploy --network testnet --tags tokens,testnet,common",
+        "deploy:kras": "hardhat deploy --network kras --tags tokens,testnet,common",
         "compile-ts": "shx rm -rf dist && tsc -b",
         "test": "hardhat test",
         "lint:sol": "solhint 'contracts/**/*.sol'",
