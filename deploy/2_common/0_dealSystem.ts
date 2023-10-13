@@ -2,7 +2,7 @@ import type { HardhatRuntimeEnvironment } from "hardhat/types";
 import { GlobalCore__factory } from "../../src/typechain-types";
 import { ethers } from "hardhat";
 
-const EPOCH_DURATION = 60;
+const EPOCH_DURATION = 15;
 
 module.exports = async function (hre: HardhatRuntimeEnvironment) {
     const accounts = await hre.getUnnamedAccounts();

@@ -10,28 +10,10 @@ export type ChainConfig = {
 
 export const DEAL_CONFIG: Record<ContractsENV, () => Promise<ChainConfig>> = {
     kras: async (): Promise<ChainConfig> => {
-        const globalCore = await import("../deployments/kras/GlobalCore.json");
-        const factory = await import("../deployments/kras/Factory.json");
-        const flt = await import("../deployments/kras/FLT.json");
-
-        return {
-            globalCore: globalCore.address,
-            dealFactoryAddress: factory.address,
-            fltToken: flt.address,
-            chainId: 80001,
-        };
+        throw new Error("Not contracts for kras");
     },
     testnet: async (): Promise<ChainConfig> => {
-        const globalCore = await import("../deployments/testnet/GlobalCore.json");
-        const factory = await import("../deployments/testnet/Factory.json");
-        const flt = await import("../deployments/testnet/FLT.json");
-
-        return {
-            globalCore: globalCore.address,
-            dealFactoryAddress: factory.address,
-            fltToken: flt.address,
-            chainId: 80001,
-        };
+        throw new Error("Not contracts for testnet");
     },
     stage: async (): Promise<ChainConfig> => {
         const globalCore = await import("../deployments/stage/GlobalCore.json");

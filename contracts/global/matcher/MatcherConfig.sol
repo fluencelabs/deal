@@ -175,7 +175,7 @@ contract MatcherConfig is IMatcherConfig {
 
         // retrun collateral
         uint amount = configStorage.computeProviderByOwner[owner].maxCollateral * workerSlots;
-        configStorage.computeProviderByOwner[owner].paymentToken.safeTransferFrom(address(this), owner, amount);
+        configStorage.computeProviderByOwner[owner].paymentToken.safeTransfer(owner, amount);
 
         emit WorkersSlotsChanged(peerId, freeWorkerSlots);
     }
