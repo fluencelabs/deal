@@ -149,6 +149,7 @@ contract MatcherConfig is IMatcherConfig {
         freeWorkerSlots += workerSlots;
 
         configStorage.computePeerByPeerId[peerId].freeWorkerSlots = freeWorkerSlots;
+        configStorage.computeProviderByOwner[owner].totalFreeWorkerSlots += workerSlots;
 
         // put collateral
         uint amount = configStorage.computeProviderByOwner[owner].maxCollateral * workerSlots;
@@ -165,6 +166,7 @@ contract MatcherConfig is IMatcherConfig {
         // validate input
         uint256 freeWorkerSlots = configStorage.computePeerByPeerId[peerId].freeWorkerSlots - workerSlots;
         configStorage.computePeerByPeerId[peerId].freeWorkerSlots = freeWorkerSlots;
+        configStorage.computeProviderByOwner[owner].totalFreeWorkerSlots -= workerSlots;
 
         // remove peer from compute provider list if it has no free worker slots
         if (freeWorkerSlots == 0) {
