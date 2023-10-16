@@ -22,6 +22,8 @@ interface IDeal is IConfig, IWorkerManager {
 
     event MaxPaidEpochUpdated(uint256 maxPaidEpoch);
 
+    event DealEnded(uint256 endedEpoch);
+
     // ------------------ Init ------------------
     function initialize(
         CIDV1 calldata appCID_,

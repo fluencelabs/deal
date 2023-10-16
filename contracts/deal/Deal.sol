@@ -346,5 +346,7 @@ contract Deal is WorkerManager, IDeal {
 
         dealStorage.isEnded = true;
         dealStorage.endedEpoch = currentEpoch;
+
+        emit DealEnded(currentEpoch);
     }
 }
