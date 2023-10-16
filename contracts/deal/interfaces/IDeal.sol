@@ -20,6 +20,8 @@ interface IDeal is IConfig, IWorkerManager {
 
     event RewardWithdrawn(bytes32 computeUnitId, uint256 reward);
 
+    event MaxPaidEpochUpdated(uint256 maxPaidEpoch);
+
     // ------------------ Init ------------------
     function initialize(
         CIDV1 calldata appCID_,

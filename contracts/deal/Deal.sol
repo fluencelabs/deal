@@ -185,12 +185,14 @@ contract Deal is WorkerManager, IDeal {
 
         balance.setTotalBalance(balance.getTotalBalance() + amount);
 
-        dealStorage.maxPaidEpoch = _calculateMaxPaidEpoch(currentEpoch, balance.getTotalBalance(), pricePerWorkerEpoch_, workerCount);
+        uint maxPaidEpoch = _calculateMaxPaidEpoch(currentEpoch, balance.getTotalBalance(), pricePerWorkerEpoch_, workerCount);
+        dealStorage.maxPaidEpoch = maxPaidEpoch;
 
         _postCommitPeriod(balance, currentEpoch);
 
         paymentToken().safeTransferFrom(msg.sender, address(this), amount);
 
+        emit MaxPaidEpochUpdated(maxPaidEpoch);
         emit Deposited(amount);
     }
 
@@ -220,8 +222,12 @@ contract Deal is WorkerManager, IDeal {
             uint minBalance = _MIN_EPOCH_FOR_BALANCE_AMOUNT * pricePerWorkerEpoch_ * targetWorkers();
             require(balance.getTotalBalance() >= minBalance, "Free balance needs to cover minimum 2 epochs");
 
-            dealStorage.maxPaidEpoch = _calculateMaxPaidEpoch(currentEpoch, balance.getTotalBalance(), pricePerWorkerEpoch_, workerCount);
+            uint maxPaidEpoch = _calculateMaxPaidEpoch(currentEpoch, balance.getTotalBalance(), pricePerWorkerEpoch_, workerCount);
+            dealStorage.maxPaidEpoch = maxPaidEpoch;
+
             _postCommitPeriod(balance, currentEpoch);
+
+            emit MaxPaidEpochUpdated(maxPaidEpoch);
         }
 
         paymentToken().safeTransfer(msg.sender, amount);
@@ -273,12 +279,15 @@ contract Deal is WorkerManager, IDeal {
         _preCommitPeriod(balance, currentEpoch, maxPaidEpoch, dealStorage.lastCommitedEpoch, newComputeUnitCount - 1, pricePerWorkerEpoch_);
 
         if (newComputeUnitCount >= minWorkers() && maxPaidEpoch > currentEpoch) {
-            dealStorage.maxPaidEpoch = _calculateMaxPaidEpoch(
+            uint newMaxPaidEpoch = _calculateMaxPaidEpoch(
                 currentEpoch,
                 balance.getTotalBalance(),
                 pricePerWorkerEpoch_,
                 newComputeUnitCount
             );
+            dealStorage.maxPaidEpoch = newMaxPaidEpoch;
+
+            emit MaxPaidEpochUpdated(newMaxPaidEpoch);
         }
 
         _postCommitPeriod(balance, currentEpoch);
@@ -303,13 +312,18 @@ contract Deal is WorkerManager, IDeal {
         uint minWorkers_ = minWorkers();
         if (newComputeUnitCount < minWorkers_ && maxPaidEpoch > currentEpoch) {
             dealStorage.maxPaidEpoch = currentEpoch;
+
+            emit MaxPaidEpochUpdated(currentEpoch);
         } else if (newComputeUnitCount >= minWorkers_) {
-            dealStorage.maxPaidEpoch = _calculateMaxPaidEpoch(
+            uint newMaxPaidEpoch = _calculateMaxPaidEpoch(
                 currentEpoch,
                 balance.getTotalBalance(),
                 pricePerWorkerEpoch_,
                 newComputeUnitCount
             );
+            dealStorage.maxPaidEpoch = newMaxPaidEpoch;
+
+            emit MaxPaidEpochUpdated(newMaxPaidEpoch);
         }
 
         _postCommitPeriod(balance, currentEpoch);
@@ -326,6 +340,8 @@ contract Deal is WorkerManager, IDeal {
         _postCommitPeriod(balance, currentEpoch);
         if (maxPaidEpoch > currentEpoch) {
             dealStorage.maxPaidEpoch = currentEpoch;
+
+            emit MaxPaidEpochUpdated(currentEpoch);
         }
 
         dealStorage.isEnded = true;

@@ -20,7 +20,6 @@ interface IWorkerManager {
     event ComputeUnitRemoved(bytes32 id);
 
     event WorkerIdUpdated(bytes32 computeUnitId, bytes32 workerId);
-    event WorkerRemoved(bytes32 computeUnitId);
 
     event CollateralWithdrawn(address owner, uint256 amount);
 
