@@ -108,10 +108,10 @@ contract MatcherConfig is IMatcherConfig {
         // validate input
         require(minPricePerEpoch > 0, "Min price per epoch should be greater than 0");
         require(maxCollateral > 0, "Max collateral should be greater than 0");
-        require(address(paymentToken) != address(0x00), "Compute provider already");
+        require(address(paymentToken) != address(0x00), "Payment token should be not zero address");
 
         address owner = msg.sender;
-        require(address(configStorage.computeProviderByOwner[owner].paymentToken) == address(0x00), "Compute provider already");
+        require(address(configStorage.computeProviderByOwner[owner].paymentToken) == address(0x00), "Compute provider already exists");
 
         // register compute provider
         configStorage.computeProviderByOwner[owner] = ComputeProvider({

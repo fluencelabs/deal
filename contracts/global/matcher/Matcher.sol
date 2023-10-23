@@ -59,6 +59,11 @@ contract Matcher is MatcherConfig, IMatcher {
             bytes32 peerId = computePeersList.first();
 
             while (peerId != bytes32(0x00) && freeWorkerSlots > 0) {
+                if (deal.hasPeer(computeProviderAddress, peerId)) {
+                    peerId = computePeersList.next(peerId);
+                    continue;
+                }
+
                 foundComputePeers.add(peerId);
                 freeWorkerSlots--;
 
@@ -121,6 +126,10 @@ contract Matcher is MatcherConfig, IMatcher {
             uint peersLength = peers[i].length;
             for (uint j = 0; j < peersLength; j++) {
                 bytes32 peerId = peers[i][j];
+
+                if (deal.hasPeer(computeProviderAddress, peerId)) {
+                    continue;
+                }
 
                 // create ComputeUnits
                 fluenceToken.approve(address(deal), dealRequiredCollateral);

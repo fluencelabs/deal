@@ -23,6 +23,7 @@ abstract contract WorkerManager is Config, IWorkerManager {
     struct WorkerManagerStorage {
         // global area
         uint256 computeUnitCount;
+        uint256 workerCount;
         mapping(address => ComputeProviderInfo) computeProviderInfo;
         // compute units area
         mapping(bytes32 => ComputeUnit) computeUnitById;
@@ -44,55 +45,33 @@ abstract contract WorkerManager is Config, IWorkerManager {
     bytes32 private constant _COMPUTE_UNIT_ID_PREFIX = keccak256("fluence.computeUnit.");
     uint256 private constant _WITHDRAW_EPOCH_TIMEOUT = 2;
 
-    // ------------------ Internal Mutable Functions ------------------
-    function _createComputeUnit(
-        uint createdEpoch,
-        address computeProvider,
-        bytes32 peerId
-    ) internal returns (bytes32 id, uint computeUnitCount) {
-        WorkerManagerStorage storage workerStorage = _getWorkerManagerStorage();
-
-        // check target workers count
-        uint256 globalComputeUnitCount = workerStorage.computeUnitCount;
-        require(globalComputeUnitCount < targetWorkers(), "Target workers reached");
-
-        // check peerId isn't exist
-        id = keccak256(abi.encodePacked(_COMPUTE_UNIT_ID_PREFIX, computeProvider, peerId));
-        require(workerStorage.computeUnitById[id].owner == address(0x00), "Id already used");
-
-        // check max workers per compute provider
-        uint256 computeUnitCountByCP = workerStorage.computeProviderInfo[computeProvider].computeUnitCount;
-        require(computeUnitCountByCP < maxWorkersPerProvider(), "Max workers per compute provider reached");
-
-        // increase computeUnit count
-        workerStorage.computeProviderInfo[computeProvider].computeUnitCount = ++computeUnitCountByCP;
-        workerStorage.computeUnitCount = ++globalComputeUnitCount;
-
-        // get required collateral
-        uint256 collateral = collateralPerWorker();
-
-        // create ComputeUnit
-        workerStorage.computeUnitById[id] = ComputeUnit({
-            id: id,
-            peerId: peerId,
-            workerId: bytes32(0),
-            owner: computeProvider,
-            collateral: collateral,
-            created: createdEpoch
-        });
-
-        // add ComputeUnit to list
-        workerStorage.computeUnitsIdsList.push(id);
-
-        emit ComputeUnitCreated(id, computeProvider);
-
-        // transfer collateral
-        fluenceToken().safeTransferFrom(msg.sender, address(this), collateral);
-
-        return (id, globalComputeUnitCount);
+    // ------------------ Internal View Functions ------------------
+    function _calculateUnitId(address computeProvider, bytes32 peerId) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked(_COMPUTE_UNIT_ID_PREFIX, computeProvider, peerId));
     }
 
-    function _removeComputeUnit(bytes32 computeUnitId, uint lastWorkedEpoch) public returns (uint computeUnitCount) {
+    // ------------------ Internal Mutable Functions ------------------
+
+    function _setWorker(bytes32 computeUnitId, bytes32 workerId) internal returns (uint256) {
+        WorkerManagerStorage storage workerStorage = _getWorkerManagerStorage();
+        ComputeUnit storage computeUnit = workerStorage.computeUnitById[computeUnitId];
+
+        require(workerId != bytes32(0), "WorkerId can't be empty");
+
+        uint workerCount = workerStorage.workerCount;
+        if (computeUnit.workerId == bytes32(0)) {
+            workerCount++;
+            workerStorage.workerCount = workerCount;
+        }
+
+        computeUnit.workerId = workerId;
+
+        emit WorkerIdUpdated(computeUnitId, workerId);
+
+        return workerCount;
+    }
+
+    function _removeComputeUnit(bytes32 computeUnitId, uint lastWorkedEpoch) public returns (uint workerCount) {
         WorkerManagerStorage storage workerStorage = _getWorkerManagerStorage();
 
         // check owner
@@ -110,12 +89,23 @@ abstract contract WorkerManager is Config, IWorkerManager {
         // remove ComputeUnit
         workerStorage.computeUnitsIdsList.remove(computeUnitId);
 
+        workerCount = workerStorage.workerCount;
+        if (workerStorage.computeUnitById[computeUnitId].workerId != bytes32(0)) {
+            workerCount--;
+            workerStorage.workerCount = workerCount;
+        }
+
         emit ComputeUnitRemoved(computeUnitId);
 
-        return newComputeUnitCount;
+        return workerCount;
     }
 
     // ------------------ Public View Functions ---------------------
+    function hasPeer(address computeProvider, bytes32 peerId) public view returns (bool) {
+        bytes32 computeUnitId = _calculateUnitId(computeProvider, peerId);
+        return _getWorkerManagerStorage().computeUnitById[computeUnitId].peerId != bytes32(0);
+    }
+
     function getComputeUnit(bytes32 id) public view returns (ComputeUnit memory) {
         return _getWorkerManagerStorage().computeUnitById[id];
     }
@@ -141,20 +131,57 @@ abstract contract WorkerManager is Config, IWorkerManager {
         return computeUnits;
     }
 
+    function getWorkerCount() public view returns (uint256) {
+        return _getWorkerManagerStorage().workerCount;
+    }
+
     function getUnlockCollateralEpoch(bytes32 computeUnitId) external view returns (uint256) {
         return _getWorkerManagerStorage().collateralWithdrawEpochByComputeUnitId[computeUnitId];
     }
 
     // ------------------ Public Mutable Functions ---------------------
-    function setWorker(bytes32 computeUnitId, bytes32 workerId) external {
+
+    function createComputeUnit(address computeProvider, bytes32 peerId) public returns (bytes32) {
         WorkerManagerStorage storage workerStorage = _getWorkerManagerStorage();
-        ComputeUnit storage computeUnit = workerStorage.computeUnitById[computeUnitId];
 
-        require(workerId != bytes32(0), "WorkerId can't be empty");
+        // check target compute units count
+        uint256 globalComputeUnitCount = workerStorage.computeUnitCount;
+        require(globalComputeUnitCount < targetWorkers(), "Target units reached");
 
-        computeUnit.workerId = workerId;
+        // check peerId isn't exist
+        bytes32 id = _calculateUnitId(computeProvider, peerId);
+        require(workerStorage.computeUnitById[id].owner == address(0x00), "Id already used");
 
-        emit WorkerIdUpdated(computeUnitId, workerId);
+        // check max units per compute provider
+        uint256 computeUnitCountByCP = workerStorage.computeProviderInfo[computeProvider].computeUnitCount;
+        require(computeUnitCountByCP < maxWorkersPerProvider(), "Max units per compute provider reached");
+
+        // increase computeUnit count
+        workerStorage.computeProviderInfo[computeProvider].computeUnitCount = ++computeUnitCountByCP;
+        workerStorage.computeUnitCount = ++globalComputeUnitCount;
+
+        // get required collateral
+        uint256 collateral = collateralPerWorker();
+
+        // create ComputeUnit
+        workerStorage.computeUnitById[id] = ComputeUnit({
+            id: id,
+            peerId: peerId,
+            workerId: bytes32(0),
+            owner: computeProvider,
+            collateral: collateral,
+            created: _globalCore().currentEpoch()
+        });
+
+        // add ComputeUnit to list
+        workerStorage.computeUnitsIdsList.push(id);
+
+        emit ComputeUnitCreated(id, computeProvider);
+
+        // transfer collateral
+        fluenceToken().safeTransferFrom(msg.sender, address(this), collateral);
+
+        return id;
     }
 
     function withdrawCollateral(bytes32 computeUnitId) external {

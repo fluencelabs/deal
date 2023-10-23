@@ -24,11 +24,15 @@ interface IWorkerManager {
     event CollateralWithdrawn(address owner, uint256 amount);
 
     // ------------------ Public View Functions ---------------------
+    function hasPeer(address computeProvider, bytes32 peerId) external view returns (bool);
+
     function getComputeUnit(bytes32 id) external view returns (ComputeUnit memory);
 
     function getComputeUnitCount() external view returns (uint256);
 
     function getComputeUnits() external view returns (ComputeUnit[] memory);
+
+    function getWorkerCount() external view returns (uint256);
 
     function getUnlockCollateralEpoch(bytes32 computeUnitId) external view returns (uint256);
 

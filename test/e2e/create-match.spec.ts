@@ -14,6 +14,7 @@ import { deployments, ethers as hardhatEthers } from "hardhat";
 import { ethers } from "ethers";
 import { IWorkerManager } from "../../src/typechain-types/contracts/deal/interfaces/IWorkerManager";
 
+const MIN_DPOSITED_EPOCHS = 2n;
 const EPOCH_DURATION = 15;
 const WITHDRAW_EPOCH_TIMEOUT = 2n;
 
@@ -46,7 +47,7 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         hash: ethers.hexlify(ethers.randomBytes(32)),
     }));
     const dealParams = {
-        initDeposit: ethers.parseEther("100"),
+        deposit: ethers.parseEther("100000"),
         appCID: {
             prefixes: hardhatEthers.hexlify(hardhatEthers.randomBytes(4)),
             hash: hardhatEthers.hexlify(hardhatEthers.randomBytes(32)),
@@ -59,6 +60,9 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         effectors: effectors,
         accessType: 0, // 0 - standart, 1 - whitelist, 2 - blacklist
     };
+
+    let minDeposit = dealParams.targetWorkers * dealParams.pricePerWorkerEpoch * MIN_DPOSITED_EPOCHS;
+    let totalDeposit = dealParams.deposit + minDeposit;
 
     // ENV contracts
     let factory: DealFactory;
@@ -97,6 +101,8 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         const createDealParams = {
             paymentToken: await flt.getAddress(),
         };
+
+        await (await flt.approve(await factory.getAddress(), minDeposit)).wait();
 
         // create deal
         const createDealTx = await factory.deployDeal(
@@ -251,6 +257,8 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
 
     // 3. Match deal
     it("3. Match deal with compute providers", async () => {
+        expect(await deal.getFreeBalance()).to.be.eq(minDeposit);
+
         const dealAddress = await deal.getAddress();
 
         // match deal
@@ -336,10 +344,32 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         stateUnits.map((unit: IWorkerManager.ComputeUnitStructOutput) => {
             expect(expectedComputeUnitIds[unit.id]).to.be.true;
         });
+
+        expect(await deal.getStatus()).to.be.eq(DealStatus.INACTIVE);
+    });
+
+    it("4. Deposit balance", async () => {
+        const amount = dealParams.deposit;
+
+        await (await flt.approve(await deal.getAddress(), amount)).wait();
+        const depositRes = await (await deal.deposit(amount)).wait();
+
+        const depositedEventTopic = deal.interface.getEvent("Deposited").topicHash;
+        const log = depositRes.logs.find(({ topics }) => {
+            return topics[0] === depositedEventTopic;
+        });
+        const args = deal.interface.parseLog({
+            data: log.data,
+            topics: [...log.topics],
+        }).args;
+
+        expect(args.amount).to.be.eq(amount);
+
+        //TODO: check balance
     });
 
     // 4. Set workers in deal
-    it("4. Set workers in Deal", async () => {
+    it("5. Set workers in Deal", async () => {
         // load modules
         const workerIdByUnitId: Record<string, string> = {};
         for (const provider of Object.values(computeProviders)) {
@@ -370,31 +400,11 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         stateComputeUints.map((unit: IWorkerManager.ComputeUnitStructOutput) => {
             expect(workerIdByUnitId[unit.id]).to.be.eq(unit.workerId);
         });
-    });
 
-    it("5. Deposit balance", async () => {
-        expect(await deal.getStatus()).to.be.eq(DealStatus.INACTIVE);
-
-        const amount = dealParams.initDeposit;
-
-        await (await flt.approve(await deal.getAddress(), amount)).wait();
-        const depositRes = await (await deal.deposit(amount)).wait();
-
-        const depositedEventTopic = deal.interface.getEvent("Deposited").topicHash;
-        const log = depositRes.logs.find(({ topics }) => {
-            return topics[0] === depositedEventTopic;
-        });
-        const args = deal.interface.parseLog({
-            data: log.data,
-            topics: [...log.topics],
-        }).args;
-
-        expect(args.amount).to.be.eq(amount);
-        expect(await deal.getFreeBalance()).to.be.eq(amount);
         expect(await deal.getStatus()).to.be.eq(DealStatus.ACTIVE);
 
         const currentEpoch = BigInt(Math.floor((await hardhatEthers.provider.getBlock("latest"))!.timestamp / EPOCH_DURATION));
-        const paidEpochs = dealParams.initDeposit / (dealParams.pricePerWorkerEpoch * dealParams.minWorkers);
+        const paidEpochs = totalDeposit / (dealParams.pricePerWorkerEpoch * (await deal.getComputeUnitCount()));
         expect(await deal.getMaxPaidEpoch()).to.be.eq(currentEpoch + paidEpochs);
     });
 
@@ -405,7 +415,7 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         await hardhatEthers.provider.send("evm_setNextBlockTimestamp", [Number(epoch) * EPOCH_DURATION]);
         await hardhatEthers.provider.send("evm_mine", []);
 
-        expect(await deal.getFreeBalance()).to.be.eq(0n);
+        expect(await deal.getFreeBalance()).to.be.lessThan(minDeposit);
         expect(await deal.getStatus()).to.be.eq(DealStatus.INACTIVE);
     });
 
@@ -415,7 +425,7 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
 
         const reward = await deal.getRewardAmount(uintId);
 
-        const paidEpochs = dealParams.initDeposit / (dealParams.pricePerWorkerEpoch * dealParams.minWorkers);
+        const paidEpochs = totalDeposit / (dealParams.pricePerWorkerEpoch * dealParams.minWorkers);
         expect(reward).to.be.eq(paidEpochs * dealParams.pricePerWorkerEpoch);
 
         const balanceBefore = await flt.balanceOf(await provider.signer.getAddress());

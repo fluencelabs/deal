@@ -35,8 +35,7 @@ interface IDeal is IConfig, IWorkerManager {
         uint256 pricePerWorkerEpoch_,
         CIDV1[] calldata effectors_,
         IConfig.AccessType accessType_,
-        address[] calldata accessList_,
-        address owner_
+        address[] calldata accessList_
     ) external;
 
     // ------------------ Public Ownable Functions ------------------

@@ -12,6 +12,9 @@ import "../deal/interfaces/IDeal.sol";
 import "../utils/Ownable.sol";
 
 contract DealFactory is UUPSUpgradeable, IDealFactory {
+    // ------------------ Constants ------------------
+    uint256 private constant _MIN_DPOSITED_EPOCHS = 2;
+
     // ----------------- Immutable -----------------
     IGlobalCore public immutable globalCore;
     IDeal public immutable dealImpl;
@@ -87,6 +90,13 @@ contract DealFactory is UUPSUpgradeable, IDealFactory {
 
         DealFactoryStorage storage dealFactoryStorage = _getDealFactoryStorage();
         dealFactoryStorage.hasDeal[deal] = true;
+
+        uint amount = pricePerWorkerEpoch_ * targetWorkers_ * _MIN_DPOSITED_EPOCHS;
+        paymentToken_.transferFrom(msg.sender, address(this), amount);
+        paymentToken_.approve(address(deal), amount);
+
+        deal.deposit(amount);
+        Ownable(address(deal)).transferOwnership(msg.sender);
 
         emit DealCreated(msg.sender, deal, globalCore.currentEpoch());
 
