@@ -31,8 +31,6 @@ abstract contract ConfigState is IConfigModule {
 }
 
 contract ConfigModule is ConfigState, ModuleBase, Initializable {
-    event AppCIDChanged(CIDV1 newAppCID);
-
     constructor(IGlobalConfig globalConfig_) ConfigState(globalConfig_) {}
 
     function initialize(
@@ -67,9 +65,7 @@ contract ConfigModule is ConfigState, ModuleBase, Initializable {
         return _appCID;
     }
 
-    function setAppCID(CIDV1 calldata appCID_) external onlyOwner {
+    function setAppCID(CIDV1 calldata appCID_) external onlyCore {
         _appCID = appCID_;
-
-        emit AppCIDChanged(appCID_);
     }
 }

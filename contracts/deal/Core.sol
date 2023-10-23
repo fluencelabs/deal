@@ -12,6 +12,8 @@ import "./interfaces/IWorkersModule.sol";
 import "./base/Types.sol";
 
 contract Core is UUPSUpgradeable, OwnableUpgradeable, ICore {
+    event AppCIDChanged(CIDV1 newAppCID);
+
     mapping(Module => address) public moduleByType;
     mapping(address => Module) public moduleByAddress;
 
@@ -72,5 +74,11 @@ contract Core is UUPSUpgradeable, OwnableUpgradeable, ICore {
 
     function setWorker(bytes32 patId, bytes32 workerId) external {
         workersModule().setWorker(patId, workerId);
+    }
+
+    function setAppCID(CIDV1 calldata appCID_) external onlyOwner {
+        configModule().setAppCID(appCID_);
+
+        emit AppCIDChanged(appCID_);
     }
 }

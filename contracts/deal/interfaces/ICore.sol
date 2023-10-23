@@ -33,4 +33,6 @@ interface ICore {
     function owner() external view returns (address);
 
     function transferOwnership(address newOwner) external;
+
+    function setAppCID(CIDV1 calldata appCID_) external;
 }

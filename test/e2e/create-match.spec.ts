@@ -114,15 +114,15 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         };
 
         // load modules
-        const configModule = await deal.getConfigModule();
+        const coreModule = await deal.getCore();
 
-        const setAppCIDTx = await configModule.setAppCID(newCID);
+        const setAppCIDTx = await coreModule.setAppCID(newCID);
 
         // parse result from event
         const resOfSetAppCIDTx = await setAppCIDTx.wait();
-        const appCIDChangedEventTopic = configModule.interface.getEvent("AppCIDChanged").topicHash;
+        const appCIDChangedEventTopic = coreModule.interface.getEvent("AppCIDChanged").topicHash;
         const log = resOfSetAppCIDTx.logs.find(({ topics }) => topics[0] === appCIDChangedEventTopic);
-        const newCIDFromContract = configModule.interface.parseLog({
+        const newCIDFromContract = coreModule.interface.parseLog({
             data: log.data,
             topics: [...log.topics],
         }).args.newAppCID;
