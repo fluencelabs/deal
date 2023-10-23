@@ -5,13 +5,14 @@ pragma solidity ^0.8.19;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "./interfaces/IDealFactory.sol";
 import "./interfaces/IGlobalCore.sol";
 import "../deal/interfaces/IDeal.sol";
 import "../utils/Ownable.sol";
 
-contract DealFactory is UUPSUpgradeable, IDealFactory {
+contract DealFactory is UUPSUpgradeable, OwnableUpgradeable, IDealFactory {
     // ----------------- Immutable -----------------
     IGlobalCore public immutable globalCore;
     IDeal public immutable dealImpl;
@@ -32,17 +33,11 @@ contract DealFactory is UUPSUpgradeable, IDealFactory {
         }
     }
 
-    // ----------------- Modifiers -----------------
-    modifier onlyOwner() {
-        require(msg.sender == Ownable(address(globalCore)).owner(), "Only owner can call this function");
-        _;
-    }
-
     // ----------------- Constructor -----------------
+    // @custom:oz-upgrades-unsafe-allow state-variable-immutable constructor
     constructor(IGlobalCore globalCore_, IDeal dealImpl_) {
         globalCore = globalCore_;
         dealImpl = dealImpl_;
-        _disableInitializers();
     }
 
     // ----------------- View -----------------
@@ -51,6 +46,11 @@ contract DealFactory is UUPSUpgradeable, IDealFactory {
     }
 
     // ----------------- Mutable -----------------
+    function initialize() initializer public {
+      __Ownable_init();
+      __UUPSUpgradeable_init();
+    }
+
     function deployDeal(
         CIDV1 calldata appCID_,
         IERC20 paymentToken_,
@@ -93,5 +93,5 @@ contract DealFactory is UUPSUpgradeable, IDealFactory {
         return deal;
     }
 
-    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+    function _authorizeUpgrade(address) internal override onlyOwner {}
 }
