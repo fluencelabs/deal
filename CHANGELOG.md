@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.2.16](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.15...deal-aurora-v0.2.16) (2023-10-23)
+
+
+### Features
+
+* add lib for interaction with the deal contract system ([#51](https://github.com/fluencelabs/deal/issues/51)) ([0911822](https://github.com/fluencelabs/deal/commit/0911822d02ea32df0fd0acd94d3421fd9a752e92))
+* add networks to client (kras, stage, testnet) ([#55](https://github.com/fluencelabs/deal/issues/55)) ([8e899e6](https://github.com/fluencelabs/deal/commit/8e899e6996273d30b79db99b58a71c71c69e9891))
+* auto deploy ([#76](https://github.com/fluencelabs/deal/issues/76)) ([de45ca3](https://github.com/fluencelabs/deal/commit/de45ca3c32955c62beae983de68d0d9344f1c5a9))
+* deploy to filecoin env ([#105](https://github.com/fluencelabs/deal/issues/105)) ([fb55199](https://github.com/fluencelabs/deal/commit/fb55199a98d09705a269bd1a6a975d280d85c034))
+* subnets update ([#83](https://github.com/fluencelabs/deal/issues/83)) ([39b5700](https://github.com/fluencelabs/deal/commit/39b5700e0774d9415656eb56bad4dbb06c6e9509))
+* whitelist & blacklist ([#98](https://github.com/fluencelabs/deal/issues/98)) ([c6d9589](https://github.com/fluencelabs/deal/commit/c6d9589e1fda42ce3b73461f1704235a6c4fefa0))
+
+
+### Bug Fixes
+
+* add kras deployment ([11b6741](https://github.com/fluencelabs/deal/commit/11b6741397f370f325425c877f1606f88add7079))
+* add verify in deploy ([f266365](https://github.com/fluencelabs/deal/commit/f26636559402f5f2c6c6d277c7ccfe569744b2d5))
+* addresses ([#62](https://github.com/fluencelabs/deal/issues/62)) ([63a97b5](https://github.com/fluencelabs/deal/commit/63a97b5f9dac8d3cad38a2155cb6c776b8679f83))
+* build ([#88](https://github.com/fluencelabs/deal/issues/88)) ([7bab4f7](https://github.com/fluencelabs/deal/commit/7bab4f76b45748d84e523152f477e8f3e9af7f38))
+* deploy ([40aee38](https://github.com/fluencelabs/deal/commit/40aee38e8a231804d807ba6f20e4a0cf598745d7))
+* fix bugs and update cp peers logic ([#87](https://github.com/fluencelabs/deal/issues/87)) ([56f5141](https://github.com/fluencelabs/deal/commit/56f5141bc95826349e267d3f2d6982aa9394152a))
+* fix phassphrase ([a656a42](https://github.com/fluencelabs/deal/commit/a656a426a9c4b432f41b59041b392f81bc922485))
+* fix tests and deploy ([#90](https://github.com/fluencelabs/deal/issues/90)) ([0c9397b](https://github.com/fluencelabs/deal/commit/0c9397b34e3c5cc21a1394cae18f4898974e2e8d))
+* fix the matching event, migrate cid from string to struct, fix tests ([#60](https://github.com/fluencelabs/deal/issues/60)) ([f2e87a8](https://github.com/fluencelabs/deal/commit/f2e87a8cf711e90266c760985d1e4eac3be3e9ce))
+* merge ([#92](https://github.com/fluencelabs/deal/issues/92)) ([63aa080](https://github.com/fluencelabs/deal/commit/63aa0809bb03d036fc4e64bfac0b923f84146f1d))
+* remove peer fix ([8cff584](https://github.com/fluencelabs/deal/commit/8cff5843899fa12e597263b36708b1c5bb128a2f))
+* update cid ([b368cf0](https://github.com/fluencelabs/deal/commit/b368cf0695001068635c897b153999c2b506023b))
+* update deployment for mumbai ([#84](https://github.com/fluencelabs/deal/issues/84)) ([2a331a5](https://github.com/fluencelabs/deal/commit/2a331a5e863fa521fca705699fb51f92a5056ac0))
+* update deployments ([6b50ff6](https://github.com/fluencelabs/deal/commit/6b50ff68c951f16968b5762b151fc2a46803f526))
+
 ## [0.2.15](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.14...deal-aurora-v0.2.15) (2023-09-26)
 
 
