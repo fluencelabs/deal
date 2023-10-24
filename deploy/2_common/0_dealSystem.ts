@@ -43,7 +43,9 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         waitConfirmations: 1,
     });
 
-    // Init Deal contract
+    // Deploy Deal contract implementation only.
+    // Note, there is no need in initialization since initialize
+    // delegated to factory contract, especially to deal creation method.
     const dealImpl = await hre.deployments.deploy("DealImpl", {
         from: deployer,
         contract: "Deal",
