@@ -1,18 +1,16 @@
 import { expect } from "chai";
-import {
-    Deal,
-    DealClient,
-    DealFactory,
-    DealFactory__factory,
-    Deal__factory,
-    IERC20,
-    IERC20__factory,
-    Matcher,
-    Matcher__factory,
-} from "../../src/index";
 import { deployments, ethers as hardhatEthers } from "hardhat";
 import { ethers } from "ethers";
 import { IWorkerManager } from "../../src/typechain-types/contracts/deal/interfaces/IWorkerManager";
+import {
+    Deal,
+    Deal__factory,
+    DealFactory,
+    IERC20,
+    IERC20__factory,
+    Matcher,
+    Matcher__factory
+} from "../../src/typechain-types";
 
 const EPOCH_DURATION = 15;
 const WITHDRAW_EPOCH_TIMEOUT = 2n;
@@ -48,8 +46,8 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
     const dealParams = {
         initDeposit: ethers.parseEther("100"),
         appCID: {
-            prefixes: hardhatEthers.hexlify(hardhatEthers.randomBytes(4)),
-            hash: hardhatEthers.hexlify(hardhatEthers.randomBytes(32)),
+            prefixes: ethers.hexlify(hardhatEthers.randomBytes(4)),
+            hash: ethers.hexlify(hardhatEthers.randomBytes(32)),
         },
         minWorkers: 60n,
         targetWorkers: 60n,
@@ -73,7 +71,10 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         await deployments.fixture(["tokens", "common", "localnet"]);
 
         const signer = await hardhatEthers.provider.getSigner();
-        factory = DealFactory__factory.connect((await deployments.get("Factory")).address, signer);
+        const DealFactoryFactory = await deployments.get("DealFactory")
+        factory = (
+            await hardhatEthers.getContractAt('DealFactory', DealFactoryFactory.address) as DealFactory).connect(signer)
+
         flt = IERC20__factory.connect((await deployments.get("FLT")).address, signer);
         matcher = Matcher__factory.connect((await deployments.get("Matcher")).address, signer);
 

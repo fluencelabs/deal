@@ -2,13 +2,14 @@
 
 pragma solidity ^0.8.19;
 
+import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./DealStorageUtils.sol";
 import "./WorkerManager.sol";
 import "./interfaces/IDeal.sol";
 import "./interfaces/IConfig.sol";
 import "../global/interfaces/IGlobalCore.sol";
-import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "../utils/OwnableUpgradableDiamond.sol";
 
 contract Deal is WorkerManager, IDeal {
     using BitMaps for BitMaps.BitMap;

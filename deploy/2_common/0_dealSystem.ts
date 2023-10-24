@@ -1,8 +1,13 @@
 import type { HardhatRuntimeEnvironment } from "hardhat/types";
-import { GlobalCore__factory } from "../../src/typechain-types";
-import { ethers } from "hardhat";
+import {GlobalCore__factory} from "../../src/typechain-types";
+import {deployments, ethers} from "hardhat";
 
 const EPOCH_DURATION = 15;
+const DEFAULT_HARDHAT_DEPLOY_SETTINGS = {
+        log: true,
+        autoMine: true,
+        waitConfirmations: 1,
+    }
 
 module.exports = async function (hre: HardhatRuntimeEnvironment) {
     const accounts = await hre.getUnnamedAccounts();
@@ -38,7 +43,9 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         waitConfirmations: 1,
     });
 
-    // Init Deal contract
+    // Deploy Deal contract implementation only.
+    // Note, there is no need in initialization since initialize
+    // delegated to factory contract, especially to deal creation method.
     const dealImpl = await hre.deployments.deploy("DealImpl", {
         from: deployer,
         contract: "Deal",
@@ -48,23 +55,20 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         waitConfirmations: 1,
     });
 
-    // Init DealFactory contract
-    const factoryImpl = await hre.deployments.deploy("FactoryImpl", {
+    const dealFactory = await hre.deployments.deploy('DealFactory', {
         from: deployer,
-        contract: "DealFactory",
         args: [globalCore.address, dealImpl.address],
-        log: true,
-        autoMine: true,
-        waitConfirmations: 1,
-    });
-
-    const factory = await hre.deployments.deploy("Factory", {
-        from: deployer,
-        contract: "ERC1967Proxy",
-        args: [factoryImpl.address, "0x"],
-        log: true,
-        autoMine: true,
-        waitConfirmations: 1,
+        contract: "DealFactory",
+        proxy: {
+            proxyContract: 'UUPS',
+            execute: {
+                init: {
+                    methodName: 'initialize',
+                    args: [],
+                },
+            },
+        },
+        ...DEFAULT_HARDHAT_DEPLOY_SETTINGS,
     });
 
     // Init Matcher contract
@@ -88,7 +92,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
 
     const globalConfigContract = GlobalCore__factory.connect(globalCore.address, await ethers.getSigner(deployer));
     if (globalCore.newlyDeployed) {
-        await (await globalConfigContract.setFactory(factory.address)).wait();
+        await (await globalConfigContract.setFactory(dealFactory.address)).wait();
         await (await globalConfigContract.setMatcher(matcher.address)).wait();
     }
 };

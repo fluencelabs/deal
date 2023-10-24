@@ -3,12 +3,12 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "../utils/Ownable.sol";
 import "./interfaces/IGlobalCore.sol";
 import "./interfaces/IDealFactory.sol";
 import "./matcher/interfaces/IMatcher.sol";
+import "../utils/OwnableUpgradableDiamond.sol";
 
-contract GlobalCore is UUPSUpgradeable, Ownable, IGlobalCore {
+contract GlobalCore is UUPSUpgradeable, OwnableUpgradableDiamond, IGlobalCore {
     // ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.globalCore.storage.v1")) - 1);
 
@@ -28,10 +28,9 @@ contract GlobalCore is UUPSUpgradeable, Ownable, IGlobalCore {
         }
     }
 
-    // ------------------ Constuctor ------------------
-    constructor() {
-        _disableInitializers();
-    }
+    // ------------------ Constructor ------------------
+    // @custom:oz-upgrades-unsafe-allow constructor
+    constructor() initializer {}
 
     // ------------------ Initializer ------------------
     function initialize(IERC20 fluenceToken_, uint256 epochDuration_) external initializer {
@@ -39,12 +38,10 @@ contract GlobalCore is UUPSUpgradeable, Ownable, IGlobalCore {
 
         globalCoreStorage.fluenceToken = fluenceToken_;
         globalCoreStorage.epochDuration = epochDuration_;
-
         __Ownable_init(msg.sender);
+        // OZ inits.
+        __UUPSUpgradeable_init();
     }
-
-    // ------------------ Internal Mutable Functions ------------------
-    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
     // ------------------ external View Functions ------------------
     function currentEpoch() external view returns (uint256) {
@@ -75,4 +72,7 @@ contract GlobalCore is UUPSUpgradeable, Ownable, IGlobalCore {
     function setFactory(IDealFactory factory_) external onlyOwner {
         _getGlobalCoreStorage().factory = factory_;
     }
+
+    // ------------------ Internal Mutable Functions ------------------
+    function _authorizeUpgrade(address) internal override onlyOwner {}
 }

@@ -9,9 +9,12 @@ import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "./interfaces/IDealFactory.sol";
 import "./interfaces/IGlobalCore.sol";
 import "../deal/interfaces/IDeal.sol";
-import "../utils/Ownable.sol";
+import "../utils/OwnableUpgradableDiamond.sol";
 
-contract DealFactory is UUPSUpgradeable, IDealFactory {
+/*
+ * @dev On init mas.sender becomes owner.
+*/
+contract DealFactory is UUPSUpgradeable, OwnableUpgradableDiamond, IDealFactory {
     // ----------------- Immutable -----------------
     IGlobalCore public immutable globalCore;
     IDeal public immutable dealImpl;
@@ -32,17 +35,17 @@ contract DealFactory is UUPSUpgradeable, IDealFactory {
         }
     }
 
-    // ----------------- Modifiers -----------------
-    modifier onlyOwner() {
-        require(msg.sender == Ownable(address(globalCore)).owner(), "Only owner can call this function");
-        _;
-    }
-
     // ----------------- Constructor -----------------
+    // @custom:oz-upgrades-unsafe-allow state-variable-immutable constructor
     constructor(IGlobalCore globalCore_, IDeal dealImpl_) {
         globalCore = globalCore_;
         dealImpl = dealImpl_;
-        _disableInitializers();
+    }
+
+    // ------------------ Initializer ------------------
+    function initialize() initializer public {
+      __Ownable_init(msg.sender);
+      __UUPSUpgradeable_init();
     }
 
     // ----------------- View -----------------
@@ -51,6 +54,7 @@ contract DealFactory is UUPSUpgradeable, IDealFactory {
     }
 
     // ----------------- Mutable -----------------
+
     function deployDeal(
         CIDV1 calldata appCID_,
         IERC20 paymentToken_,
@@ -93,5 +97,5 @@ contract DealFactory is UUPSUpgradeable, IDealFactory {
         return deal;
     }
 
-    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+    function _authorizeUpgrade(address) internal override onlyOwner {}
 }
