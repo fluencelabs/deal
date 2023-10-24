@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "./interfaces/IDealFactory.sol";
 import "./interfaces/IGlobalCore.sol";
 import "../deal/interfaces/IDeal.sol";
-import "../utils/Ownable.sol";
+import "../utils/OwnableUpgradableDiamond.sol";
 
 /*
  * @dev On init mas.sender becomes owner.
