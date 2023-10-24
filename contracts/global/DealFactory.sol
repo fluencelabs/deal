@@ -9,9 +9,12 @@ import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "./interfaces/IDealFactory.sol";
 import "./interfaces/IGlobalCore.sol";
 import "../deal/interfaces/IDeal.sol";
-import "../utils/Ownable.sol";
+import "../utils/OwnableUpgradableDiamond.sol";
 
-contract DealFactory is UUPSUpgradeable, IDealFactory {
+/*
+ * @dev On init mas.sender becomes owner.
+ */
+contract DealFactory is UUPSUpgradeable, OwnableUpgradableDiamond, IDealFactory {
     // ------------------ Constants ------------------
     uint256 private constant _MIN_DPOSITED_EPOCHS = 2;
 
@@ -35,17 +38,17 @@ contract DealFactory is UUPSUpgradeable, IDealFactory {
         }
     }
 
-    // ----------------- Modifiers -----------------
-    modifier onlyOwner() {
-        require(msg.sender == Ownable(address(globalCore)).owner(), "Only owner can call this function");
-        _;
-    }
-
     // ----------------- Constructor -----------------
+    // @custom:oz-upgrades-unsafe-allow state-variable-immutable constructor
     constructor(IGlobalCore globalCore_, IDeal dealImpl_) {
         globalCore = globalCore_;
         dealImpl = dealImpl_;
-        _disableInitializers();
+    }
+
+    // ------------------ Initializer ------------------
+    function initialize() public initializer {
+        __Ownable_init(msg.sender);
+        __UUPSUpgradeable_init();
     }
 
     // ----------------- View -----------------
@@ -54,6 +57,7 @@ contract DealFactory is UUPSUpgradeable, IDealFactory {
     }
 
     // ----------------- Mutable -----------------
+
     function deployDeal(
         CIDV1 calldata appCID_,
         IERC20 paymentToken_,
@@ -96,12 +100,12 @@ contract DealFactory is UUPSUpgradeable, IDealFactory {
         paymentToken_.approve(address(deal), amount);
 
         deal.deposit(amount);
-        Ownable(address(deal)).transferOwnership(msg.sender);
+        OwnableUpgradableDiamond(address(deal)).transferOwnership(msg.sender);
 
         emit DealCreated(msg.sender, deal, globalCore.currentEpoch());
 
         return deal;
     }
 
-    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+    function _authorizeUpgrade(address) internal override onlyOwner {}
 }

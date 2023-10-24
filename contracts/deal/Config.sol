@@ -2,14 +2,14 @@
 
 pragma solidity ^0.8.19;
 
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../utils/LinkedListWithUniqueKeys.sol";
 import "./interfaces/IConfig.sol";
 import "../global/interfaces/IGlobalCore.sol";
-import "../utils/Ownable.sol";
+import "../utils/OwnableUpgradableDiamond.sol";
 
-contract Config is Initializable, IConfig, Ownable {
+contract Config is UUPSUpgradeable, OwnableUpgradableDiamond, IConfig {
     using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
 
     // ------------------ Storage ------------------
@@ -45,6 +45,7 @@ contract Config is Initializable, IConfig, Ownable {
     IGlobalCore private immutable _globalCore_;
 
     // ------------------ Constructor ------------------
+    // @custom:oz-upgrades-unsafe-allow state-variable-immutable constructor
     constructor(IGlobalCore globalCore_) {
         _globalCore_ = globalCore_;
         _fluenceToken = globalCore_.fluenceToken();
@@ -206,4 +207,6 @@ contract Config is Initializable, IConfig, Ownable {
     function removeFromAccessList(address addr) external onlyOwner {
         _getConfigStorage().accessList.remove(bytes32(bytes20(addr)));
     }
+
+    function _authorizeUpgrade(address) internal override onlyOwner {}
 }
