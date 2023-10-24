@@ -5,14 +5,16 @@ pragma solidity ^0.8.19;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "./interfaces/IDealFactory.sol";
 import "./interfaces/IGlobalCore.sol";
 import "../deal/interfaces/IDeal.sol";
 import "../utils/Ownable.sol";
 
-contract DealFactory is UUPSUpgradeable, OwnableUpgradeable, IDealFactory {
+/*
+ * @dev On init mas.sender becomes owner.
+*/
+contract DealFactory is UUPSUpgradeable, OwnableUpgradableDiamond, IDealFactory {
     // ----------------- Immutable -----------------
     IGlobalCore public immutable globalCore;
     IDeal public immutable dealImpl;
@@ -40,16 +42,18 @@ contract DealFactory is UUPSUpgradeable, OwnableUpgradeable, IDealFactory {
         dealImpl = dealImpl_;
     }
 
+    // ------------------ Initializer ------------------
+    function initialize() initializer public {
+      __Ownable_init(msg.sender);
+      __UUPSUpgradeable_init();
+    }
+
     // ----------------- View -----------------
     function hasDeal(IDeal deal) external view returns (bool) {
         return _getDealFactoryStorage().hasDeal[deal];
     }
 
     // ----------------- Mutable -----------------
-    function initialize() initializer public {
-      __Ownable_init();
-      __UUPSUpgradeable_init();
-    }
 
     function deployDeal(
         CIDV1 calldata appCID_,

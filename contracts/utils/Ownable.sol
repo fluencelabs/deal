@@ -4,7 +4,12 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract Ownable is Initializable {
+/*
+ * @dev Similar (not fully) to the OZ OwnableUpgradable(Initializable, ContextUpgradeable).
+ * @dev The main difference is in Diamond part,
+ * @dev  e.g. from: https://github.com/OpenZeppelin/openzeppelin-contracts/issues/2964.
+*/
+contract OwnableUpgradableDiamond is Initializable {
     // ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.uitls.storage.v1.ownable")) - 1);
 
@@ -39,6 +44,10 @@ contract Ownable is Initializable {
      * @dev Initializes the contract setting the address provided by the deployer as the initial owner.
      */
     function __Ownable_init(address initialOwner) internal onlyInitializing {
+        __Ownable_init_unchained(initialOwner);
+    }
+
+    function __Ownable_init_unchained(address initialOwner) internal onlyInitializing {
         if (initialOwner == address(0)) {
             revert OwnableInvalidOwner(address(0));
         }
