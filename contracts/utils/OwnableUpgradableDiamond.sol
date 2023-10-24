@@ -11,7 +11,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 */
 contract OwnableUpgradableDiamond is Initializable {
     // ------------------ Storage ------------------
-    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.uitls.storage.v1.ownable")) - 1);
+    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.uitls.storage.v1.ownableupgradablediamond")) - 1);
 
     struct OwnableStorage {
         address owner;
