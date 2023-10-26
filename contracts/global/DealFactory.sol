@@ -44,8 +44,9 @@ contract DealFactory is UUPSUpgradeable, OwnableUpgradableDiamond, IDealFactory 
 
     // ------------------ Initializer ------------------
     function initialize() initializer public {
-      __Ownable_init(msg.sender);
-      __UUPSUpgradeable_init();
+        // OZ init.
+        __Ownable_init(msg.sender);
+        __UUPSUpgradeable_init();
     }
 
     // ----------------- View -----------------
