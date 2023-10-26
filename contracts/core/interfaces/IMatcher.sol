@@ -3,8 +3,7 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../../../deal/base/Types.sol";
-import "../../../deal/interfaces/IDeal.sol";
+import "../../deal/interfaces/IDeal.sol";
 
 interface IMatcher {
     // ----------------- Events -----------------

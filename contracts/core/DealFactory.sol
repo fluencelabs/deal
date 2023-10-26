@@ -2,30 +2,21 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import "@openzeppelin/contracts/proxy/EIP1967/ERC1967Proxy.sol";
 import "./interfaces/IDealFactory.sol";
-import "./interfaces/IGlobalCore.sol";
 import "../deal/interfaces/IDeal.sol";
-import "../utils/OwnableUpgradableDiamond.sol";
+import "./GlobalConstants.sol";
+import "./EpochController.sol";
 
 /*
  * @dev On init mas.sender becomes owner.
  */
-contract DealFactory is UUPSUpgradeable, OwnableUpgradableDiamond, IDealFactory {
-    // ------------------ Constants ------------------
-    uint256 private constant _MIN_DPOSITED_EPOCHS = 2;
-
-    // ----------------- Immutable -----------------
-    IGlobalCore public immutable globalCore;
-    IDeal public immutable dealImpl;
-
+abstract contract DealFactory is GlobalConstants, EpochController, IDealFactory {
     // ------------------ Storage ------------------
-    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.dealFactory.storage.v1")) - 1);
+    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.market.storage.v1.dealFactory")) - 1);
 
     struct DealFactoryStorage {
+        IDeal dealImpl;
         mapping(IDeal => bool) hasDeal;
     }
 
@@ -40,15 +31,13 @@ contract DealFactory is UUPSUpgradeable, OwnableUpgradableDiamond, IDealFactory 
 
     // ----------------- Constructor -----------------
     // @custom:oz-upgrades-unsafe-allow state-variable-immutable constructor
-    constructor(IGlobalCore globalCore_, IDeal dealImpl_) {
-        globalCore = globalCore_;
-        dealImpl = dealImpl_;
+    constructor() {
+        _disableInitializers();
     }
 
     // ------------------ Initializer ------------------
-    function initialize() public initializer {
-        __Ownable_init(msg.sender);
-        __UUPSUpgradeable_init();
+    function __DealFactory_init(IDeal dealImpl_) internal onlyInitializing {
+        _getDealFactoryStorage().dealImpl = dealImpl_;
     }
 
     // ----------------- View -----------------
@@ -102,10 +91,8 @@ contract DealFactory is UUPSUpgradeable, OwnableUpgradableDiamond, IDealFactory 
         deal.deposit(amount);
         OwnableUpgradableDiamond(address(deal)).transferOwnership(msg.sender);
 
-        emit DealCreated(msg.sender, deal, globalCore.currentEpoch());
+        emit DealCreated(msg.sender, deal, currentEpoch());
 
         return deal;
     }
-
-    function _authorizeUpgrade(address) internal override onlyOwner {}
 }

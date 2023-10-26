@@ -3,15 +3,17 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "./DealStorageUtils.sol";
 import "./WorkerManager.sol";
 import "./interfaces/IDeal.sol";
 import "./interfaces/IConfig.sol";
-import "../global/interfaces/IGlobalCore.sol";
+import "../core/interfaces/ICore.sol";
 import "../utils/OwnableUpgradableDiamond.sol";
 
-contract Deal is WorkerManager, IDeal {
+import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
+
+contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
     using BitMaps for BitMaps.BitMap;
     using SafeERC20 for IERC20;
     using DealStorageUtils for DealStorageUtils.Balance;
@@ -50,7 +52,7 @@ contract Deal is WorkerManager, IDeal {
     }
 
     // ------------------ Constructor ---------------------
-    constructor(IGlobalCore globalCore_) Config(globalCore_) {
+    constructor(ICore globalCore_) Config(globalCore_) {
         _disableInitializers();
     }
 
@@ -139,6 +141,8 @@ contract Deal is WorkerManager, IDeal {
         balance.commitToStorage(dealStorage);
         dealStorage.lastCommitedEpoch = currentEpoch;
     }
+
+    function _authorizeUpgrade(address) internal override onlyOwner {}
 
     // ------------------ Public View Functions ------------------
     function getStatus() public view returns (Status) {
