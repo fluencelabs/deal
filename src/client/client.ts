@@ -1,17 +1,20 @@
 import type { ethers } from "ethers";
 import { GlobalContracts } from "./global";
-import { Deal } from "./deal";
 import type { ContractsENV } from "./config";
+import { Deal, Deal__factory } from "../typechain-types";
 
 export class DealClient {
     private globalContracts: GlobalContracts;
 
-    constructor(private signer: ethers.Signer, private env: ContractsENV) {
-        this.globalContracts = new GlobalContracts(this.signer, this.env);
+    constructor(
+        private env: ContractsENV,
+        private signerOrProvider: ethers.Signer | ethers.Provider,
+    ) {
+        this.globalContracts = new GlobalContracts(this.signerOrProvider, this.env);
     }
 
     getDeal(address: string): Deal {
-        return new Deal(address, this.signer);
+        return Deal__factory.connect(address, this.signerOrProvider);
     }
 
     getGlobalContracts(): GlobalContracts {
