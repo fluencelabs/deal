@@ -1,11 +1,11 @@
-import { ethers } from "hardhat";
 import type { HardhatRuntimeEnvironment } from "hardhat/types";
+import {getEIP1559AndHardhatDeployTxArgs} from "../../hardhatUtils/hardhatDeploy";
 
-const WAIT_CONFIRMATIONS = process.env["WAIT_CONFIRMATIONS"] ? parseInt(process.env["WAIT_CONFIRMATIONS"]) : 0;
 
 module.exports = async function (hre: HardhatRuntimeEnvironment) {
     const accounts = await hre.getUnnamedAccounts();
     const deployer = accounts[0]!;
+    const EIP1559AndHardhatDeployTxArgs = await getEIP1559AndHardhatDeployTxArgs(hre.ethers.provider)
 
     const fluenceTokenAddress = (await hre.deployments.get("FLT")).address;
     const testUSDAddress = (await hre.deployments.get("TestUSD")).address;
@@ -14,9 +14,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         from: deployer,
         contract: "OwnableFaucet",
         args: [fluenceTokenAddress, testUSDAddress],
-        log: true,
-        autoMine: true,
-        waitConfirmations: WAIT_CONFIRMATIONS,
+        ...EIP1559AndHardhatDeployTxArgs,
     });
 
     if (faucet.newlyDeployed) {
@@ -24,9 +22,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
             "FLT",
             {
                 from: deployer,
-                log: true,
-                waitConfirmations: WAIT_CONFIRMATIONS,
-                autoMine: true,
+                ...EIP1559AndHardhatDeployTxArgs,
             },
             "transfer",
             faucet.address,
@@ -37,9 +33,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
             "TestUSD",
             {
                 from: deployer,
-                log: true,
-                waitConfirmations: WAIT_CONFIRMATIONS,
-                autoMine: true,
+                ...EIP1559AndHardhatDeployTxArgs,
             },
             "transfer",
             faucet.address,

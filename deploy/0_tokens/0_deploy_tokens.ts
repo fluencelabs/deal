@@ -1,12 +1,15 @@
 import { ethers } from "ethers";
 import type { HardhatRuntimeEnvironment } from "hardhat/types";
+import {getEIP1559AndHardhatDeployTxArgs} from "../../hardhatUtils/hardhatDeploy";
 
 const TEST_TOKEN_AMOUNT = 10n ** 30n * 10n ** 18n;
-const WAIT_CONFIRMATIONS = process.env["WAIT_CONFIRMATIONS"] ? parseInt(process.env["WAIT_CONFIRMATIONS"]) : 0;
+
 
 module.exports = async function (hre: HardhatRuntimeEnvironment) {
     const accounts = await hre.getUnnamedAccounts();
     const deployer = accounts[0]!;
+    const EIP1559AndHardhatDeployTxArgs = await getEIP1559AndHardhatDeployTxArgs(hre.ethers.provider)
+
 
     console.log("Deploying account:", deployer);
     console.log("Block number:", await hre.ethers.provider.getBlockNumber());
@@ -15,18 +18,14 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         from: deployer,
         contract: "TestERC20",
         args: ["Fluence Token", "FLT"],
-        log: true,
-        autoMine: true,
-        waitConfirmations: WAIT_CONFIRMATIONS,
+        ...EIP1559AndHardhatDeployTxArgs,
     });
 
     const testUSD = await hre.deployments.deploy("TestUSD", {
         from: deployer,
         contract: "TestERC20",
         args: ["Test USD", "tUSD"],
-        log: true,
-        autoMine: true,
-        waitConfirmations: WAIT_CONFIRMATIONS,
+        ...EIP1559AndHardhatDeployTxArgs,
     });
 
     if (flt.newlyDeployed) {
@@ -34,9 +33,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
             "FLT",
             {
                 from: deployer,
-                log: true,
-                waitConfirmations: WAIT_CONFIRMATIONS,
-                autoMine: true,
+                ...EIP1559AndHardhatDeployTxArgs,
             },
             "transfer",
             deployer,
@@ -49,9 +46,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
             "TestUSD",
             {
                 from: deployer,
-                log: true,
-                waitConfirmations: WAIT_CONFIRMATIONS,
-                autoMine: true,
+                ...EIP1559AndHardhatDeployTxArgs,
             },
             "transfer",
             deployer,

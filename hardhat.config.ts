@@ -45,6 +45,18 @@ const config: HardhatUserConfig = {
             url: "https://rpc.ankr.com/polygon_mumbai",
             accounts: [process.env["PRIVATE_KEY"] ?? "0x0000000000000000000000000000000000000000000000000000000000000000"],
         },
+        ipcsubnet: {
+            url: 'http://139.162.187.214:8545',
+            accounts: [process.env["PRIVATE_KEY"] ?? "0x0000000000000000000000000000000000000000000000000000000000000000"],
+            chainId: 1404213532111849,
+        },
+        calibration: {  // Currently this network is use only for debugging.
+            url: 'https://api.calibration.node.glif.io/rpc/v1',
+            accounts: [process.env["PRIVATE_KEY"] ?? "0x0000000000000000000000000000000000000000000000000000000000000000"],
+            chainId: 314159,
+            timeout: 1000000,  // recommended by IPC team.
+        }
+
     },
     etherscan: {
         apiKey: {
