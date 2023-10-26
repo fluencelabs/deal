@@ -71,23 +71,20 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         ...DEFAULT_HARDHAT_DEPLOY_SETTINGS,
     });
 
-    // Init Matcher contract
-    const matcherImpl = await hre.deployments.deploy("MatcherImpl", {
+    const matcher = await hre.deployments.deploy('Matcher', {
         from: deployer,
-        contract: "Matcher",
         args: [globalCore.address],
-        log: true,
-        autoMine: true,
-        waitConfirmations: 1,
-    });
-
-    const matcher = await hre.deployments.deploy("Matcher", {
-        from: deployer,
-        contract: "ERC1967Proxy",
-        args: [matcherImpl.address, "0x"],
-        log: true,
-        autoMine: true,
-        waitConfirmations: 1,
+        contract: "Matcher",
+        proxy: {
+            proxyContract: 'UUPS',
+            execute: {
+                init: {
+                    methodName: 'initialize',
+                    args: [],
+                },
+            },
+        },
+        ...DEFAULT_HARDHAT_DEPLOY_SETTINGS,
     });
 
     const globalConfigContract = GlobalCore__factory.connect(globalCore.address, await ethers.getSigner(deployer));

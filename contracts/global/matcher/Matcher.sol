@@ -9,8 +9,9 @@ import "./MatcherConfig.sol";
 import "./interfaces/IMatcher.sol";
 import "../../deal/interfaces/IDeal.sol";
 import "../../deal/interfaces/IConfig.sol";
+import "../../utils/OwnableUpgradableDiamond.sol";
 
-contract Matcher is MatcherConfig, IMatcher {
+contract Matcher is MatcherConfig, UUPSUpgradeable, OwnableUpgradableDiamond, IMatcher {
     using SafeERC20 for IERC20;
     using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
     using ComputeProvidersList for ComputeProvidersList.List;
@@ -21,6 +22,13 @@ contract Matcher is MatcherConfig, IMatcher {
 
     // ----------------- Constructor -----------------
     constructor(IGlobalCore globalCore_) MatcherConfig(globalCore_) {}
+
+    // ------------------ Initializer ------------------
+    function initialize() initializer public {
+        // OZ init.
+        __Ownable_init(msg.sender);
+        __UUPSUpgradeable_init();
+    }
 
     // ----------------- View -----------------
     // TODO: move this logic to offchain. Temp solution
@@ -158,4 +166,6 @@ contract Matcher is MatcherConfig, IMatcher {
             configStorage.minMatchingEpochByDeal[deal] = currentEpoch + _MIN_REMATCHING_EPOCHS;
         }
     }
+
+    function _authorizeUpgrade(address) internal override onlyOwner {}
 }
