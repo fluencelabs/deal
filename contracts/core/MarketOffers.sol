@@ -93,19 +93,41 @@ contract MarketOffers is Initializable {
         return _getOfferStorage().offers[offerId].freePeerIds;
     }
 
+    function _hasOfferEffectors(bytes32 offerId, CIDV1[] memory effectors) internal view returns (bool) {
+        OfferStorage storage offerStorage = _getOfferStorage();
+
+        for (uint i = 0; i < effectors.length; i++) {
+            bytes32 effectorHash = keccak256(abi.encodePacked(effectors[i].prefixes, effectors[i].hash));
+
+            if (!offerStorage.offers[offerId].hasEffector[effectorHash]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     function _reserveComputeUnitForDeal(bytes32 unitId, IDeal deal) internal {
         OfferStorage storage offerStorage = _getOfferStorage();
         ComputeUnit storage computeUnit = offerStorage.computeUnits[unitId];
-        ComputePeer storage computePeer = offerStorage.peers[computeUnit.peerId];
+
+        bytes32 peerId = computeUnit.peerId;
+        ComputePeer storage computePeer = offerStorage.peers[peerId];
+        Offer storage offer = offerStorage.offers[computePeer.info.offerId];
 
         require(computeUnit.deal == address(0x00), "Compute unit already reserved");
+        require(computeUnit.peerId != bytes32(0x00), "Compute unit doesn't exist");
+
         computeUnit.deal = address(deal);
 
-        //TODO: remove compute unit from free list
-        //TODO: remove peer from free list if no free units
-
-
         computePeer.freeComputeUnitIds.remove(unitId);
+        if (computePeer.freeComputeUnitIds.length() == 0) {
+            offer.freePeerIds.remove(computePeer.info.offerId);
+        }
+
+        deal.addComputeUnit(offer.info.owner, peerId);
+
+        //TODO: mv event from deal to here
     }
 
     // ----------------- Public View -----------------

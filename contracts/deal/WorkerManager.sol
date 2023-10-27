@@ -12,8 +12,7 @@ abstract contract WorkerManager is Config, IWorkerManager {
 
     // ------------------ Types ------------------
     struct ComputeProviderInfo {
-        uint256 computeUnitCount;
-        LinkedListWithUniqueKeys.Bytes32List computeUnitsIds;
+        uint computeUnitCount;
     }
 
     // ------------------ Storage ------------------
@@ -27,7 +26,6 @@ abstract contract WorkerManager is Config, IWorkerManager {
         // compute units area
         mapping(bytes32 => ComputeUnit) computeUnitById;
         LinkedListWithUniqueKeys.Bytes32List computeUnitsIdsList;
-        mapping(bytes32 => uint256) collateralWithdrawEpochByComputeUnitId;
     }
 
     WorkerManagerStorage private _storage;
@@ -38,15 +36,6 @@ abstract contract WorkerManager is Config, IWorkerManager {
         assembly {
             s.slot := storageSlot
         }
-    }
-
-    // ------------------ Constants ------------------
-    bytes32 private constant _COMPUTE_UNIT_ID_PREFIX = keccak256("fluence.computeUnit.");
-    uint256 private constant _WITHDRAW_EPOCH_TIMEOUT = 2;
-
-    // ------------------ Internal View Functions ------------------
-    function _calculateUnitId(address computeProvider, bytes32 peerId) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(_COMPUTE_UNIT_ID_PREFIX, computeProvider, peerId));
     }
 
     // ------------------ Internal Mutable Functions ------------------
@@ -70,7 +59,7 @@ abstract contract WorkerManager is Config, IWorkerManager {
         return workerCount;
     }
 
-    function _removeComputeUnit(bytes32 computeUnitId, uint lastWorkedEpoch) public returns (uint workerCount) {
+    function _removeComputeUnit(bytes32 computeUnitId) public returns (uint workerCount) {
         WorkerManagerStorage storage workerStorage = _getWorkerManagerStorage();
 
         // check owner
@@ -83,28 +72,22 @@ abstract contract WorkerManager is Config, IWorkerManager {
         workerStorage.computeProviderInfo[computeProvider].computeUnitCount--;
         workerStorage.computeUnitCount = --newComputeUnitCount;
 
-        workerStorage.collateralWithdrawEpochByComputeUnitId[computeUnitId] = lastWorkedEpoch + _WITHDRAW_EPOCH_TIMEOUT;
-
-        // remove ComputeUnit
-        workerStorage.computeUnitsIdsList.remove(computeUnitId);
-
         workerCount = workerStorage.workerCount;
         if (workerStorage.computeUnitById[computeUnitId].workerId != bytes32(0)) {
             workerCount--;
             workerStorage.workerCount = workerCount;
         }
 
-        emit ComputeUnitRemoved(computeUnitId);
+        // remove ComputeUnit
+        delete workerStorage.computeUnitById[computeUnitId];
+        workerStorage.computeUnitsIdsList.remove(computeUnitId);
+
+        emit ComputeUnitExited(computeUnitId);
 
         return workerCount;
     }
 
     // ------------------ Public View Functions ---------------------
-    function hasPeer(address computeProvider, bytes32 peerId) public view returns (bool) {
-        bytes32 computeUnitId = _calculateUnitId(computeProvider, peerId);
-        return _getWorkerManagerStorage().computeUnitById[computeUnitId].peerId != bytes32(0);
-    }
-
     function getComputeUnit(bytes32 id) public view returns (ComputeUnit memory) {
         return _getWorkerManagerStorage().computeUnitById[id];
     }
@@ -134,13 +117,9 @@ abstract contract WorkerManager is Config, IWorkerManager {
         return _getWorkerManagerStorage().workerCount;
     }
 
-    function getUnlockCollateralEpoch(bytes32 computeUnitId) external view returns (uint256) {
-        return _getWorkerManagerStorage().collateralWithdrawEpochByComputeUnitId[computeUnitId];
-    }
-
     // ------------------ Public Mutable Functions ---------------------
 
-    function createComputeUnit(address computeProvider, bytes32 peerId) public returns (bytes32) {
+    function addComputeUnit(address computeProvider, bytes32 computeUnit) public returns (bytes32) {
         WorkerManagerStorage storage workerStorage = _getWorkerManagerStorage();
 
         // check target compute units count
@@ -148,7 +127,7 @@ abstract contract WorkerManager is Config, IWorkerManager {
         require(globalComputeUnitCount < targetWorkers(), "Target units reached");
 
         // check peerId isn't exist
-        bytes32 id = _calculateUnitId(computeProvider, peerId);
+        bytes32 id = computeUnit;
         require(workerStorage.computeUnitById[id].owner == address(0x00), "Id already used");
 
         // check max units per compute provider
@@ -159,50 +138,18 @@ abstract contract WorkerManager is Config, IWorkerManager {
         workerStorage.computeProviderInfo[computeProvider].computeUnitCount = ++computeUnitCountByCP;
         workerStorage.computeUnitCount = ++globalComputeUnitCount;
 
-        // get required collateral
-        uint256 collateral = collateralPerWorker();
-
         // create ComputeUnit
         workerStorage.computeUnitById[id] = ComputeUnit({
             id: id,
-            peerId: peerId,
             workerId: bytes32(0),
             owner: computeProvider,
-            collateral: collateral,
-            created: _globalCore().currentEpoch()
+            joinedEpoch: _globalCore().currentEpoch()
         });
 
         // add ComputeUnit to list
         workerStorage.computeUnitsIdsList.push(id);
 
-        emit ComputeUnitCreated(id, computeProvider);
-
-        // transfer collateral
-        fluenceToken().safeTransferFrom(msg.sender, address(this), collateral);
-
+        emit ComputeUnitJoined(id);
         return id;
-    }
-
-    function withdrawCollateral(bytes32 computeUnitId) external {
-        WorkerManagerStorage storage workerStorage = _getWorkerManagerStorage();
-
-        require(
-            workerStorage.collateralWithdrawEpochByComputeUnitId[computeUnitId] <= _globalCore().currentEpoch(),
-            "Collateral not available"
-        );
-
-        // get collateral and compute provider
-        uint256 amount = workerStorage.computeUnitById[computeUnitId].collateral;
-        address computeProvider = workerStorage.computeUnitById[computeUnitId].owner;
-
-        // reset collateral withdraw info
-        workerStorage.collateralWithdrawEpochByComputeUnitId[computeUnitId] = 0;
-
-        // transfer collateral
-        fluenceToken().safeTransfer(computeProvider, amount);
-
-        delete workerStorage.computeUnitById[computeUnitId];
-
-        emit CollateralWithdrawn(computeProvider, amount);
     }
 }

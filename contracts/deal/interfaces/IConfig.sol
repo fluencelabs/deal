@@ -17,19 +17,13 @@ interface IConfig {
     event AppCIDChanged(CIDV1 newAppCID);
 
     // ------------------ View Functions ---------------------
-    // function globalCore() external view returns (address);
-
     function paymentToken() external view returns (IERC20);
-
-    function fluenceToken() external view returns (IERC20);
 
     function creationBlock() external view returns (uint256);
 
     function pricePerWorkerEpoch() external view returns (uint256);
 
     function targetWorkers() external view returns (uint256);
-
-    function collateralPerWorker() external view returns (uint256);
 
     function minWorkers() external view returns (uint256);
 

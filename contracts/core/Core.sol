@@ -4,13 +4,13 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "../utils/OwnableUpgradableDiamond.sol";
-import "./MarketOffer.sol";
+import "./MarketOffers.sol";
 import "./DealFactory.sol";
 import "./EpochController.sol";
 import "./GlobalConstants.sol";
 import "./Matcher.sol";
 
-contract Core is Matcher, MarketOffer, DealFactory, EpochController, GlobalConstants, UUPSUpgradeable, OwnableUpgradableDiamond {
+contract Core is MarketOffers, Matcher, DealFactory, UUPSUpgradeable {
     // ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.market.storage.v1")) - 1);
 

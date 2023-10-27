@@ -2,10 +2,9 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import "../utils/InternalOwnable.sol";
+import "../utils/OwnableUpgradableDiamond.sol";
 
-abstract contract GlobalConstants is InternalOwnable, Initializable {
+contract GlobalConstants is OwnableUpgradableDiamond {
     // ------------------ Events ------------------
     event MinDepositForNewDealUpdated(uint minDepositForNewDeal);
 

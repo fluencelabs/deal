@@ -60,7 +60,6 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
     function initialize(
         CIDV1 calldata appCID_,
         IERC20 paymentToken_,
-        uint256 collateralPerWorker_,
         uint256 minWorkers_,
         uint256 targetWorkers_,
         uint256 maxWorkersPerProvider_,
@@ -72,7 +71,6 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
         __Config_init(
             appCID_,
             paymentToken_,
-            collateralPerWorker_,
             minWorkers_,
             targetWorkers_,
             maxWorkersPerProvider_,
@@ -313,7 +311,7 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
         uint currentEpoch = _globalCore().currentEpoch();
         //TODO: fix double get worker count
         uint prevWorkerCount = getWorkerCount();
-        uint newWorkerCount = _removeComputeUnit(computeUnitId, dealStorage.isEnded ? dealStorage.endedEpoch : currentEpoch);
+        uint newWorkerCount = _removeComputeUnit(computeUnitId);
         uint pricePerWorkerEpoch_ = pricePerWorkerEpoch();
         uint maxPaidEpoch = _getDealStorage().maxPaidEpoch;
 

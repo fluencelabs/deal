@@ -2,16 +2,17 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/proxy/EIP1967/ERC1967Proxy.sol";
+import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "./interfaces/IDealFactory.sol";
 import "../deal/interfaces/IDeal.sol";
 import "./GlobalConstants.sol";
 import "./EpochController.sol";
+import "../utils/OwnableUpgradableDiamond.sol";
 
 /*
  * @dev On init mas.sender becomes owner.
  */
-abstract contract DealFactory is GlobalConstants, EpochController, IDealFactory {
+contract DealFactory is EpochController, GlobalConstants, IDealFactory {
     // ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.market.storage.v1.dealFactory")) - 1);
 
@@ -59,10 +60,12 @@ abstract contract DealFactory is GlobalConstants, EpochController, IDealFactory 
         IDeal.AccessType accessType_,
         address[] calldata accessList_
     ) external returns (IDeal) {
+        DealFactoryStorage storage dealFactoryStorage = _getDealFactoryStorage();
+
         IDeal deal = IDeal(
             address(
                 new ERC1967Proxy(
-                    address(dealImpl),
+                    address(dealFactoryStorage.dealImpl),
                     abi.encodeWithSelector(
                         IDeal.initialize.selector,
                         appCID_,
@@ -81,10 +84,9 @@ abstract contract DealFactory is GlobalConstants, EpochController, IDealFactory 
             )
         );
 
-        DealFactoryStorage storage dealFactoryStorage = _getDealFactoryStorage();
         dealFactoryStorage.hasDeal[deal] = true;
 
-        uint amount = pricePerWorkerEpoch_ * targetWorkers_ * _MIN_DPOSITED_EPOCHS;
+        uint amount = pricePerWorkerEpoch_ * targetWorkers_ * minDepositForNewDeal();
         paymentToken_.transferFrom(msg.sender, address(this), amount);
         paymentToken_.approve(address(deal), amount);
 

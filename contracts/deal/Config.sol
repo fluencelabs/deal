@@ -40,21 +40,18 @@ contract Config is OwnableUpgradableDiamond, IConfig {
     }
 
     // ------------------ Immutable ------------------
-    IERC20 private immutable _fluenceToken;
     ICore private immutable _globalCore_;
 
     // ------------------ Constructor ------------------
     // @custom:oz-upgrades-unsafe-allow state-variable-immutable constructor
     constructor(ICore globalCore_) {
         _globalCore_ = globalCore_;
-        _fluenceToken = globalCore_.fluenceToken();
     }
 
     // ------------------ Initializer ------------------
     function __Config_init(
         CIDV1 calldata appCID_,
         IERC20 paymentToken_,
-        uint256 collateralPerWorker_,
         uint256 minWorkers_,
         uint256 targetWorkers_,
         uint256 maxWorkersPerProvider_,
@@ -68,7 +65,6 @@ contract Config is OwnableUpgradableDiamond, IConfig {
 
         __Config_init_unchained(
             paymentToken_,
-            collateralPerWorker_,
             minWorkers_,
             targetWorkers_,
             maxWorkersPerProvider_,
@@ -83,7 +79,6 @@ contract Config is OwnableUpgradableDiamond, IConfig {
 
     function __Config_init_unchained(
         IERC20 paymentToken_,
-        uint256 collateralPerWorker_,
         uint256 minWorkers_,
         uint256 targetWorkers_,
         uint256 maxWorkersPerProvider_,
@@ -98,7 +93,6 @@ contract Config is OwnableUpgradableDiamond, IConfig {
 
         // --- init deal config ---
         configStorage.paymentToken = paymentToken_;
-        configStorage.collateralPerWorker = collateralPerWorker_;
         configStorage.minWorkers = minWorkers_;
         configStorage.targetWorkers = targetWorkers_;
         configStorage.maxWorkersPerProvider = maxWorkersPerProvider_;
@@ -132,10 +126,6 @@ contract Config is OwnableUpgradableDiamond, IConfig {
         return _getConfigStorage().paymentToken;
     }
 
-    function fluenceToken() public view returns (IERC20) {
-        return _fluenceToken;
-    }
-
     function creationBlock() public view returns (uint256) {
         return _getConfigStorage().creationBlock;
     }
@@ -146,10 +136,6 @@ contract Config is OwnableUpgradableDiamond, IConfig {
 
     function targetWorkers() public view returns (uint256) {
         return _getConfigStorage().targetWorkers;
-    }
-
-    function collateralPerWorker() public view returns (uint256) {
-        return _getConfigStorage().collateralPerWorker;
     }
 
     function minWorkers() public view returns (uint256) {
