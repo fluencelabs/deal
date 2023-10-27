@@ -6,13 +6,17 @@ export async function getEIP1559Args(provider: ethers.Provider) {
     // If network support EIP1559 it returns: maxFeePerGas, ...
     const feeData = await provider.getFeeData()
 
-    const maxFeePerGas = feeData.maxFeePerGas
-    const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas
-    const type = 2  // tx type.
+    const maxFeePerGas = feeData.maxFeePerGas?.toString()
+    const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas?.toString()
+    // Check if chain supports EIP1559.
+    if (maxFeePerGas && maxPriorityFeePerGas) {
+        return {
+            maxFeePerGas: maxFeePerGas.toString(),
+            maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
+            type: 2,
+        }
 
-    return {
-        maxFeePerGas,
-        maxPriorityFeePerGas,
-        type,
     }
+    // TODO: catch type1 tx args and return.
+    return {}
 }

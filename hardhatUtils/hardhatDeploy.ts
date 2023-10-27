@@ -2,11 +2,11 @@
 import {getEIP1559Args} from "../utils/transactions";
 import {ethers} from "ethers";
 
-const WAIT_CONFIRMATIONS = process.env["WAIT_CONFIRMATIONS"] ? parseInt(process.env["WAIT_CONFIRMATIONS"]) : 0;
+const WAIT_CONFIRMATIONS = process.env["WAIT_CONFIRMATIONS"] ? parseInt(<string>process.env["WAIT_CONFIRMATIONS"]) : 0;
 
-const DEFAULT_HARDHAT_DEPLOY_TX_ARGUMENTS = {
+export const DEFAULT_HARDHAT_DEPLOY_TX_ARGUMENTS = {
     log: true,
-    autoMine: true,  // TODO: use only if hardhat network: to speed up testing and etc.
+    autoMine: true,  // To speed deployment on test network.
     waitConfirmations: WAIT_CONFIRMATIONS,
 }
 

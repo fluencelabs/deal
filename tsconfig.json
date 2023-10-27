@@ -27,6 +27,8 @@
         "src/**/*",
         "hardhat.config.ts",
         "./deploy",
+        "./hardhatUtils",
+        "./utils"
     ],
     "exclude": ["dist", "node_modules"]
 }
