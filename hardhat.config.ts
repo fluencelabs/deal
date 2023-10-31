@@ -6,6 +6,10 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 
+const accounts = [
+    process.env["PRIVATE_KEY"] ?? "0x0000000000000000000000000000000000000000000000000000000000000000",
+]
+
 const config: HardhatUserConfig = {
     solidity: {
         version: "0.8.19",
@@ -35,24 +39,28 @@ const config: HardhatUserConfig = {
         },
         stage: {
             url: "https://rpc.ankr.com/polygon_mumbai",
-            accounts: [process.env["PRIVATE_KEY"] ?? "0x0000000000000000000000000000000000000000000000000000000000000000"],
+            accounts: accounts,
         },
         testnet: {
             url: "https://rpc.ankr.com/polygon_mumbai",
-            accounts: [process.env["PRIVATE_KEY"] ?? "0x0000000000000000000000000000000000000000000000000000000000000000"],
+            accounts: accounts,
         },
         kras: {
             url: "https://rpc.ankr.com/polygon_mumbai",
-            accounts: [process.env["PRIVATE_KEY"] ?? "0x0000000000000000000000000000000000000000000000000000000000000000"],
+            accounts: accounts,
+        },
+        mumbai: {
+            url: "https://rpc.ankr.com/polygon_mumbai",
+            accounts: accounts,
         },
         ipcsubnet: {
             url: 'http://139.162.187.214:8545',
-            accounts: [process.env["PRIVATE_KEY"] ?? "0x0000000000000000000000000000000000000000000000000000000000000000"],
+            accounts: accounts,
             chainId: 1404213532111849,
         },
         calibration: {  // Currently this network is use only for debugging.
             url: 'https://api.calibration.node.glif.io/rpc/v1',
-            accounts: [process.env["PRIVATE_KEY"] ?? "0x0000000000000000000000000000000000000000000000000000000000000000"],
+            accounts: accounts,
             chainId: 314159,
             timeout: 1000000,  // recommended by IPC team.
         }

@@ -23,3 +23,13 @@ npx hardhat node
 ```shell
 docker-compose up -d
 ```
+
+# Deploy
+We used to use [hardhat-deploy](https://github.com/wighawag/hardhat-deploy) plugin to deploy smart contracts on chains 
+and track differences.
+
+## Ethereum Public Networks
+For test net chains and production chains: do not forget to set envs in your **.env** file:
+
+- `WAIT_CONFIRMATIONS` in `.env`
+- `PRIVATE_KEY` for the deployer

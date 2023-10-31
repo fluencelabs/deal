@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { deployments, ethers as hardhatEthers } from "hardhat";
-import { ethers } from "ethers";
+import {ethers} from "ethers";
 import { IWorkerManager } from "../../src/typechain-types/contracts/deal/interfaces/IWorkerManager";
 import {
     Deal,
@@ -11,6 +11,7 @@ import {
     Matcher,
     Matcher__factory
 } from "../../src/typechain-types";
+import {getEIP1559Args} from "../../utils/transactions";
 
 const MIN_DPOSITED_EPOCHS = 2n;
 const EPOCH_DURATION = 15;
@@ -38,6 +39,7 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         MIN_PRICE_PER_EPOCH: ethers.parseEther("0.01"),
         PEERS_COUNT: 3,
     };
+    let txEIP1559Args = null
 
     // deal params
     const effectors = Array.from({ length: 10 }, () => ({
@@ -73,6 +75,8 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
 
     before(async () => {
         await deployments.fixture(["tokens", "common", "localnet"]);
+        // To support testing on EIP1559 chains.
+        txEIP1559Args = await getEIP1559Args(hardhatEthers.provider)
 
         const signer = await hardhatEthers.provider.getSigner();
         const DealFactoryFactory = await deployments.get("DealFactory")
@@ -103,7 +107,9 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
             paymentToken: await flt.getAddress(),
         };
 
-        await (await flt.approve(await factory.getAddress(), minDeposit)).wait();
+        await (
+            await flt.approve(await factory.getAddress(), minDeposit, {...txEIP1559Args})
+        ).wait();
 
         // create deal
         const createDealTx = await factory.deployDeal(
@@ -117,6 +123,7 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
             dealParams.effectors,
             dealParams.accessType,
             [],
+            {...txEIP1559Args},
         );
 
         // parse result from event
@@ -151,7 +158,7 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         };
 
         // load modules
-        const setAppCIDTx = await deal.setAppCID(newCID);
+        const setAppCIDTx = await deal.setAppCID(newCID, {...txEIP1559Args});
 
         // parse result from event
         const resOfSetAppCIDTx = await setAppCIDTx.wait();
@@ -179,7 +186,9 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
             // register compute provider
             const registerComputeProviderTx = await matcher
                 .connect(computeProviderSigner)
-                .registerComputeProvider(PROVIDERS_CONFIG.MIN_PRICE_PER_EPOCH, maxCollateral, fltAddress, effectors);
+                .registerComputeProvider(
+                    PROVIDERS_CONFIG.MIN_PRICE_PER_EPOCH, maxCollateral, fltAddress, effectors, {...txEIP1559Args},
+                );
             const resOfRegisterComputeProvider = await registerComputeProviderTx.wait();
 
             const computeProviderRegisteredEventTopic = matcher.interface.getEvent("ComputeProviderRegistered").topicHash;
@@ -206,7 +215,7 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         });
     });
 
-    it("2.1 try to register compute provider (not in whitlist)", async () => {
+    it("2.1 try to register compute provider (not in whitelist)", async () => {
         // load configs
         const maxCollateral = await deal.collateralPerWorker();
         const fltAddress = await flt.getAddress();
@@ -218,7 +227,9 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
             await expect(
                 await matcher
                     .connect(computeProviderSigner)
-                    .registerComputeProvider(PROVIDERS_CONFIG.MIN_PRICE_PER_EPOCH, maxCollateral, fltAddress, effectors),
+                    .registerComputeProvider(
+                        PROVIDERS_CONFIG.MIN_PRICE_PER_EPOCH, maxCollateral, fltAddress, effectors, {...txEIP1559Args},
+                    ),
             ).to.be.revertedWith("Compute provider is not in whitelist");
         });
     });
@@ -231,10 +242,14 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
                 const totalCollateral = maxCollateral * BigInt(peer.workerSlots);
 
                 // approve token for collateral
-                (await (await flt.connect(provider.signer)).approve(await matcher.getAddress(), totalCollateral)).wait();
+                (await (await flt.connect(provider.signer)).approve(
+                    await matcher.getAddress(), totalCollateral, {...txEIP1559Args},)
+                ).wait();
 
                 // register compute peer
-                const addWorkersSlotsTx = await matcher.connect(provider.signer).addWorkersSlots(peer.peerId, peer.workerSlots);
+                const addWorkersSlotsTx = await matcher.connect(provider.signer).addWorkersSlots(
+                    peer.peerId, peer.workerSlots, {...txEIP1559Args},
+                );
 
                 const resOfAddWorkersSlots = await addWorkersSlotsTx.wait();
 
@@ -268,6 +283,7 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
             dealAddress,
             findingResult.computeProviders.map((x) => x),
             findingResult.computePeers.map((x) => x.map((y) => y)),
+            {...txEIP1559Args},
         );
 
         const resOfMatchTx = await matchTx.wait();
@@ -352,8 +368,9 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
     it("4. Deposit balance", async () => {
         const amount = dealParams.deposit;
 
-        await (await flt.approve(await deal.getAddress(), amount)).wait();
-        const depositRes = await (await deal.deposit(amount)).wait();
+        await (await flt.approve(
+            await deal.getAddress(), amount, {...txEIP1559Args},)).wait();
+        const depositRes = await (await deal.deposit(amount, {...txEIP1559Args},)).wait();
 
         const depositedEventTopic = deal.interface.getEvent("Deposited").topicHash;
         const log = depositRes.logs.find(({ topics }) => {
@@ -379,7 +396,9 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
                 const workerId = ethers.hexlify(ethers.randomBytes(32));
 
                 // set worker
-                const resOfSetWorker = await (await deal.connect(provider.signer).setWorker(unitId, workerId)).wait();
+                const resOfSetWorker = await (await deal.connect(provider.signer).setWorker(
+                    unitId, workerId, {...txEIP1559Args},
+                )).wait();
 
                 // parse event
                 const workerRegistredEventTopic = deal.interface.getEvent("WorkerIdUpdated").topicHash;
@@ -430,7 +449,7 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         expect(reward).to.be.eq(paidEpochs * dealParams.pricePerWorkerEpoch);
 
         const balanceBefore = await flt.balanceOf(await provider.signer.getAddress());
-        await (await deal.withdrawRewards(uintId)).wait();
+        await (await deal.withdrawRewards(uintId, {...txEIP1559Args},)).wait();
         const balanceAfter = await flt.balanceOf(await provider.signer.getAddress());
 
         expect(balanceAfter - balanceBefore).to.be.eq(reward);
@@ -443,7 +462,9 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
 
         const currentEpoch = BigInt(Math.floor((await hardhatEthers.provider.getBlock("latest"))!.timestamp / EPOCH_DURATION));
 
-        const removeUnitTx = await (await deal.connect(provider.signer).removeComputeUnit(uintId)).wait();
+        const removeUnitTx = await (await deal.connect(provider.signer).removeComputeUnit(
+            uintId, {...txEIP1559Args},
+        )).wait();
         const computeUnitRemovedEventTopic = deal.interface.getEvent("ComputeUnitRemoved").topicHash;
         const log = removeUnitTx.logs.find(({ topics }) => {
             return topics[0] === computeUnitRemovedEventTopic;
@@ -461,7 +482,7 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         await hardhatEthers.provider.send("evm_mine", []);
 
         const balanceBefore = await flt.balanceOf(await provider.signer.getAddress());
-        await (await deal.withdrawCollateral(uintId)).wait();
+        await (await deal.withdrawCollateral(uintId, {...txEIP1559Args},)).wait();
         const balanceAfter = await flt.balanceOf(await provider.signer.getAddress());
 
         expect(balanceAfter - balanceBefore).to.be.eq(dealParams.collateralPerWorker);
