@@ -3,11 +3,12 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import "../utils/OwnableUpgradableDiamond.sol";
 import "../deal/base/Types.sol";
 import "../utils/LinkedListWithUniqueKeys.sol";
 import "../deal/interfaces/IDeal.sol";
 
-contract MarketOffers is Initializable {
+contract Market is Initializable {
     using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
 
     // ------------------ Types ------------------
@@ -26,6 +27,7 @@ contract MarketOffers is Initializable {
 
     struct ComputePeerInfo {
         bytes32 offerId;
+        uint lastUnitIndex;
     }
 
     struct ComputePeer {
@@ -55,6 +57,9 @@ contract MarketOffers is Initializable {
     event EffectorAdded(bytes32 offerId, CIDV1 effector);
     event EffectorRemoved(bytes32 offerId, CIDV1 effector);
 
+    event ComputeUnitAddedToDeal(bytes32 unitId, IDeal deal);
+    event ComputeUnitRemovedFromDeal(bytes32 unitId, IDeal deal);
+
     // ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.market.storage.v1.offer")) - 1);
 
@@ -72,12 +77,6 @@ contract MarketOffers is Initializable {
         assembly {
             s.slot := storageSlot
         }
-    }
-
-    // ------------------ Constructor ------------------
-    // @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
-        _disableInitializers();
     }
 
     // ----------------- Internal View -----------------
@@ -107,7 +106,45 @@ contract MarketOffers is Initializable {
         return true;
     }
 
-    function _reserveComputeUnitForDeal(bytes32 unitId, IDeal deal) internal {
+    // ----------------- Internal Mutable -----------------
+
+    function _addComputePeerToOffer(bytes32 offerId, RegisterComputePeer calldata peer) internal {
+        OfferStorage storage offerStorage = _getOfferStorage();
+        Offer storage offer = offerStorage.offers[offerId];
+
+        ComputePeer storage computePeer = offerStorage.peers[peer.peerId];
+
+        require(computePeer.info.offerId == bytes32(0x00), "Peer already exists in another offer");
+
+        computePeer.info = ComputePeerInfo({ offerId: offerId, lastUnitIndex: peer.freeUnits - 1 });
+
+        _addComputeUnitsToPeer(offerId, peer.peerId, peer.freeUnits);
+
+        // add peer to offer
+        offer.freePeerIds.push(peer.peerId);
+
+        emit PeerCreated(offerId, peer.peerId);
+    }
+
+    function _addComputeUnitsToPeer(bytes32 offerId, bytes32 peerId, uint freeUnits) internal {
+        OfferStorage storage offerStorage = _getOfferStorage();
+        ComputePeer storage computePeer = offerStorage.peers[peerId];
+
+        uint indexOffset = computePeer.info.lastUnitIndex + 1;
+        for (uint i = 0; i < freeUnits; i++) {
+            bytes32 unitId = keccak256(abi.encodePacked(offerId, peerId, i + indexOffset));
+
+            // create compute unit
+            offerStorage.computeUnits[unitId] = ComputeUnit({ deal: address(0x00), peerId: peerId });
+
+            // add unit to peer
+            computePeer.freeComputeUnitIds.push(unitId);
+
+            emit ComputeUnitCreated(offerId, peerId, unitId);
+        }
+    }
+
+    function _addComputeUnitToDeal(bytes32 unitId, IDeal deal) internal {
         OfferStorage storage offerStorage = _getOfferStorage();
         ComputeUnit storage computeUnit = offerStorage.computeUnits[unitId];
 
@@ -115,8 +152,8 @@ contract MarketOffers is Initializable {
         ComputePeer storage computePeer = offerStorage.peers[peerId];
         Offer storage offer = offerStorage.offers[computePeer.info.offerId];
 
-        require(computeUnit.deal == address(0x00), "Compute unit already reserved");
         require(computeUnit.peerId != bytes32(0x00), "Compute unit doesn't exist");
+        require(computeUnit.deal == address(0x00), "Compute unit already reserved");
 
         computeUnit.deal = address(deal);
 
@@ -127,7 +164,7 @@ contract MarketOffers is Initializable {
 
         deal.addComputeUnit(offer.info.owner, peerId);
 
-        //TODO: mv event from deal to here
+        emit ComputeUnitAddedToDeal(unitId, deal);
     }
 
     // ----------------- Public View -----------------
@@ -157,47 +194,47 @@ contract MarketOffers is Initializable {
         require(minPricePerWorkerEpoch > 0, "Min price per epoch should be greater than 0");
         require(address(paymentToken) != address(0x00), "Payment token should be not zero address");
 
+        // create market offer
+        Offer storage offer = offerStorage.offers[offerId];
+
+        offer.info = OfferInfo({ owner: msg.sender, minPricePerWorkerEpoch: minPricePerWorkerEpoch, paymentToken: paymentToken });
+
+        // add effectors to offer
+        for (uint j = 0; j < effectors.length; j++) {
+            bytes32 effector = keccak256(abi.encodePacked(effectors[j].prefixes, effectors[j].hash));
+            offer.hasEffector[effector] = true;
+        }
+
         uint peerLength = peers.length;
         for (uint i = 0; i < peerLength; i++) {
-            uint freeUnits = peers[i].freeUnits;
-            bytes32 peerId = peers[i].peerId;
-
-            require(offerStorage.peers[peerId].info.offerId == bytes32(0x00), "Peer already exists in another offer");
-
-            // create market offer
-            Offer storage offer = offerStorage.offers[offerId];
-
-            offer.info = OfferInfo({ owner: msg.sender, minPricePerWorkerEpoch: minPricePerWorkerEpoch, paymentToken: paymentToken });
-
-            // add effectors to offer
-            for (uint j = 0; j < effectors.length; j++) {
-                bytes32 effector = keccak256(abi.encodePacked(effectors[j].prefixes, effectors[j].hash));
-                offer.hasEffector[effector] = true;
-            }
-
-            // create compute peer
-            ComputePeer storage computePeer = offerStorage.peers[peerId];
-            computePeer.info = ComputePeerInfo({ offerId: offerId });
-
-            for (uint j = 0; j < freeUnits; j++) {
-                bytes32 unitId = keccak256(abi.encodePacked(offerId, peerId, j));
-
-                // create compute unit
-                offerStorage.computeUnits[unitId] = ComputeUnit({ deal: address(0x00), peerId: peerId });
-
-                // add unit to peer
-                computePeer.freeComputeUnitIds.push(unitId);
-
-                emit ComputeUnitCreated(offerId, peerId, unitId);
-            }
-
-            // add peer to offer
-            offer.freePeerIds.push(peerId);
-
-            emit PeerCreated(offerId, peerId);
+            _addComputePeerToOffer(offerId, peers[i]);
         }
 
         emit MarkeOfferRegistered(offerId, msg.sender, minPricePerWorkerEpoch, paymentToken, effectors);
+    }
+
+    function addComputePeers(bytes32 offerId, RegisterComputePeer[] calldata peers) external {
+        OfferStorage storage offerStorage = _getOfferStorage();
+        OfferInfo storage offer = offerStorage.offers[offerId].info;
+
+        require(offer.owner == msg.sender, "Only owner can change offer");
+
+        uint peerLength = peers.length;
+        for (uint i = 0; i < peerLength; i++) {
+            _addComputePeerToOffer(offerId, peers[i]);
+        }
+    }
+
+    function addFreeUnits(bytes32 offerId, bytes32 peerId, uint freeUnits) external {
+        OfferStorage storage offerStorage = _getOfferStorage();
+        OfferInfo storage offer = offerStorage.offers[offerId].info;
+        ComputePeerInfo storage computePeer = offerStorage.peers[peerId].info;
+
+        require(offer.owner == msg.sender, "Only owner can change offer");
+        require(freeUnits > 0, "Free units should be greater than 0");
+        require(computePeer.offerId == offerId, "Peer doesn't exist");
+
+        _addComputeUnitsToPeer(offerId, peerId, freeUnits);
     }
 
     function changeMinPricePerWorkerEpoch(bytes32 offerId, uint newMinPricePerWorkerEpoch) external {
@@ -258,5 +295,35 @@ contract MarketOffers is Initializable {
 
             emit EffectorRemoved(offerId, effectorCID);
         }
+    }
+
+    function removeComputeUnitFromDeal(bytes32 unitId) public {
+        OfferStorage storage offerStorage = _getOfferStorage();
+        ComputeUnit storage computeUnit = offerStorage.computeUnits[unitId];
+
+        bytes32 peerId = computeUnit.peerId;
+        IDeal deal = IDeal(computeUnit.deal);
+
+        require(peerId != bytes32(0x00), "Compute unit doesn't exist");
+        require(address(deal) != address(0x00), "Compute unit already free");
+
+        ComputePeer storage computePeer = offerStorage.peers[peerId];
+        Offer storage offer = offerStorage.offers[computePeer.info.offerId];
+
+        require(
+            OwnableUpgradableDiamond(address(deal)).owner() == msg.sender || offer.info.owner == msg.sender,
+            "Only deal or offer owner can remove compute unit from deal"
+        );
+
+        computeUnit.deal = address(0x00);
+
+        computePeer.freeComputeUnitIds.push(unitId);
+        if (computePeer.freeComputeUnitIds.length() == 0) {
+            offer.freePeerIds.push(computePeer.info.offerId);
+        }
+
+        deal.removeComputeUnit(unitId);
+
+        emit ComputeUnitRemovedFromDeal(unitId, deal);
     }
 }

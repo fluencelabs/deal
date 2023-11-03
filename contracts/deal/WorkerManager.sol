@@ -3,10 +3,11 @@
 pragma solidity ^0.8.19;
 
 import "./Config.sol";
-import "./interfaces/IWorkerManager.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "./interfaces/IDeal.sol";
+import "./interfaces/IWorkerManager.sol";
 
-abstract contract WorkerManager is Config, IWorkerManager {
+contract WorkerManager is Config, IWorkerManager {
     using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
     using SafeERC20 for IERC20;
 
@@ -38,6 +39,39 @@ abstract contract WorkerManager is Config, IWorkerManager {
         }
     }
 
+    // ------------------ Initializer ------------------
+    function __WorkerManager_init(
+        ICore globalCore_,
+        CIDV1 calldata appCID_,
+        IERC20 paymentToken_,
+        uint256 minWorkers_,
+        uint256 targetWorkers_,
+        uint256 maxWorkersPerProvider_,
+        uint256 pricePerWorkerEpoch_,
+        CIDV1[] calldata effectors_,
+        AccessType accessType_,
+        address[] calldata accessList_,
+        address owner_
+    ) internal onlyInitializing {
+        __Config_init(
+            globalCore_,
+            appCID_,
+            paymentToken_,
+            minWorkers_,
+            targetWorkers_,
+            maxWorkersPerProvider_,
+            pricePerWorkerEpoch_,
+            effectors_,
+            accessType_,
+            accessList_,
+            owner_
+        );
+
+        __WorkerManager_init_unchained();
+    }
+
+    function __WorkerManager_init_unchained() internal onlyInitializing {}
+
     // ------------------ Internal Mutable Functions ------------------
 
     function _setWorker(bytes32 computeUnitId, bytes32 workerId) internal returns (uint256) {
@@ -59,7 +93,41 @@ abstract contract WorkerManager is Config, IWorkerManager {
         return workerCount;
     }
 
-    function _removeComputeUnit(bytes32 computeUnitId) public returns (uint workerCount) {
+    function _addComputeUnit(address computeProvider, bytes32 computeUnit) internal returns (bytes32) {
+        WorkerManagerStorage storage workerStorage = _getWorkerManagerStorage();
+
+        // check target compute units count
+        uint256 globalComputeUnitCount = workerStorage.computeUnitCount;
+        require(globalComputeUnitCount < targetWorkers(), "Target units reached");
+
+        // check peerId isn't exist
+        bytes32 id = computeUnit;
+        require(workerStorage.computeUnitById[id].owner == address(0x00), "Id already used");
+
+        // check max units per compute provider
+        uint256 computeUnitCountByCP = workerStorage.computeProviderInfo[computeProvider].computeUnitCount;
+        require(computeUnitCountByCP < maxWorkersPerProvider(), "Max units per compute provider reached");
+
+        // increase computeUnit count
+        workerStorage.computeProviderInfo[computeProvider].computeUnitCount = ++computeUnitCountByCP;
+        workerStorage.computeUnitCount = ++globalComputeUnitCount;
+
+        // create ComputeUnit
+        workerStorage.computeUnitById[id] = ComputeUnit({
+            id: id,
+            workerId: bytes32(0),
+            owner: computeProvider,
+            joinedEpoch: _globalCore().currentEpoch()
+        });
+
+        // add ComputeUnit to list
+        workerStorage.computeUnitsIdsList.push(id);
+
+        emit ComputeUnitJoined(id);
+        return id;
+    }
+
+    function _removeComputeUnit(bytes32 computeUnitId) internal returns (uint workerCount) {
         WorkerManagerStorage storage workerStorage = _getWorkerManagerStorage();
 
         // check owner
@@ -115,41 +183,5 @@ abstract contract WorkerManager is Config, IWorkerManager {
 
     function getWorkerCount() public view returns (uint256) {
         return _getWorkerManagerStorage().workerCount;
-    }
-
-    // ------------------ Public Mutable Functions ---------------------
-
-    function addComputeUnit(address computeProvider, bytes32 computeUnit) public returns (bytes32) {
-        WorkerManagerStorage storage workerStorage = _getWorkerManagerStorage();
-
-        // check target compute units count
-        uint256 globalComputeUnitCount = workerStorage.computeUnitCount;
-        require(globalComputeUnitCount < targetWorkers(), "Target units reached");
-
-        // check peerId isn't exist
-        bytes32 id = computeUnit;
-        require(workerStorage.computeUnitById[id].owner == address(0x00), "Id already used");
-
-        // check max units per compute provider
-        uint256 computeUnitCountByCP = workerStorage.computeProviderInfo[computeProvider].computeUnitCount;
-        require(computeUnitCountByCP < maxWorkersPerProvider(), "Max units per compute provider reached");
-
-        // increase computeUnit count
-        workerStorage.computeProviderInfo[computeProvider].computeUnitCount = ++computeUnitCountByCP;
-        workerStorage.computeUnitCount = ++globalComputeUnitCount;
-
-        // create ComputeUnit
-        workerStorage.computeUnitById[id] = ComputeUnit({
-            id: id,
-            workerId: bytes32(0),
-            owner: computeProvider,
-            joinedEpoch: _globalCore().currentEpoch()
-        });
-
-        // add ComputeUnit to list
-        workerStorage.computeUnitsIdsList.push(id);
-
-        emit ComputeUnitJoined(id);
-        return id;
     }
 }

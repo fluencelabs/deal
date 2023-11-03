@@ -13,7 +13,7 @@ const config: HardhatUserConfig = {
             viaIR: true,
             optimizer: {
                 enabled: true,
-                runs: 10000,
+                runs: 10000000,
             },
         },
     },
@@ -43,6 +43,10 @@ const config: HardhatUserConfig = {
         },
         kras: {
             url: "https://rpc.ankr.com/polygon_mumbai",
+            accounts: [process.env["PRIVATE_KEY"] ?? "0x0000000000000000000000000000000000000000000000000000000000000000"],
+        },
+        orbit: {
+            url: "http://localhost:8449",
             accounts: [process.env["PRIVATE_KEY"] ?? "0x0000000000000000000000000000000000000000000000000000000000000000"],
         },
     },

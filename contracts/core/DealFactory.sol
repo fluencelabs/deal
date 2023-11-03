@@ -5,14 +5,14 @@ pragma solidity ^0.8.19;
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "./interfaces/IDealFactory.sol";
 import "../deal/interfaces/IDeal.sol";
-import "./GlobalConstants.sol";
+import "./GlobalConst.sol";
 import "./EpochController.sol";
 import "../utils/OwnableUpgradableDiamond.sol";
 
 /*
  * @dev On init mas.sender becomes owner.
  */
-contract DealFactory is EpochController, GlobalConstants, IDealFactory {
+contract DealFactory is EpochController, GlobalConst, IDealFactory {
     // ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.market.storage.v1.dealFactory")) - 1);
 
@@ -30,12 +30,6 @@ contract DealFactory is EpochController, GlobalConstants, IDealFactory {
         }
     }
 
-    // ----------------- Constructor -----------------
-    // @custom:oz-upgrades-unsafe-allow state-variable-immutable constructor
-    constructor() {
-        _disableInitializers();
-    }
-
     // ------------------ Initializer ------------------
     function __DealFactory_init(IDeal dealImpl_) internal onlyInitializing {
         _getDealFactoryStorage().dealImpl = dealImpl_;
@@ -51,7 +45,6 @@ contract DealFactory is EpochController, GlobalConstants, IDealFactory {
     function deployDeal(
         CIDV1 calldata appCID_,
         IERC20 paymentToken_,
-        uint256 collateralPerWorker_,
         uint256 minWorkers_,
         uint256 targetWorkers_,
         uint256 maxWorkersPerProvider_,
@@ -68,9 +61,9 @@ contract DealFactory is EpochController, GlobalConstants, IDealFactory {
                     address(dealFactoryStorage.dealImpl),
                     abi.encodeWithSelector(
                         IDeal.initialize.selector,
+                        address(this),
                         appCID_,
                         paymentToken_,
-                        collateralPerWorker_,
                         minWorkers_,
                         targetWorkers_,
                         maxWorkersPerProvider_,
@@ -86,7 +79,7 @@ contract DealFactory is EpochController, GlobalConstants, IDealFactory {
 
         dealFactoryStorage.hasDeal[deal] = true;
 
-        uint amount = pricePerWorkerEpoch_ * targetWorkers_ * minDepositForNewDeal();
+        uint amount = pricePerWorkerEpoch_ * targetWorkers_ * minDepositedEpoches();
         paymentToken_.transferFrom(msg.sender, address(this), amount);
         paymentToken_.approve(address(deal), amount);
 

@@ -18,10 +18,6 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
     using SafeERC20 for IERC20;
     using DealStorageUtils for DealStorageUtils.Balance;
 
-    // ------------------ Constants ------------------
-    uint256 private constant _MIN_DPOSITED_EPOCHS = 2;
-    uint256 private constant _WAIT_EPOCHS_AFTER_ENDING = 2;
-
     // ------------------ Types ------------------
     struct ComputeUnitPaymentInfo {
         uint256 startedEpoch;
@@ -52,12 +48,13 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
     }
 
     // ------------------ Constructor ---------------------
-    constructor(ICore globalCore_) Config(globalCore_) {
+    constructor() {
         _disableInitializers();
     }
 
     // ------------------ Init ------------------
     function initialize(
+        ICore globalCore_,
         CIDV1 calldata appCID_,
         IERC20 paymentToken_,
         uint256 minWorkers_,
@@ -68,7 +65,8 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
         IConfig.AccessType accessType_,
         address[] calldata accessList_
     ) public initializer {
-        __Config_init(
+        __WorkerManager_init(
+            globalCore_,
             appCID_,
             paymentToken_,
             minWorkers_,
@@ -226,7 +224,10 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
         uint pricePerWorkerEpoch_ = pricePerWorkerEpoch();
 
         if (dealStorage.isEnded) {
-            require(currentEpoch > dealStorage.endedEpoch + _WAIT_EPOCHS_AFTER_ENDING, "Can't withdraw before 2 epochs after deal end");
+            require(
+                currentEpoch > dealStorage.endedEpoch + _globalCore().minDepositedEpoches(),
+                "Can't withdraw before 2 epochs after deal end"
+            );
             dealStorage.totalBalance -= amount;
         } else {
             DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
@@ -241,7 +242,7 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
 
             balance.setTotalBalance(balance.getTotalBalance() - amount);
 
-            uint minBalance = _MIN_DPOSITED_EPOCHS * pricePerWorkerEpoch_ * targetWorkers();
+            uint minBalance = _globalCore().minDepositedEpoches() * pricePerWorkerEpoch_ * targetWorkers();
             require(balance.getTotalBalance() >= minBalance, "Free balance needs to cover minimum 2 epochs");
 
             _postCommitPeriod(balance, currentEpoch, workerCount, workerCount, minWorkers(), pricePerWorkerEpoch_);
@@ -283,6 +284,26 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
         emit RewardWithdrawn(computeUnitId, reward);
     }
 
+    function addComputeUnit(address computeProvider, bytes32 computeUnitId) public onlyCore returns (bytes32) {
+        return _addComputeUnit(computeProvider, computeUnitId);
+    }
+
+    function removeComputeUnit(bytes32 computeUnitId) public onlyCore {
+        DealStorage storage dealStorage = _getDealStorage();
+
+        uint currentEpoch = _globalCore().currentEpoch();
+        //TODO: fix double get worker count
+        uint prevWorkerCount = getWorkerCount();
+        uint newWorkerCount = _removeComputeUnit(computeUnitId);
+        uint pricePerWorkerEpoch_ = pricePerWorkerEpoch();
+        uint maxPaidEpoch = _getDealStorage().maxPaidEpoch;
+
+        DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
+        _preCommitPeriod(balance, currentEpoch, maxPaidEpoch, dealStorage.lastCommitedEpoch, prevWorkerCount, pricePerWorkerEpoch_);
+
+        _postCommitPeriod(balance, currentEpoch, prevWorkerCount, newWorkerCount, minWorkers(), pricePerWorkerEpoch_);
+    }
+
     function setWorker(bytes32 computeUnitId, bytes32 workerId) public {
         DealStorage storage dealStorage = _getDealStorage();
 
@@ -303,22 +324,6 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
 
         computeUnitPaymentInfo.startedEpoch = currentEpoch;
         computeUnitPaymentInfo.gapsDelta = balance.getGapsEpochCount();
-    }
-
-    function removeComputeUnit(bytes32 computeUnitId) public {
-        DealStorage storage dealStorage = _getDealStorage();
-
-        uint currentEpoch = _globalCore().currentEpoch();
-        //TODO: fix double get worker count
-        uint prevWorkerCount = getWorkerCount();
-        uint newWorkerCount = _removeComputeUnit(computeUnitId);
-        uint pricePerWorkerEpoch_ = pricePerWorkerEpoch();
-        uint maxPaidEpoch = _getDealStorage().maxPaidEpoch;
-
-        DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
-        _preCommitPeriod(balance, currentEpoch, maxPaidEpoch, dealStorage.lastCommitedEpoch, prevWorkerCount, pricePerWorkerEpoch_);
-
-        _postCommitPeriod(balance, currentEpoch, prevWorkerCount, newWorkerCount, minWorkers(), pricePerWorkerEpoch_);
     }
 
     function stop() external onlyOwner {

@@ -1,7 +1,8 @@
-import { ethers } from "hardhat";
 import type { HardhatRuntimeEnvironment } from "hardhat/types";
+import { DEFAULT_HARDHAT_DEPLOY_SETTINGS } from "../../env";
+import { ethers } from "hardhat";
 
-const WAIT_CONFIRMATIONS = process.env["WAIT_CONFIRMATIONS"] ? parseInt(process.env["WAIT_CONFIRMATIONS"]) : 0;
+const TEST_TOKENS_FOR_FAUCET = ethers.parseEther(String(10n ** 9n));
 
 module.exports = async function (hre: HardhatRuntimeEnvironment) {
     const accounts = await hre.getUnnamedAccounts();
@@ -14,9 +15,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         from: deployer,
         contract: "OwnableFaucet",
         args: [fluenceTokenAddress, testUSDAddress],
-        log: true,
-        autoMine: true,
-        waitConfirmations: WAIT_CONFIRMATIONS,
+        ...DEFAULT_HARDHAT_DEPLOY_SETTINGS,
     });
 
     if (faucet.newlyDeployed) {
@@ -24,26 +23,22 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
             "FLT",
             {
                 from: deployer,
-                log: true,
-                waitConfirmations: WAIT_CONFIRMATIONS,
-                autoMine: true,
+                ...DEFAULT_HARDHAT_DEPLOY_SETTINGS,
             },
             "transfer",
             faucet.address,
-            hre.ethers.parseEther(String(10n ** 9n)),
+            TEST_TOKENS_FOR_FAUCET,
         );
 
         await hre.deployments.execute(
             "TestUSD",
             {
                 from: deployer,
-                log: true,
-                waitConfirmations: WAIT_CONFIRMATIONS,
-                autoMine: true,
+                ...DEFAULT_HARDHAT_DEPLOY_SETTINGS,
             },
             "transfer",
             faucet.address,
-            hre.ethers.parseEther(String(10n ** 9n)),
+            TEST_TOKENS_FOR_FAUCET,
         );
     }
 };

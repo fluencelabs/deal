@@ -4,7 +4,9 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
-abstract contract EpochController is Initializable {
+import "./interfaces/IEpochController.sol";
+
+contract EpochController is Initializable, IEpochController {
     // ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.market.storage.v1.epochController")) - 1);
 
@@ -20,12 +22,6 @@ abstract contract EpochController is Initializable {
         assembly {
             s.slot := storageSlot
         }
-    }
-
-    // ----------------- Constructor -----------------
-    // @custom:oz-upgrades-unsafe-allow state-variable-immutable constructor
-    constructor() {
-        _disableInitializers();
     }
 
     // ------------------ Initializer ------------------

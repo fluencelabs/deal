@@ -27,11 +27,4 @@ interface IWorkerManager {
     function getComputeUnits() external view returns (ComputeUnit[] memory);
 
     function getWorkerCount() external view returns (uint256);
-
-    // ------------------ Public Mutable Functions ---------------------
-    function addComputeUnit(address computeProvider, bytes32 peerId) external returns (bytes32);
-
-    function removeComputeUnit(bytes32 computeUnitId) external;
-
-    function setWorker(bytes32 computeUnitId, bytes32 workerId) external;
 }

@@ -15,6 +15,7 @@ contract Config is OwnableUpgradableDiamond, IConfig {
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.deal.storage.v1.config")) - 1);
 
     struct ConfigStorage {
+        ICore globalCore;
         uint256 creationBlock;
         CIDV1 appCID;
         // --- deal config ---
@@ -39,17 +40,9 @@ contract Config is OwnableUpgradableDiamond, IConfig {
         }
     }
 
-    // ------------------ Immutable ------------------
-    ICore private immutable _globalCore_;
-
-    // ------------------ Constructor ------------------
-    // @custom:oz-upgrades-unsafe-allow state-variable-immutable constructor
-    constructor(ICore globalCore_) {
-        _globalCore_ = globalCore_;
-    }
-
     // ------------------ Initializer ------------------
     function __Config_init(
+        ICore globalCore_,
         CIDV1 calldata appCID_,
         IERC20 paymentToken_,
         uint256 minWorkers_,
@@ -64,6 +57,7 @@ contract Config is OwnableUpgradableDiamond, IConfig {
         __Ownable_init(owner_);
 
         __Config_init_unchained(
+            globalCore_,
             paymentToken_,
             minWorkers_,
             targetWorkers_,
@@ -78,6 +72,7 @@ contract Config is OwnableUpgradableDiamond, IConfig {
     }
 
     function __Config_init_unchained(
+        ICore globalCore_,
         IERC20 paymentToken_,
         uint256 minWorkers_,
         uint256 targetWorkers_,
@@ -92,6 +87,7 @@ contract Config is OwnableUpgradableDiamond, IConfig {
         configStorage.creationBlock = block.number;
 
         // --- init deal config ---
+        configStorage.globalCore = globalCore_;
         configStorage.paymentToken = paymentToken_;
         configStorage.minWorkers = minWorkers_;
         configStorage.targetWorkers = targetWorkers_;
@@ -109,9 +105,15 @@ contract Config is OwnableUpgradableDiamond, IConfig {
         }
     }
 
+    // ------------------ Modifiers ------------------
+    modifier onlyCore() {
+        require(msg.sender == address(_getConfigStorage().globalCore), "Config: caller is not the Core");
+        _;
+    }
+
     // ------------------ View Internal Functions ------------------
     function _globalCore() internal view returns (ICore) {
-        return _globalCore_;
+        return _getConfigStorage().globalCore;
     }
 
     // ------------------ Mutable Internal Functions ------------------

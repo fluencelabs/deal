@@ -5,6 +5,7 @@ pragma solidity ^0.8.19;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./IConfig.sol";
 import "./IWorkerManager.sol";
+import "../../core/interfaces/ICore.sol";
 
 interface IDeal is IConfig, IWorkerManager {
     // ------------------ Types ------------------
@@ -26,6 +27,7 @@ interface IDeal is IConfig, IWorkerManager {
 
     // ------------------ Init ------------------
     function initialize(
+        ICore globalCore_,
         CIDV1 calldata appCID_,
         IERC20 paymentToken_,
         uint256 minWorkers_,
@@ -52,5 +54,11 @@ interface IDeal is IConfig, IWorkerManager {
     function getMaxPaidEpoch() external view returns (uint256);
 
     // ------------------ Public Mutable Functions ------------------
+    function addComputeUnit(address computeProvider, bytes32 peerId) external returns (bytes32);
+
+    function removeComputeUnit(bytes32 computeUnitId) external;
+
     function withdrawRewards(bytes32 computeUnitId) external;
+
+    function setWorker(bytes32 computeUnitId, bytes32 workerId) external;
 }

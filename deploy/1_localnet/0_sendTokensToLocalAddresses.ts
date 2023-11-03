@@ -1,8 +1,8 @@
 import { ethers } from "ethers";
 import type { HardhatRuntimeEnvironment } from "hardhat/types";
+import { DEFAULT_HARDHAT_DEPLOY_SETTINGS, WAIT_CONFIRMATIONS } from "../../env";
 
 const TEST_LOCAL_TEST_TOKEN_AMOUNT = ethers.parseEther("100");
-const WAIT_CONFIRMATIONS = process.env["WAIT_CONFIRMATIONS"] ? parseInt(process.env["WAIT_CONFIRMATIONS"]) : 0;
 
 module.exports = async function (hre: HardhatRuntimeEnvironment) {
     const accounts = await hre.getUnnamedAccounts();
@@ -11,7 +11,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
     for (const account of accounts) {
         await hre.deployments.execute(
             "FLT",
-            { from: deployer, log: true, waitConfirmations: WAIT_CONFIRMATIONS },
+            { from: deployer, ...DEFAULT_HARDHAT_DEPLOY_SETTINGS },
             "transfer",
             account,
             TEST_LOCAL_TEST_TOKEN_AMOUNT,
@@ -19,7 +19,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
 
         await hre.deployments.execute(
             "TestUSD",
-            { from: deployer, log: true, waitConfirmations: WAIT_CONFIRMATIONS },
+            { from: deployer, ...DEFAULT_HARDHAT_DEPLOY_SETTINGS },
             "transfer",
             account,
             TEST_LOCAL_TEST_TOKEN_AMOUNT,

@@ -1,8 +1,5 @@
-import { ethers } from "ethers";
 import type { HardhatRuntimeEnvironment } from "hardhat/types";
-
-const TEST_TOKEN_AMOUNT = 10n ** 30n * 10n ** 18n;
-const WAIT_CONFIRMATIONS = process.env["WAIT_CONFIRMATIONS"] ? parseInt(process.env["WAIT_CONFIRMATIONS"]) : 0;
+import { WAIT_CONFIRMATIONS, DEFAULT_HARDHAT_DEPLOY_SETTINGS } from "../../env";
 
 module.exports = async function (hre: HardhatRuntimeEnvironment) {
     const accounts = await hre.getUnnamedAccounts();
@@ -11,53 +8,19 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
     console.log("Deploying account:", deployer);
     console.log("Block number:", await hre.ethers.provider.getBlockNumber());
 
-    const flt = await hre.deployments.deploy("FLT", {
+    await hre.deployments.deploy("FLT", {
         from: deployer,
         contract: "TestERC20",
         args: ["Fluence Token", "FLT"],
-        log: true,
-        autoMine: true,
-        waitConfirmations: WAIT_CONFIRMATIONS,
+        ...DEFAULT_HARDHAT_DEPLOY_SETTINGS,
     });
 
-    const testUSD = await hre.deployments.deploy("TestUSD", {
+    await hre.deployments.deploy("TestUSD", {
         from: deployer,
         contract: "TestERC20",
         args: ["Test USD", "tUSD"],
-        log: true,
-        autoMine: true,
-        waitConfirmations: WAIT_CONFIRMATIONS,
+        ...DEFAULT_HARDHAT_DEPLOY_SETTINGS,
     });
-
-    if (flt.newlyDeployed) {
-        await hre.deployments.execute(
-            "FLT",
-            {
-                from: deployer,
-                log: true,
-                waitConfirmations: WAIT_CONFIRMATIONS,
-                autoMine: true,
-            },
-            "transfer",
-            deployer,
-            ethers.toBeHex(TEST_TOKEN_AMOUNT),
-        );
-    }
-
-    if (testUSD.newlyDeployed) {
-        await hre.deployments.execute(
-            "TestUSD",
-            {
-                from: deployer,
-                log: true,
-                waitConfirmations: WAIT_CONFIRMATIONS,
-                autoMine: true,
-            },
-            "transfer",
-            deployer,
-            ethers.toBeHex(TEST_TOKEN_AMOUNT),
-        );
-    }
 };
 
 module.exports.tags = ["tokens"];
