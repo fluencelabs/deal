@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.20](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.19...deal-aurora-v0.2.20) (2023-11-06)
+
+
+### Bug Fixes
+
+* revert txconfig ([968b3b2](https://github.com/fluencelabs/deal/commit/968b3b2d05232bf6d4cce7650b08216033f12790))
+
 ## [0.2.19](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.18...deal-aurora-v0.2.19) (2023-11-06)
 
 
