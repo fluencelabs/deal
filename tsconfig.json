@@ -28,7 +28,9 @@
         "hardhat.config.ts",
         "./deploy",
         "./hardhatUtils",
-        "./utils"
+        "./utils",
+        "./test",
+        "./tasks"
     ],
     "exclude": ["dist", "node_modules"]
 }

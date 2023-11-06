@@ -241,10 +241,11 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
                 const maxCollateral = await deal.collateralPerWorker();
                 const totalCollateral = maxCollateral * BigInt(peer.workerSlots);
 
-                // approve token for collateral
-                (await (await flt.connect(provider.signer)).approve(
-                    await matcher.getAddress(), totalCollateral, {...txEIP1559Args},)
-                ).wait();
+                const matcherAddress = await matcher.getAddress();
+                const approvedTx = await flt.connect(provider.signer).approve(
+                    matcherAddress, totalCollateral, {...txEIP1559Args}
+                );
+                await approvedTx.wait()
 
                 // register compute peer
                 const addWorkersSlotsTx = await matcher.connect(provider.signer).addWorkersSlots(

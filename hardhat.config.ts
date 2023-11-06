@@ -2,12 +2,14 @@ import type { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "hardhat-deploy";
 import "@nomiclabs/hardhat-ganache";
+import "./tasks";
 import * as dotenv from "dotenv";
 
 dotenv.config();
 
 const accounts = [
     process.env["PRIVATE_KEY"] ?? "0x0000000000000000000000000000000000000000000000000000000000000000",
+    process.env["PRIVATE_KEY1"] ?? "0x0000000000000000000000000000000000000000000000000000000000000000",
 ]
 
 const config: HardhatUserConfig = {
@@ -50,13 +52,15 @@ const config: HardhatUserConfig = {
             accounts: accounts,
         },
         mumbai: {
-            url: "https://rpc.ankr.com/polygon_mumbai",
+            url: "https://polygon-mumbai-bor.publicnode.com",
             accounts: accounts,
+            timeout: 1000000,
         },
         ipcsubnet: {
             url: 'http://139.162.187.214:8545',
             accounts: accounts,
-            chainId: 1404213532111849,
+            chainId: 3522868364964899,
+            timeout: 1000000,
         },
         calibration: {  // Currently this network is use only for debugging.
             url: 'https://api.calibration.node.glif.io/rpc/v1',
