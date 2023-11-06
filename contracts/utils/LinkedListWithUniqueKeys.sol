@@ -87,17 +87,13 @@ library LinkedListWithUniqueKeys {
 
         if (element.prev == bytes32(0x00)) {
             self._first = element.next;
+        } else {
+            self._elements[element.prev].next = element.next;
         }
 
         if (element.next == bytes32(0x00)) {
             self._last = element.prev;
-        }
-
-        if (element.prev != bytes32(0x00)) {
-            self._elements[element.prev].next = element.next;
-        }
-
-        if (element.next != bytes32(0x00)) {
+        } else {
             self._elements[element.next].prev = element.prev;
         }
 

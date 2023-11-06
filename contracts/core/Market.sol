@@ -7,6 +7,7 @@ import "../utils/OwnableUpgradableDiamond.sol";
 import "../deal/base/Types.sol";
 import "../utils/LinkedListWithUniqueKeys.sol";
 import "../deal/interfaces/IDeal.sol";
+import "hardhat/console.sol";
 
 contract Market is Initializable {
     using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
@@ -107,7 +108,6 @@ contract Market is Initializable {
     }
 
     // ----------------- Internal Mutable -----------------
-
     function _addComputePeerToOffer(bytes32 offerId, RegisterComputePeer calldata peer) internal {
         OfferStorage storage offerStorage = _getOfferStorage();
         Offer storage offer = offerStorage.offers[offerId];
@@ -144,7 +144,7 @@ contract Market is Initializable {
         }
     }
 
-    function _addComputeUnitToDeal(bytes32 unitId, IDeal deal) internal {
+    function _mvComputeUnitToDeal(bytes32 unitId, IDeal deal) internal {
         OfferStorage storage offerStorage = _getOfferStorage();
         ComputeUnit storage computeUnit = offerStorage.computeUnits[unitId];
 
@@ -159,10 +159,10 @@ contract Market is Initializable {
 
         computePeer.freeComputeUnitIds.remove(unitId);
         if (computePeer.freeComputeUnitIds.length() == 0) {
-            offer.freePeerIds.remove(computePeer.info.offerId);
+            offer.freePeerIds.remove(peerId);
         }
 
-        deal.addComputeUnit(offer.info.owner, peerId);
+        deal.addComputeUnit(offer.info.owner, unitId);
 
         emit ComputeUnitAddedToDeal(unitId, deal);
     }
@@ -209,6 +209,8 @@ contract Market is Initializable {
         for (uint i = 0; i < peerLength; i++) {
             _addComputePeerToOffer(offerId, peers[i]);
         }
+
+        offerStorage.offerIds.push(offerId);
 
         emit MarkeOfferRegistered(offerId, msg.sender, minPricePerWorkerEpoch, paymentToken, effectors);
     }
@@ -297,7 +299,7 @@ contract Market is Initializable {
         }
     }
 
-    function removeComputeUnitFromDeal(bytes32 unitId) public {
+    function returnComputeUnitFromDeal(bytes32 unitId) public {
         OfferStorage storage offerStorage = _getOfferStorage();
         ComputeUnit storage computeUnit = offerStorage.computeUnits[unitId];
 

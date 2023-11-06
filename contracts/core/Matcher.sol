@@ -12,6 +12,7 @@ import "./GlobalConst.sol";
 import "./interfaces/IMatcher.sol";
 import "../deal/interfaces/IDeal.sol";
 import "../deal/interfaces/IConfig.sol";
+import "hardhat/console.sol";
 
 abstract contract Matcher is Market, EpochController, GlobalConst, IMatcher {
     using SafeERC20 for IERC20;
@@ -57,6 +58,7 @@ abstract contract Matcher is Market, EpochController, GlobalConst, IMatcher {
         LinkedListWithUniqueKeys.Bytes32List storage offerList = _getOffersList();
 
         bytes32 currentOfferId = offerList.first();
+
         while (currentOfferId != bytes32(0x00) && freeWorkerSlots > 0) {
             OfferInfo memory offer = getOffer(currentOfferId);
 
@@ -78,23 +80,21 @@ abstract contract Matcher is Market, EpochController, GlobalConst, IMatcher {
                 LinkedListWithUniqueKeys.Bytes32List storage computeUnitList = _getFreeComputeUnitList(currentPeerId);
 
                 bytes32 currentUnitId = computeUnitList.first();
-                while (currentUnitId != bytes32(0x00) && freeWorkerSlots > 0) {
-                    _addComputeUnitToDeal(currentUnitId, deal);
+                bytes32 nextCurrentPeerId = peerList.next(currentPeerId); // becouse mvComputeUnitToDeal can remove currentPeerId from peerList
 
-                    freeWorkerSlots--;
+                _mvComputeUnitToDeal(currentUnitId, deal);
 
-                    // TODO: only for NOX -- remove in future
-                    emit ComputeUnitMatched(currentPeerId, currentUnitId, creationBlock, appCID);
+                freeWorkerSlots--;
 
-                    currentUnitId = computeUnitList.next(currentUnitId);
+                // TODO: only for NOX -- remove in future
+                emit ComputeUnitMatched(currentPeerId, currentUnitId, creationBlock, appCID);
 
-                    if (!isDealMatched) {
-                        isDealMatched = true;
-                        break;
-                    }
+                if (!isDealMatched) {
+                    isDealMatched = true;
                 }
 
-                currentPeerId = peerList.next(currentPeerId);
+                //TODO: check max peers per provider
+                currentPeerId = bytes32(nextCurrentPeerId);
             }
 
             currentOfferId = offerList.next(currentOfferId);

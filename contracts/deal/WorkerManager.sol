@@ -133,7 +133,6 @@ contract WorkerManager is Config, IWorkerManager {
         // check owner
         address computeProvider = workerStorage.computeUnitById[computeUnitId].owner;
         require(computeProvider != address(0x00), "ComputeUnit not found");
-        require(computeProvider == msg.sender || msg.sender == owner(), "Only provider or deal owner can remove worker");
 
         // change computeUnit count
         uint256 newComputeUnitCount = workerStorage.computeUnitCount;
