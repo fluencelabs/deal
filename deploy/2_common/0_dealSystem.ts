@@ -1,17 +1,16 @@
 import type { HardhatRuntimeEnvironment } from "hardhat/types";
 import {GlobalCore__factory} from "../../src/typechain-types";
 import {deployments, ethers} from "hardhat";
+import {getEIP1559AndHardhatDeployTxArgs} from "../../hardhatUtils/hardhatDeploy";
+import {getEIP1559Args} from "../../utils/transactions";
 
 const EPOCH_DURATION = 15;
-const DEFAULT_HARDHAT_DEPLOY_SETTINGS = {
-        log: true,
-        autoMine: true,
-        waitConfirmations: 1,
-    }
 
 module.exports = async function (hre: HardhatRuntimeEnvironment) {
     const accounts = await hre.getUnnamedAccounts();
     const deployer = accounts[0]!;
+    const EIP1559AndHardhatDeployTxArgs = await getEIP1559AndHardhatDeployTxArgs(hre.ethers.provider)
+    const txEIP1559Args = await getEIP1559Args(hre.ethers.provider)
 
     const fluenceToken = (await hre.deployments.get("FLT")).address;
     const usdToken = (await hre.deployments.get("TestUSD")).address;
@@ -24,23 +23,19 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         from: deployer,
         contract: "GlobalCore",
         args: [],
-        log: true,
-        autoMine: true,
-        waitConfirmations: 1,
+        ...EIP1559AndHardhatDeployTxArgs,
     });
 
     const initGlobalCorePreTx = await GlobalCore__factory.connect(
         globalCoreImpl.address,
         await ethers.getSigner(deployer),
-    ).initialize.populateTransaction(fluenceToken, EPOCH_DURATION);
+    ).initialize.populateTransaction(fluenceToken, EPOCH_DURATION, {...txEIP1559Args});
 
     const globalCore = await hre.deployments.deploy("GlobalCore", {
         from: deployer,
         contract: "ERC1967Proxy",
         args: [globalCoreImpl.address, await initGlobalCorePreTx.data],
-        log: true,
-        autoMine: true,
-        waitConfirmations: 1,
+        ...EIP1559AndHardhatDeployTxArgs,
     });
 
     // Deploy Deal contract implementation only.
@@ -50,9 +45,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         from: deployer,
         contract: "Deal",
         args: [globalCore.address],
-        log: true,
-        autoMine: true,
-        waitConfirmations: 1,
+        ...EIP1559AndHardhatDeployTxArgs,
     });
 
     const dealFactory = await hre.deployments.deploy('DealFactory', {
@@ -68,7 +61,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
                 },
             },
         },
-        ...DEFAULT_HARDHAT_DEPLOY_SETTINGS,
+        ...EIP1559AndHardhatDeployTxArgs,
     });
 
     // Init Matcher contract
@@ -76,24 +69,20 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         from: deployer,
         contract: "Matcher",
         args: [globalCore.address],
-        log: true,
-        autoMine: true,
-        waitConfirmations: 1,
+        ...EIP1559AndHardhatDeployTxArgs,
     });
 
     const matcher = await hre.deployments.deploy("Matcher", {
         from: deployer,
         contract: "ERC1967Proxy",
         args: [matcherImpl.address, "0x"],
-        log: true,
-        autoMine: true,
-        waitConfirmations: 1,
+        ...EIP1559AndHardhatDeployTxArgs,
     });
 
     const globalConfigContract = GlobalCore__factory.connect(globalCore.address, await ethers.getSigner(deployer));
     if (globalCore.newlyDeployed) {
-        await (await globalConfigContract.setFactory(dealFactory.address)).wait();
-        await (await globalConfigContract.setMatcher(matcher.address)).wait();
+        await (await globalConfigContract.setFactory(dealFactory.address, {...txEIP1559Args})).wait();
+        await (await globalConfigContract.setMatcher(matcher.address, {...txEIP1559Args})).wait();
     }
 };
 
