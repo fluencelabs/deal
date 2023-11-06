@@ -9,6 +9,7 @@
         "clean": "hardhat clean",
         "contracts:localnet": "hardhat node --tags tokens,localnet,common --hostname 0.0.0.0",
         "update-local-deployment": "cp -r ./src/deployments/localhost/* ./src/deployments/localnet",
+        "deploy:all": "npm run deploy:testnet && npm run deploy:stage && npm run deploy:kras",
         "deploy:stage": "hardhat deploy --network stage --tags tokens,testnet,common",
         "deploy:testnet": "hardhat deploy --network testnet --tags tokens,testnet,common",
         "deploy:kras": "hardhat deploy --network kras --tags tokens,testnet,common",
