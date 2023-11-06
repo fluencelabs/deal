@@ -23,12 +23,6 @@
         "noUncheckedIndexedAccess": true,
         "noUnusedLocals": false
     },
-    "include": [
-        "src/**/*",
-        "hardhat.config.ts",
-        "./deploy",
-        "./hardhatUtils",
-        "./utils"
-    ],
+    "include": ["src/**/*"],
     "exclude": ["dist", "node_modules"]
 }
