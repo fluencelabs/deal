@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.19](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.18...deal-aurora-v0.2.19) (2023-11-06)
+
+
+### Features
+
+* CHAIN-191 Deploy on IPC subnet ([#122](https://github.com/fluencelabs/deal/issues/122)) ([fca6895](https://github.com/fluencelabs/deal/commit/fca68954f6df170c2dae496068a29e4d79d178e4))
+* update deployments ([459175f](https://github.com/fluencelabs/deal/commit/459175f8472375fe33097f9767b7d427dbc5765b))
+
+
+### Bug Fixes
+
+* ide typings ([#123](https://github.com/fluencelabs/deal/issues/123)) ([c5bd70f](https://github.com/fluencelabs/deal/commit/c5bd70f244d59e27f1c64efff33a2ab0b1a84226))
+
 ## [0.2.18](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.17...deal-aurora-v0.2.18) (2023-10-26)
 
 
