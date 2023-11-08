@@ -6,6 +6,6 @@
     "noEmit": true
   },
   // hardhat plugins add additional properties to hardhat object.
-  // Including config file to make ts see that imports and their declarations
+  // Including config file to make ts see these imports and their declarations
   "include": ["hardhat.config.ts", "test/e2e/create-match.spec.ts"]
 }
