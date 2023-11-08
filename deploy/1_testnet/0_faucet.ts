@@ -1,8 +1,9 @@
 import type { HardhatRuntimeEnvironment } from "hardhat/types";
 import {getEIP1559AndHardhatDeployTxArgs} from "../../hardhatUtils/hardhatDeploy";
+import {DeployFunction} from "hardhat-deploy/types";
 
 
-module.exports = async function (hre: HardhatRuntimeEnvironment) {
+const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const accounts = await hre.getUnnamedAccounts();
     const deployer = accounts[0]!;
     const EIP1559AndHardhatDeployTxArgs = await getEIP1559AndHardhatDeployTxArgs(hre.ethers.provider)
@@ -42,4 +43,5 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
     }
 };
 
-module.exports.tags = ["testnet"];
+export default func;
+func.tags = ["testnet"];

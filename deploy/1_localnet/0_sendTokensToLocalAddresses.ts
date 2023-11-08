@@ -1,11 +1,12 @@
 import { ethers } from "ethers";
 import type { HardhatRuntimeEnvironment } from "hardhat/types";
 import {getEIP1559Args} from "../../utils/transactions";
+import {DeployFunction} from "hardhat-deploy/types";
 
 const TEST_LOCAL_TEST_TOKEN_AMOUNT = ethers.parseEther("100");
 
 
-module.exports = async function (hre: HardhatRuntimeEnvironment) {
+const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const accounts = await hre.getUnnamedAccounts();
     const deployer = accounts[0]!;
     const txEIP1559Args = await getEIP1559Args(hre.ethers.provider)
@@ -29,4 +30,5 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
     }
 };
 
-module.exports.tags = ["localnet"];
+export default func;
+func.tags = ["localnet"];
