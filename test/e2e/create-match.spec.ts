@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { deployments, ethers as hardhatEthers } from "hardhat";
 import {ethers} from "ethers";
-import { IWorkerManager } from "../../src/typechain-types/contracts/deal/interfaces/IWorkerManager";
+import { IWorkerManager } from "../../dist/typechain-types/contracts/deal/interfaces/IWorkerManager";
 import {
     Deal,
     Deal__factory,
@@ -10,7 +10,7 @@ import {
     IERC20__factory,
     Matcher,
     Matcher__factory
-} from "../../src/typechain-types";
+} from "../../dist/typechain-types";
 import {getEIP1559Args} from "../../utils/transactions";
 
 const MIN_DPOSITED_EPOCHS = 2n;
@@ -18,9 +18,9 @@ const EPOCH_DURATION = 15;
 const WITHDRAW_EPOCH_TIMEOUT = 2n;
 
 enum DealStatus {
-    INACTIVE = 0n,
-    ACTIVE = 1n,
-    ENDED = 2n,
+    INACTIVE = 0,
+    ACTIVE = 1,
+    ENDED = 2,
 }
 
 type Peer = {
@@ -81,7 +81,7 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         const signer = await hardhatEthers.provider.getSigner();
         const DealFactoryFactory = await deployments.get("DealFactory")
         factory = (
-            await hardhatEthers.getContractAt('DealFactory', DealFactoryFactory.address) as DealFactory).connect(signer)
+            await hardhatEthers.getContractAt('DealFactory', DealFactoryFactory.address) as unknown as DealFactory).connect(signer)
 
         flt = IERC20__factory.connect((await deployments.get("FLT")).address, signer);
         matcher = Matcher__factory.connect((await deployments.get("Matcher")).address, signer);
@@ -362,7 +362,7 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
             expect(expectedComputeUnitIds[unit.id]).to.be.true;
         });
 
-        expect(await deal.getStatus()).to.be.eq(DealStatus.INACTIVE);
+        expect(await deal.getStatus()).to.be.eq(BigInt(DealStatus.INACTIVE));
     });
 
     it("4. Deposit balance", async () => {
@@ -421,7 +421,7 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
             expect(workerIdByUnitId[unit.id]).to.be.eq(unit.workerId);
         });
 
-        expect(await deal.getStatus()).to.be.eq(DealStatus.ACTIVE);
+        expect(await deal.getStatus()).to.be.eq(BigInt(DealStatus.ACTIVE));
 
         const currentEpoch = BigInt(Math.floor((await hardhatEthers.provider.getBlock("latest"))!.timestamp / EPOCH_DURATION));
         const paidEpochs = totalDeposit / (dealParams.pricePerWorkerEpoch * (await deal.getComputeUnitCount()));
@@ -436,7 +436,7 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         await hardhatEthers.provider.send("evm_mine", []);
 
         expect(await deal.getFreeBalance()).to.be.lessThan(minDeposit);
-        expect(await deal.getStatus()).to.be.eq(DealStatus.INACTIVE);
+        expect(await deal.getStatus()).to.be.eq(BigInt(DealStatus.INACTIVE));
     });
 
     it("6. Get reward", async () => {
@@ -492,6 +492,6 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
     it("8. Close deal", async () => {
         await (await deal.stop()).wait();
 
-        expect(await deal.getStatus()).to.be.eq(DealStatus.ENDED);
+        expect(await deal.getStatus()).to.be.eq(BigInt(DealStatus.ENDED));
     });
 });

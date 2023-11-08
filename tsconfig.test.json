@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "ES2021",
+    "moduleResolution": "nodenext",
+    // We don't need to emit anything in our tests
+    "noEmit": true
+  },
+  // hardhat plugins add additional properties to hardhat object.
+  // Including config file to make ts see that imports and their declarations
+  "include": ["hardhat.config.ts", "test/e2e/create-match.spec.ts"]
+}
