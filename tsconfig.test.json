@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
     "target": "ES2021",
+    "module": "ESNext",
+    "resolveJsonModule": true,
     "moduleResolution": "nodenext",
     // We don't need to emit anything in our tests
     "noEmit": true

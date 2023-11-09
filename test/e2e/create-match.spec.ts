@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { deployments, ethers as hardhatEthers } from "hardhat";
 import {ethers} from "ethers";
-import { IWorkerManager } from "../../dist/typechain-types/contracts/deal/interfaces/IWorkerManager";
+import { IWorkerManager } from "../../src/typechain-types/contracts/deal/interfaces/IWorkerManager";
 import {
     Deal,
     Deal__factory,
@@ -10,7 +10,7 @@ import {
     IERC20__factory,
     Matcher,
     Matcher__factory
-} from "../../dist/typechain-types";
+} from "../../src/typechain-types";
 import {getEIP1559Args} from "../../utils/transactions";
 
 const MIN_DPOSITED_EPOCHS = 2n;
