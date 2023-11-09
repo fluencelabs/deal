@@ -51,5 +51,7 @@ For public test-net chains and production chains: do not forget to set appropria
 After you prepared .env file and did `npm i`, to deploy all contracts to e.g. **kras**:
 
 ```bash
-npx hardhat deploy --network kras
+npm run deploy:kras
 ```
+
+> we also have `all` -> `npm run deploy:all`  
