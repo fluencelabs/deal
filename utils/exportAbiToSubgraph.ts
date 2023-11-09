@@ -3,7 +3,7 @@ import fs from "fs";
 
 const SUBGRAPH_ABI_DIR = path.join(__dirname, "..", "subgraph", "abis");
 
-// TODO: make by 1 task.
+// TODO: make by 1 hardhat task.
 export function saveAbiToSubgraph(abi: any, contractName: string) {
     const abiPath = path.join(SUBGRAPH_ABI_DIR, contractName + ".json")
     if (!fs.existsSync(SUBGRAPH_ABI_DIR)) {
