@@ -1,5 +1,14 @@
 # Subgraph
 
+# Project Structure
+
+- `docker-compose.yaml` - instruction for Docker containers to create local dev environment with **local graph node** connected to **local hardhat node** (for instruction how to use - check [#Develop](#Develop) section below).
+- `subgraph.yaml` - The Graph configuration schema to collect rules of indexing and querying contracts event via handlers.
+- `schema.graphql` - The subgraph GraphQL schema of types those are indexed and available for querying.
+- `mappings.ts` - consists of event handlers and populating logic of schema.graphql above.
+- `build/` - The auto-generated folder by The Graph's CLI
+- `generated/` - The auto-generated folder by The Graph's CLI
+
 # Develop
 To start local development with TheGraph and Hardhat:
 
@@ -35,4 +44,7 @@ npm run deploy-local
 
 Since now, you have GUI of the deployed graph: http://localhost:8000/subgraphs/name/<YourContractName>
 
-
+# TODO
+- [ ] integrate subgraph more smoothly with hardhat, and esp. with hardhat-deploy plugin
+- [ ] use subgraph templating as it used with the graph project contracts
+- [ ] check again https://github.com/graphprotocol/hardhat-graph-demo to find the solution for **auto-populating subgraph.yaml with events**
