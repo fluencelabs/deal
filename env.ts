@@ -1,6 +1,6 @@
 export const WAIT_CONFIRMATIONS = process.env["WAIT_CONFIRMATIONS"] ? parseInt(process.env["WAIT_CONFIRMATIONS"]) : 0;
 export const EPOCH_DURATION = 15n;
-export const DEFAULT_HARDHAT_DEPLOY_SETTINGS = {
+export const DEFAULT_HARDHAT_TX_SETTINGS = {
     log: true,
     autoMine: true,
     waitConfirmations: WAIT_CONFIRMATIONS,
