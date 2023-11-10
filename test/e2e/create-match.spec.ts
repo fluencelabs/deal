@@ -179,7 +179,7 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
 
             const resOfRegisterOffer = await registerOfferTx.wait();
 
-            const offerRegisteredEventTopic = env.core.interface.getEvent("MarkeOfferRegistered").topicHash;
+            const offerRegisteredEventTopic = env.core.interface.getEvent("MarketOfferRegistered").topicHash;
             const log = resOfRegisterOffer.logs.find(({ topics }) => topics[0] === offerRegisteredEventTopic);
             const parsedLog: ethers.Result = env.core.interface.parseLog({
                 data: log.data,

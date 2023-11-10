@@ -1,0 +1,16 @@
+type Greeting @entity {
+  id: ID!
+  newGreeting: String!
+  changedBy: String!
+  timestamp: BigInt!
+}
+
+type MarketOffer @entity {
+  id: ID!
+  createdAt: BigInt!
+  provider: Bytes!
+  pricePerEpoch: BigInt!
+
+  computeUnits: Int
+  maxCollateralPerWorker: BigInt
+}

@@ -48,3 +48,4 @@ Since now, you have GUI of the deployed graph: http://localhost:8000/subgraphs/n
 - [ ] integrate subgraph more smoothly with hardhat, and esp. with hardhat-deploy plugin
 - [ ] use subgraph templating as it used with the graph project contracts
 - [ ] check again https://github.com/graphprotocol/hardhat-graph-demo to find the solution for **auto-populating subgraph.yaml with events**
+- [ ] add docker-compose commands to package.json 

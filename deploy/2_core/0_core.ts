@@ -7,17 +7,19 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
     const accounts = await hre.getUnnamedAccounts();
     const deployer = accounts[0]!;
     const CoreDeploymentName = "Core"
+    const DealImplDeploymentName = 'DealImpl'
+    const CoreImplDeploymentName = "CoreImpl"
 
     const fluenceToken = (await hre.deployments.get("FLT")).address;
 
-    const dealImpl = await hre.deployments.deploy("DealImpl", {
+    const dealImpl = await hre.deployments.deploy(DealImplDeploymentName, {
         from: deployer,
         contract: "Deal",
         args: [],
         ...DEFAULT_HARDHAT_DEPLOY_SETTINGS,
     });
 
-    const coreImpl = await hre.deployments.deploy("CoreImpl", {
+    const coreImpl = await hre.deployments.deploy(CoreImplDeploymentName, {
         from: deployer,
         contract: "Core",
         args: [],
@@ -46,6 +48,8 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
 
     // Export to Subgraph.
     saveAbiToSubgraph(core.abi, CoreDeploymentName)
+    saveAbiToSubgraph(dealImpl.abi, DealImplDeploymentName)
+    saveAbiToSubgraph(coreImpl.abi, CoreImplDeploymentName)
 };
 
 module.exports.dependencies = ["Faucet"];
