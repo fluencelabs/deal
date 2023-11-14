@@ -37,7 +37,7 @@ jobs:
 
   deal:
     if: needs.release-please.outputs.release-created
-    runs-on: ubuntu-latest
+    runs-on: builder
     needs:
       - release-please
 
