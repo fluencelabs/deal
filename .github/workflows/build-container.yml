@@ -2,7 +2,7 @@
 name: "container"
 
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
       tag:
         type: string
