@@ -95,7 +95,7 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
 
-      - name: Build and push aurora container
+      - name: Build and push container
         uses: docker/build-push-action@v4
         with:
           context: .
