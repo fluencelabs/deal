@@ -1,4 +1,4 @@
-FROM node:16-alpine
+FROM python3.11-nodejs16-slim
 COPY ./ /aurora
 WORKDIR /aurora
 RUN npm install --f && npm run compile
