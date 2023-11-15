@@ -1,10 +1,36 @@
-type MarketOffer @entity {
-  id: ID!
+# Comments relates to Figma screen names.
+# Names according to Figma. Suffix according to api list, details
+
+type Offer @entity {
+  """Used in the next figma views:
+    - Offer from List Of offers 1.2.
+    - Offer 1.2
+  """
+  id: ID!  # Ref to offerId in contract.
   createdAt: BigInt!
   provider: Bytes!
   pricePerEpoch: BigInt!
   tokenSymbol: String!
+  "Currently effector id is merged(prefix + hash) aka 1 CID."
+  effectors: [Effector!]
+  peers: [Peer!] @derivedFrom(field: "offer")
 
-  computeUnits: Int
-  maxCollateralPerWorker: BigInt
+  "Sum of all connected compute units."
+  computeUnitsSum: Int
+# deprecated: maxCollateralPerWorker: BigInt
+}
+
+"Effector table is obsolete table since it is a simple mapping."
+type Effector @entity(immutable: true) {
+  "id and CID are the same. TODO: merge."
+  id: ID!
+  CID: Bytes!
+  Description: String!
+}
+
+type Peer @entity {
+  "ref to peerId in contract."
+  id: ID!
+  offer: Offer!
+  computeUnits: Int!
 }

@@ -16,16 +16,23 @@ dataSources:
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
-        - MarketOffer
+        - Offer
+        - Effector
+        - Peer
       abis:
         - name: CoreImpl
           file: ./abis/CoreImpl.json
       eventHandlers:
         - event: MarketOfferRegistered(bytes32,address,uint256,address,(bytes4,bytes32)[])
-          handler: handleRegisterMarketOffer
+          handler: handleMarketOfferRegistered
         - event: ComputeUnitCreated(bytes32,bytes32,bytes32)
           handler: handleComputeUnitCreated
+        - event: PeerCreated(bytes32,bytes32)
+          handler: handlePeerCreated
+
+
 #          handled automatically
 #        - event: ComputeUnitCreated(bytes32,bytes32,bytes32)
 #          handler: handleComputeUnitCreated
+#          receipt: true
       file: ./src/mappings.ts
