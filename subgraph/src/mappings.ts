@@ -8,19 +8,26 @@ import { log } from '@graphprotocol/graph-ts'
 
 // TODO: where/what is maxCollateralPerWorker?
 export function handleRegisterMarketOffer(event: MarketOfferRegistered): void {
+    // Events: MarketOfferRegistered
+    // Children events:
+    // - emit PeerCreated(offerId, peer.peerId);
+    // - emit ComputeUnitCreated(offerId, peerId, unitId);
+    // Screen: List of offers
+
     let entity = new MarketOffer(event.params.offerId.toHex());
 
     entity.createdAt = event.block.timestamp;
     entity.provider = event.params.owner;
     log.info("2: {}", ['2'])
     entity.pricePerEpoch = event.params.minPricePerWorkerEpoch;
-    // TODO: Handle ComputeUnitCreated events as well via transaction logs instead of contract call.
-    if (event.receipt !== null) {
-        event.receipt!.logs.forEach((txLog) => {
-            log.info('event.receipt.logs {} and type of: {}', [txLog.topics.toString(), txLog.logType]);
-        })
-    }
-
+    entity.tokenSymbol = getTokenSymbol(event.params.paymentToken)
+    // TODO: how to Handle ComputeUnitCreated events as well via transaction logs instead of contract call.
+    //  mb the flow via separate handler is more natural.
+    // if (event.receipt !== null) {
+    //     event.receipt!.logs.forEach((txLog) => {
+    //         log.info('event.receipt.logs {} and type of: {}', [txLog.topics.toString(), txLog.logType]);
+    //     })
+    // }
     entity.save();
 }
 

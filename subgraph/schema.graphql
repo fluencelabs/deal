@@ -10,6 +10,7 @@ type MarketOffer @entity {
   createdAt: BigInt!
   provider: Bytes!
   pricePerEpoch: BigInt!
+  tokenSymbol: String!
 
   computeUnits: Int
   maxCollateralPerWorker: BigInt
