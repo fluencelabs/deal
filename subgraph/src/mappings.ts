@@ -2,8 +2,10 @@
 import { MarketOffer } from "../generated/schema";
 import {MarketOfferRegistered, CoreImpl, ComputeUnitCreated} from '../generated/Core/CoreImpl'
 // import {extractIdFromEvent} from "./utils";
-import { log } from '@graphprotocol/graph-ts'
 import {getTokenSymbol} from "./tokenNames";
+import {getOrCreateMarketOffer} from "./models";
+
+import { log } from '@graphprotocol/graph-ts'
 // log.info('My value is: {}', [myValue])
 
 
@@ -15,13 +17,13 @@ export function handleRegisterMarketOffer(event: MarketOfferRegistered): void {
     // - emit ComputeUnitCreated(offerId, peerId, unitId);
     // Screen: List of offers
 
-    let entity = new MarketOffer(event.params.offerId.toHex());
+    let entity = getOrCreateMarketOffer(event.params.offerId.toHex())
 
-    entity.createdAt = event.block.timestamp;
-    entity.provider = event.params.owner;
-    log.info("2: {}", ['2'])
-    entity.pricePerEpoch = event.params.minPricePerWorkerEpoch;
+    entity.createdAt = event.block.timestamp
+    entity.provider = event.params.owner
     entity.tokenSymbol = getTokenSymbol(event.params.paymentToken)
+    entity.pricePerEpoch = event.params.minPricePerWorkerEpoch
+
     // TODO: how to Handle ComputeUnitCreated events as well via transaction logs instead of contract call.
     //  mb the flow via separate handler is more natural.
     // if (event.receipt !== null) {
@@ -33,16 +35,10 @@ export function handleRegisterMarketOffer(event: MarketOfferRegistered): void {
 }
 
 export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
-    let entity = MarketOffer.load(event.params.offerId.toHex());  // TODO: or create
-
-    if (entity == null) {
-        return
-    }
-
+    let entity = getOrCreateMarketOffer(event.params.offerId.toHex())
     // or maybe save everything into context and then count:
     //  https://thegraph.com/docs/en/developing/creating-a-subgraph/#data-source-context.
     entity.computeUnits += 1
-
 }
 
 // TODO: handle other update queries: addFreeUnits
