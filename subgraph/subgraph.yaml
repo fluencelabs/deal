@@ -23,7 +23,8 @@ dataSources:
       eventHandlers:
         - event: MarketOfferRegistered(bytes32,address,uint256,address,(bytes4,bytes32)[])
           handler: handleRegisterMarketOffer
-          receipt: true
+        - event: ComputeUnitCreated(bytes32,bytes32,bytes32)
+          handler: handleComputeUnitCreated
 #          handled automatically
 #        - event: ComputeUnitCreated(bytes32,bytes32,bytes32)
 #          handler: handleComputeUnitCreated

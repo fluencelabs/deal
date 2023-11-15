@@ -1,8 +1,9 @@
 // File should be writen after `npm run compile` is run or you will encounter syntax and import errors.
 import { MarketOffer } from "../generated/schema";
-import {MarketOfferRegistered, CoreImpl} from '../generated/Core/CoreImpl'
+import {MarketOfferRegistered, CoreImpl, ComputeUnitCreated} from '../generated/Core/CoreImpl'
 // import {extractIdFromEvent} from "./utils";
 import { log } from '@graphprotocol/graph-ts'
+import {getTokenSymbol} from "./tokenNames";
 // log.info('My value is: {}', [myValue])
 
 
@@ -31,8 +32,20 @@ export function handleRegisterMarketOffer(event: MarketOfferRegistered): void {
     entity.save();
 }
 
-// TODO: handle addFreeUnits
+export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
+    let entity = MarketOffer.load(event.params.offerId.toHex());  // TODO: or create
 
+    if (entity == null) {
+        return
+    }
+
+    // or maybe save everything into context and then count:
+    //  https://thegraph.com/docs/en/developing/creating-a-subgraph/#data-source-context.
+    entity.computeUnits += 1
+
+}
+
+// TODO: handle other update queries: addFreeUnits
 // Parse current contract data:
 //     let contract = CoreImpl.bind(event.address)
 //     let erc20Symbol = contract.symbol()
