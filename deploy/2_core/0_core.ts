@@ -1,7 +1,8 @@
 import type { HardhatRuntimeEnvironment } from "hardhat/types";
-import { DEFAULT_HARDHAT_DEPLOY_SETTINGS, EPOCH_DURATION, MIN_DEPOSITED_EPOCHES, MIN_REMATCHING_EPOCHES } from "../../env";
+import { EPOCH_DURATION, MIN_DEPOSITED_EPOCHES, MIN_REMATCHING_EPOCHES } from "../../env";
 import { Core__factory } from "../../src/typechain-types";
 import {saveAbiToSubgraph} from "../../utils/exportAbiToSubgraph";
+import { getEIP1559AndHardhatTxArgs } from "../../utils/deploy";
 
 module.exports = async function (hre: HardhatRuntimeEnvironment) {
     const accounts = await hre.getUnnamedAccounts();
@@ -11,21 +12,20 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
     const CoreImplDeploymentName = "CoreImpl"
 
     const fluenceToken = (await hre.deployments.get("FLT")).address;
+    const eip1559TxArgs = await getEIP1559AndHardhatTxArgs(hre.ethers.provider);
 
     const dealImpl = await hre.deployments.deploy(DealImplDeploymentName, {
         from: deployer,
         contract: "Deal",
         args: [],
-        ...DEFAULT_HARDHAT_DEPLOY_SETTINGS,
+        ...eip1559TxArgs,
     });
 
     const coreImpl = await hre.deployments.deploy(CoreImplDeploymentName, {
         from: deployer,
         contract: "Core",
         args: [],
-        log: true,
-        autoMine: true,
-        waitConfirmations: 1,
+        ...eip1559TxArgs,
     });
 
     const core = await hre.deployments.deploy(CoreDeploymentName, {
@@ -41,9 +41,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
                 dealImpl.address,
             ]),
         ],
-        log: true,
-        autoMine: true,
-        waitConfirmations: 1,
+        ...eip1559TxArgs,
     });
 
     // Export to Subgraph.

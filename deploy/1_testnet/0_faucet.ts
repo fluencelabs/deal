@@ -1,12 +1,14 @@
 import type { HardhatRuntimeEnvironment } from "hardhat/types";
-import { DEFAULT_HARDHAT_DEPLOY_SETTINGS } from "../../env";
 import { ethers } from "hardhat";
+import { getEIP1559AndHardhatTxArgs } from "../../utils/deploy";
 
 const TEST_TOKENS_FOR_FAUCET = ethers.parseEther(String(10n ** 9n));
 
 module.exports = async function (hre: HardhatRuntimeEnvironment) {
     const accounts = await hre.getUnnamedAccounts();
     const deployer = accounts[0]!;
+
+    const eip1559TxArgs = await getEIP1559AndHardhatTxArgs(hre.ethers.provider);
 
     const fluenceTokenAddress = (await hre.deployments.get("FLT")).address;
     const testUSDAddress = (await hre.deployments.get("TestUSD")).address;
@@ -15,7 +17,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         from: deployer,
         contract: "OwnableFaucet",
         args: [fluenceTokenAddress, testUSDAddress],
-        ...DEFAULT_HARDHAT_DEPLOY_SETTINGS,
+        ...eip1559TxArgs,
     });
 
     if (faucet.newlyDeployed) {
@@ -23,7 +25,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
             "FLT",
             {
                 from: deployer,
-                ...DEFAULT_HARDHAT_DEPLOY_SETTINGS,
+                ...eip1559TxArgs,
             },
             "transfer",
             faucet.address,
@@ -34,7 +36,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
             "TestUSD",
             {
                 from: deployer,
-                ...DEFAULT_HARDHAT_DEPLOY_SETTINGS,
+                ...eip1559TxArgs,
             },
             "transfer",
             faucet.address,

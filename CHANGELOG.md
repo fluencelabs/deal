@@ -1,5 +1,39 @@
 # Changelog
 
+## [0.2.20](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.19...deal-aurora-v0.2.20) (2023-11-06)
+
+
+### Bug Fixes
+
+* revert txconfig ([968b3b2](https://github.com/fluencelabs/deal/commit/968b3b2d05232bf6d4cce7650b08216033f12790))
+
+## [0.2.19](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.18...deal-aurora-v0.2.19) (2023-11-06)
+
+
+### Features
+
+* CHAIN-191 Deploy on IPC subnet ([#122](https://github.com/fluencelabs/deal/issues/122)) ([fca6895](https://github.com/fluencelabs/deal/commit/fca68954f6df170c2dae496068a29e4d79d178e4))
+* update deployments ([459175f](https://github.com/fluencelabs/deal/commit/459175f8472375fe33097f9767b7d427dbc5765b))
+
+
+### Bug Fixes
+
+* ide typings ([#123](https://github.com/fluencelabs/deal/issues/123)) ([c5bd70f](https://github.com/fluencelabs/deal/commit/c5bd70f244d59e27f1c64efff33a2ab0b1a84226))
+
+## [0.2.18](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.17...deal-aurora-v0.2.18) (2023-10-26)
+
+
+### Bug Fixes
+
+* client ([5f9b551](https://github.com/fluencelabs/deal/commit/5f9b551ddbf060cab32e0602b6d19f15258a0069))
+
+## [0.2.17](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.16...deal-aurora-v0.2.17) (2023-10-24)
+
+
+### Bug Fixes
+
+* version in pkg ([0bfacc6](https://github.com/fluencelabs/deal/commit/0bfacc686c1eeab6b578ded014ce71c43e93e42e))
+
 ## [0.2.15](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.14...deal-aurora-v0.2.15) (2023-09-26)
 
 
