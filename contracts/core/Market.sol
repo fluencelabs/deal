@@ -2,25 +2,23 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "../utils/OwnableUpgradableDiamond.sol";
 import "../deal/base/Types.sol";
 import "../utils/LinkedListWithUniqueKeys.sol";
 import "../deal/interfaces/IDeal.sol";
-import "hardhat/console.sol";
+import "./GlobalConst.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-contract Market is Initializable {
+contract Market is GlobalConst {
+    using SafeERC20 for IERC20;
     using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
 
     // ------------------ Types ------------------
-
-    // -------- Inputs --------
     struct RegisterComputePeer {
         bytes32 peerId;
         uint freeUnits;
     }
 
-    // -------- Storage --------
     struct ComputeUnit {
         address deal;
         bytes32 peerId;
@@ -28,7 +26,8 @@ contract Market is Initializable {
 
     struct ComputePeerInfo {
         bytes32 offerId;
-        uint lastUnitIndex;
+        bytes32 commitmentId;
+        uint unitCount;
     }
 
     struct ComputePeer {
@@ -62,7 +61,7 @@ contract Market is Initializable {
     event ComputeUnitRemovedFromDeal(bytes32 unitId, IDeal deal);
 
     // ------------------ Storage ------------------
-    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.market.storage.v1.offer")) - 1);
+    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.core.storage.v1.market")) - 1);
 
     struct OfferStorage {
         LinkedListWithUniqueKeys.Bytes32List offerIds;
@@ -81,6 +80,10 @@ contract Market is Initializable {
     }
 
     // ----------------- Internal View -----------------
+    function _calcUnitId(bytes32 offerId, bytes32 peerId, uint index) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked(offerId, peerId, index));
+    }
+
     function _getOffersList() internal view returns (LinkedListWithUniqueKeys.Bytes32List storage) {
         return _getOfferStorage().offerIds;
     }
@@ -91,6 +94,18 @@ contract Market is Initializable {
 
     function _getFreePeerList(bytes32 offerId) internal view returns (LinkedListWithUniqueKeys.Bytes32List storage) {
         return _getOfferStorage().offers[offerId].freePeerIds;
+    }
+
+    function _getOffer(bytes32 offerId) internal view returns (Offer storage) {
+        return _getOfferStorage().offers[offerId];
+    }
+
+    function _getComutePeer(bytes32 peerId) internal view returns (ComputePeer storage) {
+        return _getOfferStorage().peers[peerId];
+    }
+
+    function _getComputeUnit(bytes32 unitId) internal view returns (ComputeUnit storage) {
+        return _getOfferStorage().computeUnits[unitId];
     }
 
     function _hasOfferEffectors(bytes32 offerId, CIDV1[] memory effectors) internal view returns (bool) {
@@ -108,6 +123,7 @@ contract Market is Initializable {
     }
 
     // ----------------- Internal Mutable -----------------
+
     function _addComputePeerToOffer(bytes32 offerId, RegisterComputePeer calldata peer) internal {
         OfferStorage storage offerStorage = _getOfferStorage();
         Offer storage offer = offerStorage.offers[offerId];
@@ -116,7 +132,7 @@ contract Market is Initializable {
 
         require(computePeer.info.offerId == bytes32(0x00), "Peer already exists in another offer");
 
-        computePeer.info = ComputePeerInfo({ offerId: offerId, lastUnitIndex: peer.freeUnits - 1 });
+        computePeer.info = ComputePeerInfo({ offerId: offerId, commitmentId: bytes32(0x00), unitCount: peer.freeUnits });
 
         _addComputeUnitsToPeer(offerId, peer.peerId, peer.freeUnits);
 
@@ -130,18 +146,17 @@ contract Market is Initializable {
         OfferStorage storage offerStorage = _getOfferStorage();
         ComputePeer storage computePeer = offerStorage.peers[peerId];
 
-        uint indexOffset = computePeer.info.lastUnitIndex + 1;
+        uint indexOffset = computePeer.info.unitCount;
         for (uint i = 0; i < freeUnits; i++) {
-            bytes32 unitId = keccak256(abi.encodePacked(offerId, peerId, i + indexOffset));
+            bytes32 unitId = _calcUnitId(offerId, peerId, i + indexOffset);
 
             // create compute unit
             offerStorage.computeUnits[unitId] = ComputeUnit({ deal: address(0x00), peerId: peerId });
 
-            // add unit to peer
-            computePeer.freeComputeUnitIds.push(unitId);
-
             emit ComputeUnitCreated(offerId, peerId, unitId);
         }
+
+        computePeer.info.unitCount = indexOffset + freeUnits;
     }
 
     function _mvComputeUnitToDeal(bytes32 unitId, IDeal deal) internal {
@@ -181,6 +196,7 @@ contract Market is Initializable {
     }
 
     // ----------------- Public Mutable -----------------
+    // ---- Register offer and units ----
     function registerMarketOffer(
         bytes32 offerId,
         uint minPricePerWorkerEpoch,
@@ -235,10 +251,12 @@ contract Market is Initializable {
         require(offer.owner == msg.sender, "Only owner can change offer");
         require(freeUnits > 0, "Free units should be greater than 0");
         require(computePeer.offerId == offerId, "Peer doesn't exist");
+        require(computePeer.commitmentId == bytes32(0x00), "Peer has commitment");
 
         _addComputeUnitsToPeer(offerId, peerId, freeUnits);
     }
 
+    // ---- Change offer ----
     function changeMinPricePerWorkerEpoch(bytes32 offerId, uint newMinPricePerWorkerEpoch) external {
         OfferStorage storage offerStorage = _getOfferStorage();
         OfferInfo storage offer = offerStorage.offers[offerId].info;
@@ -299,6 +317,7 @@ contract Market is Initializable {
         }
     }
 
+    // ---- Unit management ----
     function returnComputeUnitFromDeal(bytes32 unitId) public {
         OfferStorage storage offerStorage = _getOfferStorage();
         ComputeUnit storage computeUnit = offerStorage.computeUnits[unitId];

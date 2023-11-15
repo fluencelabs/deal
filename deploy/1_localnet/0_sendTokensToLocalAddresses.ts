@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import type { HardhatRuntimeEnvironment } from "hardhat/types";
-import { DEFAULT_HARDHAT_DEPLOY_SETTINGS, WAIT_CONFIRMATIONS } from "../../env";
+import { DEFAULT_HARDHAT_DEPLOY_SETTINGS } from "../../env";
 
 const TEST_LOCAL_TEST_TOKEN_AMOUNT = ethers.parseEther("100");
 

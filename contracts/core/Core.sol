@@ -12,9 +12,9 @@ import "./GlobalConst.sol";
 import "./Matcher.sol";
 import "./interfaces/ICore.sol";
 
-contract Core is Market, Matcher, DealFactory, UUPSUpgradeable, ICore {
+contract Core is DealFactory, Matcher, UUPSUpgradeable, ICore {
     // ------------------ Storage ------------------
-    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.market.storage.v1")) - 1);
+    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.core.storage.v1")) - 1);
 
     // ------------------ Constructor ------------------
     // @custom:oz-upgrades-unsafe-allow constructor

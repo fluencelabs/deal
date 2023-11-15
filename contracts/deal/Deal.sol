@@ -25,7 +25,7 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
     }
 
     // ------------------ Storage ------------------
-    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.deal.storage.v1.deal")) - 1);
+    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.deal.storage.v1")) - 1);
 
     struct DealStorage {
         uint totalBalance;

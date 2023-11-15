@@ -6,15 +6,13 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../utils/LinkedListWithUniqueKeys.sol";
-import "./Market.sol";
-import "./EpochController.sol";
+import "./CapacityCommitment.sol";
 import "./GlobalConst.sol";
 import "./interfaces/IMatcher.sol";
 import "../deal/interfaces/IDeal.sol";
 import "../deal/interfaces/IConfig.sol";
-import "hardhat/console.sol";
 
-abstract contract Matcher is Market, EpochController, GlobalConst, IMatcher {
+contract Matcher is CapacityCommitment, IMatcher {
     using SafeERC20 for IERC20;
     using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
 
@@ -22,15 +20,15 @@ abstract contract Matcher is Market, EpochController, GlobalConst, IMatcher {
     event ComputeUnitMatched(bytes32 indexed peerId, bytes32 unitId, uint dealCreationBlock, CIDV1 appCID);
 
     // ------------------ Storage ------------------
-    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.market.storage.v1.matcher")) - 1);
+    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.core.storage.v1.matcher")) - 1);
 
-    struct MarketStorage {
+    struct MatcherStorage {
         mapping(address => uint256) lastMatchedEpoch;
     }
 
     OfferStorage private _storage;
 
-    function _getMarketStorage() private pure returns (MarketStorage storage s) {
+    function _getMatcherStorage() private pure returns (MatcherStorage storage s) {
         bytes32 storageSlot = _STORAGE_SLOT;
         assembly {
             s.slot := storageSlot
@@ -40,9 +38,9 @@ abstract contract Matcher is Market, EpochController, GlobalConst, IMatcher {
     // ----------------- External Mutable -----------------
     // TODO: move this logic to offchain. Temp solution
     function matchDeal(IDeal deal) external {
-        MarketStorage storage marketStorage = _getMarketStorage();
+        MatcherStorage storage MatcherStorage = _getMatcherStorage();
 
-        uint lastMatchedEpoch = marketStorage.lastMatchedEpoch[address(deal)];
+        uint lastMatchedEpoch = MatcherStorage.lastMatchedEpoch[address(deal)];
         require(lastMatchedEpoch == 0 || currentEpoch() > lastMatchedEpoch + minRematchingEpoches(), "Matcher: too early to rematch");
 
         uint pricePerWorkerEpoch = deal.pricePerWorkerEpoch();
@@ -101,7 +99,7 @@ abstract contract Matcher is Market, EpochController, GlobalConst, IMatcher {
         }
 
         if (isDealMatched) {
-            _getMarketStorage().lastMatchedEpoch[address(deal)] = currentEpoch();
+            _getMatcherStorage().lastMatchedEpoch[address(deal)] = currentEpoch();
         }
     }
 }
