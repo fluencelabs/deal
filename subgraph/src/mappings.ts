@@ -6,7 +6,12 @@ import {
     MarketOfferRegistered,
     CoreImpl,
     ComputeUnitCreated,
-    MarketOfferRegisteredEffectorsStruct, PeerCreated
+    MarketOfferRegisteredEffectorsStruct,
+    PeerCreated,
+    MinPricePerEpochUpdated,
+    PaymentTokenUpdated,
+    EffectorAdded,
+    EffectorAddedEffectorStruct, EffectorRemoved, ComputeUnitRemovedFromDeal, ComputeUnitAddedToDeal
 } from '../generated/Core/CoreImpl'
 // import {extractIdFromEvent} from "./utils";
 import {getTokenSymbol} from "./networkConstants";
@@ -15,6 +20,24 @@ import {BigInt, Bytes, ByteArray} from "@graphprotocol/graph-ts";
 
 import { log } from '@graphprotocol/graph-ts'
 // log.info('My value is: {}', [myValue])
+
+function parseEffectors(effectors: Array<MarketOfferRegisteredEffectorsStruct>): Array<string> {
+    let effectorEntities: Array<string> = []
+    for (let i=0; i < effectors.length; i++) {
+
+        const cid = getEffectorCID(effectors[i])
+        const effector = getOrCreateEffector(cid)
+        effectorEntities.push(effector.id)
+    }
+    return effectorEntities
+}
+
+// TODO: marke type as tuple of [Bytes, Bytes]. Currently: subgraphERROR TS1110: Type expected.
+function getEffectorCID(effectorTuple: MarketOfferRegisteredEffectorsStruct): string {
+    const cid = effectorTuple[0].toString() + effectorTuple[1].toString()
+    log.info('Extract CID from effector: {}', [cid])
+    return cid
+}
 
 
 export function handleMarketOfferRegistered(event: MarketOfferRegistered): void {
@@ -25,16 +48,7 @@ export function handleMarketOfferRegistered(event: MarketOfferRegistered): void 
 
     let entity = getOrCreateOffer(event.params.offerId.toHex())
 
-    let effectorEntities: Array<string> = []
-    const fetchedEffectors = event.params.effectors
-    for (let i=0; i < fetchedEffectors.length; i++) {
-
-        let tup: MarketOfferRegisteredEffectorsStruct
-        tup = fetchedEffectors[i]
-        const cid = tup.toString() + tup.toString()
-        const effector = getOrCreateEffector(cid)
-        effectorEntities.push(effector.id)
-    }
+    const effectorEntities = parseEffectors(event.params.effectors)
 
     entity.createdAt = event.block.timestamp
     entity.provider = event.params.owner
@@ -76,3 +90,53 @@ export function handlePeerCreated(event: PeerCreated): void {
     entity.offer = event.params.offerId.toHex()
     entity.save()
 }
+
+// Update Methods
+export function handleMinPricePerEpochUpdated(event: MinPricePerEpochUpdated): void {
+    let entity = getOrCreateOffer(event.params.offerId.toHex())
+    entity.pricePerEpoch = event.params.minPricePerWorkerEpoch
+    entity.save()
+}
+
+export function handlePaymentTokenUpdated(event: PaymentTokenUpdated): void {
+    let entity = getOrCreateOffer(event.params.offerId.toHex())
+    entity.tokenSymbol = getTokenSymbol(event.params.paymentToken)
+    entity.save()
+}
+
+export function handleEffectorAdded(event: EffectorAdded): void {
+    let entity = getOrCreateOffer(event.params.offerId.toHex())
+    const effectorTuple = event.params.effector
+    const cid = effectorTuple[0].toString() + effectorTuple[1].toString()
+    const effector = getOrCreateEffector(cid)
+    if (entity.effectors == null) {
+        entity.effectors = [cid]
+    } else {
+        entity.effectors!.push(effector.id)
+    }
+    entity.save()
+}
+
+export function handleEffectorRemoved(event: EffectorRemoved): void {
+    let entity = getOrCreateOffer(event.params.offerId.toHex())
+    const effectorTuple = event.params.effector
+    const cidToRemove = effectorTuple[0].toString() + effectorTuple[1].toString()
+
+    if (entity.effectors == null) {
+        return
+    }
+
+    // Find effector to remove
+    let effectorsToSave: Array<string> = []
+    for (let i=0; i < entity.effectors!.length; i++) {
+        const currentEffector = entity.effectors![i]
+        if (currentEffector !== cidToRemove) {
+            continue
+        }
+        effectorsToSave.push(currentEffector)
+    }
+    entity.effectors = effectorsToSave
+    entity.save()
+}
+
+

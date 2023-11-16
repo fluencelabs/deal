@@ -29,10 +29,16 @@ dataSources:
           handler: handleComputeUnitCreated
         - event: PeerCreated(bytes32,bytes32)
           handler: handlePeerCreated
-
-
-#          handled automatically
-#        - event: ComputeUnitCreated(bytes32,bytes32,bytes32)
-#          handler: handleComputeUnitCreated
-#          receipt: true
+        - event: MinPricePerEpochUpdated(bytes32,uint256)
+          handler: handleMinPricePerEpochUpdated
+        - event: PaymentTokenUpdated(bytes32,address)
+          handler: handlePaymentTokenUpdated
+        - event: EffectorAdded(bytes32,(bytes4,bytes32))
+          handler: handleEffectorAdded
+        - event: EffectorRemoved(bytes32,(bytes4,bytes32))
+          handler: handleEffectorRemoved
+#        - event: ComputeUnitAddedToDeal(bytes32,address)
+#          handler: handleComputeUnitAddedToDeal
+#        - event: ComputeUnitRemovedFromDeal(bytes32,address)
+#          handler: handleComputeUnitRemovedFromDeal
       file: ./src/mappings.ts
