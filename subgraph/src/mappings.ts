@@ -139,4 +139,10 @@ export function handleEffectorRemoved(event: EffectorRemoved): void {
     entity.save()
 }
 
+export function handleComputeUnitAddedToDeal(event: ComputeUnitAddedToDeal): void {
+    // TODO: resolve even without no info about dealId
+}
 
+export function handleComputeUnitRemovedFromDeal(event: ComputeUnitRemovedFromDeal): void {
+    // TODO: resolve even without no info about dealId
+}
