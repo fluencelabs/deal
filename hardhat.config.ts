@@ -6,9 +6,7 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 
-const accounts = [
-    process.env["PRIVATE_KEY"] ?? "0x0000000000000000000000000000000000000000000000000000000000000000",
-]
+const accounts = [process.env["PRIVATE_KEY"] ?? "0x0000000000000000000000000000000000000000000000000000000000000000"];
 
 const config: HardhatUserConfig = {
     solidity: {
@@ -54,17 +52,17 @@ const config: HardhatUserConfig = {
             accounts: accounts,
         },
         ipcsubnet: {
-            url: 'http://139.162.187.214:8545',
+            url: "http://139.162.187.214:8545",
             accounts: accounts,
             chainId: 1404213532111849,
         },
-        calibration: {  // Currently this network is use only for debugging.
-            url: 'https://api.calibration.node.glif.io/rpc/v1',
+        calibration: {
+            // Currently this network is use only for debugging.
+            url: "https://api.calibration.node.glif.io/rpc/v1",
             accounts: accounts,
             chainId: 314159,
-            timeout: 1000000,  // recommended by IPC team.
-        }
-
+            timeout: 1000000, // recommended by IPC team.
+        },
     },
     etherscan: {
         apiKey: {

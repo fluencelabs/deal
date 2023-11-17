@@ -1,16 +1,16 @@
 import type { HardhatRuntimeEnvironment } from "hardhat/types";
-import {GlobalCore__factory} from "../../src/typechain-types";
-import {deployments, ethers} from "hardhat";
-import {getEIP1559AndHardhatDeployTxArgs} from "../../hardhatUtils/hardhatDeploy";
-import {getEIP1559Args} from "../../utils/transactions";
+import { GlobalCore__factory } from "../../src/typechain-types";
+import { deployments, ethers } from "hardhat";
+import { getEIP1559AndHardhatDeployTxArgs } from "../../hardhatUtils/hardhatDeploy";
+import { getEIP1559Args } from "../../utils/transactions";
 
 const EPOCH_DURATION = 15;
 
 module.exports = async function (hre: HardhatRuntimeEnvironment) {
     const accounts = await hre.getUnnamedAccounts();
     const deployer = accounts[0]!;
-    const EIP1559AndHardhatDeployTxArgs = await getEIP1559AndHardhatDeployTxArgs(hre.ethers.provider)
-    const txEIP1559Args = await getEIP1559Args(hre.ethers.provider)
+    const EIP1559AndHardhatDeployTxArgs = await getEIP1559AndHardhatDeployTxArgs(hre.ethers.provider);
+    const txEIP1559Args = await getEIP1559Args(hre.ethers.provider);
 
     const fluenceToken = (await hre.deployments.get("FLT")).address;
     const usdToken = (await hre.deployments.get("TestUSD")).address;
@@ -29,7 +29,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
     const initGlobalCorePreTx = await GlobalCore__factory.connect(
         globalCoreImpl.address,
         await ethers.getSigner(deployer),
-    ).initialize.populateTransaction(fluenceToken, EPOCH_DURATION, {...txEIP1559Args});
+    ).initialize.populateTransaction(fluenceToken, EPOCH_DURATION, { ...txEIP1559Args });
 
     const globalCore = await hre.deployments.deploy("GlobalCore", {
         from: deployer,
@@ -48,15 +48,15 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         ...EIP1559AndHardhatDeployTxArgs,
     });
 
-    const dealFactory = await hre.deployments.deploy('DealFactory', {
+    const dealFactory = await hre.deployments.deploy("DealFactory", {
         from: deployer,
         args: [globalCore.address, dealImpl.address],
         contract: "DealFactory",
         proxy: {
-            proxyContract: 'UUPS',
+            proxyContract: "UUPS",
             execute: {
                 init: {
-                    methodName: 'initialize',
+                    methodName: "initialize",
                     args: [],
                 },
             },
@@ -80,10 +80,8 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
     });
 
     const globalConfigContract = GlobalCore__factory.connect(globalCore.address, await ethers.getSigner(deployer));
-    if (globalCore.newlyDeployed) {
-        await (await globalConfigContract.setFactory(dealFactory.address, {...txEIP1559Args})).wait();
-        await (await globalConfigContract.setMatcher(matcher.address, {...txEIP1559Args})).wait();
-    }
+    await (await globalConfigContract.setFactory(dealFactory.address, { ...txEIP1559Args })).wait();
+    await (await globalConfigContract.setMatcher(matcher.address, { ...txEIP1559Args })).wait();
 };
 
 module.exports.dependencies = ["Faucet"];
