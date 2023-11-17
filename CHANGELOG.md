@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.22](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.21...deal-aurora-v0.2.22) (2023-11-17)
+
+
+### Bug Fixes
+
+* redeploy contracts ([3430d8b](https://github.com/fluencelabs/deal/commit/3430d8bb6d8fba4e15abb5b974eb2092e0e4dd4e))
+
 ## [0.2.21](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.20...deal-aurora-v0.2.21) (2023-11-10)
 
 
