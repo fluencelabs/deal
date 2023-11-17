@@ -32,7 +32,10 @@ contract CapacityCommitment is Market {
         uint snapshotEpoch;
         uint startEpoch;
         uint failedEpoch;
+        uint withdrawCCEpochAfterFailed;
         uint totalRewards;
+        uint remainingFailsForLastEpoch;
+        uint exitedUnitCount;
     }
 
     struct UnitProofsInfo {
@@ -46,6 +49,12 @@ contract CapacityCommitment is Market {
         mapping(bytes32 => UnitProofsInfo) unitProofsInfoByUnit;
     }
 
+    struct RewardInfo {
+        uint minRequierdCCProofs;
+        uint totalSuccessProofs;
+        uint rewardPool;
+    }
+
     // ------------------ Events ------------------
 
     // ------------------ Storage ------------------
@@ -53,6 +62,7 @@ contract CapacityCommitment is Market {
 
     struct CommitmentStorage {
         mapping(bytes32 => Commitment) commitments;
+        mapping(uint => RewardInfo) rewardInfoByEpoch;
     }
 
     CommitmentStorage private _storage;
@@ -88,18 +98,21 @@ contract CapacityCommitment is Market {
     // ----------------- Internal Mutable -----------------
     function _commitCUSnapshot(
         Commitment storage cc,
+        ComputeUnit storage unit,
         UnitProofsInfo storage unitProofsInfo,
         uint epoch,
         uint expiredEpoch,
         uint ccFaildEpoch
-    ) internal {
+    ) internal returns (bool) {
+        CommitmentStorage storage s = _getCommitmentStorage();
+
         // slash compute unit
         uint prevEpoch = epoch - 1;
         if (prevEpoch > expiredEpoch) {
             prevEpoch = expiredEpoch;
         }
 
-        if (prevEpoch > ccFaildEpoch && ccFaildEpoch != 0) {
+        if (ccFaildEpoch != 0 && prevEpoch > ccFaildEpoch) {
             prevEpoch = ccFaildEpoch;
         }
 
@@ -109,7 +122,7 @@ contract CapacityCommitment is Market {
         }
 
         if (prevEpoch <= lastSuccessEpoch) {
-            return;
+            return false;
         }
 
         uint slashedCollateral = unitProofsInfo.slashedCollateral;
@@ -120,13 +133,26 @@ contract CapacityCommitment is Market {
         if (count > 0 && currentAmount > 0) {
             slashedCollateral += (collateralPerUnit_ * count * slashingRate()) / PRECISION;
 
-            if (slashedCollateral >= collateralPerUnit_) {
-                slashedCollateral = collateralPerUnit_;
+            if (prevEpoch == ccFaildEpoch) {
+                uint remainingFailsForLastEpoch = cc.info.remainingFailsForLastEpoch;
+                if (remainingFailsForLastEpoch > 0 && unit.index < remainingFailsForLastEpoch) {
+                    slashedCollateral += (collateralPerUnit_ * slashingRate()) / PRECISION;
+                }
             }
+
             unitProofsInfo.slashedCollateral = slashedCollateral;
         }
 
+        RewardInfo storage rewardInfo = s.rewardInfoByEpoch[prevEpoch];
+        cc.info.totalRewards +=
+            (rewardInfo.rewardPool * ((unitProofsInfo.proofsCountByEpoch[prevEpoch] * PRECISION) / rewardInfo.totalSuccessProofs)) /
+            PRECISION;
+
+        delete unitProofsInfo.proofsCountByEpoch[prevEpoch];
+
         unitProofsInfo.lastSuccessEpoch = prevEpoch;
+
+        return true;
     }
 
     function _commitCCSnapshot(Commitment storage cc, ComputePeer storage peer, uint epoch, uint expiredEpoch) private {
@@ -154,7 +180,10 @@ contract CapacityCommitment is Market {
 
             uint failsPerEpoch = unitCount;
             uint remainingFails = maxFails - totalCUFailCount;
-            cc.info.failedEpoch = snapshotEpoch + (remainingFails / failsPerEpoch);
+            uint failedEpoch = snapshotEpoch + (remainingFails / failsPerEpoch);
+            cc.info.failedEpoch = failedEpoch;
+            cc.info.remainingFailsForLastEpoch = remainingFails % failsPerEpoch;
+            cc.info.withdrawCCEpochAfterFailed = failedEpoch + withdrawCCEpochesAfterFailed();
         }
 
         cc.info.totalCUFailCount = totalCUFailCount;
@@ -206,8 +235,11 @@ contract CapacityCommitment is Market {
             totalCUFailCount: 0,
             snapshotEpoch: 0,
             startEpoch: 0,
+            withdrawCCEpochAfterFailed: 0,
             failedEpoch: 0,
-            totalRewards: 0
+            remainingFailsForLastEpoch: 0,
+            totalRewards: 0,
+            exitedUnitCount: 0
         });
         peer.info.commitmentId = commitmentId;
     }
@@ -232,16 +264,25 @@ contract CapacityCommitment is Market {
         uint expiredEpoch = _expiredEpoch(cc);
         _commitCCSnapshot(cc, peer, currentEpoch_ - 1, expiredEpoch);
 
-        require(currentEpoch_ >= expiredEpoch || cc.info.failedEpoch != 0, "Capacity commitment is active");
+        uint failedEpoch = cc.info.failedEpoch;
+        require(currentEpoch_ >= expiredEpoch || failedEpoch != 0, "Capacity commitment is active");
+
+        if (failedEpoch != 0) {
+            require(currentEpoch_ >= cc.info.withdrawCCEpochAfterFailed, "Capacity commitment is not ready for withdraw");
+        }
+
+        uint unitCount = peer.info.unitCount;
+        require(cc.info.exitedUnitCount == unitCount, "Capacity commitment wait compute units");
 
         address delegator = cc.info.delegator;
-        uint collateral = cc.info.collateralPerUnit * peer.info.unitCount;
-        // TODO: slashing
-        // TODO: verify unit in deal
+        uint collateralPerUnit_ = cc.info.collateralPerUnit;
 
-        uint totalRewards = cc.info.totalRewards;
+        uint totalCollateral = collateralPerUnit_ * unitCount;
+        uint slashedCollateral = cc.info.totalCUFailCount * collateralPerUnit_;
 
-        IERC20(fluenceToken()).safeTransfer(delegator, collateral);
+        totalCollateral -= slashedCollateral;
+
+        IERC20(fluenceToken()).safeTransfer(delegator, totalCollateral);
     }
 
     function lockCollateral(bytes32 commitmentId) external {
@@ -288,7 +329,17 @@ contract CapacityCommitment is Market {
 
         if (unitProofsCount == minRequierdCCProofs_) {
             cc.info.currentCUSuccessCount += 1;
-            _commitCUSnapshot(cc, unitProofsInfo, epoch, expiredEpoch, cc.info.failedEpoch);
+            _commitCUSnapshot(cc, unit, unitProofsInfo, epoch, expiredEpoch, cc.info.failedEpoch);
+
+            uint totalSuccessProofs = s.rewardInfoByEpoch[epoch].totalSuccessProofs;
+            if (totalSuccessProofs == 0) {
+                s.rewardInfoByEpoch[epoch].minRequierdCCProofs = minRequierdCCProofs_;
+                s.rewardInfoByEpoch[epoch].rewardPool = 0; //TODO; add reward pool
+            }
+
+            s.rewardInfoByEpoch[epoch].totalSuccessProofs = totalSuccessProofs + unitProofsCount;
+        } else if (unitProofsCount > minRequierdCCProofs_) {
+            s.rewardInfoByEpoch[epoch].totalSuccessProofs += 1;
         }
 
         unitProofsInfo.proofsCountByEpoch[epoch] = unitProofsCount;
@@ -304,18 +355,35 @@ contract CapacityCommitment is Market {
         _commitCCSnapshot(cc, peer, epoch - 1, expiredEpoch);
     }
 
-    function removeCUFromCC(bytes32 commitmentId, bytes32 unitId) external {
+    function removeCUFromCC(bytes32 commitmentId, bytes32[] calldata unitIds) external {
         CommitmentStorage storage s = _getCommitmentStorage();
         Commitment storage cc = s.commitments[commitmentId];
-        ComputePeer storage peer = _getComutePeer(cc.info.peerId);
-
-        require(cc.info.startEpoch == 0, "Capacity commitment is created");
-
-        uint epoch = currentEpoch();
+        uint currentEpoch_ = currentEpoch();
         uint expiredEpoch = _expiredEpoch(cc);
-        _commitCCSnapshot(cc, peer, epoch - 1, expiredEpoch);
+        uint failedEpoch = cc.info.failedEpoch;
 
-        UnitProofsInfo storage unitProofsInfo = cc.unitProofsInfoByUnit[unitId];
-        _commitCUSnapshot(cc, unitProofsInfo, epoch, expiredEpoch, cc.info.failedEpoch);
+        bytes32 peerId = cc.info.peerId;
+        ComputePeer storage peer = _getComutePeer(peerId);
+
+        _commitCCSnapshot(cc, peer, currentEpoch_ - 1, expiredEpoch);
+
+        for (uint i = 0; i < unitIds.length; i++) {
+            bytes32 unitId = unitIds[i];
+            ComputeUnit storage unit = _getComputeUnit(unitId);
+
+            require(unit.peerId == peerId, "Compute unit doesn't belong to capacity commitment");
+
+            require(currentEpoch_ >= expiredEpoch || failedEpoch != 0, "Capacity commitment is active");
+
+            if (unit.deal != address(0x00)) {
+                // TODO: double gas for getting peer
+                returnComputeUnitFromDeal(unitId);
+            }
+
+            bool success = _commitCUSnapshot(cc, unit, cc.unitProofsInfoByUnit[unitId], currentEpoch_, expiredEpoch, failedEpoch);
+            if (success) {
+                cc.info.exitedUnitCount += 1;
+            }
+        }
     }
 }

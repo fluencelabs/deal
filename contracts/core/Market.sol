@@ -20,6 +20,7 @@ contract Market is GlobalConst {
     }
 
     struct ComputeUnit {
+        uint256 index;
         address deal;
         bytes32 peerId;
     }
@@ -80,8 +81,8 @@ contract Market is GlobalConst {
     }
 
     // ----------------- Internal View -----------------
-    function _calcUnitId(bytes32 offerId, bytes32 peerId, uint index) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(offerId, peerId, index));
+    function _calcUnitId(bytes32 offerId, bytes32 peerId, uint index) internal view returns (bytes32) {
+        return keccak256(abi.encodePacked(block.number, offerId, peerId, index));
     }
 
     function _getOffersList() internal view returns (LinkedListWithUniqueKeys.Bytes32List storage) {
@@ -148,10 +149,10 @@ contract Market is GlobalConst {
 
         uint indexOffset = computePeer.info.unitCount;
         for (uint i = 0; i < freeUnits; i++) {
-            bytes32 unitId = _calcUnitId(offerId, peerId, i + indexOffset);
+            bytes32 unitId = _calcUnitId(offerId, peerId, i);
 
             // create compute unit
-            offerStorage.computeUnits[unitId] = ComputeUnit({ deal: address(0x00), peerId: peerId });
+            offerStorage.computeUnits[unitId] = ComputeUnit({ deal: address(0x00), peerId: peerId, index: indexOffset + i });
 
             emit ComputeUnitCreated(offerId, peerId, unitId);
         }
@@ -243,7 +244,7 @@ contract Market is GlobalConst {
         }
     }
 
-    function addFreeUnits(bytes32 offerId, bytes32 peerId, uint freeUnits) external {
+    function addComputeUnits(bytes32 offerId, bytes32 peerId, uint freeUnits) external {
         OfferStorage storage offerStorage = _getOfferStorage();
         OfferInfo storage offer = offerStorage.offers[offerId].info;
         ComputePeerInfo storage computePeer = offerStorage.peers[peerId].info;
@@ -254,6 +255,30 @@ contract Market is GlobalConst {
         require(computePeer.commitmentId == bytes32(0x00), "Peer has commitment");
 
         _addComputeUnitsToPeer(offerId, peerId, freeUnits);
+    }
+
+    function removeComputeUnit(bytes32 unitId, bytes32 lastUnitId) external {
+        OfferStorage storage offerStorage = _getOfferStorage();
+        ComputeUnit storage computeUnit = offerStorage.computeUnits[unitId];
+        ComputeUnit storage lastComputeUnit = offerStorage.computeUnits[lastUnitId];
+
+        bytes32 peerId = computeUnit.peerId;
+        ComputePeer storage computePeer = offerStorage.peers[peerId];
+        Offer storage offer = offerStorage.offers[computePeer.info.offerId];
+
+        require(offer.info.owner == msg.sender, "Only owner can remove compute unit");
+        require(computePeer.info.commitmentId == bytes32(0x00), "Peer has commitment");
+
+        uint unitCount = computePeer.info.unitCount;
+        require(lastComputeUnit.index == unitCount - 1, "Last unit id is not last unit in peer");
+
+        lastComputeUnit.index = computeUnit.index;
+        computePeer.info.unitCount = --unitCount;
+
+        computePeer.freeComputeUnitIds.remove(unitId);
+        delete offerStorage.computeUnits[unitId];
+
+        emit ComputeUnitRemovedFromDeal(unitId, IDeal(computeUnit.deal));
     }
 
     // ---- Change offer ----

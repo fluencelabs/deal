@@ -30,7 +30,7 @@ contract GlobalConst is EpochController, OwnableUpgradableDiamond, IGlobalConst 
         uint slashingRate;
         uint minRequierdCCProofs;
         uint maxCCProofs;
-        uint withdrawCCTimeoutAfterFailed;
+        uint withdrawCCEpochesAfterFailed;
         uint maxFailedRatio;
     }
 
@@ -109,8 +109,8 @@ contract GlobalConst is EpochController, OwnableUpgradableDiamond, IGlobalConst 
         return _getGlobalConstStorage().maxCCProofs;
     }
 
-    function withdrawCCTimeoutAfterFailed() public view returns (uint256) {
-        return _getGlobalConstStorage().withdrawCCTimeoutAfterFailed;
+    function withdrawCCEpochesAfterFailed() public view returns (uint256) {
+        return _getGlobalConstStorage().withdrawCCEpochesAfterFailed;
     }
 
     // ------------------ External Mutable Functions ------------------
@@ -144,7 +144,7 @@ contract GlobalConst is EpochController, OwnableUpgradableDiamond, IGlobalConst 
         } else if (constantType == Constant.MaxCCProofs) {
             s.maxCCProofs = v;
         } else if (constantType == Constant.WithdrawCCTimeoutAfterFailed) {
-            s.withdrawCCTimeoutAfterFailed = v;
+            s.withdrawCCEpochesAfterFailed = v;
         } else {
             revert("GlobalConst: unknown constant type");
         }

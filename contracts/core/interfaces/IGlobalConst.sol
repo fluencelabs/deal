@@ -47,7 +47,7 @@ interface IGlobalConst {
 
     function minRequierdCCProofs() external view returns (uint256);
 
-    function withdrawCCTimeoutAfterFailed() external view returns (uint256);
+    function withdrawCCEpochesAfterFailed() external view returns (uint256);
 
     // ------------------ External Mutable Functions ------------------
     function setConstant(Constant constantType, uint256 v) external;

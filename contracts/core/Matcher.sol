@@ -38,9 +38,9 @@ contract Matcher is CapacityCommitment, IMatcher {
     // ----------------- External Mutable -----------------
     // TODO: move this logic to offchain. Temp solution
     function matchDeal(IDeal deal) external {
-        MatcherStorage storage MatcherStorage = _getMatcherStorage();
+        MatcherStorage storage matcherStorage = _getMatcherStorage();
 
-        uint lastMatchedEpoch = MatcherStorage.lastMatchedEpoch[address(deal)];
+        uint lastMatchedEpoch = matcherStorage.lastMatchedEpoch[address(deal)];
         require(lastMatchedEpoch == 0 || currentEpoch() > lastMatchedEpoch + minRematchingEpoches(), "Matcher: too early to rematch");
 
         uint pricePerWorkerEpoch = deal.pricePerWorkerEpoch();
