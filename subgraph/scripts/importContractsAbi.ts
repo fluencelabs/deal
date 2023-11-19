@@ -22,7 +22,7 @@ function _writeContractAbiSync(abi: any, contractName: string) {
     if (!fs.existsSync(SUBGRAPH_ABI_DIR)) {
         fs.mkdirSync(SUBGRAPH_ABI_DIR)
     }
-    console.log("Write contract abi to " + abiPath + "...")
+    console.log("Write contract" + contractName + " abi to " + abiPath + "...")
     fs.writeFileSync(
         abiPath,
         JSON.stringify(abi, undefined, 2)
