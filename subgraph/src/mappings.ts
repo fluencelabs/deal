@@ -74,20 +74,24 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
     // or maybe save everything into context and then count:
     //  https://thegraph.com/docs/en/developing/creating-a-subgraph/#data-source-context.
     offer.computeUnitsSum += 1
+
+    // Since handlePeerCreated could not work with this handler, this logic moved here.
     peer.computeUnits += 1
 
+    peer.offer = offer.id
     peer.save()
     offer.save()
 }
 
 // It updates Peer and Offer.
-export function handlePeerCreated(event: PeerCreated): void {
-    let entity = getOrCreatePeer(event.params.peerId.toHex())
-    let offer = getOrCreateOffer(event.params.offerId.toHex())
-
-    entity.offer = offer.id
-    entity.save()
-}
+// TODO: it does not work with handleComputeUnitCreated as well.
+// export function handlePeerCreated(event: PeerCreated): void {
+//     let entity = getOrCreatePeer(event.params.peerId.toHex())
+//     let offer = getOrCreateOffer(event.params.offerId.toHex())
+//
+//     entity.offer = offer.id
+//     entity.save()
+// }
 
 // Update Methods
 export function handleMinPricePerEpochUpdated(event: MinPricePerEpochUpdated): void {
