@@ -51,6 +51,17 @@ npm run deploy-local
 
 Since now, you have GUI of the deployed graph: http://localhost:8000/subgraphs/name/<YourContractName>
 
+## Query through GUI
+E.g. the graph query to insert in http://localhost:8000/subgraphs/name/<YourContractName>:
+```graphql
+{
+  offers {
+    id
+    createdAt
+  }
+}
+```
+
 # TODO
 - [ ] integrate subgraph more smoothly with hardhat, and esp. with hardhat-deploy plugin
 - [ ] use subgraph templating as it used with the graph project contracts
