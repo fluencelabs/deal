@@ -1,7 +1,6 @@
 import type { HardhatRuntimeEnvironment } from "hardhat/types";
 import { EPOCH_DURATION, MIN_DEPOSITED_EPOCHES, MIN_REMATCHING_EPOCHES } from "../../env";
 import { Core__factory } from "../../src/typechain-types";
-import {saveAbiToSubgraph} from "../../utils/exportAbiToSubgraph";
 import { getEIP1559AndHardhatTxArgs } from "../../utils/deploy";
 
 module.exports = async function (hre: HardhatRuntimeEnvironment) {
@@ -43,11 +42,6 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
         ],
         ...eip1559TxArgs,
     });
-
-    // Export to Subgraph.
-    saveAbiToSubgraph(core.abi, CoreDeploymentName)
-    saveAbiToSubgraph(dealImpl.abi, DealImplDeploymentName)
-    saveAbiToSubgraph(coreImpl.abi, CoreImplDeploymentName)
 };
 
 module.exports.dependencies = ["Faucet"];
