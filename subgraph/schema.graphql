@@ -22,10 +22,9 @@ type Offer @entity {
 
 "Effector table is obsolete table since it is a simple mapping."
 type Effector @entity(immutable: true) {
-  "id and CID are the same. TODO: merge."
+  "id and CID are the same."
   id: ID!
-  CID: Bytes!
-  Description: String!
+  description: String!
 }
 
 type Peer @entity {

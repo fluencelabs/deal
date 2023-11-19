@@ -1,7 +1,10 @@
 import {Effector, Offer, Peer} from "../generated/schema";
-import {BigInt, Bytes, ByteArray} from "@graphprotocol/graph-ts";
+import {BigInt, Bytes} from "@graphprotocol/graph-ts";
+
+const ZERO_BYTES = Bytes.fromHexString("0x0000000000000000000000000000000000000000")
 
 // TODO: make generic.
+// TODO: rename to getOrLoad
 export function getOrCreateOffer(
     offerId: string,
     ): Offer {
@@ -10,10 +13,10 @@ export function getOrCreateOffer(
     if (entity == null) {
         entity = new Offer(offerId)
         entity.createdAt = BigInt.fromI32(0)
-        entity.provider = Bytes.fromHexString("0")
+        entity.provider = ZERO_BYTES
         entity.tokenSymbol = ""
         entity.pricePerEpoch = BigInt.fromI32(0)
-        // entity.effectors = []
+        entity.effectors = []
         entity.save()
     }
     return entity as Offer
@@ -27,8 +30,7 @@ export function getOrCreateEffector(cid: string): Effector {
 
     if (entity == null) {
         entity = new Effector(cid)
-        entity.CID = Bytes.fromHexString("0")
-        entity.Description = DEFAULT_EFFECTOR_DESCRIPTION
+        entity.description = DEFAULT_EFFECTOR_DESCRIPTION
         entity.save()
     }
     return entity as Effector

@@ -24,7 +24,6 @@ import { log } from '@graphprotocol/graph-ts'
 function parseEffectors(effectors: Array<MarketOfferRegisteredEffectorsStruct>): Array<string> {
     let effectorEntities: Array<string> = []
     for (let i=0; i < effectors.length; i++) {
-
         const cid = getEffectorCID(effectors[i])
         const effector = getOrCreateEffector(cid)
         effectorEntities.push(effector.id)
@@ -34,8 +33,8 @@ function parseEffectors(effectors: Array<MarketOfferRegisteredEffectorsStruct>):
 
 // TODO: marke type as tuple of [Bytes, Bytes]. Currently: subgraphERROR TS1110: Type expected.
 function getEffectorCID(effectorTuple: MarketOfferRegisteredEffectorsStruct): string {
-    const cid = effectorTuple[0].toString() + effectorTuple[1].toString()
-    log.info('Extract CID from effector: {}', [cid])
+    const cid = effectorTuple.prefixes.toString() + effectorTuple.hash.toString()
+    log.info('[getEffectorCID] Extract CID from effector: {}', [cid])
     return cid
 }
 
@@ -47,7 +46,6 @@ export function handleMarketOfferRegistered(event: MarketOfferRegistered): void 
     // - emit ComputeUnitCreated(offerId, peerId, unitId);
 
     let entity = getOrCreateOffer(event.params.offerId.toHex())
-
     const effectorEntities = parseEffectors(event.params.effectors)
 
     entity.createdAt = event.block.timestamp
@@ -72,11 +70,10 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
     // - emit PeerCreated(offerId, peer.peerId);
     // - emit MarketOfferRegistered
     let offer = getOrCreateOffer(event.params.offerId.toHex())
+    let peer = getOrCreatePeer(event.params.peerId.toHex())
     // or maybe save everything into context and then count:
     //  https://thegraph.com/docs/en/developing/creating-a-subgraph/#data-source-context.
     offer.computeUnitsSum += 1
-
-    let peer = getOrCreatePeer(event.params.peerId.toHex())
     peer.computeUnits += 1
 
     peer.save()
@@ -86,8 +83,9 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
 // It updates Peer and Offer.
 export function handlePeerCreated(event: PeerCreated): void {
     let entity = getOrCreatePeer(event.params.peerId.toHex())
+    let offer = getOrCreateOffer(event.params.offerId.toHex())
 
-    entity.offer = event.params.offerId.toHex()
+    entity.offer = offer.id
     entity.save()
 }
 
@@ -107,7 +105,7 @@ export function handlePaymentTokenUpdated(event: PaymentTokenUpdated): void {
 export function handleEffectorAdded(event: EffectorAdded): void {
     let entity = getOrCreateOffer(event.params.offerId.toHex())
     const effectorTuple = event.params.effector
-    const cid = effectorTuple[0].toString() + effectorTuple[1].toString()
+    const cid = effectorTuple.prefixes.toString() + effectorTuple.hash.toString()
     const effector = getOrCreateEffector(cid)
     if (entity.effectors == null) {
         entity.effectors = [cid]
@@ -120,7 +118,7 @@ export function handleEffectorAdded(event: EffectorAdded): void {
 export function handleEffectorRemoved(event: EffectorRemoved): void {
     let entity = getOrCreateOffer(event.params.offerId.toHex())
     const effectorTuple = event.params.effector
-    const cidToRemove = effectorTuple[0].toString() + effectorTuple[1].toString()
+    const cidToRemove = effectorTuple.prefixes.toString() + effectorTuple.hash.toString()
 
     if (entity.effectors == null) {
         return
