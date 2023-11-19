@@ -27,12 +27,14 @@ task("createMarket", "[Testnet Fixture] Deploy everything and create market with
     const deployer = allSigners[0]
     const providerSigners = allSigners.slice(0)
 
+    console.log(`Generate providers...`)
     contractFixture.providers = generateProviders(providerSigners)
 
     const core = Core__factory.connect((await hre.deployments.get("Core")).address, deployer);
     const flt = IERC20__factory.connect((await hre.deployments.get("FLT")).address, deployer);
     let env: Env = {core, flt}
 
+    console.log(`Register providers (and thus, their offers)...`)
     contractFixture.providers.map(async (provider) => {
         await registerFixtureProvider(contractFixture, provider, env)
     })
