@@ -12,7 +12,7 @@
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 fluence-deal-contracts",
     "test": "graph test",
     "graph-node": "docker-compose --file ./graph-node/docker-compose.yaml up -d",
-    "graph-local-clean": "docker-compose down -v && docker-compose rm -v && rm -rf data/ipfs data/postgres"
+    "graph-local-clean": "docker-compose down -v"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.60.0",
