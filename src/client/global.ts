@@ -22,7 +22,7 @@ export class GlobalContracts {
     }
 
     async getGlobalCore(): Promise<GlobalCore> {
-        return GlobalCore__factory.connect((await this.chainConfig).globalCore, this.provider);
+        return GlobalCore__factory.connect((await this.chainConfig).globalCoreAddress, this.provider);
     }
 
     async getFactory(): Promise<DealFactory> {
@@ -35,6 +35,6 @@ export class GlobalContracts {
     }
 
     async getFLT(): Promise<ERC20> {
-        return ERC20__factory.connect((await this.chainConfig).fltToken, this.provider);
+        return ERC20__factory.connect((await this.chainConfig).fltTokenAddress, this.provider);
     }
 }
