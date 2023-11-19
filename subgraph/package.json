@@ -2,6 +2,7 @@
   "name": "FluenceDeal",
   "license": "UNLICENSED",
   "scripts": {
+    "import-contracts-abi": "ts-node scripts/importContractsAbi.ts",
     "compile": "graph codegen && graph build",
     "codegen": "graph codegen",
     "build": "graph build",

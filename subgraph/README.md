@@ -12,6 +12,8 @@
 # Develop
 To start local development with TheGraph and Hardhat:
 
+> Note, that when you are working with upgradeble contracts - you leave addresses of proxies, but ABIs of real implementations. Thus, [importContractsAbi.ts](scripts/importContractsAbi.ts) should be maintained with implementations only, and [subgraph.yaml](subgraph.yaml) with addresses of proxies only.
+
 ## Environment for Local Subgraph
 1. Run hardhat node from the **root** of the project:
 ```bash
@@ -26,7 +28,12 @@ cd graph-node && docker-compose up
 ## Subgraph Repo
 How to run install package and build artifacts flow is below.
 
-1. Build artifacts and generate the **AssemblyScript** types from the sources:
+0. Add abi of contracts you are going to work with:
+```bash
+npm run import-contracts-abi
+```
+
+2. Build artifacts and generate the **AssemblyScript** types from the sources:
 ```bash
 npm i
 npm run compile
