@@ -14,7 +14,13 @@ import {
     PaymentTokenUpdated
 } from '../../generated/Core/CoreImpl'
 import {getTokenSymbol} from "./../networkConstants";
-import {createOrLoadEffector, createOrLoadOffer, createOrLoadOfferEffector, createOrLoadPeer} from "./../models";
+import {
+    createOrLoadDeal,
+    createOrLoadEffector,
+    createOrLoadOffer,
+    createOrLoadOfferEffector,
+    createOrLoadPeer
+} from "./../models";
 
 import {log, store} from '@graphprotocol/graph-ts'
 import {OfferEffector} from "../../generated/schema";
@@ -179,7 +185,11 @@ export function handleDealCreated(event: DealCreated): void {
         '[handleDealCreated] New deal created: {} by: {}',
         [event.params.owner.toString(), event.params.deal.toString()]
     )
-    
+
+    let deal = createOrLoadDeal(event.params.deal.toHex())
+    deal.createdAt = event.block.timestamp
+    deal.client = event.params.owner
+    deal.save()
 
     // Start indexing this deployed contract too
     DealTemplate.create(event.params.deal)

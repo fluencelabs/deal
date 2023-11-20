@@ -45,7 +45,7 @@ task("createMarket", "[Testnet Fixture] Deploy everything and create market with
         console.log('Successfully registered provider %and its offer...')
     }
 
-    console.log("Approve Core for FLT token deposit...")
+    console.log("Approve Core for FLT token deposit to deal...")
     const minDeposit = taskDataFixture.dealSettings.targetWorkers * taskDataFixture.pricePerWorkerEpoch * MIN_DEPOSITED_EPOCHES;
     const approveTx = await env.flt.approve(coreAddress, minDeposit)
     const approveTxRes = await approveTx.wait();

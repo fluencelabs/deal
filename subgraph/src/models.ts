@@ -1,10 +1,9 @@
-import {Effector, Offer, OfferEffector, Peer} from "../generated/schema";
+import {Deal, Effector, Offer, OfferEffector, Peer} from "../generated/schema";
 import {BigInt, Bytes} from "@graphprotocol/graph-ts";
 
 const ZERO_BYTES = Bytes.fromHexString("0x0000000000000000000000000000000000000000")
 
 // TODO: make generic.
-// TODO: rename to getOrLoad
 export function createOrLoadOffer(
     offerId: string,
     ): Offer {
@@ -61,4 +60,18 @@ export function createOrLoadPeer(peerId: string): Peer {
         entity.save()
     }
     return entity as Peer
+}
+
+
+export function createOrLoadDeal(dealId: string): Deal {
+    let entity = Deal.load(dealId)
+    if (entity == null) {
+        entity = new Deal(dealId)
+        entity.createdAt = BigInt.fromI32(0)
+        entity.client = ZERO_BYTES
+        entity.withdrawalSum = 0
+        entity.depositedSum = 0
+        entity.save()
+    }
+    return entity as Deal
 }
