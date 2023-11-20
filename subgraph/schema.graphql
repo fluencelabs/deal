@@ -61,7 +61,7 @@ type Deal @entity {
 
 #  balance: BigInt!  # on-request via frontend
 #  status: DealStatus!  # on-request via frontend
-  withdrawalSum: Int!
-  depositedSum: Int!  # only from the withdraw() no rewards.
+  withdrawalSum: BigInt!
+  depositedSum: BigInt!  # only from the withdraw() no rewards.
   maxPaidEpoch: BigInt
 }

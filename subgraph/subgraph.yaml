@@ -65,4 +65,6 @@ templates:
       eventHandlers:
         - event: Deposited(uint256)
           handler: handleDeposited
+        - event: Withdrawn(uint256)
+          handler: handleWithdrawn
       file: ./src/mappings/deal.ts

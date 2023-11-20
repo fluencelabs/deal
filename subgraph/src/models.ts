@@ -69,8 +69,8 @@ export function createOrLoadDeal(dealId: string): Deal {
         entity = new Deal(dealId)
         entity.createdAt = BigInt.fromI32(0)
         entity.client = ZERO_BYTES
-        entity.withdrawalSum = 0
-        entity.depositedSum = 0
+        entity.withdrawalSum = BigInt.fromI32(0)
+        entity.depositedSum = BigInt.fromI32(0)
         entity.save()
     }
     return entity as Deal
