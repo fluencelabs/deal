@@ -13,6 +13,7 @@ const SUBGRAPH_ABI_DIR = path.join(__dirname, "..", "abis");
 async function importContrastAbi(networkName: ContractsENV) {
     const config = await DEAL_CONFIG[networkName]()
     _writeContractAbiSync(config.coreImplAbi, 'CoreImpl')
+    _writeContractAbiSync(config.dealImplAbi, 'DealImpl')
     // TODO: add other contracts below...
 }
 

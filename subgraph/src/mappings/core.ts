@@ -5,6 +5,7 @@ import {
     ComputeUnitAddedToDeal,
     ComputeUnitCreated,
     ComputeUnitRemovedFromDeal,
+    DealCreated,
     EffectorAdded,
     EffectorRemoved,
     MarketOfferRegistered,
@@ -18,6 +19,7 @@ import {getOrCreateEffector, getOrCreateOffer, getOrCreateOfferEffector, getOrCr
 import {log, store} from '@graphprotocol/graph-ts'
 import {OfferEffector} from "../../generated/schema";
 import {getComputeUnit} from "./../contracts";
+import {Deal} from "../../generated/templates";
 
 
 function parseEffectors(effectors: Array<MarketOfferRegisteredEffectorsStruct>): Array<string> {
@@ -101,7 +103,7 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
 //     entity.save()
 // }
 
-// Update Methods
+// ---- Update Methods ----
 export function handleMinPricePerEpochUpdated(event: MinPricePerEpochUpdated): void {
     let entity = getOrCreateOffer(event.params.offerId.toHex())
     entity.pricePerEpoch = event.params.minPricePerWorkerEpoch
@@ -170,3 +172,13 @@ export function handleComputeUnitRemovedFromDeal(event: ComputeUnitRemovedFromDe
     peer.save()
     offer.save()
 }
+
+// ---- Factory Events ----
+export function handleDealCreated(event: DealCreated): void {
+    log.info(
+        '[handleDealCreated] New deal created: {} by: {}',
+        [event.params.owner.toString(), event.params.deal.toString()]
+    )
+    Deal.create(event.params.deal)
+}
+

@@ -44,4 +44,25 @@ dataSources:
           handler: handleComputeUnitAddedToDeal
         - event: ComputeUnitRemovedFromDeal(bytes32,address)
           handler: handleComputeUnitRemovedFromDeal
+        - event: DealCreated(indexed address,address,uint256)
+          handler: handleDealCreated
       file: ./src/mappings/core.ts
+templates:
+  - name: Deal
+    kind: ethereum/contract
+    network: localhost
+    source:
+      abi: DealImpl
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Deal
+      abis:
+        - name: DealImpl
+          file: ./abis/DealImpl.json
+      eventHandlers:
+        - event: Deposited(uint256)
+          handler: handleDeposited
+      file: ./src/mappings/deal.ts
