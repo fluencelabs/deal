@@ -5,7 +5,7 @@ const ZERO_BYTES = Bytes.fromHexString("0x00000000000000000000000000000000000000
 
 // TODO: make generic.
 // TODO: rename to getOrLoad
-export function getOrCreateOffer(
+export function createOrLoadOffer(
     offerId: string,
     ): Offer {
     let entity = Offer.load(offerId)
@@ -26,7 +26,7 @@ export function getOrCreateOffer(
 // TODO: add description mapper.
 const DEFAULT_EFFECTOR_DESCRIPTION = "DEFAULT_EFFECTOR_DESCRIPTION"
 
-export function getOrCreateEffector(cid: string): Effector {
+export function createOrLoadEffector(cid: string): Effector {
     let entity = Effector.load(cid)
 
     if (entity == null) {
@@ -37,7 +37,7 @@ export function getOrCreateEffector(cid: string): Effector {
     return entity as Effector
 }
 
-export function getOrCreateOfferEffector(offerId: string, effectorId: string): OfferEffector {
+export function createOrLoadOfferEffector(offerId: string, effectorId: string): OfferEffector {
     const concattedIds = offerId.concat(effectorId)
 
     let entity = OfferEffector.load(concattedIds)
@@ -51,7 +51,7 @@ export function getOrCreateOfferEffector(offerId: string, effectorId: string): O
     return entity as OfferEffector
 }
 
-export function getOrCreatePeer(peerId: string): Peer {
+export function createOrLoadPeer(peerId: string): Peer {
     let entity = Peer.load(peerId)
 
     if (entity == null) {
