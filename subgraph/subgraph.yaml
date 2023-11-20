@@ -24,6 +24,7 @@ dataSources:
         - name: CoreImpl
           file: ./abis/CoreImpl.json
       eventHandlers:
+        # Offer features.
         - event: MarketOfferRegistered(bytes32,address,uint256,address,(bytes4,bytes32)[])
           handler: handleMarketOfferRegistered
 #          Currently PeerCreated and ComputeUnitCreated are not supported together as nested events.
@@ -43,4 +44,4 @@ dataSources:
           handler: handleComputeUnitAddedToDeal
         - event: ComputeUnitRemovedFromDeal(bytes32,address)
           handler: handleComputeUnitRemovedFromDeal
-      file: ./src/mappings.ts
+      file: ./src/mappings/core.ts

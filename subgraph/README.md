@@ -72,3 +72,4 @@ E.g. the graph query to insert in http://localhost:8000/subgraphs/name/<YourCont
 - [ ] check again https://github.com/graphprotocol/hardhat-graph-demo to find the solution for **auto-populating subgraph.yaml with events**
 - [ ] add docker-compose commands to package.json
 - [ ] subgraph tests
+- [ ] fix docker versions

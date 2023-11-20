@@ -1,6 +1,7 @@
 # Comments relates to Figma screen names.
 # Names according to Figma. Suffix according to api list, details
 
+# ---- Core Contract ----
 type Offer @entity {
   """Used in the next figma views:
     - Offer from List Of offers 1.2.
@@ -15,9 +16,7 @@ type Offer @entity {
   peers: [Peer!] @derivedFrom(field: "offer")
   effectors: [OfferEffector!] @derivedFrom(field: "offer")
 
-  "Sum of all connected compute units."
-  computeUnitsSum: Int
-# deprecated: maxCollateralPerWorker: BigInt
+  computeUnitsSum: Int  # Sum of all connected compute units.
 }
 
 """To support many2many b/w offer and effector.
@@ -52,4 +51,17 @@ type Peer @entity {
   id: ID!
   offer: Offer!
   computeUnits: Int!
+}
+
+# ---- Deal Contract ----
+type Deal @entity {
+  id: ID!  # Ref to offerId in contract.
+  createdAt: BigInt!
+  client: Bytes!
+
+#  balance: BigInt!  # on-request via frontend
+#  status: DealStatus!  # on-request via frontend
+  withdrawalSum: Int!
+  depositedSum: Int!  # only from the withdraw() no rewards.
+  maxPaidEpoch: BigInt
 }
