@@ -3,6 +3,7 @@ import {HardhatRuntimeEnvironment} from "hardhat/types";
 import {CI_CHAIN_IDS} from "./utils";
 import {generateProviders, registerFixtureProvider, testDataFixture, Env} from "../utils/contratFixtures";
 import {Core__factory, IERC20__factory} from "../src";
+import {MIN_DEPOSITED_EPOCHES} from "../env";
 
 type Args = {
 };
@@ -22,23 +23,46 @@ task("createMarket", "[Testnet Fixture] Deploy everything and create market with
     console.log(`Run deploy task...`)
     await hre.run('deploy', {write: true})
 
-    let contractFixture = testDataFixture
+    let taskDataFixture = testDataFixture
 
     const deployer = allSigners[0]
     const providerSigners = allSigners.slice(0)
 
     console.log(`Generate providers...`)
-    contractFixture.providers = generateProviders(providerSigners)
+    taskDataFixture.providers = generateProviders(providerSigners)
 
-    const core = Core__factory.connect((await hre.deployments.get("Core")).address, deployer);
-    const flt = IERC20__factory.connect((await hre.deployments.get("FLT")).address, deployer);
+    const coreAddress = (await hre.deployments.get("Core")).address
+    const fltAddress = (await hre.deployments.get("FLT")).address
+    const core = Core__factory.connect(coreAddress, deployer);
+    const flt = IERC20__factory.connect(fltAddress, deployer);
     let env: Env = {core, flt}
 
-    console.log(`Register providers (and thus, their offers): %s...`, contractFixture.providers)
-    for (let i=0; i < contractFixture.providers.length; i++) {
-        const provider = contractFixture.providers[i]
+    console.log(`Register providers (and thus, their offers): %s...`, taskDataFixture.providers)
+    for (let i=0; i < taskDataFixture.providers.length; i++) {
+        const provider = taskDataFixture.providers[i]
         console.log('Start registering %s', provider.signer)
-        await registerFixtureProvider(contractFixture, provider, env)
+        await registerFixtureProvider(taskDataFixture, provider, env)
         console.log('Successfully registered provider %and its offer...')
     }
+
+    console.log("Approve Core for FLT token deposit...")
+    const minDeposit = taskDataFixture.dealSettings.targetWorkers * taskDataFixture.pricePerWorkerEpoch * MIN_DEPOSITED_EPOCHES;
+    const approveTx = await env.flt.approve(coreAddress, minDeposit)
+    const approveTxRes = await approveTx.wait();
+
+    console.log("Create Deal...")
+    // TODO: change to another signer. Not deployer could deploy this...
+    const deployDealTx = await env.core.deployDeal(
+        taskDataFixture.dealSettings.appCID,
+        fltAddress,
+        taskDataFixture.dealSettings.minWorkers,
+        taskDataFixture.dealSettings.targetWorkers,
+        taskDataFixture.dealSettings.maxWorkerPerProvider,
+        taskDataFixture.pricePerWorkerEpoch,
+        taskDataFixture.effectors,
+        taskDataFixture.dealSettings.accessType,
+        [],
+    );
+
+    const deployDealTxRes = await deployDealTx.wait();
 });
