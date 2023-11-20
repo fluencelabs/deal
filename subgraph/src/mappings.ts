@@ -50,6 +50,7 @@ export function handleMarketOfferRegistered(event: MarketOfferRegistered): void 
     const effectorEntities = parseEffectors(event.params.effectors)
 
     entity.createdAt = event.block.timestamp
+    entity.updatedAt = event.block.timestamp
     entity.provider = event.params.owner
     entity.tokenSymbol = getTokenSymbol(event.params.paymentToken)
     entity.pricePerEpoch = event.params.minPricePerWorkerEpoch
@@ -87,6 +88,8 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
 
     peer.offer = offer.id
     peer.save()
+
+    offer.updatedAt = event.block.timestamp
     offer.save()
 }
 
@@ -120,6 +123,8 @@ export function handleEffectorAdded(event: EffectorAdded): void {
     const effector = getOrCreateEffector(cid)
 
     getOrCreateOfferEffector(offer.id, effector.id)
+
+    offer.updatedAt = event.block.timestamp
     offer.save()
 }
 
@@ -131,6 +136,9 @@ export function handleEffectorRemoved(event: EffectorRemoved): void {
 
     const offerEffector = getOrCreateOfferEffector(offer.id, effector.id)
     store.remove('OfferEffector', offerEffector.id)
+
+    offer.updatedAt = event.block.timestamp
+    offer.save()
 }
 
 export function handleComputeUnitAddedToDeal(event: ComputeUnitAddedToDeal): void {
@@ -143,6 +151,7 @@ export function handleComputeUnitAddedToDeal(event: ComputeUnitAddedToDeal): voi
 
     peer.computeUnits += 1
     offer.computeUnitsSum += 1
+    offer.updatedAt = event.block.timestamp
 
     peer.save()
     offer.save()
@@ -158,6 +167,7 @@ export function handleComputeUnitRemovedFromDeal(event: ComputeUnitRemovedFromDe
 
     peer.computeUnits -= 1
     offer.computeUnitsSum -= 1
+    offer.updatedAt = event.block.timestamp
 
     peer.save()
     offer.save()

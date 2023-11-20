@@ -13,6 +13,7 @@ export function getOrCreateOffer(
     if (entity == null) {
         entity = new Offer(offerId)
         entity.createdAt = BigInt.fromI32(0)
+        entity.updatedAt = BigInt.fromI32(0)
         entity.provider = ZERO_BYTES
         entity.tokenSymbol = ""
         entity.pricePerEpoch = BigInt.fromI32(0)

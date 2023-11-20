@@ -8,6 +8,7 @@ type Offer @entity {
   """
   id: ID!  # Ref to offerId in contract.
   createdAt: BigInt!
+  updatedAt: BigInt!
   provider: Bytes!
   pricePerEpoch: BigInt!
   tokenSymbol: String!
