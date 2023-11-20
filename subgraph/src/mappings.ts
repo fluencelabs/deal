@@ -3,19 +3,23 @@
 // TODO: reorganise to sub models of mapping module.
 
 import {
-    MarketOfferRegistered,
+    ComputeUnitAddedToDeal,
     ComputeUnitCreated,
+    ComputeUnitRemovedFromDeal,
+    EffectorAdded,
+    EffectorRemoved,
+    MarketOfferRegistered,
     MarketOfferRegisteredEffectorsStruct,
     MinPricePerEpochUpdated,
-    PaymentTokenUpdated,
-    EffectorAdded,
-    EffectorRemoved, ComputeUnitRemovedFromDeal, ComputeUnitAddedToDeal
+    PaymentTokenUpdated
 } from '../generated/Core/CoreImpl'
 import {getTokenSymbol} from "./networkConstants";
 import {getOrCreateEffector, getOrCreateOffer, getOrCreateOfferEffector, getOrCreatePeer} from "./models";
 
-import { log, store } from '@graphprotocol/graph-ts'
+import {log, store} from '@graphprotocol/graph-ts'
 import {OfferEffector} from "../generated/schema";
+import {getComputeUnit} from "./contracts";
+
 // log.info('My value is: {}', [myValue])
 
 function parseEffectors(effectors: Array<MarketOfferRegisteredEffectorsStruct>): Array<string> {
@@ -28,7 +32,7 @@ function parseEffectors(effectors: Array<MarketOfferRegisteredEffectorsStruct>):
     return effectorEntities
 }
 
-// TODO: marke type as tuple of [Bytes, Bytes]. Currently: subgraphERROR TS1110: Type expected.
+
 function getEffectorCID(effectorTuple: MarketOfferRegisteredEffectorsStruct): string {
     const cid = effectorTuple.prefixes.toString() + effectorTuple.hash.toString()
     log.info('[getEffectorCID] Extract CID from effector: {}', [cid])
@@ -130,9 +134,31 @@ export function handleEffectorRemoved(event: EffectorRemoved): void {
 }
 
 export function handleComputeUnitAddedToDeal(event: ComputeUnitAddedToDeal): void {
-    // TODO: resolve even without no info about dealId
+    const unitId = event.params.unitId
+
+    // Call the contract to extract peerId of the computeUnit.
+    let computeUnit = getComputeUnit(event.address, unitId)
+    let peer = getOrCreatePeer(computeUnit.peerId.toHex())
+    let offer = getOrCreateOffer(peer.offer)
+
+    peer.computeUnits += 1
+    offer.computeUnitsSum += 1
+
+    peer.save()
+    offer.save()
 }
 
 export function handleComputeUnitRemovedFromDeal(event: ComputeUnitRemovedFromDeal): void {
-    // TODO: resolve even without no info about dealId
+    const unitId = event.params.unitId
+
+    // Call the contract to extract peerId of the computeUnit.
+    let computeUnit = getComputeUnit(event.address, unitId)
+    let peer = getOrCreatePeer(computeUnit.peerId.toHex())
+    let offer = getOrCreateOffer(peer.offer)
+
+    peer.computeUnits -= 1
+    offer.computeUnitsSum -= 1
+
+    peer.save()
+    offer.save()
 }

@@ -2,6 +2,7 @@ import {Bytes} from "@graphprotocol/graph-ts";
 
 const DEFAULT_TOKEN_SYMBOL = 'USDT'
 
+// TODO: add calls to token name() to do meta automatically.
 // const TOKEN_TO_SYMBOL = {
 //     // TODO: resolve that can not be compiled
 // }
