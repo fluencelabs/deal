@@ -6,28 +6,28 @@ import { getEIP1559AndHardhatTxArgs } from "../../utils/deploy";
 module.exports = async function (hre: HardhatRuntimeEnvironment) {
     const accounts = await hre.getUnnamedAccounts();
     const deployer = accounts[0]!;
+    const CoreDeploymentName = "Core"
+    const DealImplDeploymentName = 'DealImpl'
+    const CoreImplDeploymentName = "CoreImpl"
 
     const fluenceToken = (await hre.deployments.get("FLT")).address;
-
     const eip1559TxArgs = await getEIP1559AndHardhatTxArgs(hre.ethers.provider);
 
-    const dealImpl = await hre.deployments.deploy("DealImpl", {
+    const dealImpl = await hre.deployments.deploy(DealImplDeploymentName, {
         from: deployer,
         contract: "Deal",
         args: [],
         ...eip1559TxArgs,
     });
 
-    const coreImpl = await hre.deployments.deploy("CoreImpl", {
+    const coreImpl = await hre.deployments.deploy(CoreImplDeploymentName, {
         from: deployer,
         contract: "Core",
         args: [],
-        log: true,
-        autoMine: true,
-        waitConfirmations: 1,
+        ...eip1559TxArgs,
     });
 
-    await hre.deployments.deploy("Core", {
+    const core = await hre.deployments.deploy(CoreDeploymentName, {
         from: deployer,
         contract: "ERC1967Proxy",
         args: [
@@ -40,9 +40,7 @@ module.exports = async function (hre: HardhatRuntimeEnvironment) {
                 dealImpl.address,
             ]),
         ],
-        log: true,
-        autoMine: true,
-        waitConfirmations: 1,
+        ...eip1559TxArgs,
     });
 };
 

@@ -1,60 +1,66 @@
-export declare const CONTRACTS_ENV: readonly ["kras", "testnet", "stage", "local"];
+import path from "path";
+
+const HARDHAT_DEPLOYMENTS_DIR = "../deployments"
+
+
+// TODO: what is local?
+export declare const CONTRACTS_ENV: readonly ["kras", "testnet", "stage", "local", "localhost"];
 export type ContractsENV = (typeof CONTRACTS_ENV)[number];
 
 export type ChainConfig = {
-    globalCore: string;
+    coreImplAbi: any;
+    globalCoreAddress: string;
     dealFactoryAddress: string;
-    fltToken: string;
+    fltTokenAddress: string;
     chainId: number;
 };
 
+type HardhatDeployment = {
+    address: string,
+    abi: any,
+}
+
+async function _tryImportDeployment(jsonPath: string): Promise<HardhatDeployment> {
+    try {
+        return await import(jsonPath);
+    } catch(e: any) {
+        console.warn('Could not import deployment: %s, return nullable deployment and pass.', jsonPath)
+        return {
+            abi: [],
+            address: '',
+        }
+    }
+}
+
+async function _getConfig(networkName: ContractsENV) {
+    const coreImplDeployment = await _tryImportDeployment(path.join(HARDHAT_DEPLOYMENTS_DIR, networkName, "CoreImpl.json"));
+    // TODO: deprecate the below one...
+    const globalCoreDeployment = await _tryImportDeployment(path.join(HARDHAT_DEPLOYMENTS_DIR, networkName, "GlobalCore.json"));
+    const factoryDeployment = await _tryImportDeployment(path.join(HARDHAT_DEPLOYMENTS_DIR, networkName, "DealFactory.json"));
+    const fltDeployment = await _tryImportDeployment(path.join(HARDHAT_DEPLOYMENTS_DIR, networkName, "FLT.json"));
+    return {
+        coreImplAbi: coreImplDeployment.abi,
+        globalCoreAddress: globalCoreDeployment.address,
+        dealFactoryAddress: factoryDeployment.address,
+        fltTokenAddress: fltDeployment.address,
+        chainId: 314159,
+    };
+}
+
 export const DEAL_CONFIG: Record<ContractsENV, () => Promise<ChainConfig>> = {
     kras: async (): Promise<ChainConfig> => {
-        const globalCore = await import("../deployments/kras/GlobalCore.json");
-        const factory = await import("../deployments/kras/DealFactory.json");
-        const flt = await import("../deployments/kras/FLT.json");
-
-        return {
-            globalCore: globalCore.address,
-            dealFactoryAddress: factory.address,
-            fltToken: flt.address,
-            chainId: 314159,
-        };
+        return await _getConfig('kras')
     },
     testnet: async (): Promise<ChainConfig> => {
-        const globalCore = await import("../deployments/testnet/GlobalCore.json");
-        const factory = await import("../deployments/testnet/DealFactory.json");
-        const flt = await import("../deployments/testnet/FLT.json");
-
-        return {
-            globalCore: globalCore.address,
-            dealFactoryAddress: factory.address,
-            fltToken: flt.address,
-            chainId: 314159,
-        };
+        return await _getConfig('testnet')
     },
     stage: async (): Promise<ChainConfig> => {
-        const globalCore = await import("../deployments/stage/GlobalCore.json");
-        const factory = await import("../deployments/stage/DealFactory.json");
-        const flt = await import("../deployments/stage/FLT.json");
-
-        return {
-            globalCore: globalCore.address,
-            dealFactoryAddress: factory.address,
-            fltToken: flt.address,
-            chainId: 314159,
-        };
+        return await _getConfig('stage')
     },
     local: async (): Promise<ChainConfig> => {
-        const globalCore = await import("../deployments/localnet/GlobalCore.json");
-        const factory = await import("../deployments/localnet/DealFactory.json");
-        const flt = await import("../deployments/localnet/FLT.json");
-
-        return {
-            globalCore: globalCore.address,
-            dealFactoryAddress: factory.address,
-            fltToken: flt.address,
-            chainId: 31337,
-        };
+        return await _getConfig('local')
+    },
+    localhost: async (): Promise<ChainConfig> => {
+        return await _getConfig('localhost')
     },
 };

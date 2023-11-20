@@ -49,7 +49,7 @@ contract Market is Initializable {
     }
 
     // ------------------ Events ------------------
-    event MarkeOfferRegistered(bytes32 offerId, address owner, uint minPricePerWorkerEpoch, address paymentToken, CIDV1[] effectors);
+    event MarketOfferRegistered(bytes32 offerId, address owner, uint minPricePerWorkerEpoch, address paymentToken, CIDV1[] effectors);
     event PeerCreated(bytes32 offerId, bytes32 peerId);
     event ComputeUnitCreated(bytes32 offerId, bytes32 peerId, bytes32 unitId);
 
@@ -212,7 +212,7 @@ contract Market is Initializable {
 
         offerStorage.offerIds.push(offerId);
 
-        emit MarkeOfferRegistered(offerId, msg.sender, minPricePerWorkerEpoch, paymentToken, effectors);
+        emit MarketOfferRegistered(offerId, msg.sender, minPricePerWorkerEpoch, paymentToken, effectors);
     }
 
     function addComputePeers(bytes32 offerId, RegisterComputePeer[] calldata peers) external {

@@ -3,6 +3,11 @@ import { deployments, ethers as hardhatEthers } from "hardhat";
 import { ethers } from "ethers";
 import { Core, Core__factory, Deal, Deal__factory, IERC20, IERC20__factory, IWorkerManager } from "../../src/typechain-types";
 import { EPOCH_DURATION, MIN_DEPOSITED_EPOCHES } from "../../env";
+import {
+    generateProviders,
+    registerFixtureProvider,
+    testDataFixture
+} from "../../utils/contratFixtures";
 
 enum DealStatus {
     INACTIVE = 0n,
@@ -11,53 +16,7 @@ enum DealStatus {
 }
 
 describe("Create deal -> Register CPs -> Match -> Set workers", () => {
-    const testData: {
-        deal: Deal | undefined;
-        pricePerWorkerEpoch: bigint;
-        effectors: Array<{
-            prefixes: string;
-            hash: string;
-        }>;
-        providers: Array<{
-            signer: ethers.Signer;
-            peers: Array<{
-                peerId: string;
-                freeUnits: number;
-                units: Array<string>;
-            }>;
-            offerId: string;
-        }>;
-        dealSettings: {
-            deposited: bigint;
-            appCID: {
-                prefixes: string;
-                hash: string;
-            };
-            minWorkers: bigint;
-            targetWorkers: bigint;
-            maxWorkerPerProvider: bigint;
-            accessType: number;
-        };
-    } = {
-        deal: undefined,
-        pricePerWorkerEpoch: ethers.parseEther("0.01"),
-        effectors: Array.from({ length: 10 }, () => ({
-            prefixes: ethers.hexlify(ethers.randomBytes(4)),
-            hash: ethers.hexlify(ethers.randomBytes(32)),
-        })),
-        providers: [],
-        dealSettings: {
-            deposited: 0n,
-            appCID: {
-                prefixes: ethers.hexlify(hardhatEthers.randomBytes(4)),
-                hash: ethers.hexlify(hardhatEthers.randomBytes(32)),
-            },
-            minWorkers: 60n,
-            targetWorkers: 60n,
-            maxWorkerPerProvider: 3n,
-            accessType: 0, // 0 - standart, 1 - whitelist, 2 - blacklist
-        },
-    };
+    const testData = testDataFixture;
 
     const env: {
         core: Core | undefined;
@@ -77,19 +36,10 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         env.flt = IERC20__factory.connect((await deployments.get("FLT")).address, signer);
 
         // generate compute providers
-        (await hardhatEthers.getSigners()).slice(0).map((signer) => {
-            testData.providers.push({
-                signer: signer,
-                peers: new Array(3).fill(0).map(() => {
-                    return {
-                        peerId: ethers.hexlify(ethers.randomBytes(32)),
-                        freeUnits: 1,
-                        units: [],
-                    };
-                }),
-                offerId: ethers.hexlify(ethers.randomBytes(32)),
-            });
-        });
+        const allSigners = await hre.ethers.getSigners()
+        // Exclude deployer.
+        const providerSigners = allSigners.slice(0)
+        testData.providers = generateProviders(providerSigners)
     });
 
     it("1.1. create deal", async () => {
@@ -163,23 +113,9 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
         const fltAddress = await env.flt.getAddress();
 
         testData.providers.map(async (provider) => {
-            const computeProviderSigner = provider.signer;
+            const resOfRegisterOffer = await registerFixtureProvider(testData, provider, env)
 
-            // register compute provider
-            const registerOfferTx = await env.core!.connect(computeProviderSigner).registerMarketOffer(
-                provider.offerId,
-                testData.pricePerWorkerEpoch,
-                fltAddress,
-                testData.effectors,
-                provider.peers.map((x) => ({
-                    peerId: x.peerId,
-                    freeUnits: x.freeUnits,
-                })),
-            );
-
-            const resOfRegisterOffer = await registerOfferTx.wait();
-
-            const offerRegisteredEventTopic = env.core.interface.getEvent("MarkeOfferRegistered").topicHash;
+            const offerRegisteredEventTopic = env.core.interface.getEvent("MarketOfferRegistered").topicHash;
             const log = resOfRegisterOffer.logs.find(({ topics }) => topics[0] === offerRegisteredEventTopic);
             const parsedLog: ethers.Result = env.core.interface.parseLog({
                 data: log.data,
@@ -188,6 +124,7 @@ describe("Create deal -> Register CPs -> Match -> Set workers", () => {
 
             // verify register result
             // a. verify event
+            const computeProviderSigner = provider.signer;
             expect(parsedLog.offerId).to.be.equal(provider.offerId);
             expect(parsedLog.owner).to.be.equal(await computeProviderSigner.getAddress());
             expect(parsedLog.minPricePerWorkerEpoch).to.be.equal(testData.pricePerWorkerEpoch);

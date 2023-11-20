@@ -3,6 +3,7 @@ import "@nomicfoundation/hardhat-toolbox";
 import "hardhat-deploy";
 import "@nomiclabs/hardhat-ganache";
 import * as dotenv from "dotenv";
+import "./tasks";
 
 dotenv.config();
 
