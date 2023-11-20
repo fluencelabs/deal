@@ -8,7 +8,7 @@ dataSources:
     name: Core
     network: localhost
     source:
-      address: '0x8AD6B55F56bB747E39c839dF850AFa446eCa6867'
+      address: '0x789E0BD94672c3B010b3C57C21902be39412940B'
       abi:  CoreImpl
       startBlock: 1
     mapping:
@@ -19,12 +19,14 @@ dataSources:
         - Offer
         - Effector
         - Peer
+        - OfferEffector
       abis:
         - name: CoreImpl
           file: ./abis/CoreImpl.json
       eventHandlers:
         - event: MarketOfferRegistered(bytes32,address,uint256,address,(bytes4,bytes32)[])
           handler: handleMarketOfferRegistered
+#          Currently PeerCreated and ComputeUnitCreated are not supported together as nested events.
 #        - event: PeerCreated(bytes32,bytes32)
 #          handler: handlePeerCreated
         - event: ComputeUnitCreated(bytes32,bytes32,bytes32)

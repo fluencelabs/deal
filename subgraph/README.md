@@ -57,7 +57,11 @@ E.g. the graph query to insert in http://localhost:8000/subgraphs/name/<YourCont
 {
   offers {
     id
-    createdAt
+    computeUnitsSum
+    peers {
+      id
+      computeUnits
+    }
   }
 }
 ```
@@ -66,4 +70,5 @@ E.g. the graph query to insert in http://localhost:8000/subgraphs/name/<YourCont
 - [ ] integrate subgraph more smoothly with hardhat, and esp. with hardhat-deploy plugin
 - [ ] use subgraph templating as it used with the graph project contracts
 - [ ] check again https://github.com/graphprotocol/hardhat-graph-demo to find the solution for **auto-populating subgraph.yaml with events**
-- [ ] add docker-compose commands to package.json 
+- [ ] add docker-compose commands to package.json
+- [ ] subgraph tests

@@ -4,21 +4,18 @@
 
 import {
     MarketOfferRegistered,
-    CoreImpl,
     ComputeUnitCreated,
     MarketOfferRegisteredEffectorsStruct,
-    PeerCreated,
     MinPricePerEpochUpdated,
     PaymentTokenUpdated,
     EffectorAdded,
-    EffectorAddedEffectorStruct, EffectorRemoved, ComputeUnitRemovedFromDeal, ComputeUnitAddedToDeal
+    EffectorRemoved, ComputeUnitRemovedFromDeal, ComputeUnitAddedToDeal
 } from '../generated/Core/CoreImpl'
-// import {extractIdFromEvent} from "./utils";
 import {getTokenSymbol} from "./networkConstants";
-import {getOrCreateEffector, getOrCreateOffer, getOrCreatePeer} from "./models";
-import {BigInt, Bytes, ByteArray} from "@graphprotocol/graph-ts";
+import {getOrCreateEffector, getOrCreateOffer, getOrCreateOfferEffector, getOrCreatePeer} from "./models";
 
-import { log } from '@graphprotocol/graph-ts'
+import { log, store } from '@graphprotocol/graph-ts'
+import {OfferEffector} from "../generated/schema";
 // log.info('My value is: {}', [myValue])
 
 function parseEffectors(effectors: Array<MarketOfferRegisteredEffectorsStruct>): Array<string> {
@@ -41,7 +38,7 @@ function getEffectorCID(effectorTuple: MarketOfferRegisteredEffectorsStruct): st
 
 export function handleMarketOfferRegistered(event: MarketOfferRegistered): void {
     // Events: MarketOfferRegistered
-    // Children events:
+    // Nested events:
     // - emit PeerCreated(offerId, peer.peerId);
     // - emit ComputeUnitCreated(offerId, peerId, unitId);
 
@@ -52,7 +49,13 @@ export function handleMarketOfferRegistered(event: MarketOfferRegistered): void 
     entity.provider = event.params.owner
     entity.tokenSymbol = getTokenSymbol(event.params.paymentToken)
     entity.pricePerEpoch = event.params.minPricePerWorkerEpoch
-    entity.effectors = effectorEntities
+
+    // Link effectors and offer:
+    for (let i=0; i < effectorEntities.length; i++) {
+        const effectorId = effectorEntities[i]
+        // Automatically create link or ensure that exists.
+        getOrCreateOfferEffector(entity.id, effectorId)
+    }
 
     // TODO: how to Handle ComputeUnitCreated events as well via transaction logs instead of contract call.
     //  mb the flow via separate handler is more natural.
@@ -107,38 +110,23 @@ export function handlePaymentTokenUpdated(event: PaymentTokenUpdated): void {
 }
 
 export function handleEffectorAdded(event: EffectorAdded): void {
-    let entity = getOrCreateOffer(event.params.offerId.toHex())
+    let offer = getOrCreateOffer(event.params.offerId.toHex())
     const effectorTuple = event.params.effector
     const cid = effectorTuple.prefixes.toString() + effectorTuple.hash.toString()
     const effector = getOrCreateEffector(cid)
-    if (entity.effectors == null) {
-        entity.effectors = [cid]
-    } else {
-        entity.effectors!.push(effector.id)
-    }
-    entity.save()
+
+    getOrCreateOfferEffector(offer.id, effector.id)
+    offer.save()
 }
 
 export function handleEffectorRemoved(event: EffectorRemoved): void {
-    let entity = getOrCreateOffer(event.params.offerId.toHex())
+    let offer = getOrCreateOffer(event.params.offerId.toHex())
     const effectorTuple = event.params.effector
     const cidToRemove = effectorTuple.prefixes.toString() + effectorTuple.hash.toString()
+    const effector = getOrCreateEffector(cidToRemove)
 
-    if (entity.effectors == null) {
-        return
-    }
-
-    // Find effector to remove
-    let effectorsToSave: Array<string> = []
-    for (let i=0; i < entity.effectors!.length; i++) {
-        const currentEffector = entity.effectors![i]
-        if (currentEffector !== cidToRemove) {
-            continue
-        }
-        effectorsToSave.push(currentEffector)
-    }
-    entity.effectors = effectorsToSave
-    entity.save()
+    const offerEffector = getOrCreateOfferEffector(offer.id, effector.id)
+    store.remove('OfferEffector', offerEffector.id)
 }
 
 export function handleComputeUnitAddedToDeal(event: ComputeUnitAddedToDeal): void {

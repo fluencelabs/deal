@@ -11,20 +11,39 @@ type Offer @entity {
   provider: Bytes!
   pricePerEpoch: BigInt!
   tokenSymbol: String!
-  "Currently effector id is merged(prefix + hash) aka 1 CID."
-  effectors: [Effector!]
   peers: [Peer!] @derivedFrom(field: "offer")
+  effectors: [OfferEffector!] @derivedFrom(field: "offer")
 
   "Sum of all connected compute units."
   computeUnitsSum: Int
 # deprecated: maxCollateralPerWorker: BigInt
 }
 
+"""To support many2many b/w offer and effector.
+E.g. to use
+{
+  offers {
+    effectors {
+      effector {
+        description
+      }
+    }
+  }
+}
+"""
+type OfferEffector @entity(immutable: true) {
+    id: ID! # Set to `user.id.concat(organization.id)`
+    offer: Offer!
+    effector: Effector!
+}
+
+
 "Effector table is obsolete table since it is a simple mapping."
 type Effector @entity(immutable: true) {
   "id and CID are the same."
-  id: ID!
+  id: ID!  # Currently effector id is merged(prefix + hash) aka 1 CID.
   description: String!
+  offers: [OfferEffector!] @derivedFrom(field: "effector")
 }
 
 type Peer @entity {

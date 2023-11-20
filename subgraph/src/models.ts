@@ -1,4 +1,4 @@
-import {Effector, Offer, Peer} from "../generated/schema";
+import {Effector, Offer, OfferEffector, Peer} from "../generated/schema";
 import {BigInt, Bytes} from "@graphprotocol/graph-ts";
 
 const ZERO_BYTES = Bytes.fromHexString("0x0000000000000000000000000000000000000000")
@@ -16,7 +16,7 @@ export function getOrCreateOffer(
         entity.provider = ZERO_BYTES
         entity.tokenSymbol = ""
         entity.pricePerEpoch = BigInt.fromI32(0)
-        entity.effectors = []
+        // entity.effectors = []
         entity.save()
     }
     return entity as Offer
@@ -34,6 +34,20 @@ export function getOrCreateEffector(cid: string): Effector {
         entity.save()
     }
     return entity as Effector
+}
+
+export function getOrCreateOfferEffector(offerId: string, effectorId: string): OfferEffector {
+    const concattedIds = offerId.concat(effectorId)
+
+    let entity = OfferEffector.load(concattedIds)
+
+    if (entity == null) {
+        entity = new OfferEffector(concattedIds)
+        entity.offer = offerId
+        entity.effector = effectorId
+        entity.save()
+    }
+    return entity as OfferEffector
 }
 
 export function getOrCreatePeer(peerId: string): Peer {
