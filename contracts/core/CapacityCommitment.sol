@@ -33,9 +33,9 @@ contract CapacityCommitment is Market {
         uint startEpoch;
         uint failedEpoch;
         uint withdrawCCEpochAfterFailed;
-        uint totalRewards;
         uint remainingFailsForLastEpoch;
         uint exitedUnitCount;
+        uint totalWithdrawnReward;
     }
 
     struct UnitProofsInfo {
@@ -46,6 +46,7 @@ contract CapacityCommitment is Market {
 
     struct Commitment {
         CommitmentInfo info;
+        Vesting[] vestings;
         mapping(bytes32 => UnitProofsInfo) unitProofsInfoByUnit;
     }
 
@@ -53,6 +54,11 @@ contract CapacityCommitment is Market {
         uint minRequierdCCProofs;
         uint totalSuccessProofs;
         uint rewardPool;
+    }
+
+    struct Vesting {
+        uint timestamp;
+        uint cumulativeAmount;
     }
 
     // ------------------ Events ------------------
@@ -93,6 +99,40 @@ contract CapacityCommitment is Market {
 
     function _expiredEpoch(Commitment storage cc) private view returns (uint) {
         return cc.info.startEpoch + cc.info.duration;
+    }
+
+    function _findClosestMinVestingByTimestamp(Vesting[] storage vestings, uint timestamp) internal view returns (int index, uint length) {
+        length = vestings.length;
+        index = -1;
+
+        uint low = 0;
+        uint high = length - 1;
+
+        Vesting storage vesting;
+        while (low <= high) {
+            uint mid = (low + high) / 2;
+
+            vesting = vestings[mid];
+            uint vestingTimestamp = vesting.timestamp;
+
+            if (low == high) {
+                if (timestamp >= vestingTimestamp) {
+                    return (int(mid), length);
+                } else {
+                    return (int(mid) - 1, length);
+                }
+            }
+
+            if (timestamp < vestingTimestamp) {
+                high = mid - 1;
+            } else if (timestamp > vestingTimestamp) {
+                low = mid + 1;
+            } else {
+                return (int(mid), length);
+            }
+        }
+
+        return (-1, length);
     }
 
     // ----------------- Internal Mutable -----------------
@@ -143,12 +183,16 @@ contract CapacityCommitment is Market {
             unitProofsInfo.slashedCollateral = slashedCollateral;
         }
 
-        RewardInfo storage rewardInfo = s.rewardInfoByEpoch[prevEpoch];
-        cc.info.totalRewards +=
-            (rewardInfo.rewardPool * ((unitProofsInfo.proofsCountByEpoch[prevEpoch] * PRECISION) / rewardInfo.totalSuccessProofs)) /
-            PRECISION;
+        RewardInfo storage rewardInfo = s.rewardInfoByEpoch[lastSuccessEpoch];
+        uint reward = (rewardInfo.rewardPool *
+            ((unitProofsInfo.proofsCountByEpoch[lastSuccessEpoch] * PRECISION) / rewardInfo.totalSuccessProofs)) / PRECISION;
 
-        delete unitProofsInfo.proofsCountByEpoch[prevEpoch];
+        Vesting storage lastVesting = cc.vestings[cc.vestings.length - 1];
+        cc.vestings.push(
+            Vesting({ timestamp: block.timestamp + vestingDuration(), cumulativeAmount: lastVesting.cumulativeAmount + reward })
+        );
+
+        delete unitProofsInfo.proofsCountByEpoch[lastSuccessEpoch];
 
         unitProofsInfo.lastSuccessEpoch = prevEpoch;
 
@@ -210,6 +254,24 @@ contract CapacityCommitment is Market {
     }
 
     // ----------------- Public Mutable -----------------
+    function totalRewards(bytes32 commitmentId) external view returns (uint256) {
+        CommitmentStorage storage s = _getCommitmentStorage();
+        Commitment storage cc = s.commitments[commitmentId];
+
+        uint last = cc.vestings.length - 1;
+        return cc.vestings[last].cumulativeAmount - cc.info.withdrawCCEpochAfterFailed;
+    }
+
+    function unlockedRewards(bytes32 commitmentId) external view returns (uint256) {
+        CommitmentStorage storage s = _getCommitmentStorage();
+        Commitment storage cc = s.commitments[commitmentId];
+
+        (int index, uint length) = _findClosestMinVestingByTimestamp(cc.vestings, block.timestamp);
+        require(index >= 0, "No vesting found");
+
+        return cc.vestings[uint(index)].cumulativeAmount - cc.info.totalWithdrawnReward;
+    }
+
     function createCapacityCommitment(bytes32 peerId, uint duration, address delegator, uint rewardDelegationRate) external {
         CommitmentStorage storage s = _getCommitmentStorage();
 
@@ -238,8 +300,8 @@ contract CapacityCommitment is Market {
             withdrawCCEpochAfterFailed: 0,
             failedEpoch: 0,
             remainingFailsForLastEpoch: 0,
-            totalRewards: 0,
-            exitedUnitCount: 0
+            exitedUnitCount: 0,
+            totalWithdrawnReward: 0
         });
         peer.info.commitmentId = commitmentId;
     }
@@ -385,5 +447,33 @@ contract CapacityCommitment is Market {
                 cc.info.exitedUnitCount += 1;
             }
         }
+    }
+
+    function withdraw(bytes32 commitmentId) external {
+        CommitmentStorage storage s = _getCommitmentStorage();
+        Commitment storage cc = s.commitments[commitmentId];
+        (int index, uint length) = _findClosestMinVestingByTimestamp(cc.vestings, block.timestamp);
+        require(index >= 0, "Nothing to withdraw");
+
+        Vesting storage vesting = cc.vestings[uint(index)];
+        uint totalWithdrawnReward = cc.info.totalWithdrawnReward;
+        uint amount = vesting.cumulativeAmount - totalWithdrawnReward;
+
+        require(amount > 0, "Nothing to withdraw");
+
+        if (uint(index) == (length - 1)) {
+            cc.vestings[cc.vestings.length - 1].cumulativeAmount = 0;
+            cc.info.totalWithdrawnReward = 0;
+        } else {
+            cc.info.totalWithdrawnReward = totalWithdrawnReward + amount;
+        }
+
+        IERC20 flt = IERC20(fluenceToken());
+
+        uint delegatorReward = (amount * cc.info.rewardDelegatorRate) / PRECISION;
+        uint providerReward = amount - delegatorReward;
+
+        flt.safeTransfer(cc.info.delegator, delegatorReward);
+        flt.safeTransfer(_getOffer(_getComutePeer(cc.info.peerId).info.offerId).info.owner, providerReward);
     }
 }

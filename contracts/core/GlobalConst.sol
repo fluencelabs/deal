@@ -134,6 +134,7 @@ contract GlobalConst is EpochController, OwnableUpgradableDiamond, IGlobalConst 
         } else if (constantType == Constant.TargetRevenuePerEpoch) {
             s.targetRevenuePerEpoch = v;
         } else if (constantType == Constant.VestingDuration) {
+            require(s.vestingDuration == 0, "GlobalConst: vesting duration already set");
             s.vestingDuration = v;
         } else if (constantType == Constant.SlashingRate) {
             s.slashingRate = v;
