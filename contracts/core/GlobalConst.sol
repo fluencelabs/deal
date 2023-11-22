@@ -15,7 +15,10 @@ contract GlobalConst is OwnableUpgradableDiamond, IGlobalConst {
     event ConstantsUpdated(Constant constantType, uint value);
 
     // ------------------ Storage ------------------
-    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.market.storage.v1.globalConstants")) - 1);
+    bytes32 private constant _STORAGE_SLOT =
+        bytes32(
+            uint256(keccak256("fluence.market.storage.v1.globalConstants")) - 1
+        );
 
     struct GlobalConstStorage {
         address fluenceToken;
@@ -25,7 +28,11 @@ contract GlobalConst is OwnableUpgradableDiamond, IGlobalConst {
 
     GlobalConstStorage private _storage;
 
-    function _getGlobalConstStorage() private pure returns (GlobalConstStorage storage s) {
+    function _getGlobalConstStorage()
+        private
+        pure
+        returns (GlobalConstStorage storage s)
+    {
         bytes32 storageSlot = _STORAGE_SLOT;
         assembly {
             s.slot := storageSlot
@@ -33,8 +40,13 @@ contract GlobalConst is OwnableUpgradableDiamond, IGlobalConst {
     }
 
     // ------------------ Initializer ------------------
-    function __GlobalConst_init(address fluenceToken_, uint minDepositedEpoches_, uint minRematchingEpoches_) internal onlyInitializing {
-        GlobalConstStorage storage globalConstantsStorage = _getGlobalConstStorage();
+    function __GlobalConst_init(
+        address fluenceToken_,
+        uint minDepositedEpoches_,
+        uint minRematchingEpoches_
+    ) internal onlyInitializing {
+        GlobalConstStorage
+            storage globalConstantsStorage = _getGlobalConstStorage();
 
         globalConstantsStorage.fluenceToken = fluenceToken_;
         globalConstantsStorage.minDepositedEpoches = minDepositedEpoches_;

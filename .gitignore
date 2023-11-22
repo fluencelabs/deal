@@ -1,12 +1,17 @@
-# See http://help.github.com/ignore-files/ for more about ignoring files.
+# Compiler files
+cache/
+out/
 
-# compiled output
-dist
-tmp
-/out-tsc
+# Ignores development broadcast logs
+!/broadcast
+/broadcast/*/31337/
+/broadcast/**/dry-run/
 
-# dependencies
-node_modules
+# Docs
+docs/
+
+# Dotenv file
+.env
 
 # IDEs and editors
 /.idea
@@ -24,30 +29,6 @@ node_modules
 !.vscode/launch.json
 !.vscode/extensions.json
 
-# misc
-/.sass-cache
-/connect.lock
-/coverage
-/libpeerconnection.log
-npm-debug.log
-yarn-error.log
-testem.log
-/typings
-
 # System Files
 .DS_Store
 Thumbs.db
-
-node_modules
-.env
-coverage
-coverage.json
-
-#Hardhat files
-cache
-artifacts
-
-typechain-types
-
-src/deployments/localhost
-src/deployments/local

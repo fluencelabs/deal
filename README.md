@@ -1,57 +1,66 @@
-# Deal Contracts System
+## Foundry
 
-* [Develop](#develop)
-   * [Publish typechain](#publish-typechain)
-   * [Run local network with contracts](#run-local-network-with-contracts)
-   * [Run local network with contracts in docker](#run-local-network-with-contracts-in-docker)
-* [Deploy](#deploy)
-   * [Ethereum Public Networks](#ethereum-public-networks)
-   * [Run Deploy](#run-deploy)
+**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
 
-# Develop
-## Publish typechain
+Foundry consists of:
 
-You have to open the main branch and pull the latest version of it locally Then
-do the following (replace versions with the actual versions that you want):
+-   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
+-   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
+-   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
+-   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
 
-```shell
-git tag -a v0.0.0 -m ""
-git push origin v0.0.0
-```
+## Documentation
 
-## Run local network with contracts
+https://book.getfoundry.sh/
+
+## Usage
+
+### Build
 
 ```shell
-npm install
-npm run compile
-npx hardhat node
+$ forge build
 ```
 
-## Run local network with contracts in docker
+### Test
 
 ```shell
-docker-compose up -d
+$ forge test
 ```
 
-# Deploy
-We used to use [hardhat-deploy](https://github.com/wighawag/hardhat-deploy) plugin to deploy smart contracts on chains 
-and track differences of the contracts (plugin identifies if the contract changed and deploy/update contract).
+### Format
 
-Note, that we commit our **deployed contract addresses** into the repo, e.g. `Faucet` contract from the **kras**: [src/deployments/kras/Faucet.json](src/deployments/kras/Faucet.json). Thus, if you run deploy commands described below the addresses may change (if the contract in the network differs from the contract in you repo) and there will be **git diff** you ought to propagate the teams/community.  
-
-> For all available for the hardhat-deploy networks and their writings, please refer to `networks` from [hardhat.config.ts](hardhat.config.ts).
-
-## Ethereum Public Networks
-For public test-net chains and production chains: do not forget to set appropriate in your **.env** file:
-
-- `WAIT_CONFIRMATIONS` in `.env` (e.g. 5-8)
-- `PRIVATE_KEY` for the deployer (raw private key)
-
-## Run Deploy
-After you prepared .env file and did `npm i`, to deploy all contracts to e.g. **kras**:
-
-```bash
-npm run deploy:kras
+```shell
+$ forge fmt
 ```
 
-> we also have `all` -> `npm run deploy:all`  
+### Gas Snapshots
+
+```shell
+$ forge snapshot
+```
+
+### Anvil
+
+```shell
+$ anvil
+```
+
+### Deploy
+
+```shell
+$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
+```
+
+### Cast
+
+```shell
+$ cast <subcommand>
+```
+
+### Help
+
+```shell
+$ forge --help
+$ anvil --help
+$ cast --help
+```
