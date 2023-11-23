@@ -64,4 +64,7 @@ type Deal @entity {
   withdrawalSum: BigInt!
   depositedSum: BigInt!  # only from the withdraw() no rewards.
   maxPaidEpoch: BigInt
+
+  # If status active or cancelled.
+  appCID: ID
 }

@@ -70,4 +70,6 @@ templates:
           handler: handleWithdrawn
         - event: MaxPaidEpochUpdated(uint256)
           handler: handleMaxPaidEpochUpdated
+        - event: AdminChanged(address,address)
+          handler: handleAppCIDChanged
       file: ./src/mappings/deal.ts
