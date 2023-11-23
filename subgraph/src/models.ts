@@ -1,7 +1,20 @@
-import {Deal, Effector, Offer, OfferEffector, Peer} from "../generated/schema";
+import {Deal, Effector, Offer, OfferEffector, Peer, Token, DealEffector} from "../generated/schema";
 import {BigInt, Bytes} from "@graphprotocol/graph-ts";
+import {getTokenSymbol} from "./networkConstants";
 
 const ZERO_BYTES = Bytes.fromHexString("0x0000000000000000000000000000000000000000")
+
+
+export function createOrLoadToken(tokenAddress: string): Token {
+    let entity = Token.load(tokenAddress)
+
+    if (entity == null) {
+        entity = new Token(tokenAddress)
+        entity.symbol = getTokenSymbol(Bytes.fromHexString(tokenAddress))
+        entity.save()
+    }
+    return entity as Token
+}
 
 // TODO: make generic.
 export function createOrLoadOffer(
@@ -14,7 +27,7 @@ export function createOrLoadOffer(
         entity.createdAt = BigInt.fromI32(0)
         entity.updatedAt = BigInt.fromI32(0)
         entity.provider = ZERO_BYTES
-        entity.tokenSymbol = ""
+        entity.paymentToken = ""
         entity.pricePerEpoch = BigInt.fromI32(0)
         // entity.effectors = []
         entity.save()
@@ -71,7 +84,26 @@ export function createOrLoadDeal(dealId: string): Deal {
         entity.client = ZERO_BYTES
         entity.withdrawalSum = BigInt.fromI32(0)
         entity.depositedSum = BigInt.fromI32(0)
+        entity.paymentToken = ""
+        entity.minWorkers = 0
+        entity.maxWorkersPerProvider = 0
+        entity.targetWorkers = 0
+        entity.pricePerWorkerEpoch = BigInt.fromI32(0)
         entity.save()
+
     }
     return entity as Deal
+}
+
+export function createOrLoadDealEffector(dealId: string, effectorId: string): DealEffector {
+    const concattedIds = dealId.concat(effectorId)
+    let entity = DealEffector.load(concattedIds)
+
+    if (entity == null) {
+        entity = new DealEffector(concattedIds)
+        entity.deal = dealId
+        entity.effector = effectorId
+        entity.save()
+    }
+    return entity as DealEffector
 }

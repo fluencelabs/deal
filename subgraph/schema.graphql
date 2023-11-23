@@ -1,6 +1,12 @@
 # Comments relates to Figma screen names.
 # Names according to Figma. Suffix according to api list, details
 
+type Token @entity {
+  id: ID!  # Token Address
+  symbol: String!
+}
+
+
 # ---- Core Contract ----
 type Offer @entity {
   """Used in the next figma views:
@@ -12,12 +18,14 @@ type Offer @entity {
   updatedAt: BigInt!
   provider: Bytes!
   pricePerEpoch: BigInt!
-  tokenSymbol: String!
+  paymentToken: Token!
+
   peers: [Peer!] @derivedFrom(field: "offer")
   effectors: [OfferEffector!] @derivedFrom(field: "offer")
 
   computeUnitsSum: Int  # Sum of all connected compute units.
 }
+
 
 """To support many2many b/w offer and effector.
 E.g. to use
@@ -54,17 +62,35 @@ type Peer @entity {
 }
 
 # ---- Deal Contract ----
+type DealEffector @entity(immutable: true) {
+    id: ID! # Set to `deal.id.concat(effector.id)`
+    deal: Deal!
+    effector: Effector!
+}
+
 type Deal @entity {
   id: ID!  # Ref to offerId in contract.
   createdAt: BigInt!
   client: Bytes!
+  # Settings from public methods.
+  minWorkers: Int!
+  targetWorkers: Int!
+  maxWorkersPerProvider: Int!
+  paymentToken: Token!
+  pricePerWorkerEpoch: BigInt!
+  effectors: [DealEffector!] @derivedFrom(field: "deal")
+  # TODO: add whitelists
+
 
 #  balance: BigInt!  # on-request via frontend
 #  status: DealStatus!  # on-request via frontend
   withdrawalSum: BigInt!
-  depositedSum: BigInt!  # only from the withdraw() no rewards.
+  depositedSum: BigInt!  # calculated from the withdraw() [no rewards withdraw].
   maxPaidEpoch: BigInt
 
   # If status active or cancelled.
   appCID: ID
+
+#  TODO
+  offer: Offer
 }

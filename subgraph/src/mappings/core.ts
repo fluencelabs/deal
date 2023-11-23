@@ -12,18 +12,17 @@ import {
     MinPricePerEpochUpdated,
     PaymentTokenUpdated
 } from '../../generated/Core/CoreImpl'
-import {getTokenSymbol} from "./../networkConstants";
 import {
-    createOrLoadDeal,
+    createOrLoadDeal, createOrLoadDealEffector,
     createOrLoadEffector,
     createOrLoadOffer,
     createOrLoadOfferEffector,
-    createOrLoadPeer
+    createOrLoadPeer, createOrLoadToken
 } from "./../models";
 
 import {log, store} from '@graphprotocol/graph-ts'
 import {OfferEffector} from "../../generated/schema";
-import {getComputeUnit} from "./../contracts";
+import {getComputeUnit, getDealContract} from "./../contracts";
 import {Deal as DealTemplate} from "../../generated/templates";
 import {AppCID, getEffectorCID, parseEffectors} from "./utils";
 
@@ -41,7 +40,8 @@ export function handleMarketOfferRegistered(event: MarketOfferRegistered): void 
     entity.createdAt = event.block.timestamp
     entity.updatedAt = event.block.timestamp
     entity.provider = event.params.owner
-    entity.tokenSymbol = getTokenSymbol(event.params.paymentToken)
+
+    entity.paymentToken = createOrLoadToken(event.params.paymentToken.toHex()).id
     entity.pricePerEpoch = event.params.minPricePerWorkerEpoch
 
     // Link effectors and offer:
@@ -101,7 +101,7 @@ export function handleMinPricePerEpochUpdated(event: MinPricePerEpochUpdated): v
 
 export function handlePaymentTokenUpdated(event: PaymentTokenUpdated): void {
     let entity = createOrLoadOffer(event.params.offerId.toHex())
-    entity.tokenSymbol = getTokenSymbol(event.params.paymentToken)
+    entity.paymentToken = createOrLoadToken(event.params.paymentToken.toHex()).id
     entity.save()
 }
 
@@ -164,17 +164,37 @@ export function handleComputeUnitRemovedFromDeal(event: ComputeUnitRemovedFromDe
 
 // ---- Factory Events ----
 export function handleDealCreated(event: DealCreated): void {
+    const dealAddress = event.params.deal
     log.info(
         '[handleDealCreated] New deal created: {} by: {}',
-        [event.params.owner.toString(), event.params.deal.toString()]
+        [event.params.owner.toString(), dealAddress.toString()]
     )
 
-    let deal = createOrLoadDeal(event.params.deal.toHex())
+    let deal = createOrLoadDeal(dealAddress.toHex())
     deal.createdAt = event.block.timestamp
     deal.client = event.params.owner
+
+    // Fetch other data from the contract.
+    const contract = getDealContract(dealAddress)
+    deal.paymentToken = contract.paymentToken().toHex()
+    deal.minWorkers = contract.minWorkers().toI32()
+    deal.targetWorkers = contract.targetWorkers().toI32()
+    deal.maxWorkersPerProvider = contract.maxWorkersPerProvider().toI32()
+    deal.pricePerWorkerEpoch = contract.pricePerWorkerEpoch()
     deal.save()
 
+    // Get effectors.
+    const effectorsRaw = contract.effectors()
+    const appCIDS = changetype<Array<AppCID>>(effectorsRaw)
+    const effectorEntities = parseEffectors(appCIDS)
+    // Link effectors and deals:
+    for (let i=0; i < effectorEntities.length; i++) {
+        const effectorId = effectorEntities[i]
+        // Automatically create link or ensure that exists.
+        createOrLoadDealEffector(deal.id, effectorId)
+    }
+
     // Start indexing this deployed contract too
-    DealTemplate.create(event.params.deal)
+    DealTemplate.create(dealAddress)
 }
 
