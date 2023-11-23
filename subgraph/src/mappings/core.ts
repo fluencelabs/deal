@@ -9,7 +9,6 @@ import {
     EffectorAdded,
     EffectorRemoved,
     MarketOfferRegistered,
-    MarketOfferRegisteredEffectorsStruct,
     MinPricePerEpochUpdated,
     PaymentTokenUpdated
 } from '../../generated/Core/CoreImpl'
@@ -26,24 +25,7 @@ import {log, store} from '@graphprotocol/graph-ts'
 import {OfferEffector} from "../../generated/schema";
 import {getComputeUnit} from "./../contracts";
 import {Deal as DealTemplate} from "../../generated/templates";
-
-
-function parseEffectors(effectors: Array<MarketOfferRegisteredEffectorsStruct>): Array<string> {
-    let effectorEntities: Array<string> = []
-    for (let i=0; i < effectors.length; i++) {
-        const cid = getEffectorCID(effectors[i])
-        const effector = createOrLoadEffector(cid)
-        effectorEntities.push(effector.id)
-    }
-    return effectorEntities
-}
-
-
-function getEffectorCID(effectorTuple: MarketOfferRegisteredEffectorsStruct): string {
-    const cid = effectorTuple.prefixes.toString() + effectorTuple.hash.toString()
-    log.info('[getEffectorCID] Extract CID from effector: {}', [cid])
-    return cid
-}
+import {AppCID, getEffectorCID, parseEffectors} from "./utils";
 
 
 export function handleMarketOfferRegistered(event: MarketOfferRegistered): void {
@@ -53,7 +35,8 @@ export function handleMarketOfferRegistered(event: MarketOfferRegistered): void 
     // - emit ComputeUnitCreated(offerId, peerId, unitId);
 
     let entity = createOrLoadOffer(event.params.offerId.toHex())
-    const effectorEntities = parseEffectors(event.params.effectors)
+    const appCIDS = changetype<Array<AppCID>>(event.params.effectors)
+    const effectorEntities = parseEffectors(appCIDS)
 
     entity.createdAt = event.block.timestamp
     entity.updatedAt = event.block.timestamp
@@ -124,8 +107,8 @@ export function handlePaymentTokenUpdated(event: PaymentTokenUpdated): void {
 
 export function handleEffectorAdded(event: EffectorAdded): void {
     let offer = createOrLoadOffer(event.params.offerId.toHex())
-    const effectorTuple = event.params.effector
-    const cid = effectorTuple.prefixes.toString() + effectorTuple.hash.toString()
+    const appCID = changetype<AppCID>(event.params.effector)
+    const cid = getEffectorCID(appCID)
     const effector = createOrLoadEffector(cid)
 
     createOrLoadOfferEffector(offer.id, effector.id)
@@ -136,8 +119,8 @@ export function handleEffectorAdded(event: EffectorAdded): void {
 
 export function handleEffectorRemoved(event: EffectorRemoved): void {
     let offer = createOrLoadOffer(event.params.offerId.toHex())
-    const effectorTuple = event.params.effector
-    const cidToRemove = effectorTuple.prefixes.toString() + effectorTuple.hash.toString()
+    const appCID = changetype<AppCID>(event.params.effector)
+    const cidToRemove = getEffectorCID(appCID)
     const effector = createOrLoadEffector(cidToRemove)
 
     const offerEffector = createOrLoadOfferEffector(offer.id, effector.id)
