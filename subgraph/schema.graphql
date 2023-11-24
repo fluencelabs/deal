@@ -58,7 +58,12 @@ type Peer @entity {
   "ref to peerId in contract."
   id: ID!
   offer: Offer!
-  computeUnits: Int!
+  computeUnits: [ComputeUnit!] @derivedFrom(field: "peer")
+}
+
+type ComputeUnit @entity(immutable: true) {
+  id: ID!
+  peer: Peer!
 }
 
 # ---- Deal Contract ----
@@ -70,6 +75,7 @@ type DealToEffector @entity(immutable: true) {
 
 type Deal @entity {
   id: ID!  # Ref to offerId in contract.
+  appCID: String!
   createdAt: BigInt!
   client: Bytes!
   # Settings from public methods.
@@ -80,17 +86,13 @@ type Deal @entity {
   pricePerWorkerEpoch: BigInt!
   effectors: [DealToEffector!] @derivedFrom(field: "deal")
   # TODO: add whitelists...
-
-
+  # TODO: add blacklists...
 
 #  balance: BigInt!  # on-request via frontend
 #  status: DealStatus!  # on-request via frontend
   withdrawalSum: BigInt!
   depositedSum: BigInt!  # calculated from the withdraw() [no rewards withdraw].
   maxPaidEpoch: BigInt
-
-  # If status active or cancelled.
-  appCID: ID
 
 #  TODO
   offer: Offer

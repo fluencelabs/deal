@@ -13,6 +13,7 @@ import {
     PaymentTokenUpdated
 } from '../../generated/Core/CoreImpl'
 import {
+    createOrLoadComputeUnit,
     createOrLoadDeal, createOrLoadDealEffector,
     createOrLoadEffector,
     createOrLoadOffer,
@@ -73,7 +74,9 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
     offer.computeUnitsSum += 1
 
     // Since handlePeerCreated could not work with this handler, this logic moved here.
-    peer.computeUnits += 1
+    let computeUnit = createOrLoadComputeUnit(event.params.unitId.toHex())
+    computeUnit.peer = peer.id
+    computeUnit.save()
 
     peer.offer = offer.id
     peer.save()
@@ -134,11 +137,16 @@ export function handleComputeUnitAddedToDeal(event: ComputeUnitAddedToDeal): voi
     const unitId = event.params.unitId
 
     // Call the contract to extract peerId of the computeUnit.
-    let computeUnit = getComputeUnit(event.address, unitId)
+    const computeUnit = getComputeUnit(event.address, unitId)
     let peer = createOrLoadPeer(computeUnit.peerId.toHex())
     let offer = createOrLoadOffer(peer.offer)
 
-    peer.computeUnits += 1
+    // Link CU to peer
+    let computeUnitEntity = createOrLoadComputeUnit(unitId.toHex())
+    computeUnitEntity.peer = peer.id
+    computeUnitEntity.save()
+
+    // Sum CU in Offer.
     offer.computeUnitsSum += 1
     offer.updatedAt = event.block.timestamp
 
@@ -150,11 +158,14 @@ export function handleComputeUnitRemovedFromDeal(event: ComputeUnitRemovedFromDe
     const unitId = event.params.unitId
 
     // Call the contract to extract peerId of the computeUnit.
-    let computeUnit = getComputeUnit(event.address, unitId)
+    const computeUnit = getComputeUnit(event.address, unitId)
     let peer = createOrLoadPeer(computeUnit.peerId.toHex())
     let offer = createOrLoadOffer(peer.offer)
 
-    peer.computeUnits -= 1
+    // rm from storage compute unit.
+    let computeUnitEntity = createOrLoadComputeUnit(unitId.toHex())
+    store.remove('ComputeUnit', computeUnitEntity.id)
+
     offer.computeUnitsSum -= 1
     offer.updatedAt = event.block.timestamp
 

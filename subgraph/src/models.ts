@@ -1,4 +1,4 @@
-import {Deal, Effector, Offer, OfferToEffector, Peer, Token, DealToEffector} from "../generated/schema";
+import {Deal, Effector, Offer, OfferToEffector, Peer, Token, DealToEffector, ComputeUnit} from "../generated/schema";
 import {BigInt, Bytes} from "@graphprotocol/graph-ts";
 import {getTokenSymbol} from "./networkConstants";
 
@@ -68,11 +68,21 @@ export function createOrLoadPeer(peerId: string): Peer {
 
     if (entity == null) {
         entity = new Peer(peerId)
-        entity.computeUnits = 0
         entity.offer = ""
         entity.save()
     }
     return entity as Peer
+}
+
+export function createOrLoadComputeUnit(cuId: string): ComputeUnit {
+    let entity = ComputeUnit.load(cuId)
+
+    if (entity == null) {
+        entity = new ComputeUnit(cuId)
+        entity.peer = ""
+        entity.save()
+    }
+    return entity as ComputeUnit
 }
 
 
@@ -86,6 +96,7 @@ export function createOrLoadDeal(dealId: string): Deal {
         entity.depositedSum = BigInt.fromI32(0)
         entity.paymentToken = ""
         entity.minWorkers = 0
+        entity.appCID = ""
         entity.maxWorkersPerProvider = 0
         entity.targetWorkers = 0
         entity.pricePerWorkerEpoch = BigInt.fromI32(0)
