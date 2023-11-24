@@ -1,6 +1,12 @@
-import {AppCIDChanged, Deposited, MaxPaidEpochUpdated, Withdrawn} from "../../generated/templates/Deal/DealImpl";
-import {createOrLoadDeal} from "../models";
+import {createOrLoadComputeUnit, createOrLoadDeal} from "../models";
 import {AppCID, getEffectorCID} from "./utils";
+import {
+    AppCIDChanged,
+    ComputeUnitJoined,
+    Deposited,
+    MaxPaidEpochUpdated,
+    Withdrawn, WorkerIdUpdated
+} from "../../generated/Core/DealImpl";
 
 export function handleDeposited(event: Deposited): void {
     let deal = createOrLoadDeal(event.address.toHex())
@@ -26,4 +32,20 @@ export function handleAppCIDChanged(event: AppCIDChanged): void {
 
     deal.appCID = getEffectorCID(cid)
     deal.save()
+}
+
+// Joined to Deal.
+export function handleComputeUnitJoined(event: ComputeUnitJoined): void {
+    let deal = createOrLoadDeal(event.address.toHex())
+
+    let computeUnit = createOrLoadComputeUnit(event.params.unitId.toHex())
+    computeUnit.addedToDeal = deal.id
+    computeUnit.save()
+}
+
+// Link workerId to CU.
+export function handleWorkerIdUpdated(event: WorkerIdUpdated): void {
+    let computeUnit = createOrLoadComputeUnit(event.params.computeUnitId.toHex())
+    computeUnit.workerID = event.params.workerId.toHex()
+    computeUnit.save()
 }

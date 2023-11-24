@@ -2,7 +2,7 @@ import {task} from "hardhat/config";
 import {HardhatRuntimeEnvironment} from "hardhat/types";
 import {CI_CHAIN_IDS} from "./utils";
 import {generateProviders, registerFixtureProvider, testDataFixture, Env} from "../utils/contratFixtures";
-import {Core__factory, IERC20__factory} from "../src";
+import {Core__factory, Deal__factory, IERC20__factory} from "../src";
 import {MIN_DEPOSITED_EPOCHES} from "../env";
 
 type Args = {
@@ -63,6 +63,22 @@ task("createMarket", "[Testnet Fixture] Deploy everything and create market with
         taskDataFixture.dealSettings.accessType,
         [],
     );
-
     const deployDealTxRes = await deployDealTx.wait();
+
+    // Remember created deal.
+    const dealCreatedEventTopic = env.core.interface.getEvent("DealCreated").topicHash;
+    const log = deployDealTxRes.logs.find(({ topics }) => {
+        return topics[0] === dealCreatedEventTopic;
+    });
+    const dealAddress = env.core.interface.parseLog({
+        data: log.data,
+        topics: [...log.topics],
+    }).args.deal;
+    console.log("Created Deal at address:", dealAddress)
+
+    taskDataFixture.deal = Deal__factory.connect(dealAddress, deployer);
+
+    console.log('Match deal from core perspective...')
+    const matchTx = await env.core.matchDeal(dealAddress);
+    const resOfMatchTx = await matchTx.wait();
 });

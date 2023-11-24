@@ -1,11 +1,14 @@
 # Comments relates to Figma screen names.
 # Names according to Figma. Suffix according to api list, details
 
-type Token @entity {
+type Token @entity(immutable: true) {
   id: ID!  # Token Address
   symbol: String!
 }
 
+type Provider @entity {
+  id: ID!
+}
 
 # ---- Core Contract ----
 type Offer @entity {
@@ -16,13 +19,14 @@ type Offer @entity {
   id: ID!  # Ref to offerId in contract.
   createdAt: BigInt!
   updatedAt: BigInt!
-  provider: Bytes!
+  provider: Provider!
   pricePerEpoch: BigInt!
   paymentToken: Token!
 
   peers: [Peer!] @derivedFrom(field: "offer")
   effectors: [OfferToEffector!] @derivedFrom(field: "offer")
 
+  # Add Statistics below.
   computeUnitsSum: Int  # Sum of all connected compute units.
 }
 
@@ -39,7 +43,7 @@ E.g. to use
   }
 }
 """
-type OfferToEffector @entity(immutable: true) {
+type OfferToEffector @entity {
     id: ID! # Set to `user.id.concat(organization.id)`
     offer: Offer!
     effector: Effector!
@@ -47,7 +51,7 @@ type OfferToEffector @entity(immutable: true) {
 
 
 "Effector table is obsolete table since it is a simple mapping."
-type Effector @entity(immutable: true) {
+type Effector @entity {
   "id and CID are the same."
   id: ID!  # Currently effector id is merged(prefix + hash) aka 1 CID.
   description: String!
@@ -61,13 +65,19 @@ type Peer @entity {
   computeUnits: [ComputeUnit!] @derivedFrom(field: "peer")
 }
 
-type ComputeUnit @entity(immutable: true) {
+type ComputeUnit @entity {
   id: ID!
   peer: Peer!
+  "In order to simplify relation."
+  provider: Provider!
+
+  addedToDeal: Deal
+  workerID: String
+  # TODO: worker status "Expired" how to calculate.
 }
 
 # ---- Deal Contract ----
-type DealToEffector @entity(immutable: true) {
+type DealToEffector @entity {
     id: ID! # Set to `deal.id.concat(effector.id)`
     deal: Deal!
     effector: Effector!
@@ -87,13 +97,14 @@ type Deal @entity {
   effectors: [DealToEffector!] @derivedFrom(field: "deal")
   # TODO: add whitelists...
   # TODO: add blacklists...
+  #  balance: BigInt!  # on-request via frontend
+  #  status: DealStatus!  # on-request via frontend
 
-#  balance: BigInt!  # on-request via frontend
-#  status: DealStatus!  # on-request via frontend
+  # Add Statistics below.
   withdrawalSum: BigInt!
   depositedSum: BigInt!  # calculated from the withdraw() [no rewards withdraw].
   maxPaidEpoch: BigInt
 
-#  TODO
-  offer: Offer
+  "I.e. Matching Result (Figma)."
+  addedComputeUnits: [ComputeUnit!] @derivedFrom(field: "addedToDeal")
 }

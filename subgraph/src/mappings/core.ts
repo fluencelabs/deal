@@ -18,12 +18,12 @@ import {
     createOrLoadEffector,
     createOrLoadOffer,
     createOrLoadOfferEffector,
-    createOrLoadPeer, createOrLoadToken
+    createOrLoadPeer, createOrLoadProvider, createOrLoadToken
 } from "./../models";
 
 import {log, store} from '@graphprotocol/graph-ts'
 import {OfferToEffector} from "../../generated/schema";
-import {getComputeUnit, getDealContract} from "./../contracts";
+import {getComputeUnit, getDealContract, getOfferInfo} from "./../contracts";
 import {Deal as DealTemplate} from "../../generated/templates";
 import {AppCID, getEffectorCID, parseEffectors} from "./utils";
 
@@ -40,7 +40,9 @@ export function handleMarketOfferRegistered(event: MarketOfferRegistered): void 
 
     entity.createdAt = event.block.timestamp
     entity.updatedAt = event.block.timestamp
-    entity.provider = event.params.owner
+
+    const provider = createOrLoadProvider(event.params.owner.toHex())
+    entity.provider = provider.id
 
     entity.paymentToken = createOrLoadToken(event.params.paymentToken.toHex()).id
     entity.pricePerEpoch = event.params.minPricePerWorkerEpoch
@@ -69,18 +71,21 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
     // - emit MarketOfferRegistered
     let offer = createOrLoadOffer(event.params.offerId.toHex())
     let peer = createOrLoadPeer(event.params.peerId.toHex())
-    // or maybe save everything into context and then count:
-    //  https://thegraph.com/docs/en/developing/creating-a-subgraph/#data-source-context.
-    offer.computeUnitsSum += 1
 
     // Since handlePeerCreated could not work with this handler, this logic moved here.
     let computeUnit = createOrLoadComputeUnit(event.params.unitId.toHex())
+
+    const offerInfo = getOfferInfo(event.address, offer.id)
+    const provider = createOrLoadProvider(offerInfo.owner.toHex())
+    computeUnit.provider = provider.id
+
     computeUnit.peer = peer.id
     computeUnit.save()
 
     peer.offer = offer.id
     peer.save()
 
+    offer.computeUnitsSum += 1
     offer.updatedAt = event.block.timestamp
     offer.save()
 }

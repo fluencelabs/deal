@@ -10,7 +10,7 @@ dataSources:
     source:
       address: '0x789E0BD94672c3B010b3C57C21902be39412940B'
       abi:  CoreImpl
-      startBlock: 0
+      startBlock: 1
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -19,10 +19,13 @@ dataSources:
         - Offer
         - Effector
         - Peer
-        - OfferEffector
+        - OfferToEffector
+        - ComputeUnit
       abis:
         - name: CoreImpl
           file: ./abis/CoreImpl.json
+        - name: DealImpl
+          file: ./abis/DealImpl.json
       eventHandlers:
         # Offer features.
         - event: MarketOfferRegistered(bytes32,address,uint256,address,(bytes4,bytes32)[])
@@ -60,6 +63,7 @@ templates:
       language: wasm/assemblyscript
       entities:
         - Deal
+        - DealToEffector
       abis:
         - name: DealImpl
           file: ./abis/DealImpl.json
@@ -72,4 +76,8 @@ templates:
           handler: handleMaxPaidEpochUpdated
         - event: AdminChanged(address,address)
           handler: handleAppCIDChanged
+        - event: ComputeUnitJoined(bytes32)
+          handler: handleComputeUnitJoined
+        - event: WorkerIdUpdated(bytes32,bytes32)
+          handler: handleWorkerIdUpdated
       file: ./src/mappings/deal.ts
