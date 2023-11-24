@@ -79,3 +79,4 @@ ts-node scripts/importContractsAbi.ts && npm run compile && npm run create-local
 - [ ] add docker-compose commands to package.json
 - [ ] subgraph tests
 - [ ] fix docker versions
+- [ ] it is mb better to flag CU and etc as removed instead of deleting as it is in, e.g. `store.remove('ComputeUnit', computeUnitEntity.id)`
