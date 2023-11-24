@@ -21,7 +21,7 @@ import {
 } from "./../models";
 
 import {log, store} from '@graphprotocol/graph-ts'
-import {OfferEffector} from "../../generated/schema";
+import {OfferToEffector} from "../../generated/schema";
 import {getComputeUnit, getDealContract} from "./../contracts";
 import {Deal as DealTemplate} from "../../generated/templates";
 import {AppCID, getEffectorCID, parseEffectors} from "./utils";
@@ -124,7 +124,7 @@ export function handleEffectorRemoved(event: EffectorRemoved): void {
     const effector = createOrLoadEffector(cidToRemove)
 
     const offerEffector = createOrLoadOfferEffector(offer.id, effector.id)
-    store.remove('OfferEffector', offerEffector.id)
+    store.remove('OfferToEffector', offerEffector.id)
 
     offer.updatedAt = event.block.timestamp
     offer.save()

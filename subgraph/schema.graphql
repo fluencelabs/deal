@@ -21,7 +21,7 @@ type Offer @entity {
   paymentToken: Token!
 
   peers: [Peer!] @derivedFrom(field: "offer")
-  effectors: [OfferEffector!] @derivedFrom(field: "offer")
+  effectors: [OfferToEffector!] @derivedFrom(field: "offer")
 
   computeUnitsSum: Int  # Sum of all connected compute units.
 }
@@ -39,7 +39,7 @@ E.g. to use
   }
 }
 """
-type OfferEffector @entity(immutable: true) {
+type OfferToEffector @entity(immutable: true) {
     id: ID! # Set to `user.id.concat(organization.id)`
     offer: Offer!
     effector: Effector!
@@ -51,7 +51,7 @@ type Effector @entity(immutable: true) {
   "id and CID are the same."
   id: ID!  # Currently effector id is merged(prefix + hash) aka 1 CID.
   description: String!
-  offers: [OfferEffector!] @derivedFrom(field: "effector")
+  offers: [OfferToEffector!] @derivedFrom(field: "effector")
 }
 
 type Peer @entity {
@@ -62,7 +62,7 @@ type Peer @entity {
 }
 
 # ---- Deal Contract ----
-type DealEffector @entity(immutable: true) {
+type DealToEffector @entity(immutable: true) {
     id: ID! # Set to `deal.id.concat(effector.id)`
     deal: Deal!
     effector: Effector!
@@ -78,8 +78,9 @@ type Deal @entity {
   maxWorkersPerProvider: Int!
   paymentToken: Token!
   pricePerWorkerEpoch: BigInt!
-  effectors: [DealEffector!] @derivedFrom(field: "deal")
-  # TODO: add whitelists
+  effectors: [DealToEffector!] @derivedFrom(field: "deal")
+  # TODO: add whitelists...
+
 
 
 #  balance: BigInt!  # on-request via frontend

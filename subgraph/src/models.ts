@@ -1,4 +1,4 @@
-import {Deal, Effector, Offer, OfferEffector, Peer, Token, DealEffector} from "../generated/schema";
+import {Deal, Effector, Offer, OfferToEffector, Peer, Token, DealToEffector} from "../generated/schema";
 import {BigInt, Bytes} from "@graphprotocol/graph-ts";
 import {getTokenSymbol} from "./networkConstants";
 
@@ -49,18 +49,18 @@ export function createOrLoadEffector(cid: string): Effector {
     return entity as Effector
 }
 
-export function createOrLoadOfferEffector(offerId: string, effectorId: string): OfferEffector {
+export function createOrLoadOfferEffector(offerId: string, effectorId: string): OfferToEffector {
     const concattedIds = offerId.concat(effectorId)
 
-    let entity = OfferEffector.load(concattedIds)
+    let entity = OfferToEffector.load(concattedIds)
 
     if (entity == null) {
-        entity = new OfferEffector(concattedIds)
+        entity = new OfferToEffector(concattedIds)
         entity.offer = offerId
         entity.effector = effectorId
         entity.save()
     }
-    return entity as OfferEffector
+    return entity as OfferToEffector
 }
 
 export function createOrLoadPeer(peerId: string): Peer {
@@ -95,15 +95,15 @@ export function createOrLoadDeal(dealId: string): Deal {
     return entity as Deal
 }
 
-export function createOrLoadDealEffector(dealId: string, effectorId: string): DealEffector {
+export function createOrLoadDealEffector(dealId: string, effectorId: string): DealToEffector {
     const concattedIds = dealId.concat(effectorId)
-    let entity = DealEffector.load(concattedIds)
+    let entity = DealToEffector.load(concattedIds)
 
     if (entity == null) {
-        entity = new DealEffector(concattedIds)
+        entity = new DealToEffector(concattedIds)
         entity.deal = dealId
         entity.effector = effectorId
         entity.save()
     }
-    return entity as DealEffector
+    return entity as DealToEffector
 }
