@@ -1,66 +1,62 @@
 import path from "path";
 
-const HARDHAT_DEPLOYMENTS_DIR = "../deployments"
+export declare const NETWORL_NAME: readonly [
+  "kras",
+  "testnet",
+  "stage",
+  "local",
+];
 
-
-// TODO: what is local?
-export declare const CONTRACTS_ENV: readonly ["kras", "testnet", "stage", "local", "localhost"];
-export type ContractsENV = (typeof CONTRACTS_ENV)[number];
-
-export type ChainConfig = {
-    coreImplAbi: any;
-    globalCoreAddress: string;
-    dealFactoryAddress: string;
-    fltTokenAddress: string;
-    chainId: number;
+export const DEPLOYMENTS_DIR = path.join("../deployments");
+export type Network = (typeof NETWORL_NAME)[number];
+export type Deployment = {
+  core: string;
+  flt: string;
+  usdc: string;
+  chainId: number;
 };
 
-type HardhatDeployment = {
-    address: string,
-    abi: any,
-}
-
-async function _tryImportDeployment(jsonPath: string): Promise<HardhatDeployment> {
-    try {
-        return await import(jsonPath);
-    } catch(e: any) {
-        console.warn('Could not import deployment: %s, return nullable deployment and pass.', jsonPath)
-        return {
-            abi: [],
-            address: '',
-        }
-    }
-}
-
-async function _getConfig(networkName: ContractsENV) {
-    const coreImplDeployment = await _tryImportDeployment(path.join(HARDHAT_DEPLOYMENTS_DIR, networkName, "CoreImpl.json"));
-    // TODO: deprecate the below one...
-    const globalCoreDeployment = await _tryImportDeployment(path.join(HARDHAT_DEPLOYMENTS_DIR, networkName, "GlobalCore.json"));
-    const factoryDeployment = await _tryImportDeployment(path.join(HARDHAT_DEPLOYMENTS_DIR, networkName, "DealFactory.json"));
-    const fltDeployment = await _tryImportDeployment(path.join(HARDHAT_DEPLOYMENTS_DIR, networkName, "FLT.json"));
-    return {
-        coreImplAbi: coreImplDeployment.abi,
-        globalCoreAddress: globalCoreDeployment.address,
-        dealFactoryAddress: factoryDeployment.address,
-        fltTokenAddress: fltDeployment.address,
-        chainId: 314159,
-    };
-}
-
-export const DEAL_CONFIG: Record<ContractsENV, () => Promise<ChainConfig>> = {
-    kras: async (): Promise<ChainConfig> => {
-        return await _getConfig('kras')
-    },
-    testnet: async (): Promise<ChainConfig> => {
-        return await _getConfig('testnet')
-    },
-    stage: async (): Promise<ChainConfig> => {
-        return await _getConfig('stage')
-    },
-    local: async (): Promise<ChainConfig> => {
-        return await _getConfig('local')
-    },
-    localhost: async (): Promise<ChainConfig> => {
-        return await _getConfig('localhost')
-    },
+export const getDeployment = async (network: Network): Promise<Deployment> => {
+  switch (network) {
+    case "kras":
+      return await _getDeployment("kras", 80001);
+    case "testnet":
+      return await _getDeployment("testnet", 80001);
+    case "stage":
+      return await _getDeployment("stage", 80001);
+    case "local":
+      return await _getDeployment("local", 31337);
+    default:
+      throw new Error(`Unknown network: ${network}`);
+  }
 };
+
+async function _getDeployment(
+  networkName: Network,
+  chainId: number,
+): Promise<Deployment> {
+  const deployment = await await import(
+    path.join(DEPLOYMENTS_DIR, String(chainId), ".json")
+  );
+
+  if (deployment?.core?.address === undefined) {
+    throw new Error(
+      `Could not find global core address for network: ${networkName}`,
+    );
+  } else if (deployment?.flt?.address === undefined) {
+    throw new Error(
+      `Could not find flt token address for network: ${networkName}`,
+    );
+  } else if (deployment?.usdc?.address === undefined) {
+    throw new Error(
+      `Could not find usdc token address for network: ${networkName}`,
+    );
+  }
+
+  return {
+    core: deployment.core.address,
+    flt: deployment.tFLT.address,
+    usdc: deployment.tUSD.address,
+    chainId: chainId,
+  };
+}

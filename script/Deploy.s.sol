@@ -28,7 +28,7 @@ contract DeployContracts is Depoyments, Script {
     uint256 constant DEFAULT_MIN_REMATCHING_EPOCHES = 2;
 
     // ------------------ Deploy result ------------------
-    string constant DEPLOYMENTS_PATH = "/ts-client/deployments/";
+    string constant DEPLOYMENTS_PATH = "/deployments/";
     string private fullDeploymentsPath;
     // ------------------ Types ------------------
 
