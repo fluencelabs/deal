@@ -23,7 +23,7 @@ import {
 
 import {log, store} from '@graphprotocol/graph-ts'
 import {OfferToEffector} from "../../generated/schema";
-import {getDealContract, getOfferInfo} from "./../contracts";
+import {getOfferInfo} from "./../contracts";
 import {Deal as DealTemplate} from "../../generated/templates";
 import {AppCID, getEffectorCID, parseEffectors} from "./utils";
 
@@ -181,18 +181,15 @@ export function handleDealCreated(event: DealCreated): void {
     deal.createdAt = event.block.timestamp
     deal.owner = event.params.owner
 
-    // Fetch other data from the contract.
-    const contract = getDealContract(dealAddress)
-    deal.paymentToken = contract.paymentToken().toHex()
-    deal.minWorkers = contract.minWorkers().toI32()
-    deal.targetWorkers = contract.targetWorkers().toI32()
-    deal.maxWorkersPerProvider = contract.maxWorkersPerProvider().toI32()
-    deal.pricePerWorkerEpoch = contract.pricePerWorkerEpoch()
+    deal.paymentToken = event.params.paymentToken.toHex()
+    deal.minWorkers = event.params.minWorkers.toI32()
+    deal.targetWorkers = event.params.targetWorkers.toI32()
+    deal.maxWorkersPerProvider = event.params.maxWorkersPerProvider.toI32()
+    deal.pricePerWorkerEpoch = event.params.pricePerWorkerEpoch
     deal.save()
 
     // Get effectors.
-    const effectorsRaw = contract.effectors()
-    const appCIDS = changetype<Array<AppCID>>(effectorsRaw)
+    const appCIDS = changetype<Array<AppCID>>(event.params.effectors)
     const effectorEntities = parseEffectors(appCIDS)
     // Link effectors and deals:
     for (let i=0; i < effectorEntities.length; i++) {

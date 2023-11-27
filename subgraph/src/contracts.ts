@@ -18,6 +18,7 @@ export function getComputeUnit(contractAddress: Address, unitId: Bytes): CoreImp
     return contract.getComputeUnit(unitId)
 }
 
+// @deprecated.
 export function getDealContract(contractAddress: Address): DealImpl {
     return DealImpl.bind(contractAddress);
 }

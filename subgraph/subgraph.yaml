@@ -48,7 +48,7 @@ dataSources:
         - event: ComputeUnitRemovedFromDeal(bytes32,address,bytes32)
           handler: handleComputeUnitRemovedFromDeal
         # Catch Deals.
-        - event: DealCreated(indexed address,address,uint256)
+        - event: DealCreated(indexed address,address,uint256,address,uint256,uint256,uint256,uint256,(bytes4,bytes32)[])
           handler: handleDealCreated
       file: ./src/mappings/core.ts
 templates:

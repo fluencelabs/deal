@@ -94,7 +94,8 @@ contract DealFactory is EpochController, GlobalConst, IDealFactory {
             minWorkers_,
             targetWorkers_,
             maxWorkersPerProvider_,
-            pricePerWorkerEpoch_
+            pricePerWorkerEpoch_,
+            effectors_
         );
 
         return deal;

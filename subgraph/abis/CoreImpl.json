@@ -245,6 +245,24 @@
         "internalType": "uint256",
         "name": "pricePerWorkerEpoch",
         "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bytes4",
+            "name": "prefixes",
+            "type": "bytes4"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "hash",
+            "type": "bytes32"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct CIDV1[]",
+        "name": "effectors",
+        "type": "tuple[]"
       }
     ],
     "name": "DealCreated",
