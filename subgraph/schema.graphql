@@ -71,7 +71,7 @@ type ComputeUnit @entity {
   "In order to simplify relation."
   provider: Provider!
 
-  addedToDeal: Deal
+  deal: Deal
   workerID: String
   # TODO: worker status "Expired" how to calculate.
 }
@@ -106,5 +106,5 @@ type Deal @entity {
   maxPaidEpoch: BigInt
 
   "I.e. Matching Result (Figma)."
-  addedComputeUnits: [ComputeUnit!] @derivedFrom(field: "addedToDeal")
+  addedComputeUnits: [ComputeUnit!] @derivedFrom(field: "deal")
 }

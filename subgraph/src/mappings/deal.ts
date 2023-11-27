@@ -39,7 +39,7 @@ export function handleComputeUnitJoined(event: ComputeUnitJoined): void {
     let deal = createOrLoadDeal(event.address.toHex())
 
     let computeUnit = createOrLoadComputeUnit(event.params.unitId.toHex())
-    computeUnit.addedToDeal = deal.id
+    computeUnit.deal = deal.id
     computeUnit.save()
 }
 
