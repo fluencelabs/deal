@@ -54,13 +54,6 @@ export function handleMarketOfferRegistered(event: MarketOfferRegistered): void 
         createOrLoadOfferEffector(entity.id, effectorId)
     }
 
-    // TODO: how to Handle ComputeUnitCreated events as well via transaction logs instead of contract call.
-    //  mb the flow via separate handler is more natural.
-    // if (event.receipt !== null) {
-    //     event.receipt!.logs.forEach((txLog) => {
-    //         log.info('event.receipt.logs {} and type of: {}', [txLog.topics.toString(), txLog.logType]);
-    //     })
-    // }
     entity.save();
 }
 
@@ -142,11 +135,10 @@ export function handleComputeUnitAddedToDeal(event: ComputeUnitAddedToDeal): voi
     const unitId = event.params.unitId
 
     // Call the contract to extract peerId of the computeUnit.
-    const computeUnit = getComputeUnit(event.address, unitId)
-    let peer = createOrLoadPeer(computeUnit.peerId.toHex())
+    let peer = createOrLoadPeer(event.params.peerId.toHex())
     let offer = createOrLoadOffer(peer.offer)
 
-    // Link CU to peer
+    // Link CU to peer.
     let computeUnitEntity = createOrLoadComputeUnit(unitId.toHex())
     computeUnitEntity.peer = peer.id
     computeUnitEntity.save()
@@ -163,8 +155,7 @@ export function handleComputeUnitRemovedFromDeal(event: ComputeUnitRemovedFromDe
     const unitId = event.params.unitId
 
     // Call the contract to extract peerId of the computeUnit.
-    const computeUnit = getComputeUnit(event.address, unitId)
-    let peer = createOrLoadPeer(computeUnit.peerId.toHex())
+    let peer = createOrLoadPeer(event.params.peerId.toHex())
     let offer = createOrLoadOffer(peer.offer)
 
     // rm from storage compute unit.

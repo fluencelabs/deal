@@ -43,9 +43,9 @@ dataSources:
           handler: handleEffectorAdded
         - event: EffectorRemoved(bytes32,(bytes4,bytes32))
           handler: handleEffectorRemoved
-        - event: ComputeUnitAddedToDeal(bytes32,address)
+        - event: ComputeUnitAddedToDeal(bytes32,address,bytes32)
           handler: handleComputeUnitAddedToDeal
-        - event: ComputeUnitRemovedFromDeal(bytes32,address)
+        - event: ComputeUnitRemovedFromDeal(bytes32,address,bytes32)
           handler: handleComputeUnitRemovedFromDeal
         # Catch Deals.
         - event: DealCreated(indexed address,address,uint256)

@@ -68,8 +68,11 @@ E.g. the graph query to insert in http://localhost:8000/subgraphs/name/<YourCont
 
 ## Tricks & Tips
 If you updated contract and want to push this update to the subgraph, I could recommend 1 fully features command:
+
+but first: you should deploy on localhost your updated contract, e.g. `npx hardhat deploy --network localhost`
+
 ```bash
-npx hardhat deploy --network localhost && ts-node scripts/importContractsAbi.ts && npm run compile && npm run create-local && npm run deploy-local
+ts-node scripts/importContractsAbi.ts && npm run compile && npm run create-local && npm run deploy-local
 ```
 
 # TODO

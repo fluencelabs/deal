@@ -72,6 +72,12 @@
         "internalType": "contract IDeal",
         "name": "deal",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "peerId",
+        "type": "bytes32"
       }
     ],
     "name": "ComputeUnitAddedToDeal",
@@ -159,6 +165,12 @@
         "internalType": "contract IDeal",
         "name": "deal",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "peerId",
+        "type": "bytes32"
       }
     ],
     "name": "ComputeUnitRemovedFromDeal",
