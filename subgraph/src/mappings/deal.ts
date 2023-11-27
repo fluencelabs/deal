@@ -10,13 +10,13 @@ import {
 
 export function handleDeposited(event: Deposited): void {
     let deal = createOrLoadDeal(event.address.toHex())
-    deal.depositedSum = event.params.amount.plus(deal.depositedSum)
+    deal.depositedSum = deal.depositedSum.plus(event.params.amount)
     deal.save()
 }
 
 export function handleWithdrawn(event: Withdrawn): void {
     let deal = createOrLoadDeal(event.address.toHex())
-    deal.depositedSum = deal.depositedSum.minus(event.params.amount)
+    deal.withdrawalSum = deal.withdrawalSum.plus(event.params.amount)
     deal.save()
 }
 
