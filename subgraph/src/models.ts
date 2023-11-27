@@ -28,16 +28,6 @@ export function createOrLoadToken(tokenAddress: string): Token {
     return entity as Token
 }
 
-export function createOrLoadProvider(providerId: string): Provider {
-    let entity = Provider.load(providerId)
-
-    if (entity == null) {
-        entity = new Provider(providerId)
-        entity.save()
-    }
-    return entity as Provider
-}
-
 // TODO: add description mapper.
 const DEFAULT_EFFECTOR_DESCRIPTION = "DEFAULT_EFFECTOR_DESCRIPTION"
 

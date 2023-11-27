@@ -18,12 +18,11 @@ import {
     createOrLoadDeal, createOrLoadDealEffector,
     createOrLoadEffector,
     createOrLoadOfferEffector,
-    createOrLoadPeer, createOrLoadProvider, createOrLoadToken
+    createOrLoadPeer, createOrLoadToken
 } from "./../models";
 
 import {log, store} from '@graphprotocol/graph-ts'
-import {Offer, OfferToEffector} from "../../generated/schema";
-import {getOfferInfo} from "./../contracts";
+import {Offer, OfferToEffector, Peer, Provider} from "../../generated/schema";
 import {Deal as DealTemplate} from "../../generated/templates";
 import {AppCID, getEffectorCID, parseEffectors} from "./utils";
 
@@ -34,27 +33,27 @@ export function handleMarketOfferRegistered(event: MarketOfferRegistered): void 
     // - emit PeerCreated(offerId, peer.peerId);
     // - emit ComputeUnitCreated(offerId, peerId, unitId);
 
+    // Create provider.
+    const provider = new Provider(event.params.owner.toHex())
+    provider.save()
+
+    // Create Offer.
     let offer = new Offer(event.params.offerId.toHex())
-    const appCIDS = changetype<Array<AppCID>>(event.params.effectors)
-    const effectorEntities = parseEffectors(appCIDS)
-
-    offer.createdAt = event.block.timestamp
-    offer.updatedAt = event.block.timestamp
-
-    const provider = createOrLoadProvider(event.params.owner.toHex())
     offer.provider = provider.id
-
     offer.paymentToken = createOrLoadToken(event.params.paymentToken.toHex()).id
     offer.pricePerEpoch = event.params.minPricePerWorkerEpoch
+    offer.createdAt = event.block.timestamp
+    offer.updatedAt = event.block.timestamp
+    offer.save();
 
+    const appCIDS = changetype<Array<AppCID>>(event.params.effectors)
+    const effectorEntities = parseEffectors(appCIDS)
     // Link effectors and offer:
     for (let i=0; i < effectorEntities.length; i++) {
         const effectorId = effectorEntities[i]
         // Automatically create link or ensure that exists.
         createOrLoadOfferEffector(offer.id, effectorId)
     }
-
-    offer.save();
 }
 
 // It updates Peer and Offer.
@@ -63,14 +62,12 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
     // - emit PeerCreated(offerId, peer.peerId);
     // - emit MarketOfferRegistered
     let offer = Offer.load(event.params.offerId.toHex()) as Offer
-    let peer = createOrLoadPeer(event.params.peerId.toHex())
+    const peer = Peer.load(event.params.peerId.toHex()) as Peer
 
     // Since handlePeerCreated could not work with this handler, this logic moved here.
     let computeUnit = createOrLoadComputeUnit(event.params.unitId.toHex())
 
-    const offerInfo = getOfferInfo(event.address, offer.id)
-    const provider = createOrLoadProvider(offerInfo.owner.toHex())
-    computeUnit.provider = provider.id
+    computeUnit.provider = peer.provider
 
     computeUnit.peer = peer.id
     computeUnit.save()
@@ -82,9 +79,12 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
 
 // It updates Peer and Offer.
 export function handlePeerCreated(event: PeerCreated): void {
-    let peer = createOrLoadPeer(event.params.peerId.toHex())
-    let offer = Offer.load(event.params.offerId.toHex()) as Offer
+    const peer = new Peer(event.params.peerId.toHex())
+    const offer = Offer.load(event.params.offerId.toHex()) as Offer
 
+    // const provider = Provider.load(offer.provider) as Provider
+    // log.info('offer.provider {}', offer.provider.toString())
+    peer.provider = offer.provider
     peer.offer = offer.id
     peer.save()
 }

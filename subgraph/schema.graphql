@@ -62,6 +62,7 @@ type Peer @entity {
   "ref to peerId in contract."
   id: ID!
   offer: Offer!
+  provider: Provider!
   computeUnits: [ComputeUnit!] @derivedFrom(field: "peer")
 }
 

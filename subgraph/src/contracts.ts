@@ -7,6 +7,7 @@ import {
 import {Address, Bytes} from "@graphprotocol/graph-ts";
 
 
+// @deprecated.
 export function getOfferInfo(contractAddress: Address, offerId: string): CoreImpl__getOfferResultValue0Struct {
     const contract = CoreImpl.bind(contractAddress)
     return contract.getOffer(Bytes.fromHexString(offerId))
