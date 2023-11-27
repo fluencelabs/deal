@@ -30,9 +30,8 @@ dataSources:
         # Offer features.
         - event: MarketOfferRegistered(bytes32,address,uint256,address,(bytes4,bytes32)[])
           handler: handleMarketOfferRegistered
-#          Currently PeerCreated and ComputeUnitCreated are not supported together as nested events.
-#        - event: PeerCreated(bytes32,bytes32)
-#          handler: handlePeerCreated
+        - event: PeerCreated(bytes32,bytes32)
+          handler: handlePeerCreated
         - event: ComputeUnitCreated(bytes32,bytes32,bytes32)
           handler: handleComputeUnitCreated
         - event: MinPricePerEpochUpdated(bytes32,uint256)

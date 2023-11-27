@@ -38,25 +38,6 @@ export function createOrLoadProvider(providerId: string): Provider {
     return entity as Provider
 }
 
-// TODO: make generic.
-export function createOrLoadOffer(
-    offerId: string,
-    ): Offer {
-    let entity = Offer.load(offerId)
-
-    if (entity == null) {
-        entity = new Offer(offerId)
-        entity.createdAt =
-        entity.updatedAt = ZERO_BIG_INT
-        entity.provider = ZERO_STRING
-        entity.paymentToken = ZERO_STRING
-        entity.pricePerEpoch = ZERO_BIG_INT
-        // entity.effectors = []
-        entity.save()
-    }
-    return entity as Offer
-}
-
 // TODO: add description mapper.
 const DEFAULT_EFFECTOR_DESCRIPTION = "DEFAULT_EFFECTOR_DESCRIPTION"
 

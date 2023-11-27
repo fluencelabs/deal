@@ -10,19 +10,19 @@ import {
     EffectorRemoved,
     MarketOfferRegistered,
     MinPricePerEpochUpdated,
-    PaymentTokenUpdated
+    PaymentTokenUpdated,
+    PeerCreated,
 } from '../../generated/Core/CoreImpl'
 import {
     createOrLoadComputeUnit,
     createOrLoadDeal, createOrLoadDealEffector,
     createOrLoadEffector,
-    createOrLoadOffer,
     createOrLoadOfferEffector,
     createOrLoadPeer, createOrLoadProvider, createOrLoadToken
 } from "./../models";
 
 import {log, store} from '@graphprotocol/graph-ts'
-import {OfferToEffector} from "../../generated/schema";
+import {Offer, OfferToEffector} from "../../generated/schema";
 import {getOfferInfo} from "./../contracts";
 import {Deal as DealTemplate} from "../../generated/templates";
 import {AppCID, getEffectorCID, parseEffectors} from "./utils";
@@ -34,27 +34,27 @@ export function handleMarketOfferRegistered(event: MarketOfferRegistered): void 
     // - emit PeerCreated(offerId, peer.peerId);
     // - emit ComputeUnitCreated(offerId, peerId, unitId);
 
-    let entity = createOrLoadOffer(event.params.offerId.toHex())
+    let offer = new Offer(event.params.offerId.toHex())
     const appCIDS = changetype<Array<AppCID>>(event.params.effectors)
     const effectorEntities = parseEffectors(appCIDS)
 
-    entity.createdAt = event.block.timestamp
-    entity.updatedAt = event.block.timestamp
+    offer.createdAt = event.block.timestamp
+    offer.updatedAt = event.block.timestamp
 
     const provider = createOrLoadProvider(event.params.owner.toHex())
-    entity.provider = provider.id
+    offer.provider = provider.id
 
-    entity.paymentToken = createOrLoadToken(event.params.paymentToken.toHex()).id
-    entity.pricePerEpoch = event.params.minPricePerWorkerEpoch
+    offer.paymentToken = createOrLoadToken(event.params.paymentToken.toHex()).id
+    offer.pricePerEpoch = event.params.minPricePerWorkerEpoch
 
     // Link effectors and offer:
     for (let i=0; i < effectorEntities.length; i++) {
         const effectorId = effectorEntities[i]
         // Automatically create link or ensure that exists.
-        createOrLoadOfferEffector(entity.id, effectorId)
+        createOrLoadOfferEffector(offer.id, effectorId)
     }
 
-    entity.save();
+    offer.save();
 }
 
 // It updates Peer and Offer.
@@ -62,7 +62,7 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
     // Parent events:
     // - emit PeerCreated(offerId, peer.peerId);
     // - emit MarketOfferRegistered
-    let offer = createOrLoadOffer(event.params.offerId.toHex())
+    let offer = Offer.load(event.params.offerId.toHex()) as Offer
     let peer = createOrLoadPeer(event.params.peerId.toHex())
 
     // Since handlePeerCreated could not work with this handler, this logic moved here.
@@ -75,39 +75,35 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
     computeUnit.peer = peer.id
     computeUnit.save()
 
-    peer.offer = offer.id
-    peer.save()
-
     offer.computeUnitsSum += 1
     offer.updatedAt = event.block.timestamp
     offer.save()
 }
 
 // It updates Peer and Offer.
-// TODO: it does not work with handleComputeUnitCreated as well.
-// export function handlePeerCreated(event: PeerCreated): void {
-//     let entity = createOrLoadPeer(event.params.peerId.toHex())
-//     let offer = createOrLoadOffer(event.params.offerId.toHex())
-//
-//     entity.offer = offer.id
-//     entity.save()
-// }
+export function handlePeerCreated(event: PeerCreated): void {
+    let peer = createOrLoadPeer(event.params.peerId.toHex())
+    let offer = Offer.load(event.params.offerId.toHex()) as Offer
+
+    peer.offer = offer.id
+    peer.save()
+}
 
 // ---- Update Methods ----
 export function handleMinPricePerEpochUpdated(event: MinPricePerEpochUpdated): void {
-    let entity = createOrLoadOffer(event.params.offerId.toHex())
-    entity.pricePerEpoch = event.params.minPricePerWorkerEpoch
-    entity.save()
+    let offer = Offer.load(event.params.offerId.toHex()) as Offer
+    offer.pricePerEpoch = event.params.minPricePerWorkerEpoch
+    offer.save()
 }
 
 export function handlePaymentTokenUpdated(event: PaymentTokenUpdated): void {
-    let entity = createOrLoadOffer(event.params.offerId.toHex())
-    entity.paymentToken = createOrLoadToken(event.params.paymentToken.toHex()).id
-    entity.save()
+    let offer = Offer.load(event.params.offerId.toHex()) as Offer
+    offer.paymentToken = createOrLoadToken(event.params.paymentToken.toHex()).id
+    offer.save()
 }
 
 export function handleEffectorAdded(event: EffectorAdded): void {
-    let offer = createOrLoadOffer(event.params.offerId.toHex())
+    let offer = Offer.load(event.params.offerId.toHex()) as Offer
     const appCID = changetype<AppCID>(event.params.effector)
     const cid = getEffectorCID(appCID)
     const effector = createOrLoadEffector(cid)
@@ -119,7 +115,7 @@ export function handleEffectorAdded(event: EffectorAdded): void {
 }
 
 export function handleEffectorRemoved(event: EffectorRemoved): void {
-    let offer = createOrLoadOffer(event.params.offerId.toHex())
+    let offer = Offer.load(event.params.offerId.toHex()) as Offer
     const appCID = changetype<AppCID>(event.params.effector)
     const cidToRemove = getEffectorCID(appCID)
     const effector = createOrLoadEffector(cidToRemove)
@@ -136,7 +132,7 @@ export function handleComputeUnitAddedToDeal(event: ComputeUnitAddedToDeal): voi
 
     // Call the contract to extract peerId of the computeUnit.
     let peer = createOrLoadPeer(event.params.peerId.toHex())
-    let offer = createOrLoadOffer(peer.offer)
+    let offer = Offer.load(peer.offer) as Offer
 
     // Link CU to peer.
     let computeUnitEntity = createOrLoadComputeUnit(unitId.toHex())
@@ -156,7 +152,7 @@ export function handleComputeUnitRemovedFromDeal(event: ComputeUnitRemovedFromDe
 
     // Call the contract to extract peerId of the computeUnit.
     let peer = createOrLoadPeer(event.params.peerId.toHex())
-    let offer = createOrLoadOffer(peer.offer)
+    let offer = Offer.load(peer.offer) as Offer
 
     // rm from storage compute unit.
     let computeUnitEntity = createOrLoadComputeUnit(unitId.toHex())
