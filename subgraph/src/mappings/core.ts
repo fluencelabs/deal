@@ -10,7 +10,8 @@ import {
     EffectorRemoved,
     MarketOfferRegistered,
     MinPricePerEpochUpdated,
-    PaymentTokenUpdated
+    PaymentTokenUpdated,
+    PeerCreated,
 } from '../../generated/Core/CoreImpl'
 import {
     createOrLoadComputeUnit,
@@ -54,13 +55,6 @@ export function handleMarketOfferRegistered(event: MarketOfferRegistered): void 
         createOrLoadOfferEffector(entity.id, effectorId)
     }
 
-    // TODO: how to Handle ComputeUnitCreated events as well via transaction logs instead of contract call.
-    //  mb the flow via separate handler is more natural.
-    // if (event.receipt !== null) {
-    //     event.receipt!.logs.forEach((txLog) => {
-    //         log.info('event.receipt.logs {} and type of: {}', [txLog.topics.toString(), txLog.logType]);
-    //     })
-    // }
     entity.save();
 }
 
@@ -82,23 +76,19 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
     computeUnit.peer = peer.id
     computeUnit.save()
 
-    peer.offer = offer.id
-    peer.save()
-
     offer.computeUnitsSum += 1
     offer.updatedAt = event.block.timestamp
     offer.save()
 }
 
-// It updates Peer and Offer.
-// TODO: it does not work with handleComputeUnitCreated as well.
-// export function handlePeerCreated(event: PeerCreated): void {
-//     let entity = createOrLoadPeer(event.params.peerId.toHex())
-//     let offer = createOrLoadOffer(event.params.offerId.toHex())
-//
-//     entity.offer = offer.id
-//     entity.save()
-// }
+// It updates Peer, Offer, CU.
+export function handlePeerCreated(event: PeerCreated): void {
+    let peer = createOrLoadPeer(event.params.peerId.toHex())
+    let offer = createOrLoadOffer(event.params.offerId.toHex())
+
+    peer.offer = offer.id
+    peer.save()
+}
 
 // ---- Update Methods ----
 export function handleMinPricePerEpochUpdated(event: MinPricePerEpochUpdated): void {
