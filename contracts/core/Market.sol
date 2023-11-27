@@ -118,12 +118,12 @@ contract Market is Initializable {
 
         computePeer.info = ComputePeerInfo({ offerId: offerId, lastUnitIndex: peer.freeUnits - 1 });
 
+        emit PeerCreated(offerId, peer.peerId);
+
         _addComputeUnitsToPeer(offerId, peer.peerId, peer.freeUnits);
 
         // add peer to offer
         offer.freePeerIds.push(peer.peerId);
-
-        emit PeerCreated(offerId, peer.peerId);
     }
 
     function _addComputeUnitsToPeer(bytes32 offerId, bytes32 peerId, uint freeUnits) internal {
@@ -205,14 +205,14 @@ contract Market is Initializable {
             offer.hasEffector[effector] = true;
         }
 
+        emit MarketOfferRegistered(offerId, msg.sender, minPricePerWorkerEpoch, paymentToken, effectors);
+
         uint peerLength = peers.length;
         for (uint i = 0; i < peerLength; i++) {
             _addComputePeerToOffer(offerId, peers[i]);
         }
 
         offerStorage.offerIds.push(offerId);
-
-        emit MarketOfferRegistered(offerId, msg.sender, minPricePerWorkerEpoch, paymentToken, effectors);
     }
 
     function addComputePeers(bytes32 offerId, RegisterComputePeer[] calldata peers) external {
