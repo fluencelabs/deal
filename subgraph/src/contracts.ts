@@ -12,6 +12,7 @@ export function getOfferInfo(contractAddress: Address, offerId: string): CoreImp
     return contract.getOffer(Bytes.fromHexString(offerId))
 }
 
+// @deprecated.
 export function getComputeUnit(contractAddress: Address, unitId: Bytes): CoreImpl__getComputeUnitResultValue0Struct {
     const contract = CoreImpl.bind(contractAddress);
     return contract.getComputeUnit(unitId)

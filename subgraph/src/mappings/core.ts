@@ -23,7 +23,7 @@ import {
 
 import {log, store} from '@graphprotocol/graph-ts'
 import {OfferToEffector} from "../../generated/schema";
-import {getComputeUnit, getDealContract, getOfferInfo} from "./../contracts";
+import {getDealContract, getOfferInfo} from "./../contracts";
 import {Deal as DealTemplate} from "../../generated/templates";
 import {AppCID, getEffectorCID, parseEffectors} from "./utils";
 
