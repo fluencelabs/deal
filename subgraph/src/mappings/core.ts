@@ -14,15 +14,14 @@ import {
     PeerCreated,
 } from '../../generated/Core/CoreImpl'
 import {
-    createOrLoadComputeUnit,
-    createOrLoadDeal, createOrLoadDealEffector,
+    createOrLoadDealEffector,
     createOrLoadEffector,
     createOrLoadOfferEffector,
-    createOrLoadPeer, createOrLoadToken
+    createOrLoadToken, ZERO_BIG_INT
 } from "./../models";
 
 import {log, store} from '@graphprotocol/graph-ts'
-import {ComputeUnit, Offer, OfferToEffector, Peer, Provider} from "../../generated/schema";
+import {ComputeUnit, Deal, Offer, OfferToEffector, Peer, Provider} from "../../generated/schema";
 import {Deal as DealTemplate} from "../../generated/templates";
 import {AppCID, getEffectorCID, parseEffectors} from "./utils";
 
@@ -137,7 +136,7 @@ export function handleComputeUnitAddedToDeal(event: ComputeUnitAddedToDeal): voi
 
 export function handleComputeUnitRemovedFromDeal(event: ComputeUnitRemovedFromDeal): void {
     // Call the contract to extract peerId of the computeUnit.
-    const peer = createOrLoadPeer(event.params.peerId.toHex())
+    const peer = Peer.load(event.params.peerId.toHex()) as Peer
     let offer = Offer.load(peer.offer) as Offer
 
     offer.computeUnitsSum += 1
@@ -153,7 +152,7 @@ export function handleDealCreated(event: DealCreated): void {
         [event.params.owner.toString(), dealAddress.toString()]
     )
 
-    let deal = createOrLoadDeal(dealAddress.toHex())
+    let deal = new Deal(dealAddress.toHex())
     deal.createdAt = event.block.timestamp
     deal.owner = event.params.owner
 
@@ -162,6 +161,10 @@ export function handleDealCreated(event: DealCreated): void {
     deal.targetWorkers = event.params.targetWorkers.toI32()
     deal.maxWorkersPerProvider = event.params.maxWorkersPerProvider.toI32()
     deal.pricePerWorkerEpoch = event.params.pricePerWorkerEpoch
+    const appCID = changetype<AppCID>(event.params.appCID)
+    deal.appCID = getEffectorCID(appCID)
+    deal.withdrawalSum = ZERO_BIG_INT
+    deal.depositedSum = ZERO_BIG_INT
     deal.save()
 
     // Get effectors.

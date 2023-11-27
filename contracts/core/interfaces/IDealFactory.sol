@@ -16,7 +16,8 @@ interface IDealFactory {
         uint targetWorkers,
         uint maxWorkersPerProvider,
         uint pricePerWorkerEpoch,
-        CIDV1[] effectors
+        CIDV1[] effectors,
+        CIDV1 appCID
     );
 
     // ----------------- View -----------------

@@ -263,6 +263,24 @@
         "internalType": "struct CIDV1[]",
         "name": "effectors",
         "type": "tuple[]"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bytes4",
+            "name": "prefixes",
+            "type": "bytes4"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "hash",
+            "type": "bytes32"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct CIDV1",
+        "name": "appCID",
+        "type": "tuple"
       }
     ],
     "name": "DealCreated",
