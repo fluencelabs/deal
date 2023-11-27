@@ -22,14 +22,14 @@ import {
 } from "./../models";
 
 import {log, store} from '@graphprotocol/graph-ts'
-import {Offer, OfferToEffector, Peer, Provider} from "../../generated/schema";
+import {ComputeUnit, Offer, OfferToEffector, Peer, Provider} from "../../generated/schema";
 import {Deal as DealTemplate} from "../../generated/templates";
 import {AppCID, getEffectorCID, parseEffectors} from "./utils";
 
 
 export function handleMarketOfferRegistered(event: MarketOfferRegistered): void {
     // Events: MarketOfferRegistered
-    // Nested events:
+    // Nested events (event order is important):
     // - emit PeerCreated(offerId, peer.peerId);
     // - emit ComputeUnitCreated(offerId, peerId, unitId);
 
@@ -65,10 +65,8 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
     const peer = Peer.load(event.params.peerId.toHex()) as Peer
 
     // Since handlePeerCreated could not work with this handler, this logic moved here.
-    let computeUnit = createOrLoadComputeUnit(event.params.unitId.toHex())
-
+    let computeUnit = new ComputeUnit(event.params.unitId.toHex())
     computeUnit.provider = peer.provider
-
     computeUnit.peer = peer.id
     computeUnit.save()
 
@@ -79,7 +77,7 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
 
 // It updates Peer and Offer.
 export function handlePeerCreated(event: PeerCreated): void {
-    const peer = new Peer(event.params.peerId.toHex())
+    let peer = new Peer(event.params.peerId.toHex())
     const offer = Offer.load(event.params.offerId.toHex()) as Offer
 
     // const provider = Provider.load(offer.provider) as Provider
@@ -128,40 +126,22 @@ export function handleEffectorRemoved(event: EffectorRemoved): void {
 }
 
 export function handleComputeUnitAddedToDeal(event: ComputeUnitAddedToDeal): void {
-    const unitId = event.params.unitId
-
     // Call the contract to extract peerId of the computeUnit.
-    let peer = createOrLoadPeer(event.params.peerId.toHex())
+    const peer = Peer.load(event.params.peerId.toHex()) as Peer
     let offer = Offer.load(peer.offer) as Offer
 
-    // Link CU to peer.
-    let computeUnitEntity = createOrLoadComputeUnit(unitId.toHex())
-    computeUnitEntity.peer = peer.id
-    computeUnitEntity.save()
-
-    // Sum CU in Offer.
-    offer.computeUnitsSum += 1
+    offer.computeUnitsSum -= 1
     offer.updatedAt = event.block.timestamp
-
-    peer.save()
     offer.save()
 }
 
 export function handleComputeUnitRemovedFromDeal(event: ComputeUnitRemovedFromDeal): void {
-    const unitId = event.params.unitId
-
     // Call the contract to extract peerId of the computeUnit.
-    let peer = createOrLoadPeer(event.params.peerId.toHex())
+    const peer = createOrLoadPeer(event.params.peerId.toHex())
     let offer = Offer.load(peer.offer) as Offer
 
-    // rm from storage compute unit.
-    let computeUnitEntity = createOrLoadComputeUnit(unitId.toHex())
-    store.remove('ComputeUnit', computeUnitEntity.id)
-
-    offer.computeUnitsSum -= 1
+    offer.computeUnitsSum += 1
     offer.updatedAt = event.block.timestamp
-
-    peer.save()
     offer.save()
 }
 
