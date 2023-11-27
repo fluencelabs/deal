@@ -114,7 +114,7 @@ export function createOrLoadDeal(dealId: string): Deal {
     if (entity == null) {
         entity = new Deal(dealId)
         entity.createdAt = ZERO_BIG_INT
-        entity.client = ZERO_BYTES
+        entity.owner = ZERO_BYTES
         entity.withdrawalSum = ZERO_BIG_INT
         entity.depositedSum = ZERO_BIG_INT
         entity.paymentToken = ZERO_STRING

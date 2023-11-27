@@ -188,7 +188,7 @@ export function handleDealCreated(event: DealCreated): void {
 
     let deal = createOrLoadDeal(dealAddress.toHex())
     deal.createdAt = event.block.timestamp
-    deal.client = event.params.owner
+    deal.owner = event.params.owner
 
     // Fetch other data from the contract.
     const contract = getDealContract(dealAddress)
