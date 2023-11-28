@@ -86,6 +86,7 @@ jobs:
 
   container:
     if: needs.release-please.outputs.release-created
+    needs: release-please
     strategy:
       matrix:
         include:
