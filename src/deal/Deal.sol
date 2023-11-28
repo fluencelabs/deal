@@ -304,8 +304,8 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
         emit RewardWithdrawn(computeUnitId, reward);
     }
 
-    function addComputeUnit(address computeProvider, bytes32 computeUnitId) public onlyCore returns (bytes32) {
-        return _addComputeUnit(computeProvider, computeUnitId);
+    function addComputeUnit(address computeProvider, bytes32 computeUnitId) public onlyCore {
+        _addComputeUnit(computeProvider, computeUnitId);
     }
 
     function removeComputeUnit(bytes32 computeUnitId) public onlyCore {

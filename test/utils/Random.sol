@@ -11,7 +11,7 @@ import "src/core/Core.sol";
 import "src/deal/Deal.sol";
 
 library Random {
-    function pseudoRandom(string memory seed, uint256 index) internal view returns (bytes32) {
-        return keccak256(abi.encodePacked(blockhash(block.number - 1), seed, index));
+    function pseudoRandom(bytes memory seed) internal view returns (bytes32) {
+        return keccak256(abi.encodePacked(blockhash(block.number - 1), seed));
     }
 }

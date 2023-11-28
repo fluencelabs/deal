@@ -93,7 +93,7 @@ contract WorkerManager is Config, IWorkerManager {
         return workerCount;
     }
 
-    function _addComputeUnit(address computeProvider, bytes32 computeUnit) internal returns (bytes32) {
+    function _addComputeUnit(address computeProvider, bytes32 computeUnit) internal {
         WorkerManagerStorage storage workerStorage = _getWorkerManagerStorage();
 
         // check target compute units count
@@ -124,7 +124,6 @@ contract WorkerManager is Config, IWorkerManager {
         workerStorage.computeUnitsIdsList.push(id);
 
         emit ComputeUnitJoined(id);
-        return id;
     }
 
     function _removeComputeUnit(bytes32 computeUnitId) internal returns (uint256 workerCount) {

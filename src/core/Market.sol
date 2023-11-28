@@ -27,7 +27,7 @@ contract Market is Initializable {
 
     struct ComputePeerInfo {
         bytes32 offerId;
-        uint256 lastUnitIndex;
+        uint256 nextUnitIndex;
     }
 
     struct ComputePeer {
@@ -120,10 +120,13 @@ contract Market is Initializable {
         ComputePeer storage computePeer = offerStorage.peers[peer.peerId];
 
         require(computePeer.info.offerId == bytes32(0x00), "Peer already exists in another offer");
+        require(peer.freeUnits > 0, "Free units should be greater than 0");
 
-        computePeer.info = ComputePeerInfo({offerId: offerId, lastUnitIndex: peer.freeUnits - 1});
+        computePeer.info.offerId = offerId;
 
         _addComputeUnitsToPeer(offerId, peer.peerId, peer.freeUnits);
+
+        computePeer.info.nextUnitIndex = peer.freeUnits;
 
         // add peer to offer
         offer.freePeerIds.push(peer.peerId);
@@ -135,7 +138,7 @@ contract Market is Initializable {
         OfferStorage storage offerStorage = _getOfferStorage();
         ComputePeer storage computePeer = offerStorage.peers[peerId];
 
-        uint256 indexOffset = computePeer.info.lastUnitIndex + 1;
+        uint256 indexOffset = computePeer.info.nextUnitIndex;
         for (uint256 i = 0; i < freeUnits; i++) {
             bytes32 unitId = keccak256(abi.encodePacked(offerId, peerId, i + indexOffset));
 
@@ -147,6 +150,8 @@ contract Market is Initializable {
 
             emit ComputeUnitCreated(offerId, peerId, unitId);
         }
+
+        computePeer.info.nextUnitIndex = indexOffset + freeUnits;
     }
 
     function _mvComputeUnitToDeal(bytes32 unitId, IDeal deal) internal {
@@ -174,15 +179,24 @@ contract Market is Initializable {
 
     // ----------------- Public View -----------------
     function getOffer(bytes32 offerId) public view returns (OfferInfo memory) {
-        return _getOfferStorage().offers[offerId].info;
+        OfferInfo storage offer = _getOfferStorage().offers[offerId].info;
+        require(offer.owner != address(0x00), "Offer doesn't exist");
+
+        return offer;
     }
 
     function getPeer(bytes32 peerId) public view returns (ComputePeerInfo memory) {
-        return _getOfferStorage().peers[peerId].info;
+        ComputePeerInfo storage computePeer = _getOfferStorage().peers[peerId].info;
+        require(computePeer.offerId != bytes32(0x00), "Peer doesn't exist");
+
+        return computePeer;
     }
 
     function getComputeUnit(bytes32 unitId) public view returns (ComputeUnit memory) {
-        return _getOfferStorage().computeUnits[unitId];
+        ComputeUnit storage computeUnit = _getOfferStorage().computeUnits[unitId];
+        require(computeUnit.peerId != bytes32(0x00), "Compute unit doesn't exist");
+
+        return computeUnit;
     }
 
     // ----------------- Public Mutable -----------------

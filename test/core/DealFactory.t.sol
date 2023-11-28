@@ -5,15 +5,13 @@ import {Test, console2} from "forge-std/Test.sol";
 import "forge-std/console.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import "src/dev/TestERC20.sol";
 import "src/core/Core.sol";
 import "src/deal/Deal.sol";
 import "src/deal/interfaces/IConfig.sol";
 import "test/utils/DeployDealSystem.sol";
 import "test/utils/Random.sol";
 
-contract CreateDeal is Test {
+contract DealFactoryTest is Test {
     using SafeERC20 for IERC20;
 
     // ------------------ Types ------------------
@@ -39,10 +37,10 @@ contract CreateDeal is Test {
     {
         CIDV1[] memory effectors = new CIDV1[](10);
         for (uint256 i = 0; i < 10; i++) {
-            effectors[i] = CIDV1({prefixes: 0x12345678, hash: Random.pseudoRandom("effector", i)});
+            effectors[i] = CIDV1({prefixes: 0x12345678, hash: Random.pseudoRandom(abi.encode("effector", i))});
         }
 
-        CIDV1 memory appCID = CIDV1({prefixes: 0x12345678, hash: Random.pseudoRandom("appCID", 0)});
+        CIDV1 memory appCID = CIDV1({prefixes: 0x12345678, hash: Random.pseudoRandom(abi.encode("appCID", 0))});
 
         uint256 minWorkers = 1;
         uint256 maxWorkersPerProvider = 1;
