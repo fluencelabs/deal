@@ -5,7 +5,7 @@ import {
     DealToEffector,
 } from "../generated/schema";
 import {BigInt, Bytes} from "@graphprotocol/graph-ts";
-import {getTokenSymbol} from "./networkConstants";
+import {getTokenSymbol} from "./contracts";
 
 const ZERO_BYTES = Bytes.fromHexString("0x0000000000000000000000000000000000000000")
 const ZERO_STRING = ""

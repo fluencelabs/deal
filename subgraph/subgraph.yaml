@@ -26,6 +26,8 @@ dataSources:
           file: ./abis/CoreImpl.json
         - name: DealImpl
           file: ./abis/DealImpl.json
+        - name: ERC20
+          file: ./abis/ERC20.json
       eventHandlers:
         # Offer features.
         - event: MarketOfferRegistered(bytes32,address,uint256,address,(bytes4,bytes32)[])
