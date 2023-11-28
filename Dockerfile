@@ -1,4 +1,4 @@
-FROM node:16-alpine
+FROM nikolaik/python-nodejs:python3.11-nodejs16-bullseye
 COPY ./ /aurora
 WORKDIR /aurora
 RUN npm install --f && npm run compile
