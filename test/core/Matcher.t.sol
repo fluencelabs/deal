@@ -19,23 +19,34 @@ contract MatcherTest is Test {
     // ------------------ Internals ------------------
 
     function _registerOffers(
-        uint256 count,
+        uint256 offerCount,
+        uint256 peerCountPerOffer,
+        uint256 unitCountPerPeer,
         CIDV1[] memory effectors,
         address paymentToken,
-        uint256 minPricePerWorkerEpoch,
-        uint256 unitCountPerPeer
-    ) internal returns (bytes32[] memory offerIds) {
-        offerIds = new bytes32[](count);
+        uint256 minPricePerWorkerEpoch
+    ) internal returns (bytes32[] memory offerIds, bytes32[][] memory peerIds, bytes32[][][] memory unitIds) {
+        offerIds = new bytes32[](offerCount);
+        peerIds = new bytes32[][](offerCount);
+        unitIds = new bytes32[][][](offerCount);
 
-        for (uint256 i = 0; i < count; i++) {
+        for (uint256 i = 0; i < offerCount; i++) {
             bytes32 offerId = Random.pseudoRandom(abi.encode("offerId", i));
+            offerIds[i] = offerId;
 
-            Market.RegisterComputePeer[] memory peers = new Market.RegisterComputePeer[](10);
-            for (uint256 j = 0; j < 10; j++) {
-                peers[j] = Market.RegisterComputePeer({
-                    peerId: Random.pseudoRandom(abi.encode(offerId, "peers", j)),
-                    freeUnits: unitCountPerPeer
-                });
+            peerIds[i] = new bytes32[](peerCountPerOffer);
+            unitIds[i] = new bytes32[][](peerCountPerOffer);
+
+            Market.RegisterComputePeer[] memory peers = new Market.RegisterComputePeer[](peerCountPerOffer);
+            for (uint256 j = 0; j < peerCountPerOffer; j++) {
+                bytes32 peerId = Random.pseudoRandom(abi.encode(offerId, "peerId", j));
+                peerIds[i][j] = peerId;
+                peers[j] = Market.RegisterComputePeer({peerId: peerId, freeUnits: unitCountPerPeer});
+
+                unitIds[i][j] = new bytes32[](unitCountPerPeer);
+                for (uint256 k = 0; k < unitCountPerPeer; k++) {
+                    unitIds[i][j][k] = keccak256(abi.encodePacked(offerId, peerId, k));
+                }
             }
 
             deployment.core.registerMarketOffer(offerId, minPricePerWorkerEpoch, paymentToken, effectors, peers);
@@ -56,26 +67,39 @@ contract MatcherTest is Test {
         address paymentToken = address(deployment.tUSD);
         uint256 creationBlock = block.number;
         uint256 pricePerWorkerEpoch = 1 ether;
-        uint256 offerCount = 10;
-        uint256 unitCountPerPeer = 5;
-        uint256 freeUnitCount = offerCount * unitCountPerPeer;
+        uint256 offerCount = 3;
+        uint256 unitCountPerPeer = 2;
+        uint256 peerCountPerOffer = 3;
+        uint256 targetWorkers = offerCount * peerCountPerOffer;
         CIDV1 memory appCID = CIDV1({prefixes: 0x12345678, hash: Random.pseudoRandom(abi.encode("appCID"))});
 
         DealMock dealMock = new DealMock(
             pricePerWorkerEpoch,
             paymentToken,
-            offerCount * unitCountPerPeer,
+            targetWorkers,
             effectors,
             appCID,
             creationBlock
         );
 
-        bytes32[] memory offerIds =
-            _registerOffers(offerCount, effectors, paymentToken, pricePerWorkerEpoch, unitCountPerPeer);
+        (bytes32[] memory offerIds, bytes32[][] memory peerIds, bytes32[][][] memory unitIds) = _registerOffers(
+            offerCount, peerCountPerOffer, unitCountPerPeer, effectors, paymentToken, pricePerWorkerEpoch
+        );
 
-        //deployment.core.matchDeal(IDeal(address(dealMock)));
+        deployment.core.matchDeal(IDeal(address(dealMock)));
 
-        //TODO: add expect
+        assertEq(dealMock.getComputeUnitCount(), targetWorkers);
+        for (uint256 i = 0; i < offerIds.length; i++) {
+            bytes32 offerId = offerIds[i];
+            Market.OfferInfo memory offer = deployment.core.getOffer(offerId);
+            for (uint256 j = 0; j < peerIds[i].length; j++) {
+                bytes32 unitId = unitIds[i][j][1];
+                assertEq(deployment.core.getComputeUnit(unitId).deal, address(dealMock));
+                assertEq(dealMock.computeProviderByUnitId(unitId), offer.owner);
+                assertTrue(dealMock.unitExists(unitId));
+            }
+        }
+
         //TODO: event test
     }
 }
@@ -83,9 +107,10 @@ contract MatcherTest is Test {
 contract DealMock {
     uint256 public pricePerWorkerEpoch;
     address public paymentToken;
-    uint256 public freeWorkerSlots;
     CIDV1 public appCID;
     uint256 public creationBlock;
+    uint256 public getComputeUnitCount;
+    uint256 public targetWorkers;
 
     CIDV1[] internal _effectors;
 
@@ -95,14 +120,14 @@ contract DealMock {
     constructor(
         uint256 _pricePerWorkerEpoch,
         address _paymentToken,
-        uint256 _freeWorkerSlots,
+        uint256 _targetWorkers,
         CIDV1[] memory effectors_,
         CIDV1 memory _appCID,
         uint256 _creationBlock
     ) {
         pricePerWorkerEpoch = _pricePerWorkerEpoch;
         paymentToken = _paymentToken;
-        freeWorkerSlots = _freeWorkerSlots;
+        targetWorkers = _targetWorkers;
         _effectors = effectors_;
         appCID = _appCID;
         creationBlock = _creationBlock;
@@ -122,11 +147,10 @@ contract DealMock {
 
     function addComputeUnit(address computeProvider, bytes32 unitId) external {
         require(!unitExists[unitId], "Unit already exists");
-        require(freeWorkerSlots > 0, "No free worker slots");
 
         unitExists[unitId] = true;
         computeProviderByUnitId[unitId] = computeProvider;
 
-        freeWorkerSlots--;
+        getComputeUnitCount++;
     }
 }
