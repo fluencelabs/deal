@@ -1,25 +1,66 @@
-# Deal Contracts System
+## Foundry
 
-## Publish typechain
+**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
 
-You have to open the main branch and pull the latest version of it locally Then
-do the following (replace versions with the actual versions that you want):
+Foundry consists of:
+
+-   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
+-   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
+-   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
+-   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+
+## Documentation
+
+https://book.getfoundry.sh/
+
+## Usage
+
+### Build
 
 ```shell
-git tag -a v0.0.0 -m ""
-git push origin v0.0.0
+$ forge build
 ```
 
-## Run local network with contracts
+### Test
 
 ```shell
-npm install
-npm run compile
-npx hardhat node
+$ forge test
 ```
 
-## Run local network with contracts in docker
+### Format
 
 ```shell
-docker-compose up -d
+$ forge fmt
+```
+
+### Gas Snapshots
+
+```shell
+$ forge snapshot
+```
+
+### Anvil
+
+```shell
+$ anvil
+```
+
+### Deploy
+
+```shell
+$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
+```
+
+### Cast
+
+```shell
+$ cast <subcommand>
+```
+
+### Help
+
+```shell
+$ forge --help
+$ anvil --help
+$ cast --help
 ```

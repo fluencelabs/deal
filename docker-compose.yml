@@ -1,5 +1,5 @@
 services:
-  hardhat-node:
+  anvil-node:
     build:
       context: .
     ports:

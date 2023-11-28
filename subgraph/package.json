@@ -1,0 +1,22 @@
+{
+  "name": "FluenceDeal",
+  "license": "UNLICENSED",
+  "scripts": {
+    "import-contracts-abi": "ts-node scripts/importContractsAbi.ts",
+    "compile": "graph codegen && graph build",
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ fluence-deal-contracts",
+    "create-local": "graph create --node http://localhost:8020/ fluence-deal-contracts",
+    "remove-local": "graph remove --node http://localhost:8020/ fluence-deal-contracts",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 fluence-deal-contracts",
+    "test": "graph test",
+    "graph-node": "docker-compose up -d",
+    "graph-local-clean": "docker-compose down -v"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "0.60.0",
+    "@graphprotocol/graph-ts": "0.30.0"
+  },
+  "devDependencies": { "matchstick-as": "0.5.0" }
+}

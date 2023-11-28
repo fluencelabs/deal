@@ -1,0 +1,27 @@
+{
+  "Core": {
+    "addr": "0x367761085BF3C12e5DA2Df99AC6E1a824612b8fb",
+    "codeHash": "0x2adb7ee5e3cf34892185680e4085bd4aea7f58bd5aa562bf4ef120c1fb79e059",
+    "creationCodeHash": "0x74cc9f0486668ad4ce2c5abd6537600f466db7e5928c81bd101ffc7c9351a02c"
+  },
+  "CoreImpl": {
+    "addr": "0xC9a43158891282A2B1475592D5719c001986Aaec",
+    "codeHash": "0xb0f1e441fc149662c947a72ae3378a6a6863a9232143f640c850f0970f622479",
+    "creationCodeHash": "0x0ab300ba73f9ba4844640528d019be3ec69e145ccf762c1abd28ceedb22e87a7"
+  },
+  "DealImpl": {
+    "addr": "0x1c85638e118b37167e9298c2268758e058DdfDA0",
+    "codeHash": "0xf01b5bbae68f1a3b3ca6dd9d02428a9064b966b481925dda4c197a06f04a4d1d",
+    "creationCodeHash": "0xf11db2849071a7ed34012eb6338ae26e67305fa374a5a14d516c3c1c07152196"
+  },
+  "tFLT": {
+    "addr": "0x5081a39b8A5f0E35a8D959395a630b68B74Dd30f",
+    "codeHash": "0x9cac2e71acb98d58c2a9b469ce0b803ccf7ca7785735427c1719ae4db6cd9b9c",
+    "creationCodeHash": "0xbe50b8ab76f5388bc6259940a27831bf6a9e474156ecbad05d330ccd8a93c57b"
+  },
+  "tUSD": {
+    "addr": "0x1fA02b2d6A771842690194Cf62D91bdd92BfE28d",
+    "codeHash": "0x9cac2e71acb98d58c2a9b469ce0b803ccf7ca7785735427c1719ae4db6cd9b9c",
+    "creationCodeHash": "0xfc2aa0f8034cd63cc549e71c24508afae5cb19ed0a820c89e5377c845e0f2cb8"
+  }
+}
