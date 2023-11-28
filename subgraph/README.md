@@ -41,12 +41,14 @@ npm run compile
 
 2. Create the subgraph
 ```bash
-npm run create-local
+npm run create:local
 ```
 
 4. Deploy the subgraph on local graph node
+> Note, that it will get localhost contract addresses and block number from [networks.json](config/networks.json) and inserts into subgraph.yaml.
+
 ```bash
-npm run deploy-local 
+npm run deploy:local 
 ```
 
 Since now, you have GUI of the deployed graph: http://localhost:8000/subgraphs/name/<YourContractName>
@@ -73,6 +75,44 @@ but first: you should deploy on localhost your updated contract, e.g. `npx hardh
 
 ```bash
 ts-node scripts/importContractsAbi.ts && npm run compile && npm run create-local && npm run deploy-local
+```
+
+# Deploy 
+
+## To Localhost
+Check `## Dev in Subgraph Repo` section.
+
+## To TheGraph Studio [not for subnets]
+> Note, this solution is only for **dev querying** or for **L1** deploy on some networks. 
+
+E.g. for the **Mumbai** network
+
+1. Auth in the Graph with deployKey from GUI
+```bash
+graph auth --studio <deployKey>
+```
+
+> Before deploy on **Mumbai** check that `subgraph.yml` consists of mumbai **contract address** and **suitable block number**, 
+>  and network to **mumbai**.
+
+2. Deploy
+> Note, that bia command below it will get mumbai contract addresses and block number from [networks.json](config/networks.json) and inserts into subgraph.yaml.
+
+```bash
+npm run deploy:studio:stage
+```
+
+## To Hosted Service [not for subnets]
+> Note, this solution for deploy only on supported testnets, and instead of  **Studio** deploy it gives you full featured query API for free (not simple dev quiery). 
+
+0. Get your token: https://thegraph.com/docs/en/deploying/deploying-a-subgraph-to-hosted/#store-the-access-token
+```bash
+graph auth --product hosted-service <token>
+```
+
+E.g. according to the site after login from Github:
+```bash
+graph deploy --product hosted-service --network mumbai <githubName>/fluence-deal-contracts
 ```
 
 # TODO
