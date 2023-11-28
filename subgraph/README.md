@@ -57,7 +57,7 @@ E.g. the graph query to insert in http://localhost:8000/subgraphs/name/<YourCont
 {
   offers {
     id
-    computeUnitsSum
+    computeUnitsAvailable
     peers {
       id
       computeUnits

@@ -24,6 +24,7 @@ import {log, store} from '@graphprotocol/graph-ts'
 import {ComputeUnit, Deal, Offer, OfferToEffector, Peer, Provider} from "../../generated/schema";
 import {Deal as DealTemplate} from "../../generated/templates";
 import {AppCID, getEffectorCID, parseEffectors} from "./utils";
+import {getProviderName} from "../networkConstants";
 
 
 export function handleMarketOfferRegistered(event: MarketOfferRegistered): void {
@@ -33,7 +34,10 @@ export function handleMarketOfferRegistered(event: MarketOfferRegistered): void 
     // - emit ComputeUnitCreated(offerId, peerId, unitId);
 
     // Create provider.
-    const provider = new Provider(event.params.owner.toHex())
+    const providerAddress = event.params.owner.toHex()
+    let provider = new Provider(providerAddress)
+    provider.name = getProviderName(providerAddress)
+    provider.createdAt = event.block.timestamp
     provider.save()
 
     // Create Offer.
@@ -69,7 +73,8 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
     computeUnit.peer = peer.id
     computeUnit.save()
 
-    offer.computeUnitsSum += 1
+    offer.computeUnitsAvailable += 1
+    offer.computeUnitsTotal += 1
     offer.updatedAt = event.block.timestamp
     offer.save()
 }
@@ -129,7 +134,7 @@ export function handleComputeUnitAddedToDeal(event: ComputeUnitAddedToDeal): voi
     const peer = Peer.load(event.params.peerId.toHex()) as Peer
     let offer = Offer.load(peer.offer) as Offer
 
-    offer.computeUnitsSum -= 1
+    offer.computeUnitsAvailable -= 1
     offer.updatedAt = event.block.timestamp
     offer.save()
 }
@@ -139,7 +144,7 @@ export function handleComputeUnitRemovedFromDeal(event: ComputeUnitRemovedFromDe
     const peer = Peer.load(event.params.peerId.toHex()) as Peer
     let offer = Offer.load(peer.offer) as Offer
 
-    offer.computeUnitsSum += 1
+    offer.computeUnitsAvailable += 1
     offer.updatedAt = event.block.timestamp
     offer.save()
 }

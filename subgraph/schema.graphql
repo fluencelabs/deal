@@ -8,6 +8,10 @@ type Token @entity(immutable: true) {
 
 type Provider @entity {
   id: ID!
+  name: String!
+  createdAt: BigInt!
+
+  offers: [Offer!] @derivedFrom(field: "provider")
 }
 
 # ---- Core Contract ----
@@ -27,7 +31,8 @@ type Offer @entity {
   effectors: [OfferToEffector!] @derivedFrom(field: "offer")
 
   # Add Statistics below.
-  computeUnitsSum: Int  # Sum of all connected compute units.
+  computeUnitsAvailable: Int  # Sum of all available compute units in the offer (not in the deals).
+  computeUnitsTotal: Int  # Sum of all compute units registered in the offer. TODO: when CU deleted?
 }
 
 
