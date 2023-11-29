@@ -111,6 +111,6 @@ jobs:
       - name: Create and push manifest images
         uses: Noelware/docker-manifest-action@0.4.0
         with:
-          inputs: fluencelabs/chain-rpc:${{ needs.container.output.version }}
+          inputs: fluencelabs/chain-rpc:${{ needs.container.outputs.version }}
           images: fluencelabs/chain-rpc:${{ needs.container.outputs.version }}-amd64,fluencelabs/chain-rpc:${{ needs.container.outputs.version }}-arm64
           push: true
