@@ -21,7 +21,7 @@
         "fmt:ts": "prettier 'deploy/**/*.ts' 'test/**/*.ts' -w"
     },
     "dependencies": {
-        "@nomicfoundation/hardhat-toolbox": "^3.0.0",
+        "@nomicfoundation/hardhat-toolbox": "^4.0.0",
         "@openzeppelin/contracts": "^4.9.3",
         "@openzeppelin/contracts-upgradeable": "^4.9.3",
         "dotenv": "^16.3.1"
