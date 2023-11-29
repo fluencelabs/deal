@@ -78,6 +78,8 @@ templates:
           handler: handleAppCIDChanged
         - event: ComputeUnitJoined(bytes32)
           handler: handleComputeUnitJoined
+        - event: ComputeUnitRemoved(bytes32)
+          handler: handleComputeUnitRemoved
         - event: WorkerIdUpdated(bytes32,bytes32)
           handler: handleWorkerIdUpdated
       file: ./src/mappings/deal.ts

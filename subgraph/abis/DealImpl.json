@@ -93,7 +93,7 @@
         "type": "bytes32"
       }
     ],
-    "name": "ComputeUnitExited",
+    "name": "ComputeUnitJoined",
     "type": "event"
   },
   {
@@ -106,7 +106,7 @@
         "type": "bytes32"
       }
     ],
-    "name": "ComputeUnitJoined",
+    "name": "ComputeUnitRemoved",
     "type": "event"
   },
   {

@@ -129,6 +129,7 @@ export function handleEffectorRemoved(event: EffectorRemoved): void {
     offer.save()
 }
 
+// Note, in Deal we also handle ComputeUnitJoined.
 export function handleComputeUnitAddedToDeal(event: ComputeUnitAddedToDeal): void {
     // Call the contract to extract peerId of the computeUnit.
     const peer = Peer.load(event.params.peerId.toHex()) as Peer
@@ -139,6 +140,7 @@ export function handleComputeUnitAddedToDeal(event: ComputeUnitAddedToDeal): voi
     offer.save()
 }
 
+// Note, in Deal we also handle ComputeUnitRemoved.
 export function handleComputeUnitRemovedFromDeal(event: ComputeUnitRemovedFromDeal): void {
     // Call the contract to extract peerId of the computeUnit.
     const peer = Peer.load(event.params.peerId.toHex()) as Peer

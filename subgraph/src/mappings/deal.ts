@@ -4,7 +4,9 @@ import {
     ComputeUnitJoined,
     Deposited,
     MaxPaidEpochUpdated,
-    Withdrawn, WorkerIdUpdated
+    Withdrawn,
+    WorkerIdUpdated,
+    ComputeUnitRemoved
 } from "../../generated/Core/DealImpl";
 import {ComputeUnit, Deal} from "../../generated/schema";
 
@@ -22,7 +24,7 @@ export function handleWithdrawn(event: Withdrawn): void {
 
 export function handleMaxPaidEpochUpdated(event: MaxPaidEpochUpdated): void {
     let deal = Deal.load(event.address.toHex()) as Deal
-    deal.maxPaidEpoch = deal.depositedSum.minus(event.params.maxPaidEpoch)
+    deal.maxPaidEpoch = event.params.maxPaidEpoch
     deal.save()
 }
 
@@ -34,11 +36,20 @@ export function handleAppCIDChanged(event: AppCIDChanged): void {
 }
 
 // Joined to Deal.
+// Note, in Market we also handle handleComputeUnitAddedToDeal.
 export function handleComputeUnitJoined(event: ComputeUnitJoined): void {
     const deal = Deal.load(event.address.toHex()) as Deal
 
     let computeUnit = ComputeUnit.load(event.params.unitId.toHex()) as ComputeUnit
     computeUnit.deal = deal.id
+    computeUnit.save()
+}
+
+// Removed from Deal.
+// Note, in Market we also handle ComputeUnitRemovedFromDeal.
+export function handleComputeUnitRemoved(event: ComputeUnitRemoved): void {
+    let computeUnit = ComputeUnit.load(event.params.unitId.toHex()) as ComputeUnit
+    computeUnit.deal = null
     computeUnit.save()
 }
 
