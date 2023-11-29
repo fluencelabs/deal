@@ -31,7 +31,15 @@ start-local-chain:
 
 deploy-local:
 	@make verify-command program=forge
-	@forge script script/Deploy.s.sol --rpc-url local  \
+	@forge script script/Deploy.s.sol --rpc-url anvil-node  \
+	--mnemonics "test test test test test test test test test test test junk" \
+	--sender 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --broadcast
+
+	@echo "\033[0;32mSuccess! Contracts deployed to local chain.\033[0m"
+
+deploy-docker:
+	@make verify-command program=forge
+	@forge script script/Deploy.s.sol --rpc-url http://anvil-node:8545  \
 	--mnemonics "test test test test test test test test test test test junk" \
 	--sender 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --broadcast
 

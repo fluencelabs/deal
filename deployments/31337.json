@@ -1,27 +1,27 @@
 {
   "Core": {
     "addr": "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
-    "codeHash": "0x2adb7ee5e3cf34892185680e4085bd4aea7f58bd5aa562bf4ef120c1fb79e059",
-    "creationCodeHash": "0x32783b565ad7795da41affb3f18a9b8280f8748cbdb62165ff5ff9ca0b39654c"
+    "codeHash": "0x7acc71481e0405a7810703a753b0a0a584eb91d1b714c1f6c3fad170a5155c54",
+    "creationCodeHash": "0x22de918124bc46c30b8889f4e76e23cce8bc7687236631b4a0f8f1dca6719554"
   },
   "CoreImpl": {
     "addr": "0x4ed7c70F96B99c776995fB64377f0d4aB3B0e1C1",
-    "codeHash": "0xb0f1e441fc149662c947a72ae3378a6a6863a9232143f640c850f0970f622479",
-    "creationCodeHash": "0x0ab300ba73f9ba4844640528d019be3ec69e145ccf762c1abd28ceedb22e87a7"
+    "codeHash": "0x57bd1655f73d2e0e12f4b78e1539e6e5d967f20c7e0252702fad9dcaa7342d6c",
+    "creationCodeHash": "0x0da09740f21c0eb77e957461f472726a2b34e7c566e2f38a1c285f457f5baeda"
   },
   "DealImpl": {
     "addr": "0x322813Fd9A801c5507c9de605d63CEA4f2CE6c44",
-    "codeHash": "0xf01b5bbae68f1a3b3ca6dd9d02428a9064b966b481925dda4c197a06f04a4d1d",
-    "creationCodeHash": "0xf11db2849071a7ed34012eb6338ae26e67305fa374a5a14d516c3c1c07152196"
+    "codeHash": "0xfaee52a9b32c885280e027cea9feb9da366bd7864adfd1d38d8e19d0ecf96650",
+    "creationCodeHash": "0x228b57bf7febf2e37bd1d9bccdf0ff4cb84d9ed00708621260f83879cfe504ef"
   },
   "tFLT": {
     "addr": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-    "codeHash": "0x9cac2e71acb98d58c2a9b469ce0b803ccf7ca7785735427c1719ae4db6cd9b9c",
-    "creationCodeHash": "0xbe50b8ab76f5388bc6259940a27831bf6a9e474156ecbad05d330ccd8a93c57b"
+    "codeHash": "0xfc444be89c2affe6c6868ac3e7b7c1958222b1723e0a523c3c03268d1e32cdfb",
+    "creationCodeHash": "0x9930e1e9930fbac3dde086340b13ea224aecea31f964827e1bb714871116a821"
   },
   "tUSD": {
     "addr": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-    "codeHash": "0x9cac2e71acb98d58c2a9b469ce0b803ccf7ca7785735427c1719ae4db6cd9b9c",
-    "creationCodeHash": "0xfc2aa0f8034cd63cc549e71c24508afae5cb19ed0a820c89e5377c845e0f2cb8"
+    "codeHash": "0xfc444be89c2affe6c6868ac3e7b7c1958222b1723e0a523c3c03268d1e32cdfb",
+    "creationCodeHash": "0xae35ee52015249b87c5219c9e95aaca61168450eff4303b0d9fa5af243fb7ef5"
   }
 }
