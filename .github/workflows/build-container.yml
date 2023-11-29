@@ -14,6 +14,7 @@ concurrency:
 
 jobs:
   container:
+    name: "Publish ${{ matrix.arch }} container"
 
     strategy:
       matrix:
@@ -24,6 +25,9 @@ jobs:
             runner: linux-arm64-m-xlarge
 
     runs-on: ${{ matrix.runner }}
+
+    outputs:
+      version: ${{ steps.version.outputs.version }}
 
     permissions:
       contents: read
@@ -64,13 +68,53 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
 
-      - name: Build and push chain-rpc container
+      - name: Build and push chain-rpc arch container
         uses: docker/build-push-action@v4
         with:
           context: .
           platforms: linux/${{ matrix.arch }}
           push: true
+          provenance: false
           tags: |
-            fluencelabs/chain-rpc:${{ steps.version.outputs.version }}
+            fluencelabs/chain-rpc:${{ steps.version.outputs.version }}-${{ matrix.arch }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  manifest:
+    name: "Merge arch images"
+    needs: container
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Import secrets
+        uses: hashicorp/vault-action@v2.7.3
+        with:
+          url: https://vault.fluence.dev
+          path: jwt/github
+          role: ci
+          method: jwt
+          jwtGithubAudience: "https://github.com/fluencelabs"
+          jwtTtl: 300
+          exportToken: false
+          secrets: |
+            kv/hub.docker.com/fluencebot username | DOCKER_USERNAME ;
+            kv/hub.docker.com/fluencebot password | DOCKER_PASSWORD
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+
+      - name: Merge arch containers
+        uses: Noelware/docker-manifest-action@0.4.0
+        with:
+          inputs: fluencelabs/chain-rpc:${{ needs.container.outputs.version }}
+          images: fluencelabs/chain-rpc:${{ needs.container.outputs.version }}-amd64,fluencelabs/chain-rpc:${{ needs.container.outputs.version }}-arm64
+          push: true
+          amend: true
