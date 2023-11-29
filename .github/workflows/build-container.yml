@@ -72,6 +72,7 @@ jobs:
           context: .
           platforms: linux/${{ matrix.arch }}
           push: true
+          provenance: false
           tags: |
             fluencelabs/chain-rpc:${{ steps.version.outputs.version }}-${{ matrix.arch }}
           cache-from: type=gha
