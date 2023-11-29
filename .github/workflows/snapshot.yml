@@ -191,7 +191,7 @@ jobs:
       - name: Merge arch containers
         uses: Noelware/docker-manifest-action@0.4.0
         with:
-          inputs: docker.fluence.dev/chain-rpc:${{ steps.version.outputs.id }}
+          inputs: docker.fluence.dev/chain-rpc:${{ needs.container.outputs.version }}
           images: docker.fluence.dev/chain-rpc:${{ needs.container.outputs.version }}-amd64,docker.fluence.dev/chain-rpc:${{ needs.container.outputs.version }}-arm64
           push: true
           amend: true
