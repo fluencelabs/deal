@@ -114,3 +114,4 @@ jobs:
           inputs: fluencelabs/chain-rpc:${{ needs.container.outputs.version }}
           images: fluencelabs/chain-rpc:${{ needs.container.outputs.version }}-amd64,fluencelabs/chain-rpc:${{ needs.container.outputs.version }}-arm64
           push: true
+          amend: true
