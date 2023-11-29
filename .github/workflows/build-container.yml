@@ -14,6 +14,8 @@ concurrency:
 
 jobs:
   container:
+    name: "Publish ${{ matrix.arch }} container"
+
     strategy:
       matrix:
         include:
@@ -66,7 +68,7 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
 
-      - name: Build and push chain-rpc container
+      - name: Build and push chain-rpc arch container
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -109,7 +111,7 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
 
-      - name: Create and push manifest images
+      - name: Merge arch containers
         uses: Noelware/docker-manifest-action@0.4.0
         with:
           inputs: fluencelabs/chain-rpc:${{ needs.container.outputs.version }}
