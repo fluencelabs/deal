@@ -8,6 +8,9 @@
    * [Ethereum Public Networks](#ethereum-public-networks)
    * [Run Deploy](#run-deploy)
 
+# Repo Requirement
+e.g. Node v16.14.2
+
 # Develop
 ## Publish typechain
 

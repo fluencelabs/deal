@@ -15,7 +15,7 @@ interface IWorkerManager {
 
     // ------------------ Events ------------------
     event ComputeUnitJoined(bytes32 unitId);
-    event ComputeUnitExited(bytes32 unitId);
+    event ComputeUnitRemoved(bytes32 unitId);
 
     event WorkerIdUpdated(bytes32 computeUnitId, bytes32 workerId);
 

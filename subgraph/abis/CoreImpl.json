@@ -72,6 +72,12 @@
         "internalType": "contract IDeal",
         "name": "deal",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "peerId",
+        "type": "bytes32"
       }
     ],
     "name": "ComputeUnitAddedToDeal",
@@ -159,6 +165,12 @@
         "internalType": "contract IDeal",
         "name": "deal",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "peerId",
+        "type": "bytes32"
       }
     ],
     "name": "ComputeUnitRemovedFromDeal",
@@ -203,6 +215,72 @@
         "internalType": "uint256",
         "name": "createdAtEpoch",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "contract IERC20",
+        "name": "paymentToken",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "minWorkers",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "targetWorkers",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "maxWorkersPerProvider",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "pricePerWorkerEpoch",
+        "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bytes4",
+            "name": "prefixes",
+            "type": "bytes4"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "hash",
+            "type": "bytes32"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct CIDV1[]",
+        "name": "effectors",
+        "type": "tuple[]"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bytes4",
+            "name": "prefixes",
+            "type": "bytes4"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "hash",
+            "type": "bytes32"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct CIDV1",
+        "name": "appCID",
+        "type": "tuple"
       }
     ],
     "name": "DealCreated",

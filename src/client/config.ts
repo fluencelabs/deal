@@ -8,6 +8,7 @@ export declare const CONTRACTS_ENV: readonly ["kras", "testnet", "stage", "local
 export type ContractsENV = (typeof CONTRACTS_ENV)[number];
 
 export type ChainConfig = {
+    dealImplAbi: any;
     coreImplAbi: any;
     globalCoreAddress: string;
     dealFactoryAddress: string;
@@ -34,11 +35,13 @@ async function _tryImportDeployment(jsonPath: string): Promise<HardhatDeployment
 
 async function _getConfig(networkName: ContractsENV) {
     const coreImplDeployment = await _tryImportDeployment(path.join(HARDHAT_DEPLOYMENTS_DIR, networkName, "CoreImpl.json"));
+    const dealImplDeployment = await _tryImportDeployment(path.join(HARDHAT_DEPLOYMENTS_DIR, networkName, "DealImpl.json"));
     // TODO: deprecate the below one...
     const globalCoreDeployment = await _tryImportDeployment(path.join(HARDHAT_DEPLOYMENTS_DIR, networkName, "GlobalCore.json"));
     const factoryDeployment = await _tryImportDeployment(path.join(HARDHAT_DEPLOYMENTS_DIR, networkName, "DealFactory.json"));
     const fltDeployment = await _tryImportDeployment(path.join(HARDHAT_DEPLOYMENTS_DIR, networkName, "FLT.json"));
     return {
+        dealImplAbi: dealImplDeployment.abi,
         coreImplAbi: coreImplDeployment.abi,
         globalCoreAddress: globalCoreDeployment.address,
         dealFactoryAddress: factoryDeployment.address,

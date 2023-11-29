@@ -149,7 +149,7 @@ contract WorkerManager is Config, IWorkerManager {
         delete workerStorage.computeUnitById[computeUnitId];
         workerStorage.computeUnitsIdsList.remove(computeUnitId);
 
-        emit ComputeUnitExited(computeUnitId);
+        emit ComputeUnitRemoved(computeUnitId);
 
         return workerCount;
     }

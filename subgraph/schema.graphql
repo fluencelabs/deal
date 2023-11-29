@@ -1,6 +1,20 @@
 # Comments relates to Figma screen names.
 # Names according to Figma. Suffix according to api list, details
 
+type Token @entity(immutable: true) {
+  id: ID!  # Token Address
+  symbol: String!
+}
+
+type Provider @entity {
+  id: ID!
+  name: String!
+  createdAt: BigInt!
+
+  offers: [Offer!] @derivedFrom(field: "provider")
+}
+
+# ---- Core Contract ----
 type Offer @entity {
   """Used in the next figma views:
     - Offer from List Of offers 1.2.
@@ -9,16 +23,18 @@ type Offer @entity {
   id: ID!  # Ref to offerId in contract.
   createdAt: BigInt!
   updatedAt: BigInt!
-  provider: Bytes!
+  provider: Provider!
   pricePerEpoch: BigInt!
-  tokenSymbol: String!
-  peers: [Peer!] @derivedFrom(field: "offer")
-  effectors: [OfferEffector!] @derivedFrom(field: "offer")
+  paymentToken: Token!
 
-  "Sum of all connected compute units."
-  computeUnitsSum: Int
-# deprecated: maxCollateralPerWorker: BigInt
+  peers: [Peer!] @derivedFrom(field: "offer")
+  effectors: [OfferToEffector!] @derivedFrom(field: "offer")
+
+  # Add Statistics below.
+  computeUnitsAvailable: Int  # Sum of all available compute units in the offer (not in the deals).
+  computeUnitsTotal: Int  # Sum of all compute units registered in the offer. TODO: when CU deleted?
 }
+
 
 """To support many2many b/w offer and effector.
 E.g. to use
@@ -32,7 +48,7 @@ E.g. to use
   }
 }
 """
-type OfferEffector @entity(immutable: true) {
+type OfferToEffector @entity {
     id: ID! # Set to `user.id.concat(organization.id)`
     offer: Offer!
     effector: Effector!
@@ -40,16 +56,61 @@ type OfferEffector @entity(immutable: true) {
 
 
 "Effector table is obsolete table since it is a simple mapping."
-type Effector @entity(immutable: true) {
+type Effector @entity {
   "id and CID are the same."
   id: ID!  # Currently effector id is merged(prefix + hash) aka 1 CID.
   description: String!
-  offers: [OfferEffector!] @derivedFrom(field: "effector")
+  offers: [OfferToEffector!] @derivedFrom(field: "effector")
 }
 
 type Peer @entity {
   "ref to peerId in contract."
   id: ID!
   offer: Offer!
-  computeUnits: Int!
+  provider: Provider!
+  computeUnits: [ComputeUnit!] @derivedFrom(field: "peer")
+}
+
+type ComputeUnit @entity {
+  id: ID!
+  peer: Peer!
+  "In order to simplify relation."
+  provider: Provider!
+
+  deal: Deal
+  workerID: String
+  # TODO: worker status "Expired" how to calculate.
+}
+
+# ---- Deal Contract ----
+type DealToEffector @entity {
+    id: ID! # Set to `deal.id.concat(effector.id)`
+    deal: Deal!
+    effector: Effector!
+}
+
+type Deal @entity {
+  id: ID!  # Ref to offerId in contract.
+  appCID: String!
+  createdAt: BigInt!
+  owner: Bytes!
+  # Settings from public methods.
+  minWorkers: Int!
+  targetWorkers: Int!
+  maxWorkersPerProvider: Int!
+  paymentToken: Token!
+  pricePerWorkerEpoch: BigInt!
+  effectors: [DealToEffector!] @derivedFrom(field: "deal")
+  # TODO: add whitelists...
+  # TODO: add blacklists...
+  #  balance: BigInt!  # on-request via frontend
+  #  status: DealStatus!  # on-request via frontend
+
+  # Add Statistics below.
+  withdrawalSum: BigInt!
+  depositedSum: BigInt!  # calculated from the withdraw() [no rewards withdraw].
+  maxPaidEpoch: BigInt
+
+  "I.e. Matching Result (Figma)."
+  addedComputeUnits: [ComputeUnit!] @derivedFrom(field: "deal")
 }
