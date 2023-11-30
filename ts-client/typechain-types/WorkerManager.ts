@@ -75,8 +75,8 @@ export interface WorkerManagerInterface extends Interface {
   getEvent(
     nameOrSignatureOrTopic:
       | "AppCIDChanged"
-      | "ComputeUnitExited"
       | "ComputeUnitJoined"
+      | "ComputeUnitRemoved"
       | "Initialized"
       | "OwnershipTransferred"
       | "WorkerIdUpdated"
@@ -238,7 +238,7 @@ export namespace AppCIDChangedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace ComputeUnitExitedEvent {
+export namespace ComputeUnitJoinedEvent {
   export type InputTuple = [unitId: BytesLike];
   export type OutputTuple = [unitId: string];
   export interface OutputObject {
@@ -250,7 +250,7 @@ export namespace ComputeUnitExitedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace ComputeUnitJoinedEvent {
+export namespace ComputeUnitRemovedEvent {
   export type InputTuple = [unitId: BytesLike];
   export type OutputTuple = [unitId: string];
   export interface OutputObject {
@@ -489,18 +489,18 @@ export interface WorkerManager extends BaseContract {
     AppCIDChangedEvent.OutputObject
   >;
   getEvent(
-    key: "ComputeUnitExited"
-  ): TypedContractEvent<
-    ComputeUnitExitedEvent.InputTuple,
-    ComputeUnitExitedEvent.OutputTuple,
-    ComputeUnitExitedEvent.OutputObject
-  >;
-  getEvent(
     key: "ComputeUnitJoined"
   ): TypedContractEvent<
     ComputeUnitJoinedEvent.InputTuple,
     ComputeUnitJoinedEvent.OutputTuple,
     ComputeUnitJoinedEvent.OutputObject
+  >;
+  getEvent(
+    key: "ComputeUnitRemoved"
+  ): TypedContractEvent<
+    ComputeUnitRemovedEvent.InputTuple,
+    ComputeUnitRemovedEvent.OutputTuple,
+    ComputeUnitRemovedEvent.OutputObject
   >;
   getEvent(
     key: "Initialized"
@@ -536,17 +536,6 @@ export interface WorkerManager extends BaseContract {
       AppCIDChangedEvent.OutputObject
     >;
 
-    "ComputeUnitExited(bytes32)": TypedContractEvent<
-      ComputeUnitExitedEvent.InputTuple,
-      ComputeUnitExitedEvent.OutputTuple,
-      ComputeUnitExitedEvent.OutputObject
-    >;
-    ComputeUnitExited: TypedContractEvent<
-      ComputeUnitExitedEvent.InputTuple,
-      ComputeUnitExitedEvent.OutputTuple,
-      ComputeUnitExitedEvent.OutputObject
-    >;
-
     "ComputeUnitJoined(bytes32)": TypedContractEvent<
       ComputeUnitJoinedEvent.InputTuple,
       ComputeUnitJoinedEvent.OutputTuple,
@@ -556,6 +545,17 @@ export interface WorkerManager extends BaseContract {
       ComputeUnitJoinedEvent.InputTuple,
       ComputeUnitJoinedEvent.OutputTuple,
       ComputeUnitJoinedEvent.OutputObject
+    >;
+
+    "ComputeUnitRemoved(bytes32)": TypedContractEvent<
+      ComputeUnitRemovedEvent.InputTuple,
+      ComputeUnitRemovedEvent.OutputTuple,
+      ComputeUnitRemovedEvent.OutputObject
+    >;
+    ComputeUnitRemoved: TypedContractEvent<
+      ComputeUnitRemovedEvent.InputTuple,
+      ComputeUnitRemovedEvent.OutputTuple,
+      ComputeUnitRemovedEvent.OutputObject
     >;
 
     "Initialized(uint8)": TypedContractEvent<

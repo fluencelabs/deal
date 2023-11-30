@@ -7,7 +7,18 @@ import "src/deal/interfaces/IDeal.sol";
 
 interface IDealFactory {
     // ----------------- Events -----------------
-    event DealCreated(address indexed owner, IDeal deal, uint256 createdAtEpoch);
+    event DealCreated(
+        address indexed owner,
+        IDeal deal,
+        uint256 createdAtEpoch,
+        IERC20 paymentToken,
+        uint256 minWorkers,
+        uint256 targetWorkers,
+        uint256 maxWorkersPerProvider,
+        uint256 pricePerWorkerEpoch,
+        CIDV1[] effectors,
+        CIDV1 appCID
+    );
 
     // ----------------- View -----------------
     function hasDeal(IDeal deal) external view returns (bool);

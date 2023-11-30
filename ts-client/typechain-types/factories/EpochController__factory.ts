@@ -16,61 +16,61 @@ import type {
 
 const _abi = [
   {
-    anonymous: false,
+    type: "function",
+    name: "currentEpoch",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "epochDuration",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "initTimestamp",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "event",
+    name: "Initialized",
     inputs: [
       {
-        indexed: false,
-        internalType: "uint8",
         name: "version",
         type: "uint8",
+        indexed: false,
+        internalType: "uint8",
       },
     ],
-    name: "Initialized",
-    type: "event",
-  },
-  {
-    inputs: [],
-    name: "currentEpoch",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "epochDuration",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "initTimestamp",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
+    anonymous: false,
   },
 ] as const;
 
 const _bytecode =
-  "0x608080604052346100165761018f908161001c8239f35b600080fdfe608080604052600436101561001357600080fd5b600090813560e01c9081634ff0876a1461011a575080637358c57a146100dd5763766718081461004257600080fd5b346100da57806003193601126100da577f121cc1dc602a3fb184234459f7659f6eed686da5dd7f26f01d0c4c514c9c57825442034281116100c6577f121cc1dc602a3fb184234459f7659f6eed686da5dd7f26f01d0c4c514c9c57835480156100b2576020925060405191048152f35b634e487b7160e01b83526012600452602483fd5b634e487b7160e01b82526011600452602482fd5b80fd5b50346100da57806003193601126100da5760207f121cc1dc602a3fb184234459f7659f6eed686da5dd7f26f01d0c4c514c9c578254604051908152f35b9050346101555781600319360112610155576020907f121cc1dc602a3fb184234459f7659f6eed686da5dd7f26f01d0c4c514c9c5783548152f35b5080fdfea2646970667358221220bd2e7c84394d7edbfc626c694329670b34604a2b6579ab76f8c0164dd7a88d6a64736f6c63430008130033";
+  "0x6080806040523461001657610254908161001c8239f35b600080fdfe608080604052600436101561001357600080fd5b600090813560e01c9081634ff0876a146101c1575080637358c57a146101665763766718081461004257600080fd5b3461016357807ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc360112610163577f7d4f8ec43464738265ced6b7ed5f90007e9b7c34318bdd82d9249328b50bd357544203428111610136577f7d4f8ec43464738265ced6b7ed5f90007e9b7c34318bdd82d9249328b50bd35854908115610109570460010190816001116100dc57602082604051908152f35b807f4e487b7100000000000000000000000000000000000000000000000000000000602492526011600452fd5b6024837f4e487b710000000000000000000000000000000000000000000000000000000081526012600452fd5b6024827f4e487b710000000000000000000000000000000000000000000000000000000081526011600452fd5b80fd5b503461016357807ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc3601126101635760207f7d4f8ec43464738265ced6b7ed5f90007e9b7c34318bdd82d9249328b50bd35754604051908152f35b90503461021a57817ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261021a576020907f7d4f8ec43464738265ced6b7ed5f90007e9b7c34318bdd82d9249328b50bd358548152f35b5080fdfea26469706673582212206d278da55ecbb4638344d18b9f32f55789397ab13b1444f35bab2814cd2e4b2364736f6c63430008130033";
 
 type EpochControllerConstructorParams =
   | [signer?: Signer]

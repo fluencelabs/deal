@@ -7,17 +7,17 @@ import type { IMatcher, IMatcherInterface } from "../IMatcher";
 
 const _abi = [
   {
+    type: "function",
+    name: "matchDeal",
     inputs: [
       {
-        internalType: "contract IDeal",
         name: "deal",
         type: "address",
+        internalType: "contract IDeal",
       },
     ],
-    name: "matchDeal",
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function",
   },
 ] as const;
 

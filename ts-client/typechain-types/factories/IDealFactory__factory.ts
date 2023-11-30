@@ -7,131 +7,197 @@ import type { IDealFactory, IDealFactoryInterface } from "../IDealFactory";
 
 const _abi = [
   {
-    anonymous: false,
+    type: "function",
+    name: "deployDeal",
     inputs: [
       {
-        indexed: true,
-        internalType: "address",
-        name: "owner",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "contract IDeal",
-        name: "deal",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "createdAtEpoch",
-        type: "uint256",
-      },
-    ],
-    name: "DealCreated",
-    type: "event",
-  },
-  {
-    inputs: [
-      {
-        components: [
-          {
-            internalType: "bytes4",
-            name: "prefixes",
-            type: "bytes4",
-          },
-          {
-            internalType: "bytes32",
-            name: "hash",
-            type: "bytes32",
-          },
-        ],
-        internalType: "struct CIDV1",
         name: "appCID_",
         type: "tuple",
-      },
-      {
-        internalType: "contract IERC20",
-        name: "paymentToken_",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "minWorkers_",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "targetWorkers_",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "maxWorkersPerProvider_",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "pricePerWorkerEpoch_",
-        type: "uint256",
-      },
-      {
+        internalType: "struct CIDV1",
         components: [
           {
-            internalType: "bytes4",
             name: "prefixes",
             type: "bytes4",
+            internalType: "bytes4",
           },
           {
-            internalType: "bytes32",
             name: "hash",
             type: "bytes32",
+            internalType: "bytes32",
           },
         ],
-        internalType: "struct CIDV1[]",
+      },
+      {
+        name: "paymentToken_",
+        type: "address",
+        internalType: "contract IERC20",
+      },
+      {
+        name: "minWorkers_",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "targetWorkers_",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "maxWorkersPerProvider_",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "pricePerWorkerEpoch_",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
         name: "effectors_",
         type: "tuple[]",
+        internalType: "struct CIDV1[]",
+        components: [
+          {
+            name: "prefixes",
+            type: "bytes4",
+            internalType: "bytes4",
+          },
+          {
+            name: "hash",
+            type: "bytes32",
+            internalType: "bytes32",
+          },
+        ],
       },
       {
-        internalType: "enum IConfig.AccessType",
         name: "accessType_",
         type: "uint8",
+        internalType: "enum IConfig.AccessType",
       },
       {
-        internalType: "address[]",
         name: "accessList_",
         type: "address[]",
+        internalType: "address[]",
       },
     ],
-    name: "deployDeal",
     outputs: [
       {
-        internalType: "contract IDeal",
         name: "",
         type: "address",
+        internalType: "contract IDeal",
       },
     ],
     stateMutability: "nonpayable",
-    type: "function",
   },
   {
+    type: "function",
+    name: "hasDeal",
     inputs: [
       {
-        internalType: "contract IDeal",
         name: "deal",
         type: "address",
+        internalType: "contract IDeal",
       },
     ],
-    name: "hasDeal",
     outputs: [
       {
-        internalType: "bool",
         name: "",
         type: "bool",
+        internalType: "bool",
       },
     ],
     stateMutability: "view",
-    type: "function",
+  },
+  {
+    type: "event",
+    name: "DealCreated",
+    inputs: [
+      {
+        name: "owner",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "deal",
+        type: "address",
+        indexed: false,
+        internalType: "contract IDeal",
+      },
+      {
+        name: "createdAtEpoch",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "paymentToken",
+        type: "address",
+        indexed: false,
+        internalType: "contract IERC20",
+      },
+      {
+        name: "minWorkers",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "targetWorkers",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "maxWorkersPerProvider",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "pricePerWorkerEpoch",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "effectors",
+        type: "tuple[]",
+        indexed: false,
+        internalType: "struct CIDV1[]",
+        components: [
+          {
+            name: "prefixes",
+            type: "bytes4",
+            internalType: "bytes4",
+          },
+          {
+            name: "hash",
+            type: "bytes32",
+            internalType: "bytes32",
+          },
+        ],
+      },
+      {
+        name: "appCID",
+        type: "tuple",
+        indexed: false,
+        internalType: "struct CIDV1",
+        components: [
+          {
+            name: "prefixes",
+            type: "bytes4",
+            internalType: "bytes4",
+          },
+          {
+            name: "hash",
+            type: "bytes32",
+            internalType: "bytes32",
+          },
+        ],
+      },
+    ],
+    anonymous: false,
   },
 ] as const;
 

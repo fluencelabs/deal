@@ -61,8 +61,8 @@ contract Market is GlobalConst {
     event EffectorAdded(bytes32 offerId, CIDV1 effector);
     event EffectorRemoved(bytes32 offerId, CIDV1 effector);
 
-    event ComputeUnitAddedToDeal(bytes32 unitId, IDeal deal);
-    event ComputeUnitRemovedFromDeal(bytes32 unitId, IDeal deal);
+    event ComputeUnitAddedToDeal(bytes32 unitId, IDeal deal, bytes32 peerId);
+    event ComputeUnitRemovedFromDeal(bytes32 unitId, IDeal deal, bytes32 peerId);
 
     // ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.core.storage.v1.market")) - 1);
@@ -143,14 +143,14 @@ contract Market is GlobalConst {
 
         computePeer.info = ComputePeerInfo({offerId: offerId, commitmentId: bytes32(0x00), unitCount: peer.freeUnits});
 
+        emit PeerCreated(offerId, peer.peerId);
+
         _addComputeUnitsToPeer(offerId, peer.peerId, peer.freeUnits);
 
         computePeer.info.unitCount = peer.freeUnits;
 
         // add peer to offer
         offer.freePeerIds.push(peer.peerId);
-
-        emit PeerCreated(offerId, peer.peerId);
     }
 
     function _addComputeUnitsToPeer(bytes32 offerId, bytes32 peerId, uint256 freeUnits) internal {
@@ -191,7 +191,7 @@ contract Market is GlobalConst {
 
         deal.addComputeUnit(offer.info.owner, unitId);
 
-        emit ComputeUnitAddedToDeal(unitId, deal);
+        emit ComputeUnitAddedToDeal(unitId, deal, computeUnit.peerId);
     }
 
     // ----------------- Public View -----------------
@@ -243,14 +243,14 @@ contract Market is GlobalConst {
             offer.hasEffector[effector] = true;
         }
 
+        emit MarketOfferRegistered(offerId, msg.sender, minPricePerWorkerEpoch, paymentToken, effectors);
+
         uint256 peerLength = peers.length;
         for (uint256 i = 0; i < peerLength; i++) {
             _addComputePeerToOffer(offerId, peers[i]);
         }
 
         offerStorage.offerIds.push(offerId);
-
-        emit MarketOfferRegistered(offerId, msg.sender, minPricePerWorkerEpoch, paymentToken, effectors);
     }
 
     function addComputePeers(bytes32 offerId, RegisterComputePeer[] calldata peers) external {
@@ -299,7 +299,7 @@ contract Market is GlobalConst {
         computePeer.freeComputeUnitIds.remove(unitId);
         delete offerStorage.computeUnits[unitId];
 
-        emit ComputeUnitRemovedFromDeal(unitId, IDeal(computeUnit.deal));
+        emit ComputeUnitRemovedFromDeal(unitId, IDeal(computeUnit.deal), peerId);
     }
 
     // ---- Change offer ----
@@ -391,6 +391,6 @@ contract Market is GlobalConst {
 
         deal.removeComputeUnit(unitId);
 
-        emit ComputeUnitRemovedFromDeal(unitId, deal);
+        emit ComputeUnitRemovedFromDeal(unitId, deal, peerId);
     }
 }

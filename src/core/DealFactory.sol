@@ -89,7 +89,18 @@ contract DealFactory is GlobalConst, IDealFactory {
         deal.deposit(amount);
         OwnableUpgradableDiamond(address(deal)).transferOwnership(msg.sender);
 
-        emit DealCreated(msg.sender, deal, currentEpoch());
+        emit DealCreated(
+            msg.sender,
+            deal,
+            currentEpoch(),
+            paymentToken_,
+            minWorkers_,
+            targetWorkers_,
+            maxWorkersPerProvider_,
+            pricePerWorkerEpoch_,
+            effectors_,
+            appCID_
+        );
 
         return deal;
     }

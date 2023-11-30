@@ -33,18 +33,31 @@ export type CIDV1StructOutput = [prefixes: string, hash: string] & {
 export interface DealFactoryInterface extends Interface {
   getFunction(
     nameOrSignature:
+      | "PRECISION"
+      | "collateralPerUnit"
       | "currentEpoch"
       | "deployDeal"
       | "epochDuration"
+      | "fltPrice"
       | "fluenceToken"
       | "hasDeal"
       | "initTimestamp"
+      | "maxCCProofs"
+      | "maxCapacityRewardPerEpoch"
+      | "maxFailedRatio"
+      | "minCapacityCommitmentDuration"
+      | "minCapacityRewardPerEpoch"
       | "minDepositedEpoches"
       | "minRematchingEpoches"
+      | "minRequierdCCProofs"
       | "owner"
       | "renounceOwnership"
       | "setConstant"
+      | "slashingRate"
+      | "targetRevenuePerEpoch"
       | "transferOwnership"
+      | "vestingDuration"
+      | "withdrawCCEpochesAfterFailed"
   ): FunctionFragment;
 
   getEvent(
@@ -55,6 +68,11 @@ export interface DealFactoryInterface extends Interface {
       | "OwnershipTransferred"
   ): EventFragment;
 
+  encodeFunctionData(functionFragment: "PRECISION", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "collateralPerUnit",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "currentEpoch",
     values?: undefined
@@ -77,6 +95,7 @@ export interface DealFactoryInterface extends Interface {
     functionFragment: "epochDuration",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "fltPrice", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "fluenceToken",
     values?: undefined
@@ -90,11 +109,35 @@ export interface DealFactoryInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "maxCCProofs",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "maxCapacityRewardPerEpoch",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "maxFailedRatio",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "minCapacityCommitmentDuration",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "minCapacityRewardPerEpoch",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "minDepositedEpoches",
     values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "minRematchingEpoches",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "minRequierdCCProofs",
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
@@ -107,10 +150,31 @@ export interface DealFactoryInterface extends Interface {
     values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "slashingRate",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "targetRevenuePerEpoch",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [AddressLike]
   ): string;
+  encodeFunctionData(
+    functionFragment: "vestingDuration",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "withdrawCCEpochesAfterFailed",
+    values?: undefined
+  ): string;
 
+  decodeFunctionResult(functionFragment: "PRECISION", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "collateralPerUnit",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "currentEpoch",
     data: BytesLike
@@ -120,6 +184,7 @@ export interface DealFactoryInterface extends Interface {
     functionFragment: "epochDuration",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "fltPrice", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "fluenceToken",
     data: BytesLike
@@ -130,11 +195,35 @@ export interface DealFactoryInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "maxCCProofs",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "maxCapacityRewardPerEpoch",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "maxFailedRatio",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "minCapacityCommitmentDuration",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "minCapacityRewardPerEpoch",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "minDepositedEpoches",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "minRematchingEpoches",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "minRequierdCCProofs",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
@@ -147,7 +236,23 @@ export interface DealFactoryInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "slashingRate",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "targetRevenuePerEpoch",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "transferOwnership",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "vestingDuration",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "withdrawCCEpochesAfterFailed",
     data: BytesLike
   ): Result;
 }
@@ -169,17 +274,38 @@ export namespace DealCreatedEvent {
   export type InputTuple = [
     owner: AddressLike,
     deal: AddressLike,
-    createdAtEpoch: BigNumberish
+    createdAtEpoch: BigNumberish,
+    paymentToken: AddressLike,
+    minWorkers: BigNumberish,
+    targetWorkers: BigNumberish,
+    maxWorkersPerProvider: BigNumberish,
+    pricePerWorkerEpoch: BigNumberish,
+    effectors: CIDV1Struct[],
+    appCID: CIDV1Struct
   ];
   export type OutputTuple = [
     owner: string,
     deal: string,
-    createdAtEpoch: bigint
+    createdAtEpoch: bigint,
+    paymentToken: string,
+    minWorkers: bigint,
+    targetWorkers: bigint,
+    maxWorkersPerProvider: bigint,
+    pricePerWorkerEpoch: bigint,
+    effectors: CIDV1StructOutput[],
+    appCID: CIDV1StructOutput
   ];
   export interface OutputObject {
     owner: string;
     deal: string;
     createdAtEpoch: bigint;
+    paymentToken: string;
+    minWorkers: bigint;
+    targetWorkers: bigint;
+    maxWorkersPerProvider: bigint;
+    pricePerWorkerEpoch: bigint;
+    effectors: CIDV1StructOutput[];
+    appCID: CIDV1StructOutput;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -255,6 +381,10 @@ export interface DealFactory extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
+  PRECISION: TypedContractMethod<[], [bigint], "view">;
+
+  collateralPerUnit: TypedContractMethod<[], [bigint], "view">;
+
   currentEpoch: TypedContractMethod<[], [bigint], "view">;
 
   deployDeal: TypedContractMethod<
@@ -275,15 +405,29 @@ export interface DealFactory extends BaseContract {
 
   epochDuration: TypedContractMethod<[], [bigint], "view">;
 
+  fltPrice: TypedContractMethod<[], [bigint], "view">;
+
   fluenceToken: TypedContractMethod<[], [string], "view">;
 
   hasDeal: TypedContractMethod<[deal: AddressLike], [boolean], "view">;
 
   initTimestamp: TypedContractMethod<[], [bigint], "view">;
 
+  maxCCProofs: TypedContractMethod<[], [bigint], "view">;
+
+  maxCapacityRewardPerEpoch: TypedContractMethod<[], [bigint], "view">;
+
+  maxFailedRatio: TypedContractMethod<[], [bigint], "view">;
+
+  minCapacityCommitmentDuration: TypedContractMethod<[], [bigint], "view">;
+
+  minCapacityRewardPerEpoch: TypedContractMethod<[], [bigint], "view">;
+
   minDepositedEpoches: TypedContractMethod<[], [bigint], "view">;
 
   minRematchingEpoches: TypedContractMethod<[], [bigint], "view">;
+
+  minRequierdCCProofs: TypedContractMethod<[], [bigint], "view">;
 
   owner: TypedContractMethod<[], [string], "view">;
 
@@ -295,16 +439,30 @@ export interface DealFactory extends BaseContract {
     "nonpayable"
   >;
 
+  slashingRate: TypedContractMethod<[], [bigint], "view">;
+
+  targetRevenuePerEpoch: TypedContractMethod<[], [bigint], "view">;
+
   transferOwnership: TypedContractMethod<
     [newOwner: AddressLike],
     [void],
     "nonpayable"
   >;
 
+  vestingDuration: TypedContractMethod<[], [bigint], "view">;
+
+  withdrawCCEpochesAfterFailed: TypedContractMethod<[], [bigint], "view">;
+
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
   ): T;
 
+  getFunction(
+    nameOrSignature: "PRECISION"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "collateralPerUnit"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "currentEpoch"
   ): TypedContractMethod<[], [bigint], "view">;
@@ -329,6 +487,9 @@ export interface DealFactory extends BaseContract {
     nameOrSignature: "epochDuration"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
+    nameOrSignature: "fltPrice"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "fluenceToken"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
@@ -338,10 +499,28 @@ export interface DealFactory extends BaseContract {
     nameOrSignature: "initTimestamp"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
+    nameOrSignature: "maxCCProofs"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "maxCapacityRewardPerEpoch"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "maxFailedRatio"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "minCapacityCommitmentDuration"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "minCapacityRewardPerEpoch"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "minDepositedEpoches"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "minRematchingEpoches"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "minRequierdCCProofs"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "owner"
@@ -357,8 +536,20 @@ export interface DealFactory extends BaseContract {
     "nonpayable"
   >;
   getFunction(
+    nameOrSignature: "slashingRate"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "targetRevenuePerEpoch"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "transferOwnership"
   ): TypedContractMethod<[newOwner: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "vestingDuration"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "withdrawCCEpochesAfterFailed"
+  ): TypedContractMethod<[], [bigint], "view">;
 
   getEvent(
     key: "ConstantsUpdated"
@@ -401,7 +592,7 @@ export interface DealFactory extends BaseContract {
       ConstantsUpdatedEvent.OutputObject
     >;
 
-    "DealCreated(address,address,uint256)": TypedContractEvent<
+    "DealCreated(address,address,uint256,address,uint256,uint256,uint256,uint256,tuple[],tuple)": TypedContractEvent<
       DealCreatedEvent.InputTuple,
       DealCreatedEvent.OutputTuple,
       DealCreatedEvent.OutputObject

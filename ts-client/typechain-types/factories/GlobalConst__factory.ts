@@ -13,172 +13,380 @@ import type { GlobalConst, GlobalConstInterface } from "../GlobalConst";
 
 const _abi = [
   {
-    inputs: [
-      {
-        internalType: "address",
-        name: "owner",
-        type: "address",
-      },
-    ],
-    name: "OwnableInvalidOwner",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
-    name: "OwnableUnauthorizedAccount",
-    type: "error",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "enum GlobalConst.Constant",
-        name: "constantType",
-        type: "uint8",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "value",
-        type: "uint256",
-      },
-    ],
-    name: "ConstantsUpdated",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "uint8",
-        name: "version",
-        type: "uint8",
-      },
-    ],
-    name: "Initialized",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "previousOwner",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "newOwner",
-        type: "address",
-      },
-    ],
-    name: "OwnershipTransferred",
-    type: "event",
-  },
-  {
+    type: "function",
+    name: "PRECISION",
     inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "collateralPerUnit",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "currentEpoch",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "epochDuration",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "fltPrice",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "fluenceToken",
+    inputs: [],
     outputs: [
       {
-        internalType: "address",
         name: "",
         type: "address",
+        internalType: "address",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "initTimestamp",
     inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "maxCCProofs",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "maxCapacityRewardPerEpoch",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "maxFailedRatio",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "minCapacityCommitmentDuration",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "minCapacityRewardPerEpoch",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "minDepositedEpoches",
+    inputs: [],
     outputs: [
       {
-        internalType: "uint256",
         name: "",
         type: "uint256",
+        internalType: "uint256",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
-    inputs: [],
+    type: "function",
     name: "minRematchingEpoches",
+    inputs: [],
     outputs: [
       {
-        internalType: "uint256",
         name: "",
         type: "uint256",
+        internalType: "uint256",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "minRequierdCCProofs",
     inputs: [],
-    name: "owner",
     outputs: [
       {
-        internalType: "address",
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "owner",
+    inputs: [],
+    outputs: [
+      {
         name: "",
         type: "address",
+        internalType: "address",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
-    inputs: [],
+    type: "function",
     name: "renounceOwnership",
+    inputs: [],
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function",
   },
   {
+    type: "function",
+    name: "setConstant",
     inputs: [
       {
-        internalType: "enum GlobalConst.Constant",
         name: "constantType",
         type: "uint8",
+        internalType: "enum IGlobalConst.Constant",
       },
       {
-        internalType: "uint256",
         name: "v",
         type: "uint256",
+        internalType: "uint256",
       },
     ],
-    name: "setConstant",
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function",
   },
   {
-    inputs: [
+    type: "function",
+    name: "slashingRate",
+    inputs: [],
+    outputs: [
       {
-        internalType: "address",
-        name: "newOwner",
-        type: "address",
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
       },
     ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "targetRevenuePerEpoch",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "transferOwnership",
+    inputs: [
+      {
+        name: "newOwner",
+        type: "address",
+        internalType: "address",
+      },
+    ],
     outputs: [],
     stateMutability: "nonpayable",
+  },
+  {
     type: "function",
+    name: "vestingDuration",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "withdrawCCEpochesAfterFailed",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "event",
+    name: "ConstantsUpdated",
+    inputs: [
+      {
+        name: "constantType",
+        type: "uint8",
+        indexed: false,
+        internalType: "enum IGlobalConst.Constant",
+      },
+      {
+        name: "value",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "Initialized",
+    inputs: [
+      {
+        name: "version",
+        type: "uint8",
+        indexed: false,
+        internalType: "uint8",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "OwnershipTransferred",
+    inputs: [
+      {
+        name: "previousOwner",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "newOwner",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "error",
+    name: "OwnableInvalidOwner",
+    inputs: [
+      {
+        name: "owner",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "OwnableUnauthorizedAccount",
+    inputs: [
+      {
+        name: "account",
+        type: "address",
+        internalType: "address",
+      },
+    ],
   },
 ] as const;
 
 const _bytecode =
-  "0x6080806040523461001657610426908161001c8239f35b600080fdfe608060408181526004908136101561001657600080fd5b600092833560e01c90816342e14eb21461035c57508063715018a6146102ef5780638da5cb5b146102b9578063ac027f9714610271578063d6f563d814610153578063df238721146101115763f2fde38b1461007157600080fd5b3461010d57602036600319011261010d576001600160a01b03823581811693919290849003610109576100a2610397565b83156100f35750506000805160206103d183398151915280546001600160a01b031981168417909155167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08380a380f35b51631e4fbdf760e01b8152908101849052602490fd5b8480fd5b8280fd5b83823461014f578160031936011261014f576020907f69fd5a837e660cfb338b8ff11344a85cd64fc4103e7bd3f69149a34c2eff5fea549051908152f35b5080fd5b5082903461014f578060031936011261014f578235600281101561010d5760243561017c610397565b8391806101f057817f69fd5a837e660cfb338b8ff11344a85cd64fc4103e7bd3f69149a34c2eff5fe9555b8351926101dd577f2e1ab86f1064ccfa48a8bdbdac5c07e8da91d61e58f10bdba0e53257c0d7294394955082526020820152a180f35b634e487b7160e01b855260218652602485fd5b8492506001810361022357817f69fd5a837e660cfb338b8ff11344a85cd64fc4103e7bd3f69149a34c2eff5fea556101a7565b835162461bcd60e51b8152602081880152602260248201527f476c6f62616c436f6e73743a20756e6b6e6f776e20636f6e7374616e74207479604482015261706560f01b6064820152608490fd5b83823461014f578160031936011261014f577f69fd5a837e660cfb338b8ff11344a85cd64fc4103e7bd3f69149a34c2eff5fe85490516001600160a01b039091168152602090f35b83823461014f578160031936011261014f576000805160206103d18339815191525490516001600160a01b039091168152602090f35b8334610359578060031936011261035957610308610397565b6000805160206103d183398151915280546001600160a01b0319811690915581906001600160a01b03167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08280a380f35b80fd5b84903461014f578160031936011261014f576020907f69fd5a837e660cfb338b8ff11344a85cd64fc4103e7bd3f69149a34c2eff5fe9548152f35b6000805160206103d1833981519152546001600160a01b031633036103b857565b60405163118cdaa760e01b8152336004820152602490fdfec43ef91433cf7d0ab2ca98c18785d28d6a5685461d30e867805d7a83cc8deb80a2646970667358221220a823af0a8c48c7edb5fcb8c423f832eb070f60f97e7273c9c8d258f0b7fb2b7064736f6c63430008130033";
+  "0x608080604052346100165761100b908161001c8239f35b600080fdfe608060408181526004918236101561001657600080fd5b600092833560e01c91826313baa06914610f0c575081631514617e14610eb05781633a49cf4814610e5457816342e14eb214610df85781634ff0876a14610d9c5781635a5b810714610d405781635ff2449114610ce457816369e9f4bb14610c88578163715018a614610bc75781637358c57a14610b6b5781637667180814610a4c5781638da5cb5b146109da578163a376fb911461097e578163aaf5eb6814610943578163ac027f97146108d1578163bbae14b514610875578163d6f563d8146103ff578163db46d205146103a3578163df23872114610347578163e989ce8a146102eb578163f26c329b1461028f578163f2fde38b14610180575063f44e553e1461012257600080fd5b3461017c57817ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261017c576020907f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e0150324549051908152f35b5080fd5b9190503461028b5760207ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261028b5781359173ffffffffffffffffffffffffffffffffffffffff91828416809403610287576101dd610f65565b83156102585750507fb13d3e7783d509d8d65d3e1e62ec0b103a07e0cbfa1ee74ae19127f297dddfcc805490837fffffffffffffffffffffffff00000000000000000000000000000000000000008316179055167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08380a380f35b908460249251917f1e4fbdf7000000000000000000000000000000000000000000000000000000008352820152fd5b8480fd5b8280fd5b50503461017c57817ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261017c576020907f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e015031f549051908152f35b50503461017c57817ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261017c576020907f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e015031b549051908152f35b50503461017c57817ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261017c576020907f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e015031a549051908152f35b50503461017c57817ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261017c576020907f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e015031e549051908152f35b83833461017c57807ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261017c578235600e81101561028b57602435610445610f65565b8391806104d257817f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e0150319555b8351926104a6577f2e1ab86f1064ccfa48a8bdbdac5c07e8da91d61e58f10bdba0e53257c0d7294394955082526020820152a180f35b6024856021887f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b8492506001810361050557817f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e015031a55610470565b8492506002810361053857817f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e015031b55610470565b8492506003810361056b57817f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e015031c55610470565b84925085810361059d57817f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e015031d55610470565b849250600581036105d057817f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e015031e55610470565b8492506006810361060357817f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e015031f55610470565b8492506007810361063657817f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e015032055610470565b849250600881036106f3577f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e0150321805461067057829055610470565b60848760208751917f08c379a0000000000000000000000000000000000000000000000000000000008352820152602960248201527f476c6f62616c436f6e73743a2076657374696e67206475726174696f6e20616c60448201527f72656164792073657400000000000000000000000000000000000000000000006064820152fd5b8492506009810361072657817f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e015032255610470565b849250600a810361075957817f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e015032655610470565b849250600b810361078c57817f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e015032355610470565b849250600c81036107bf57817f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e015032455610470565b849250600d81036107f257817f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e015032555610470565b60848660208651917f08c379a0000000000000000000000000000000000000000000000000000000008352820152602260248201527f476c6f62616c436f6e73743a20756e6b6e6f776e20636f6e7374616e7420747960448201527f70650000000000000000000000000000000000000000000000000000000000006064820152fd5b50503461017c57817ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261017c576020907f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e015031c549051908152f35b50503461017c57817ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261017c5760209073ffffffffffffffffffffffffffffffffffffffff7f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e015031854169051908152f35b50503461017c57817ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261017c57602090516127108152f35b50503461017c57817ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261017c576020907f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e0150326549051908152f35b50503461017c57817ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261017c5760209073ffffffffffffffffffffffffffffffffffffffff7fb13d3e7783d509d8d65d3e1e62ec0b103a07e0cbfa1ee74ae19127f297dddfcc54169051908152f35b83833461017c57817ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261017c577f7d4f8ec43464738265ced6b7ed5f90007e9b7c34318bdd82d9249328b50bd357544203428111610b3f577f7d4f8ec43464738265ced6b7ed5f90007e9b7c34318bdd82d9249328b50bd35854908115610b1357046001019182600111610ae7576020838351908152f35b806011857f4e487b71000000000000000000000000000000000000000000000000000000006024945252fd5b6024846012877f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b6024836011867f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b50503461017c57817ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261017c576020907f7d4f8ec43464738265ced6b7ed5f90007e9b7c34318bdd82d9249328b50bd357549051908152f35b8334610c8557807ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc360112610c8557610bfe610f65565b8073ffffffffffffffffffffffffffffffffffffffff7fb13d3e7783d509d8d65d3e1e62ec0b103a07e0cbfa1ee74ae19127f297dddfcc8054907fffffffffffffffffffffffff000000000000000000000000000000000000000082169055167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08280a380f35b80fd5b50503461017c57817ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261017c576020907f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e0150325549051908152f35b50503461017c57817ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261017c576020907f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e015031d549051908152f35b50503461017c57817ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261017c576020907f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e0150323549051908152f35b50503461017c57817ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261017c576020907f7d4f8ec43464738265ced6b7ed5f90007e9b7c34318bdd82d9249328b50bd358549051908152f35b50503461017c57817ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261017c576020907f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e0150319549051908152f35b50503461017c57817ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261017c576020907f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e0150320549051908152f35b50503461017c57817ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261017c576020907f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e0150321549051908152f35b84903461017c57817ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261017c576020907f60ac4d56f7e69877e4b95a6e91f4b3612278b580a93ea7637885a480e0150322548152f35b73ffffffffffffffffffffffffffffffffffffffff7fb13d3e7783d509d8d65d3e1e62ec0b103a07e0cbfa1ee74ae19127f297dddfcc54163303610fa557565b60246040517f118cdaa7000000000000000000000000000000000000000000000000000000008152336004820152fdfea2646970667358221220b2f404391bc751985e00118c7f7733035e49d06ee99100adc2d7dd2ed50a422d64736f6c63430008130033";
 
 type GlobalConstConstructorParams =
   | [signer?: Signer]

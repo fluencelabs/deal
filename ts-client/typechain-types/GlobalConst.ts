@@ -26,13 +26,29 @@ import type {
 export interface GlobalConstInterface extends Interface {
   getFunction(
     nameOrSignature:
+      | "PRECISION"
+      | "collateralPerUnit"
+      | "currentEpoch"
+      | "epochDuration"
+      | "fltPrice"
       | "fluenceToken"
+      | "initTimestamp"
+      | "maxCCProofs"
+      | "maxCapacityRewardPerEpoch"
+      | "maxFailedRatio"
+      | "minCapacityCommitmentDuration"
+      | "minCapacityRewardPerEpoch"
       | "minDepositedEpoches"
       | "minRematchingEpoches"
+      | "minRequierdCCProofs"
       | "owner"
       | "renounceOwnership"
       | "setConstant"
+      | "slashingRate"
+      | "targetRevenuePerEpoch"
       | "transferOwnership"
+      | "vestingDuration"
+      | "withdrawCCEpochesAfterFailed"
   ): FunctionFragment;
 
   getEvent(
@@ -42,8 +58,46 @@ export interface GlobalConstInterface extends Interface {
       | "OwnershipTransferred"
   ): EventFragment;
 
+  encodeFunctionData(functionFragment: "PRECISION", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "collateralPerUnit",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "currentEpoch",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "epochDuration",
+    values?: undefined
+  ): string;
+  encodeFunctionData(functionFragment: "fltPrice", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "fluenceToken",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "initTimestamp",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "maxCCProofs",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "maxCapacityRewardPerEpoch",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "maxFailedRatio",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "minCapacityCommitmentDuration",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "minCapacityRewardPerEpoch",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -52,6 +106,10 @@ export interface GlobalConstInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "minRematchingEpoches",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "minRequierdCCProofs",
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
@@ -64,12 +122,66 @@ export interface GlobalConstInterface extends Interface {
     values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "slashingRate",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "targetRevenuePerEpoch",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [AddressLike]
   ): string;
+  encodeFunctionData(
+    functionFragment: "vestingDuration",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "withdrawCCEpochesAfterFailed",
+    values?: undefined
+  ): string;
 
+  decodeFunctionResult(functionFragment: "PRECISION", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "collateralPerUnit",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "currentEpoch",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "epochDuration",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "fltPrice", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "fluenceToken",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "initTimestamp",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "maxCCProofs",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "maxCapacityRewardPerEpoch",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "maxFailedRatio",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "minCapacityCommitmentDuration",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "minCapacityRewardPerEpoch",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -78,6 +190,10 @@ export interface GlobalConstInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "minRematchingEpoches",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "minRequierdCCProofs",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
@@ -90,7 +206,23 @@ export interface GlobalConstInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "slashingRate",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "targetRevenuePerEpoch",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "transferOwnership",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "vestingDuration",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "withdrawCCEpochesAfterFailed",
     data: BytesLike
   ): Result;
 }
@@ -176,11 +308,35 @@ export interface GlobalConst extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
+  PRECISION: TypedContractMethod<[], [bigint], "view">;
+
+  collateralPerUnit: TypedContractMethod<[], [bigint], "view">;
+
+  currentEpoch: TypedContractMethod<[], [bigint], "view">;
+
+  epochDuration: TypedContractMethod<[], [bigint], "view">;
+
+  fltPrice: TypedContractMethod<[], [bigint], "view">;
+
   fluenceToken: TypedContractMethod<[], [string], "view">;
+
+  initTimestamp: TypedContractMethod<[], [bigint], "view">;
+
+  maxCCProofs: TypedContractMethod<[], [bigint], "view">;
+
+  maxCapacityRewardPerEpoch: TypedContractMethod<[], [bigint], "view">;
+
+  maxFailedRatio: TypedContractMethod<[], [bigint], "view">;
+
+  minCapacityCommitmentDuration: TypedContractMethod<[], [bigint], "view">;
+
+  minCapacityRewardPerEpoch: TypedContractMethod<[], [bigint], "view">;
 
   minDepositedEpoches: TypedContractMethod<[], [bigint], "view">;
 
   minRematchingEpoches: TypedContractMethod<[], [bigint], "view">;
+
+  minRequierdCCProofs: TypedContractMethod<[], [bigint], "view">;
 
   owner: TypedContractMethod<[], [string], "view">;
 
@@ -192,24 +348,68 @@ export interface GlobalConst extends BaseContract {
     "nonpayable"
   >;
 
+  slashingRate: TypedContractMethod<[], [bigint], "view">;
+
+  targetRevenuePerEpoch: TypedContractMethod<[], [bigint], "view">;
+
   transferOwnership: TypedContractMethod<
     [newOwner: AddressLike],
     [void],
     "nonpayable"
   >;
 
+  vestingDuration: TypedContractMethod<[], [bigint], "view">;
+
+  withdrawCCEpochesAfterFailed: TypedContractMethod<[], [bigint], "view">;
+
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
   ): T;
 
   getFunction(
+    nameOrSignature: "PRECISION"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "collateralPerUnit"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "currentEpoch"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "epochDuration"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "fltPrice"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "fluenceToken"
   ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "initTimestamp"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "maxCCProofs"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "maxCapacityRewardPerEpoch"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "maxFailedRatio"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "minCapacityCommitmentDuration"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "minCapacityRewardPerEpoch"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "minDepositedEpoches"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "minRematchingEpoches"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "minRequierdCCProofs"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "owner"
@@ -225,8 +425,20 @@ export interface GlobalConst extends BaseContract {
     "nonpayable"
   >;
   getFunction(
+    nameOrSignature: "slashingRate"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "targetRevenuePerEpoch"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "transferOwnership"
   ): TypedContractMethod<[newOwner: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "vestingDuration"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "withdrawCCEpochesAfterFailed"
+  ): TypedContractMethod<[], [bigint], "view">;
 
   getEvent(
     key: "ConstantsUpdated"

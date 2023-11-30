@@ -174,13 +174,7 @@ const _abi = [
       },
     ],
     name: "addComputeUnit",
-    outputs: [
-      {
-        internalType: "bytes32",
-        name: "",
-        type: "bytes32",
-      },
-    ],
+    outputs: [],
     stateMutability: "nonpayable",
     type: "function",
   },

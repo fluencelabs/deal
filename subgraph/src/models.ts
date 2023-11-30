@@ -1,32 +1,32 @@
-import {Effector, Offer, OfferEffector, Peer} from "../generated/schema";
+import {
+    Effector,
+    OfferToEffector,
+    Token,
+    DealToEffector,
+} from "../generated/schema";
 import {BigInt, Bytes} from "@graphprotocol/graph-ts";
+import {getTokenSymbol} from "./contracts";
 
 const ZERO_BYTES = Bytes.fromHexString("0x0000000000000000000000000000000000000000")
+const ZERO_STRING = ""
+export const ZERO_BIG_INT = BigInt.fromI32(0)
 
-// TODO: make generic.
-// TODO: rename to getOrLoad
-export function getOrCreateOffer(
-    offerId: string,
-    ): Offer {
-    let entity = Offer.load(offerId)
+
+export function createOrLoadToken(tokenAddress: string): Token {
+    let entity = Token.load(tokenAddress)
 
     if (entity == null) {
-        entity = new Offer(offerId)
-        entity.createdAt = BigInt.fromI32(0)
-        entity.updatedAt = BigInt.fromI32(0)
-        entity.provider = ZERO_BYTES
-        entity.tokenSymbol = ""
-        entity.pricePerEpoch = BigInt.fromI32(0)
-        // entity.effectors = []
+        entity = new Token(tokenAddress)
+        entity.symbol = getTokenSymbol(Bytes.fromHexString(tokenAddress))
         entity.save()
     }
-    return entity as Offer
+    return entity as Token
 }
 
 // TODO: add description mapper.
 const DEFAULT_EFFECTOR_DESCRIPTION = "DEFAULT_EFFECTOR_DESCRIPTION"
 
-export function getOrCreateEffector(cid: string): Effector {
+export function createOrLoadEffector(cid: string): Effector {
     let entity = Effector.load(cid)
 
     if (entity == null) {
@@ -37,28 +37,29 @@ export function getOrCreateEffector(cid: string): Effector {
     return entity as Effector
 }
 
-export function getOrCreateOfferEffector(offerId: string, effectorId: string): OfferEffector {
+export function createOrLoadOfferEffector(offerId: string, effectorId: string): OfferToEffector {
     const concattedIds = offerId.concat(effectorId)
 
-    let entity = OfferEffector.load(concattedIds)
+    let entity = OfferToEffector.load(concattedIds)
 
     if (entity == null) {
-        entity = new OfferEffector(concattedIds)
+        entity = new OfferToEffector(concattedIds)
         entity.offer = offerId
         entity.effector = effectorId
         entity.save()
     }
-    return entity as OfferEffector
+    return entity as OfferToEffector
 }
 
-export function getOrCreatePeer(peerId: string): Peer {
-    let entity = Peer.load(peerId)
+export function createOrLoadDealEffector(dealId: string, effectorId: string): DealToEffector {
+    const concattedIds = dealId.concat(effectorId)
+    let entity = DealToEffector.load(concattedIds)
 
     if (entity == null) {
-        entity = new Peer(peerId)
-        entity.computeUnits = 0
-        entity.offer = ""
+        entity = new DealToEffector(concattedIds)
+        entity.deal = dealId
+        entity.effector = effectorId
         entity.save()
     }
-    return entity as Peer
+    return entity as DealToEffector
 }

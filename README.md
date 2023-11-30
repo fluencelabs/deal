@@ -1,66 +1,71 @@
-## Foundry
+https://book.getfoundry.sh/
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+Deal Contracts System
 
-Foundry consists of:
-
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
-
-## Documentation
+## Install Foundry
 
 https://book.getfoundry.sh/
 
-## Usage
+## Build
 
-### Build
+### Build contracts and ts-client
 
 ```shell
-$ forge build
+$ make build
 ```
 
-### Test
+### Build only contracts
+
+```shell
+$ make build-contracts
+```
+
+### Update abi for subgraph and ts-client
+
+```shell
+$ make update-abi
+```
+
+## Start local network using docker
+
+```shell
+$ docker compose -f ./docker/docker-compose.yml up
+```
+
+RPC: [http://0.0.0.0:8545](http://0.0.0.0:8545)
+
+Explorer: [http://localhost:4000](http://localhost:4000)
+
+## Start local network locally
+
+```shell
+$ make start-local-chain
+```
+
+```shell
+$ make deploy-local
+```
+
+## Deploy to network
+
+```shell
+$ PRIVATE_KEY=${} make deploy-{network_name}
+```
+
+## Test
 
 ```shell
 $ forge test
 ```
 
-### Format
+## Format
 
 ```shell
 $ forge fmt
 ```
 
-### Gas Snapshots
+## Gas Snapshots
 
 ```shell
 $ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
 ```

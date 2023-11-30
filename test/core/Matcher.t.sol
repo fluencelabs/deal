@@ -73,14 +73,8 @@ contract MatcherTest is Test {
         uint256 targetWorkers = offerCount * peerCountPerOffer;
         CIDV1 memory appCID = CIDV1({prefixes: 0x12345678, hash: Random.pseudoRandom(abi.encode("appCID"))});
 
-        DealMock dealMock = new DealMock(
-            pricePerWorkerEpoch,
-            paymentToken,
-            targetWorkers,
-            effectors,
-            appCID,
-            creationBlock
-        );
+        DealMock dealMock =
+            new DealMock(pricePerWorkerEpoch, paymentToken, targetWorkers, effectors, appCID, creationBlock);
 
         (bytes32[] memory offerIds, bytes32[][] memory peerIds, bytes32[][][] memory unitIds) = _registerOffers(
             offerCount, peerCountPerOffer, unitCountPerPeer, effectors, paymentToken, pricePerWorkerEpoch
@@ -88,15 +82,15 @@ contract MatcherTest is Test {
 
         deployment.core.matchDeal(IDeal(address(dealMock)));
 
-        assertEq(dealMock.getComputeUnitCount(), targetWorkers);
+        assertEq(dealMock.getComputeUnitCount(), targetWorkers, "Wrong number of compute units");
         for (uint256 i = 0; i < offerIds.length; i++) {
             bytes32 offerId = offerIds[i];
             Market.OfferInfo memory offer = deployment.core.getOffer(offerId);
             for (uint256 j = 0; j < peerIds[i].length; j++) {
-                bytes32 unitId = unitIds[i][j][1];
+                bytes32 unitId = unitIds[i][j][0];
                 assertEq(deployment.core.getComputeUnit(unitId).deal, address(dealMock));
-                assertEq(dealMock.computeProviderByUnitId(unitId), offer.owner);
-                assertTrue(dealMock.unitExists(unitId));
+                assertEq(dealMock.computeProviderByUnitId(unitId), offer.owner, "Wrong compute provider");
+                assertTrue(dealMock.unitExists(unitId), "Unit does not exist");
             }
         }
 
