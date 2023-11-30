@@ -10,151 +10,151 @@ import type {
 
 const _abi = [
   {
-    anonymous: false,
+    type: "function",
+    name: "getComputeUnit",
     inputs: [
       {
-        indexed: false,
-        internalType: "bytes32",
-        name: "unitId",
-        type: "bytes32",
-      },
-    ],
-    name: "ComputeUnitExited",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "bytes32",
-        name: "unitId",
-        type: "bytes32",
-      },
-    ],
-    name: "ComputeUnitJoined",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "bytes32",
-        name: "computeUnitId",
-        type: "bytes32",
-      },
-      {
-        indexed: false,
-        internalType: "bytes32",
-        name: "workerId",
-        type: "bytes32",
-      },
-    ],
-    name: "WorkerIdUpdated",
-    type: "event",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes32",
         name: "id",
         type: "bytes32",
+        internalType: "bytes32",
       },
     ],
-    name: "getComputeUnit",
     outputs: [
       {
-        components: [
-          {
-            internalType: "bytes32",
-            name: "id",
-            type: "bytes32",
-          },
-          {
-            internalType: "bytes32",
-            name: "workerId",
-            type: "bytes32",
-          },
-          {
-            internalType: "address",
-            name: "owner",
-            type: "address",
-          },
-          {
-            internalType: "uint256",
-            name: "joinedEpoch",
-            type: "uint256",
-          },
-        ],
-        internalType: "struct IWorkerManager.ComputeUnit",
         name: "",
         type: "tuple",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "getComputeUnitCount",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "getComputeUnits",
-    outputs: [
-      {
+        internalType: "struct IWorkerManager.ComputeUnit",
         components: [
           {
-            internalType: "bytes32",
             name: "id",
             type: "bytes32",
+            internalType: "bytes32",
           },
           {
-            internalType: "bytes32",
             name: "workerId",
             type: "bytes32",
+            internalType: "bytes32",
           },
           {
-            internalType: "address",
             name: "owner",
             type: "address",
+            internalType: "address",
           },
           {
-            internalType: "uint256",
             name: "joinedEpoch",
             type: "uint256",
+            internalType: "uint256",
           },
         ],
-        internalType: "struct IWorkerManager.ComputeUnit[]",
-        name: "",
-        type: "tuple[]",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "getComputeUnitCount",
     inputs: [],
-    name: "getWorkerCount",
     outputs: [
       {
-        internalType: "uint256",
         name: "",
         type: "uint256",
+        internalType: "uint256",
       },
     ],
     stateMutability: "view",
+  },
+  {
     type: "function",
+    name: "getComputeUnits",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "tuple[]",
+        internalType: "struct IWorkerManager.ComputeUnit[]",
+        components: [
+          {
+            name: "id",
+            type: "bytes32",
+            internalType: "bytes32",
+          },
+          {
+            name: "workerId",
+            type: "bytes32",
+            internalType: "bytes32",
+          },
+          {
+            name: "owner",
+            type: "address",
+            internalType: "address",
+          },
+          {
+            name: "joinedEpoch",
+            type: "uint256",
+            internalType: "uint256",
+          },
+        ],
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getWorkerCount",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "event",
+    name: "ComputeUnitJoined",
+    inputs: [
+      {
+        name: "unitId",
+        type: "bytes32",
+        indexed: false,
+        internalType: "bytes32",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "ComputeUnitRemoved",
+    inputs: [
+      {
+        name: "unitId",
+        type: "bytes32",
+        indexed: false,
+        internalType: "bytes32",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "WorkerIdUpdated",
+    inputs: [
+      {
+        name: "computeUnitId",
+        type: "bytes32",
+        indexed: false,
+        internalType: "bytes32",
+      },
+      {
+        name: "workerId",
+        type: "bytes32",
+        indexed: false,
+        internalType: "bytes32",
+      },
+    ],
+    anonymous: false,
   },
 ] as const;
 

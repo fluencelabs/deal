@@ -361,11 +361,16 @@ export namespace BeaconUpgradedEvent {
 }
 
 export namespace ComputeUnitAddedToDealEvent {
-  export type InputTuple = [unitId: BytesLike, deal: AddressLike];
-  export type OutputTuple = [unitId: string, deal: string];
+  export type InputTuple = [
+    unitId: BytesLike,
+    deal: AddressLike,
+    peerId: BytesLike
+  ];
+  export type OutputTuple = [unitId: string, deal: string, peerId: string];
   export interface OutputObject {
     unitId: string;
     deal: string;
+    peerId: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -417,11 +422,16 @@ export namespace ComputeUnitMatchedEvent {
 }
 
 export namespace ComputeUnitRemovedFromDealEvent {
-  export type InputTuple = [unitId: BytesLike, deal: AddressLike];
-  export type OutputTuple = [unitId: string, deal: string];
+  export type InputTuple = [
+    unitId: BytesLike,
+    deal: AddressLike,
+    peerId: BytesLike
+  ];
+  export type OutputTuple = [unitId: string, deal: string, peerId: string];
   export interface OutputObject {
     unitId: string;
     deal: string;
+    peerId: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -446,17 +456,38 @@ export namespace DealCreatedEvent {
   export type InputTuple = [
     owner: AddressLike,
     deal: AddressLike,
-    createdAtEpoch: BigNumberish
+    createdAtEpoch: BigNumberish,
+    paymentToken: AddressLike,
+    minWorkers: BigNumberish,
+    targetWorkers: BigNumberish,
+    maxWorkersPerProvider: BigNumberish,
+    pricePerWorkerEpoch: BigNumberish,
+    effectors: CIDV1Struct[],
+    appCID: CIDV1Struct
   ];
   export type OutputTuple = [
     owner: string,
     deal: string,
-    createdAtEpoch: bigint
+    createdAtEpoch: bigint,
+    paymentToken: string,
+    minWorkers: bigint,
+    targetWorkers: bigint,
+    maxWorkersPerProvider: bigint,
+    pricePerWorkerEpoch: bigint,
+    effectors: CIDV1StructOutput[],
+    appCID: CIDV1StructOutput
   ];
   export interface OutputObject {
     owner: string;
     deal: string;
     createdAtEpoch: bigint;
+    paymentToken: string;
+    minWorkers: bigint;
+    targetWorkers: bigint;
+    maxWorkersPerProvider: bigint;
+    pricePerWorkerEpoch: bigint;
+    effectors: CIDV1StructOutput[];
+    appCID: CIDV1StructOutput;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -1100,7 +1131,7 @@ export interface Core extends BaseContract {
       BeaconUpgradedEvent.OutputObject
     >;
 
-    "ComputeUnitAddedToDeal(bytes32,address)": TypedContractEvent<
+    "ComputeUnitAddedToDeal(bytes32,address,bytes32)": TypedContractEvent<
       ComputeUnitAddedToDealEvent.InputTuple,
       ComputeUnitAddedToDealEvent.OutputTuple,
       ComputeUnitAddedToDealEvent.OutputObject
@@ -1133,7 +1164,7 @@ export interface Core extends BaseContract {
       ComputeUnitMatchedEvent.OutputObject
     >;
 
-    "ComputeUnitRemovedFromDeal(bytes32,address)": TypedContractEvent<
+    "ComputeUnitRemovedFromDeal(bytes32,address,bytes32)": TypedContractEvent<
       ComputeUnitRemovedFromDealEvent.InputTuple,
       ComputeUnitRemovedFromDealEvent.OutputTuple,
       ComputeUnitRemovedFromDealEvent.OutputObject
@@ -1155,7 +1186,7 @@ export interface Core extends BaseContract {
       ConstantsUpdatedEvent.OutputObject
     >;
 
-    "DealCreated(address,address,uint256)": TypedContractEvent<
+    "DealCreated(address,address,uint256,address,uint256,uint256,uint256,uint256,tuple[],tuple)": TypedContractEvent<
       DealCreatedEvent.InputTuple,
       DealCreatedEvent.OutputTuple,
       DealCreatedEvent.OutputObject

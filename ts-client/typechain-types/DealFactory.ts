@@ -169,17 +169,38 @@ export namespace DealCreatedEvent {
   export type InputTuple = [
     owner: AddressLike,
     deal: AddressLike,
-    createdAtEpoch: BigNumberish
+    createdAtEpoch: BigNumberish,
+    paymentToken: AddressLike,
+    minWorkers: BigNumberish,
+    targetWorkers: BigNumberish,
+    maxWorkersPerProvider: BigNumberish,
+    pricePerWorkerEpoch: BigNumberish,
+    effectors: CIDV1Struct[],
+    appCID: CIDV1Struct
   ];
   export type OutputTuple = [
     owner: string,
     deal: string,
-    createdAtEpoch: bigint
+    createdAtEpoch: bigint,
+    paymentToken: string,
+    minWorkers: bigint,
+    targetWorkers: bigint,
+    maxWorkersPerProvider: bigint,
+    pricePerWorkerEpoch: bigint,
+    effectors: CIDV1StructOutput[],
+    appCID: CIDV1StructOutput
   ];
   export interface OutputObject {
     owner: string;
     deal: string;
     createdAtEpoch: bigint;
+    paymentToken: string;
+    minWorkers: bigint;
+    targetWorkers: bigint;
+    maxWorkersPerProvider: bigint;
+    pricePerWorkerEpoch: bigint;
+    effectors: CIDV1StructOutput[];
+    appCID: CIDV1StructOutput;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -401,7 +422,7 @@ export interface DealFactory extends BaseContract {
       ConstantsUpdatedEvent.OutputObject
     >;
 
-    "DealCreated(address,address,uint256)": TypedContractEvent<
+    "DealCreated(address,address,uint256,address,uint256,uint256,uint256,uint256,tuple[],tuple)": TypedContractEvent<
       DealCreatedEvent.InputTuple,
       DealCreatedEvent.OutputTuple,
       DealCreatedEvent.OutputObject

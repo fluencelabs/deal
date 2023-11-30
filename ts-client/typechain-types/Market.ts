@@ -187,11 +187,16 @@ export interface MarketInterface extends Interface {
 }
 
 export namespace ComputeUnitAddedToDealEvent {
-  export type InputTuple = [unitId: BytesLike, deal: AddressLike];
-  export type OutputTuple = [unitId: string, deal: string];
+  export type InputTuple = [
+    unitId: BytesLike,
+    deal: AddressLike,
+    peerId: BytesLike
+  ];
+  export type OutputTuple = [unitId: string, deal: string, peerId: string];
   export interface OutputObject {
     unitId: string;
     deal: string;
+    peerId: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -218,11 +223,16 @@ export namespace ComputeUnitCreatedEvent {
 }
 
 export namespace ComputeUnitRemovedFromDealEvent {
-  export type InputTuple = [unitId: BytesLike, deal: AddressLike];
-  export type OutputTuple = [unitId: string, deal: string];
+  export type InputTuple = [
+    unitId: BytesLike,
+    deal: AddressLike,
+    peerId: BytesLike
+  ];
+  export type OutputTuple = [unitId: string, deal: string, peerId: string];
   export interface OutputObject {
     unitId: string;
     deal: string;
+    peerId: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -609,7 +619,7 @@ export interface Market extends BaseContract {
   >;
 
   filters: {
-    "ComputeUnitAddedToDeal(bytes32,address)": TypedContractEvent<
+    "ComputeUnitAddedToDeal(bytes32,address,bytes32)": TypedContractEvent<
       ComputeUnitAddedToDealEvent.InputTuple,
       ComputeUnitAddedToDealEvent.OutputTuple,
       ComputeUnitAddedToDealEvent.OutputObject
@@ -631,7 +641,7 @@ export interface Market extends BaseContract {
       ComputeUnitCreatedEvent.OutputObject
     >;
 
-    "ComputeUnitRemovedFromDeal(bytes32,address)": TypedContractEvent<
+    "ComputeUnitRemovedFromDeal(bytes32,address,bytes32)": TypedContractEvent<
       ComputeUnitRemovedFromDealEvent.InputTuple,
       ComputeUnitRemovedFromDealEvent.OutputTuple,
       ComputeUnitRemovedFromDealEvent.OutputObject

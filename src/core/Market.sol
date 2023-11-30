@@ -59,8 +59,8 @@ contract Market is Initializable {
     event EffectorAdded(bytes32 offerId, CIDV1 effector);
     event EffectorRemoved(bytes32 offerId, CIDV1 effector);
 
-    event ComputeUnitAddedToDeal(bytes32 unitId, IDeal deal);
-    event ComputeUnitRemovedFromDeal(bytes32 unitId, IDeal deal);
+    event ComputeUnitAddedToDeal(bytes32 unitId, IDeal deal, bytes32 peerId);
+    event ComputeUnitRemovedFromDeal(bytes32 unitId, IDeal deal, bytes32 peerId);
 
     // ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.market.storage.v1.offer")) - 1);
@@ -124,14 +124,14 @@ contract Market is Initializable {
 
         computePeer.info.offerId = offerId;
 
+        emit PeerCreated(offerId, peer.peerId);
+
         _addComputeUnitsToPeer(offerId, peer.peerId, peer.freeUnits);
 
         computePeer.info.nextUnitIndex = peer.freeUnits;
 
         // add peer to offer
         offer.freePeerIds.push(peer.peerId);
-
-        emit PeerCreated(offerId, peer.peerId);
     }
 
     function _addComputeUnitsToPeer(bytes32 offerId, bytes32 peerId, uint256 freeUnits) internal {
@@ -174,7 +174,7 @@ contract Market is Initializable {
 
         deal.addComputeUnit(offer.info.owner, unitId);
 
-        emit ComputeUnitAddedToDeal(unitId, deal);
+        emit ComputeUnitAddedToDeal(unitId, deal, computeUnit.peerId);
     }
 
     // ----------------- Public View -----------------
@@ -225,14 +225,14 @@ contract Market is Initializable {
             offer.hasEffector[effector] = true;
         }
 
+        emit MarketOfferRegistered(offerId, msg.sender, minPricePerWorkerEpoch, paymentToken, effectors);
+
         uint256 peerLength = peers.length;
         for (uint256 i = 0; i < peerLength; i++) {
             _addComputePeerToOffer(offerId, peers[i]);
         }
 
         offerStorage.offerIds.push(offerId);
-
-        emit MarketOfferRegistered(offerId, msg.sender, minPricePerWorkerEpoch, paymentToken, effectors);
     }
 
     function addComputePeers(bytes32 offerId, RegisterComputePeer[] calldata peers) external {
@@ -346,6 +346,6 @@ contract Market is Initializable {
 
         deal.removeComputeUnit(unitId);
 
-        emit ComputeUnitRemovedFromDeal(unitId, deal);
+        emit ComputeUnitRemovedFromDeal(unitId, deal, peerId);
     }
 }
