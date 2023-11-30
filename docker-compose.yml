@@ -1,6 +1,0 @@
-services:
-  hardhat-node:
-    build:
-      context: .
-    ports:
-      - "8545:8545"
