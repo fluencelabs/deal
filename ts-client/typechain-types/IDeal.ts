@@ -457,7 +457,7 @@ export interface IDeal extends BaseContract {
 
   addComputeUnit: TypedContractMethod<
     [computeProvider: AddressLike, unitId: BytesLike],
-    [string],
+    [void],
     "nonpayable"
   >;
 
@@ -573,7 +573,7 @@ export interface IDeal extends BaseContract {
     nameOrSignature: "addComputeUnit"
   ): TypedContractMethod<
     [computeProvider: AddressLike, unitId: BytesLike],
-    [string],
+    [void],
     "nonpayable"
   >;
   getFunction(

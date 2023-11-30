@@ -572,7 +572,7 @@ export interface Deal extends BaseContract {
 
   addComputeUnit: TypedContractMethod<
     [computeProvider: AddressLike, computeUnitId: BytesLike],
-    [string],
+    [void],
     "nonpayable"
   >;
 
@@ -714,7 +714,7 @@ export interface Deal extends BaseContract {
     nameOrSignature: "addComputeUnit"
   ): TypedContractMethod<
     [computeProvider: AddressLike, computeUnitId: BytesLike],
-    [string],
+    [void],
     "nonpayable"
   >;
   getFunction(

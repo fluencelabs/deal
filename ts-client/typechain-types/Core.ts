@@ -62,13 +62,13 @@ export declare namespace Market {
 
   export type ComputePeerInfoStruct = {
     offerId: BytesLike;
-    lastUnitIndex: BigNumberish;
+    nextUnitIndex: BigNumberish;
   };
 
   export type ComputePeerInfoStructOutput = [
     offerId: string,
-    lastUnitIndex: bigint
-  ] & { offerId: string; lastUnitIndex: bigint };
+    nextUnitIndex: bigint
+  ] & { offerId: string; nextUnitIndex: bigint };
 }
 
 export interface CoreInterface extends Interface {

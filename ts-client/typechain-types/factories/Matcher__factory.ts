@@ -597,7 +597,7 @@ const _abi = [
           },
           {
             internalType: "uint256",
-            name: "lastUnitIndex",
+            name: "nextUnitIndex",
             type: "uint256",
           },
         ],
