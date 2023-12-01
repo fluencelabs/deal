@@ -1,22 +1,31 @@
 query OffersQuery(
   $createdAtFrom: BigInt,
   $createdAtTo: BigInt,
-  $pricePerEpochFrom: BigInt,
-  $pricePerEpochTo: BigInt,
+  $minPricePerWorkerEpoch: BigInt,
+  $maxPricePerWorkerEpoch: BigInt,
   $paymentTokens: [String!],
-  $effectors: [String!],
+  $effectorIds: [String!],
+  $offset: Int,
+  $limit: Int,
+  $orderBy: Offer_orderBy,
+  $orderType: OrderDirection,
 ) {
   offers(
       where: {
+          createdAt_not: null,
           createdAt_gt: $createdAtFrom,
           createdAt_lt: $createdAtTo,
-          pricePerEpoch_gt: $pricePerEpochFrom,
-          pricePerEpoch_lt: $pricePerEpochTo,
+          pricePerEpoch_gt: $minPricePerWorkerEpoch,
+          pricePerEpoch_lt: $maxPricePerWorkerEpoch,
           paymentToken_in: $paymentTokens,
           effectors_: {
-      	        effector_in: $effectors,
+      	        effector_in: $effectorIds,
             }
       }
+      first: $limit
+      skip: $offset
+      orderBy: $orderBy
+      orderDirection: $orderType
   ) {
     ...BasicOffer
   }
@@ -42,6 +51,7 @@ fragment BasicOffer on Offer {
       symbol
     }
     computeUnitsTotal
+    computeUnitsAvailable
     effectors {
       effector {
         id

@@ -8,8 +8,9 @@ export type ProviderShort = {
     offers: Array<OfferShort>;
 };
 
+// TODO: What is offer name? deprecated.
 export type OfferShort = {
-    name: string;
+    id: string;
     createdAt: number;
     totalComputeUnits: number;
     freeComputeUnits: number;
@@ -133,12 +134,8 @@ export enum ProviderShortOrder {
     CreatedAt,
 }
 
-export enum OfferShortOrder {
-    CreatedAt,
-    PricePerWorkerEpoch,
-    MaxCollateralPerWorker,
-    UpdatedAt,
-}
+export type OfferShortOrderBy = "createdAt" | "pricePerWorkerEpoch" | "maxCollateralPerWorker" | "updatedAt";
+export type OrderType = "asc" | "desc";
 
 export enum ProviderShortSearch {
     None,
