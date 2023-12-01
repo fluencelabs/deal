@@ -1,3 +1,5 @@
+.graphclient/
+
 # Logs
 logs
 *.log

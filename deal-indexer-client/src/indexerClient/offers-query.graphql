@@ -1,0 +1,51 @@
+query OffersQuery(
+  $createdAtFrom: BigInt,
+  $createdAtTo: BigInt,
+  $pricePerEpochFrom: BigInt,
+  $pricePerEpochTo: BigInt,
+  $paymentTokens: [String!],
+  $effectors: [String!],
+) {
+  offers(
+      where: {
+          createdAt_gt: $createdAtFrom,
+          createdAt_lt: $createdAtTo,
+          pricePerEpoch_gt: $pricePerEpochFrom,
+          pricePerEpoch_lt: $pricePerEpochTo,
+          paymentToken_in: $paymentTokens,
+          effectors_: {
+      	        effector_in: $effectors,
+            }
+      }
+  ) {
+    ...BasicOffer
+  }
+}
+
+query OfferQuery(
+  $id: ID!
+) {
+  offer(id: $id) {
+    ...BasicOffer
+  }
+}
+
+fragment BasicOffer on Offer {
+  id
+    createdAt
+    provider {
+      id
+    }
+    pricePerEpoch
+    paymentToken {
+      id
+      symbol
+    }
+    computeUnitsTotal
+    effectors {
+      effector {
+        id
+        description
+      }
+    }
+}

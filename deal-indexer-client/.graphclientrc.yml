@@ -1,0 +1,8 @@
+sources:
+  - name: CoreImpl
+    handler:
+      graphql:
+        endpoint: http://localhost:8000/subgraphs/name/fluence-deal-contracts
+
+documents:
+  - ./src/indexerClient/offers-query.graphql

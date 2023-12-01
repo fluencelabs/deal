@@ -1,5 +1,12 @@
 {
+  "name": "deal-explorer-client",
+  "version": "0.0.0",
+  "scripts": {
+    "load-subgraph-types": "graphclient build",
+    "graphiql": "graphclient serve-dev"
+  },
   "devDependencies": {
+    "@graphprotocol/client-cli": "^3.0.0",
     "typescript": "^5.2.2"
   },
   "dependencies": {
