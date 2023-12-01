@@ -36,6 +36,16 @@ query OfferQuery(
 ) {
   offer(id: $id) {
     ...BasicOffer
+    peers {
+        id
+        offer {
+            id
+        }
+        computeUnits {
+            id
+            workerId
+        }
+    }
   }
 }
 

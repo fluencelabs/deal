@@ -3,19 +3,21 @@ import {
     Deal,
     DealShort,
     DealStatus,
-    Offer,
     OfferShort,
-    OfferShortOrderBy, OrderType,
+    OfferShortOrderBy,
+    OrderType,
     Provider,
     ProviderDetailsStatusFilter,
     ProviderShort,
     ProviderShortOrder,
     ProviderShortSearch,
     ShortDeal,
+    OfferDetail,
 } from "./types";
 import { ContractsENV, DealClient } from "../../src";
-import { execute, OffersQueryDocument, OffersQueryQuery } from "../.graphclient";
+import { execute, Offer, OfferQueryDocument, OfferQueryQuery, OffersQueryDocument, OffersQueryQuery } from "../.graphclient";
 import { requestIndexer } from "./indexerClient/indexerClient";
+import { string } from "hardhat/internal/core/params/argumentTypes";
 
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
@@ -156,7 +158,25 @@ export class DealExplorerClient {
         }));
     }
 
-
+    _composeOfferShort(offer: unknown): OfferShort {
+        const effectors = [];
+        if (offer.effectors) {
+            offer.effectors.map((effector) => {
+                effectors.push({
+                    cid: effector.effector.id,
+                    description: effector.effector.description,
+                });
+            });
+        }
+        return {
+            id: offer.id,
+            createdAt: offer.createdAt,
+            totalComputeUnits: offer.computeUnitsTotal,
+            freeComputeUnits: offer.computeUnitsAvailable,
+            paymentToken: { address: offer.paymentToken.id, symbol: offer.paymentToken.symbol },
+            effectors: effectors,
+        } as OfferShort;
+    }
 
     /*
      * @dev Get offers list for 1 page and specified filters.
@@ -189,7 +209,6 @@ export class DealExplorerClient {
         orderBy: OfferShortOrderBy = "createdAt",
         orderType: OrderType = "desc",
     ): Promise<Array<OfferShort>> {
-        const res = [];
         const options = {
             createdAtFrom,
             createdAtTo,
@@ -203,67 +222,41 @@ export class DealExplorerClient {
             orderType,
         };
         const data = (await requestIndexer(OffersQueryDocument, options)) as OffersQueryQuery;
+        const res = [];
         if (data) {
             for (const offer of data.offers) {
-                const effectors = [];
-                if (offer.effectors) {
-                    offer.effectors.map((effector) => {
-                        effectors.push({
-                            cid: effector.effector.id,
-                            description: effector.effector.description,
-                        });
-                    });
-                }
-                res.push({
-                    id: offer.id,
-                    createdAt: offer.createdAt,
-                    totalComputeUnits: offer.computeUnitsTotal,
-                    freeComputeUnits: offer.computeUnitsAvailable,
-                    paymentToken: { address: offer.paymentToken.id, symbol: offer.paymentToken.symbol },
-                    effectors: effectors,
-                });
+                res.push(this._composeOfferShort(offer));
             }
         }
         return res;
     }
 
-    async getOffer(offerId: string): Promise<Offer> {
-        return {
-            id: ethers.hexlify(ethers.randomBytes(32)),
-            name: `Test offer`,
-            createdAt: new Date().getTime() / 1000,
-            updatedAt: new Date().getTime() / 1000,
-            maxCollateralPerWorker: 10,
-            minPricePerWorkerEpoch: 1.2,
-            paymentToken: {
-                address: ethers.hexlify(ethers.randomBytes(20)),
-                symbol: "USDT",
-            },
-            totalComputeUnits: 12,
-            freeComputeUnits: 1,
-            effectors: [
-                {
-                    cid: "rendomCID",
-                    description: "Test effector #1",
-                },
-                {
-                    cid: "rendomCID",
-                    description: "Test effector #2",
-                },
-            ],
-            peers: new Array(5).map((x, i) => ({
-                id: ethers.hexlify(ethers.randomBytes(32)),
-                offerId: ethers.hexlify(ethers.randomBytes(32)),
-                transactionHash: ethers.hexlify(ethers.randomBytes(32)),
-                workerSlots: 10,
-                computeUnits: new Array(5).map((x, i) => ({
-                    id: ethers.hexlify(ethers.randomBytes(32)),
-                    collateral: 10,
-                    dealId: ethers.hexlify(ethers.randomBytes(20)),
-                    workerId: ethers.hexlify(ethers.randomBytes(32)),
-                })),
-            })),
+    // Return OfferDetail View.
+    async getOffer(offerId: string): Promise<OfferDetail | null> {
+        const options = {
+            id: offerId,
         };
+        const data = (await requestIndexer(OfferQueryDocument, options)) as OfferQueryQuery;
+        let res = null;
+        if (data && data.offer) {
+            res = this._composeOfferShort(data.offer);
+            const peersComposed = [];
+            if (data.offer.peers) {
+                for (const peer of data.offer.peers) {
+                    const computeUnitsComposed = [];
+                    for (const cu of peer.computeUnits) {
+                        computeUnitsComposed.push({ id: cu.id, workerId: cu.workerId });
+                    }
+                    peersComposed.push({
+                        id: peer.id,
+                        offerId: peer.offer.id,
+                        computeUnits: computeUnitsComposed,
+                    });
+                }
+                res["peers"] = peersComposed;
+            }
+        }
+        return res;
     }
 
     async getDeals(

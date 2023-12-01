@@ -56,6 +56,6 @@ export function handleComputeUnitRemoved(event: ComputeUnitRemoved): void {
 // Link workerId to CU.
 export function handleWorkerIdUpdated(event: WorkerIdUpdated): void {
     let computeUnit = ComputeUnit.load(event.params.computeUnitId.toHex()) as ComputeUnit
-    computeUnit.workerID = event.params.workerId.toHex()
+    computeUnit.workerId = event.params.workerId.toHex()
     computeUnit.save()
 }

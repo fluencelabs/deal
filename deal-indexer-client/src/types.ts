@@ -8,7 +8,7 @@ export type ProviderShort = {
     offers: Array<OfferShort>;
 };
 
-// TODO: What is offer name? deprecated.
+// TODO: What is offer.name? deprecated.
 export type OfferShort = {
     id: string;
     createdAt: number;
@@ -17,6 +17,12 @@ export type OfferShort = {
     paymentToken: PaymentToken;
     effectors: Array<Effector>;
 };
+
+// TODO: maxCollateralPerWorker deprecated
+// TODO: minPricePerWorkerEpoch deprecated
+export interface OfferDetail extends OfferShort {
+    peers: Array<Peer>;
+}
 
 export type PaymentToken = {
     address: string;
@@ -46,36 +52,22 @@ export type RevenueByDay = {
     value: number;
 };
 
-export type Offer = {
-    id: string;
-    name: string;
-    createdAt: number;
-    updatedAt: number;
-    maxCollateralPerWorker: number;
-    minPricePerWorkerEpoch: number;
-    paymentToken: PaymentToken;
-    totalComputeUnits: number;
-    freeComputeUnits: number;
-    effectors: Array<Effector>;
-    peers: Array<Peer>;
-};
-
 export type Effector = {
     cid: string;
     description: string;
 };
 
+// TODO: transactionHash deprecated.
+// TODO: workerSlots deprecated.
 export type Peer = {
     id: string;
     offerId: string;
-    transactionHash: string;
-    workerSlots: number;
     computeUnits: Array<ComputeUnit>;
 };
 
+// TODO: deprecated: collateral.
 export type ComputeUnit = {
     id: string;
-    collateral: number;
     workerId: string | undefined;
 };
 
