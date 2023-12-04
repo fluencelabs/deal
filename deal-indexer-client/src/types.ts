@@ -69,49 +69,29 @@ export type ComputeUnit = {
     workerId: string | undefined;
 };
 
-export type ShortDeal = {
-    id: string;
-    offerId: string;
-    client: string;
-    paymentToken: PaymentToken;
-    createdAt: number;
-    minWorkers: number;
-    targetWorkers: number;
-    registeredWorkers: number;
-    status: DealStatus;
-};
-
 export type DealShort = {
     id: string;
     createdAt: number;
-    owner: string;
+    client: string;
+    paymentToken: PaymentToken;
     minWorkers: number;
     targetWorkers: number;
     matchedWorkers: number;
     registeredWorkers: number;
-    balance: number;
+    // Active if CU has worker set.
     status: DealStatus;
+    balance: number;
+    totalEarnings: number;
 };
 
-export type Deal = {
-    id: string;
-    appCID: string;
-    owner: string;
-    createdAt: number;
-    minWorkers: number;
-    targetWorkers: number;
-    matchedWorkers: number;
-    registeredWorkers: number;
-    paymentToken: PaymentToken;
+// Collateral deprecated.
+export interface DealDetail extends DealShort {
     pricePerWorkerEpoch: number;
-    collateral: number;
     computeUnits: Array<ComputeUnit>;
     whitelist: Array<string>;
     blacklist: Array<string>;
     effectors: Array<Effector>;
-    totalPaidAmount: number;
-    status: DealStatus;
-};
+}
 
 export enum DealStatus {
     Inactive,
@@ -120,12 +100,9 @@ export enum DealStatus {
 }
 
 export type ProviderShortOrderBy = "createdAt" | "computeUnitsTotal";
-
 export type OfferShortOrderBy = "createdAt" | "pricePerWorkerEpoch" | "maxCollateralPerWorker" | "updatedAt";
+export type DealsShortOrderBy = "createdAt";
+
 export type OrderType = "asc" | "desc";
 
-export enum ProviderDetailsStatusFilter {
-    All,
-    Active,
-    Inactive,
-}
+export type ProviderDetailsStatusFilter = "all" | "active" | "incative"

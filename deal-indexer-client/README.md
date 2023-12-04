@@ -15,3 +15,7 @@ when `npm run load-subgraph-types` (ref to [Graph Client](https://thegraph.com/d
 - [ ] use deal package instead of import from `../src`
 - [ ] commit to the special repo
 - [ ] after merge with foundry -> to different npm packages [refactor work with several packages]
+- [ ] add ulr links to fetch filters...
+- [offers] TODO: search fields: by client or dealId?
+- resolve registered workers! (separate class?)
+- page counter?

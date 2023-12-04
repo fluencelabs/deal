@@ -14,3 +14,4 @@ sources:
 documents:
   - ./src/indexerClient/offers-query.graphql
   - ./src/indexerClient/providers-query.graphql
+  - ./src/indexerClient/deals-query.graphql

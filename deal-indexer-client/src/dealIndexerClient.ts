@@ -1,32 +1,38 @@
 import { ethers, Provider as EthersProvider } from "ethers";
 import {
-    Deal,
     DealShort,
-    DealStatus,
     OfferShort,
     OfferShortOrderBy,
     OrderType,
-    Provider,
     ProviderDetailsStatusFilter,
     ProviderShort,
-    ShortDeal,
     OfferDetail,
     ProviderShortOrderBy,
-    Effector, ProviderDetail, ProviderBase,
+    Effector,
+    ProviderDetail,
+    ProviderBase,
+    DealsShortOrderBy,
+    DealDetail,
+    Peer,
 } from "./types";
 import { ContractsENV, DealClient } from "../../src";
 import {
+    DealQueryDocument,
+    DealQueryQuery,
+    DealsQueryDocument,
+    DealsQueryQuery,
     OfferQueryDocument,
     OfferQueryQuery,
     OffersQueryDocument,
-    OffersQueryQuery, ProviderQueryDocument, ProviderQueryQuery,
+    OffersQueryQuery,
+    ProviderQueryDocument,
+    ProviderQueryQuery,
     ProvidersQueryDocument,
     ProvidersQueryQuery,
 } from "../.graphclient";
 import { requestIndexer } from "./indexerClient/indexerClient";
 
-
-interface OfferFilters {
+interface OffersFilters {
     search?: string | undefined;
     effectorIds?: Array<string> | undefined;
     paymentTokens?: Array<string> | undefined;
@@ -48,9 +54,21 @@ interface ProvidersFilters {
     effectorIds?: Array<string> | undefined;
 }
 
-interface OffersByProviderFilter {
+interface ByProviderAndStatusFilter {
     providerId?: string | undefined;
     status?: ProviderDetailsStatusFilter | undefined;
+}
+
+interface DealsFilters {
+    search?: string | undefined;
+    effectorIds?: Array<string> | undefined;
+    paymentToken?: string | undefined;
+    minPricePerWorkerEpoch?: number | undefined;
+    maxPricePerWorkerEpoch?: number | undefined;
+    createdAtFrom?: number | undefined;
+    createdAtTo?: number | undefined;
+    onlyApproved?: boolean;
+    providerId?: string | undefined;
 }
 
 /*
@@ -72,6 +90,8 @@ export class DealExplorerClient {
             this.ethersProvider = new ethers.JsonRpcProvider(chainRpcUrl);
         } else if (ethersProvider) {
             this.ethersProvider = ethersProvider;
+        } else {
+            throw Error("One of chainRPCUrl or ethersProvider should be delclared.");
         }
         this.indexerUrl = indexerUrl;
         this.contractDealClient = new DealClient(contractsEnv || this.DEFAULT_CONTRACTS_ENV, this.ethersProvider);
@@ -158,34 +178,31 @@ export class DealExplorerClient {
     }
 
     async getOffersByProvider(
-        offersByProviderFilter: OffersByProviderFilter,
+        byProviderAndStatusFilter: ByProviderAndStatusFilter,
         offset: number = 0,
         limit: number = this.DEFAULT_PAGE_LIMIT,
         orderBy: OfferShortOrderBy = "createdAt",
         orderType: OrderType = this.DEFAULT_ORDER_TYPE,
     ): Promise<Array<OfferShort>> {
-        if (offersByProviderFilter.status) {
+        if (byProviderAndStatusFilter.status) {
             // TODO.
             console.warn("Status filter is not implemented.");
         }
-        return await this._getOffersImpl({ providerId: offersByProviderFilter.providerId }, offset, limit, orderBy, orderType);
+        return await this._getOffersImpl({ providerId: byProviderAndStatusFilter.providerId }, offset, limit, orderBy, orderType);
     }
 
-    async getDealsByProvider(providerId: string, filter: ProviderDetailsStatusFilter): Promise<Array<ShortDeal>> {
-        return new Array(5).map((x, i) => ({
-            id: ethers.hexlify(ethers.randomBytes(20)),
-            offerId: ethers.hexlify(ethers.randomBytes(32)),
-            client: ethers.hexlify(ethers.randomBytes(20)),
-            paymentToken: {
-                address: ethers.hexlify(ethers.randomBytes(20)),
-                symbol: "USDT",
-            },
-            createdAt: new Date().getTime() / 1000 - i * 24 * 60 * 60,
-            minWorkers: 1 * i,
-            targetWorkers: 3 * i,
-            registeredWorkers: 2 * i,
-            status: DealStatus.Active,
-        }));
+    async getDealsByProvider(
+        byProviderAndStatusFilter: ByProviderAndStatusFilter,
+        offset: number = 0,
+        limit: number = this.DEFAULT_PAGE_LIMIT,
+        orderBy: DealsShortOrderBy = "createdAt",
+        orderType: OrderType = this.DEFAULT_ORDER_TYPE,
+    ): Promise<Array<DealShort>> {
+        if (byProviderAndStatusFilter.status) {
+            // TODO.
+            console.warn("Status filter is not implemented.");
+        }
+        return await this._getDealsImpl({ providerId: byProviderAndStatusFilter.providerId }, offset, limit, orderBy, orderType);
     }
 
     _composeEffectors(effectors: unknown): Array<Effector> {
@@ -214,7 +231,7 @@ export class DealExplorerClient {
     }
 
     async _getOffersImpl(
-        offerFilters: OfferFilters,
+        offerFilters: OffersFilters,
         // TODO: simplify general args declaration.
         offset: number = 0,
         limit: number = this.DEFAULT_PAGE_LIMIT,
@@ -254,7 +271,7 @@ export class DealExplorerClient {
      * TODO: use onlyApproved.
      */
     async getOffers(
-        offerFilters: OfferFilters,
+        offerFilters: OffersFilters,
         // TODO: simplify general args declaration.
         offset: number = 0,
         limit: number = this.DEFAULT_PAGE_LIMIT,
@@ -262,6 +279,24 @@ export class DealExplorerClient {
         orderType: OrderType = this.DEFAULT_ORDER_TYPE,
     ): Promise<Array<OfferShort>> {
         return await this._getOffersImpl(offerFilters, offset, limit, orderBy, orderType);
+    }
+
+    _composePeers(peers: unknown): Array<Peer> {
+        const peersComposed = [];
+        if (peers) {
+            for (const peer of peers) {
+                const computeUnitsComposed = [];
+                for (const cu of peer.computeUnits) {
+                    computeUnitsComposed.push({ id: cu.id, workerId: cu.workerId });
+                }
+                peersComposed.push({
+                    id: peer.id,
+                    offerId: peer.offer.id,
+                    computeUnits: computeUnitsComposed,
+                });
+            }
+        }
+        return peersComposed;
     }
 
     // Return OfferDetail View.
@@ -274,82 +309,89 @@ export class DealExplorerClient {
         if (data && data.offer) {
             res = this._composeOfferShort(data.offer);
             res["updatedAt"] = data.offer.updatedAt;
-            const peersComposed = [];
-            if (data.offer.peers) {
-                for (const peer of data.offer.peers) {
-                    const computeUnitsComposed = [];
-                    for (const cu of peer.computeUnits) {
-                        computeUnitsComposed.push({ id: cu.id, workerId: cu.workerId });
-                    }
-                    peersComposed.push({
-                        id: peer.id,
-                        offerId: peer.offer.id,
-                        computeUnits: computeUnitsComposed,
-                    });
-                }
-                res["peers"] = peersComposed;
+            res["peers"] = this._composePeers(data.offer.peers);
+        }
+        return res;
+    }
+
+    async _getDealsImpl(
+        dealsFilters: DealsFilters,
+        // TODO: simplify general args declaration.
+        offset: number = 0,
+        limit: number = this.DEFAULT_PAGE_LIMIT,
+        orderBy: DealsShortOrderBy = "createdAt",
+        orderType: OrderType = this.DEFAULT_ORDER_TYPE,
+    ): Promise<Array<DealShort>> {
+        if (dealsFilters.search) {
+            console.warn("Currently search field does not implemented.");
+        }
+        const options = {
+            ...dealsFilters,
+            offset,
+            limit,
+            orderBy,
+            orderType,
+        };
+        const data = (await requestIndexer(DealsQueryDocument, options)) as DealsQueryQuery;
+        const res = [];
+        if (data) {
+            for (const deal of data.deals) {
+                res.push(this._composeDealsShort(deal));
             }
         }
         return res;
     }
 
-    async getDeals(
-        effectorIds: Array<string> | undefined = undefined,
-        paymentToken: string | undefined = undefined,
-        minPricePerWorkerEpoch: number | undefined = undefined,
-        maxPricePerWorkerEpoch: number | undefined = undefined,
-        minCollateralPerWorker: number | undefined = undefined,
-        maxCollateralPerWorker: number | undefined = undefined,
-        createdAtFrom: number | undefined = undefined,
-        createdAtTo: number | undefined = undefined,
-        onlyApproved: boolean = false,
-        skip: number,
-        take: number,
-        order: OfferShortOrder,
-    ): Promise<Array<DealShort>> {
-        return new Array(5).map((x, i) => ({
-            id: ethers.hexlify(ethers.randomBytes(20)),
-            createdAt: new Date().getTime() / 1000 - i * 24 * 60 * 60,
-            owner: ethers.hexlify(ethers.randomBytes(20)),
-            minWorkers: 1 * i,
-            targetWorkers: 3 * i,
-            matchedWorkers: 2 * i,
-            registeredWorkers: 2 * i,
-            balance: 100 * i,
-            status: DealStatus.Active,
-        }));
+    _composeDealsShort(deal: unknown): DealShort {
+        const effectors = this._composeEffectors(deal.effectors);
+        return {
+            id: deal.id,
+            createdAt: deal.createdAt,
+            client: deal.client,
+            minWorkers: deal.minWorkers,
+            targetWorkers: deal.targetWorkers,
+            paymentToken: { address: deal.paymentToken.id, symbol: deal.paymentToken.symbol },
+            effectors: effectors,
+            // TODO:
+            // balance
+            // status
+            // registeredWorkers
+            // matchedWorkers
+            // totalEarnings
+        } as DealShort;
     }
 
-    async getDeal(dealId: string): Promise<Deal> {
-        return {
-            id: ethers.hexlify(ethers.randomBytes(20)),
-            appCID: "randomCID",
-            owner: ethers.hexlify(ethers.randomBytes(20)),
-            createdAt: new Date().getTime() / 1000,
-            minWorkers: 1,
-            targetWorkers: 3,
-            matchedWorkers: 2,
-            registeredWorkers: 2,
-            paymentToken: {
-                address: ethers.hexlify(ethers.randomBytes(20)),
-                symbol: "USDT",
-            },
-            pricePerWorkerEpoch: 1.2,
-            collateral: 10,
-            computeUnits: new Array(5).map((x, i) => ({
-                id: ethers.hexlify(ethers.randomBytes(32)),
-                collateral: 10,
-                workerId: ethers.hexlify(ethers.randomBytes(32)),
-            })),
-            whitelist: new Array(5).map((x, i) => ethers.hexlify(ethers.randomBytes(20))),
-            blacklist: new Array(5).map((x, i) => ethers.hexlify(ethers.randomBytes(20))),
-            effectors: new Array(5).map((x, i) => ({
-                cid: "rendomCID",
-                description: `Test effector #{i}`,
-            })),
-            totalPaidAmount: 100,
-            status: DealStatus.Active,
+    /*
+     * @dev Deprecated:
+     * - minCollateralPerWorker
+     * - maxCollateralPerWorker
+     */
+    async getDeals(
+        dealFilters: DealsFilters,
+        // TODO: simplify general args declaration.
+        offset: number = 0,
+        limit: number = this.DEFAULT_PAGE_LIMIT,
+        orderBy: DealsShortOrderBy = "createdAt",
+        orderType: OrderType = this.DEFAULT_ORDER_TYPE,
+    ): Promise<Array<DealShort>> {
+        return await this._getDealsImpl(dealFilters, offset, limit, orderBy, orderType);
+    }
+
+    async getDeal(dealId: string): Promise<DealDetail> {
+        const options = {
+            id: dealId,
         };
+        const data = (await requestIndexer(DealQueryDocument, options)) as DealQueryQuery;
+        let res = null;
+        if (data && data.deal) {
+            const deal = data.deal;
+            res = this._composeDealsShort(deal);
+            res["pricePerWorkerEpoch"] = deal.pricePerWorkerEpoch;
+            res["computeUnits"] = deal.addedComputeUnits;
+            res["whitelist"] = [];
+            res["blacklist"] = [];
+        }
+        return res;
     }
 }
 

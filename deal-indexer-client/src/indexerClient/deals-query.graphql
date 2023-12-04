@@ -1,0 +1,70 @@
+query DealsQuery(
+  $createdAtFrom: BigInt,
+  $createdAtTo: BigInt,
+  $minPricePerWorkerEpoch: BigInt,
+  $maxPricePerWorkerEpoch: BigInt,
+  $paymentTokens: [String!],
+  $effectorIds: [String!],
+  $offset: Int,
+  $limit: Int,
+  $orderBy: Deal_orderBy,
+  $orderType: OrderDirection,
+  $providerId: String,
+) {
+  deals(
+      where: {
+          createdAt_gt: $createdAtFrom,
+          createdAt_lt: $createdAtTo,
+          maxPaidEpoch_gt: $minPricePerWorkerEpoch,
+          maxPaidEpoch_lt: $maxPricePerWorkerEpoch,
+          paymentToken_in: $paymentTokens,
+          effectors_: {
+      	        effector_in: $effectorIds,
+            },
+      }
+      first: $limit
+      skip: $offset
+      orderBy: $orderBy
+      orderDirection: $orderType
+  ) {
+    ...BasicDeal
+  }
+}
+
+query DealQuery(
+  $id: ID!
+) {
+  deal(id: $id) {
+    ...BasicDeal
+      maxWorkersPerProvider
+      appCID
+      pricePerWorkerEpoch
+  }
+}
+
+fragment BasicDeal on Deal {
+    id
+    createdAt
+    minWorkers
+    targetWorkers
+    paymentToken {
+      id
+      symbol
+    }
+    effectors {
+      effector {
+        id
+        description
+      }
+    }
+    addedComputeUnits {
+        id
+        workerId
+        provider {
+            id
+        }
+    }
+    maxPaidEpoch
+    depositedSum
+    withdrawalSum
+}
