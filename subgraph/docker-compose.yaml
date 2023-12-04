@@ -10,7 +10,7 @@ volumes:
 
 services:
   graph-node:
-    image: graphprotocol/graph-node
+    image: graphprotocol/graph-node:v0.33.0
     ports:
       - '8000:8000'
       - '8001:8001'
