@@ -38,7 +38,8 @@ export type Provider = {
     isApproved: boolean;
     peerCount: number;
     effectorCount: number;
-    revenue: Array<Revenue>;
+    // deprecated.
+    // revenue: Array<Revenue>;
 };
 
 export type Revenue = {
@@ -121,20 +122,10 @@ export enum DealStatus {
     Ended,
 }
 
-export enum ProviderShortOrder {
-    TotalComputeUnits,
-    CreatedAt,
-}
+export type ProviderShortOrderBy = "createdAt" | "computeUnitsTotal";
 
 export type OfferShortOrderBy = "createdAt" | "pricePerWorkerEpoch" | "maxCollateralPerWorker" | "updatedAt";
 export type OrderType = "asc" | "desc";
-
-export enum ProviderShortSearch {
-    None,
-    Id,
-    Name,
-    EffectorIds,
-}
 
 export enum ProviderDetailsStatusFilter {
     All,

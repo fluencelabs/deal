@@ -9,27 +9,35 @@ import {
     Provider,
     ProviderDetailsStatusFilter,
     ProviderShort,
-    ProviderShortOrder,
-    ProviderShortSearch,
     ShortDeal,
     OfferDetail,
+    ProviderShortOrderBy,
+    Effector,
 } from "./types";
 import { ContractsENV, DealClient } from "../../src";
-import { execute, Offer, OfferQueryDocument, OfferQueryQuery, OffersQueryDocument, OffersQueryQuery } from "../.graphclient";
+import {
+    OfferQueryDocument,
+    OfferQueryQuery,
+    OffersQueryDocument,
+    OffersQueryQuery,
+    ProvidersQueryDocument,
+    ProvidersQueryQuery,
+} from "../.graphclient";
 import { requestIndexer } from "./indexerClient/indexerClient";
-import { string } from "hardhat/internal/core/params/argumentTypes";
 
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
+ * @dev It supports mainnet, testnet by selecting related contractsEnv.
+ * TODO: Note, deprecated: do not use chainRPCUrl, use ethersProvider instead.
  */
 export class DealExplorerClient {
     private indexerUrl: string;
     DEFAULT_CONTRACTS_ENV: ContractsENV = "kras";
     DEFAULT_PAGE_LIMIT = 100;
+    DEFAULT_ORDER_TYPE: OrderType = "desc";
 
     private ethersProvider: EthersProvider;
     private contractDealClient: DealClient;
-    // @deprecated: do not use chainRPCUrl, use ethersProvider instead.
     constructor(indexerUrl: string, chainRpcUrl?: string, ethersProvider?: EthersProvider, contractsEnv?: ContractsENV) {
         if (chainRpcUrl) {
             console.warn("Do not use chainRPCUrl, use ethersProvider instead.");
@@ -41,53 +49,55 @@ export class DealExplorerClient {
         this.contractDealClient = new DealClient(contractsEnv || this.DEFAULT_CONTRACTS_ENV, this.ethersProvider);
     }
 
-    async getProviders(
-        search: ProviderShortSearch,
-        searchValue: string | undefined,
-        order: ProviderShortOrder,
-        skip: number,
-        take: number,
-    ): Promise<Array<ProviderShort>> {
-        return new Array(10).map((x, i) => ({
-            id: ethers.hexlify(ethers.randomBytes(20)),
-            name: `Test provider ${i}`,
-            createdAt: new Date().getTime() / 1000,
-            totalComputeUnits: 125,
-            freeComputeUnits: 100,
+    _composeProviderShort(provider: unknown): ProviderShort {
+        const effectors = this._composeEffectors(provider.effectors);
+        return {
+            id: provider.id,
+            createdAt: provider.createdAt,
+            totalComputeUnits: provider.computeUnitsTotal,
+            freeComputeUnits: provider.computeUnitsAvailable,
+            name: provider.name,
+            effectors: effectors,
+            // TODO: add logic for approved.
             isApproved: true,
-            offers: new Array(5).map((x, i) => ({
-                name: `Test offer ${i}`,
-                createdAt: new Date().getTime() / 1000,
-                totalComputeUnits: 125,
-                freeComputeUnits: 100,
-                paymentToken: {
-                    address: ethers.hexlify(ethers.randomBytes(20)),
-                    symbol: "USDT",
-                },
-                effectors: [
-                    {
-                        cid: "rendomCID",
-                        description: "Test effector #1",
-                    },
-                    {
-                        cid: "rendomCID",
-                        description: "Test effector #2",
-                    },
-                ],
-                peers: new Array(5).map((x, i) => ({
-                    id: ethers.hexlify(ethers.randomBytes(32)),
-                    offerId: ethers.hexlify(ethers.randomBytes(32)),
-                    transactionHash: ethers.hexlify(ethers.randomBytes(32)),
-                    workerSlots: 10,
-                    computeUnits: new Array(5).map((x, i) => ({
-                        id: ethers.hexlify(ethers.randomBytes(32)),
-                        collateral: 10,
-                        dealId: ethers.hexlify(ethers.randomBytes(20)),
-                        workerId: ethers.hexlify(ethers.randomBytes(32)),
-                    })),
-                })),
-            })),
-        }));
+        } as ProviderShort;
+    }
+
+    /*
+     * @dev: search: you could perform search by `provider address` or `provider name`.
+     * @dev Note, deprecation:
+     * @dev - skip: renamed to offset
+     * @dev - take: renamed to limit
+     * @dev - order: renamed to orderBy
+     * @dev - search: provide just a search txt.
+     * @dev - searchValue: deprecated.
+     */
+    async getProviders(
+        search: string | undefined = undefined,
+        effectorIds: Array<string> | undefined = undefined,
+        offset: number = 0,
+        limit: number = this.DEFAULT_PAGE_LIMIT,
+        orderBy: ProviderShortOrderBy = "createdAt",
+        orderType: OrderType = this.DEFAULT_ORDER_TYPE,
+    ): Promise<Array<ProviderShort>> {
+        if (search) {
+            console.warn("Currently search field does not implemented.");
+        }
+        const options = {
+            effectorIds,
+            offset,
+            limit,
+            orderBy,
+            orderType,
+        };
+        const data = (await requestIndexer(ProvidersQueryDocument, options)) as ProvidersQueryQuery;
+        const res = [];
+        if (data) {
+            for (const provider of data.providers) {
+                res.push(this._composeProviderShort(provider));
+            }
+        }
+        return res;
     }
 
     async getProvider(providerId: string): Promise<Provider> {
@@ -158,16 +168,21 @@ export class DealExplorerClient {
         }));
     }
 
-    _composeOfferShort(offer: unknown): OfferShort {
-        const effectors = [];
-        if (offer.effectors) {
-            offer.effectors.map((effector) => {
-                effectors.push({
+    _composeEffectors(effectors: unknown): Array<Effector> {
+        const effectorsComposed = [];
+        if (effectors) {
+            effectors.map((effector) => {
+                effectorsComposed.push({
                     cid: effector.effector.id,
                     description: effector.effector.description,
                 });
             });
         }
+        return effectorsComposed;
+    }
+
+    _composeOfferShort(offer: unknown): OfferShort {
+        const effectors = this._composeEffectors(offer.effectors);
         return {
             id: offer.id,
             createdAt: offer.createdAt,
@@ -191,6 +206,7 @@ export class DealExplorerClient {
      * TODO: use onlyApproved.
      */
     async getOffers(
+        search: string | undefined = undefined,
         effectorIds: Array<string> | undefined = undefined,
         paymentTokens: Array<string> | undefined = undefined,
         minPricePerWorkerEpoch: number | undefined = undefined,
@@ -207,8 +223,11 @@ export class DealExplorerClient {
         offset: number = 0,
         limit: number = this.DEFAULT_PAGE_LIMIT,
         orderBy: OfferShortOrderBy = "createdAt",
-        orderType: OrderType = "desc",
+        orderType: OrderType = this.DEFAULT_ORDER_TYPE,
     ): Promise<Array<OfferShort>> {
+        if (search) {
+            console.warn("Currently search field does not implemented.");
+        }
         const options = {
             createdAtFrom,
             createdAtTo,
@@ -240,6 +259,7 @@ export class DealExplorerClient {
         let res = null;
         if (data && data.offer) {
             res = this._composeOfferShort(data.offer);
+            res["updatedAt"] = data.offer.updatedAt;
             const peersComposed = [];
             if (data.offer.peers) {
                 for (const peer of data.offer.peers) {

@@ -1,0 +1,59 @@
+query ProvidersQuery(
+  $effectorIds: [String!],
+  $offset: Int,
+  $limit: Int,
+  $orderBy: Provider_orderBy,
+  $orderType: OrderDirection,
+) {
+  providers(
+      where: {
+          offers_: {
+              effectors_: {
+                  effector_in: $effectorIds,
+              }
+          }
+      }
+      first: $limit
+      skip: $offset
+      orderBy: $orderBy
+      orderDirection: $orderType
+  ) {
+    id
+    name
+    computeUnitsAvailable
+    computeUnitsTotal
+    offers {
+      ...BasicOffer
+    }
+  }
+}
+
+#query OfferQuery(
+#  $id: ID!
+#) {
+#  offer(id: $id) {
+#    ...BasicOffer
+#    updatedAt
+#    peers {
+#        ...BasicPeer
+#    }
+#  }
+#}
+
+fragment BasicOffer on Offer {
+    id
+    createdAt
+    pricePerEpoch
+    paymentToken {
+      id
+      symbol
+    }
+    computeUnitsTotal
+    computeUnitsAvailable
+    effectors {
+      effector {
+        id
+        description
+      }
+    }
+}

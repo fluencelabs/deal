@@ -36,6 +36,7 @@ query OfferQuery(
 ) {
   offer(id: $id) {
     ...BasicOffer
+    updatedAt
     peers {
         ...BasicPeer
     }
@@ -45,9 +46,6 @@ query OfferQuery(
 fragment BasicOffer on Offer {
     id
     createdAt
-    provider {
-      id
-    }
     pricePerEpoch
     paymentToken {
       id
