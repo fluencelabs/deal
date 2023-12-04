@@ -25,6 +25,34 @@ import {
 } from "../.graphclient";
 import { requestIndexer } from "./indexerClient/indexerClient";
 
+
+interface OfferFilters {
+    search?: string | undefined;
+    effectorIds?: Array<string> | undefined;
+    paymentTokens?: Array<string> | undefined;
+    minPricePerWorkerEpoch?: number | undefined;
+    maxPricePerWorkerEpoch?: number | undefined;
+    //? eslint-disable-next-line @typescript-eslint/no-unused-vars
+    minCollateralPerWorker?: number | undefined;
+    //? eslint-disable-next-line @typescript-eslint/no-unused-vars
+    maxCollateralPerWorker?: number | undefined;
+    //? eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onlyApproved?: boolean;
+    createdAtFrom?: number | undefined;
+    createdAtTo?: number | undefined;
+    providerId?: string | undefined;
+}
+
+interface ProvidersFilters {
+    search?: string | undefined;
+    effectorIds?: Array<string> | undefined;
+}
+
+interface OffersByProviderFilter {
+    providerId?: string | undefined;
+    status?: ProviderDetailsStatusFilter | undefined;
+}
+
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
  * @dev It supports mainnet, testnet by selecting related contractsEnv.
@@ -85,18 +113,17 @@ export class DealExplorerClient {
      * @dev - searchValue: deprecated.
      */
     async getProviders(
-        search: string | undefined = undefined,
-        effectorIds: Array<string> | undefined = undefined,
+        providersFilters: ProvidersFilters,
         offset: number = 0,
         limit: number = this.DEFAULT_PAGE_LIMIT,
         orderBy: ProviderShortOrderBy = "createdAt",
         orderType: OrderType = this.DEFAULT_ORDER_TYPE,
     ): Promise<Array<ProviderShort>> {
-        if (search) {
+        if (providersFilters.search) {
             console.warn("Currently search field does not implemented.");
         }
         const options = {
-            effectorIds,
+            ...providersFilters,
             offset,
             limit,
             orderBy,
@@ -130,31 +157,18 @@ export class DealExplorerClient {
         return res;
     }
 
-    async getOffersByProvider(providerId: string, filter: ProviderDetailsStatusFilter): Promise<Array<OfferShort>> {
-        return new Array(5).map((x, i) => ({
-            id: ethers.hexlify(ethers.randomBytes(32)),
-            name: `Test offer ${i}`,
-            createdAt: new Date().getTime() / 1000 - i * 24 * 60 * 60,
-            updatedAt: new Date().getTime() / 1000 - i * 24 * 60 * 60,
-            maxCollateralPerWorker: 10 * i,
-            minPricePerWorkerEpoch: 1.2 * i,
-            paymentToken: {
-                address: ethers.hexlify(ethers.randomBytes(20)),
-                symbol: "USDT",
-            },
-            totalComputeUnits: 12 * i,
-            freeComputeUnits: 1 * i,
-            effectors: [
-                {
-                    cid: "rendomCID",
-                    description: "Test effector #1",
-                },
-                {
-                    cid: "rendomCID",
-                    description: "Test effector #2",
-                },
-            ],
-        }));
+    async getOffersByProvider(
+        offersByProviderFilter: OffersByProviderFilter,
+        offset: number = 0,
+        limit: number = this.DEFAULT_PAGE_LIMIT,
+        orderBy: OfferShortOrderBy = "createdAt",
+        orderType: OrderType = this.DEFAULT_ORDER_TYPE,
+    ): Promise<Array<OfferShort>> {
+        if (offersByProviderFilter.status) {
+            // TODO.
+            console.warn("Status filter is not implemented.");
+        }
+        return await this._getOffersImpl({ providerId: offersByProviderFilter.providerId }, offset, limit, orderBy, orderType);
     }
 
     async getDealsByProvider(providerId: string, filter: ProviderDetailsStatusFilter): Promise<Array<ShortDeal>> {
@@ -199,48 +213,19 @@ export class DealExplorerClient {
         } as OfferShort;
     }
 
-    /*
-     * @dev Get offers list for 1 page and specified filters.
-     * @dev # Deprecated Notice:
-     * @dev - minCollateralPerWorker
-     * @dev - maxCollateralPerWorker
-     * @dev - skip: renamed to offset
-     * @dev - take: renamed to limit
-     * @dev - order: renamed to orderBy
-     * @dev - paymentToken: array of paymentTokens
-     * TODO: remove unused vars.
-     * TODO: use onlyApproved.
-     */
-    async getOffers(
-        search: string | undefined = undefined,
-        effectorIds: Array<string> | undefined = undefined,
-        paymentTokens: Array<string> | undefined = undefined,
-        minPricePerWorkerEpoch: number | undefined = undefined,
-        maxPricePerWorkerEpoch: number | undefined = undefined,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        minCollateralPerWorker: number | undefined = undefined,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        maxCollateralPerWorker: number | undefined = undefined,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        onlyApproved: boolean = false,
-        createdAtFrom: number | undefined = undefined,
-        createdAtTo: number | undefined = undefined,
+    async _getOffersImpl(
+        offerFilters: OfferFilters,
         // TODO: simplify general args declaration.
         offset: number = 0,
         limit: number = this.DEFAULT_PAGE_LIMIT,
         orderBy: OfferShortOrderBy = "createdAt",
         orderType: OrderType = this.DEFAULT_ORDER_TYPE,
     ): Promise<Array<OfferShort>> {
-        if (search) {
+        if (offerFilters.search) {
             console.warn("Currently search field does not implemented.");
         }
         const options = {
-            createdAtFrom,
-            createdAtTo,
-            minPricePerWorkerEpoch,
-            maxPricePerWorkerEpoch,
-            paymentTokens,
-            effectorIds,
+            ...offerFilters,
             offset,
             limit,
             orderBy,
@@ -254,6 +239,29 @@ export class DealExplorerClient {
             }
         }
         return res;
+    }
+
+    /*
+     * @dev Get offers list for 1 page and specified filters.
+     * @dev # Deprecated Notice:
+     * @dev - minCollateralPerWorker
+     * @dev - maxCollateralPerWorker
+     * @dev - skip: renamed to offset
+     * @dev - take: renamed to limit
+     * @dev - order: renamed to orderBy
+     * @dev - paymentToken: array of paymentTokens
+     * TODO: remove unused vars.
+     * TODO: use onlyApproved.
+     */
+    async getOffers(
+        offerFilters: OfferFilters,
+        // TODO: simplify general args declaration.
+        offset: number = 0,
+        limit: number = this.DEFAULT_PAGE_LIMIT,
+        orderBy: OfferShortOrderBy = "createdAt",
+        orderType: OrderType = this.DEFAULT_ORDER_TYPE,
+    ): Promise<Array<OfferShort>> {
+        return await this._getOffersImpl(offerFilters, offset, limit, orderBy, orderType);
     }
 
     // Return OfferDetail View.

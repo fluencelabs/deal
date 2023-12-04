@@ -9,6 +9,7 @@ query OffersQuery(
   $limit: Int,
   $orderBy: Offer_orderBy,
   $orderType: OrderDirection,
+  $providerId: String,
 ) {
   offers(
       where: {
@@ -20,7 +21,8 @@ query OffersQuery(
           paymentToken_in: $paymentTokens,
           effectors_: {
       	        effector_in: $effectorIds,
-            }
+            },
+          provider: $providerId,
       }
       first: $limit
       skip: $offset
