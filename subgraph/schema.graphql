@@ -12,6 +12,10 @@ type Provider @entity {
   createdAt: BigInt!
 
   offers: [Offer!] @derivedFrom(field: "provider")
+
+  # Add Statistics below.
+  computeUnitsAvailable: Int  # Sum of all available compute units in the offer (not in the deals).
+  computeUnitsTotal: Int  # Sum of all compute units registered in the offer. TODO: when CU deleted?
 }
 
 # ---- Core Contract ----
