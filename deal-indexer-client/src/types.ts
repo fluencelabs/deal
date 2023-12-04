@@ -1,12 +1,22 @@
-export type ProviderShort = {
+export type ProviderBase = {
     id: string;
     name: string;
     createdAt: number;
     totalComputeUnits: number;
     freeComputeUnits: number;
     isApproved: boolean;
-    offers: Array<OfferShort>;
 };
+
+export interface ProviderShort extends ProviderBase {
+    offers: Array<OfferShort>;
+}
+
+export interface ProviderDetail extends ProviderBase {
+    peerCount: number;
+    effectorCount: number;
+    // deprecated.
+    // revenue: Array<Revenue>;
+}
 
 // TODO: What is offer.name? deprecated.
 export type OfferShort = {
@@ -27,19 +37,6 @@ export interface OfferDetail extends OfferShort {
 export type PaymentToken = {
     address: string;
     symbol: string;
-};
-
-export type Provider = {
-    id: string;
-    name: string;
-    createdAt: number;
-    totalComputeUnits: number;
-    freeComputeUnits: number;
-    isApproved: boolean;
-    peerCount: number;
-    effectorCount: number;
-    // deprecated.
-    // revenue: Array<Revenue>;
 };
 
 export type Revenue = {

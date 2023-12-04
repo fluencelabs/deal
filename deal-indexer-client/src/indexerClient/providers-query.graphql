@@ -18,27 +18,29 @@ query ProvidersQuery(
       orderBy: $orderBy
       orderDirection: $orderType
   ) {
-    id
-    name
-    computeUnitsAvailable
-    computeUnitsTotal
+    ...ProviderBase
     offers {
       ...BasicOffer
     }
   }
 }
 
-#query OfferQuery(
-#  $id: ID!
-#) {
-#  offer(id: $id) {
-#    ...BasicOffer
-#    updatedAt
-#    peers {
-#        ...BasicPeer
-#    }
-#  }
-#}
+query ProviderQuery(
+  $id: ID!
+) {
+  provider(id: $id) {
+    ...ProviderBase
+    peerCount
+    effectorCount
+  }
+}
+
+fragment ProviderBase on Provider {
+    id
+    name
+    computeUnitsAvailable
+    computeUnitsTotal
+}
 
 fragment BasicOffer on Offer {
     id

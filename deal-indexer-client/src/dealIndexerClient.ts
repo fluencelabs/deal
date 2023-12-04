@@ -12,14 +12,14 @@ import {
     ShortDeal,
     OfferDetail,
     ProviderShortOrderBy,
-    Effector,
+    Effector, ProviderDetail, ProviderBase,
 } from "./types";
 import { ContractsENV, DealClient } from "../../src";
 import {
     OfferQueryDocument,
     OfferQueryQuery,
     OffersQueryDocument,
-    OffersQueryQuery,
+    OffersQueryQuery, ProviderQueryDocument, ProviderQueryQuery,
     ProvidersQueryDocument,
     ProvidersQueryQuery,
 } from "../.graphclient";
@@ -49,17 +49,29 @@ export class DealExplorerClient {
         this.contractDealClient = new DealClient(contractsEnv || this.DEFAULT_CONTRACTS_ENV, this.ethersProvider);
     }
 
-    _composeProviderShort(provider: unknown): ProviderShort {
-        const effectors = this._composeEffectors(provider.effectors);
+    _composeProviderBase(provider: unknown): ProviderBase {
         return {
             id: provider.id,
             createdAt: provider.createdAt,
             totalComputeUnits: provider.computeUnitsTotal,
             freeComputeUnits: provider.computeUnitsAvailable,
             name: provider.name,
-            effectors: effectors,
             // TODO: add logic for approved.
             isApproved: true,
+        } as ProviderBase;
+    }
+
+    _composeProviderShort(provider: unknown): ProviderShort {
+        const providerBase = this._composeProviderBase(provider);
+        const composedOffers = [];
+        if (provider.offers) {
+            for (const offer in provider.offers) {
+                composedOffers.push(this._composeOfferShort(offer));
+            }
+        }
+        return {
+            ...providerBase,
+            offers: composedOffers,
         } as ProviderShort;
     }
 
@@ -100,28 +112,22 @@ export class DealExplorerClient {
         return res;
     }
 
-    async getProvider(providerId: string): Promise<Provider> {
-        return {
-            id: ethers.hexlify(ethers.randomBytes(20)),
-            name: `Test provider`,
-            createdAt: new Date().getTime() / 1000,
-            totalComputeUnits: 125,
-            freeComputeUnits: 100,
-            isApproved: true,
-            peerCount: 10,
-            effectorCount: 5,
-            revenue: new Array(5).map((x, i) => ({
-                total: 1000,
-                paymentToken: {
-                    address: ethers.hexlify(ethers.randomBytes(20)),
-                    symbol: "USDT",
-                },
-                byDays: new Array(10).map((x, i) => ({
-                    time: new Date().getTime() / 1000 - i * 24 * 60 * 60,
-                    value: 100 * i + 1,
-                })),
-            })),
+    async getProvider(providerId: string): Promise<ProviderDetail> {
+        const options = {
+            id: providerId,
         };
+        const data = (await requestIndexer(ProviderQueryDocument, options)) as ProviderQueryQuery;
+        let res = null;
+        if (data && data.provider) {
+            const providerFetched = data.provider;
+            const providerBase = this._composeProviderBase(providerFetched);
+            res = {
+                ...providerBase,
+                peerCount: providerFetched.peerCount,
+                effectorCount: providerFetched.effectorCount,
+            };
+        }
+        return res;
     }
 
     async getOffersByProvider(providerId: string, filter: ProviderDetailsStatusFilter): Promise<Array<OfferShort>> {
