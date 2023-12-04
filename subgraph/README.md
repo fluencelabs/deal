@@ -124,3 +124,4 @@ graph deploy --product hosted-service --network mumbai <githubName>/fluence-deal
 - [ ] fix docker versions
 - [ ] it is mb better to flag CU and etc as removed instead of deleting as it is in, e.g. `store.remove('ComputeUnit', computeUnitEntity.id)`
 - [ ] rm warn about to hexString instead of hex()
+- [ ] where is delete events? (e.g. peer deleted)
