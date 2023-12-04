@@ -104,5 +104,3 @@ export type OfferShortOrderBy = "createdAt" | "pricePerWorkerEpoch" | "maxCollat
 export type DealsShortOrderBy = "createdAt";
 
 export type OrderType = "asc" | "desc";
-
-export type ProviderDetailsStatusFilter = "all" | "active" | "incative"
