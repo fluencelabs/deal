@@ -20,3 +20,4 @@ when `npm run load-subgraph-types` (ref to [Graph Client](https://thegraph.com/d
 - [ ]resolve registered workers! (separate class?)
 - [ ] page counter (thanks to graphQL for no paginators)?
 - [ ] optional filtering in `.graphql` schemes (discord solution processing...) [currently unsolved]
+- [ ] resolve hardcoded endpoint in .graphclientrc.yml (http://localhost:8000/subgraphs/name/fluence-deal-contracts)
