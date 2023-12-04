@@ -17,5 +17,6 @@ when `npm run load-subgraph-types` (ref to [Graph Client](https://thegraph.com/d
 - [ ] after merge with foundry -> to different npm packages [refactor work with several packages]
 - [ ] add ulr links to fetch filters...
 - [offers] TODO: search fields: by client or dealId?
-- resolve registered workers! (separate class?)
-- page counter?
+- [ ]resolve registered workers! (separate class?)
+- [ ] page counter (thanks to graphQL for no paginators)?
+- [ ] optional filtering in `.graphql` schemes (discord solution processing...) [currently unsolved]
