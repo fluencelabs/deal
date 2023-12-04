@@ -32,6 +32,8 @@ export function handleMarketOfferRegistered(event: MarketOfferRegistered): void 
     const provider = new Provider(providerAddress);
     provider.name = getProviderName(providerAddress);
     provider.createdAt = event.block.timestamp;
+    provider.computeUnitsAvailable = 0;
+    provider.computeUnitsTotal = 0;
     provider.save();
 
     // Create Offer.
