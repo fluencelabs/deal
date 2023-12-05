@@ -20,9 +20,9 @@ To start local development with TheGraph and Hardhat:
 npx hardhat node --hostname 0.0.0.0 
 ```
 
-2. Run Graph Node with help of Docker Compose and [instruction](graph-node/docker-compose.yaml):
+2. Run Graph Node with help of Docker Compose: [docker-compose.yml](subgraph/docker-compose.yaml):
 ```bash
-cd graph-node && docker-compose up
+cd subgraph && docker-compose up
 ```
 
 ## Dev in Subgraph Repo
@@ -36,7 +36,7 @@ How to run install package and build artifacts flow is below.
 npm run import-contracts-abi
 ```
 
-2. Build artifacts and generate the **AssemblyScript** types from the sources:
+1. Build artifacts and generate the **AssemblyScript** types from the sources:
 ```bash
 npm i
 npm run compile
@@ -47,7 +47,7 @@ npm run compile
 npm run create:local
 ```
 
-4. Deploy the subgraph on local graph node
+3. Deploy the subgraph on local graph node
 > Note, that it will get localhost contract addresses and block number from [networks.json](config/networks.json) and inserts into subgraph.yaml.
 
 ```bash
