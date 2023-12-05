@@ -36,6 +36,11 @@ npx hardhat node
 docker-compose up -d
 ```
 
+## Subgraph (Contract Indexer)
+It is a backend for the contracts that collects info from contract events into graphQL schemes.
+
+For more info check out [README.md](subgraph/README.md). 
+
 # Deploy
 We used to use [hardhat-deploy](https://github.com/wighawag/hardhat-deploy) plugin to deploy smart contracts on chains 
 and track differences of the contracts (plugin identifies if the contract changed and deploy/update contract).
