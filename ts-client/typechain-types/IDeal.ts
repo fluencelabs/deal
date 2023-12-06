@@ -34,16 +34,24 @@ export declare namespace IWorkerManager {
   export type ComputeUnitStruct = {
     id: BytesLike;
     workerId: BytesLike;
-    owner: AddressLike;
+    peerId: BytesLike;
+    provider: AddressLike;
     joinedEpoch: BigNumberish;
   };
 
   export type ComputeUnitStructOutput = [
     id: string,
     workerId: string,
-    owner: string,
+    peerId: string,
+    provider: string,
     joinedEpoch: bigint
-  ] & { id: string; workerId: string; owner: string; joinedEpoch: bigint };
+  ] & {
+    id: string;
+    workerId: string;
+    peerId: string;
+    provider: string;
+    joinedEpoch: bigint;
+  };
 }
 
 export interface IDealInterface extends Interface {
@@ -83,8 +91,8 @@ export interface IDealInterface extends Interface {
   getEvent(
     nameOrSignatureOrTopic:
       | "AppCIDChanged"
-      | "ComputeUnitExited"
       | "ComputeUnitJoined"
+      | "ComputeUnitRemoved"
       | "DealEnded"
       | "Deposited"
       | "MaxPaidEpochUpdated"
@@ -99,7 +107,7 @@ export interface IDealInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "addComputeUnit",
-    values: [AddressLike, BytesLike]
+    values: [AddressLike, BytesLike, BytesLike]
   ): string;
   encodeFunctionData(functionFragment: "appCID", values?: undefined): string;
   encodeFunctionData(
@@ -312,7 +320,7 @@ export namespace AppCIDChangedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace ComputeUnitExitedEvent {
+export namespace ComputeUnitJoinedEvent {
   export type InputTuple = [unitId: BytesLike];
   export type OutputTuple = [unitId: string];
   export interface OutputObject {
@@ -324,7 +332,7 @@ export namespace ComputeUnitExitedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace ComputeUnitJoinedEvent {
+export namespace ComputeUnitRemovedEvent {
   export type InputTuple = [unitId: BytesLike];
   export type OutputTuple = [unitId: string];
   export interface OutputObject {
@@ -456,7 +464,7 @@ export interface IDeal extends BaseContract {
   accessType: TypedContractMethod<[], [bigint], "view">;
 
   addComputeUnit: TypedContractMethod<
-    [computeProvider: AddressLike, unitId: BytesLike],
+    [computeProvider: AddressLike, unitId: BytesLike, peerId: BytesLike],
     [void],
     "nonpayable"
   >;
@@ -572,7 +580,7 @@ export interface IDeal extends BaseContract {
   getFunction(
     nameOrSignature: "addComputeUnit"
   ): TypedContractMethod<
-    [computeProvider: AddressLike, unitId: BytesLike],
+    [computeProvider: AddressLike, unitId: BytesLike, peerId: BytesLike],
     [void],
     "nonpayable"
   >;
@@ -693,18 +701,18 @@ export interface IDeal extends BaseContract {
     AppCIDChangedEvent.OutputObject
   >;
   getEvent(
-    key: "ComputeUnitExited"
-  ): TypedContractEvent<
-    ComputeUnitExitedEvent.InputTuple,
-    ComputeUnitExitedEvent.OutputTuple,
-    ComputeUnitExitedEvent.OutputObject
-  >;
-  getEvent(
     key: "ComputeUnitJoined"
   ): TypedContractEvent<
     ComputeUnitJoinedEvent.InputTuple,
     ComputeUnitJoinedEvent.OutputTuple,
     ComputeUnitJoinedEvent.OutputObject
+  >;
+  getEvent(
+    key: "ComputeUnitRemoved"
+  ): TypedContractEvent<
+    ComputeUnitRemovedEvent.InputTuple,
+    ComputeUnitRemovedEvent.OutputTuple,
+    ComputeUnitRemovedEvent.OutputObject
   >;
   getEvent(
     key: "DealEnded"
@@ -761,17 +769,6 @@ export interface IDeal extends BaseContract {
       AppCIDChangedEvent.OutputObject
     >;
 
-    "ComputeUnitExited(bytes32)": TypedContractEvent<
-      ComputeUnitExitedEvent.InputTuple,
-      ComputeUnitExitedEvent.OutputTuple,
-      ComputeUnitExitedEvent.OutputObject
-    >;
-    ComputeUnitExited: TypedContractEvent<
-      ComputeUnitExitedEvent.InputTuple,
-      ComputeUnitExitedEvent.OutputTuple,
-      ComputeUnitExitedEvent.OutputObject
-    >;
-
     "ComputeUnitJoined(bytes32)": TypedContractEvent<
       ComputeUnitJoinedEvent.InputTuple,
       ComputeUnitJoinedEvent.OutputTuple,
@@ -781,6 +778,17 @@ export interface IDeal extends BaseContract {
       ComputeUnitJoinedEvent.InputTuple,
       ComputeUnitJoinedEvent.OutputTuple,
       ComputeUnitJoinedEvent.OutputObject
+    >;
+
+    "ComputeUnitRemoved(bytes32)": TypedContractEvent<
+      ComputeUnitRemovedEvent.InputTuple,
+      ComputeUnitRemovedEvent.OutputTuple,
+      ComputeUnitRemovedEvent.OutputObject
+    >;
+    ComputeUnitRemoved: TypedContractEvent<
+      ComputeUnitRemovedEvent.InputTuple,
+      ComputeUnitRemovedEvent.OutputTuple,
+      ComputeUnitRemovedEvent.OutputObject
     >;
 
     "DealEnded(uint256)": TypedContractEvent<

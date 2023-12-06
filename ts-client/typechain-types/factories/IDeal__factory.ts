@@ -7,699 +7,714 @@ import type { IDeal, IDealInterface } from "../IDeal";
 
 const _abi = [
   {
-    anonymous: false,
-    inputs: [
-      {
-        components: [
-          {
-            internalType: "bytes4",
-            name: "prefixes",
-            type: "bytes4",
-          },
-          {
-            internalType: "bytes32",
-            name: "hash",
-            type: "bytes32",
-          },
-        ],
-        indexed: false,
-        internalType: "struct CIDV1",
-        name: "newAppCID",
-        type: "tuple",
-      },
-    ],
-    name: "AppCIDChanged",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "bytes32",
-        name: "unitId",
-        type: "bytes32",
-      },
-    ],
-    name: "ComputeUnitExited",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "bytes32",
-        name: "unitId",
-        type: "bytes32",
-      },
-    ],
-    name: "ComputeUnitJoined",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "endedEpoch",
-        type: "uint256",
-      },
-    ],
-    name: "DealEnded",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
-    name: "Deposited",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "maxPaidEpoch",
-        type: "uint256",
-      },
-    ],
-    name: "MaxPaidEpochUpdated",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "bytes32",
-        name: "computeUnitId",
-        type: "bytes32",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "reward",
-        type: "uint256",
-      },
-    ],
-    name: "RewardWithdrawn",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
-    name: "Withdrawn",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "bytes32",
-        name: "computeUnitId",
-        type: "bytes32",
-      },
-      {
-        indexed: false,
-        internalType: "bytes32",
-        name: "workerId",
-        type: "bytes32",
-      },
-    ],
-    name: "WorkerIdUpdated",
-    type: "event",
-  },
-  {
-    inputs: [],
+    type: "function",
     name: "accessType",
+    inputs: [],
     outputs: [
       {
-        internalType: "enum IConfig.AccessType",
         name: "",
         type: "uint8",
+        internalType: "enum IConfig.AccessType",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "addComputeUnit",
     inputs: [
       {
-        internalType: "address",
         name: "computeProvider",
         type: "address",
+        internalType: "address",
       },
       {
-        internalType: "bytes32",
         name: "unitId",
         type: "bytes32",
+        internalType: "bytes32",
+      },
+      {
+        name: "peerId",
+        type: "bytes32",
+        internalType: "bytes32",
       },
     ],
-    name: "addComputeUnit",
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function",
   },
   {
-    inputs: [],
+    type: "function",
     name: "appCID",
+    inputs: [],
     outputs: [
       {
-        components: [
-          {
-            internalType: "bytes4",
-            name: "prefixes",
-            type: "bytes4",
-          },
-          {
-            internalType: "bytes32",
-            name: "hash",
-            type: "bytes32",
-          },
-        ],
-        internalType: "struct CIDV1",
         name: "",
         type: "tuple",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "enum IConfig.AccessType",
-        name: "accessType_",
-        type: "uint8",
-      },
-    ],
-    name: "changeAccessType",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "creationBlock",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
-    name: "deposit",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "effectors",
-    outputs: [
-      {
+        internalType: "struct CIDV1",
         components: [
           {
-            internalType: "bytes4",
             name: "prefixes",
             type: "bytes4",
+            internalType: "bytes4",
           },
           {
-            internalType: "bytes32",
             name: "hash",
             type: "bytes32",
+            internalType: "bytes32",
           },
         ],
-        internalType: "struct CIDV1[]",
-        name: "",
-        type: "tuple[]",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
-    inputs: [],
-    name: "getAccessList",
-    outputs: [
-      {
-        internalType: "address[]",
-        name: "",
-        type: "address[]",
-      },
-    ],
-    stateMutability: "view",
     type: "function",
-  },
-  {
+    name: "changeAccessType",
     inputs: [
       {
-        internalType: "bytes32",
+        name: "accessType_",
+        type: "uint8",
+        internalType: "enum IConfig.AccessType",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "creationBlock",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "deposit",
+    inputs: [
+      {
+        name: "amount",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "effectors",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "tuple[]",
+        internalType: "struct CIDV1[]",
+        components: [
+          {
+            name: "prefixes",
+            type: "bytes4",
+            internalType: "bytes4",
+          },
+          {
+            name: "hash",
+            type: "bytes32",
+            internalType: "bytes32",
+          },
+        ],
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getAccessList",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "address[]",
+        internalType: "address[]",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getComputeUnit",
+    inputs: [
+      {
         name: "id",
         type: "bytes32",
+        internalType: "bytes32",
       },
     ],
-    name: "getComputeUnit",
     outputs: [
       {
-        components: [
-          {
-            internalType: "bytes32",
-            name: "id",
-            type: "bytes32",
-          },
-          {
-            internalType: "bytes32",
-            name: "workerId",
-            type: "bytes32",
-          },
-          {
-            internalType: "address",
-            name: "owner",
-            type: "address",
-          },
-          {
-            internalType: "uint256",
-            name: "joinedEpoch",
-            type: "uint256",
-          },
-        ],
-        internalType: "struct IWorkerManager.ComputeUnit",
         name: "",
         type: "tuple",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "getComputeUnitCount",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "getComputeUnits",
-    outputs: [
-      {
+        internalType: "struct IWorkerManager.ComputeUnit",
         components: [
           {
-            internalType: "bytes32",
             name: "id",
             type: "bytes32",
+            internalType: "bytes32",
           },
           {
-            internalType: "bytes32",
             name: "workerId",
             type: "bytes32",
+            internalType: "bytes32",
           },
           {
-            internalType: "address",
-            name: "owner",
+            name: "peerId",
+            type: "bytes32",
+            internalType: "bytes32",
+          },
+          {
+            name: "provider",
             type: "address",
+            internalType: "address",
           },
           {
-            internalType: "uint256",
             name: "joinedEpoch",
             type: "uint256",
+            internalType: "uint256",
           },
         ],
-        internalType: "struct IWorkerManager.ComputeUnit[]",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getComputeUnitCount",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getComputeUnits",
+    inputs: [],
+    outputs: [
+      {
         name: "",
         type: "tuple[]",
+        internalType: "struct IWorkerManager.ComputeUnit[]",
+        components: [
+          {
+            name: "id",
+            type: "bytes32",
+            internalType: "bytes32",
+          },
+          {
+            name: "workerId",
+            type: "bytes32",
+            internalType: "bytes32",
+          },
+          {
+            name: "peerId",
+            type: "bytes32",
+            internalType: "bytes32",
+          },
+          {
+            name: "provider",
+            type: "address",
+            internalType: "address",
+          },
+          {
+            name: "joinedEpoch",
+            type: "uint256",
+            internalType: "uint256",
+          },
+        ],
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
-    inputs: [],
+    type: "function",
     name: "getFreeBalance",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
     inputs: [],
-    name: "getMaxPaidEpoch",
     outputs: [
       {
-        internalType: "uint256",
         name: "",
         type: "uint256",
+        internalType: "uint256",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "getMaxPaidEpoch",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getRewardAmount",
     inputs: [
       {
-        internalType: "bytes32",
         name: "computeUnitId",
         type: "bytes32",
+        internalType: "bytes32",
       },
     ],
-    name: "getRewardAmount",
     outputs: [
       {
-        internalType: "uint256",
         name: "",
         type: "uint256",
+        internalType: "uint256",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
-    inputs: [],
+    type: "function",
     name: "getStatus",
+    inputs: [],
     outputs: [
       {
-        internalType: "enum IDeal.Status",
         name: "",
         type: "uint8",
+        internalType: "enum IDeal.Status",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
-    inputs: [],
+    type: "function",
     name: "getWorkerCount",
+    inputs: [],
     outputs: [
       {
-        internalType: "uint256",
         name: "",
         type: "uint256",
+        internalType: "uint256",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "initialize",
     inputs: [
       {
-        internalType: "contract ICore",
         name: "globalCore_",
         type: "address",
+        internalType: "contract ICore",
       },
       {
-        components: [
-          {
-            internalType: "bytes4",
-            name: "prefixes",
-            type: "bytes4",
-          },
-          {
-            internalType: "bytes32",
-            name: "hash",
-            type: "bytes32",
-          },
-        ],
-        internalType: "struct CIDV1",
         name: "appCID_",
         type: "tuple",
+        internalType: "struct CIDV1",
+        components: [
+          {
+            name: "prefixes",
+            type: "bytes4",
+            internalType: "bytes4",
+          },
+          {
+            name: "hash",
+            type: "bytes32",
+            internalType: "bytes32",
+          },
+        ],
       },
       {
-        internalType: "contract IERC20",
         name: "paymentToken_",
         type: "address",
+        internalType: "contract IERC20",
       },
       {
-        internalType: "uint256",
         name: "minWorkers_",
         type: "uint256",
+        internalType: "uint256",
       },
       {
-        internalType: "uint256",
         name: "targetWorkers_",
         type: "uint256",
+        internalType: "uint256",
       },
       {
-        internalType: "uint256",
         name: "maxWorkersPerProvider_",
         type: "uint256",
+        internalType: "uint256",
       },
       {
-        internalType: "uint256",
         name: "pricePerWorkerEpoch_",
         type: "uint256",
+        internalType: "uint256",
       },
       {
-        components: [
-          {
-            internalType: "bytes4",
-            name: "prefixes",
-            type: "bytes4",
-          },
-          {
-            internalType: "bytes32",
-            name: "hash",
-            type: "bytes32",
-          },
-        ],
-        internalType: "struct CIDV1[]",
         name: "effectors_",
         type: "tuple[]",
-      },
-      {
-        internalType: "enum IConfig.AccessType",
-        name: "accessType_",
-        type: "uint8",
-      },
-      {
-        internalType: "address[]",
-        name: "accessList_",
-        type: "address[]",
-      },
-    ],
-    name: "initialize",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "addr",
-        type: "address",
-      },
-    ],
-    name: "isInAccessList",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "maxWorkersPerProvider",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "minWorkers",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "paymentToken",
-    outputs: [
-      {
-        internalType: "contract IERC20",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "pricePerWorkerEpoch",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "computeUnitId",
-        type: "bytes32",
-      },
-    ],
-    name: "removeComputeUnit",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "addr",
-        type: "address",
-      },
-    ],
-    name: "removeFromAccessList",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
+        internalType: "struct CIDV1[]",
         components: [
           {
-            internalType: "bytes4",
             name: "prefixes",
             type: "bytes4",
+            internalType: "bytes4",
           },
           {
-            internalType: "bytes32",
             name: "hash",
             type: "bytes32",
+            internalType: "bytes32",
           },
         ],
-        internalType: "struct CIDV1",
-        name: "appCID_",
-        type: "tuple",
+      },
+      {
+        name: "accessType_",
+        type: "uint8",
+        internalType: "enum IConfig.AccessType",
+      },
+      {
+        name: "accessList_",
+        type: "address[]",
+        internalType: "address[]",
       },
     ],
-    name: "setAppCID",
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function",
   },
   {
+    type: "function",
+    name: "isInAccessList",
     inputs: [
       {
-        internalType: "bytes32",
-        name: "computeUnitId",
-        type: "bytes32",
-      },
-      {
-        internalType: "bytes32",
-        name: "workerId",
-        type: "bytes32",
+        name: "addr",
+        type: "address",
+        internalType: "address",
       },
     ],
-    name: "setWorker",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "targetWorkers",
     outputs: [
       {
-        internalType: "uint256",
         name: "",
-        type: "uint256",
+        type: "bool",
+        internalType: "bool",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
-    inputs: [
+    type: "function",
+    name: "maxWorkersPerProvider",
+    inputs: [],
+    outputs: [
       {
-        internalType: "uint256",
-        name: "amount",
+        name: "",
         type: "uint256",
+        internalType: "uint256",
       },
     ],
-    name: "withdraw",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
+    stateMutability: "view",
   },
   {
+    type: "function",
+    name: "minWorkers",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "paymentToken",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "contract IERC20",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "pricePerWorkerEpoch",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "removeComputeUnit",
     inputs: [
       {
-        internalType: "bytes32",
         name: "computeUnitId",
         type: "bytes32",
+        internalType: "bytes32",
       },
     ],
-    name: "withdrawRewards",
     outputs: [],
     stateMutability: "nonpayable",
+  },
+  {
     type: "function",
+    name: "removeFromAccessList",
+    inputs: [
+      {
+        name: "addr",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "setAppCID",
+    inputs: [
+      {
+        name: "appCID_",
+        type: "tuple",
+        internalType: "struct CIDV1",
+        components: [
+          {
+            name: "prefixes",
+            type: "bytes4",
+            internalType: "bytes4",
+          },
+          {
+            name: "hash",
+            type: "bytes32",
+            internalType: "bytes32",
+          },
+        ],
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "setWorker",
+    inputs: [
+      {
+        name: "computeUnitId",
+        type: "bytes32",
+        internalType: "bytes32",
+      },
+      {
+        name: "workerId",
+        type: "bytes32",
+        internalType: "bytes32",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "targetWorkers",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "withdraw",
+    inputs: [
+      {
+        name: "amount",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "withdrawRewards",
+    inputs: [
+      {
+        name: "computeUnitId",
+        type: "bytes32",
+        internalType: "bytes32",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "event",
+    name: "AppCIDChanged",
+    inputs: [
+      {
+        name: "newAppCID",
+        type: "tuple",
+        indexed: false,
+        internalType: "struct CIDV1",
+        components: [
+          {
+            name: "prefixes",
+            type: "bytes4",
+            internalType: "bytes4",
+          },
+          {
+            name: "hash",
+            type: "bytes32",
+            internalType: "bytes32",
+          },
+        ],
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "ComputeUnitJoined",
+    inputs: [
+      {
+        name: "unitId",
+        type: "bytes32",
+        indexed: false,
+        internalType: "bytes32",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "ComputeUnitRemoved",
+    inputs: [
+      {
+        name: "unitId",
+        type: "bytes32",
+        indexed: false,
+        internalType: "bytes32",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "DealEnded",
+    inputs: [
+      {
+        name: "endedEpoch",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "Deposited",
+    inputs: [
+      {
+        name: "amount",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "MaxPaidEpochUpdated",
+    inputs: [
+      {
+        name: "maxPaidEpoch",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "RewardWithdrawn",
+    inputs: [
+      {
+        name: "computeUnitId",
+        type: "bytes32",
+        indexed: false,
+        internalType: "bytes32",
+      },
+      {
+        name: "reward",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "Withdrawn",
+    inputs: [
+      {
+        name: "amount",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "WorkerIdUpdated",
+    inputs: [
+      {
+        name: "computeUnitId",
+        type: "bytes32",
+        indexed: false,
+        internalType: "bytes32",
+      },
+      {
+        name: "workerId",
+        type: "bytes32",
+        indexed: false,
+        internalType: "bytes32",
+      },
+    ],
+    anonymous: false,
   },
 ] as const;
 

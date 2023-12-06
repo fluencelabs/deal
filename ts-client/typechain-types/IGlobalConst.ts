@@ -8,6 +8,7 @@ import type {
   FunctionFragment,
   Result,
   Interface,
+  EventFragment,
   ContractRunner,
   ContractMethod,
   Listener,
@@ -16,6 +17,7 @@ import type {
   TypedContractEvent,
   TypedDeferredTopicFilter,
   TypedEventLog,
+  TypedLogDescription,
   TypedListener,
   TypedContractMethod,
 } from "./common";
@@ -23,25 +25,63 @@ import type {
 export interface IGlobalConstInterface extends Interface {
   getFunction(
     nameOrSignature:
-      | "collateralPerUnit"
+      | "ccActiveUnitCount"
+      | "ccMaxFailedRatio"
+      | "ccSlashingRate"
+      | "ccVestingDuration"
+      | "ccWithdrawEpochesAfterFailed"
+      | "fltCCCollateralPerUnit"
+      | "fltCCTargetRevenuePerEpoch"
       | "fltPrice"
       | "fluenceToken"
-      | "maxCapacityRewardPerEpoch"
-      | "maxFailedRatio"
-      | "minCapacityCommitmentDuration"
-      | "minCapacityRewardPerEpoch"
-      | "minDepositedEpoches"
-      | "minRematchingEpoches"
-      | "minRequierdCCProofs"
-      | "setConstant"
-      | "slashingRate"
-      | "targetRevenuePerEpoch"
-      | "vestingDuration"
-      | "withdrawCCEpochesAfterFailed"
+      | "getCCRewardPool"
+      | "maxCCProofsPerEpoch"
+      | "maxCCRewardPerEpoch"
+      | "minCCDuration"
+      | "minCCRequierdProofsPerEpoch"
+      | "minCCRewardPerEpoch"
+      | "minDealDepositedEpoches"
+      | "minDealRematchingEpoches"
+      | "setCCConstant"
+      | "setDealConstant"
+      | "setFLTPrice"
+      | "usdCCCollateralPerUnit"
+      | "usdCCTargetRevenuePerEpoch"
   ): FunctionFragment;
 
+  getEvent(
+    nameOrSignatureOrTopic:
+      | "CCConstantUpdated"
+      | "DealConstantUpdated"
+      | "FLTPriceUpdated"
+  ): EventFragment;
+
   encodeFunctionData(
-    functionFragment: "collateralPerUnit",
+    functionFragment: "ccActiveUnitCount",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "ccMaxFailedRatio",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "ccSlashingRate",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "ccVestingDuration",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "ccWithdrawEpochesAfterFailed",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "fltCCCollateralPerUnit",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "fltCCTargetRevenuePerEpoch",
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "fltPrice", values?: undefined): string;
@@ -50,56 +90,84 @@ export interface IGlobalConstInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "maxCapacityRewardPerEpoch",
+    functionFragment: "getCCRewardPool",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "maxCCProofsPerEpoch",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "maxFailedRatio",
+    functionFragment: "maxCCRewardPerEpoch",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "minCapacityCommitmentDuration",
+    functionFragment: "minCCDuration",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "minCapacityRewardPerEpoch",
+    functionFragment: "minCCRequierdProofsPerEpoch",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "minDepositedEpoches",
+    functionFragment: "minCCRewardPerEpoch",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "minRematchingEpoches",
+    functionFragment: "minDealDepositedEpoches",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "minRequierdCCProofs",
+    functionFragment: "minDealRematchingEpoches",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "setConstant",
+    functionFragment: "setCCConstant",
     values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "slashingRate",
+    functionFragment: "setDealConstant",
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setFLTPrice",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "usdCCCollateralPerUnit",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "targetRevenuePerEpoch",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "vestingDuration",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "withdrawCCEpochesAfterFailed",
+    functionFragment: "usdCCTargetRevenuePerEpoch",
     values?: undefined
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "collateralPerUnit",
+    functionFragment: "ccActiveUnitCount",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "ccMaxFailedRatio",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "ccSlashingRate",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "ccVestingDuration",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "ccWithdrawEpochesAfterFailed",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "fltCCCollateralPerUnit",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "fltCCTargetRevenuePerEpoch",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "fltPrice", data: BytesLike): Result;
@@ -108,53 +176,95 @@ export interface IGlobalConstInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "maxCapacityRewardPerEpoch",
+    functionFragment: "getCCRewardPool",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "maxFailedRatio",
+    functionFragment: "maxCCProofsPerEpoch",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "minCapacityCommitmentDuration",
+    functionFragment: "maxCCRewardPerEpoch",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "minCapacityRewardPerEpoch",
+    functionFragment: "minCCDuration",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "minDepositedEpoches",
+    functionFragment: "minCCRequierdProofsPerEpoch",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "minRematchingEpoches",
+    functionFragment: "minCCRewardPerEpoch",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "minRequierdCCProofs",
+    functionFragment: "minDealDepositedEpoches",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setConstant",
+    functionFragment: "minDealRematchingEpoches",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "slashingRate",
+    functionFragment: "setCCConstant",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "targetRevenuePerEpoch",
+    functionFragment: "setDealConstant",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "vestingDuration",
+    functionFragment: "setFLTPrice",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "withdrawCCEpochesAfterFailed",
+    functionFragment: "usdCCCollateralPerUnit",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "usdCCTargetRevenuePerEpoch",
+    data: BytesLike
+  ): Result;
+}
+
+export namespace CCConstantUpdatedEvent {
+  export type InputTuple = [constantType: BigNumberish, newValue: BigNumberish];
+  export type OutputTuple = [constantType: bigint, newValue: bigint];
+  export interface OutputObject {
+    constantType: bigint;
+    newValue: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace DealConstantUpdatedEvent {
+  export type InputTuple = [constantType: BigNumberish, newValue: BigNumberish];
+  export type OutputTuple = [constantType: bigint, newValue: bigint];
+  export interface OutputObject {
+    constantType: bigint;
+    newValue: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace FLTPriceUpdatedEvent {
+  export type InputTuple = [newPrice: BigNumberish];
+  export type OutputTuple = [newPrice: bigint];
+  export interface OutputObject {
+    newPrice: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
 
 export interface IGlobalConst extends BaseContract {
@@ -200,46 +310,86 @@ export interface IGlobalConst extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
-  collateralPerUnit: TypedContractMethod<[], [bigint], "view">;
+  ccActiveUnitCount: TypedContractMethod<[], [bigint], "view">;
+
+  ccMaxFailedRatio: TypedContractMethod<[], [bigint], "view">;
+
+  ccSlashingRate: TypedContractMethod<[], [bigint], "view">;
+
+  ccVestingDuration: TypedContractMethod<[], [bigint], "view">;
+
+  ccWithdrawEpochesAfterFailed: TypedContractMethod<[], [bigint], "view">;
+
+  fltCCCollateralPerUnit: TypedContractMethod<[], [bigint], "view">;
+
+  fltCCTargetRevenuePerEpoch: TypedContractMethod<[], [bigint], "view">;
 
   fltPrice: TypedContractMethod<[], [bigint], "view">;
 
   fluenceToken: TypedContractMethod<[], [string], "view">;
 
-  maxCapacityRewardPerEpoch: TypedContractMethod<[], [bigint], "view">;
+  getCCRewardPool: TypedContractMethod<[epoch: BigNumberish], [bigint], "view">;
 
-  maxFailedRatio: TypedContractMethod<[], [bigint], "view">;
+  maxCCProofsPerEpoch: TypedContractMethod<[], [bigint], "view">;
 
-  minCapacityCommitmentDuration: TypedContractMethod<[], [bigint], "view">;
+  maxCCRewardPerEpoch: TypedContractMethod<[], [bigint], "view">;
 
-  minCapacityRewardPerEpoch: TypedContractMethod<[], [bigint], "view">;
+  minCCDuration: TypedContractMethod<[], [bigint], "view">;
 
-  minDepositedEpoches: TypedContractMethod<[], [bigint], "view">;
+  minCCRequierdProofsPerEpoch: TypedContractMethod<[], [bigint], "view">;
 
-  minRematchingEpoches: TypedContractMethod<[], [bigint], "view">;
+  minCCRewardPerEpoch: TypedContractMethod<[], [bigint], "view">;
 
-  minRequierdCCProofs: TypedContractMethod<[], [bigint], "view">;
+  minDealDepositedEpoches: TypedContractMethod<[], [bigint], "view">;
 
-  setConstant: TypedContractMethod<
+  minDealRematchingEpoches: TypedContractMethod<[], [bigint], "view">;
+
+  setCCConstant: TypedContractMethod<
     [constantType: BigNumberish, v: BigNumberish],
     [void],
     "nonpayable"
   >;
 
-  slashingRate: TypedContractMethod<[], [bigint], "view">;
+  setDealConstant: TypedContractMethod<
+    [constantType: BigNumberish, v: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
 
-  targetRevenuePerEpoch: TypedContractMethod<[], [bigint], "view">;
+  setFLTPrice: TypedContractMethod<
+    [fltPrice_: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
 
-  vestingDuration: TypedContractMethod<[], [bigint], "view">;
+  usdCCCollateralPerUnit: TypedContractMethod<[], [bigint], "view">;
 
-  withdrawCCEpochesAfterFailed: TypedContractMethod<[], [bigint], "view">;
+  usdCCTargetRevenuePerEpoch: TypedContractMethod<[], [bigint], "view">;
 
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
   ): T;
 
   getFunction(
-    nameOrSignature: "collateralPerUnit"
+    nameOrSignature: "ccActiveUnitCount"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "ccMaxFailedRatio"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "ccSlashingRate"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "ccVestingDuration"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "ccWithdrawEpochesAfterFailed"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "fltCCCollateralPerUnit"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "fltCCTargetRevenuePerEpoch"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "fltPrice"
@@ -248,45 +398,107 @@ export interface IGlobalConst extends BaseContract {
     nameOrSignature: "fluenceToken"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "maxCapacityRewardPerEpoch"
+    nameOrSignature: "getCCRewardPool"
+  ): TypedContractMethod<[epoch: BigNumberish], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "maxCCProofsPerEpoch"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "maxFailedRatio"
+    nameOrSignature: "maxCCRewardPerEpoch"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "minCapacityCommitmentDuration"
+    nameOrSignature: "minCCDuration"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "minCapacityRewardPerEpoch"
+    nameOrSignature: "minCCRequierdProofsPerEpoch"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "minDepositedEpoches"
+    nameOrSignature: "minCCRewardPerEpoch"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "minRematchingEpoches"
+    nameOrSignature: "minDealDepositedEpoches"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "minRequierdCCProofs"
+    nameOrSignature: "minDealRematchingEpoches"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "setConstant"
+    nameOrSignature: "setCCConstant"
   ): TypedContractMethod<
     [constantType: BigNumberish, v: BigNumberish],
     [void],
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "slashingRate"
+    nameOrSignature: "setDealConstant"
+  ): TypedContractMethod<
+    [constantType: BigNumberish, v: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "setFLTPrice"
+  ): TypedContractMethod<[fltPrice_: BigNumberish], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "usdCCCollateralPerUnit"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "targetRevenuePerEpoch"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "vestingDuration"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "withdrawCCEpochesAfterFailed"
+    nameOrSignature: "usdCCTargetRevenuePerEpoch"
   ): TypedContractMethod<[], [bigint], "view">;
 
-  filters: {};
+  getEvent(
+    key: "CCConstantUpdated"
+  ): TypedContractEvent<
+    CCConstantUpdatedEvent.InputTuple,
+    CCConstantUpdatedEvent.OutputTuple,
+    CCConstantUpdatedEvent.OutputObject
+  >;
+  getEvent(
+    key: "DealConstantUpdated"
+  ): TypedContractEvent<
+    DealConstantUpdatedEvent.InputTuple,
+    DealConstantUpdatedEvent.OutputTuple,
+    DealConstantUpdatedEvent.OutputObject
+  >;
+  getEvent(
+    key: "FLTPriceUpdated"
+  ): TypedContractEvent<
+    FLTPriceUpdatedEvent.InputTuple,
+    FLTPriceUpdatedEvent.OutputTuple,
+    FLTPriceUpdatedEvent.OutputObject
+  >;
+
+  filters: {
+    "CCConstantUpdated(uint8,uint256)": TypedContractEvent<
+      CCConstantUpdatedEvent.InputTuple,
+      CCConstantUpdatedEvent.OutputTuple,
+      CCConstantUpdatedEvent.OutputObject
+    >;
+    CCConstantUpdated: TypedContractEvent<
+      CCConstantUpdatedEvent.InputTuple,
+      CCConstantUpdatedEvent.OutputTuple,
+      CCConstantUpdatedEvent.OutputObject
+    >;
+
+    "DealConstantUpdated(uint8,uint256)": TypedContractEvent<
+      DealConstantUpdatedEvent.InputTuple,
+      DealConstantUpdatedEvent.OutputTuple,
+      DealConstantUpdatedEvent.OutputObject
+    >;
+    DealConstantUpdated: TypedContractEvent<
+      DealConstantUpdatedEvent.InputTuple,
+      DealConstantUpdatedEvent.OutputTuple,
+      DealConstantUpdatedEvent.OutputObject
+    >;
+
+    "FLTPriceUpdated(uint256)": TypedContractEvent<
+      FLTPriceUpdatedEvent.InputTuple,
+      FLTPriceUpdatedEvent.OutputTuple,
+      FLTPriceUpdatedEvent.OutputObject
+    >;
+    FLTPriceUpdated: TypedContractEvent<
+      FLTPriceUpdatedEvent.InputTuple,
+      FLTPriceUpdatedEvent.OutputTuple,
+      FLTPriceUpdatedEvent.OutputObject
+    >;
+  };
 }

@@ -3,52 +3,59 @@
 pragma solidity ^0.8.19;
 
 interface IGlobalConst {
-    enum Constant {
+    // ------------------ Events ------------------
+    event FLTPriceUpdated(uint256 newPrice);
+    event DealConstantUpdated(DealConstantType constantType, uint256 newValue);
+    event CCConstantUpdated(CCConstantType constantType, uint256 newValue);
+
+    // ------------------ Types ------------------
+    enum DealConstantType {
         MinDepositedEpoches,
-        MinRematchingEpoches,
-        CollateralPerUnit,
-        MinCapacityCommitmentDuration,
-        FLTPrice,
-        MinCapacityRewardPerEpoch,
-        MaxCapacityRewardPerEpoch,
-        TargetRevenuePerEpoch,
+        MinRematchingEpoches
+    }
+
+    enum CCConstantType {
+        USDCollateralPerUnit,
+        USDTargetRevenuePerEpoch,
+        MinDuration,
+        MinRewardPerEpoch,
+        MaxRewardPerEpoch,
         VestingDuration,
         SlashingRate,
-        MaxFailedRatio,
-        MinRequierdCCProofs,
-        MaxCCProofs,
-        WithdrawCCTimeoutAfterFailed
+        MinRequierdProofsPerEpoch,
+        MaxProofsPerEpoch,
+        WithdrawEpochesAfterFailed,
+        MaxFailedRatio
     }
 
     // ------------------ External View Functions ------------------
+    // global constants
     function fluenceToken() external view returns (address);
-
-    function minDepositedEpoches() external view returns (uint256);
-
-    function minRematchingEpoches() external view returns (uint256);
-
-    function collateralPerUnit() external view returns (uint256);
-
-    function minCapacityCommitmentDuration() external view returns (uint256);
-
     function fltPrice() external view returns (uint256);
 
-    function minCapacityRewardPerEpoch() external view returns (uint256);
+    // deal constants
+    function minDealDepositedEpoches() external view returns (uint256);
+    function minDealRematchingEpoches() external view returns (uint256);
 
-    function maxCapacityRewardPerEpoch() external view returns (uint256);
-
-    function targetRevenuePerEpoch() external view returns (uint256);
-
-    function vestingDuration() external view returns (uint256);
-
-    function slashingRate() external view returns (uint256);
-
-    function maxFailedRatio() external view returns (uint256);
-
-    function minRequierdCCProofs() external view returns (uint256);
-
-    function withdrawCCEpochesAfterFailed() external view returns (uint256);
+    // cc constants
+    function fltCCCollateralPerUnit() external view returns (uint256);
+    function usdCCCollateralPerUnit() external view returns (uint256);
+    function fltCCTargetRevenuePerEpoch() external view returns (uint256);
+    function usdCCTargetRevenuePerEpoch() external view returns (uint256);
+    function minCCDuration() external view returns (uint256);
+    function minCCRewardPerEpoch() external view returns (uint256);
+    function maxCCRewardPerEpoch() external view returns (uint256);
+    function ccVestingDuration() external view returns (uint256);
+    function ccSlashingRate() external view returns (uint256);
+    function minCCRequierdProofsPerEpoch() external view returns (uint256);
+    function maxCCProofsPerEpoch() external view returns (uint256);
+    function ccWithdrawEpochesAfterFailed() external view returns (uint256);
+    function ccMaxFailedRatio() external view returns (uint256);
+    function ccActiveUnitCount() external view returns (uint256);
+    function getCCRewardPool(uint256 epoch) external view returns (uint256);
 
     // ------------------ External Mutable Functions ------------------
-    function setConstant(Constant constantType, uint256 v) external;
+    function setFLTPrice(uint256 fltPrice_) external;
+    function setDealConstant(DealConstantType constantType, uint256 v) external;
+    function setCCConstant(CCConstantType constantType, uint256 v) external;
 }

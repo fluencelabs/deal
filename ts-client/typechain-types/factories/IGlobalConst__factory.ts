@@ -8,7 +8,85 @@ import type { IGlobalConst, IGlobalConstInterface } from "../IGlobalConst";
 const _abi = [
   {
     type: "function",
-    name: "collateralPerUnit",
+    name: "ccActiveUnitCount",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "ccMaxFailedRatio",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "ccSlashingRate",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "ccVestingDuration",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "ccWithdrawEpochesAfterFailed",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "fltCCCollateralPerUnit",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "fltCCTargetRevenuePerEpoch",
     inputs: [],
     outputs: [
       {
@@ -47,7 +125,26 @@ const _abi = [
   },
   {
     type: "function",
-    name: "maxCapacityRewardPerEpoch",
+    name: "getCCRewardPool",
+    inputs: [
+      {
+        name: "epoch",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "maxCCProofsPerEpoch",
     inputs: [],
     outputs: [
       {
@@ -60,7 +157,7 @@ const _abi = [
   },
   {
     type: "function",
-    name: "maxFailedRatio",
+    name: "maxCCRewardPerEpoch",
     inputs: [],
     outputs: [
       {
@@ -73,7 +170,7 @@ const _abi = [
   },
   {
     type: "function",
-    name: "minCapacityCommitmentDuration",
+    name: "minCCDuration",
     inputs: [],
     outputs: [
       {
@@ -86,7 +183,7 @@ const _abi = [
   },
   {
     type: "function",
-    name: "minCapacityRewardPerEpoch",
+    name: "minCCRequierdProofsPerEpoch",
     inputs: [],
     outputs: [
       {
@@ -99,7 +196,7 @@ const _abi = [
   },
   {
     type: "function",
-    name: "minDepositedEpoches",
+    name: "minCCRewardPerEpoch",
     inputs: [],
     outputs: [
       {
@@ -112,7 +209,7 @@ const _abi = [
   },
   {
     type: "function",
-    name: "minRematchingEpoches",
+    name: "minDealDepositedEpoches",
     inputs: [],
     outputs: [
       {
@@ -125,7 +222,7 @@ const _abi = [
   },
   {
     type: "function",
-    name: "minRequierdCCProofs",
+    name: "minDealRematchingEpoches",
     inputs: [],
     outputs: [
       {
@@ -138,12 +235,12 @@ const _abi = [
   },
   {
     type: "function",
-    name: "setConstant",
+    name: "setCCConstant",
     inputs: [
       {
         name: "constantType",
         type: "uint8",
-        internalType: "enum IGlobalConst.Constant",
+        internalType: "enum IGlobalConst.CCConstantType",
       },
       {
         name: "v",
@@ -156,7 +253,38 @@ const _abi = [
   },
   {
     type: "function",
-    name: "slashingRate",
+    name: "setDealConstant",
+    inputs: [
+      {
+        name: "constantType",
+        type: "uint8",
+        internalType: "enum IGlobalConst.DealConstantType",
+      },
+      {
+        name: "v",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "setFLTPrice",
+    inputs: [
+      {
+        name: "fltPrice_",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "usdCCCollateralPerUnit",
     inputs: [],
     outputs: [
       {
@@ -169,7 +297,7 @@ const _abi = [
   },
   {
     type: "function",
-    name: "targetRevenuePerEpoch",
+    name: "usdCCTargetRevenuePerEpoch",
     inputs: [],
     outputs: [
       {
@@ -181,30 +309,55 @@ const _abi = [
     stateMutability: "view",
   },
   {
-    type: "function",
-    name: "vestingDuration",
-    inputs: [],
-    outputs: [
+    type: "event",
+    name: "CCConstantUpdated",
+    inputs: [
       {
-        name: "",
+        name: "constantType",
+        type: "uint8",
+        indexed: false,
+        internalType: "enum IGlobalConst.CCConstantType",
+      },
+      {
+        name: "newValue",
         type: "uint256",
+        indexed: false,
         internalType: "uint256",
       },
     ],
-    stateMutability: "view",
+    anonymous: false,
   },
   {
-    type: "function",
-    name: "withdrawCCEpochesAfterFailed",
-    inputs: [],
-    outputs: [
+    type: "event",
+    name: "DealConstantUpdated",
+    inputs: [
       {
-        name: "",
+        name: "constantType",
+        type: "uint8",
+        indexed: false,
+        internalType: "enum IGlobalConst.DealConstantType",
+      },
+      {
+        name: "newValue",
         type: "uint256",
+        indexed: false,
         internalType: "uint256",
       },
     ],
-    stateMutability: "view",
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "FLTPriceUpdated",
+    inputs: [
+      {
+        name: "newPrice",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
   },
 ] as const;
 

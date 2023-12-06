@@ -7,31 +7,49 @@ import "./interfaces/IGlobalConst.sol";
 import "./EpochController.sol";
 
 contract GlobalConst is EpochController, OwnableUpgradableDiamond, IGlobalConst {
-    // ------------------ Events ------------------
-    event ConstantsUpdated(Constant constantType, uint256 value);
-
     // ------------------ Constants ------------------
     uint256 public constant PRECISION = 10000; // min: 0.0001
+
+    uint256 internal constant _REWARD_POOL_GROWTH_RATE = 9000; // 90%
+    uint256 internal constant _REWARD_POOL_SHRINK_RATE = 11000; // 110%
+
+    // ------------------ Types ------------------
+    struct DealConst {
+        uint256 minDepositedEpoches;
+        uint256 minRematchingEpoches;
+    }
+
+    struct CCConst {
+        uint256 fltCollateralPerUnit;
+        uint256 usdCollateralPerUnit;
+        uint256 fltTargetRevenuePerEpoch;
+        uint256 usdTargetRevenuePerEpoch;
+        uint256 minDuration;
+        uint256 minRewardPerEpoch;
+        uint256 maxRewardPerEpoch;
+        uint256 vestingDuration;
+        uint256 slashingRate;
+        uint256 minRequierdProofsPerEpoch;
+        uint256 maxProofsPerEpoch;
+        uint256 withdrawEpochesAfterFailed;
+        uint256 maxFailedRatio;
+        uint256 activeUnitCount;
+    }
+
+    struct RewardPoolPerEpoch {
+        uint256 epoch;
+        uint256 value;
+    }
 
     // ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.core.storage.v1.globalConst")) - 1);
 
     struct GlobalConstStorage {
         address fluenceToken;
-        uint256 minDepositedEpoches;
-        uint256 minRematchingEpoches;
-        uint256 collateralPerUnit;
-        uint256 minCapacityCommitmentDuration;
         uint256 fltPrice;
-        uint256 minCapacityRewardPerEpoch;
-        uint256 maxCapacityRewardPerEpoch;
-        uint256 targetRevenuePerEpoch;
-        uint256 vestingDuration;
-        uint256 slashingRate;
-        uint256 minRequierdCCProofs;
-        uint256 maxCCProofs;
-        uint256 withdrawCCEpochesAfterFailed;
-        uint256 maxFailedRatio;
+        DealConst dealConst;
+        CCConst ccConst;
+        RewardPoolPerEpoch[] rewardPoolPerEpoches;
     }
 
     GlobalConstStorage private _storage;
@@ -44,115 +62,266 @@ contract GlobalConst is EpochController, OwnableUpgradableDiamond, IGlobalConst 
     }
 
     // ------------------ Initializer ------------------
-    function __GlobalConst_init(address fluenceToken_, uint256 minDepositedEpoches_, uint256 minRematchingEpoches_)
-        internal
-        onlyInitializing
-    {
+    function __GlobalConst_init(
+        address fluenceToken_,
+        uint256 fltPrice_,
+        uint256 minDepositedEpoches_,
+        uint256 minRematchingEpoches_,
+        uint256 usdCollateralPerUnit_,
+        uint256 usdTargetRevenuePerEpoch_,
+        uint256 minDuration_,
+        uint256 minRewardPerEpoch_,
+        uint256 maxRewardPerEpoch_,
+        uint256 vestingDuration_,
+        uint256 slashingRate_,
+        uint256 minRequierdProofsPerEpoch_,
+        uint256 maxProofsPerEpoch_,
+        uint256 withdrawEpochesAfterFailed_,
+        uint256 maxFailedRatio_
+    ) internal onlyInitializing {
         GlobalConstStorage storage globalConstantsStorage = _getGlobalConstStorage();
 
         globalConstantsStorage.fluenceToken = fluenceToken_;
-        globalConstantsStorage.minDepositedEpoches = minDepositedEpoches_;
-        globalConstantsStorage.minRematchingEpoches = minRematchingEpoches_;
+        globalConstantsStorage.dealConst.minDepositedEpoches = minDepositedEpoches_;
+        globalConstantsStorage.dealConst.minRematchingEpoches = minRematchingEpoches_;
+        globalConstantsStorage.ccConst.usdCollateralPerUnit = usdCollateralPerUnit_;
+        globalConstantsStorage.ccConst.usdTargetRevenuePerEpoch = usdTargetRevenuePerEpoch_;
+        globalConstantsStorage.ccConst.minDuration = minDuration_;
+        globalConstantsStorage.ccConst.minRewardPerEpoch = minRewardPerEpoch_;
+        globalConstantsStorage.ccConst.maxRewardPerEpoch = maxRewardPerEpoch_;
+        globalConstantsStorage.ccConst.vestingDuration = vestingDuration_;
+        globalConstantsStorage.ccConst.slashingRate = slashingRate_;
+        globalConstantsStorage.ccConst.minRequierdProofsPerEpoch = minRequierdProofsPerEpoch_;
+        globalConstantsStorage.ccConst.maxProofsPerEpoch = maxProofsPerEpoch_;
+        globalConstantsStorage.ccConst.withdrawEpochesAfterFailed = withdrawEpochesAfterFailed_;
+        globalConstantsStorage.ccConst.maxFailedRatio = maxFailedRatio_;
+
+        setFLTPrice(fltPrice_);
+    }
+
+    // ------------------ Internal Mutable Functions ------------------
+    function _setRewardPool(uint256 fltPrice_, uint256 activeUnitCount_) internal {
+        GlobalConstStorage storage globalConstantsStorage = _getGlobalConstStorage();
+
+        uint256 currentEpoch_ = currentEpoch();
+        uint256 currentTarget = 0;
+
+        if (activeUnitCount_ > 0) {
+            currentTarget = fltPrice_ / activeUnitCount_;
+        }
+
+        // load last reward pool
+        uint256 length = globalConstantsStorage.rewardPoolPerEpoches.length;
+        uint256 lastRewardPoolValue;
+        uint256 lastRewardPoolEpoch;
+
+        if (length > 0) {
+            RewardPoolPerEpoch storage lastRewardPool = globalConstantsStorage.rewardPoolPerEpoches[length - 1];
+            lastRewardPoolEpoch = lastRewardPool.epoch;
+
+            if (length < 2) {
+                lastRewardPoolValue = 0;
+            } else if (currentEpoch_ == lastRewardPool.epoch) {
+                lastRewardPoolValue = globalConstantsStorage.rewardPoolPerEpoches[length - 2].value;
+            } else {
+                lastRewardPoolValue = lastRewardPool.value;
+            }
+        }
+
+        // calculate new reward pool
+        uint256 newRewardPool;
+        if (currentTarget > globalConstantsStorage.ccConst.usdTargetRevenuePerEpoch) {
+            uint256 minRewardPerEpoch = globalConstantsStorage.ccConst.minRewardPerEpoch;
+            newRewardPool = lastRewardPoolValue * _REWARD_POOL_SHRINK_RATE / PRECISION;
+            if (newRewardPool < minRewardPerEpoch) {
+                newRewardPool = minRewardPerEpoch;
+            }
+        } else {
+            uint256 maxRewardPerEpoch = globalConstantsStorage.ccConst.maxRewardPerEpoch;
+            newRewardPool = lastRewardPoolValue * _REWARD_POOL_GROWTH_RATE / PRECISION;
+            if (newRewardPool > maxRewardPerEpoch) {
+                newRewardPool = maxRewardPerEpoch;
+            }
+        }
+
+        // save new reward pool
+        if (currentEpoch_ == lastRewardPoolEpoch) {
+            globalConstantsStorage.rewardPoolPerEpoches[length - 1].value = newRewardPool;
+        } else {
+            globalConstantsStorage.rewardPoolPerEpoches.push(
+                RewardPoolPerEpoch({epoch: currentEpoch_, value: newRewardPool})
+            );
+        }
+    }
+
+    function _setCCActiveUnitCount(uint256 activeUnitCount_) internal {
+        GlobalConstStorage storage globalConstantsStorage = _getGlobalConstStorage();
+
+        globalConstantsStorage.ccConst.activeUnitCount = activeUnitCount_;
+        _setRewardPool(globalConstantsStorage.fltPrice, activeUnitCount_);
     }
 
     // ------------------ External View Functions ------------------
+    // global constants
     function fluenceToken() public view returns (address) {
         return _getGlobalConstStorage().fluenceToken;
     }
 
-    function minDepositedEpoches() public view returns (uint256) {
-        return _getGlobalConstStorage().minDepositedEpoches;
-    }
-
-    function minRematchingEpoches() public view returns (uint256) {
-        return _getGlobalConstStorage().minRematchingEpoches;
-    }
-
-    function collateralPerUnit() public view returns (uint256) {
-        return _getGlobalConstStorage().collateralPerUnit;
-    }
-
-    function minCapacityCommitmentDuration() public view returns (uint256) {
-        return _getGlobalConstStorage().minCapacityCommitmentDuration;
-    }
-
-    function fltPrice() public view returns (uint256) {
+    function fltPrice() public view override returns (uint256) {
         return _getGlobalConstStorage().fltPrice;
     }
 
-    function minCapacityRewardPerEpoch() public view returns (uint256) {
-        return _getGlobalConstStorage().minCapacityRewardPerEpoch;
+    // deal constants
+    function minDealDepositedEpoches() public view override returns (uint256) {
+        return _getGlobalConstStorage().dealConst.minDepositedEpoches;
     }
 
-    function maxCapacityRewardPerEpoch() public view returns (uint256) {
-        return _getGlobalConstStorage().maxCapacityRewardPerEpoch;
+    function minDealRematchingEpoches() public view override returns (uint256) {
+        return _getGlobalConstStorage().dealConst.minRematchingEpoches;
     }
 
-    function targetRevenuePerEpoch() public view returns (uint256) {
-        return _getGlobalConstStorage().targetRevenuePerEpoch;
+    // cc constants
+    function fltCCCollateralPerUnit() public view override returns (uint256) {
+        return _getGlobalConstStorage().ccConst.fltCollateralPerUnit;
     }
 
-    function vestingDuration() public view returns (uint256) {
-        return _getGlobalConstStorage().vestingDuration;
+    function usdCCCollateralPerUnit() public view override returns (uint256) {
+        return _getGlobalConstStorage().ccConst.usdCollateralPerUnit;
     }
 
-    function slashingRate() public view returns (uint256) {
-        return _getGlobalConstStorage().slashingRate;
+    function fltCCTargetRevenuePerEpoch() public view override returns (uint256) {
+        return _getGlobalConstStorage().ccConst.fltTargetRevenuePerEpoch;
     }
 
-    function maxFailedRatio() public view returns (uint256) {
-        return _getGlobalConstStorage().maxFailedRatio;
+    function usdCCTargetRevenuePerEpoch() public view override returns (uint256) {
+        return _getGlobalConstStorage().ccConst.usdTargetRevenuePerEpoch;
     }
 
-    function minRequierdCCProofs() public view returns (uint256) {
-        return _getGlobalConstStorage().minRequierdCCProofs;
+    function minCCDuration() public view override returns (uint256) {
+        return _getGlobalConstStorage().ccConst.minDuration;
     }
 
-    function maxCCProofs() public view returns (uint256) {
-        return _getGlobalConstStorage().maxCCProofs;
+    function minCCRewardPerEpoch() public view override returns (uint256) {
+        return _getGlobalConstStorage().ccConst.minRewardPerEpoch;
     }
 
-    function withdrawCCEpochesAfterFailed() public view returns (uint256) {
-        return _getGlobalConstStorage().withdrawCCEpochesAfterFailed;
+    function maxCCRewardPerEpoch() public view override returns (uint256) {
+        return _getGlobalConstStorage().ccConst.maxRewardPerEpoch;
+    }
+
+    function ccVestingDuration() public view override returns (uint256) {
+        return _getGlobalConstStorage().ccConst.vestingDuration;
+    }
+
+    function ccSlashingRate() public view override returns (uint256) {
+        return _getGlobalConstStorage().ccConst.slashingRate;
+    }
+
+    function minCCRequierdProofsPerEpoch() public view override returns (uint256) {
+        return _getGlobalConstStorage().ccConst.minRequierdProofsPerEpoch;
+    }
+
+    function maxCCProofsPerEpoch() public view override returns (uint256) {
+        return _getGlobalConstStorage().ccConst.maxProofsPerEpoch;
+    }
+
+    function ccWithdrawEpochesAfterFailed() public view override returns (uint256) {
+        return _getGlobalConstStorage().ccConst.withdrawEpochesAfterFailed;
+    }
+
+    function ccMaxFailedRatio() public view override returns (uint256) {
+        return _getGlobalConstStorage().ccConst.maxFailedRatio;
+    }
+
+    function ccActiveUnitCount() public view override returns (uint256) {
+        return _getGlobalConstStorage().ccConst.activeUnitCount;
+    }
+
+    function getCCRewardPool(uint256 epoch) public view override returns (uint256) {
+        GlobalConstStorage storage globalConstantsStorage = _getGlobalConstStorage();
+
+        uint256 length = globalConstantsStorage.rewardPoolPerEpoches.length;
+        uint256 low = 0;
+        uint256 high = length - 1;
+
+        uint256 value = 0;
+        while (low <= high) {
+            uint256 mid = (low + high) / 2;
+            RewardPoolPerEpoch storage rewardPool = globalConstantsStorage.rewardPoolPerEpoches[mid];
+            uint256 rewardPoolEpoch = rewardPool.epoch;
+            if (epoch > rewardPoolEpoch) {
+                value = rewardPool.value;
+                low = mid + 1;
+            } else if (epoch < rewardPoolEpoch) {
+                high = mid - 1;
+            } else {
+                return rewardPool.value;
+            }
+        }
+
+        return value;
     }
 
     // ------------------ External Mutable Functions ------------------
-    function setConstant(Constant constantType, uint256 v) external onlyOwner {
-        GlobalConstStorage storage s = _getGlobalConstStorage();
+    function setFLTPrice(uint256 fltPrice_) public onlyOwner {
+        GlobalConstStorage storage globalConstantsStorage = _getGlobalConstStorage();
+        globalConstantsStorage.fltPrice = fltPrice_;
 
-        if (constantType == Constant.MinDepositedEpoches) {
-            s.minDepositedEpoches = v;
-        } else if (constantType == Constant.MinRematchingEpoches) {
-            s.minRematchingEpoches = v;
-        } else if (constantType == Constant.CollateralPerUnit) {
-            s.collateralPerUnit = v;
-        } else if (constantType == Constant.MinCapacityCommitmentDuration) {
-            s.minCapacityCommitmentDuration = v;
-        } else if (constantType == Constant.FLTPrice) {
-            s.fltPrice = v;
-        } else if (constantType == Constant.MinCapacityRewardPerEpoch) {
-            s.minCapacityRewardPerEpoch = v;
-        } else if (constantType == Constant.MaxCapacityRewardPerEpoch) {
-            s.maxCapacityRewardPerEpoch = v;
-        } else if (constantType == Constant.TargetRevenuePerEpoch) {
-            s.targetRevenuePerEpoch = v;
-        } else if (constantType == Constant.VestingDuration) {
-            require(s.vestingDuration == 0, "GlobalConst: vesting duration already set");
-            s.vestingDuration = v;
-        } else if (constantType == Constant.SlashingRate) {
-            s.slashingRate = v;
-        } else if (constantType == Constant.MaxFailedRatio) {
-            s.maxFailedRatio = v;
-        } else if (constantType == Constant.MinRequierdCCProofs) {
-            s.minRequierdCCProofs = v;
-        } else if (constantType == Constant.MaxCCProofs) {
-            s.maxCCProofs = v;
-        } else if (constantType == Constant.WithdrawCCTimeoutAfterFailed) {
-            s.withdrawCCEpochesAfterFailed = v;
+        _setRewardPool(fltPrice_, globalConstantsStorage.ccConst.activeUnitCount);
+
+        globalConstantsStorage.ccConst.fltTargetRevenuePerEpoch =
+            fltPrice_ * globalConstantsStorage.ccConst.usdTargetRevenuePerEpoch / PRECISION;
+        globalConstantsStorage.ccConst.fltCollateralPerUnit =
+            fltPrice_ * globalConstantsStorage.ccConst.usdCollateralPerUnit / PRECISION;
+
+        emit FLTPriceUpdated(fltPrice_);
+    }
+
+    function setDealConstant(DealConstantType constantType, uint256 v) external onlyOwner {
+        GlobalConstStorage storage globalConstantsStorage = _getGlobalConstStorage();
+
+        if (constantType == DealConstantType.MinDepositedEpoches) {
+            globalConstantsStorage.dealConst.minDepositedEpoches = v;
+        } else if (constantType == DealConstantType.MinRematchingEpoches) {
+            globalConstantsStorage.dealConst.minRematchingEpoches = v;
         } else {
             revert("GlobalConst: unknown constant type");
         }
 
-        emit ConstantsUpdated(constantType, v);
+        emit DealConstantUpdated(constantType, v);
+    }
+
+    function setCCConstant(CCConstantType constantType, uint256 v) external onlyOwner {
+        GlobalConstStorage storage globalConstantsStorage = _getGlobalConstStorage();
+
+        if (constantType == CCConstantType.USDCollateralPerUnit) {
+            globalConstantsStorage.ccConst.usdCollateralPerUnit = v;
+            globalConstantsStorage.ccConst.fltCollateralPerUnit = globalConstantsStorage.fltPrice * v / PRECISION;
+        } else if (constantType == CCConstantType.USDTargetRevenuePerEpoch) {
+            globalConstantsStorage.ccConst.usdTargetRevenuePerEpoch = v;
+            globalConstantsStorage.ccConst.fltTargetRevenuePerEpoch = globalConstantsStorage.fltPrice * v / PRECISION;
+        } else if (constantType == CCConstantType.MinDuration) {
+            globalConstantsStorage.ccConst.minDuration = v;
+        } else if (constantType == CCConstantType.MinRewardPerEpoch) {
+            globalConstantsStorage.ccConst.minRewardPerEpoch = v;
+        } else if (constantType == CCConstantType.MaxRewardPerEpoch) {
+            globalConstantsStorage.ccConst.maxRewardPerEpoch = v;
+        } else if (constantType == CCConstantType.VestingDuration) {
+            globalConstantsStorage.ccConst.vestingDuration = v;
+        } else if (constantType == CCConstantType.SlashingRate) {
+            globalConstantsStorage.ccConst.slashingRate = v;
+        } else if (constantType == CCConstantType.MinRequierdProofsPerEpoch) {
+            globalConstantsStorage.ccConst.minRequierdProofsPerEpoch = v;
+        } else if (constantType == CCConstantType.MaxProofsPerEpoch) {
+            globalConstantsStorage.ccConst.maxProofsPerEpoch = v;
+        } else if (constantType == CCConstantType.WithdrawEpochesAfterFailed) {
+            globalConstantsStorage.ccConst.withdrawEpochesAfterFailed = v;
+        } else if (constantType == CCConstantType.MaxFailedRatio) {
+            globalConstantsStorage.ccConst.maxFailedRatio = v;
+        } else {
+            revert("GlobalConst: unknown constant type");
+        }
+
+        emit CCConstantUpdated(constantType, v);
     }
 }

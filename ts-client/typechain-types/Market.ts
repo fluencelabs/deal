@@ -30,16 +30,37 @@ export type CIDV1StructOutput = [prefixes: string, hash: string] & {
   hash: string;
 };
 
-export declare namespace Market {
+export declare namespace IMarket {
   export type RegisterComputePeerStruct = {
     peerId: BytesLike;
-    freeUnits: BigNumberish;
+    unitCount: BigNumberish;
+    owner: AddressLike;
   };
 
   export type RegisterComputePeerStructOutput = [
     peerId: string,
-    freeUnits: bigint
-  ] & { peerId: string; freeUnits: bigint };
+    unitCount: bigint,
+    owner: string
+  ] & { peerId: string; unitCount: bigint; owner: string };
+
+  export type ComputePeerStruct = {
+    offerId: BytesLike;
+    commitmentId: BytesLike;
+    unitCount: BigNumberish;
+    owner: AddressLike;
+  };
+
+  export type ComputePeerStructOutput = [
+    offerId: string,
+    commitmentId: string,
+    unitCount: bigint,
+    owner: string
+  ] & {
+    offerId: string;
+    commitmentId: string;
+    unitCount: bigint;
+    owner: string;
+  };
 
   export type ComputeUnitStruct = {
     index: BigNumberish;
@@ -53,29 +74,21 @@ export declare namespace Market {
     peerId: string
   ] & { index: bigint; deal: string; peerId: string };
 
-  export type OfferInfoStruct = {
-    owner: AddressLike;
+  export type OfferStruct = {
+    provider: AddressLike;
     minPricePerWorkerEpoch: BigNumberish;
     paymentToken: AddressLike;
   };
 
-  export type OfferInfoStructOutput = [
-    owner: string,
+  export type OfferStructOutput = [
+    provider: string,
     minPricePerWorkerEpoch: bigint,
     paymentToken: string
-  ] & { owner: string; minPricePerWorkerEpoch: bigint; paymentToken: string };
-
-  export type ComputePeerInfoStruct = {
-    offerId: BytesLike;
-    commitmentId: BytesLike;
-    unitCount: BigNumberish;
+  ] & {
+    provider: string;
+    minPricePerWorkerEpoch: bigint;
+    paymentToken: string;
   };
-
-  export type ComputePeerInfoStructOutput = [
-    offerId: string,
-    commitmentId: string,
-    unitCount: bigint
-  ] & { offerId: string; commitmentId: string; unitCount: bigint };
 }
 
 export interface MarketInterface extends Interface {
@@ -85,47 +98,55 @@ export interface MarketInterface extends Interface {
       | "addComputePeers"
       | "addComputeUnits"
       | "addEffector"
+      | "ccActiveUnitCount"
+      | "ccMaxFailedRatio"
+      | "ccSlashingRate"
+      | "ccVestingDuration"
+      | "ccWithdrawEpochesAfterFailed"
       | "changeMinPricePerWorkerEpoch"
       | "changePaymentToken"
-      | "collateralPerUnit"
       | "currentEpoch"
       | "epochDuration"
+      | "fltCCCollateralPerUnit"
+      | "fltCCTargetRevenuePerEpoch"
       | "fltPrice"
       | "fluenceToken"
+      | "getCCRewardPool"
+      | "getComputePeer"
       | "getComputeUnit"
       | "getOffer"
-      | "getPeer"
       | "initTimestamp"
-      | "maxCCProofs"
-      | "maxCapacityRewardPerEpoch"
-      | "maxFailedRatio"
-      | "minCapacityCommitmentDuration"
-      | "minCapacityRewardPerEpoch"
-      | "minDepositedEpoches"
-      | "minRematchingEpoches"
-      | "minRequierdCCProofs"
+      | "maxCCProofsPerEpoch"
+      | "maxCCRewardPerEpoch"
+      | "minCCDuration"
+      | "minCCRequierdProofsPerEpoch"
+      | "minCCRewardPerEpoch"
+      | "minDealDepositedEpoches"
+      | "minDealRematchingEpoches"
       | "owner"
       | "registerMarketOffer"
       | "removeComputeUnit"
       | "removeEffector"
       | "renounceOwnership"
       | "returnComputeUnitFromDeal"
-      | "setConstant"
-      | "slashingRate"
-      | "targetRevenuePerEpoch"
+      | "setCCConstant"
+      | "setDealConstant"
+      | "setFLTPrice"
       | "transferOwnership"
-      | "vestingDuration"
-      | "withdrawCCEpochesAfterFailed"
+      | "usdCCCollateralPerUnit"
+      | "usdCCTargetRevenuePerEpoch"
   ): FunctionFragment;
 
   getEvent(
     nameOrSignatureOrTopic:
+      | "CCConstantUpdated"
       | "ComputeUnitAddedToDeal"
       | "ComputeUnitCreated"
       | "ComputeUnitRemovedFromDeal"
-      | "ConstantsUpdated"
+      | "DealConstantUpdated"
       | "EffectorAdded"
       | "EffectorRemoved"
+      | "FLTPriceUpdated"
       | "Initialized"
       | "MarketOfferRegistered"
       | "MinPricePerEpochUpdated"
@@ -137,15 +158,35 @@ export interface MarketInterface extends Interface {
   encodeFunctionData(functionFragment: "PRECISION", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "addComputePeers",
-    values: [BytesLike, Market.RegisterComputePeerStruct[]]
+    values: [BytesLike, IMarket.RegisterComputePeerStruct[]]
   ): string;
   encodeFunctionData(
     functionFragment: "addComputeUnits",
-    values: [BytesLike, BytesLike, BigNumberish]
+    values: [BytesLike, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "addEffector",
     values: [BytesLike, CIDV1Struct[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "ccActiveUnitCount",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "ccMaxFailedRatio",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "ccSlashingRate",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "ccVestingDuration",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "ccWithdrawEpochesAfterFailed",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "changeMinPricePerWorkerEpoch",
@@ -156,15 +197,19 @@ export interface MarketInterface extends Interface {
     values: [BytesLike, AddressLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "collateralPerUnit",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "currentEpoch",
     values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "epochDuration",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "fltCCCollateralPerUnit",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "fltCCTargetRevenuePerEpoch",
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "fltPrice", values?: undefined): string;
@@ -173,56 +218,58 @@ export interface MarketInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "getCCRewardPool",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getComputePeer",
+    values: [BytesLike]
+  ): string;
+  encodeFunctionData(
     functionFragment: "getComputeUnit",
     values: [BytesLike]
   ): string;
   encodeFunctionData(functionFragment: "getOffer", values: [BytesLike]): string;
-  encodeFunctionData(functionFragment: "getPeer", values: [BytesLike]): string;
   encodeFunctionData(
     functionFragment: "initTimestamp",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "maxCCProofs",
+    functionFragment: "maxCCProofsPerEpoch",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "maxCapacityRewardPerEpoch",
+    functionFragment: "maxCCRewardPerEpoch",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "maxFailedRatio",
+    functionFragment: "minCCDuration",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "minCapacityCommitmentDuration",
+    functionFragment: "minCCRequierdProofsPerEpoch",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "minCapacityRewardPerEpoch",
+    functionFragment: "minCCRewardPerEpoch",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "minDepositedEpoches",
+    functionFragment: "minDealDepositedEpoches",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "minRematchingEpoches",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "minRequierdCCProofs",
+    functionFragment: "minDealRematchingEpoches",
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "registerMarketOffer",
     values: [
-      BytesLike,
       BigNumberish,
       AddressLike,
       CIDV1Struct[],
-      Market.RegisterComputePeerStruct[]
+      IMarket.RegisterComputePeerStruct[]
     ]
   ): string;
   encodeFunctionData(
@@ -242,27 +289,27 @@ export interface MarketInterface extends Interface {
     values: [BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "setConstant",
+    functionFragment: "setCCConstant",
     values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "slashingRate",
-    values?: undefined
+    functionFragment: "setDealConstant",
+    values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "targetRevenuePerEpoch",
-    values?: undefined
+    functionFragment: "setFLTPrice",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [AddressLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "vestingDuration",
+    functionFragment: "usdCCCollateralPerUnit",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "withdrawCCEpochesAfterFailed",
+    functionFragment: "usdCCTargetRevenuePerEpoch",
     values?: undefined
   ): string;
 
@@ -280,15 +327,31 @@ export interface MarketInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "ccActiveUnitCount",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "ccMaxFailedRatio",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "ccSlashingRate",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "ccVestingDuration",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "ccWithdrawEpochesAfterFailed",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "changeMinPricePerWorkerEpoch",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "changePaymentToken",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "collateralPerUnit",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -299,9 +362,25 @@ export interface MarketInterface extends Interface {
     functionFragment: "epochDuration",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "fltCCCollateralPerUnit",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "fltCCTargetRevenuePerEpoch",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "fltPrice", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "fluenceToken",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getCCRewardPool",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getComputePeer",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -309,41 +388,36 @@ export interface MarketInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "getOffer", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "getPeer", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "initTimestamp",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "maxCCProofs",
+    functionFragment: "maxCCProofsPerEpoch",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "maxCapacityRewardPerEpoch",
+    functionFragment: "maxCCRewardPerEpoch",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "maxFailedRatio",
+    functionFragment: "minCCDuration",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "minCapacityCommitmentDuration",
+    functionFragment: "minCCRequierdProofsPerEpoch",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "minCapacityRewardPerEpoch",
+    functionFragment: "minCCRewardPerEpoch",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "minDepositedEpoches",
+    functionFragment: "minDealDepositedEpoches",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "minRematchingEpoches",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "minRequierdCCProofs",
+    functionFragment: "minDealRematchingEpoches",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
@@ -368,15 +442,15 @@ export interface MarketInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setConstant",
+    functionFragment: "setCCConstant",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "slashingRate",
+    functionFragment: "setDealConstant",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "targetRevenuePerEpoch",
+    functionFragment: "setFLTPrice",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -384,13 +458,26 @@ export interface MarketInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "vestingDuration",
+    functionFragment: "usdCCCollateralPerUnit",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "withdrawCCEpochesAfterFailed",
+    functionFragment: "usdCCTargetRevenuePerEpoch",
     data: BytesLike
   ): Result;
+}
+
+export namespace CCConstantUpdatedEvent {
+  export type InputTuple = [constantType: BigNumberish, newValue: BigNumberish];
+  export type OutputTuple = [constantType: bigint, newValue: bigint];
+  export interface OutputObject {
+    constantType: bigint;
+    newValue: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
 
 export namespace ComputeUnitAddedToDealEvent {
@@ -412,14 +499,9 @@ export namespace ComputeUnitAddedToDealEvent {
 }
 
 export namespace ComputeUnitCreatedEvent {
-  export type InputTuple = [
-    offerId: BytesLike,
-    peerId: BytesLike,
-    unitId: BytesLike
-  ];
-  export type OutputTuple = [offerId: string, peerId: string, unitId: string];
+  export type InputTuple = [peerId: BytesLike, unitId: BytesLike];
+  export type OutputTuple = [peerId: string, unitId: string];
   export interface OutputObject {
-    offerId: string;
     peerId: string;
     unitId: string;
   }
@@ -447,12 +529,12 @@ export namespace ComputeUnitRemovedFromDealEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace ConstantsUpdatedEvent {
-  export type InputTuple = [constantType: BigNumberish, value: BigNumberish];
-  export type OutputTuple = [constantType: bigint, value: bigint];
+export namespace DealConstantUpdatedEvent {
+  export type InputTuple = [constantType: BigNumberish, newValue: BigNumberish];
+  export type OutputTuple = [constantType: bigint, newValue: bigint];
   export interface OutputObject {
     constantType: bigint;
-    value: bigint;
+    newValue: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -486,6 +568,18 @@ export namespace EffectorRemovedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
+export namespace FLTPriceUpdatedEvent {
+  export type InputTuple = [newPrice: BigNumberish];
+  export type OutputTuple = [newPrice: bigint];
+  export interface OutputObject {
+    newPrice: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
 export namespace InitializedEvent {
   export type InputTuple = [version: BigNumberish];
   export type OutputTuple = [version: bigint];
@@ -500,22 +594,22 @@ export namespace InitializedEvent {
 
 export namespace MarketOfferRegisteredEvent {
   export type InputTuple = [
+    provider: AddressLike,
     offerId: BytesLike,
-    owner: AddressLike,
     minPricePerWorkerEpoch: BigNumberish,
     paymentToken: AddressLike,
     effectors: CIDV1Struct[]
   ];
   export type OutputTuple = [
+    provider: string,
     offerId: string,
-    owner: string,
     minPricePerWorkerEpoch: bigint,
     paymentToken: string,
     effectors: CIDV1StructOutput[]
   ];
   export interface OutputObject {
+    provider: string;
     offerId: string;
-    owner: string;
     minPricePerWorkerEpoch: bigint;
     paymentToken: string;
     effectors: CIDV1StructOutput[];
@@ -569,11 +663,16 @@ export namespace PaymentTokenUpdatedEvent {
 }
 
 export namespace PeerCreatedEvent {
-  export type InputTuple = [offerId: BytesLike, peerId: BytesLike];
-  export type OutputTuple = [offerId: string, peerId: string];
+  export type InputTuple = [
+    offerId: BytesLike,
+    peerId: BytesLike,
+    owner: AddressLike
+  ];
+  export type OutputTuple = [offerId: string, peerId: string, owner: string];
   export interface OutputObject {
     offerId: string;
     peerId: string;
+    owner: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -627,13 +726,13 @@ export interface Market extends BaseContract {
   PRECISION: TypedContractMethod<[], [bigint], "view">;
 
   addComputePeers: TypedContractMethod<
-    [offerId: BytesLike, peers: Market.RegisterComputePeerStruct[]],
+    [offerId: BytesLike, peers: IMarket.RegisterComputePeerStruct[]],
     [void],
     "nonpayable"
   >;
 
   addComputeUnits: TypedContractMethod<
-    [offerId: BytesLike, peerId: BytesLike, freeUnits: BigNumberish],
+    [peerId: BytesLike, unitCount: BigNumberish],
     [void],
     "nonpayable"
   >;
@@ -643,6 +742,16 @@ export interface Market extends BaseContract {
     [void],
     "nonpayable"
   >;
+
+  ccActiveUnitCount: TypedContractMethod<[], [bigint], "view">;
+
+  ccMaxFailedRatio: TypedContractMethod<[], [bigint], "view">;
+
+  ccSlashingRate: TypedContractMethod<[], [bigint], "view">;
+
+  ccVestingDuration: TypedContractMethod<[], [bigint], "view">;
+
+  ccWithdrawEpochesAfterFailed: TypedContractMethod<[], [bigint], "view">;
 
   changeMinPricePerWorkerEpoch: TypedContractMethod<
     [offerId: BytesLike, newMinPricePerWorkerEpoch: BigNumberish],
@@ -656,63 +765,64 @@ export interface Market extends BaseContract {
     "nonpayable"
   >;
 
-  collateralPerUnit: TypedContractMethod<[], [bigint], "view">;
-
   currentEpoch: TypedContractMethod<[], [bigint], "view">;
 
   epochDuration: TypedContractMethod<[], [bigint], "view">;
+
+  fltCCCollateralPerUnit: TypedContractMethod<[], [bigint], "view">;
+
+  fltCCTargetRevenuePerEpoch: TypedContractMethod<[], [bigint], "view">;
 
   fltPrice: TypedContractMethod<[], [bigint], "view">;
 
   fluenceToken: TypedContractMethod<[], [string], "view">;
 
+  getCCRewardPool: TypedContractMethod<[epoch: BigNumberish], [bigint], "view">;
+
+  getComputePeer: TypedContractMethod<
+    [peerId: BytesLike],
+    [IMarket.ComputePeerStructOutput],
+    "view"
+  >;
+
   getComputeUnit: TypedContractMethod<
     [unitId: BytesLike],
-    [Market.ComputeUnitStructOutput],
+    [IMarket.ComputeUnitStructOutput],
     "view"
   >;
 
   getOffer: TypedContractMethod<
     [offerId: BytesLike],
-    [Market.OfferInfoStructOutput],
-    "view"
-  >;
-
-  getPeer: TypedContractMethod<
-    [peerId: BytesLike],
-    [Market.ComputePeerInfoStructOutput],
+    [IMarket.OfferStructOutput],
     "view"
   >;
 
   initTimestamp: TypedContractMethod<[], [bigint], "view">;
 
-  maxCCProofs: TypedContractMethod<[], [bigint], "view">;
+  maxCCProofsPerEpoch: TypedContractMethod<[], [bigint], "view">;
 
-  maxCapacityRewardPerEpoch: TypedContractMethod<[], [bigint], "view">;
+  maxCCRewardPerEpoch: TypedContractMethod<[], [bigint], "view">;
 
-  maxFailedRatio: TypedContractMethod<[], [bigint], "view">;
+  minCCDuration: TypedContractMethod<[], [bigint], "view">;
 
-  minCapacityCommitmentDuration: TypedContractMethod<[], [bigint], "view">;
+  minCCRequierdProofsPerEpoch: TypedContractMethod<[], [bigint], "view">;
 
-  minCapacityRewardPerEpoch: TypedContractMethod<[], [bigint], "view">;
+  minCCRewardPerEpoch: TypedContractMethod<[], [bigint], "view">;
 
-  minDepositedEpoches: TypedContractMethod<[], [bigint], "view">;
+  minDealDepositedEpoches: TypedContractMethod<[], [bigint], "view">;
 
-  minRematchingEpoches: TypedContractMethod<[], [bigint], "view">;
-
-  minRequierdCCProofs: TypedContractMethod<[], [bigint], "view">;
+  minDealRematchingEpoches: TypedContractMethod<[], [bigint], "view">;
 
   owner: TypedContractMethod<[], [string], "view">;
 
   registerMarketOffer: TypedContractMethod<
     [
-      offerId: BytesLike,
       minPricePerWorkerEpoch: BigNumberish,
       paymentToken: AddressLike,
       effectors: CIDV1Struct[],
-      peers: Market.RegisterComputePeerStruct[]
+      peers: IMarket.RegisterComputePeerStruct[]
     ],
-    [void],
+    [string],
     "nonpayable"
   >;
 
@@ -736,15 +846,23 @@ export interface Market extends BaseContract {
     "nonpayable"
   >;
 
-  setConstant: TypedContractMethod<
+  setCCConstant: TypedContractMethod<
     [constantType: BigNumberish, v: BigNumberish],
     [void],
     "nonpayable"
   >;
 
-  slashingRate: TypedContractMethod<[], [bigint], "view">;
+  setDealConstant: TypedContractMethod<
+    [constantType: BigNumberish, v: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
 
-  targetRevenuePerEpoch: TypedContractMethod<[], [bigint], "view">;
+  setFLTPrice: TypedContractMethod<
+    [fltPrice_: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
 
   transferOwnership: TypedContractMethod<
     [newOwner: AddressLike],
@@ -752,9 +870,9 @@ export interface Market extends BaseContract {
     "nonpayable"
   >;
 
-  vestingDuration: TypedContractMethod<[], [bigint], "view">;
+  usdCCCollateralPerUnit: TypedContractMethod<[], [bigint], "view">;
 
-  withdrawCCEpochesAfterFailed: TypedContractMethod<[], [bigint], "view">;
+  usdCCTargetRevenuePerEpoch: TypedContractMethod<[], [bigint], "view">;
 
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
@@ -766,14 +884,14 @@ export interface Market extends BaseContract {
   getFunction(
     nameOrSignature: "addComputePeers"
   ): TypedContractMethod<
-    [offerId: BytesLike, peers: Market.RegisterComputePeerStruct[]],
+    [offerId: BytesLike, peers: IMarket.RegisterComputePeerStruct[]],
     [void],
     "nonpayable"
   >;
   getFunction(
     nameOrSignature: "addComputeUnits"
   ): TypedContractMethod<
-    [offerId: BytesLike, peerId: BytesLike, freeUnits: BigNumberish],
+    [peerId: BytesLike, unitCount: BigNumberish],
     [void],
     "nonpayable"
   >;
@@ -784,6 +902,21 @@ export interface Market extends BaseContract {
     [void],
     "nonpayable"
   >;
+  getFunction(
+    nameOrSignature: "ccActiveUnitCount"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "ccMaxFailedRatio"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "ccSlashingRate"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "ccVestingDuration"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "ccWithdrawEpochesAfterFailed"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "changeMinPricePerWorkerEpoch"
   ): TypedContractMethod<
@@ -799,13 +932,16 @@ export interface Market extends BaseContract {
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "collateralPerUnit"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
     nameOrSignature: "currentEpoch"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "epochDuration"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "fltCCCollateralPerUnit"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "fltCCTargetRevenuePerEpoch"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "fltPrice"
@@ -814,52 +950,52 @@ export interface Market extends BaseContract {
     nameOrSignature: "fluenceToken"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
+    nameOrSignature: "getCCRewardPool"
+  ): TypedContractMethod<[epoch: BigNumberish], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "getComputePeer"
+  ): TypedContractMethod<
+    [peerId: BytesLike],
+    [IMarket.ComputePeerStructOutput],
+    "view"
+  >;
+  getFunction(
     nameOrSignature: "getComputeUnit"
   ): TypedContractMethod<
     [unitId: BytesLike],
-    [Market.ComputeUnitStructOutput],
+    [IMarket.ComputeUnitStructOutput],
     "view"
   >;
   getFunction(
     nameOrSignature: "getOffer"
   ): TypedContractMethod<
     [offerId: BytesLike],
-    [Market.OfferInfoStructOutput],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "getPeer"
-  ): TypedContractMethod<
-    [peerId: BytesLike],
-    [Market.ComputePeerInfoStructOutput],
+    [IMarket.OfferStructOutput],
     "view"
   >;
   getFunction(
     nameOrSignature: "initTimestamp"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "maxCCProofs"
+    nameOrSignature: "maxCCProofsPerEpoch"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "maxCapacityRewardPerEpoch"
+    nameOrSignature: "maxCCRewardPerEpoch"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "maxFailedRatio"
+    nameOrSignature: "minCCDuration"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "minCapacityCommitmentDuration"
+    nameOrSignature: "minCCRequierdProofsPerEpoch"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "minCapacityRewardPerEpoch"
+    nameOrSignature: "minCCRewardPerEpoch"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "minDepositedEpoches"
+    nameOrSignature: "minDealDepositedEpoches"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "minRematchingEpoches"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "minRequierdCCProofs"
+    nameOrSignature: "minDealRematchingEpoches"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "owner"
@@ -868,13 +1004,12 @@ export interface Market extends BaseContract {
     nameOrSignature: "registerMarketOffer"
   ): TypedContractMethod<
     [
-      offerId: BytesLike,
       minPricePerWorkerEpoch: BigNumberish,
       paymentToken: AddressLike,
       effectors: CIDV1Struct[],
-      peers: Market.RegisterComputePeerStruct[]
+      peers: IMarket.RegisterComputePeerStruct[]
     ],
-    [void],
+    [string],
     "nonpayable"
   >;
   getFunction(
@@ -898,28 +1033,39 @@ export interface Market extends BaseContract {
     nameOrSignature: "returnComputeUnitFromDeal"
   ): TypedContractMethod<[unitId: BytesLike], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "setConstant"
+    nameOrSignature: "setCCConstant"
   ): TypedContractMethod<
     [constantType: BigNumberish, v: BigNumberish],
     [void],
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "slashingRate"
-  ): TypedContractMethod<[], [bigint], "view">;
+    nameOrSignature: "setDealConstant"
+  ): TypedContractMethod<
+    [constantType: BigNumberish, v: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
   getFunction(
-    nameOrSignature: "targetRevenuePerEpoch"
-  ): TypedContractMethod<[], [bigint], "view">;
+    nameOrSignature: "setFLTPrice"
+  ): TypedContractMethod<[fltPrice_: BigNumberish], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "transferOwnership"
   ): TypedContractMethod<[newOwner: AddressLike], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "vestingDuration"
+    nameOrSignature: "usdCCCollateralPerUnit"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "withdrawCCEpochesAfterFailed"
+    nameOrSignature: "usdCCTargetRevenuePerEpoch"
   ): TypedContractMethod<[], [bigint], "view">;
 
+  getEvent(
+    key: "CCConstantUpdated"
+  ): TypedContractEvent<
+    CCConstantUpdatedEvent.InputTuple,
+    CCConstantUpdatedEvent.OutputTuple,
+    CCConstantUpdatedEvent.OutputObject
+  >;
   getEvent(
     key: "ComputeUnitAddedToDeal"
   ): TypedContractEvent<
@@ -942,11 +1088,11 @@ export interface Market extends BaseContract {
     ComputeUnitRemovedFromDealEvent.OutputObject
   >;
   getEvent(
-    key: "ConstantsUpdated"
+    key: "DealConstantUpdated"
   ): TypedContractEvent<
-    ConstantsUpdatedEvent.InputTuple,
-    ConstantsUpdatedEvent.OutputTuple,
-    ConstantsUpdatedEvent.OutputObject
+    DealConstantUpdatedEvent.InputTuple,
+    DealConstantUpdatedEvent.OutputTuple,
+    DealConstantUpdatedEvent.OutputObject
   >;
   getEvent(
     key: "EffectorAdded"
@@ -961,6 +1107,13 @@ export interface Market extends BaseContract {
     EffectorRemovedEvent.InputTuple,
     EffectorRemovedEvent.OutputTuple,
     EffectorRemovedEvent.OutputObject
+  >;
+  getEvent(
+    key: "FLTPriceUpdated"
+  ): TypedContractEvent<
+    FLTPriceUpdatedEvent.InputTuple,
+    FLTPriceUpdatedEvent.OutputTuple,
+    FLTPriceUpdatedEvent.OutputObject
   >;
   getEvent(
     key: "Initialized"
@@ -1006,6 +1159,17 @@ export interface Market extends BaseContract {
   >;
 
   filters: {
+    "CCConstantUpdated(uint8,uint256)": TypedContractEvent<
+      CCConstantUpdatedEvent.InputTuple,
+      CCConstantUpdatedEvent.OutputTuple,
+      CCConstantUpdatedEvent.OutputObject
+    >;
+    CCConstantUpdated: TypedContractEvent<
+      CCConstantUpdatedEvent.InputTuple,
+      CCConstantUpdatedEvent.OutputTuple,
+      CCConstantUpdatedEvent.OutputObject
+    >;
+
     "ComputeUnitAddedToDeal(bytes32,address,bytes32)": TypedContractEvent<
       ComputeUnitAddedToDealEvent.InputTuple,
       ComputeUnitAddedToDealEvent.OutputTuple,
@@ -1017,7 +1181,7 @@ export interface Market extends BaseContract {
       ComputeUnitAddedToDealEvent.OutputObject
     >;
 
-    "ComputeUnitCreated(bytes32,bytes32,bytes32)": TypedContractEvent<
+    "ComputeUnitCreated(bytes32,bytes32)": TypedContractEvent<
       ComputeUnitCreatedEvent.InputTuple,
       ComputeUnitCreatedEvent.OutputTuple,
       ComputeUnitCreatedEvent.OutputObject
@@ -1039,15 +1203,15 @@ export interface Market extends BaseContract {
       ComputeUnitRemovedFromDealEvent.OutputObject
     >;
 
-    "ConstantsUpdated(uint8,uint256)": TypedContractEvent<
-      ConstantsUpdatedEvent.InputTuple,
-      ConstantsUpdatedEvent.OutputTuple,
-      ConstantsUpdatedEvent.OutputObject
+    "DealConstantUpdated(uint8,uint256)": TypedContractEvent<
+      DealConstantUpdatedEvent.InputTuple,
+      DealConstantUpdatedEvent.OutputTuple,
+      DealConstantUpdatedEvent.OutputObject
     >;
-    ConstantsUpdated: TypedContractEvent<
-      ConstantsUpdatedEvent.InputTuple,
-      ConstantsUpdatedEvent.OutputTuple,
-      ConstantsUpdatedEvent.OutputObject
+    DealConstantUpdated: TypedContractEvent<
+      DealConstantUpdatedEvent.InputTuple,
+      DealConstantUpdatedEvent.OutputTuple,
+      DealConstantUpdatedEvent.OutputObject
     >;
 
     "EffectorAdded(bytes32,tuple)": TypedContractEvent<
@@ -1072,6 +1236,17 @@ export interface Market extends BaseContract {
       EffectorRemovedEvent.OutputObject
     >;
 
+    "FLTPriceUpdated(uint256)": TypedContractEvent<
+      FLTPriceUpdatedEvent.InputTuple,
+      FLTPriceUpdatedEvent.OutputTuple,
+      FLTPriceUpdatedEvent.OutputObject
+    >;
+    FLTPriceUpdated: TypedContractEvent<
+      FLTPriceUpdatedEvent.InputTuple,
+      FLTPriceUpdatedEvent.OutputTuple,
+      FLTPriceUpdatedEvent.OutputObject
+    >;
+
     "Initialized(uint8)": TypedContractEvent<
       InitializedEvent.InputTuple,
       InitializedEvent.OutputTuple,
@@ -1083,7 +1258,7 @@ export interface Market extends BaseContract {
       InitializedEvent.OutputObject
     >;
 
-    "MarketOfferRegistered(bytes32,address,uint256,address,tuple[])": TypedContractEvent<
+    "MarketOfferRegistered(address,bytes32,uint256,address,tuple[])": TypedContractEvent<
       MarketOfferRegisteredEvent.InputTuple,
       MarketOfferRegisteredEvent.OutputTuple,
       MarketOfferRegisteredEvent.OutputObject
@@ -1127,7 +1302,7 @@ export interface Market extends BaseContract {
       PaymentTokenUpdatedEvent.OutputObject
     >;
 
-    "PeerCreated(bytes32,bytes32)": TypedContractEvent<
+    "PeerCreated(bytes32,bytes32,address)": TypedContractEvent<
       PeerCreatedEvent.InputTuple,
       PeerCreatedEvent.OutputTuple,
       PeerCreatedEvent.OutputObject

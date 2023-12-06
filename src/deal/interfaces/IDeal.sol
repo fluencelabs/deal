@@ -54,7 +54,7 @@ interface IDeal is IConfig, IWorkerManager {
     function getMaxPaidEpoch() external view returns (uint256);
 
     // ------------------ Public Mutable Functions ------------------
-    function addComputeUnit(address computeProvider, bytes32 unitId) external;
+    function addComputeUnit(address computeProvider, bytes32 unitId, bytes32 peerId) external;
 
     function removeComputeUnit(bytes32 computeUnitId) external;
 

@@ -34,16 +34,24 @@ export declare namespace IWorkerManager {
   export type ComputeUnitStruct = {
     id: BytesLike;
     workerId: BytesLike;
-    owner: AddressLike;
+    peerId: BytesLike;
+    provider: AddressLike;
     joinedEpoch: BigNumberish;
   };
 
   export type ComputeUnitStructOutput = [
     id: string,
     workerId: string,
-    owner: string,
+    peerId: string,
+    provider: string,
     joinedEpoch: bigint
-  ] & { id: string; workerId: string; owner: string; joinedEpoch: bigint };
+  ] & {
+    id: string;
+    workerId: string;
+    peerId: string;
+    provider: string;
+    joinedEpoch: bigint;
+  };
 }
 
 export interface DealInterface extends Interface {
@@ -111,7 +119,7 @@ export interface DealInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "addComputeUnit",
-    values: [AddressLike, BytesLike]
+    values: [AddressLike, BytesLike, BytesLike]
   ): string;
   encodeFunctionData(functionFragment: "appCID", values?: undefined): string;
   encodeFunctionData(
@@ -571,7 +579,7 @@ export interface Deal extends BaseContract {
   accessType: TypedContractMethod<[], [bigint], "view">;
 
   addComputeUnit: TypedContractMethod<
-    [computeProvider: AddressLike, computeUnitId: BytesLike],
+    [computeProvider: AddressLike, computeUnitId: BytesLike, peerId: BytesLike],
     [void],
     "nonpayable"
   >;
@@ -713,7 +721,7 @@ export interface Deal extends BaseContract {
   getFunction(
     nameOrSignature: "addComputeUnit"
   ): TypedContractMethod<
-    [computeProvider: AddressLike, computeUnitId: BytesLike],
+    [computeProvider: AddressLike, computeUnitId: BytesLike, peerId: BytesLike],
     [void],
     "nonpayable"
   >;

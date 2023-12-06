@@ -81,7 +81,7 @@ contract Depoyments is ScriptBase {
         internal
         returns (address)
     {
-        (address addr, bool isNew) = _tryDeployContract(contractName, artifactName, args);
+        (address addr,) = _tryDeployContract(contractName, artifactName, args);
 
         return addr;
     }
@@ -130,7 +130,7 @@ contract Depoyments is ScriptBase {
         return (addr, isNew);
     }
 
-    function _printDeployments() internal {
+    function _printDeployments() internal view {
         console.log("----------------- Deployments -----------------");
         for (uint256 i = 0; i < deployments.contractNames.length; i++) {
             string memory name = deployments.contractNames[i];

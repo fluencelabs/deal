@@ -26,16 +26,44 @@ contract Core is DealFactory, Matcher, UUPSUpgradeable, ICore {
 
     // ------------------ Initializer ------------------
     function initialize(
-        address fluenceToken_,
         uint256 epochDuration_,
+        Deal dealImpl_,
+        address fluenceToken_,
+        uint256 fltPrice_,
         uint256 minDepositedEpoches_,
         uint256 minRematchingEpoches_,
-        Deal dealImpl_
+        uint256 usdCollateralPerUnit_,
+        uint256 usdTargetRevenuePerEpoch_,
+        uint256 minDuration_,
+        uint256 minRewardPerEpoch_,
+        uint256 maxRewardPerEpoch_,
+        uint256 vestingDuration_,
+        uint256 slashingRate_,
+        uint256 minRequierdProofsPerEpoch_,
+        uint256 maxProofsPerEpoch_,
+        uint256 withdrawEpochesAfterFailed_,
+        uint256 maxFailedRatio_
     ) public initializer {
         __Ownable_init(msg.sender);
-        __GlobalConst_init(fluenceToken_, minDepositedEpoches_, minRematchingEpoches_);
         __EpochController_init(epochDuration_);
         __DealFactory_init(dealImpl_);
+        __GlobalConst_init(
+            fluenceToken_,
+            fltPrice_,
+            minDepositedEpoches_,
+            minRematchingEpoches_,
+            usdCollateralPerUnit_,
+            usdTargetRevenuePerEpoch_,
+            minDuration_,
+            minRewardPerEpoch_,
+            maxRewardPerEpoch_,
+            vestingDuration_,
+            slashingRate_,
+            minRequierdProofsPerEpoch_,
+            maxProofsPerEpoch_,
+            withdrawEpochesAfterFailed_,
+            maxFailedRatio_
+        );
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner {}

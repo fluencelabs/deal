@@ -36,7 +36,12 @@ const _abi = [
             internalType: "bytes32",
           },
           {
-            name: "owner",
+            name: "peerId",
+            type: "bytes32",
+            internalType: "bytes32",
+          },
+          {
+            name: "provider",
             type: "address",
             internalType: "address",
           },
@@ -84,7 +89,12 @@ const _abi = [
             internalType: "bytes32",
           },
           {
-            name: "owner",
+            name: "peerId",
+            type: "bytes32",
+            internalType: "bytes32",
+          },
+          {
+            name: "provider",
             type: "address",
             internalType: "address",
           },

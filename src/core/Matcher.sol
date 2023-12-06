@@ -45,7 +45,7 @@ contract Matcher is CapacityCommitment, IMatcher {
 
         uint256 lastMatchedEpoch = matcherStorage.lastMatchedEpoch[address(deal)];
         require(
-            lastMatchedEpoch == 0 || currentEpoch() > lastMatchedEpoch + minRematchingEpoches(),
+            lastMatchedEpoch == 0 || currentEpoch() > lastMatchedEpoch + minDealRematchingEpoches(),
             "Matcher: too early to rematch"
         );
 
@@ -64,10 +64,10 @@ contract Matcher is CapacityCommitment, IMatcher {
         bytes32 currentOfferId = offerList.first();
 
         while (currentOfferId != bytes32(0x00) && freeWorkerSlots > 0) {
-            OfferInfo memory offer = getOffer(currentOfferId);
+            Offer memory offer = getOffer(currentOfferId);
 
             if (
-                (accessType == IConfig.AccessType.BLACKLIST && deal.isInAccessList(offer.owner))
+                (accessType == IConfig.AccessType.BLACKLIST && deal.isInAccessList(offer.provider))
                 //(accessType == IConfig.AccessType.WHITELIST && !deal.isInAccessList(computeProviderAddress)) ||
                 || pricePerWorkerEpoch < offer.minPricePerWorkerEpoch || paymentToken != offer.paymentToken
                     || !_hasOfferEffectors(currentOfferId, effectors)

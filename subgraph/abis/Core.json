@@ -29,7 +29,7 @@
       {
         "name": "peers",
         "type": "tuple[]",
-        "internalType": "struct Market.RegisterComputePeer[]",
+        "internalType": "struct IMarket.RegisterComputePeer[]",
         "components": [
           {
             "name": "peerId",
@@ -37,9 +37,14 @@
             "internalType": "bytes32"
           },
           {
-            "name": "freeUnits",
+            "name": "unitCount",
             "type": "uint256",
             "internalType": "uint256"
+          },
+          {
+            "name": "owner",
+            "type": "address",
+            "internalType": "address"
           }
         ]
       }
@@ -52,17 +57,12 @@
     "name": "addComputeUnits",
     "inputs": [
       {
-        "name": "offerId",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      },
-      {
         "name": "peerId",
         "type": "bytes32",
         "internalType": "bytes32"
       },
       {
-        "name": "freeUnits",
+        "name": "unitCount",
         "type": "uint256",
         "internalType": "uint256"
       }
@@ -102,6 +102,71 @@
   },
   {
     "type": "function",
+    "name": "ccActiveUnitCount",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "ccMaxFailedRatio",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "ccSlashingRate",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "ccVestingDuration",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "ccWithdrawEpochesAfterFailed",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "changeMinPricePerWorkerEpoch",
     "inputs": [
       {
@@ -135,19 +200,6 @@
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "collateralPerUnit",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -288,6 +340,19 @@
   },
   {
     "type": "function",
+    "name": "depositCapacityCommitmentCollateral",
+    "inputs": [
+      {
+        "name": "commitmentId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "epochDuration",
     "inputs": [],
     "outputs": [
@@ -311,6 +376,32 @@
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "fltCCCollateralPerUnit",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "fltCCTargetRevenuePerEpoch",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -340,6 +431,25 @@
   },
   {
     "type": "function",
+    "name": "getCCRewardPool",
+    "inputs": [
+      {
+        "name": "epoch",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "getCCStatus",
     "inputs": [
       {
@@ -359,6 +469,143 @@
   },
   {
     "type": "function",
+    "name": "getCapacityCommitment",
+    "inputs": [
+      {
+        "name": "commitmentId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "internalType": "struct CapacityCommitment.CommitmentInfo",
+        "components": [
+          {
+            "name": "status",
+            "type": "uint8",
+            "internalType": "enum CapacityCommitment.CCStatus"
+          },
+          {
+            "name": "peerId",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "collateralPerUnit",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "duration",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "rewardDelegatorRate",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "delegator",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "currentCUSuccessCount",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "totalCUFailCount",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "snapshotEpoch",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "startEpoch",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "failedEpoch",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "withdrawCCEpochAfterFailed",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "remainingFailsForLastEpoch",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "exitedUnitCount",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "totalWithdrawnReward",
+            "type": "uint256",
+            "internalType": "uint256"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getComputePeer",
+    "inputs": [
+      {
+        "name": "peerId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "internalType": "struct IMarket.ComputePeer",
+        "components": [
+          {
+            "name": "offerId",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "commitmentId",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "unitCount",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "owner",
+            "type": "address",
+            "internalType": "address"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "getComputeUnit",
     "inputs": [
       {
@@ -371,7 +618,7 @@
       {
         "name": "",
         "type": "tuple",
-        "internalType": "struct Market.ComputeUnit",
+        "internalType": "struct IMarket.ComputeUnit",
         "components": [
           {
             "name": "index",
@@ -407,10 +654,10 @@
       {
         "name": "",
         "type": "tuple",
-        "internalType": "struct Market.OfferInfo",
+        "internalType": "struct IMarket.Offer",
         "components": [
           {
-            "name": "owner",
+            "name": "provider",
             "type": "address",
             "internalType": "address"
           },
@@ -423,42 +670,6 @@
             "name": "paymentToken",
             "type": "address",
             "internalType": "address"
-          }
-        ]
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "getPeer",
-    "inputs": [
-      {
-        "name": "peerId",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "tuple",
-        "internalType": "struct Market.ComputePeerInfo",
-        "components": [
-          {
-            "name": "offerId",
-            "type": "bytes32",
-            "internalType": "bytes32"
-          },
-          {
-            "name": "commitmentId",
-            "type": "bytes32",
-            "internalType": "bytes32"
-          },
-          {
-            "name": "unitCount",
-            "type": "uint256",
-            "internalType": "uint256"
           }
         ]
       }
@@ -502,12 +713,22 @@
     "name": "initialize",
     "inputs": [
       {
+        "name": "epochDuration_",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "dealImpl_",
+        "type": "address",
+        "internalType": "contract Deal"
+      },
+      {
         "name": "fluenceToken_",
         "type": "address",
         "internalType": "address"
       },
       {
-        "name": "epochDuration_",
+        "name": "fltPrice_",
         "type": "uint256",
         "internalType": "uint256"
       },
@@ -522,22 +743,59 @@
         "internalType": "uint256"
       },
       {
-        "name": "dealImpl_",
-        "type": "address",
-        "internalType": "contract Deal"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "lockCollateral",
-    "inputs": [
+        "name": "usdCollateralPerUnit_",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
       {
-        "name": "commitmentId",
-        "type": "bytes32",
-        "internalType": "bytes32"
+        "name": "usdTargetRevenuePerEpoch_",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "minDuration_",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "minRewardPerEpoch_",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "maxRewardPerEpoch_",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "vestingDuration_",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "slashingRate_",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "minRequierdProofsPerEpoch_",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "maxProofsPerEpoch_",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "withdrawEpochesAfterFailed_",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "maxFailedRatio_",
+        "type": "uint256",
+        "internalType": "uint256"
       }
     ],
     "outputs": [],
@@ -558,7 +816,7 @@
   },
   {
     "type": "function",
-    "name": "maxCCProofs",
+    "name": "maxCCProofsPerEpoch",
     "inputs": [],
     "outputs": [
       {
@@ -571,7 +829,7 @@
   },
   {
     "type": "function",
-    "name": "maxCapacityRewardPerEpoch",
+    "name": "maxCCRewardPerEpoch",
     "inputs": [],
     "outputs": [
       {
@@ -584,7 +842,7 @@
   },
   {
     "type": "function",
-    "name": "maxFailedRatio",
+    "name": "minCCDuration",
     "inputs": [],
     "outputs": [
       {
@@ -597,7 +855,7 @@
   },
   {
     "type": "function",
-    "name": "minCapacityCommitmentDuration",
+    "name": "minCCRequierdProofsPerEpoch",
     "inputs": [],
     "outputs": [
       {
@@ -610,7 +868,7 @@
   },
   {
     "type": "function",
-    "name": "minCapacityRewardPerEpoch",
+    "name": "minCCRewardPerEpoch",
     "inputs": [],
     "outputs": [
       {
@@ -623,7 +881,7 @@
   },
   {
     "type": "function",
-    "name": "minDepositedEpoches",
+    "name": "minDealDepositedEpoches",
     "inputs": [],
     "outputs": [
       {
@@ -636,20 +894,7 @@
   },
   {
     "type": "function",
-    "name": "minRematchingEpoches",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "minRequierdCCProofs",
+    "name": "minDealRematchingEpoches",
     "inputs": [],
     "outputs": [
       {
@@ -691,11 +936,6 @@
     "name": "registerMarketOffer",
     "inputs": [
       {
-        "name": "offerId",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      },
-      {
         "name": "minPricePerWorkerEpoch",
         "type": "uint256",
         "internalType": "uint256"
@@ -725,7 +965,7 @@
       {
         "name": "peers",
         "type": "tuple[]",
-        "internalType": "struct Market.RegisterComputePeer[]",
+        "internalType": "struct IMarket.RegisterComputePeer[]",
         "components": [
           {
             "name": "peerId",
@@ -733,14 +973,25 @@
             "internalType": "bytes32"
           },
           {
-            "name": "freeUnits",
+            "name": "unitCount",
             "type": "uint256",
             "internalType": "uint256"
+          },
+          {
+            "name": "owner",
+            "type": "address",
+            "internalType": "address"
           }
         ]
       }
     ],
-    "outputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
     "stateMutability": "nonpayable"
   },
   {
@@ -844,12 +1095,12 @@
   },
   {
     "type": "function",
-    "name": "setConstant",
+    "name": "setCCConstant",
     "inputs": [
       {
         "name": "constantType",
         "type": "uint8",
-        "internalType": "enum IGlobalConst.Constant"
+        "internalType": "enum IGlobalConst.CCConstantType"
       },
       {
         "name": "v",
@@ -862,16 +1113,34 @@
   },
   {
     "type": "function",
-    "name": "slashingRate",
-    "inputs": [],
-    "outputs": [
+    "name": "setDealConstant",
+    "inputs": [
       {
-        "name": "",
+        "name": "constantType",
+        "type": "uint8",
+        "internalType": "enum IGlobalConst.DealConstantType"
+      },
+      {
+        "name": "v",
         "type": "uint256",
         "internalType": "uint256"
       }
     ],
-    "stateMutability": "view"
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setFLTPrice",
+    "inputs": [
+      {
+        "name": "fltPrice_",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
   },
   {
     "type": "function",
@@ -890,19 +1159,6 @@
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "targetRevenuePerEpoch",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -988,7 +1244,7 @@
   },
   {
     "type": "function",
-    "name": "vestingDuration",
+    "name": "usdCCCollateralPerUnit",
     "inputs": [],
     "outputs": [
       {
@@ -1001,7 +1257,20 @@
   },
   {
     "type": "function",
-    "name": "withdraw",
+    "name": "usdCCTargetRevenuePerEpoch",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "withdrawCCReward",
     "inputs": [
       {
         "name": "commitmentId",
@@ -1011,19 +1280,6 @@
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "withdrawCCEpochesAfterFailed",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
   },
   {
     "type": "event",
@@ -1059,6 +1315,120 @@
   },
   {
     "type": "event",
+    "name": "CCConstantUpdated",
+    "inputs": [
+      {
+        "name": "constantType",
+        "type": "uint8",
+        "indexed": false,
+        "internalType": "enum IGlobalConst.CCConstantType"
+      },
+      {
+        "name": "newValue",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "CapacityCommitmentActivated",
+    "inputs": [
+      {
+        "name": "commitmentId",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "CapacityCommitmentCreated",
+    "inputs": [
+      {
+        "name": "peerId",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "commitmentId",
+        "type": "bytes32",
+        "indexed": false,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "delegator",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      },
+      {
+        "name": "rewardDelegationRate",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "fltCCCollateralPerUnit",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "CapacityCommitmentFinished",
+    "inputs": [
+      {
+        "name": "commitmentId",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "CapacityCommitmentRemoved",
+    "inputs": [
+      {
+        "name": "commitmentId",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "CollateralDeposited",
+    "inputs": [
+      {
+        "name": "commitmentId",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "totalCollateral",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
     "name": "ComputeUnitAddedToDeal",
     "inputs": [
       {
@@ -1087,15 +1457,9 @@
     "name": "ComputeUnitCreated",
     "inputs": [
       {
-        "name": "offerId",
-        "type": "bytes32",
-        "indexed": false,
-        "internalType": "bytes32"
-      },
-      {
         "name": "peerId",
         "type": "bytes32",
-        "indexed": false,
+        "indexed": true,
         "internalType": "bytes32"
       },
       {
@@ -1177,16 +1541,16 @@
   },
   {
     "type": "event",
-    "name": "ConstantsUpdated",
+    "name": "DealConstantUpdated",
     "inputs": [
       {
         "name": "constantType",
         "type": "uint8",
         "indexed": false,
-        "internalType": "enum IGlobalConst.Constant"
+        "internalType": "enum IGlobalConst.DealConstantType"
       },
       {
-        "name": "value",
+        "name": "newValue",
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
@@ -1349,6 +1713,19 @@
   },
   {
     "type": "event",
+    "name": "FLTPriceUpdated",
+    "inputs": [
+      {
+        "name": "newPrice",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
     "name": "Initialized",
     "inputs": [
       {
@@ -1365,16 +1742,16 @@
     "name": "MarketOfferRegistered",
     "inputs": [
       {
+        "name": "provider",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
         "name": "offerId",
         "type": "bytes32",
         "indexed": false,
         "internalType": "bytes32"
-      },
-      {
-        "name": "owner",
-        "type": "address",
-        "indexed": false,
-        "internalType": "address"
       },
       {
         "name": "minPricePerWorkerEpoch",
@@ -1473,7 +1850,7 @@
       {
         "name": "offerId",
         "type": "bytes32",
-        "indexed": false,
+        "indexed": true,
         "internalType": "bytes32"
       },
       {
@@ -1481,6 +1858,50 @@
         "type": "bytes32",
         "indexed": false,
         "internalType": "bytes32"
+      },
+      {
+        "name": "owner",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "ProofSubmitted",
+    "inputs": [
+      {
+        "name": "commitmentId",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "unitId",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RewardWithdrawn",
+    "inputs": [
+      {
+        "name": "commitmentId",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
       }
     ],
     "anonymous": false

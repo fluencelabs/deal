@@ -82,7 +82,7 @@ contract DealFactory is GlobalConst, IDealFactory {
 
         dealFactoryStorage.hasDeal[deal] = true;
 
-        uint256 amount = pricePerWorkerEpoch_ * targetWorkers_ * minDepositedEpoches();
+        uint256 amount = pricePerWorkerEpoch_ * targetWorkers_ * minDealDepositedEpoches();
         paymentToken_.safeTransferFrom(msg.sender, address(this), amount);
         paymentToken_.approve(address(deal), amount);
 

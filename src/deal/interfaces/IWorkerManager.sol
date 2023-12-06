@@ -9,7 +9,8 @@ interface IWorkerManager {
     struct ComputeUnit {
         bytes32 id;
         bytes32 workerId;
-        address owner;
+        bytes32 peerId;
+        address provider;
         uint256 joinedEpoch;
     }
 

@@ -19,7 +19,7 @@ export function getTokenSymbol(address: Bytes): string {
 }
 
 // @deprecated.
-export function getOfferInfo(
+export function getOffer(
   contractAddress: Address,
   offerId: string
 ): Core__getOfferResultValue0Struct {

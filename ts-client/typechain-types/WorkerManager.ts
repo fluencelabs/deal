@@ -34,16 +34,24 @@ export declare namespace IWorkerManager {
   export type ComputeUnitStruct = {
     id: BytesLike;
     workerId: BytesLike;
-    owner: AddressLike;
+    peerId: BytesLike;
+    provider: AddressLike;
     joinedEpoch: BigNumberish;
   };
 
   export type ComputeUnitStructOutput = [
     id: string,
     workerId: string,
-    owner: string,
+    peerId: string,
+    provider: string,
     joinedEpoch: bigint
-  ] & { id: string; workerId: string; owner: string; joinedEpoch: bigint };
+  ] & {
+    id: string;
+    workerId: string;
+    peerId: string;
+    provider: string;
+    joinedEpoch: bigint;
+  };
 }
 
 export interface WorkerManagerInterface extends Interface {
