@@ -1,27 +1,12 @@
 query DealsQuery(
-  $createdAtFrom: BigInt,
-  $createdAtTo: BigInt,
-  $minPricePerWorkerEpoch: BigInt,
-  $maxPricePerWorkerEpoch: BigInt,
-  $paymentTokens: [String!],
-  $effectorIds: [String!],
+  $filters: Deal_filter,
   $offset: Int,
   $limit: Int,
   $orderBy: Deal_orderBy,
   $orderType: OrderDirection,
-  $providerId: String,
 ) {
   deals(
-      where: {
-          createdAt_gt: $createdAtFrom,
-          createdAt_lt: $createdAtTo,
-          maxPaidEpoch_gt: $minPricePerWorkerEpoch,
-          maxPaidEpoch_lt: $maxPricePerWorkerEpoch,
-          paymentToken_in: $paymentTokens,
-          effectors_: {
-      	        effector_in: $effectorIds,
-            },
-      }
+      where: $filters
       first: $limit
       skip: $offset
       orderBy: $orderBy
@@ -47,6 +32,7 @@ fragment BasicDeal on Deal {
     createdAt
     minWorkers
     targetWorkers
+    owner
     paymentToken {
       id
       symbol

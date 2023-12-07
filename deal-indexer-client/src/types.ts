@@ -100,7 +100,8 @@ export enum DealStatus {
 }
 
 export type ProviderShortOrderBy = "createdAt" | "computeUnitsTotal";
-export type OfferShortOrderBy = "createdAt" | "pricePerWorkerEpoch" | "maxCollateralPerWorker" | "updatedAt";
+export type OfferShortOrderBy = "createdAt" | "pricePerWorkerEpoch" | "updatedAt";
+
 export type DealsShortOrderBy = "createdAt";
 
 export type OrderType = "asc" | "desc";

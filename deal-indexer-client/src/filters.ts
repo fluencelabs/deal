@@ -7,10 +7,6 @@ export interface OffersFilters {
     minPricePerWorkerEpoch?: number | undefined;
     maxPricePerWorkerEpoch?: number | undefined;
     //? eslint-disable-next-line @typescript-eslint/no-unused-vars
-    minCollateralPerWorker?: number | undefined;
-    //? eslint-disable-next-line @typescript-eslint/no-unused-vars
-    maxCollateralPerWorker?: number | undefined;
-    //? eslint-disable-next-line @typescript-eslint/no-unused-vars
     onlyApproved?: boolean;
     createdAtFrom?: number | undefined;
     createdAtTo?: number | undefined;
@@ -30,7 +26,7 @@ export interface ByProviderAndStatusFilter {
 export interface DealsFilters {
     search?: string | undefined;
     effectorIds?: Array<string> | undefined;
-    paymentToken?: string | undefined;
+    paymentTokens?: Array<string> | undefined;
     minPricePerWorkerEpoch?: number | undefined;
     maxPricePerWorkerEpoch?: number | undefined;
     createdAtFrom?: number | undefined;

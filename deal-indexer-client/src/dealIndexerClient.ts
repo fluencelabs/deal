@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ethers, Provider as EthersProvider } from "ethers";
 import {
     DealShort,
@@ -14,23 +15,12 @@ import {
     DealDetail,
     Peer,
 } from "./types";
-import { ContractsENV, DealClient } from "../../src";
-import {
-    DealQueryDocument,
-    DealQueryQuery,
-    DealsQueryDocument,
-    DealsQueryQuery,
-    OfferQueryDocument,
-    OfferQueryQuery,
-    OffersQueryDocument,
-    OffersQueryQuery,
-    ProviderQueryDocument,
-    ProviderQueryQuery,
-    ProvidersQueryDocument,
-    ProvidersQueryQuery,
-} from "../.graphclient";
-import { requestIndexer } from "./indexerClient/indexerClient";
+import { ContractsENV } from "../../src";
 import { ByProviderAndStatusFilter, DealsFilters, OffersFilters, ProvidersFilters } from "./filters";
+import { IndexerClient } from "./indexerClient/indexerClient";
+import { BasicOfferFragment, ProviderOfProvidersQueryFragment } from "./indexerClient/queries/providers-query.generated";
+import { Deal_Filter, Deal_OrderBy, Offer_Filter, Offer_OrderBy } from "./indexerClient/generated.types";
+import { BasicDealFragment } from "./indexerClient/queries/deals-query.generated";
 
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
@@ -38,13 +28,13 @@ import { ByProviderAndStatusFilter, DealsFilters, OffersFilters, ProvidersFilter
  * TODO: Note, deprecated: do not use chainRPCUrl, use ethersProvider instead.
  */
 export class DealExplorerClient {
-    private indexerUrl: string;
     DEFAULT_CONTRACTS_ENV: ContractsENV = "kras";
     DEFAULT_PAGE_LIMIT = 100;
     DEFAULT_ORDER_TYPE: OrderType = "desc";
 
     private ethersProvider: EthersProvider;
-    private contractDealClient: DealClient;
+    // private contractDealClient: DealClient;
+    private indexerClient: IndexerClient;
     constructor(indexerUrl: string, chainRpcUrl?: string, ethersProvider?: EthersProvider, contractsEnv?: ContractsENV) {
         if (chainRpcUrl) {
             console.warn("Do not use chainRPCUrl, use ethersProvider instead.");
@@ -54,11 +44,11 @@ export class DealExplorerClient {
         } else {
             throw Error("One of chainRPCUrl or ethersProvider should be delclared.");
         }
-        this.indexerUrl = indexerUrl;
-        this.contractDealClient = new DealClient(contractsEnv || this.DEFAULT_CONTRACTS_ENV, this.ethersProvider);
+        this.indexerClient = new IndexerClient(indexerUrl);
+        // this.contractDealClient = new DealClient(contractsEnv || this.DEFAULT_CONTRACTS_ENV, this.ethersProvider);
     }
 
-    _composeProviderBase(provider: unknown): ProviderBase {
+    _composeProviderBase(provider: ProviderOfProvidersQueryFragment): ProviderBase {
         return {
             id: provider.id,
             createdAt: provider.createdAt,
@@ -70,11 +60,11 @@ export class DealExplorerClient {
         } as ProviderBase;
     }
 
-    _composeProviderShort(provider: unknown): ProviderShort {
+    _composeProviderShort(provider: ProviderOfProvidersQueryFragment): ProviderShort {
         const providerBase = this._composeProviderBase(provider);
         const composedOffers = [];
         if (provider.offers) {
-            for (const offer in provider.offers) {
+            for (const offer of provider.offers) {
                 composedOffers.push(this._composeOfferShort(offer));
             }
         }
@@ -94,23 +84,34 @@ export class DealExplorerClient {
      * @dev - searchValue: deprecated.
      */
     async getProviders(
-        providersFilters: ProvidersFilters,
+        providersFilters?: ProvidersFilters,
         offset: number = 0,
         limit: number = this.DEFAULT_PAGE_LIMIT,
         orderBy: ProviderShortOrderBy = "createdAt",
         orderType: OrderType = this.DEFAULT_ORDER_TYPE,
     ): Promise<Array<ProviderShort>> {
-        if (providersFilters.search) {
-            console.warn("Currently search field does not implemented.");
+        const composedFilters = {};
+        if (providersFilters) {
+            if (providersFilters.search) {
+                console.warn("Currently search field does not implemented.");
+            }
+            // https://github.com/graphprotocol/graph-node/issues/2539
+            // https://github.com/graphprotocol/graph-node/issues/4775
+            // https://github.com/graphprotocol/graph-node/blob/ad31fd9699b0957abda459340dff093b2a279074/NEWS.md?plain=1#L30
+            // Thus, kinda join should be presented on client side =(.
+            if (providersFilters.effectorIds) {
+                // composedFilters = { offers_: { effectors_: { effector_in: providersFilters.effectorIds } } };
+                console.warn("Currently effectorIds filter does not implemented.");
+            }
         }
-        const options = {
-            ...providersFilters,
+
+        const data = await this.indexerClient.getProviders({
+            filters: composedFilters,
             offset,
             limit,
             orderBy,
             orderType,
-        };
-        const data = (await requestIndexer(ProvidersQueryDocument, options)) as ProvidersQueryQuery;
+        });
         const res = [];
         if (data) {
             for (const provider of data.providers) {
@@ -124,7 +125,7 @@ export class DealExplorerClient {
         const options = {
             id: providerId,
         };
-        const data = (await requestIndexer(ProviderQueryDocument, options)) as ProviderQueryQuery;
+        const data = await this.indexerClient.getProvider(options);
         let res = null;
         if (data && data.provider) {
             const providerFetched = data.provider;
@@ -179,7 +180,7 @@ export class DealExplorerClient {
         return effectorsComposed;
     }
 
-    _composeOfferShort(offer: unknown): OfferShort {
+    _composeOfferShort(offer: BasicOfferFragment): OfferShort {
         const effectors = this._composeEffectors(offer.effectors);
         return {
             id: offer.id,
@@ -191,25 +192,66 @@ export class DealExplorerClient {
         } as OfferShort;
     }
 
+    _convertOfferShortOrderByToIndexerType(v: OfferShortOrderBy): Offer_OrderBy {
+        if (v == "pricePerWorkerEpoch") {
+            return "pricePerEpoch" as Offer_OrderBy;
+        }
+        return v as Offer_OrderBy;
+    }
+
+    _convertOffersFiltersToIndexerType(v?: OffersFilters): Offer_Filter {
+        if (!v) {
+            return {};
+        }
+        if (v.search) {
+            console.warn("Currently search field does not implemented.");
+        }
+        if (v.onlyApproved) {
+            console.warn("Currently onlyApproved field does not implemented.");
+        }
+        const res: Offer_Filter = {};
+        if (v.effectorIds) {
+            res.effectors_ = {
+                effector_in: v.effectorIds,
+            };
+        }
+        if (v.createdAtFrom) {
+            res.createdAt_gt = v.createdAtFrom.toString();
+        }
+        if (v.createdAtTo) {
+            res.createdAt_lt = v.createdAtTo.toString();
+        }
+        if (v.minPricePerWorkerEpoch) {
+            res.pricePerEpoch_gt = v.minPricePerWorkerEpoch.toString();
+        }
+        if (v.maxPricePerWorkerEpoch) {
+            res.pricePerEpoch_lt = v.maxPricePerWorkerEpoch.toString();
+        }
+        if (v.paymentTokens) {
+            res.paymentToken_in = v.paymentTokens;
+        }
+        if (v.providerId) {
+            res.provider = v.providerId;
+        }
+        return res as Offer_Filter;
+    }
+
     async _getOffersImpl(
-        offerFilters: OffersFilters,
-        // TODO: simplify general args declaration.
+        offerFilters?: OffersFilters,
         offset: number = 0,
         limit: number = this.DEFAULT_PAGE_LIMIT,
         orderBy: OfferShortOrderBy = "createdAt",
         orderType: OrderType = this.DEFAULT_ORDER_TYPE,
     ): Promise<Array<OfferShort>> {
-        if (offerFilters.search) {
-            console.warn("Currently search field does not implemented.");
-        }
-        const options = {
-            ...offerFilters,
+        const orderByConverted = this._convertOfferShortOrderByToIndexerType(orderBy);
+        const filters = this._convertOffersFiltersToIndexerType(offerFilters);
+        const data = await this.indexerClient.getOffers({
+            filters,
             offset,
             limit,
-            orderBy,
+            orderBy: orderByConverted,
             orderType,
-        };
-        const data = (await requestIndexer(OffersQueryDocument, options)) as OffersQueryQuery;
+        });
         const res = [];
         if (data) {
             for (const offer of data.offers) {
@@ -232,8 +274,7 @@ export class DealExplorerClient {
      * TODO: use onlyApproved.
      */
     async getOffers(
-        offerFilters: OffersFilters,
-        // TODO: simplify general args declaration.
+        offerFilters?: OffersFilters,
         offset: number = 0,
         limit: number = this.DEFAULT_PAGE_LIMIT,
         orderBy: OfferShortOrderBy = "createdAt",
@@ -265,7 +306,7 @@ export class DealExplorerClient {
         const options = {
             id: offerId,
         };
-        const data = (await requestIndexer(OfferQueryDocument, options)) as OfferQueryQuery;
+        const data = await this.indexerClient.getOffer(options);
         let res = null;
         if (data && data.offer) {
             res = this._composeOfferShort(data.offer);
@@ -275,25 +316,64 @@ export class DealExplorerClient {
         return res;
     }
 
+    _convertDealShortOrderByToIndexerType(v: DealsShortOrderBy): Deal_OrderBy {
+        // Currently no needs in convert because only createdAt.
+        return v as Deal_OrderBy;
+    }
+
+    _convertDealsFiltersToIndexerType(v?: DealsFilters): Deal_Filter {
+        if (!v) {
+            return {};
+        }
+        if (v.search) {
+            console.warn("Currently search field does not implemented.");
+        }
+        if (v.onlyApproved) {
+            console.warn("Currently onlyApproved field does not implemented.");
+        }
+        const res: Deal_Filter = {};
+        if (v.effectorIds) {
+            res.effectors_ = {
+                effector_in: v.effectorIds,
+            };
+        }
+        if (v.paymentTokens) {
+            res.paymentToken_in = v.paymentTokens;
+        }
+        if (v.minPricePerWorkerEpoch) {
+            res.pricePerWorkerEpoch_gt = v.minPricePerWorkerEpoch.toString();
+        }
+        if (v.maxPricePerWorkerEpoch) {
+            res.pricePerWorkerEpoch_lt = v.maxPricePerWorkerEpoch.toString();
+        }
+        if (v.createdAtFrom) {
+            res.createdAt_gt = v.createdAtFrom.toString();
+        }
+        if (v.createdAtTo) {
+            res.createdAt_lt = v.createdAtTo.toString();
+        }
+        if (v.providerId) {
+            res.addedComputeUnits_ = { provider: v.providerId };
+        }
+        return res as Deal_Filter;
+    }
+
     async _getDealsImpl(
-        dealsFilters: DealsFilters,
-        // TODO: simplify general args declaration.
+        dealsFilters?: DealsFilters,
         offset: number = 0,
         limit: number = this.DEFAULT_PAGE_LIMIT,
         orderBy: DealsShortOrderBy = "createdAt",
         orderType: OrderType = this.DEFAULT_ORDER_TYPE,
     ): Promise<Array<DealShort>> {
-        if (dealsFilters.search) {
-            console.warn("Currently search field does not implemented.");
-        }
-        const options = {
-            ...dealsFilters,
+        const orderByConverted = this._convertDealShortOrderByToIndexerType(orderBy);
+        const filtersConverted = this._convertDealsFiltersToIndexerType(dealsFilters);
+        const data = await this.indexerClient.getDeals({
+            filters: filtersConverted,
             offset,
             limit,
-            orderBy,
+            orderBy: orderByConverted,
             orderType,
-        };
-        const data = (await requestIndexer(DealsQueryDocument, options)) as DealsQueryQuery;
+        });
         const res = [];
         if (data) {
             for (const deal of data.deals) {
@@ -303,12 +383,12 @@ export class DealExplorerClient {
         return res;
     }
 
-    _composeDealsShort(deal: unknown): DealShort {
+    _composeDealsShort(deal: BasicDealFragment): DealShort {
         const effectors = this._composeEffectors(deal.effectors);
         return {
             id: deal.id,
             createdAt: deal.createdAt,
-            client: deal.client,
+            client: deal.owner,
             minWorkers: deal.minWorkers,
             targetWorkers: deal.targetWorkers,
             paymentToken: { address: deal.paymentToken.id, symbol: deal.paymentToken.symbol },
@@ -322,14 +402,8 @@ export class DealExplorerClient {
         } as DealShort;
     }
 
-    /*
-     * @dev Deprecated:
-     * - minCollateralPerWorker
-     * - maxCollateralPerWorker
-     */
     async getDeals(
-        dealFilters: DealsFilters,
-        // TODO: simplify general args declaration.
+        dealFilters?: DealsFilters,
         offset: number = 0,
         limit: number = this.DEFAULT_PAGE_LIMIT,
         orderBy: DealsShortOrderBy = "createdAt",
@@ -342,13 +416,14 @@ export class DealExplorerClient {
         const options = {
             id: dealId,
         };
-        const data = (await requestIndexer(DealQueryDocument, options)) as DealQueryQuery;
+        const data = await this.indexerClient.getDeal(options);
         let res = null;
         if (data && data.deal) {
             const deal = data.deal;
             res = this._composeDealsShort(deal);
             res["pricePerWorkerEpoch"] = deal.pricePerWorkerEpoch;
             res["computeUnits"] = deal.addedComputeUnits;
+            // TODO: resolve whitelists and blacklists.
             res["whitelist"] = [];
             res["blacklist"] = [];
         }

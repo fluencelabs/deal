@@ -1,43 +1,44 @@
 query ProvidersQuery(
-  $effectorIds: [String!],
+  $filters: Provider_filter,
   $offset: Int,
   $limit: Int,
   $orderBy: Provider_orderBy,
   $orderType: OrderDirection,
 ) {
   providers(
-      where: {
-          offers_: {
-              effectors_: {
-                  effector_in: $effectorIds,
-              }
-          }
-      }
+      where: $filters
       first: $limit
       skip: $offset
       orderBy: $orderBy
       orderDirection: $orderType
   ) {
-    ...ProviderBase
+    ...ProviderOfProvidersQuery
+  }
+}
+
+
+fragment ProviderOfProvidersQuery on Provider {
+    ...ProviderABC
     offers {
       ...BasicOffer
     }
-  }
 }
+
 
 query ProviderQuery(
   $id: ID!
 ) {
   provider(id: $id) {
-    ...ProviderBase
+    ...ProviderABC
     peerCount
     effectorCount
   }
 }
 
-fragment ProviderBase on Provider {
+fragment ProviderABC on Provider {
     id
     name
+    createdAt
     computeUnitsAvailable
     computeUnitsTotal
 }

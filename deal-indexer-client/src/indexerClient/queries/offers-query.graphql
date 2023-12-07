@@ -1,29 +1,12 @@
 query OffersQuery(
-  $createdAtFrom: BigInt,
-  $createdAtTo: BigInt,
-  $minPricePerWorkerEpoch: BigInt,
-  $maxPricePerWorkerEpoch: BigInt,
-  $paymentTokens: [String!],
-  $effectorIds: [String!],
+  $filters: Offer_filter,
   $offset: Int,
   $limit: Int,
   $orderBy: Offer_orderBy,
   $orderType: OrderDirection,
-  $providerId: String,
 ) {
   offers(
-      where: {
-          createdAt_not: null,
-          createdAt_gt: $createdAtFrom,
-          createdAt_lt: $createdAtTo,
-          pricePerEpoch_gt: $minPricePerWorkerEpoch,
-          pricePerEpoch_lt: $maxPricePerWorkerEpoch,
-          paymentToken_in: $paymentTokens,
-          effectors_: {
-      	        effector_in: $effectorIds,
-            },
-          provider: $providerId,
-      }
+      where: $filters
       first: $limit
       skip: $offset
       orderBy: $orderBy
