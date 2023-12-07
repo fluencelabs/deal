@@ -1,3 +1,4 @@
+// This module relates to deal-explorer-client.
 import type { CodegenConfig } from "@graphql-codegen/cli";
 
 const config: CodegenConfig = {
