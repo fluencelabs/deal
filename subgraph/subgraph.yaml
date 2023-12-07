@@ -23,29 +23,29 @@ dataSources:
         - ComputeUnit
       abis:
         - name: Core
-          file: ./abis/Core.json
+          file: ../out/Core.sol/Core.abi.json
         - name: Deal
-          file: ./abis/Deal.json
+          file: ../out/Deal.sol/Deal.abi.json
         - name: ERC20
-          file: ./abis/ERC20.json
+          file: ../out/ERC20.sol/ERC20.abi.json
       eventHandlers:
-        - event: MarketOfferRegistered(bytes32,address,uint256,address,(bytes4,bytes32)[])
+        - event: MarketOfferRegistered(indexed address,bytes32,uint256,address,(bytes4,bytes32)[])
           handler: handleMarketOfferRegistered
-        - event: PeerCreated(bytes32,bytes32)
+        - event: PeerCreated(indexed bytes32,bytes32,address)
           handler: handlePeerCreated
-        - event: ComputeUnitCreated(bytes32,bytes32,bytes32)
+        - event: ComputeUnitCreated(indexed bytes32,bytes32)
           handler: handleComputeUnitCreated
-        - event: MinPricePerEpochUpdated(bytes32,uint256)
+        - event: MinPricePerEpochUpdated(indexed bytes32,uint256)
           handler: handleMinPricePerEpochUpdated
-        - event: PaymentTokenUpdated(bytes32,address)
+        - event: PaymentTokenUpdated(indexed bytes32,address)
           handler: handlePaymentTokenUpdated
-        - event: EffectorAdded(bytes32,(bytes4,bytes32))
+        - event: EffectorAdded(indexed bytes32,(bytes4,bytes32))
           handler: handleEffectorAdded
-        - event: EffectorRemoved(bytes32,(bytes4,bytes32))
+        - event: EffectorRemoved(indexed bytes32,(bytes4,bytes32))
           handler: handleEffectorRemoved
-        - event: ComputeUnitAddedToDeal(bytes32,address,bytes32)
+        - event: ComputeUnitAddedToDeal(indexed bytes32,address,bytes32)
           handler: handleComputeUnitAddedToDeal
-        - event: ComputeUnitRemovedFromDeal(bytes32,address,bytes32)
+        - event: ComputeUnitRemovedFromDeal(indexed bytes32,address,bytes32)
           handler: handleComputeUnitRemovedFromDeal
         - event: DealCreated(indexed
             address,address,uint256,address,uint256,uint256,uint256,uint256,(bytes4,bytes32)[],(bytes4,bytes32))

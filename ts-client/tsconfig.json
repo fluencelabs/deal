@@ -1,15 +1,14 @@
 {
   "compilerOptions": {
     "outDir": "dist",
-    "target": "ESNext",
-    "module": "ESNext",
     "allowJs": false,
     "strict": true,
     "declaration": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext",
+    "module": "nodenext",
     "experimentalDecorators": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,

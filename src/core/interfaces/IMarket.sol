@@ -43,13 +43,13 @@ interface IMarket {
     event PeerCreated(bytes32 indexed offerId, bytes32 peerId, address owner);
     event ComputeUnitCreated(bytes32 indexed peerId, bytes32 unitId);
 
-    event MinPricePerEpochUpdated(bytes32 offerId, uint256 minPricePerWorkerEpoch);
-    event PaymentTokenUpdated(bytes32 offerId, address paymentToken);
-    event EffectorAdded(bytes32 offerId, CIDV1 effector);
-    event EffectorRemoved(bytes32 offerId, CIDV1 effector);
+    event MinPricePerEpochUpdated(bytes32 indexed offerId, uint256 minPricePerWorkerEpoch);
+    event PaymentTokenUpdated(bytes32 indexed offerId, address paymentToken);
+    event EffectorAdded(bytes32 indexed offerId, CIDV1 effector);
+    event EffectorRemoved(bytes32 indexed offerId, CIDV1 effector);
 
-    event ComputeUnitAddedToDeal(bytes32 unitId, IDeal deal, bytes32 peerId);
-    event ComputeUnitRemovedFromDeal(bytes32 unitId, IDeal deal, bytes32 peerId);
+    event ComputeUnitAddedToDeal(bytes32 indexed unitId, IDeal deal, bytes32 peerId);
+    event ComputeUnitRemovedFromDeal(bytes32 indexed unitId, IDeal deal, bytes32 peerId);
 
     // ----------------- Public View -----------------
     function getOffer(bytes32 offerId) external view returns (Offer memory);

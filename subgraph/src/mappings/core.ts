@@ -43,7 +43,7 @@ export function handleMarketOfferRegistered(
   // - emit ComputeUnitCreated(offerId, peerId, unitId);
 
   // Create provider.
-  const providerAddress = event.params.owner.toHex();
+  const providerAddress = event.params.provider.toHex();
   let provider = new Provider(providerAddress);
   provider.name = getProviderName(providerAddress);
   provider.createdAt = event.block.timestamp;
@@ -73,8 +73,9 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
   // Parent events:
   // - emit PeerCreated(offerId, peer.peerId);
   // - emit MarketOfferRegistered
-  let offer = Offer.load(event.params.offerId.toHex()) as Offer;
   const peer = Peer.load(event.params.peerId.toHex()) as Peer;
+
+  let offer = Offer.load(peer.offer) as Offer;
 
   // Since handlePeerCreated could not work with this handler, this logic moved here.
   let computeUnit = new ComputeUnit(event.params.unitId.toHex());

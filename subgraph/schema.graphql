@@ -2,7 +2,7 @@
 # Names according to Figma. Suffix according to api list, details
 
 type Token @entity(immutable: true) {
-  id: ID!  # Token Address
+  id: ID! # Token Address
   symbol: String!
 }
 
@@ -16,11 +16,12 @@ type Provider @entity {
 
 # ---- Core Contract ----
 type Offer @entity {
-  """Used in the next figma views:
-    - Offer from List Of offers 1.2.
-    - Offer 1.2
   """
-  id: ID!  # Ref to offerId in contract.
+  Used in the next figma views:
+  - Offer from List Of offers 1.2.
+  - Offer 1.2
+  """
+  id: ID! # Ref to offerId in contract.
   createdAt: BigInt!
   updatedAt: BigInt!
   provider: Provider!
@@ -31,12 +32,12 @@ type Offer @entity {
   effectors: [OfferToEffector!] @derivedFrom(field: "offer")
 
   # Add Statistics below.
-  computeUnitsAvailable: Int  # Sum of all available compute units in the offer (not in the deals).
-  computeUnitsTotal: Int  # Sum of all compute units registered in the offer. TODO: when CU deleted?
+  computeUnitsAvailable: Int # Sum of all available compute units in the offer (not in the deals).
+  computeUnitsTotal: Int # Sum of all compute units registered in the offer. TODO: when CU deleted?
 }
 
-
-"""To support many2many b/w offer and effector.
+"""
+To support many2many b/w offer and effector.
 E.g. to use
 {
   offers {
@@ -49,16 +50,15 @@ E.g. to use
 }
 """
 type OfferToEffector @entity {
-    id: ID! # Set to `user.id.concat(organization.id)`
-    offer: Offer!
-    effector: Effector!
+  id: ID! # Set to `user.id.concat(organization.id)`
+  offer: Offer!
+  effector: Effector!
 }
-
 
 "Effector table is obsolete table since it is a simple mapping."
 type Effector @entity {
   "id and CID are the same."
-  id: ID!  # Currently effector id is merged(prefix + hash) aka 1 CID.
+  id: ID! # Currently effector id is merged(prefix + hash) aka 1 CID.
   description: String!
   offers: [OfferToEffector!] @derivedFrom(field: "effector")
 }
@@ -84,13 +84,13 @@ type ComputeUnit @entity {
 
 # ---- Deal Contract ----
 type DealToEffector @entity {
-    id: ID! # Set to `deal.id.concat(effector.id)`
-    deal: Deal!
-    effector: Effector!
+  id: ID! # Set to `deal.id.concat(effector.id)`
+  deal: Deal!
+  effector: Effector!
 }
 
 type Deal @entity {
-  id: ID!  # Ref to offerId in contract.
+  id: ID! # Ref to offerId in contract.
   appCID: String!
   createdAt: BigInt!
   owner: Bytes!
@@ -108,7 +108,7 @@ type Deal @entity {
 
   # Add Statistics below.
   withdrawalSum: BigInt!
-  depositedSum: BigInt!  # calculated from the withdraw() [no rewards withdraw].
+  depositedSum: BigInt! # calculated from the withdraw() [no rewards withdraw].
   maxPaidEpoch: BigInt
 
   "I.e. Matching Result (Figma)."

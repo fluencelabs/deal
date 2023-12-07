@@ -12,6 +12,7 @@ fs_permissions = [
     { access = "read-write", path = "./subgraph/abis" },
     { access = "read", path = "./out" },
 ]
+extra_output_files = ["abi"]
 gas_reports = ["*"]
 optimizer = true
 optimizer_runs = 4294967295
