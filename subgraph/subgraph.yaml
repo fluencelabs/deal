@@ -23,11 +23,11 @@ dataSources:
         - ComputeUnit
       abis:
         - name: Core
-          file: ./abis/Core.json
+          file: ../out/Core.sol/Core.json
         - name: Deal
-          file: ./abis/Deal.json
+          file: ../out/Deal.sol/Deal.json
         - name: ERC20
-          file: ./abis/ERC20.json
+          file: ../out/ERC20.sol/ERC20.json
       eventHandlers:
         - event: MarketOfferRegistered(bytes32,address,uint256,address,(bytes4,bytes32)[])
           handler: handleMarketOfferRegistered

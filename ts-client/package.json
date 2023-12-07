@@ -2,19 +2,23 @@
   "name": "@fluencelabs/deal-aurora",
   "version": "0.2.22",
   "main": "dist/index.js",
+  "type": "module",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "npm run generate-contract-types && npm run update-deployments && shx rm -rf dist && tsc -b",
-    "generate-contract-types": "typechain --target ethers-v6 '../out/**/*.json' --out-dir typechain-types",
-    "update-deployments": "rm -f -r deployments && cp -r ../deployments ./deployments",
+    "build:ts": "shx rm -rf dist && tsc -b",
+    "generate-contract-types": "shx rm -rf ./src/typechain-types && typechain --target ethers-v6 '../out/**/*.json' --out-dir ./src/typechain-types --node16-modules && npm run replace-imports",
+    "replace-imports": "node replace-imports.js",
+    "update-deployments": "rm -rf deployments && cp -r ../deployments ./src/deployments",
     "lint": "eslint 'client/**/*.ts' --max-warnings 0 --fix",
     "fmt": "prettier 'client/**/*.ts' --w"
   },
   "dependencies": {
-    "ethers": "6.7.1",
-    "dotenv": "^16.3.1"
+    "dotenv": "^16.3.1",
+    "ethers": "6.7.1"
   },
   "devDependencies": {
+    "@tsconfig/node18-strictest-esm": "^1.0.1",
     "@typechain/ethers-v6": "^0.5.0",
     "@types/node": "^20.5.4",
     "@typescript-eslint/eslint-plugin": "^6.9.0",

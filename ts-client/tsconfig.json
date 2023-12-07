@@ -1,28 +1,20 @@
 {
+  "extends": "@tsconfig/node18-strictest-esm/tsconfig.json",
   "compilerOptions": {
-    "outDir": "dist",
-    "target": "ES2021",
-    "module": "commonjs",
-    "allowJs": false,
-    "strict": true,
     "declaration": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "moduleResolution": "node",
-    "experimentalDecorators": true,
+    "importHelpers": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "moduleResolution": "nodenext",
+    "module": "nodenext",
     "resolveJsonModule": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true,
-    "allowUnusedLabels": false,
-    "allowUnreachableCode": false,
-    "exactOptionalPropertyTypes": true,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "noUncheckedIndexedAccess": true,
-    "noUnusedLocals": false
+    "importsNotUsedAsValues": "remove",
+    "verbatimModuleSyntax": true,
+    "lib": ["es2023"]
   },
-  "include": ["**/*"],
+  "ts-node": {
+    "esm": true
+  },
+  "include": ["src/**/*"],
   "exclude": ["dist", "node_modules"]
 }
