@@ -1,23 +1,25 @@
 # deal-explorer-client
 
-# GraphQL Scheme Generation
-This repo uses graphQL to query Indexer (subgraph). Schemes for graphQL query declared in `.graphclient` that populated 
-when `npm run load-subgraph-types` (ref to [Graph Client](https://thegraph.com/docs/en/querying/querying-from-an-application/#graphql-clients)).
+# Develop
+## GraphQL Scheme Generation
+It generates typescripts for the graphQl schemes declared in [src/indexerClient/queries](src/indexerClient/queries) via
+[codegen.ts](codegen.ts).
 
-> Before ypu load typescripts you need to aim client what models you actually waiting for. 
->  You did it via declaring all fields and filters you need in, e.g. [offers-query.graphql](src/indexerClient/offers-query.graphql).
+Thus, TS files with `generated` key word you should not rewrite manually.
 
-| Thus, with the command above you always ensure, that you work with currently implemented subgraph models in the url declared in [.graphclientrc.yml](.graphclientrc.yml).
-
+> Those generate files are under git commit because them are a part of the source code, e.g. 
+> [dealIndexerClient.ts](src/dealIndexerClient.ts) & [indexerClient.ts](src/indexerClient/indexerClient.ts).
 
 # ToDo
-- [ ] rename to deal-explorer-client
+- [x] rename to deal-explorer-client
 - [ ] use deal package instead of import from `../src`
 - [ ] commit to the special repo
 - [ ] after merge with foundry -> to different npm packages [refactor work with several packages]
-- [ ] add ulr links to fetch filters...
-- [offers] TODO: search fields: by client or dealId?
-- [ ]resolve registered workers! (separate class?)
+- [x] add ulr links to fetch filters...
+- [x] TODO: search fields: by client or dealId?
+- [ ] resolve registered workers! (separate class?)
 - [ ] page counter (thanks to graphQL for no paginators)?
-- [ ] optional filtering in `.graphql` schemes (discord solution processing...) [currently unsolved]
-- [ ] resolve hardcoded endpoint in .graphclientrc.yml (http://localhost:8000/subgraphs/name/fluence-deal-contracts)
+- [x] optional filtering in `.graphql` schemes (discord solution processing...) [currently unsolved]
+- [ ] convert values: timestamps, eths
+- [x] move to simple client
+- [ ] codegen - get url from env
