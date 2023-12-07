@@ -3,7 +3,7 @@ import type { CodegenConfig } from "@graphql-codegen/cli";
 const config: CodegenConfig = {
     overwrite: true,
     schema: "http://localhost:8000/subgraphs/name/fluence-deal-contracts",
-    documents: "src/indexerClient/queries/*.graphql",
+    documents: "dealExplorerClient/indexerClient/queries/*.graphql",
     generates: {
         "src/indexerClient/generated.types.ts": {
             plugins: ["typescript"],

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { ethers, Provider as EthersProvider } from "ethers";
+import { ethers } from "ethers";
 import {
     DealShort,
     OfferShort,
@@ -15,12 +15,12 @@ import {
     DealDetail,
     Peer,
 } from "./types";
-import { ContractsENV } from "../../src";
 import { ByProviderAndStatusFilter, DealsFilters, OffersFilters, ProvidersFilters } from "./filters";
 import { IndexerClient } from "./indexerClient/indexerClient";
 import { BasicOfferFragment, ProviderOfProvidersQueryFragment } from "./indexerClient/queries/providers-query.generated";
 import { Deal_Filter, Deal_OrderBy, Offer_Filter, Offer_OrderBy } from "./indexerClient/generated.types";
 import { BasicDealFragment } from "./indexerClient/queries/deals-query.generated";
+import {DealClient, Network} from "../../ts-client";
 
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
@@ -28,24 +28,31 @@ import { BasicDealFragment } from "./indexerClient/queries/deals-query.generated
  * TODO: Note, deprecated: do not use chainRPCUrl, use ethersProvider instead.
  */
 export class DealExplorerClient {
-    DEFAULT_CONTRACTS_ENV: ContractsENV = "kras";
+    DEFAULT_NETWORK: Network = "kras";
     DEFAULT_PAGE_LIMIT = 100;
     DEFAULT_ORDER_TYPE: OrderType = "desc";
 
-    private ethersProvider: EthersProvider;
+    private ethersProvider: ethers.Provider;
     // private contractDealClient: DealClient;
     private indexerClient: IndexerClient;
-    constructor(indexerUrl: string, chainRpcUrl?: string, ethersProvider?: EthersProvider, contractsEnv?: ContractsENV) {
+    private contractsClient: DealClient;
+    constructor(indexerUrl: string, chainRpcUrl?: string, ethersProvider?: ethers.Provider, network?: Network) {
         if (chainRpcUrl) {
             console.warn("Do not use chainRPCUrl, use ethersProvider instead.");
-            this.ethersProvider = new ethers.JsonRpcProvider(chainRpcUrl);
+            this.ethersProvider = new ethers.JsonRpcProvider(
+                chainRpcUrl,
+                undefined,
+                {},
+            );
         } else if (ethersProvider) {
             this.ethersProvider = ethersProvider;
         } else {
             throw Error("One of chainRPCUrl or ethersProvider should be delclared.");
         }
         this.indexerClient = new IndexerClient(indexerUrl);
-        // this.contractDealClient = new DealClient(contractsEnv || this.DEFAULT_CONTRACTS_ENV, this.ethersProvider);
+        // TODO: arghhhhh!
+        // @ts-ignore
+        this.contractsClient = new DealClient(this.ethersProvider,network || this.DEFAULT_NETWORK);
     }
 
     _composeProviderBase(provider: ProviderOfProvidersQueryFragment): ProviderBase {
@@ -434,4 +441,4 @@ export class DealExplorerClient {
 /*
  * @deprecated: rename to DealExplorerClient
  */
-export class DealIndexerClient extends DealExplorerClient {}
+export class DealExplorerClient extends DealExplorerClient {}

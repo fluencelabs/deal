@@ -1,3 +1,5 @@
+TODO: about other packages...
+
 # deal-explorer-client
 
 # Develop
@@ -7,7 +9,7 @@ It generates typescripts for the graphQl schemes declared in [src/indexerClient/
 Thus, TS files with `generated` key word you **should not rewrite manually**.
 
 > Those generated files are under git commit because it is a part of the source code, e.g. 
-> [dealIndexerClient.ts](src/dealIndexerClient.ts) & [indexerClient.ts](src/indexerClient/indexerClient.ts).
+> [dealExplorerClient.ts](client/dealExplorerClient/dealIndexerClient.ts) & [indexerClient.ts](client/dealExplorerClient/indexerClient/indexerClient.ts).
 
 # ToDo
 - [x] rename to deal-explorer-client
