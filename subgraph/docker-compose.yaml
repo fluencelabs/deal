@@ -31,8 +31,8 @@ services:
       ethereum: 'localhost:http://host.docker.internal:8545'
       GRAPH_LOG: info
       # https://github.com/graphprotocol/graph-node/issues/3159#issuecomment-1062827725
-#      ETHEREUM_REORG_THRESHOLD: 1
-#      ETHEREUM_ANCESTOR_COUNT: 1
+      ETHEREUM_REORG_THRESHOLD: 1
+      ETHEREUM_ANCESTOR_COUNT: 1
   ipfs:
     image: ipfs/go-ipfs:latest
     ports:
