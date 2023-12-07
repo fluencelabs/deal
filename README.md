@@ -69,3 +69,10 @@ $ forge fmt
 ```shell
 $ forge snapshot
 ```
+
+## Develop
+After [starting local network](#start-local-network-locally) you could create market on our contracts:
+
+```shell
+$ make create-pure-market-local
+```

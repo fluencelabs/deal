@@ -18,7 +18,7 @@ import "./utils/Depoyments.sol";
 contract CreateMarket is Depoyments, Script {
     using SafeERC20 for IERC20;
 
-    string constant DEPLOYMENTS_PATH = "/ts-client/deployments/";
+    string constant DEPLOYMENTS_PATH = "/deployments/";
     string private fullDeploymentsPath;
 
     string constant DEFAULT_ANVIL_MNEMONIC = "test test test test test test test test test test test junk";
