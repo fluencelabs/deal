@@ -2,12 +2,11 @@
 
 # Develop
 ## GraphQL Scheme Generation
-It generates typescripts for the graphQl schemes declared in [src/indexerClient/queries](src/indexerClient/queries) via
-[codegen.ts](codegen.ts).
+It generates typescripts for the graphQl schemes declared in [src/indexerClient/queries](src/indexerClient/queries) via fetched graphql schemes. Instruction rules are defined in [codegen.ts](codegen.ts).
 
-Thus, TS files with `generated` key word you should not rewrite manually.
+Thus, TS files with `generated` key word you **should not rewrite manually**.
 
-> Those generate files are under git commit because them are a part of the source code, e.g. 
+> Those generated files are under git commit because it is a part of the source code, e.g. 
 > [dealIndexerClient.ts](src/dealIndexerClient.ts) & [indexerClient.ts](src/indexerClient/indexerClient.ts).
 
 # ToDo
