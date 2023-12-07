@@ -75,3 +75,6 @@ $ forge snapshot
 It is a backend for the contracts that collects info from contract events into graphQL schemes.
 
 For more info check out [README.md](subgraph/README.md).
+
+# ToDo
+- [ ] we could not be certain that on docker compose up it will deploy on the same addresses, as stated in [ts-client/deployments](ts-client/deployments): mount volume? compose deployments? use the same script that will update in the same format in deployments.

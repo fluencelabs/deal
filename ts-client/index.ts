@@ -1,3 +1,3 @@
 export { DealClient } from "./client/client";
-export { ContractsENV } from "./client/config";
+export { Network } from "./client/config";
 export * from "./typechain-types";
