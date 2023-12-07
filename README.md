@@ -78,3 +78,10 @@ For more info check out [README.md](subgraph/README.md).
 
 # ToDo
 - [ ] we could not be certain that on docker compose up it will deploy on the same addresses, as stated in [ts-client/deployments](ts-client/deployments): mount volume? compose deployments? use the same script that will update in the same format in deployments.
+
+## Develop
+After [starting local network](#start-local-network-locally) you could create market on our contracts:
+
+```shell
+$ make create-pure-market-local
+```
