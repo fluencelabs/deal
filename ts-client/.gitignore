@@ -4,7 +4,6 @@
 dist
 tmp
 /out-tsc
-typechain-types
 
 # dependencies
 node_modules
