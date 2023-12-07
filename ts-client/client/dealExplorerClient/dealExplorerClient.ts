@@ -20,7 +20,8 @@ import { IndexerClient } from "./indexerClient/indexerClient";
 import { BasicOfferFragment, ProviderOfProvidersQueryFragment } from "./indexerClient/queries/providers-query.generated";
 import { Deal_Filter, Deal_OrderBy, Offer_Filter, Offer_OrderBy } from "./indexerClient/generated.types";
 import { BasicDealFragment } from "./indexerClient/queries/deals-query.generated";
-import {DealClient, Network} from "../../ts-client";
+import {DealClient} from "../client";
+import {Network} from "../config";
 
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
@@ -441,4 +442,4 @@ export class DealExplorerClient {
 /*
  * @deprecated: rename to DealExplorerClient
  */
-export class DealExplorerClient extends DealExplorerClient {}
+export class DealIndexerClient extends DealExplorerClient {}
