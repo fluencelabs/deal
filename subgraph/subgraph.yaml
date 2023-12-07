@@ -8,7 +8,7 @@ dataSources:
     name: Core
     network: localhost
     source:
-      abi: CoreImpl
+      abi: Core
       address: "0x789E0BD94672c3B010b3C57C21902be39412940B"
       startBlock: 0
     mapping:
@@ -22,10 +22,10 @@ dataSources:
         - OfferToEffector
         - ComputeUnit
       abis:
-        - name: CoreImpl
-          file: ./abis/CoreImpl.json
-        - name: DealImpl
-          file: ./abis/DealImpl.json
+        - name: Core
+          file: ./abis/Core.json
+        - name: Deal
+          file: ./abis/Deal.json
         - name: ERC20
           file: ./abis/ERC20.json
       eventHandlers:
@@ -56,7 +56,7 @@ templates:
     kind: ethereum/contract
     network: localhost
     source:
-      abi: DealImpl
+      abi: Deal
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -65,8 +65,8 @@ templates:
         - Deal
         - DealToEffector
       abis:
-        - name: DealImpl
-          file: ./abis/DealImpl.json
+        - name: Deal
+          file: ./abis/Deal.json
       eventHandlers:
         - event: Deposited(uint256)
           handler: handleDeposited

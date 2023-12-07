@@ -23,8 +23,14 @@ jobs:
           node-version: "16"
           registry-url: "https://registry.npmjs.org"
           cache: "npm"
+          cache-dependency-path: "./ts-client/package-lock.json"
 
-      - run: npm install --f
-      - run: npm run build
-        env:
-          PRIVATE_KEY: ${{ secrets.DEAL_TESNET_PRIVATE_KEY }}
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - run: npm install
+        working-directory: ./ts-client
+
+      - run: make build

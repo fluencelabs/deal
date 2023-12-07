@@ -2,30 +2,45 @@
 // Note: handlers named as in the contract methods
 
 import {
-    ComputeUnitAddedToDeal,
-    ComputeUnitCreated,
-    ComputeUnitRemovedFromDeal,
-    DealCreated,
-    EffectorAdded,
-    EffectorRemoved,
-    MarketOfferRegistered,
-    MinPricePerEpochUpdated,
-    PaymentTokenUpdated,
-    PeerCreated,
-} from "../../generated/Core/CoreImpl";
-import { createOrLoadDealEffector, createOrLoadEffector, createOrLoadOfferEffector, createOrLoadToken, ZERO_BIG_INT } from "./../models";
+  ComputeUnitAddedToDeal,
+  ComputeUnitCreated,
+  ComputeUnitRemovedFromDeal,
+  DealCreated,
+  EffectorAdded,
+  EffectorRemoved,
+  MarketOfferRegistered,
+  MinPricePerEpochUpdated,
+  PaymentTokenUpdated,
+  PeerCreated,
+} from "../../generated/Core/Core";
+import {
+  createOrLoadDealEffector,
+  createOrLoadEffector,
+  createOrLoadOfferEffector,
+  createOrLoadToken,
+  ZERO_BIG_INT,
+} from "./../models";
 
 import { log, store } from "@graphprotocol/graph-ts";
-import { ComputeUnit, Deal, Offer, Peer, Provider } from "../../generated/schema";
+import {
+  ComputeUnit,
+  Deal,
+  Offer,
+  OfferToEffector,
+  Peer,
+  Provider,
+} from "../../generated/schema";
 import { Deal as DealTemplate } from "../../generated/templates";
 import { AppCID, getEffectorCID, parseEffectors } from "./utils";
 import { getProviderName } from "../networkConstants";
 
-export function handleMarketOfferRegistered(event: MarketOfferRegistered): void {
-    // Events: MarketOfferRegistered
-    // Nested events (event order is important):
-    // - emit PeerCreated(offerId, peer.peerId);
-    // - emit ComputeUnitCreated(offerId, peerId, unitId);
+export function handleMarketOfferRegistered(
+  event: MarketOfferRegistered
+): void {
+  // Events: MarketOfferRegistered
+  // Nested events (event order is important):
+  // - emit PeerCreated(offerId, peer.peerId);
+  // - emit ComputeUnitCreated(offerId, peerId, unitId);
 
     // Create provider.
     const providerAddress = event.params.owner.toHex();
