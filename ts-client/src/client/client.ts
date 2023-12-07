@@ -1,20 +1,21 @@
 import type { ethers } from "ethers";
+
 import {
-  Core,
   Core__factory,
-  Deal,
   Deal__factory,
-  ERC20,
   ERC20__factory,
-} from "../typechain-types";
-import { Deployment, getDeployment, Network } from "./config";
+} from "../typechain-types/index.js";
+import { getDeployment } from "./config.js";
+
+import type { Core, Deal, ERC20 } from "../typechain-types/index.js";
+import type { Deployment, Network } from "./config.js";
 
 export class DealClient {
   private deployment: Promise<Deployment>;
 
   constructor(
     private signerOrProvider: ethers.Signer | ethers.Provider,
-    private network: Network,
+    network: Network,
   ) {
     this.deployment = getDeployment(network);
   }
