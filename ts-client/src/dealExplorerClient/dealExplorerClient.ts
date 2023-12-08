@@ -20,8 +20,8 @@ import { IndexerClient } from "./indexerClient/indexerClient";
 import { BasicOfferFragment, ProviderOfProvidersQueryFragment } from "./indexerClient/queries/providers-query.generated";
 import { Deal_Filter, Deal_OrderBy, Offer_Filter, Offer_OrderBy } from "./indexerClient/generated.types";
 import { BasicDealFragment } from "./indexerClient/queries/deals-query.generated";
-import {DealClient} from "../client";
-import {Network} from "../config";
+import { DealClient } from "../client/client";
+import { Network } from "../client/config";
 
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.

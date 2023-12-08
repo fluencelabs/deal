@@ -1,1 +1,1 @@
-export { DealIndexerClient, DealExplorerClient } from "./dealExplorerClient";
+export { DealIndexerClient, DealExplorerClient } from "./dealExplorerClient"
