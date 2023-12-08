@@ -1,3 +1,8 @@
+# ts-clients
+
+## Requirements
+- node version: v18.16.1
+
 TODO: about other packages...
 
 # deal-explorer-client
