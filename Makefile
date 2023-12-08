@@ -9,6 +9,7 @@ build-contracts:
 	@forge build
 
 build:
+	@make build-contracts
 	@cd ts-client && npm run build
 	@cd subgraph && npm run compile
 

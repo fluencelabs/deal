@@ -29,7 +29,6 @@ interface IGlobalConst {
     }
 
     // ------------------ External View Functions ------------------
-    // global constants
     function fluenceToken() external view returns (address);
     function fltPrice() external view returns (uint256);
 
