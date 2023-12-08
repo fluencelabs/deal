@@ -15,9 +15,7 @@
   },
   "dependencies": {
     "dotenv": "^16.3.1",
-    "ethers": "6.7.1"
     "ethers": "6.7.1",
-    "dotenv": "^16.3.1",
     "@graphql-typed-document-node/core": "^3.2.0",
     "graphql": "^16.8.1",
     "graphql-request": "^6.1.0",
