@@ -77,7 +77,7 @@ If you updated contract and want to push this update to the subgraph, I could re
 but first: you should deploy on localhost your updated contract, e.g. `npx hardhat deploy --network localhost`
 
 ```bash
-ts-node scripts/importContractsAbi.ts && npm run compile && npm run create-local && npm run deploy:local --version-label 0.0.0
+npm run compile && npm run create:local && npm run deploy:local
 ```
 
 # Deploy 
