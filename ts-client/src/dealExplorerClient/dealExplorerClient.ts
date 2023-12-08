@@ -399,12 +399,12 @@ export class DealExplorerClient {
             targetWorkers: deal.targetWorkers,
             paymentToken: { address: deal.paymentToken.id, symbol: deal.paymentToken.symbol },
             effectors: effectors,
-            // TODO:
-            // balance
-            // status
-            // registeredWorkers
-            // matchedWorkers
-            // totalEarnings
+            // TODO: add missed implementations.
+            balance: 0,
+            status: "active",
+            registeredWorkers: 0,
+            matchedWorkers: 0,
+            totalEarnings: 0,
         } as DealShort;
     }
 

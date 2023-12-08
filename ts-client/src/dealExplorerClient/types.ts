@@ -93,11 +93,7 @@ export interface DealDetail extends DealShort {
     effectors: Array<Effector>;
 }
 
-export enum DealStatus {
-    Inactive,
-    Active,
-    Ended,
-}
+export type DealStatus = "inactive" | "active" | "ended";
 
 export type ProviderShortOrderBy = "createdAt" | "computeUnitsTotal";
 export type OfferShortOrderBy = "createdAt" | "pricePerWorkerEpoch" | "updatedAt";
