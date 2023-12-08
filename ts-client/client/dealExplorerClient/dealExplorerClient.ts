@@ -51,8 +51,6 @@ export class DealExplorerClient {
             throw Error("One of chainRPCUrl or ethersProvider should be delclared.");
         }
         this.indexerClient = new IndexerClient(indexerUrl);
-        // TODO: arghhhhh!
-        // @ts-ignore
         this.contractsClient = new DealClient(this.ethersProvider,network || this.DEFAULT_NETWORK);
     }
 
