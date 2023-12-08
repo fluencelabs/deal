@@ -1,0 +1,9 @@
+# Run make commands for foundry from running docker container.
+# E.g. bash: >>> docker exec -ti docker-deploy-script-1 sh
+services:
+  deploy-script:
+    build:
+      context: ../
+      dockerfile: ./docker/dev.Dockerfile
+    volumes:
+      - ../:/app/
