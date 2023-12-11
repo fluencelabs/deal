@@ -77,7 +77,9 @@ async function main() {
 
     // No filters example.
     const res = await client.getOffers();
-    console.log(res[0]);
+    for (const offer of res.data) {
+        console.log(offer.effectors)
+    }
 }
 
 asyncRuntimeDecorator(main);
