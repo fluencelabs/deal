@@ -1,4 +1,5 @@
 // @ts-nocheck
+// TODO: resolve generated files into esm, or insert into all "@ts-nocheck" after generation.
 import { ethers } from "ethers";
 import {
     DealShort,

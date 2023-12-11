@@ -9,9 +9,10 @@
     "build:ts": "shx rm -rf dist && tsc -b",
     "generate-contract-types": "shx rm -rf ./src/typechain-types && typechain --target ethers-v6 '../out/**/*.json' --out-dir ./src/typechain-types --node16-modules && npm run replace-imports",
     "replace-imports": "node replace-imports.js",
-    "update-deployments": "rm -rf deployments && cp -r ../deployments ./src/deployments",
+    "update-deployments": "rm -rf src/deployments && cp -r ../deployments ./src/deployments",
     "lint": "eslint 'client/**/*.ts' --max-warnings 0 --fix",
-    "fmt": "prettier 'client/**/*.ts' --w"
+    "fmt": "prettier 'client/**/*.ts' --w",
+    "codegen:indexerClient": "graphql-codegen --config codegen.ts"
   },
   "dependencies": {
     "dotenv": "^16.3.1",
