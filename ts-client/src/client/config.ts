@@ -1,6 +1,6 @@
 import path from "path";
 
-export declare const NETWORL_NAME: readonly [
+export declare const NETWORK_NAME: readonly [
   "kras",
   "testnet",
   "stage",
@@ -8,7 +8,7 @@ export declare const NETWORL_NAME: readonly [
 ];
 
 export const DEPLOYMENTS_DIR = path.join("../deployments");
-export type Network = (typeof NETWORL_NAME)[number];
+export type Network = (typeof NETWORK_NAME)[number];
 export type Deployment = {
   core: string;
   flt: string;
