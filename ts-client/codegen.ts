@@ -4,9 +4,9 @@ import type { CodegenConfig } from "@graphql-codegen/cli";
 const config: CodegenConfig = {
     overwrite: true,
     schema: "http://localhost:8000/subgraphs/name/fluence-deal-contracts",
-    documents: "dealExplorerClient/indexerClient/queries/*.graphql",
+    documents: "src/dealExplorerClient/indexerClient/queries/*.graphql",
     generates: {
-        "src/indexerClient/generated.types.ts": {
+        "src/dealExplorerClient/indexerClient/generated.types.ts": {
             plugins: ["typescript"],
             config: {
                 scalars: {
@@ -15,7 +15,7 @@ const config: CodegenConfig = {
                 enumsAsTypes: true,
             },
         },
-        "src/indexerClient/": {
+        "src/dealExplorerClient/indexerClient/": {
             preset: "near-operation-file",
             presetConfig: {
                 extension: ".generated.ts",
