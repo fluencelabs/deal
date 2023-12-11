@@ -1,3 +1,20 @@
+interface ListViewABC {
+  // define data
+  total: number
+}
+
+export interface ProviderShortListView extends ListViewABC {
+  data: Array<ProviderShort>
+}
+
+export interface OfferShortListView extends ListViewABC {
+  data: Array<OfferShort>
+}
+
+export interface DealShortListView extends ListViewABC {
+  data: Array<DealShort>
+}
+
 export type ProviderBase = {
     id: string;
     name: string;

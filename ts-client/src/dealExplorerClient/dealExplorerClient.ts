@@ -23,6 +23,11 @@ import type { Deal_Filter, Deal_OrderBy, Offer_Filter, Offer_OrderBy } from "./i
 import type { BasicDealFragment } from "./indexerClient/queries/deals-query.generated.js";
 import { DealClient } from "../client/client.js";
 import type { Network } from "../client/config.js";
+import type {
+  DealShortListView,
+  OfferShortListView,
+  ProviderShortListView
+} from "./types.js";
 
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
@@ -96,7 +101,7 @@ export class DealExplorerClient {
         limit: number = this.DEFAULT_PAGE_LIMIT,
         orderBy: ProviderShortOrderBy = "createdAt",
         orderType: OrderType = this.DEFAULT_ORDER_TYPE,
-    ): Promise<Array<ProviderShort>> {
+    ): Promise<ProviderShortListView> {
         const composedFilters = {};
         if (providersFilters) {
             if (providersFilters.search) {
@@ -125,7 +130,11 @@ export class DealExplorerClient {
                 res.push(this._composeProviderShort(provider));
             }
         }
-        return res;
+        return {
+          // TODO: add real counter.
+          total: res.length,
+          data: res,
+        };
     }
 
     async getProvider(providerId: string): Promise<ProviderDetail> {
@@ -152,12 +161,18 @@ export class DealExplorerClient {
         limit: number = this.DEFAULT_PAGE_LIMIT,
         orderBy: OfferShortOrderBy = "createdAt",
         orderType: OrderType = this.DEFAULT_ORDER_TYPE,
-    ): Promise<Array<OfferShort>> {
+    ): Promise<OfferShortListView> {
         if (byProviderAndStatusFilter.status) {
             // TODO.
             console.warn("Status filter is not implemented.");
         }
-        return await this._getOffersImpl({ providerId: byProviderAndStatusFilter.providerId }, offset, limit, orderBy, orderType);
+        const offers = await this._getOffersImpl(
+          { providerId: byProviderAndStatusFilter.providerId }, offset, limit, orderBy, orderType,
+        );
+        return {
+          total: offers.length,
+          data: offers,
+        }
     }
 
     async getDealsByProvider(
@@ -166,12 +181,17 @@ export class DealExplorerClient {
         limit: number = this.DEFAULT_PAGE_LIMIT,
         orderBy: DealsShortOrderBy = "createdAt",
         orderType: OrderType = this.DEFAULT_ORDER_TYPE,
-    ): Promise<Array<DealShort>> {
+    ): Promise<DealShortListView> {
         if (byProviderAndStatusFilter.status) {
             // TODO.
             console.warn("Status filter is not implemented.");
         }
-        return await this._getDealsImpl({ providerId: byProviderAndStatusFilter.providerId }, offset, limit, orderBy, orderType);
+        const deals = await this._getDealsImpl(
+          { providerId: byProviderAndStatusFilter.providerId }, offset, limit, orderBy, orderType);
+        return {
+          total: deals.length,
+          data: deals,
+        }
     }
 
     _composeEffectors(effectors: unknown): Array<Effector> {
@@ -286,8 +306,12 @@ export class DealExplorerClient {
         limit: number = this.DEFAULT_PAGE_LIMIT,
         orderBy: OfferShortOrderBy = "createdAt",
         orderType: OrderType = this.DEFAULT_ORDER_TYPE,
-    ): Promise<Array<OfferShort>> {
-        return await this._getOffersImpl(offerFilters, offset, limit, orderBy, orderType);
+    ): Promise<OfferShortListView> {
+        const offers = await this._getOffersImpl(offerFilters, offset, limit, orderBy, orderType);
+        return {
+          total: offers.length,
+          data: offers,
+        }
     }
 
     _composePeers(peers: unknown): Array<Peer> {
@@ -415,8 +439,12 @@ export class DealExplorerClient {
         limit: number = this.DEFAULT_PAGE_LIMIT,
         orderBy: DealsShortOrderBy = "createdAt",
         orderType: OrderType = this.DEFAULT_ORDER_TYPE,
-    ): Promise<Array<DealShort>> {
-        return await this._getDealsImpl(dealFilters, offset, limit, orderBy, orderType);
+    ): Promise<DealShortListView> {
+        const deals = await this._getDealsImpl(dealFilters, offset, limit, orderBy, orderType);
+        return {
+          total: deals.length,
+          data: deals,
+        }
     }
 
     async getDeal(dealId: string): Promise<DealDetail> {
