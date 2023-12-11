@@ -30,7 +30,8 @@ jobs:
         with:
           version: nightly
 
-      - run: npm install
-        working-directory: ./ts-client
+      - name: Install via make
+      - run: make install
+
 
       - run: make build
