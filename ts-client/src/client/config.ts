@@ -35,28 +35,30 @@ async function _getDeployment(
   networkName: Network,
   chainId: number,
 ): Promise<Deployment> {
-  const deployment = await import(
-    path.join(DEPLOYMENTS_DIR, String(chainId) + ".json")
+  let deployment = await import(
+    path.join(DEPLOYMENTS_DIR, String(chainId) + ".json"),
+    {assert: { type: "json" }}
   );
+  deployment = deployment?.default
 
-  if (deployment?.core?.address === undefined) {
+  if (deployment?.Core?.addr === undefined) {
     throw new Error(
       `Could not find global core address for network: ${networkName}`,
     );
-  } else if (deployment?.flt?.address === undefined) {
+  } else if (deployment?.tFLT?.addr === undefined) {
     throw new Error(
       `Could not find flt token address for network: ${networkName}`,
     );
-  } else if (deployment?.usdc?.address === undefined) {
+  } else if (deployment?.tUSD?.addr === undefined) {
     throw new Error(
       `Could not find usdc token address for network: ${networkName}`,
     );
   }
 
   return {
-    core: deployment.core.address,
-    flt: deployment.tFLT.address,
-    usdc: deployment.tUSD.address,
+    core: deployment.Core.addr,
+    flt: deployment.tFLT.addr,
+    usdc: deployment.tUSD.addr,
     chainId: chainId,
   };
 }
