@@ -16,3 +16,5 @@
 /Dockerfile
 /slither.config.json
 /tsconfig.json
+/.editorconfig
+/replace-imports.js
