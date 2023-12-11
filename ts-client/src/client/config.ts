@@ -36,7 +36,7 @@ async function _getDeployment(
   chainId: number,
 ): Promise<Deployment> {
   const deployment = await await import(
-    path.join(DEPLOYMENTS_DIR, String(chainId), ".json")
+    path.join(DEPLOYMENTS_DIR, String(chainId) + ".json")
   );
 
   if (deployment?.core?.address === undefined) {
