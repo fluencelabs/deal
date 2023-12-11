@@ -1,5 +1,12 @@
 # ts-clients
 
+* [deal-explorer-client](#deal-explorer-client)
+   * [Install](#install)
+   * [Example UseCase](#example-usecase)
+* [Develop](#develop)
+   * [GraphQL Scheme Generation](#graphql-scheme-generation)
+* [ToDo](#todo)
+
 ## Requirements
 - node version: v18.16.1
 
