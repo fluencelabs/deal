@@ -1,8 +1,8 @@
 {
     "mumbai": {
         "Core": {
-            "address": "0x2B33002672cA9112453729668D0deD8fD1641cE7",
-            "startBlock": 42946617
+            "address": "0x496640DDcBA39192D4797B8d3435ef2806BCFAB7",
+            "startBlock": 43334846
         }
     },
     "localhost": {
