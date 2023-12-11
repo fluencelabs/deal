@@ -35,7 +35,7 @@ async function _getDeployment(
   networkName: Network,
   chainId: number,
 ): Promise<Deployment> {
-  const deployment = await await import(
+  const deployment = await import(
     path.join(DEPLOYMENTS_DIR, String(chainId) + ".json")
   );
 
