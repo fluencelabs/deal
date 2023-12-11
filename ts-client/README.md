@@ -7,6 +7,75 @@ TODO: about other packages...
 
 # deal-explorer-client
 
+## Install 
+```bash
+npm i @fluencelabs/deal-aurora
+```
+
+## Example UseCase
+- node version v18.16.1
+- TS
+
+tsconfig.js for reactApp example:
+```json
+{
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "target": "es2015",
+
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "noFallthroughCasesInSwitch": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true
+  }
+}
+```
+
+ready to use main.js (to run with e.g. via `node --loader ts-node/esm main.ts`)
+```typescript
+import { DealExplorerClient } from "@fluencelabs/deal-aurora";
+
+type asyncRuntimeDecoratorType = (func: Function) => void;
+
+const asyncRuntimeDecorator: asyncRuntimeDecoratorType = (func) => {
+    func()
+        .then(() => process.exit(0))
+        .catch((error: unknown) => {
+            console.error(error);
+            process.exit(1);
+        });
+};
+
+async function main() {
+    // Lets use with local env.
+    // TODO: change to Mumbai.
+    const client = new DealExplorerClient(
+        "http://localhost:8000/subgraphs/name/fluence-deal-contracts",
+        "http://localhost:8545",
+        undefined,
+        "local",
+    );
+
+    // Filter example.
+    // await client.getProviders({ effectorIds: ["1241"] });
+
+    // No filters example.
+    const res = await client.getOffers();
+    console.log(res[0]);
+}
+
+asyncRuntimeDecorator(main);
+```
+
 # Develop
 ## GraphQL Scheme Generation
 It generates typescripts for the graphQl schemes declared in [src/indexerClient/queries](src/indexerClient/queries) via fetched graphql schemes. Instruction rules are defined in [codegen.ts](codegen.ts).
