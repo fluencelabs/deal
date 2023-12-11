@@ -12,6 +12,12 @@ type Provider @entity {
   createdAt: BigInt!
 
   offers: [Offer!] @derivedFrom(field: "provider")
+
+  # Add Statistics below.
+  computeUnitsAvailable: Int!  # Sum of all available compute units in the offer (not in the deals).
+  computeUnitsTotal: Int!  # Sum of all compute units registered in the offer. TODO: when CU deleted?
+  peerCount: Int!
+  effectorCount: Int!
 }
 
 # ---- Core Contract ----
@@ -24,6 +30,7 @@ type Offer @entity {
   createdAt: BigInt!
   updatedAt: BigInt!
   provider: Provider!
+#   TODO: price per epoch and price per worker epoch are the same essentials?
   pricePerEpoch: BigInt!
   paymentToken: Token!
 
@@ -78,7 +85,7 @@ type ComputeUnit @entity {
   provider: Provider!
 
   deal: Deal
-  workerID: String
+  workerId: String
   # TODO: worker status "Expired" how to calculate.
 }
 
@@ -113,4 +120,5 @@ type Deal @entity {
 
   "I.e. Matching Result (Figma)."
   addedComputeUnits: [ComputeUnit!] @derivedFrom(field: "deal")
+  #   TODO: add matched workers.
 }

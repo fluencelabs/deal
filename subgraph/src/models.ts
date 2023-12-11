@@ -37,18 +37,32 @@ export function createOrLoadEffector(cid: string): Effector {
     return entity as Effector
 }
 
-export function createOrLoadOfferEffector(offerId: string, effectorId: string): OfferToEffector {
+// Subgprah compiler does not support return mapping/dict,
+//  thus, class is presented.
+class createOrLoadOfferEffectorReturn {
+    public created: boolean;
+    public entity: OfferToEffector;
+    constructor(entity: OfferToEffector, created: boolean) {
+        this.created = created
+        this.entity = entity
+    }
+}
+
+// Returns number of created entities.
+export function createOrLoadOfferEffector(offerId: string, effectorId: string): createOrLoadOfferEffectorReturn {
     const concattedIds = offerId.concat(effectorId)
 
     let entity = OfferToEffector.load(concattedIds)
+    let created = false
 
     if (entity == null) {
         entity = new OfferToEffector(concattedIds)
         entity.offer = offerId
         entity.effector = effectorId
         entity.save()
+        created = true
     }
-    return entity as OfferToEffector
+    return new createOrLoadOfferEffectorReturn(entity, created);
 }
 
 export function createOrLoadDealEffector(dealId: string, effectorId: string): DealToEffector {

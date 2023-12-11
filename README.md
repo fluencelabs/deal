@@ -2,6 +2,7 @@ https://book.getfoundry.sh/
 
 Deal Contracts System
 
+# Contract
 ## Install Foundry
 
 https://book.getfoundry.sh/
@@ -69,6 +70,14 @@ $ forge fmt
 ```shell
 $ forge snapshot
 ```
+
+# Subgraph (Contract Indexer)
+It is a backend for the contracts that collects info from contract events into graphQL schemes.
+
+For more info check out [README.md](subgraph/README.md).
+
+# ToDo
+- [ ] we could not be certain that on docker compose up it will deploy on the same addresses, as stated in [ts-client/deployments](ts-client/deployments): mount volume? compose deployments? use the same script that will update in the same format in deployments.
 
 ## Develop
 After [starting local network](#start-local-network-locally) you could create market on our contracts:

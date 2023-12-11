@@ -1,0 +1,61 @@
+query OffersQuery(
+  $filters: Offer_filter,
+  $offset: Int,
+  $limit: Int,
+  $orderBy: Offer_orderBy,
+  $orderType: OrderDirection,
+) {
+  offers(
+      where: $filters
+      first: $limit
+      skip: $offset
+      orderBy: $orderBy
+      orderDirection: $orderType
+  ) {
+    ...BasicOffer
+  }
+}
+
+query OfferQuery(
+  $id: ID!
+) {
+  offer(id: $id) {
+    ...BasicOffer
+    updatedAt
+    peers {
+        ...BasicPeer
+    }
+  }
+}
+
+fragment BasicOffer on Offer {
+    id
+    createdAt
+    pricePerEpoch
+    paymentToken {
+      id
+      symbol
+    }
+    computeUnitsTotal
+    computeUnitsAvailable
+    effectors {
+      effector {
+        id
+        description
+      }
+    }
+}
+
+fragment BasicPeer on Peer {
+    id
+    offer {
+        id
+    }
+    provider {
+        id
+    }
+    computeUnits {
+        id
+        workerId
+    }
+}

@@ -9,7 +9,7 @@ dataSources:
     network: localhost
     source:
       abi: Core
-      address: "0x789E0BD94672c3B010b3C57C21902be39412940B"
+      address: "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f"
       startBlock: 0
     mapping:
       kind: ethereum/events
@@ -23,11 +23,11 @@ dataSources:
         - ComputeUnit
       abis:
         - name: Core
-          file: ./abis/Core.json
+          file: ../out/Core.sol/Core.json
         - name: Deal
-          file: ./abis/Deal.json
+          file: ../out/Deal.sol/Deal.json
         - name: ERC20
-          file: ./abis/ERC20.json
+          file: ../out/ERC20.sol/ERC20.json
       eventHandlers:
         - event: MarketOfferRegistered(bytes32,address,uint256,address,(bytes4,bytes32)[])
           handler: handleMarketOfferRegistered

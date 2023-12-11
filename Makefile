@@ -4,31 +4,20 @@ export
 verify-command:
 	@command -v $(program) > /dev/null || (echo "\033[0;31m$(program) is not installed. Please install $(program) and try again.\033[0m" && exit 1)
 
+install:
+	@cd ts-client && npm install
+	@cd subgraph && npm install
+	
 build-contracts: 
 	@make verify-command program=forge
 	@forge build
 
 build:
-	@make update-abi
+	@make build-contracts
 	@cd ts-client && npm run build
+	@cd subgraph && npm run compile
 
 	@echo "\033[0;32mSuccess! Build complete.\033[0m"
-
-update-abi:
-	@make verify-command program=jq
-	@make build-contracts
-	
-	# add abi to ts-client
-	@jq -r ".abi" out/Core.sol/Core.json > ts-client/abi/Core.json
-	@jq -r ".abi" out/Deal.sol/Deal.json > ts-client/abi/Deal.json
-
-	# add abi to subgraph
-	@jq -r ".abi" out/Core.sol/Core.json > subgraph/abis/Core.json
-	@jq -r ".abi" out/Deal.sol/Deal.json > subgraph/abis/Deal.json
-	@jq -r ".abi" out/ERC20.sol/ERC20.json > subgraph/abis/ERC20.json
-
-
-	@echo "\033[0;32mSuccess! ABI updated.\033[0m"
 
 start-local-chain:
 	@make verify-command program=anvil
@@ -53,7 +42,7 @@ deploy-docker:
 deploy-%:
 	@make verify-command program=forge
 	@forge script script/Deploy.s.sol --rpc-url $* \
-	--private-key $(PRIVATE_KEY)
+	--private-key $(PRIVATE_KEY) --broadcast
 
 	@echo "\033[0;32mSuccess! Contracts deployed to $* chain.\033[0m"
 
