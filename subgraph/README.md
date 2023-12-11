@@ -28,13 +28,7 @@ cd subgraph && docker-compose up
 ## Dev in Subgraph Repo
 How to run install package and build artifacts flow is below.
 
-0. Add abi of contracts you are going to work with:
-
-> Note, that if you did not change the contracts, you may pass this step.
-
-```bash
-npm run import-contracts-abi
-```
+0. Ensure you use preferred contract version according to the [subgraph.yaml](subgraph.yaml) 
 
 1. Build artifacts and generate the **AssemblyScript** types from the sources:
 ```bash

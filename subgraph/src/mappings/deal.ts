@@ -7,7 +7,7 @@ import {
     Withdrawn,
     WorkerIdUpdated,
     ComputeUnitRemoved
-} from "../../generated/Core/DealImpl";
+} from "../../generated/Core/Deal";
 import {ComputeUnit, Deal} from "../../generated/schema";
 
 export function handleDeposited(event: Deposited): void {
