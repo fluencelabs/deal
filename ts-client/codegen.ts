@@ -5,9 +5,17 @@ const config: CodegenConfig = {
     overwrite: true,
     schema: "http://localhost:8000/subgraphs/name/fluence-deal-contracts",
     documents: "src/dealExplorerClient/indexerClient/queries/*.graphql",
+    emitLegacyCommonJSImports: false,
     generates: {
         "src/dealExplorerClient/indexerClient/generated.types.ts": {
-            plugins: ["typescript"],
+            plugins: [
+              {
+                add: {
+                  content: '/* eslint-disable */\n//@ts-nocheck'
+                }
+              },
+              "typescript"
+            ],
             config: {
                 scalars: {
                     BigInt: "string",
@@ -21,7 +29,20 @@ const config: CodegenConfig = {
                 extension: ".generated.ts",
                 baseTypesPath: "generated.types.ts",
             },
-            plugins: ["typescript-operations", "typescript-graphql-request"],
+            plugins: [
+              {
+                add: {
+                  content: '/* eslint-disable */\n//@ts-nocheck'
+                }
+              },
+              "typescript-operations", "typescript-graphql-request"
+            ],
+            // TODO: add hook on after generation.
+            hooks: {
+              afterOneFileWrite: (filenamePath: string) => {
+                console.log(filenamePath);
+              }
+            }
         },
     },
 };

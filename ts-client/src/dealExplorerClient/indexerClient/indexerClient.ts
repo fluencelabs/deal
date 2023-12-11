@@ -1,21 +1,22 @@
 import { GraphQLClient } from "graphql-request";
-import {
+import type {
     DealQueryQueryVariables,
     DealsQueryQueryVariables,
-    getSdk as getDealsSdk,
     Sdk as DealsSdk
-} from "./queries/deals-query.generated";
-import {
-    getSdk as getOffersSdk,
+} from "./queries/deals-query.generated.js";
+import { getSdk as getDealsSdk } from "./queries/deals-query.generated.js";
+import type {
     OfferQueryQueryVariables,
     OffersQueryQueryVariables,
     Sdk as OffersSdk
-} from "./queries/offers-query.generated";
-import {
-    getSdk as getProvidersSdk, ProviderQueryQueryVariables,
+} from "./queries/offers-query.generated.js";
+import { getSdk as getOffersSdk } from "./queries/offers-query.generated.js";
+import type {
+    ProviderQueryQueryVariables,
     ProvidersQueryQueryVariables,
     Sdk as ProvidersSdk
-} from "./queries/providers-query.generated";
+} from "./queries/providers-query.generated.js";
+import { getSdk as getProvidersSdk } from "./queries/providers-query.generated.js";
 
 export class IndexerClient {
     public dealsClient: DealsSdk;

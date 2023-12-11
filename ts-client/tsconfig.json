@@ -16,5 +16,5 @@
     "esm": true
   },
   "include": ["src/**/*"],
-  "exclude": ["dist", "node_modules", "src/dealExplorerClient", "src/tests"]
+  "exclude": ["dist", "node_modules", "src/tests"]
 }

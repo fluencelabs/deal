@@ -1,7 +1,7 @@
 // @ts-nocheck
 // TODO: resolve generated files into esm, or insert into all "@ts-nocheck" after generation.
 import { ethers } from "ethers";
-import {
+import type {
     DealShort,
     OfferShort,
     OfferShortOrderBy,
@@ -15,14 +15,14 @@ import {
     DealsShortOrderBy,
     DealDetail,
     Peer,
-} from "./types";
-import { ByProviderAndStatusFilter, DealsFilters, OffersFilters, ProvidersFilters } from "./filters";
-import { IndexerClient } from "./indexerClient/indexerClient";
-import { BasicOfferFragment, ProviderOfProvidersQueryFragment } from "./indexerClient/queries/providers-query.generated";
-import { Deal_Filter, Deal_OrderBy, Offer_Filter, Offer_OrderBy } from "./indexerClient/generated.types";
-import { BasicDealFragment } from "./indexerClient/queries/deals-query.generated";
-import { DealClient } from "../client/client";
-import { Network } from "../client/config";
+} from "./types.js";
+import type { ByProviderAndStatusFilter, DealsFilters, OffersFilters, ProvidersFilters } from "./filters.js";
+import { IndexerClient } from "./indexerClient/indexerClient.js";
+import type { BasicOfferFragment, ProviderOfProvidersQueryFragment } from "./indexerClient/queries/providers-query.generated.js";
+import type { Deal_Filter, Deal_OrderBy, Offer_Filter, Offer_OrderBy } from "./indexerClient/generated.types.js";
+import type { BasicDealFragment } from "./indexerClient/queries/deals-query.generated.js";
+import { DealClient } from "../client/client.js";
+import type { Network } from "../client/config.js";
 
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
