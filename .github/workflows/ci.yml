@@ -30,8 +30,6 @@ jobs:
         with:
           version: nightly
 
-      - name: Install via make
       - run: make install
-
 
       - run: make build
