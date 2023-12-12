@@ -37,9 +37,9 @@ async function _getDeployment(
 ): Promise<Deployment> {
   let deployment = await import(
     path.join(DEPLOYMENTS_DIR, String(chainId) + ".json"),
-    {assert: { type: "json" }}
+    { assert: { type: "json" } }
   );
-  deployment = deployment?.default
+  deployment = deployment?.default;
 
   if (deployment?.Core?.addr === undefined) {
     throw new Error(
