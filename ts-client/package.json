@@ -11,13 +11,8 @@
     "replace-imports": "node replace-imports.js",
     "update-deployments": "rm -rf src/deployments && cp -r ../deployments ./src/deployments",
     "fmt": "prettier 'src/**/*.ts' --w",
-    "codegen:indexerClient": "graphql-codegen --config codegen.ts",
-    "precommit-msg": "echo 'Pre-commit checks...' && exit 0"
+    "codegen:indexerClient": "graphql-codegen --config codegen.ts"
   },
-  "pre-commit": [
-    "precommit-msg",
-    "fmt"
-  ],
   "dependencies": {
     "@graphql-typed-document-node/core": "^3.2.0",
     "dotenv": "^16.3.1",
@@ -47,7 +42,6 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-unused-imports": "^3.0.0",
     "husky": "^8.0.3",
-    "pre-commit": "^1.2.2",
     "prettier": "^3.0.2",
     "shx": "^0.3.4",
     "ts-node": "^10.9.1",
