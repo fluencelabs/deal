@@ -63,16 +63,25 @@ const asyncRuntimeDecorator: asyncRuntimeDecoratorType = (func) => {
 };
 
 async function main() {
-    // Lets use with local env.
-    // TODO: change to Mumbai.
+    // For local uncomment below:
+    // const subgraphUrl = "http://localhost:8000/subgraphs/name/fluence-deal-contracts"
+    // const rpcUrl = "http://localhost:8545"
+    // const stand = "local"
+
+    // For Mumbai uncomment below:
+    const subgraphUrl = "https://api.thegraph.com/subgraphs/name/alcibiadescleinias/fluence-deal-contracts"
+    const rpcUrl = "https://rpc.ankr.com/polygon_mumbai"
+    const stand = "testnet"
+
+    // General typed class to use.
     const client = new DealExplorerClient(
-        "http://localhost:8000/subgraphs/name/fluence-deal-contracts",
-        "http://localhost:8545",
-        undefined,
-        "local",
+        subgraphUrl,
+        rpcUrl,
+        undefined,  // TODO: demonstrate on ready.
+        stand,
     );
 
-    // Filter example.
+    // With filter example.
     // await client.getProviders({ effectorIds: ["1241"] });
 
     // No filters example.
