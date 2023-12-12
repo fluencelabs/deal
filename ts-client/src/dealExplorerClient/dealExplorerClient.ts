@@ -1,5 +1,4 @@
 // @ts-nocheck
-// TODO: resolve generated files into esm, or insert into all "@ts-nocheck" after generation.
 import { ethers } from "ethers";
 import type {
   DealShort,
@@ -143,6 +142,7 @@ export class DealExplorerClient {
       }
     }
 
+    const total = await this.indexerClient.getTotalProviders({filters: composedFilters})
     const data = await this.indexerClient.getProviders({
       filters: composedFilters,
       offset,
@@ -158,7 +158,7 @@ export class DealExplorerClient {
     }
     return {
       // TODO: add real counter.
-      total: res.length,
+      total: total,
       data: res,
     };
   }
@@ -192,17 +192,13 @@ export class DealExplorerClient {
       // TODO.
       console.warn("Status filter is not implemented.");
     }
-    const offers = await this._getOffersImpl(
+    return await this._getOffersImpl(
       { providerId: byProviderAndStatusFilter.providerId },
       offset,
       limit,
       orderBy,
       orderType,
     );
-    return {
-      total: offers.length,
-      data: offers,
-    };
   }
 
   async getDealsByProvider(
@@ -216,17 +212,13 @@ export class DealExplorerClient {
       // TODO.
       console.warn("Status filter is not implemented.");
     }
-    const deals = await this._getDealsImpl(
+    return await this._getDealsImpl(
       { providerId: byProviderAndStatusFilter.providerId },
       offset,
       limit,
       orderBy,
       orderType,
     );
-    return {
-      total: deals.length,
-      data: deals,
-    };
   }
 
   _composeEffectors(effectors: unknown): Array<Effector> {
@@ -307,12 +299,13 @@ export class DealExplorerClient {
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: OfferShortOrderBy = "createdAt",
     orderType: OrderType = this.DEFAULT_ORDER_TYPE,
-  ): Promise<Array<OfferShort>> {
+  ): Promise<OfferShortListView> {
     const orderByConverted =
       this._convertOfferShortOrderByToIndexerType(orderBy);
-    const filters = this._convertOffersFiltersToIndexerType(offerFilters);
+    const filtersConverted = this._convertOffersFiltersToIndexerType(offerFilters);
+    const total = await this.indexerClient.getTotalOffers({filters: filtersConverted})
     const data = await this.indexerClient.getOffers({
-      filters,
+      filters: filtersConverted,
       offset,
       limit,
       orderBy: orderByConverted,
@@ -324,7 +317,7 @@ export class DealExplorerClient {
         res.push(this._composeOfferShort(offer));
       }
     }
-    return res;
+    return {data: res, total: total};
   }
 
   /*
@@ -346,17 +339,13 @@ export class DealExplorerClient {
     orderBy: OfferShortOrderBy = "createdAt",
     orderType: OrderType = this.DEFAULT_ORDER_TYPE,
   ): Promise<OfferShortListView> {
-    const offers = await this._getOffersImpl(
+    return await this._getOffersImpl(
       offerFilters,
       offset,
       limit,
       orderBy,
       orderType,
     );
-    return {
-      total: offers.length,
-      data: offers,
-    };
   }
 
   _composePeers(peers: unknown): Array<Peer> {
@@ -440,11 +429,12 @@ export class DealExplorerClient {
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: DealsShortOrderBy = "createdAt",
     orderType: OrderType = this.DEFAULT_ORDER_TYPE,
-  ): Promise<Array<DealShort>> {
+  ): Promise<DealShortListView> {
     const orderByConverted =
       this._convertDealShortOrderByToIndexerType(orderBy);
     const filtersConverted =
       this._convertDealsFiltersToIndexerType(dealsFilters);
+    const total = await this.indexerClient.getTotalDeals({filters: filtersConverted})
     const data = await this.indexerClient.getDeals({
       filters: filtersConverted,
       offset,
@@ -458,7 +448,7 @@ export class DealExplorerClient {
         res.push(this._composeDealsShort(deal));
       }
     }
-    return res;
+    return {data: res, total: total};
   }
 
   _composeDealsShort(deal: BasicDealFragment): DealShort {
@@ -490,17 +480,13 @@ export class DealExplorerClient {
     orderBy: DealsShortOrderBy = "createdAt",
     orderType: OrderType = this.DEFAULT_ORDER_TYPE,
   ): Promise<DealShortListView> {
-    const deals = await this._getDealsImpl(
+    return await this._getDealsImpl(
       dealFilters,
       offset,
       limit,
       orderBy,
       orderType,
     );
-    return {
-      total: deals.length,
-      data: deals,
-    };
   }
 
   async getDeal(dealId: string): Promise<DealDetail> {
