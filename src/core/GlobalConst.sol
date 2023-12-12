@@ -8,10 +8,10 @@ import "./EpochController.sol";
 
 contract GlobalConst is EpochController, OwnableUpgradableDiamond, IGlobalConst {
     // ------------------ Constants ------------------
-    uint256 public constant PRECISION = 10000; // min: 0.0001
+    uint256 public constant PRECISION = 10000000; // min: 0.0000001
 
-    uint256 internal constant _REWARD_POOL_GROWTH_RATE = 9000; // 90%
-    uint256 internal constant _REWARD_POOL_SHRINK_RATE = 11000; // 110%
+    uint256 internal constant _REWARD_POOL_GROWTH_RATE = 9000000; // 90%
+    uint256 internal constant _REWARD_POOL_SHRINK_RATE = 11000000; // 110%
 
     // ------------------ Types ------------------
     struct DealConst {
@@ -270,9 +270,9 @@ contract GlobalConst is EpochController, OwnableUpgradableDiamond, IGlobalConst 
         _setRewardPool(fltPrice_, globalConstantsStorage.ccConst.activeUnitCount);
 
         globalConstantsStorage.ccConst.fltTargetRevenuePerEpoch =
-            fltPrice_ * globalConstantsStorage.ccConst.usdTargetRevenuePerEpoch / PRECISION;
+            globalConstantsStorage.ccConst.usdTargetRevenuePerEpoch / fltPrice_;
         globalConstantsStorage.ccConst.fltCollateralPerUnit =
-            fltPrice_ * globalConstantsStorage.ccConst.usdCollateralPerUnit / PRECISION;
+            globalConstantsStorage.ccConst.usdCollateralPerUnit / fltPrice_;
 
         emit FLTPriceUpdated(fltPrice_);
     }
@@ -296,10 +296,10 @@ contract GlobalConst is EpochController, OwnableUpgradableDiamond, IGlobalConst 
 
         if (constantType == CCConstantType.USDCollateralPerUnit) {
             globalConstantsStorage.ccConst.usdCollateralPerUnit = v;
-            globalConstantsStorage.ccConst.fltCollateralPerUnit = globalConstantsStorage.fltPrice * v / PRECISION;
+            globalConstantsStorage.ccConst.fltCollateralPerUnit = v / globalConstantsStorage.fltPrice;
         } else if (constantType == CCConstantType.USDTargetRevenuePerEpoch) {
             globalConstantsStorage.ccConst.usdTargetRevenuePerEpoch = v;
-            globalConstantsStorage.ccConst.fltTargetRevenuePerEpoch = globalConstantsStorage.fltPrice * v / PRECISION;
+            globalConstantsStorage.ccConst.fltTargetRevenuePerEpoch = v / globalConstantsStorage.fltPrice;
         } else if (constantType == CCConstantType.MinDuration) {
             globalConstantsStorage.ccConst.minDuration = v;
         } else if (constantType == CCConstantType.MinRewardPerEpoch) {

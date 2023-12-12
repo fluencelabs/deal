@@ -112,7 +112,7 @@ contract Depoyments is ScriptBase {
 
         address addr;
 
-        assembly {
+        assembly ("memory-safe") {
             addr := create(0, add(creationCode, 0x20), mload(creationCode))
         }
 

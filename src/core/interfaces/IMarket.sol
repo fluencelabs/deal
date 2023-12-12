@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "src/deal/interfaces/IDeal.sol";
+import "src/deal/base/Types.sol";
 
 interface IMarket {
     // ------------------ Types ------------------

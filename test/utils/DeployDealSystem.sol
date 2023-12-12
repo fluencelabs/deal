@@ -20,7 +20,7 @@ library DeployDealSystem {
     }
 
     // ------------------ Constants ------------------
-    uint256 public constant PRECISION = 10000; // min: 0.0001
+    uint256 public constant PRECISION = 10000000; // min: 0.0000001
     uint256 public constant DEFAULT_EPOCH_DURATION = 1 days;
     uint256 public constant DEFAULT_FLT_PRICE = 10 * PRECISION; // 10 USD
     uint256 public constant DEFAULT_MIN_DEPOSITED_EPOCHES = 2;
@@ -31,7 +31,7 @@ library DeployDealSystem {
     uint256 public constant DEFAULT_MIN_REWARD_PER_EPOCH = 10000;
     uint256 public constant DEFAULT_MAX_REWARD_PER_EPOCH = 1;
     uint256 public constant DEFAULT_VESTING_DURATION = 2 days;
-    uint256 public constant DEFAULT_SLASHING_RATE = 100; // 0.01 = 1% = 100
+    uint256 public constant DEFAULT_SLASHING_RATE = 100000; // 0.01 = 1% = 100000
     uint256 public constant DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH = 3;
     uint256 public constant DEFAULT_MAX_PROOFS_PER_EPOCH = 5;
     uint256 public constant DEFAULT_WITHDRAW_EPOCHES_AFTER_FAILED = 2;

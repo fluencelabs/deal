@@ -1,14 +1,9 @@
 import path from "path";
 
-export declare const NETWORK_NAME: readonly [
-  "kras",
-  "testnet",
-  "stage",
-  "local",
-];
+export const CONTRACTS_ENV = ["kras", "testnet", "stage", "local"];
 
 export const DEPLOYMENTS_DIR = path.join("../deployments");
-export type Network = (typeof NETWORK_NAME)[number];
+export type ContractsENV = (typeof CONTRACTS_ENV)[number];
 export type Deployment = {
   core: string;
   flt: string;
@@ -16,23 +11,30 @@ export type Deployment = {
   chainId: number;
 };
 
-export const getDeployment = async (network: Network): Promise<Deployment> => {
-  switch (network) {
+export const getDeployment = async (env: ContractsENV): Promise<Deployment> => {
+  let chainId = 0;
+  switch (env) {
     case "kras":
-      return await _getDeployment("kras", 80001);
+      chainId = 80001;
+      break;
     case "testnet":
-      return await _getDeployment("testnet", 80001);
+      chainId = 137;
+      break;
     case "stage":
-      return await _getDeployment("stage", 80001);
+      chainId = 1337;
+      break;
     case "local":
-      return await _getDeployment("local", 31337);
+      chainId = 31337;
+      break;
     default:
-      throw new Error(`Unknown network: ${network}`);
+      throw new Error(`Unknown chain env: ${env}`);
   }
+
+  return _getDeployment(env, chainId);
 };
 
 async function _getDeployment(
-  networkName: Network,
+  env: ContractsENV,
   chainId: number,
 ): Promise<Deployment> {
   const deployment = await await import(
@@ -40,17 +42,11 @@ async function _getDeployment(
   );
 
   if (deployment?.core?.address === undefined) {
-    throw new Error(
-      `Could not find global core address for network: ${networkName}`,
-    );
+    throw new Error(`Could not find global core address for env: ${env}`);
   } else if (deployment?.flt?.address === undefined) {
-    throw new Error(
-      `Could not find flt token address for network: ${networkName}`,
-    );
+    throw new Error(`Could not find flt token address for env: ${env}`);
   } else if (deployment?.usdc?.address === undefined) {
-    throw new Error(
-      `Could not find usdc token address for network: ${networkName}`,
-    );
+    throw new Error(`Could not find usdc token address for env: ${env}`);
   }
 
   return {

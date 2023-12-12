@@ -445,8 +445,9 @@ contract CapacityCommitment is ICapacityCommitment, Market {
 
             if (prevEpoch == ccFaildEpoch) {
                 uint256 remainingFailsForLastEpoch = cc.info.remainingFailsForLastEpoch;
-                if (remainingFailsForLastEpoch > 0 && unit.index < remainingFailsForLastEpoch) {
+                if (remainingFailsForLastEpoch > 0) {
                     slashedCollateral += (collateralPerUnit_ * ccSlashingRate()) / PRECISION;
+                    cc.info.remainingFailsForLastEpoch = --remainingFailsForLastEpoch;
                 }
             }
 

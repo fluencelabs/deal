@@ -4,6 +4,11 @@ export
 verify-command:
 	@command -v $(program) > /dev/null || (echo "\033[0;31m$(program) is not installed. Please install $(program) and try again.\033[0m" && exit 1)
 
+install:
+	@make verify-command program=npm
+	@cd ts-client && npm install
+	@cd subgraph && npm install
+
 build-contracts: 
 	@make verify-command program=forge
 	@forge build
@@ -21,7 +26,7 @@ start-local-chain:
 
 deploy-local:
 	@make verify-command program=forge
-	@forge script script/Deploy.s.sol --rpc-url anvil-node  \
+	@CONTRACTS_ENV_NAME=local forge script script/Deploy.s.sol --rpc-url local  \
 	--mnemonics "test test test test test test test test test test test junk" \
 	--sender 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --broadcast
 
@@ -37,7 +42,7 @@ deploy-docker:
 
 deploy-%:
 	@make verify-command program=forge
-	@forge script script/Deploy.s.sol --rpc-url $* \
+	@CONTRACT_ENV_NAME=$* forge script script/Deploy.s.sol --rpc-url $* \
 	--private-key $(PRIVATE_KEY)
 
 	@echo "\033[0;32mSuccess! Contracts deployed to $* chain.\033[0m"

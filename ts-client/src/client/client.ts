@@ -8,16 +8,16 @@ import {
 import { getDeployment } from "./config.js";
 
 import type { Core, Deal, ERC20 } from "../typechain-types/index.js";
-import type { Deployment, Network } from "./config.js";
+import type { Deployment, ContractsENV } from "./config.js";
 
 export class DealClient {
   private deployment: Promise<Deployment>;
 
   constructor(
     private signerOrProvider: ethers.Signer | ethers.Provider,
-    network: Network,
+    env: ContractsENV,
   ) {
-    this.deployment = getDeployment(network);
+    this.deployment = getDeployment(env);
   }
 
   getDeal(address: string): Deal {
