@@ -10,20 +10,31 @@
     "generate-contract-types": "shx rm -rf ./src/typechain-types && typechain --target ethers-v6 '../out/**/*.json' --out-dir ./src/typechain-types --node16-modules && npm run replace-imports",
     "replace-imports": "node replace-imports.js",
     "update-deployments": "rm -rf src/deployments && cp -r ../deployments ./src/deployments",
-    "lint": "eslint 'client/**/*.ts' --max-warnings 0 --fix",
-    "fmt": "prettier 'client/**/*.ts' --w",
-    "codegen:indexerClient": "graphql-codegen --config codegen.ts"
+    "fmt": "prettier 'src/**/*.ts' --w",
+    "codegen:indexerClient": "graphql-codegen --config codegen.ts",
+    "precommit-msg": "echo 'Pre-commit checks...' && exit 0"
   },
+  "pre-commit": [
+    "precommit-msg",
+    "fmt"
+  ],
   "dependencies": {
+    "@graphql-typed-document-node/core": "^3.2.0",
     "dotenv": "^16.3.1",
     "ethers": "6.7.1",
-    "@graphql-typed-document-node/core": "^3.2.0",
     "graphql": "^16.8.1",
     "graphql-request": "^6.1.0",
     "graphql-scalars": "^1.22.4",
     "graphql-tag": "^2.12.6"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "5.0.0",
+    "@graphql-codegen/client-preset": "4.1.0",
+    "@graphql-codegen/introspection": "4.0.0",
+    "@graphql-codegen/near-operation-file-preset": "^3.0.0",
+    "@graphql-codegen/typescript": "^4.0.1",
+    "@graphql-codegen/typescript-graphql-request": "^6.0.1",
+    "@graphql-codegen/typescript-operations": "^4.0.1",
     "@tsconfig/node18-strictest-esm": "^1.0.1",
     "@typechain/ethers-v6": "^0.5.0",
     "@types/node": "^20.5.4",
@@ -36,19 +47,12 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-unused-imports": "^3.0.0",
     "husky": "^8.0.3",
+    "pre-commit": "^1.2.2",
     "prettier": "^3.0.2",
     "shx": "^0.3.4",
     "ts-node": "^10.9.1",
     "typechain": "^8.3.1",
-    "typescript": "^5.1.6",
-
-    "@graphql-codegen/cli": "5.0.0",
-    "@graphql-codegen/client-preset": "4.1.0",
-    "@graphql-codegen/introspection": "4.0.0",
-    "@graphql-codegen/near-operation-file-preset": "^3.0.0",
-    "@graphql-codegen/typescript": "^4.0.1",
-    "@graphql-codegen/typescript-graphql-request": "^6.0.1",
-    "@graphql-codegen/typescript-operations": "^4.0.1"
+    "typescript": "^5.1.6"
   },
   "eslintConfig": {
     "env": {
