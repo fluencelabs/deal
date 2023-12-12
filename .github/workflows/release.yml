@@ -61,9 +61,7 @@ jobs:
           jwtTtl: 300
           exportToken: false
           secrets: |
-            kv/npmjs/fluencebot token | NODE_AUTH_TOKEN ;
-            kv/hub.docker.com/fluencebot username | DOCKER_USERNAME ;
-            kv/hub.docker.com/fluencebot password | DOCKER_PASSWORD
+            kv/npmjs/fluencebot token | NODE_AUTH_TOKEN
 
       - name: Setup node
         uses: actions/setup-node@v3
@@ -73,13 +71,13 @@ jobs:
           cache-dependency-path: ./ts-client/package-lock.json
           cache: "npm"
 
+      - run: npm install
+        working-directory: ./ts-client
+
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
-
-      - run: npm install
-        working-directory: ./ts-client
 
       - run: make build
 
