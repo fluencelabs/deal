@@ -10,9 +10,6 @@ concurrency:
 
 jobs:
   release-please:
-    defaults:
-      run:
-        working-directory: ./ts-client
     runs-on: ubuntu-latest
 
     outputs:
@@ -27,6 +24,7 @@ jobs:
         id: release
         uses: google-github-actions/release-please-action@v3
         with:
+          path: ./ts-client
           token: ${{ secrets.FLUENCEBOT_RELEASE_PLEASE_PAT }}
           command: manifest
           config-file: .github/release-please/config.json
@@ -40,10 +38,8 @@ jobs:
 
   deal:
     if: needs.release-please.outputs.release-created
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./ts-client
+    runs-on: ubuntu-lates
+
     needs:
       - release-please
 
@@ -75,7 +71,7 @@ jobs:
         with:
           node-version: "16"
           registry-url: "https://registry.npmjs.org"
-          cache-dependency-path: package-lock.json
+          cache-dependency-path: ./ts-client/package-lock.json
           cache: "npm"
 
       - name: Install Foundry
@@ -84,12 +80,13 @@ jobs:
           version: nightly
 
       - run: npm install
+        working-directory: ./ts-client
 
       - run: make build
-        working-directory: /
 
       - name: Publish to npm registry
         run: npm publish --access public
+        working-directory: ./ts-client
 
   slack:
     if: always()
