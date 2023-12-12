@@ -1,0 +1,26 @@
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+via_ir = true
+solc_version = "0.8.19"
+fs_permissions = [
+    { access = "read-write", path = "./deployments" },
+    { access = "read-write", path = "./ts-client/abi" },
+    { access = "read-write", path = "./subgraph/abis" },
+    { access = "read", path = "./out" },
+]
+gas_reports = ["*"]
+optimizer = true
+optimizer_runs = 4294967295
+
+[rpc_endpoints]
+local = "http://0.0.0.0:8545"
+stage = "https://rpc.ankr.com/polygon_mumbai"
+testnet = "https://rpc.ankr.com/polygon_mumbai"
+kras = "https://rpc.ankr.com/polygon_mumbai"
+mumbai = "https://rpc.ankr.com/polygon_mumbai"
+ipcsubnet = "http://139.162.187.214:8545"
+calibration = "https://api.calibration.node.glif.io/rpc/v1"

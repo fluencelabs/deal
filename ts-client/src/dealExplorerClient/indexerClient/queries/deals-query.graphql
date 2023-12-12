@@ -1,0 +1,56 @@
+query DealsQuery(
+  $filters: Deal_filter,
+  $offset: Int,
+  $limit: Int,
+  $orderBy: Deal_orderBy,
+  $orderType: OrderDirection,
+) {
+  deals(
+      where: $filters
+      first: $limit
+      skip: $offset
+      orderBy: $orderBy
+      orderDirection: $orderType
+  ) {
+    ...BasicDeal
+  }
+}
+
+query DealQuery(
+  $id: ID!
+) {
+  deal(id: $id) {
+    ...BasicDeal
+      maxWorkersPerProvider
+      appCID
+      pricePerWorkerEpoch
+  }
+}
+
+fragment BasicDeal on Deal {
+    id
+    createdAt
+    minWorkers
+    targetWorkers
+    owner
+    paymentToken {
+      id
+      symbol
+    }
+    effectors {
+      effector {
+        id
+        description
+      }
+    }
+    addedComputeUnits {
+        id
+        workerId
+        provider {
+            id
+        }
+    }
+    maxPaidEpoch
+    depositedSum
+    withdrawalSum
+}

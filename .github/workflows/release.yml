@@ -72,17 +72,19 @@ jobs:
           cache-dependency-path: package-lock.json
           cache: "npm"
 
-      - run: npm install --f
-        working-directory: .
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
 
-      - run: npm run build
-        env:
-          PRIVATE_KEY: ${{ secrets.DEAL_TESNET_PRIVATE_KEY }}
-        working-directory: .
+      - run: npm install
+        working-directory: ./ts-client
+
+      - run: make build
 
       - name: Publish to npm registry
         run: npm publish --access public
-        working-directory: .
+        working-directory: ./ts-client
 
   container:
     name: "Publish ${{ matrix.arch }} container"

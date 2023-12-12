@@ -1,57 +1,87 @@
-# Deal Contracts System
+https://book.getfoundry.sh/
 
-* [Develop](#develop)
-   * [Publish typechain](#publish-typechain)
-   * [Run local network with contracts](#run-local-network-with-contracts)
-   * [Run local network with contracts in docker](#run-local-network-with-contracts-in-docker)
-* [Deploy](#deploy)
-   * [Ethereum Public Networks](#ethereum-public-networks)
-   * [Run Deploy](#run-deploy)
+Deal Contracts System
 
-# Develop
-## Publish typechain
+# Contract
+## Install Foundry
 
-You have to open the main branch and pull the latest version of it locally Then
-do the following (replace versions with the actual versions that you want):
+https://book.getfoundry.sh/
+
+## Build
+
+### Build contracts and ts-client
 
 ```shell
-git tag -a v0.0.0 -m ""
-git push origin v0.0.0
+$ make build
 ```
 
-## Run local network with contracts
+### Build only contracts
 
 ```shell
-npm install
-npm run compile
-npx hardhat node
+$ make build-contracts
 ```
 
-## Run local network with contracts in docker
+### Update abi for subgraph and ts-client
 
 ```shell
-docker-compose up -d
+$ make update-abi
 ```
 
-# Deploy
-We used to use [hardhat-deploy](https://github.com/wighawag/hardhat-deploy) plugin to deploy smart contracts on chains 
-and track differences of the contracts (plugin identifies if the contract changed and deploy/update contract).
+## Start local network using docker
 
-Note, that we commit our **deployed contract addresses** into the repo, e.g. `Faucet` contract from the **kras**: [src/deployments/kras/Faucet.json](src/deployments/kras/Faucet.json). Thus, if you run deploy commands described below the addresses may change (if the contract in the network differs from the contract in you repo) and there will be **git diff** you ought to propagate the teams/community.  
-
-> For all available for the hardhat-deploy networks and their writings, please refer to `networks` from [hardhat.config.ts](hardhat.config.ts).
-
-## Ethereum Public Networks
-For public test-net chains and production chains: do not forget to set appropriate in your **.env** file:
-
-- `WAIT_CONFIRMATIONS` in `.env` (e.g. 5-8)
-- `PRIVATE_KEY` for the deployer (raw private key)
-
-## Run Deploy
-After you prepared .env file and did `npm i`, to deploy all contracts to e.g. **kras**:
-
-```bash
-npm run deploy:kras
+```shell
+$ docker compose -f ./docker/docker-compose.yml up
 ```
 
-> we also have `all` -> `npm run deploy:all`  
+RPC: [http://0.0.0.0:8545](http://0.0.0.0:8545)
+
+Explorer: [http://localhost:4000](http://localhost:4000)
+
+## Start local network locally
+
+```shell
+$ make start-local-chain
+```
+
+```shell
+$ make deploy-local
+```
+
+## Deploy to network
+
+```shell
+$ PRIVATE_KEY=${} make deploy-{network_name}
+```
+
+## Test
+
+```shell
+$ forge test
+```
+
+## Format
+
+```shell
+$ forge fmt
+```
+
+## Gas Snapshots
+
+```shell
+$ forge snapshot
+```
+
+# Subgraph (Contract Indexer)
+It is a backend for the contracts that collects info from contract events into graphQL schemes.
+
+For more info check out [README.md](subgraph/README.md).
+
+# ToDo
+- [ ] we could not be certain that on docker compose up it will deploy on the same addresses, as stated in [ts-client/deployments](ts-client/deployments): mount volume? compose deployments? use the same script that will update in the same format in deployments.
+
+## Develop
+After [starting local network](#start-local-network-locally) you could create market on our contracts:
+
+```shell
+$ make create-pure-market-local
+```

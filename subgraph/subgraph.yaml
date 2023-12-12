@@ -1,0 +1,85 @@
+specVersion: 0.0.5
+description: TODO
+repository: https://TODO
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: Core
+    network: localhost
+    source:
+      abi: Core
+      address: "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f"
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Offer
+        - Effector
+        - Peer
+        - OfferToEffector
+        - ComputeUnit
+      abis:
+        - name: Core
+          file: ../out/Core.sol/Core.json
+        - name: Deal
+          file: ../out/Deal.sol/Deal.json
+        - name: ERC20
+          file: ../out/ERC20.sol/ERC20.json
+      eventHandlers:
+        - event: MarketOfferRegistered(bytes32,address,uint256,address,(bytes4,bytes32)[])
+          handler: handleMarketOfferRegistered
+        - event: PeerCreated(bytes32,bytes32)
+          handler: handlePeerCreated
+        - event: ComputeUnitCreated(bytes32,bytes32,bytes32)
+          handler: handleComputeUnitCreated
+        - event: MinPricePerEpochUpdated(bytes32,uint256)
+          handler: handleMinPricePerEpochUpdated
+        - event: PaymentTokenUpdated(bytes32,address)
+          handler: handlePaymentTokenUpdated
+        - event: EffectorAdded(bytes32,(bytes4,bytes32))
+          handler: handleEffectorAdded
+        - event: EffectorRemoved(bytes32,(bytes4,bytes32))
+          handler: handleEffectorRemoved
+        - event: ComputeUnitAddedToDeal(bytes32,address,bytes32)
+          handler: handleComputeUnitAddedToDeal
+        - event: ComputeUnitRemovedFromDeal(bytes32,address,bytes32)
+          handler: handleComputeUnitRemovedFromDeal
+        - event: DealCreated(indexed
+            address,address,uint256,address,uint256,uint256,uint256,uint256,(bytes4,bytes32)[],(bytes4,bytes32))
+          handler: handleDealCreated
+      file: ./src/mappings/core.ts
+templates:
+  - name: Deal
+    kind: ethereum/contract
+    network: localhost
+    source:
+      abi: Deal
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Deal
+        - DealToEffector
+      abis:
+        - name: Deal
+          file: ../out/Deal.sol/Deal.json
+      eventHandlers:
+        - event: Deposited(uint256)
+          handler: handleDeposited
+        - event: Withdrawn(uint256)
+          handler: handleWithdrawn
+        - event: MaxPaidEpochUpdated(uint256)
+          handler: handleMaxPaidEpochUpdated
+        - event: AdminChanged(address,address)
+          handler: handleAppCIDChanged
+        - event: ComputeUnitJoined(bytes32)
+          handler: handleComputeUnitJoined
+        - event: ComputeUnitRemoved(bytes32)
+          handler: handleComputeUnitRemoved
+        - event: WorkerIdUpdated(bytes32,bytes32)
+          handler: handleWorkerIdUpdated
+      file: ./src/mappings/deal.ts
