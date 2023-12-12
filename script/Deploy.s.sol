@@ -12,6 +12,7 @@ import "src/core/Core.sol";
 import "src/dev/OwnableFaucet.sol";
 import "src/dev/TestERC20.sol";
 import "./utils/Depoyments.sol";
+import "src/utils/Multicall3.sol";
 
 contract DeployContracts is Depoyments, Script {
     using SafeERC20 for IERC20;
@@ -74,6 +75,7 @@ contract DeployContracts is Depoyments, Script {
         ENV memory env = _loadENV();
 
         _startDeploy();
+        _deployMulticall3();
         (IERC20 tFLT, IERC20 tUSD) = _deployTestTokens();
 
         if (env.chainId == LOCAL_CHAIN_ID) {
@@ -179,6 +181,11 @@ contract DeployContracts is Depoyments, Script {
 
         args = abi.encode("USD Token", "tUSD");
         tUSD = IERC20(_deployContract("tUSD", "TestERC20", args));
+    }
+
+    function _deployMulticall3() internal returns (Multicall3 multicall) {
+        bytes memory args = abi.encode();
+        multicall = Multicall3(_deployContract("Multicall3", "Multicall3", args));
     }
 
     function _deployTestFaucet(IERC20 tFLT, IERC20 tUSD) internal returns (address faucet, bool isNew) {

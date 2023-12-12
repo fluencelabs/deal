@@ -1,0 +1,62 @@
+query ProvidersQuery(
+  $filters: Provider_filter,
+  $offset: Int,
+  $limit: Int,
+  $orderBy: Provider_orderBy,
+  $orderType: OrderDirection,
+) {
+  providers(
+      where: $filters
+      first: $limit
+      skip: $offset
+      orderBy: $orderBy
+      orderDirection: $orderType
+  ) {
+    ...ProviderOfProvidersQuery
+  }
+}
+
+
+fragment ProviderOfProvidersQuery on Provider {
+    ...ProviderABC
+    offers {
+      ...BasicOffer
+    }
+}
+
+
+query ProviderQuery(
+  $id: ID!
+) {
+  provider(id: $id) {
+    ...ProviderABC
+    peerCount
+    effectorCount
+  }
+}
+
+fragment ProviderABC on Provider {
+    id
+    name
+    createdAt
+    computeUnitsAvailable
+    computeUnitsTotal
+}
+
+fragment BasicOffer on Offer {
+    id
+    createdAt
+    pricePerEpoch
+    paymentToken {
+      id
+      symbol
+    }
+    computeUnitsTotal
+    computeUnitsAvailable
+    effectors {
+      effector {
+        id
+        description
+      }
+    }
+}

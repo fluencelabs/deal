@@ -41,7 +41,7 @@ export function handleComputeUnitJoined(event: ComputeUnitJoined): void {
   const deal = Deal.load(event.address.toHex()) as Deal;
 
   let computeUnit = ComputeUnit.load(
-    event.params.unitId.toHex()
+    event.params.unitId.toHex(),
   ) as ComputeUnit;
   computeUnit.deal = deal.id;
   computeUnit.save();
@@ -51,7 +51,7 @@ export function handleComputeUnitJoined(event: ComputeUnitJoined): void {
 // Note, in Market we also handle ComputeUnitRemovedFromDeal.
 export function handleComputeUnitRemoved(event: ComputeUnitRemoved): void {
   let computeUnit = ComputeUnit.load(
-    event.params.unitId.toHex()
+    event.params.unitId.toHex(),
   ) as ComputeUnit;
   computeUnit.deal = null;
   computeUnit.save();
@@ -60,8 +60,8 @@ export function handleComputeUnitRemoved(event: ComputeUnitRemoved): void {
 // Link workerId to CU.
 export function handleWorkerIdUpdated(event: WorkerIdUpdated): void {
   let computeUnit = ComputeUnit.load(
-    event.params.computeUnitId.toHex()
+    event.params.computeUnitId.toHex(),
   ) as ComputeUnit;
-  computeUnit.workerID = event.params.workerId.toHex();
+  computeUnit.workerId = event.params.workerId.toHex();
   computeUnit.save();
 }

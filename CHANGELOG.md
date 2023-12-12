@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.22](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.21...deal-aurora-v0.2.22) (2023-11-17)
+
+
+### Bug Fixes
+
+* redeploy contracts ([3430d8b](https://github.com/fluencelabs/deal/commit/3430d8bb6d8fba4e15abb5b974eb2092e0e4dd4e))
+
+## [0.2.21](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.20...deal-aurora-v0.2.21) (2023-11-10)
+
+
+### Features
+
+* add deploy instruction [CHAIN-213] ([#129](https://github.com/fluencelabs/deal/issues/129)) ([a9d2f8f](https://github.com/fluencelabs/deal/commit/a9d2f8f513e7052f1f252af8aaadd3272d3495a1))
+
 ## [0.2.20](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.19...deal-aurora-v0.2.20) (2023-11-06)
 
 

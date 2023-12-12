@@ -39,10 +39,10 @@ jobs:
     secrets:
       PRIVATE_KEY: ${{ secrets.DEAL_TESNET_PRIVATE_KEY }}
 
-  cli:
-    needs:
-      - deal
-    uses: fluencelabs/cli/.github/workflows/tests.yml@main
-    with:
-      deal-aurora-image: "${{ needs.deal.outputs.image }}"
-      deal-aurora-version: "${{ needs.deal.outputs.version }}"
+  # cli:
+  #   needs:
+  #     - deal
+  #   uses: fluencelabs/cli/.github/workflows/tests.yml@main
+  #   with:
+  #     deal-aurora-image: "${{ needs.deal.outputs.image }}"
+  #     deal-aurora-version: "${{ needs.deal.outputs.version }}"

@@ -47,5 +47,10 @@ deploy-%:
 
 	@echo "\033[0;32mSuccess! Contracts deployed to $* chain.\033[0m"
 
+create-pure-market-local:
+	@make verify-command program=forge
+	@forge script script/CreateMarket.s.sol --rpc-url local  \
+	--mnemonics "test test test test test test test test test test test junk" \
+	--sender 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --broadcast
 
-
+	@echo "\033[0;32mSuccess! Pure market created on local chain - check it out.\033[0m"

@@ -11,14 +11,14 @@ import {
   MarketOfferRegistered,
   MinPricePerEpochUpdated,
   PaymentTokenUpdated,
-  PeerCreated,
+  PeerCreated
 } from "../../generated/Core/Core";
 import {
   createOrLoadDealEffector,
   createOrLoadEffector,
   createOrLoadOfferEffector,
   createOrLoadToken,
-  ZERO_BIG_INT,
+  ZERO_BIG_INT
 } from "./../models";
 
 import { log, store } from "@graphprotocol/graph-ts";
@@ -28,7 +28,7 @@ import {
   Offer,
   OfferToEffector,
   Peer,
-  Provider,
+  Provider
 } from "../../generated/schema";
 import { Deal as DealTemplate } from "../../generated/templates";
 import { AppCID, getEffectorCID, parseEffectors } from "./utils";
@@ -44,13 +44,17 @@ export function handleMarketOfferRegistered(
 
   // Create provider.
   const providerAddress = event.params.provider.toHex();
-  let provider = new Provider(providerAddress);
+  const provider = new Provider(providerAddress);
   provider.name = getProviderName(providerAddress);
   provider.createdAt = event.block.timestamp;
+  provider.computeUnitsAvailable = 0;
+  provider.computeUnitsTotal = 0;
+  provider.peerCount = 0;
+  provider.effectorCount = 0;
   provider.save();
 
   // Create Offer.
-  let offer = new Offer(event.params.offerId.toHex());
+  const offer = new Offer(event.params.offerId.toHex());
   offer.provider = provider.id;
   offer.paymentToken = createOrLoadToken(event.params.paymentToken.toHex()).id;
   offer.pricePerEpoch = event.params.minPricePerWorkerEpoch;
@@ -61,11 +65,24 @@ export function handleMarketOfferRegistered(
   const appCIDS = changetype<Array<AppCID>>(event.params.effectors);
   const effectorEntities = parseEffectors(appCIDS);
   // Link effectors and offer:
+  let createdOfferToEffector = 0;
   for (let i = 0; i < effectorEntities.length; i++) {
     const effectorId = effectorEntities[i];
     // Automatically create link or ensure that exists.
-    createOrLoadOfferEffector(offer.id, effectorId);
+    const createOrLoadOfferEffectorRes = createOrLoadOfferEffector(
+      offer.id,
+      effectorId
+    );
+
+    if (createOrLoadOfferEffectorRes.created) {
+      createdOfferToEffector = createdOfferToEffector + 1;
+    }
   }
+  // const createdOfferToEffectorf32 = reinterpret<f32>(createdOfferToEffector);
+  // const createdOfferToEffectori32 = reinterpret<i32>(createdOfferToEffectorf32);
+
+  provider.effectorCount = provider.effectorCount + createdOfferToEffector;
+  provider.save();
 }
 
 // It updates Peer and Offer.
@@ -74,15 +91,18 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
   // - emit PeerCreated(offerId, peer.peerId);
   // - emit MarketOfferRegistered
   const peer = Peer.load(event.params.peerId.toHex()) as Peer;
-
-  let offer = Offer.load(peer.offer) as Offer;
+  const offer = Offer.load(peer.offer) as Offer;
+  const provider = Provider.load(offer.provider) as Provider;
 
   // Since handlePeerCreated could not work with this handler, this logic moved here.
-  let computeUnit = new ComputeUnit(event.params.unitId.toHex());
+  const computeUnit = new ComputeUnit(event.params.unitId.toHex());
   computeUnit.provider = peer.provider;
   computeUnit.peer = peer.id;
   computeUnit.save();
 
+  provider.computeUnitsAvailable += 1;
+  provider.computeUnitsTotal += 1;
+  provider.save();
   offer.computeUnitsAvailable += 1;
   offer.computeUnitsTotal += 1;
   offer.updatedAt = event.block.timestamp;
@@ -91,8 +111,11 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
 
 // It updates Peer and Offer.
 export function handlePeerCreated(event: PeerCreated): void {
-  let peer = new Peer(event.params.peerId.toHex());
+  const peer = new Peer(event.params.peerId.toHex());
   const offer = Offer.load(event.params.offerId.toHex()) as Offer;
+  const provider = Provider.load(offer.provider) as Provider;
+  provider.peerCount = provider.peerCount + 1;
+  provider.save();
 
   // const provider = Provider.load(offer.provider) as Provider
   // log.info('offer.provider {}', offer.provider.toString())
@@ -105,37 +128,57 @@ export function handlePeerCreated(event: PeerCreated): void {
 export function handleMinPricePerEpochUpdated(
   event: MinPricePerEpochUpdated
 ): void {
-  let offer = Offer.load(event.params.offerId.toHex()) as Offer;
+  const offer = Offer.load(event.params.offerId.toHex()) as Offer;
   offer.pricePerEpoch = event.params.minPricePerWorkerEpoch;
   offer.save();
 }
 
 export function handlePaymentTokenUpdated(event: PaymentTokenUpdated): void {
-  let offer = Offer.load(event.params.offerId.toHex()) as Offer;
+  const offer = Offer.load(event.params.offerId.toHex()) as Offer;
   offer.paymentToken = createOrLoadToken(event.params.paymentToken.toHex()).id;
   offer.save();
 }
 
 export function handleEffectorAdded(event: EffectorAdded): void {
-  let offer = Offer.load(event.params.offerId.toHex()) as Offer;
+  const offer = Offer.load(event.params.offerId.toHex()) as Offer;
+  const provider = Provider.load(offer.provider) as Provider;
   const appCID = changetype<AppCID>(event.params.effector);
   const cid = getEffectorCID(appCID);
   const effector = createOrLoadEffector(cid);
 
-  createOrLoadOfferEffector(offer.id, effector.id);
+  const createOrLoadOfferEffectorRes = createOrLoadOfferEffector(
+    offer.id,
+    effector.id
+  );
 
   offer.updatedAt = event.block.timestamp;
   offer.save();
+  if (createOrLoadOfferEffectorRes.created) {
+    provider.effectorCount = provider.effectorCount + 1;
+    provider.save();
+  }
 }
 
 export function handleEffectorRemoved(event: EffectorRemoved): void {
-  let offer = Offer.load(event.params.offerId.toHex()) as Offer;
+  const offer = Offer.load(event.params.offerId.toHex()) as Offer;
+  const provider = Provider.load(offer.provider) as Provider;
   const appCID = changetype<AppCID>(event.params.effector);
   const cidToRemove = getEffectorCID(appCID);
   const effector = createOrLoadEffector(cidToRemove);
 
-  const offerEffector = createOrLoadOfferEffector(offer.id, effector.id);
-  store.remove("OfferToEffector", offerEffector.id);
+  const createOrLoadOfferEffectorRes = createOrLoadOfferEffector(
+    offer.id,
+    effector.id
+  );
+  store.remove("OfferToEffector", createOrLoadOfferEffectorRes.entity.id);
+  if (createOrLoadOfferEffectorRes.created) {
+    // We created and deleted the effector: means nothing should be changed in counter.
+    provider.effectorCount = provider.effectorCount + 1;
+    provider.save();
+  } else {
+    provider.effectorCount = provider.effectorCount - 1;
+    provider.save();
+  }
 
   offer.updatedAt = event.block.timestamp;
   offer.save();
@@ -147,8 +190,11 @@ export function handleComputeUnitAddedToDeal(
 ): void {
   // Call the contract to extract peerId of the computeUnit.
   const peer = Peer.load(event.params.peerId.toHex()) as Peer;
-  let offer = Offer.load(peer.offer) as Offer;
+  const offer = Offer.load(peer.offer) as Offer;
+  const provider = Provider.load(offer.provider) as Provider;
 
+  provider.computeUnitsAvailable -= 1;
+  provider.save();
   offer.computeUnitsAvailable -= 1;
   offer.updatedAt = event.block.timestamp;
   offer.save();
@@ -160,8 +206,12 @@ export function handleComputeUnitRemovedFromDeal(
 ): void {
   // Call the contract to extract peerId of the computeUnit.
   const peer = Peer.load(event.params.peerId.toHex()) as Peer;
-  let offer = Offer.load(peer.offer) as Offer;
+  const offer = Offer.load(peer.offer) as Offer;
+  const provider = Provider.load(offer.provider) as Provider;
 
+  provider.computeUnitsAvailable += 1;
+  provider.computeUnitsTotal += 1;
+  provider.save();
   offer.computeUnitsAvailable += 1;
   offer.updatedAt = event.block.timestamp;
   offer.save();
@@ -172,10 +222,10 @@ export function handleDealCreated(event: DealCreated): void {
   const dealAddress = event.params.deal;
   log.info("[handleDealCreated] New deal created: {} by: {}", [
     event.params.owner.toString(),
-    dealAddress.toString(),
+    dealAddress.toString()
   ]);
 
-  let deal = new Deal(dealAddress.toHex());
+  const deal = new Deal(dealAddress.toHex());
   deal.createdAt = event.block.timestamp;
   deal.owner = event.params.owner;
 

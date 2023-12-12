@@ -5,7 +5,7 @@
 - `docker-compose.yaml` - instruction for Docker containers to create local dev environment with **local graph node** connected to **local hardhat node** (for instruction how to use - check [#Develop](#Develop) section below).
 - `subgraph.yaml` - The Graph configuration schema to collect rules of indexing and querying contracts event via handlers.
 - `schema.graphql` - The subgraph GraphQL schema of types those are indexed and available for querying.
-- `mappings.ts` - consists of event handlers and populating logic of schema.graphql above.
+- `mappings.ts` - consists of event handlers and populating logic of `schema.graphql` above.
 - `build/` - The auto-generated folder by The Graph's CLI
 - `generated/` - The auto-generated folder by The Graph's CLI
 
@@ -20,20 +20,17 @@ To start local development with TheGraph and Hardhat:
 npx hardhat node --hostname 0.0.0.0 
 ```
 
-2. Run Graph Node with help of Docker Compose and [instruction](graph-node/docker-compose.yaml):
+2. Run Graph Node with help of Docker Compose: [docker-compose.yml](subgraph/docker-compose.yaml):
 ```bash
-cd graph-node && docker-compose up
+cd subgraph && docker-compose up
 ```
 
 ## Dev in Subgraph Repo
 How to run install package and build artifacts flow is below.
 
-0. Add abi of contracts you are going to work with:
-```bash
-npm run import-contracts-abi
-```
+0. Ensure you use preferred contract version according to the [subgraph.yaml](subgraph.yaml) 
 
-2. Build artifacts and generate the **AssemblyScript** types from the sources:
+1. Build artifacts and generate the **AssemblyScript** types from the sources:
 ```bash
 npm i
 npm run compile
@@ -44,7 +41,7 @@ npm run compile
 npm run create:local
 ```
 
-4. Deploy the subgraph on local graph node
+3. Deploy the subgraph on local graph node
 > Note, that it will get localhost contract addresses and block number from [networks.json](config/networks.json) and inserts into subgraph.yaml.
 
 ```bash
@@ -74,7 +71,7 @@ If you updated contract and want to push this update to the subgraph, I could re
 but first: you should deploy on localhost your updated contract, e.g. `npx hardhat deploy --network localhost`
 
 ```bash
-ts-node scripts/importContractsAbi.ts && npm run compile && npm run create-local && npm run deploy:local
+npm run compile && npm run create:local && npm run deploy:local
 ```
 
 # Deploy 
@@ -124,3 +121,4 @@ graph deploy --product hosted-service --network mumbai <githubName>/fluence-deal
 - [ ] fix docker versions
 - [ ] it is mb better to flag CU and etc as removed instead of deleting as it is in, e.g. `store.remove('ComputeUnit', computeUnitEntity.id)`
 - [ ] rm warn about to hexString instead of hex()
+- [ ] where is delete events? (e.g. peer deleted)

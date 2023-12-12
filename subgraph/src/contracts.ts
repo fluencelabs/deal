@@ -19,9 +19,9 @@ export function getTokenSymbol(address: Bytes): string {
 }
 
 // @deprecated.
-export function getOffer(
+export function getOfferInfo(
   contractAddress: Address,
-  offerId: string
+  offerId: string,
 ): Core__getOfferResultValue0Struct {
   const contract = Core.bind(contractAddress);
   return contract.getOffer(Bytes.fromHexString(offerId));
@@ -30,7 +30,7 @@ export function getOffer(
 // @deprecated.
 export function getComputeUnit(
   contractAddress: Address,
-  unitId: Bytes
+  unitId: Bytes,
 ): Core__getComputeUnitResultValue0Struct {
   const contract = Core.bind(contractAddress);
   return contract.getComputeUnit(unitId);

@@ -8,16 +8,27 @@
     "deploy:studio:stage": "graph deploy --network mumbai --network-file config/networks.json fluence-deal-contracts",
     "create:local": "graph create --node http://localhost:8020/ fluence-deal-contracts",
     "remove:local": "graph remove --node http://localhost:8020/ fluence-deal-contracts",
-    "deploy:local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 --network localhost --network-file config/networks.json fluence-deal-contracts",
+    "deploy:local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 --network localhost --network-file config/networks.json --version-label 0.0.0 fluence-deal-contracts",
+    "deploy:mumbai": "graph deploy --product hosted-service --network-file config/networks.json --network mumbai alcibiadescleinias/fluence-deal-contracts",
     "test": "graph test",
     "graph-node": "docker-compose up -d",
-    "graph-local-clean": "docker-compose down -v"
+    "graph-local-clean": "docker-compose down -v",
+    "fmt": "prettier 'src/**/*.ts' --w"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.60.0",
     "@graphprotocol/graph-ts": "0.30.0"
   },
   "devDependencies": {
-    "matchstick-as": "0.5.0"
+    "matchstick-as": "0.5.0",
+    "@typescript-eslint/eslint-plugin": "^6.9.0",
+    "@typescript-eslint/parser": "^6.9.0",
+    "eslint": "^8.52.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-import": "^2.29.0",
+    "eslint-plugin-license-header": "^0.6.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-unused-imports": "^3.0.0",
+    "prettier": "^3.0.2"
   }
 }
