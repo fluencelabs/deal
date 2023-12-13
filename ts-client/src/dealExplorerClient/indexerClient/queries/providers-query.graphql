@@ -73,8 +73,12 @@ fragment BasicOffer on Offer {
     computeUnitsAvailable
     effectors {
       effector {
-        id
-        description
+        ...EffectorBasic
       }
     }
+}
+
+fragment EffectorBasic on Effector {
+    id
+    description
 }

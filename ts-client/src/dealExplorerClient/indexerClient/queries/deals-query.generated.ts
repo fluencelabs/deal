@@ -39,6 +39,14 @@ export type BasicDealFragment = { __typename?: 'Deal', id: string, createdAt: an
 
 export type ComputeUnitBasicFragment = { __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string } };
 
+export type EffectorBasicFragment = { __typename?: 'Effector', id: string, description: string };
+
+export const EffectorBasicFragmentDoc = gql`
+    fragment EffectorBasic on Effector {
+  id
+  description
+}
+    `;
 export const ComputeUnitBasicFragmentDoc = gql`
     fragment ComputeUnitBasic on ComputeUnit {
   id
@@ -61,8 +69,7 @@ export const BasicDealFragmentDoc = gql`
   }
   effectors {
     effector {
-      id
-      description
+      ...EffectorBasic
     }
   }
   addedComputeUnits {
@@ -72,7 +79,8 @@ export const BasicDealFragmentDoc = gql`
   depositedSum
   withdrawalSum
 }
-    ${ComputeUnitBasicFragmentDoc}`;
+    ${EffectorBasicFragmentDoc}
+${ComputeUnitBasicFragmentDoc}`;
 export const DealsQueryDocument = gql`
     query DealsQuery($filters: Deal_filter, $offset: Int, $limit: Int, $orderBy: Deal_orderBy, $orderType: OrderDirection) {
   deals(

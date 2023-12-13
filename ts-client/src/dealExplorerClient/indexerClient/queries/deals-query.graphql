@@ -58,8 +58,7 @@ fragment BasicDeal on Deal {
     }
     effectors {
       effector {
-        id
-        description
+        ...EffectorBasic
       }
     }
     addedComputeUnits {
@@ -76,4 +75,9 @@ fragment ComputeUnitBasic on ComputeUnit {
     provider {
         id
     }
+}
+
+fragment EffectorBasic on Effector {
+    id
+    description
 }

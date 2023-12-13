@@ -41,6 +41,8 @@ export type ProviderAbcFragment = { __typename?: 'Provider', id: string, name: s
 
 export type BasicOfferFragment = { __typename?: 'Offer', id: string, createdAt: any, pricePerEpoch: any, computeUnitsTotal?: number | null, computeUnitsAvailable?: number | null, paymentToken: { __typename?: 'Token', id: string, symbol: string }, effectors?: Array<{ __typename?: 'OfferToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null };
 
+export type EffectorBasicFragment = { __typename?: 'Effector', id: string, description: string };
+
 export const ProviderAbcFragmentDoc = gql`
     fragment ProviderABC on Provider {
   id
@@ -48,6 +50,12 @@ export const ProviderAbcFragmentDoc = gql`
   createdAt
   computeUnitsAvailable
   computeUnitsTotal
+}
+    `;
+export const EffectorBasicFragmentDoc = gql`
+    fragment EffectorBasic on Effector {
+  id
+  description
 }
     `;
 export const BasicOfferFragmentDoc = gql`
@@ -63,12 +71,11 @@ export const BasicOfferFragmentDoc = gql`
   computeUnitsAvailable
   effectors {
     effector {
-      id
-      description
+      ...EffectorBasic
     }
   }
 }
-    `;
+    ${EffectorBasicFragmentDoc}`;
 export const ProviderOfProvidersQueryFragmentDoc = gql`
     fragment ProviderOfProvidersQuery on Provider {
   ...ProviderABC

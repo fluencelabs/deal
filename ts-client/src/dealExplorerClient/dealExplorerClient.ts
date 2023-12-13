@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { ethers } from "ethers";
 import type {
   DealShort,
@@ -41,6 +40,7 @@ import type {
   OfferShortListView,
   ProviderShortListView,
 } from "./types.js";
+import type { BasicPeerFragment } from "./indexerClient/queries/offers-query.generated.js";
 
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
@@ -79,6 +79,7 @@ export class DealExplorerClient {
       this.ethersProvider,
       network || this.DEFAULT_NETWORK,
     );
+    console.log('add impl to', this.contractsClient)
   }
 
   _composeProviderBase(
@@ -121,7 +122,7 @@ export class DealExplorerClient {
    * @dev - searchValue: deprecated.
    */
   async getProviders(
-      providersFilters?: ProvidersFilters,
+    providersFilters?: ProvidersFilters,
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: ProviderShortOrderBy = "createdAt",
@@ -142,7 +143,7 @@ export class DealExplorerClient {
       }
     }
 
-    const total = await this.indexerClient.getTotalProviders({filters: composedFilters})
+    const total = await this.indexerClient.getTotalProviders({ filters: composedFilters })
     const data = await this.indexerClient.getProviders({
       filters: composedFilters,
       offset,
@@ -163,7 +164,7 @@ export class DealExplorerClient {
     };
   }
 
-  async getProvider(providerId: string): Promise<ProviderDetail> {
+  async getProvider(providerId: string): Promise<ProviderDetail | null> {
     const options = {
       id: providerId,
     };
@@ -221,21 +222,23 @@ export class DealExplorerClient {
     );
   }
 
-  _composeEffectors(effectors: unknown): Array<Effector> {
-    const effectorsComposed = [];
-    if (effectors) {
-      effectors.map((effector) => {
-        effectorsComposed.push({
-          cid: effector.effector.id,
-          description: effector.effector.description,
-        });
-      });
+  _composeEffectors(
+    manyToManyEffectors: Array<{ effector: { id: string, description: string } }> | null | undefined): Array<Effector> {
+    let composedEffectors: Array<Effector> = []
+    if (!manyToManyEffectors) {
+      return composedEffectors
     }
-    return effectorsComposed;
+    for (const effector of manyToManyEffectors) {
+      composedEffectors.push({
+        cid: effector.effector.id,
+        description: effector.effector.description,
+      })
+    }
+
+    return composedEffectors;
   }
 
   _composeOfferShort(offer: BasicOfferFragment): OfferShort {
-    const effectors = this._composeEffectors(offer.effectors);
     return {
       id: offer.id,
       createdAt: offer.createdAt,
@@ -245,7 +248,7 @@ export class DealExplorerClient {
         address: offer.paymentToken.id,
         symbol: offer.paymentToken.symbol,
       },
-      effectors: effectors,
+      effectors: this._composeEffectors(offer.effectors),
     } as OfferShort;
   }
 
@@ -303,7 +306,7 @@ export class DealExplorerClient {
     const orderByConverted =
       this._convertOfferShortOrderByToIndexerType(orderBy);
     const filtersConverted = this._convertOffersFiltersToIndexerType(offerFilters);
-    const total = await this.indexerClient.getTotalOffers({filters: filtersConverted})
+    const total = await this.indexerClient.getTotalOffers({ filters: filtersConverted })
     const data = await this.indexerClient.getOffers({
       filters: filtersConverted,
       offset,
@@ -317,7 +320,7 @@ export class DealExplorerClient {
         res.push(this._composeOfferShort(offer));
       }
     }
-    return {data: res, total: total};
+    return { data: res, total: total };
   }
 
   /*
@@ -348,19 +351,17 @@ export class DealExplorerClient {
     );
   }
 
-  _composePeers(peers: unknown): Array<Peer> {
-    const peersComposed = [];
+  _composePeers(peers: Array<BasicPeerFragment>): Array<Peer> {
+    const peersComposed: Array<Peer> = [];
     if (peers) {
       for (const peer of peers) {
-        const computeUnitsComposed = [];
-        for (const cu of peer.computeUnits) {
-          computeUnitsComposed.push({ id: cu.id, workerId: cu.workerId });
-        }
-        peersComposed.push({
-          id: peer.id,
-          offerId: peer.offer.id,
-          computeUnits: computeUnitsComposed,
-        });
+        peersComposed.push(
+          {
+            id: peer.id,
+            offerId: peer.offer.id,
+            computeUnits: peer.computeUnits ? this._composeComputeUnits(peer.computeUnits as Array<ComputeUnitBasicFragment>) : [],
+          }
+        );
       }
     }
     return peersComposed;
@@ -372,11 +373,13 @@ export class DealExplorerClient {
       id: offerId,
     };
     const data = await this.indexerClient.getOffer(options);
-    let res = null;
+    let res: OfferDetail | null = null;
     if (data && data.offer) {
-      res = this._composeOfferShort(data.offer);
-      res["updatedAt"] = data.offer.updatedAt;
-      res["peers"] = this._composePeers(data.offer.peers);
+      res = {
+        ...this._composeOfferShort(data.offer),
+        "peers": this._composePeers(data.offer.peers as Array<BasicPeerFragment>),
+        "updatedAt": data.offer.updatedAt
+      };
     }
     return res;
   }
@@ -434,7 +437,7 @@ export class DealExplorerClient {
       this._convertDealShortOrderByToIndexerType(orderBy);
     const filtersConverted =
       this._convertDealsFiltersToIndexerType(dealsFilters);
-    const total = await this.indexerClient.getTotalDeals({filters: filtersConverted})
+    const total = await this.indexerClient.getTotalDeals({ filters: filtersConverted })
     const data = await this.indexerClient.getDeals({
       filters: filtersConverted,
       offset,
@@ -448,7 +451,7 @@ export class DealExplorerClient {
         res.push(this._composeDealsShort(deal));
       }
     }
-    return {data: res, total: total};
+    return { data: res, total: total };
   }
 
   _composeDealsShort(deal: BasicDealFragment): DealShort {

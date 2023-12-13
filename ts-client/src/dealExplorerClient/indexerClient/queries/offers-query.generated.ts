@@ -33,12 +33,22 @@ export type OfferQueryQueryVariables = Types.Exact<{
 }>;
 
 
-export type OfferQueryQuery = { __typename?: 'Query', offer?: { __typename?: 'Offer', updatedAt: any, id: string, createdAt: any, pricePerEpoch: any, computeUnitsTotal?: number | null, computeUnitsAvailable?: number | null, peers?: Array<{ __typename?: 'Peer', id: string, offer: { __typename?: 'Offer', id: string }, provider: { __typename?: 'Provider', id: string }, computeUnits?: Array<{ __typename?: 'ComputeUnit', id: string, workerId?: string | null }> | null }> | null, paymentToken: { __typename?: 'Token', id: string, symbol: string }, effectors?: Array<{ __typename?: 'OfferToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null } | null };
+export type OfferQueryQuery = { __typename?: 'Query', offer?: { __typename?: 'Offer', updatedAt: any, id: string, createdAt: any, pricePerEpoch: any, computeUnitsTotal?: number | null, computeUnitsAvailable?: number | null, peers?: Array<{ __typename?: 'Peer', id: string, offer: { __typename?: 'Offer', id: string }, provider: { __typename?: 'Provider', id: string }, computeUnits?: Array<{ __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string } }> | null }> | null, paymentToken: { __typename?: 'Token', id: string, symbol: string }, effectors?: Array<{ __typename?: 'OfferToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null } | null };
 
 export type BasicOfferFragment = { __typename?: 'Offer', id: string, createdAt: any, pricePerEpoch: any, computeUnitsTotal?: number | null, computeUnitsAvailable?: number | null, paymentToken: { __typename?: 'Token', id: string, symbol: string }, effectors?: Array<{ __typename?: 'OfferToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null };
 
-export type BasicPeerFragment = { __typename?: 'Peer', id: string, offer: { __typename?: 'Offer', id: string }, provider: { __typename?: 'Provider', id: string }, computeUnits?: Array<{ __typename?: 'ComputeUnit', id: string, workerId?: string | null }> | null };
+export type BasicPeerFragment = { __typename?: 'Peer', id: string, offer: { __typename?: 'Offer', id: string }, provider: { __typename?: 'Provider', id: string }, computeUnits?: Array<{ __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string } }> | null };
 
+export type ComputeUnitBasicFragment = { __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string } };
+
+export type EffectorBasicFragment = { __typename?: 'Effector', id: string, description: string };
+
+export const EffectorBasicFragmentDoc = gql`
+    fragment EffectorBasic on Effector {
+  id
+  description
+}
+    `;
 export const BasicOfferFragmentDoc = gql`
     fragment BasicOffer on Offer {
   id
@@ -52,9 +62,17 @@ export const BasicOfferFragmentDoc = gql`
   computeUnitsAvailable
   effectors {
     effector {
-      id
-      description
+      ...EffectorBasic
     }
+  }
+}
+    ${EffectorBasicFragmentDoc}`;
+export const ComputeUnitBasicFragmentDoc = gql`
+    fragment ComputeUnitBasic on ComputeUnit {
+  id
+  workerId
+  provider {
+    id
   }
 }
     `;
@@ -68,11 +86,10 @@ export const BasicPeerFragmentDoc = gql`
     id
   }
   computeUnits {
-    id
-    workerId
+    ...ComputeUnitBasic
   }
 }
-    `;
+    ${ComputeUnitBasicFragmentDoc}`;
 export const OffersQueryDocument = gql`
     query OffersQuery($filters: Offer_filter, $offset: Int, $limit: Int, $orderBy: Offer_orderBy, $orderType: OrderDirection) {
   offers(
