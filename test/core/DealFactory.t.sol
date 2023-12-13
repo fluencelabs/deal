@@ -46,7 +46,7 @@ contract DealFactoryTest is Test {
         uint256 maxWorkersPerProvider = 1;
         IERC20 paymentToken = IERC20(address(deployment.tUSD));
 
-        IDeal d = deployment.core.deployDeal(
+        IDeal d = deployment.market.deployDeal(
             appCID,
             paymentToken,
             minWorkers,
@@ -86,7 +86,7 @@ contract DealFactoryTest is Test {
 
         uint256 balanceBefore = deployment.tUSD.balanceOf(address(this));
 
-        deployment.tUSD.safeApprove(address(deployment.core), minAmount);
+        deployment.tUSD.safeApprove(address(deployment.market), minAmount);
         (IDeal d, DealParams memory dealParams) = _deployDeal(pricePerWorkerEpoch, targetWorkers);
 
         uint256 balanceDiff = balanceBefore - deployment.tUSD.balanceOf(address(this));
@@ -113,7 +113,7 @@ contract DealFactoryTest is Test {
             assertEq(dealParams.accessList[i], accessList[i], "Should set accessList");
         }
 
-        assertEq(deployment.core.hasDeal(d), true, "Should deal set in Core");
+        assertEq(deployment.market.hasDeal(d), true, "Should deal set in Core");
 
         //TODO: Check events
     }
@@ -133,7 +133,7 @@ contract DealFactoryTest is Test {
 
         vm.startPrank(address(0x01));
 
-        deployment.tUSD.safeApprove(address(deployment.core), minAmount * 100);
+        deployment.tUSD.safeApprove(address(deployment.market), minAmount * 100);
 
         vm.expectRevert("ERC20: transfer amount exceeds balance");
         _deployDeal(pricePerWorkerEpoch, targetWorkers);

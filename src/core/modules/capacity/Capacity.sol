@@ -60,6 +60,14 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
     }
     // #endregion
 
+    // #region ------------------ Initializer & Upgradeable ------------------
+    function initialize(ICore core) public initializer {
+        __BaseModule_init(core);
+    }
+
+    function _authorizeUpgrade(address newImplementation) internal override onlyCoreOwner {}
+    // #endregion
+
     // #region ----------------- Public View -----------------
     function getCCStatus(bytes32 commitmentId) external view returns (CCStatus) {
         CommitmentStorage storage s = _getCommitmentStorage();
@@ -546,7 +554,4 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
         return newStatus;
     }
     // #endregion
-
-    // #region ----------------- Upgradeable -----------------
-    function _authorizeUpgrade(address newImplementation) internal override onlyCoreOwner {}
 }

@@ -9,6 +9,8 @@ import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "src/dev/TestERC20.sol";
 import "src/core/Core.sol";
 import "src/deal/Deal.sol";
+import "src/core/modules/market/Market.sol";
+import "src/core/modules/capacity/Capacity.sol";
 
 library DeployDealSystem {
     // ------------------ Types ------------------
@@ -17,6 +19,8 @@ library DeployDealSystem {
         IERC20 tFLT;
         IERC20 tUSD;
         Core core;
+        Market market;
+        Capacity capacity;
     }
 
     // ------------------ Constants ------------------
@@ -52,7 +56,6 @@ library DeployDealSystem {
                     abi.encodeWithSelector(
                         Core.initialize.selector,
                         DEFAULT_EPOCH_DURATION,
-                        dealImpl,
                         deployment.tFLT,
                         DEFAULT_FLT_PRICE,
                         DEFAULT_MIN_DEPOSITED_EPOCHES,
@@ -69,6 +72,22 @@ library DeployDealSystem {
                         DEFAULT_WITHDRAW_EPOCHES_AFTER_FAILED,
                         DEFAULT_MAX_FAILED_RATIO
                     )
+                )
+            )
+        );
+
+        deployment.market = Market(
+            address(
+                new ERC1967Proxy(
+                    address(new Market()), abi.encodeWithSelector(Market.initialize.selector, deployment.core, dealImpl)
+                )
+            )
+        );
+
+        deployment.capacity = Capacity(
+            address(
+                new ERC1967Proxy(
+                    address(new Capacity()), abi.encodeWithSelector(Capacity.initialize.selector, deployment.core)
                 )
             )
         );

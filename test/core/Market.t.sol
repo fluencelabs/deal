@@ -6,14 +6,15 @@ import "forge-std/console.sol";
 import "forge-std/Vm.sol";
 import "src/core/Core.sol";
 import "test/utils/DeployDealSystem.sol";
-import "src/core/Market.sol";
 import "test/utils/Random.sol";
+import "src/core/modules/market/Market.sol";
+import "src/core/modules/market/interfaces/IMarket.sol";
 
 contract MarketTest is Test {
     using SafeERC20 for IERC20;
 
     // ------------------ Constants ------------------
-    bytes32 private constant _OFFER_ID_PREFIX = bytes32(uint256(keccak256("fluence.core.market.offer")) - 1);
+    bytes32 private constant _OFFER_ID_PREFIX = bytes32(uint256(keccak256("fluence.market.offer")) - 1);
 
     // ------------------ Events ------------------
     event MarketOfferRegistered(
@@ -53,7 +54,7 @@ contract MarketTest is Test {
 
         for (uint256 i = 0; i < 10; i++) {
             registerPeers.push(
-                IMarket.RegisterComputePeer({
+                IOffer.RegisterComputePeer({
                     peerId: Random.pseudoRandom(abi.encode("peerId", i)),
                     unitCount: (i + 1) * 5,
                     owner: address(bytes20(Random.pseudoRandom(abi.encode("peerId-address", i))))
@@ -69,47 +70,47 @@ contract MarketTest is Test {
                 address(this),
                 block.number,
                 abi.encodeWithSelector(
-                    Market.registerMarketOffer.selector, minPricePerWorkerEpoch, paymentToken, effectors, registerPeers
+                    IOffer.registerMarketOffer.selector, minPricePerWorkerEpoch, paymentToken, effectors, registerPeers
                 )
             )
         );
 
-        vm.expectEmit(true, true, false, true, address(deployment.core));
+        vm.expectEmit(true, true, false, true, address(deployment.market));
         emit MarketOfferRegistered(address(this), offerId, minPricePerWorkerEpoch, paymentToken, effectors);
 
         for (uint256 i = 0; i < registerPeers.length; i++) {
-            Market.RegisterComputePeer memory registerPeer = registerPeers[i];
+            IOffer.RegisterComputePeer memory registerPeer = registerPeers[i];
 
-            vm.expectEmit(true, true, false, true, address(deployment.core));
+            vm.expectEmit(true, true, false, true, address(deployment.market));
             emit PeerCreated(offerId, registerPeer.peerId, registerPeer.owner);
 
             for (uint256 j = 0; j < registerPeer.unitCount; j++) {
                 bytes32 unitId = keccak256(abi.encodePacked(offerId, registerPeer.peerId, j));
 
-                vm.expectEmit(true, true, false, true, address(deployment.core));
+                vm.expectEmit(true, true, false, true, address(deployment.market));
                 emit ComputeUnitCreated(registerPeer.peerId, unitId);
             }
         }
 
         // Register offer
         bytes32 retOfferId =
-            deployment.core.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, registerPeers);
+            deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, registerPeers);
 
         assertEq(retOfferId, offerId, "OfferId mismatch");
     }
 
     function test_GetOfferPeersUnits() public {
         bytes32 offerId =
-            deployment.core.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, registerPeers);
+            deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, registerPeers);
 
-        Market.Offer memory offer = deployment.core.getOffer(offerId);
+        Market.Offer memory offer = deployment.market.getOffer(offerId);
         assertEq(offer.provider, address(this));
         assertEq(offer.minPricePerWorkerEpoch, minPricePerWorkerEpoch);
         assertEq(offer.paymentToken, paymentToken);
 
         for (uint256 i = 0; i < registerPeers.length; i++) {
             Market.RegisterComputePeer memory registerPeer = registerPeers[i];
-            Market.ComputePeer memory computePeer = deployment.core.getComputePeer(registerPeer.peerId);
+            Market.ComputePeer memory computePeer = deployment.market.getComputePeer(registerPeer.peerId);
 
             require(computePeer.offerId == offerId, "OfferId mismatch");
             require(computePeer.unitCount == registerPeer.unitCount, "NextUnitIndex mismatch");
@@ -117,7 +118,7 @@ contract MarketTest is Test {
 
             for (uint256 j = 0; j < registerPeer.unitCount; j++) {
                 bytes32 unitId = keccak256(abi.encodePacked(offerId, registerPeer.peerId, j));
-                Market.ComputeUnit memory computeUnit = deployment.core.getComputeUnit(unitId);
+                Market.ComputeUnit memory computeUnit = deployment.market.getComputeUnit(unitId);
 
                 require(computeUnit.peerId == registerPeer.peerId, "PeerId mismatch");
                 require(computeUnit.deal == address(0), "Deal address mismatch");

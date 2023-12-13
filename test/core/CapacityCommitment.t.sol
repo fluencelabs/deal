@@ -5,10 +5,11 @@ import {Test, console2} from "forge-std/Test.sol";
 import "forge-std/console.sol";
 import "forge-std/Vm.sol";
 import "src/core/Core.sol";
-import "src/core/CapacityCommitment.sol";
-import "src/core/interfaces/ICapacityCommitment.sol";
+import "src/core/modules/capacity/Capacity.sol";
+import "src/core/modules/capacity/interfaces/ICapacity.sol";
 import "test/utils/DeployDealSystem.sol";
-import "src/core/Market.sol";
+import "src/core/modules/market/Market.sol";
+import "src/core/modules/market/interfaces/IMarket.sol";
 import "test/utils/Random.sol";
 
 contract CapacityCommitmentTest is Test {
@@ -56,7 +57,7 @@ contract CapacityCommitmentTest is Test {
 
         for (uint256 i = 0; i < 10; i++) {
             registerPeers.push(
-                IMarket.RegisterComputePeer({
+                IOffer.RegisterComputePeer({
                     peerId: Random.pseudoRandom(abi.encode("peerId", i)),
                     unitCount: (i + 1) * 5,
                     owner: address(bytes20(Random.pseudoRandom(abi.encode("peerId-address", i))))
@@ -72,20 +73,20 @@ contract CapacityCommitmentTest is Test {
     }
 
     function test_CreateCapacityCommitment() public {
-        deployment.core.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, registerPeers);
+        deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, registerPeers);
 
         bytes32 peerId = registerPeers[0].peerId;
         bytes32 commitmentId =
             keccak256(abi.encodePacked(block.number, peerId, ccDuration, ccDelegator, rewardCCDelegationRate));
 
         // expect emit CapacityCommitmentCreated
-        vm.expectEmit(true, true, false, true, address(deployment.core));
+        vm.expectEmit(true, true, false, true, address(deployment.market));
         emit CapacityCommitmentCreated(
             peerId, commitmentId, ccDelegator, rewardCCDelegationRate, deployment.core.fltCCCollateralPerUnit()
         );
 
         // call createCapacityCommitment
-        deployment.core.createCapacityCommitment(peerId, ccDuration, ccDelegator, rewardCCDelegationRate);
+        deployment.capacity.createCapacityCommitment(peerId, ccDuration, ccDelegator, rewardCCDelegationRate);
     }
 
     function test_GetCapacityCommitment() public {
@@ -93,9 +94,9 @@ contract CapacityCommitmentTest is Test {
 
         (bytes32 commitmentId,) = _createCapacityCommitment(peerId);
 
-        CapacityCommitment.CommitmentInfo memory commitment = deployment.core.getCapacityCommitment(commitmentId);
+        Capacity.CommitmentInfo memory commitment = deployment.capacity.getCapacityCommitment(commitmentId);
 
-        assertEq(uint256(commitment.status), uint256(CapacityCommitment.CCStatus.WaitDelegation), "Status mismatch");
+        assertEq(uint256(commitment.status), uint256(ICapacity.CCStatus.WaitDelegation), "Status mismatch");
         assertEq(commitment.peerId, peerId, "PeerId mismatch");
         assertEq(commitment.collateralPerUnit, deployment.core.fltCCCollateralPerUnit(), "CollateralPerUnit mismatch");
         assertEq(commitment.duration, ccDuration, "Duration mismatch");
@@ -129,15 +130,15 @@ contract CapacityCommitmentTest is Test {
         vm.expectEmit(true, true, false, true, address(deployment.core));
         emit CapacityCommitmentActivated(commitmentId);
 
-        deployment.core.depositCapacityCommitmentCollateral(commitmentId);
+        deployment.capacity.depositCapacityCommitmentCollateral(commitmentId);
         vm.stopPrank();
 
         uint256 activeUnitCountAfter = deployment.core.ccActiveUnitCount();
         assertEq(activeUnitCountAfter, activeUnitCountBefore + unitCount, "ActiveUnitCount mismatch");
 
         // Verify commitment info
-        CapacityCommitment.CommitmentInfo memory commitment = deployment.core.getCapacityCommitment(commitmentId);
-        assertEq(uint256(commitment.status), uint256(CapacityCommitment.CCStatus.Active), "Status mismatch");
+        Capacity.CommitmentInfo memory commitment = deployment.capacity.getCapacityCommitment(commitmentId);
+        assertEq(uint256(commitment.status), uint256(ICapacity.CCStatus.Active), "Status mismatch");
         assertEq(commitment.peerId, peerId, "PeerId mismatch");
         assertEq(commitment.collateralPerUnit, deployment.core.fltCCCollateralPerUnit(), "CollateralPerUnit mismatch");
         assertEq(commitment.duration, ccDuration, "Duration mismatch");
@@ -166,10 +167,10 @@ contract CapacityCommitmentTest is Test {
         vm.warp(block.timestamp + DeployDealSystem.DEFAULT_EPOCH_DURATION);
 
         vm.startPrank(peerOwner);
-        vm.expectEmit(true, true, false, false, address(deployment.core));
+        vm.expectEmit(true, true, false, false, address(deployment.capacity));
         emit ProofSubmitted(commitmentId, unitId);
 
-        deployment.core.submitProof(unitId, proof);
+        deployment.capacity.submitProof(unitId, proof);
         vm.stopPrank();
     }
 
@@ -190,21 +191,21 @@ contract CapacityCommitmentTest is Test {
             vm.expectEmit(true, true, false, false, address(deployment.core));
             emit ProofSubmitted(commitmentId, unitId);
 
-            deployment.core.submitProof(unitId, proof);
+            deployment.capacity.submitProof(unitId, proof);
         }
 
         vm.warp(block.timestamp + DeployDealSystem.DEFAULT_EPOCH_DURATION);
 
-        assertGe(deployment.core.totalRewards(commitmentId), 0, "TotalRewards mismatch");
+        assertGe(deployment.capacity.totalRewards(commitmentId), 0, "TotalRewards mismatch");
 
         vm.stopPrank();
     }
 
     // ------------------ Internals ------------------
     function _createCapacityCommitment(bytes32 peerId) internal returns (bytes32 commitmentId, bytes32 offerId) {
-        offerId = deployment.core.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, registerPeers);
+        offerId = deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, registerPeers);
 
-        deployment.core.createCapacityCommitment(peerId, ccDuration, ccDelegator, rewardCCDelegationRate);
+        deployment.capacity.createCapacityCommitment(peerId, ccDuration, ccDelegator, rewardCCDelegationRate);
 
         commitmentId =
             keccak256(abi.encodePacked(block.number, peerId, ccDuration, ccDelegator, rewardCCDelegationRate));
@@ -218,7 +219,7 @@ contract CapacityCommitmentTest is Test {
 
         vm.startPrank(ccDelegator);
         deployment.tFLT.approve(address(deployment.core), unitCount * deployment.core.fltCCCollateralPerUnit());
-        deployment.core.depositCapacityCommitmentCollateral(commitmentId);
+        deployment.capacity.depositCapacityCommitmentCollateral(commitmentId);
         vm.stopPrank();
     }
 }

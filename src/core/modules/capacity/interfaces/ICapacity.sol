@@ -2,6 +2,8 @@
 
 pragma solidity ^0.8.19;
 
+import "src/core/interfaces/ICore.sol";
+
 interface ICapacity {
     // ------------------ Events ------------------
     event CapacityCommitmentCreated(
@@ -45,4 +47,7 @@ interface ICapacity {
         uint256 exitedUnitCount;
         uint256 totalWithdrawnReward;
     }
+
+    // ------------------ Initializer ------------------
+    function initialize(ICore core) external;
 }

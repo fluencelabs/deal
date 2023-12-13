@@ -58,13 +58,15 @@ contract DealFactory is BaseModule, IDealFactory {
     ) external returns (IDeal) {
         DealFactoryStorage storage dealFactoryStorage = _getDealFactoryStorage();
 
+        ICore core = _core();
+
         IDeal deal = IDeal(
             address(
                 new ERC1967Proxy(
                     address(dealFactoryStorage.dealImpl),
                     abi.encodeWithSelector(
                         IDeal.initialize.selector,
-                        address(this),
+                        core,
                         appCID_,
                         paymentToken_,
                         minWorkers_,
@@ -82,12 +84,11 @@ contract DealFactory is BaseModule, IDealFactory {
 
         dealFactoryStorage.hasDeal[deal] = true;
 
-        ICore core = _core();
         uint256 amount = pricePerWorkerEpoch_ * targetWorkers_ * core.minDealDepositedEpoches();
         paymentToken_.safeTransferFrom(msg.sender, address(this), amount);
         paymentToken_.approve(address(deal), amount);
-
         deal.deposit(amount);
+
         OwnableUpgradableDiamond(address(deal)).transferOwnership(msg.sender);
 
         emit DealCreated(
