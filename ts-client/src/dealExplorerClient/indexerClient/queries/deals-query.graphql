@@ -63,13 +63,17 @@ fragment BasicDeal on Deal {
       }
     }
     addedComputeUnits {
-        id
-        workerId
-        provider {
-            id
-        }
+        ...ComputeUnitBasic
     }
     maxPaidEpoch
     depositedSum
     withdrawalSum
+}
+
+fragment ComputeUnitBasic on ComputeUnit {
+    id
+    workerId
+    provider {
+        id
+    }
 }

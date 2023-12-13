@@ -37,6 +37,17 @@ export type DealQueryQuery = { __typename?: 'Query', deal?: { __typename?: 'Deal
 
 export type BasicDealFragment = { __typename?: 'Deal', id: string, createdAt: any, minWorkers: number, targetWorkers: number, owner: any, maxPaidEpoch?: any | null, depositedSum: any, withdrawalSum: any, paymentToken: { __typename?: 'Token', id: string, symbol: string }, effectors?: Array<{ __typename?: 'DealToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null, addedComputeUnits?: Array<{ __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string } }> | null };
 
+export type ComputeUnitBasicFragment = { __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string } };
+
+export const ComputeUnitBasicFragmentDoc = gql`
+    fragment ComputeUnitBasic on ComputeUnit {
+  id
+  workerId
+  provider {
+    id
+  }
+}
+    `;
 export const BasicDealFragmentDoc = gql`
     fragment BasicDeal on Deal {
   id
@@ -55,17 +66,13 @@ export const BasicDealFragmentDoc = gql`
     }
   }
   addedComputeUnits {
-    id
-    workerId
-    provider {
-      id
-    }
+    ...ComputeUnitBasic
   }
   maxPaidEpoch
   depositedSum
   withdrawalSum
 }
-    `;
+    ${ComputeUnitBasicFragmentDoc}`;
 export const DealsQueryDocument = gql`
     query DealsQuery($filters: Deal_filter, $offset: Int, $limit: Int, $orderBy: Deal_orderBy, $orderType: OrderDirection) {
   deals(
