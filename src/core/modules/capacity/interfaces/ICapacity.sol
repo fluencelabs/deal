@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.19;
 
-interface ICapacityCommitment {
+interface ICapacity {
     // ------------------ Events ------------------
     event CapacityCommitmentCreated(
         bytes32 indexed peerId,
@@ -19,4 +19,30 @@ interface ICapacityCommitment {
 
     event ProofSubmitted(bytes32 indexed commitmentId, bytes32 indexed unitId);
     event RewardWithdrawn(bytes32 indexed commitmentId, uint256 amount);
+
+    // ------------------ Types ------------------
+    enum CCStatus {
+        Active,
+        WaitDelegation,
+        Inactive,
+        Failed
+    }
+
+    struct CommitmentInfo {
+        CCStatus status;
+        bytes32 peerId;
+        uint256 collateralPerUnit;
+        uint256 duration;
+        uint256 rewardDelegatorRate;
+        address delegator;
+        uint256 currentCUSuccessCount;
+        uint256 totalCUFailCount;
+        uint256 snapshotEpoch;
+        uint256 startEpoch;
+        uint256 failedEpoch;
+        uint256 withdrawCCEpochAfterFailed;
+        uint256 remainingFailsForLastEpoch;
+        uint256 exitedUnitCount;
+        uint256 totalWithdrawnReward;
+    }
 }

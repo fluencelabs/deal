@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 import "src/core/interfaces/ICore.sol";
-import "src/core/interfaces/IMarket.sol";
+import "src/core/modules/market/interfaces/IMarket.sol";
 import "src/utils/OwnableUpgradableDiamond.sol";
 import "./DealStorageUtils.sol";
 import "./WorkerManager.sol";
@@ -330,8 +330,9 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
     function setWorker(bytes32 computeUnitId, bytes32 workerId) public {
         DealStorage storage dealStorage = _getDealStorage();
 
+        ICore core = _globalCore();
         ComputeUnit memory unit = getComputeUnit(computeUnitId);
-        IMarket.ComputePeer memory marketPeer = _globalCore().getComputePeer(unit.peerId);
+        IMarket.ComputePeer memory marketPeer = core.market().getComputePeer(unit.peerId);
 
         require(msg.sender == unit.provider || msg.sender == marketPeer.owner, "Only provider or owner can set worker");
 
@@ -339,7 +340,7 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
         uint256 prevWorkerCount = getWorkerCount();
         uint256 newWorkerCounts = _setWorker(computeUnitId, workerId);
 
-        uint256 currentEpoch = _globalCore().currentEpoch();
+        uint256 currentEpoch = core.currentEpoch();
         uint256 pricePerWorkerEpoch_ = pricePerWorkerEpoch();
 
         ComputeUnitPaymentInfo storage computeUnitPaymentInfo = dealStorage.cUnitPaymentInfo[computeUnitId];

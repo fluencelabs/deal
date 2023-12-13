@@ -6,18 +6,17 @@ import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "src/deal/interfaces/IDeal.sol";
 import "src/utils/OwnableUpgradableDiamond.sol";
+import "src/core/modules/BaseModule.sol";
 import "./interfaces/IDealFactory.sol";
-import "./GlobalConst.sol";
-import "./EpochController.sol";
 
 /*
  * @dev On init mas.sender becomes owner.
  */
-contract DealFactory is GlobalConst, IDealFactory {
+contract DealFactory is BaseModule, IDealFactory {
     using SafeERC20 for IERC20;
 
     // ------------------ Storage ------------------
-    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.core.storage.v1.dealFactory")) - 1);
+    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.market.storage.v1.dealFactory")) - 1);
 
     struct DealFactoryStorage {
         IDeal dealImpl;
@@ -35,7 +34,9 @@ contract DealFactory is GlobalConst, IDealFactory {
 
     // ------------------ Initializer ------------------
     function __DealFactory_init(IDeal dealImpl_) internal onlyInitializing {
-        _getDealFactoryStorage().dealImpl = dealImpl_;
+        DealFactoryStorage storage dealFactoryStorage = _getDealFactoryStorage();
+
+        dealFactoryStorage.dealImpl = dealImpl_;
     }
 
     // ----------------- View -----------------
@@ -44,7 +45,6 @@ contract DealFactory is GlobalConst, IDealFactory {
     }
 
     // ----------------- Mutable -----------------
-
     function deployDeal(
         CIDV1 calldata appCID_,
         IERC20 paymentToken_,
@@ -82,7 +82,8 @@ contract DealFactory is GlobalConst, IDealFactory {
 
         dealFactoryStorage.hasDeal[deal] = true;
 
-        uint256 amount = pricePerWorkerEpoch_ * targetWorkers_ * minDealDepositedEpoches();
+        ICore core = _core();
+        uint256 amount = pricePerWorkerEpoch_ * targetWorkers_ * core.minDealDepositedEpoches();
         paymentToken_.safeTransferFrom(msg.sender, address(this), amount);
         paymentToken_.approve(address(deal), amount);
 
@@ -92,7 +93,7 @@ contract DealFactory is GlobalConst, IDealFactory {
         emit DealCreated(
             msg.sender,
             deal,
-            currentEpoch(),
+            core.currentEpoch(),
             paymentToken_,
             minWorkers_,
             targetWorkers_,

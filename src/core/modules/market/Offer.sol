@@ -5,18 +5,18 @@ pragma solidity ^0.8.19;
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "src/utils/OwnableUpgradableDiamond.sol";
-import "src/deal/base/Types.sol";
 import "src/utils/LinkedListWithUniqueKeys.sol";
+import "src/deal/base/Types.sol";
 import "src/deal/interfaces/IDeal.sol";
-import "./interfaces/IMarket.sol";
-import "./GlobalConst.sol";
+import "src/core/modules/BaseModule.sol";
+import "./interfaces/IOffer.sol";
 
-contract Market is GlobalConst, IMarket {
+contract Offer is BaseModule, IOffer {
     using SafeERC20 for IERC20;
     using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
 
     // ------------------ Constants ------------------
-    bytes32 private constant _OFFER_ID_PREFIX = bytes32(uint256(keccak256("fluence.core.market.offer")) - 1);
+    bytes32 private constant _OFFER_ID_PREFIX = bytes32(uint256(keccak256("fluence.market.offer")) - 1);
 
     // ------------------ Types ------------------
     struct Effectors {
@@ -24,7 +24,7 @@ contract Market is GlobalConst, IMarket {
     }
 
     // ------------------ Storage ------------------
-    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.core.storage.v1.market")) - 1);
+    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.market.storage.v1")) - 1);
 
     struct OfferStorage {
         mapping(bytes32 => Offer) offers;
@@ -219,7 +219,7 @@ contract Market is GlobalConst, IMarket {
     }
 
     // Unit management
-    function returnComputeUnitFromDeal(bytes32 unitId) public {
+    function returnComputeUnitFromDeal(bytes32 unitId) public onlyCapacity {
         OfferStorage storage offerStorage = _getOfferStorage();
         ComputeUnit storage computeUnit = offerStorage.computeUnits[unitId];
 
@@ -249,6 +249,13 @@ contract Market is GlobalConst, IMarket {
         deal.removeComputeUnit(unitId);
 
         emit ComputeUnitRemovedFromDeal(unitId, deal, peerId);
+    }
+
+    function setCommitmentId(bytes32 peerId, bytes32 commitmentId) external onlyCapacity {
+        OfferStorage storage offerStorage = _getOfferStorage();
+        ComputePeer storage computePeer = offerStorage.peers[peerId];
+
+        computePeer.commitmentId = commitmentId;
     }
 
     // ----------------- Internal View -----------------

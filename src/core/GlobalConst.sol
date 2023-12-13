@@ -3,10 +3,10 @@
 pragma solidity ^0.8.19;
 
 import "src/utils/OwnableUpgradableDiamond.sol";
+import "src/core/EpochController.sol";
 import "./interfaces/IGlobalConst.sol";
-import "./EpochController.sol";
 
-contract GlobalConst is EpochController, OwnableUpgradableDiamond, IGlobalConst {
+contract GlobalConst is OwnableUpgradableDiamond, EpochController, IGlobalConst {
     // ------------------ Constants ------------------
     uint256 public constant PRECISION = 10000000; // min: 0.0000001
 

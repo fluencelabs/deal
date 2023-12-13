@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "src/deal/interfaces/IDeal.sol";
 import "src/deal/base/Types.sol";
 
-interface IMarket {
+interface IOffer {
     // ------------------ Types ------------------
     struct RegisterComputePeer {
         bytes32 peerId;
@@ -73,6 +73,8 @@ interface IMarket {
     function addComputeUnits(bytes32 peerId, uint256 unitCount) external;
 
     function removeComputeUnit(bytes32 unitId, bytes32 lastUnitId) external;
+
+    function setCommitmentId(bytes32 peerId, bytes32 commitmentId) external;
 
     // ---- Change offer ----
     function changeMinPricePerWorkerEpoch(bytes32 offerId, uint256 newMinPricePerWorkerEpoch) external;

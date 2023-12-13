@@ -2,6 +2,9 @@
 
 pragma solidity ^0.8.19;
 
+import "src/core/modules/capacity/interfaces/ICapacity.sol";
+import "src/core/modules/market/interfaces/IMarket.sol";
+
 interface IGlobalConst {
     // ------------------ Events ------------------
     event FLTPriceUpdated(uint256 newPrice);
@@ -27,6 +30,9 @@ interface IGlobalConst {
         WithdrawEpochesAfterFailed,
         MaxFailedRatio
     }
+
+    // ------------------ External Constants ------------------
+    function PRECISION() external view returns (uint256);
 
     // ------------------ External View Functions ------------------
     function fluenceToken() external view returns (address);
