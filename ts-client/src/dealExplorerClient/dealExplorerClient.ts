@@ -466,6 +466,7 @@ export class DealExplorerClient {
     orderType: OrderType = this.DEFAULT_ORDER_TYPE,
   ): Promise<Array<DealShort>> {
     await this._init();
+
     const orderByConverted =
       this._convertDealShortOrderByToIndexerType(orderBy);
     const filtersConverted =
@@ -482,7 +483,9 @@ export class DealExplorerClient {
     const res = [];
     if (data) {
       const dealAddresses = data.deals.map(deal => { return deal.id })
+      // Use several n feature calls instead of limit * n calls to rpc.
       const dealStatuses: Array<DealStatus> = await this._dealRpcClient?.getStatusDealBatch(dealAddresses)
+      const freeBalances: Array<BigInt | null> = await this._dealRpcClient?.getFreeBalanceDealBatch(dealAddresses)
 
       for (let i = 0; i < data.deals.length; i++) {
         const deal = data.deals[i]
@@ -490,7 +493,10 @@ export class DealExplorerClient {
         res.push(
           this._composeDealsShort(
             deal,
-            status
+            {
+              dealStatus: dealStatuses[i],
+              freeBalance: freeBalances[i],
+            }
           )
         );
       }
@@ -498,8 +504,18 @@ export class DealExplorerClient {
     return res;
   }
 
-  _composeDealsShort(deal: BasicDealFragment, status?: DealStatus): DealShort {
+  _composeDealsShort(
+    deal: BasicDealFragment,
+    fromRpcForDealShort: {
+      dealStatus: DealStatus,
+      freeBalance: BigInt | null
+    }
+  ): DealShort {
     const effectors = this._composeEffectors(deal.effectors);
+
+    const freeBalance = fromRpcForDealShort.freeBalance
+    const totalEarnings = (BigInt(deal.depositedSum) - BigInt(deal.withdrawalSum)) - freeBalance
+
     return {
       id: deal.id,
       createdAt: deal.createdAt,
@@ -512,11 +528,11 @@ export class DealExplorerClient {
       },
       effectors: effectors,
       // TODO: add missed implementations.
-      balance: 0,
-      status: status ? status : "active",
+      balance: freeBalance ? freeBalance : 0,
+      status: fromRpcForDealShort.dealStatus ? fromRpcForDealShort.dealStatus : "active",
       registeredWorkers: 0,
       matchedWorkers: 0,
-      totalEarnings: 0,
+      totalEarnings: totalEarnings,
     } as DealShort;
   }
 
