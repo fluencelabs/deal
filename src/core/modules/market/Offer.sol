@@ -10,6 +10,7 @@ import "src/deal/base/Types.sol";
 import "src/deal/interfaces/IDeal.sol";
 import "src/core/modules/BaseModule.sol";
 import "./interfaces/IOffer.sol";
+import "forge-std/console.sol";
 
 contract Offer is BaseModule, IOffer {
     using SafeERC20 for IERC20;
@@ -119,7 +120,7 @@ contract Offer is BaseModule, IOffer {
         }
     }
 
-    function addComputeUnits(bytes32 peerId, uint256 unitCount) external {
+    function addComputeUnits(bytes32 peerId, bytes32[] calldata unitIds) external {
         OfferStorage storage offerStorage = _getOfferStorage();
         ComputePeer storage computePeer = offerStorage.peers[peerId];
         bytes32 offerId = computePeer.offerId;
@@ -127,16 +128,14 @@ contract Offer is BaseModule, IOffer {
 
         require(computePeer.owner == address(0x00), "Peer doesn't exist");
         require(offer.provider == msg.sender, "Only owner can change offer");
-        require(unitCount > 0, "Free units should be greater than 0");
         require(computePeer.commitmentId == bytes32(0x00), "Peer has commitment");
 
-        _addComputeUnitsToPeer(offerId, peerId, unitCount);
+        _addComputeUnitsToPeer(peerId, unitIds);
     }
 
-    function removeComputeUnit(bytes32 unitId, bytes32 lastUnitId) external {
+    function removeComputeUnit(bytes32 unitId) external {
         OfferStorage storage offerStorage = _getOfferStorage();
         ComputeUnit storage computeUnit = offerStorage.computeUnits[unitId];
-        ComputeUnit storage lastComputeUnit = offerStorage.computeUnits[lastUnitId];
 
         bytes32 peerId = computeUnit.peerId;
         ComputePeer storage computePeer = offerStorage.peers[peerId];
@@ -144,17 +143,12 @@ contract Offer is BaseModule, IOffer {
 
         require(offer.provider == msg.sender, "Only owner can remove compute unit");
         require(computePeer.commitmentId == bytes32(0x00), "Peer has commitment");
+        require(computeUnit.deal == address(0x00), "Compute unit is in deal");
 
-        uint256 unitCount = computePeer.unitCount;
-        require(lastComputeUnit.index == unitCount - 1, "Last unit id is not last unit in peer");
-
-        lastComputeUnit.index = computeUnit.index;
-        computePeer.unitCount = --unitCount;
+        computePeer.unitCount--;
 
         offerStorage.freeComputeUnitByPeerId[peerId].remove(unitId);
         delete offerStorage.computeUnits[unitId];
-
-        emit ComputeUnitRemovedFromDeal(unitId, IDeal(computeUnit.deal), peerId);
     }
 
     // Change offer
@@ -259,10 +253,6 @@ contract Offer is BaseModule, IOffer {
     }
 
     // ----------------- Internal View -----------------
-    function _calcUnitId(bytes32 offerId, bytes32 peerId, uint256 index) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(offerId, peerId, index));
-    }
-
     function _getOffersList() internal view returns (LinkedListWithUniqueKeys.Bytes32List storage) {
         return _getOfferStorage().offerIds;
     }
@@ -312,32 +302,37 @@ contract Offer is BaseModule, IOffer {
         ComputePeer storage computePeer = offerStorage.peers[peer.peerId];
 
         require(computePeer.offerId == bytes32(0x00), "Peer already exists in another offer");
-        require(peer.unitCount > 0, "Free units should be greater than 0");
 
         computePeer.offerId = offerId;
         computePeer.owner = peer.owner;
 
         emit PeerCreated(offerId, peer.peerId, peer.owner);
 
-        _addComputeUnitsToPeer(offerId, peer.peerId, peer.unitCount);
+        _addComputeUnitsToPeer(peer.peerId, peer.unitIds);
 
-        computePeer.unitCount = peer.unitCount;
+        computePeer.unitCount = peer.unitIds.length;
 
         // add peer to offer
         offerStorage.freePeersByOfferId[offerId].push(peer.peerId);
     }
 
-    function _addComputeUnitsToPeer(bytes32 offerId, bytes32 peerId, uint256 unitCount) internal {
+    function _addComputeUnitsToPeer(bytes32 peerId, bytes32[] memory unitIds) internal {
         OfferStorage storage offerStorage = _getOfferStorage();
         ComputePeer storage computePeer = offerStorage.peers[peerId];
 
         uint256 indexOffset = computePeer.unitCount;
+        uint256 unitCount = unitIds.length;
+
+        require(unitCount > 0, "Units should be greater than 0");
+
         for (uint256 i = 0; i < unitCount; i++) {
-            bytes32 unitId = _calcUnitId(offerId, peerId, indexOffset + i);
+            bytes32 unitId = unitIds[i];
+
+            require(offerStorage.computeUnits[unitId].peerId == bytes32(0x00), "Compute unit already exists");
 
             // create compute unit
-            offerStorage.computeUnits[unitId] =
-                ComputeUnit({deal: address(0x00), peerId: peerId, index: indexOffset + i});
+            offerStorage.computeUnits[unitId] = ComputeUnit({deal: address(0x00), peerId: peerId});
+            offerStorage.freeComputeUnitByPeerId[peerId].push(unitId);
 
             emit ComputeUnitCreated(peerId, unitId);
         }

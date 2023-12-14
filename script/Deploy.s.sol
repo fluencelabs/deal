@@ -13,6 +13,12 @@ import "src/dev/OwnableFaucet.sol";
 import "src/dev/TestERC20.sol";
 import "./utils/Depoyments.sol";
 import "src/utils/Multicall3.sol";
+import "src/core/Core.sol";
+import "src/core/interfaces/ICore.sol";
+import "src/core/modules/market/Market.sol";
+import "src/core/modules/market/interfaces/IMarket.sol";
+import "src/core/modules/capacity/Capacity.sol";
+import "src/core/modules/capacity/interfaces/ICapacity.sol";
 
 contract DeployContracts is Depoyments, Script {
     using SafeERC20 for IERC20;
@@ -214,12 +220,17 @@ contract DeployContracts is Depoyments, Script {
         address coreImpl = _deployContract("CoreImpl", "Core", new bytes(0));
         address dealImpl = _deployContract("DealImpl", "Deal", new bytes(0));
 
-        bytes memory args = abi.encode(
+        (address marketImpl, bool isNewMarket) = _tryDeployContract("MarketImpl", "Market", new bytes(0));
+        (address capacityImpl, bool isNewCapacity) = _tryDeployContract("CapacityImpl", "Capacity", new bytes(0));
+
+        address coreAddr;
+        address market;
+        address capacity;
+        bytes memory coreArgs = abi.encode(
             coreImpl,
             abi.encodeWithSelector(
                 Core.initialize.selector,
                 epochDuration_,
-                dealImpl,
                 flt,
                 fltPrice_,
                 minDepositedEpoches_,
@@ -237,9 +248,25 @@ contract DeployContracts is Depoyments, Script {
                 maxFailedRatio_
             )
         );
+        bytes memory marketArgs =
+            abi.encode(marketImpl, abi.encodeWithSelector(Market.initialize.selector, coreAddr, dealImpl));
+        bytes memory capacityArgs =
+            abi.encode(capacityImpl, abi.encodeWithSelector(Capacity.initialize.selector, coreAddr));
 
-        address core = _deployContract("Core", "ERC1967Proxy", args);
-        flt.safeTransfer(core, 1_000_000 ether);
+        if (isNewMarket || isNewCapacity) {
+            coreAddr = _forceDeployContract("Core", "ERC1967Proxy", coreArgs);
+            market = _forceDeployContract("Market", "ERC1967Proxy", marketArgs);
+            capacity = _forceDeployContract("Capacity", "ERC1967Proxy", capacityArgs);
+
+            ICore core = ICore(coreAddr);
+            core.initializeModules(ICapacity(capacity), IMarket(market));
+        } else {
+            coreAddr = _deployContract("Core", "ERC1967Proxy", coreArgs);
+            market = _deployContract("Market", "ERC1967Proxy", marketArgs);
+            capacity = _deployContract("Capacity", "ERC1967Proxy", capacityArgs);
+        }
+
+        flt.safeTransfer(capacity, 1_000_000 ether);
     }
 
     function _startDeploy() internal {

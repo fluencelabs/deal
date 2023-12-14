@@ -6,5 +6,5 @@ import "./IDealFactory.sol";
 import "./IOffer.sol";
 
 interface IMarket is IDealFactory, IOffer {
-    function initialize(ICore core) external;
+    function initialize(ICore core, IDeal dealImpl) external;
 }

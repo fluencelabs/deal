@@ -53,10 +53,17 @@ contract MarketTest is Test {
         }
 
         for (uint256 i = 0; i < 10; i++) {
+            bytes32 peerId = Random.pseudoRandom(abi.encode("peerId", i));
+
+            bytes32[] memory unitIds = new bytes32[](5);
+            for (uint256 j = 0; j < unitIds.length; j++) {
+                unitIds[j] = keccak256(abi.encodePacked(Random.pseudoRandom(abi.encode(peerId, "unitId", i, j))));
+            }
+
             registerPeers.push(
                 IOffer.RegisterComputePeer({
-                    peerId: Random.pseudoRandom(abi.encode("peerId", i)),
-                    unitCount: (i + 1) * 5,
+                    peerId: peerId,
+                    unitIds: unitIds,
                     owner: address(bytes20(Random.pseudoRandom(abi.encode("peerId-address", i))))
                 })
             );
@@ -84,8 +91,8 @@ contract MarketTest is Test {
             vm.expectEmit(true, true, false, true, address(deployment.market));
             emit PeerCreated(offerId, registerPeer.peerId, registerPeer.owner);
 
-            for (uint256 j = 0; j < registerPeer.unitCount; j++) {
-                bytes32 unitId = keccak256(abi.encodePacked(offerId, registerPeer.peerId, j));
+            for (uint256 j = 0; j < registerPeer.unitIds.length; j++) {
+                bytes32 unitId = registerPeer.unitIds[j];
 
                 vm.expectEmit(true, true, false, true, address(deployment.market));
                 emit ComputeUnitCreated(registerPeer.peerId, unitId);
@@ -113,11 +120,11 @@ contract MarketTest is Test {
             Market.ComputePeer memory computePeer = deployment.market.getComputePeer(registerPeer.peerId);
 
             require(computePeer.offerId == offerId, "OfferId mismatch");
-            require(computePeer.unitCount == registerPeer.unitCount, "NextUnitIndex mismatch");
+            require(computePeer.unitCount == registerPeer.unitIds.length, "NextUnitIndex mismatch");
             require(computePeer.owner == registerPeer.owner, "Owner mismatch");
 
-            for (uint256 j = 0; j < registerPeer.unitCount; j++) {
-                bytes32 unitId = keccak256(abi.encodePacked(offerId, registerPeer.peerId, j));
+            for (uint256 j = 0; j < registerPeer.unitIds.length; j++) {
+                bytes32 unitId = registerPeer.unitIds[j];
                 Market.ComputeUnit memory computeUnit = deployment.market.getComputeUnit(unitId);
 
                 require(computeUnit.peerId == registerPeer.peerId, "PeerId mismatch");

@@ -7,8 +7,9 @@ import "src/core/interfaces/ICore.sol";
 import "src/deal/interfaces/IDeal.sol";
 import "./Matcher.sol";
 import "./DealFactory.sol";
+import "./interfaces/IMarket.sol";
 
-contract Market is UUPSUpgradeable, DealFactory, Matcher {
+contract Market is UUPSUpgradeable, DealFactory, Matcher, IMarket {
     // ------------------ Initializer ------------------
     function initialize(ICore core, IDeal dealImpl) public initializer {
         __BaseModule_init(core);

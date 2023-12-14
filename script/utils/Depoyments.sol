@@ -86,6 +86,16 @@ contract Depoyments is ScriptBase {
         return addr;
     }
 
+    function _forceDeployContract(string memory contractName, string memory artifactName, bytes memory args)
+        internal
+        returns (address)
+    {
+        delete deployments.contracts[contractName];
+        (address addr,) = _tryDeployContract(contractName, artifactName, args);
+
+        return addr;
+    }
+
     function _tryDeployContract(string memory contractName, string memory artifactName, bytes memory args)
         internal
         returns (address, bool)
@@ -131,6 +141,7 @@ contract Depoyments is ScriptBase {
     }
 
     function _printDeployments() internal view {
+        console.log("\n");
         console.log("----------------- Deployments -----------------");
         for (uint256 i = 0; i < deployments.contractNames.length; i++) {
             string memory name = deployments.contractNames[i];

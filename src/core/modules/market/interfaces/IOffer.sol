@@ -10,8 +10,8 @@ interface IOffer {
     // ------------------ Types ------------------
     struct RegisterComputePeer {
         bytes32 peerId;
-        uint256 unitCount;
         address owner;
+        bytes32[] unitIds;
     }
 
     struct Offer {
@@ -28,7 +28,6 @@ interface IOffer {
     }
 
     struct ComputeUnit {
-        uint256 index;
         address deal;
         bytes32 peerId;
     }
@@ -70,9 +69,9 @@ interface IOffer {
 
     function addComputePeers(bytes32 offerId, RegisterComputePeer[] calldata peers) external;
 
-    function addComputeUnits(bytes32 peerId, uint256 unitCount) external;
+    function addComputeUnits(bytes32 peerId, bytes32[] calldata unitIds) external;
 
-    function removeComputeUnit(bytes32 unitId, bytes32 lastUnitId) external;
+    function removeComputeUnit(bytes32 unitId) external;
 
     function setCommitmentId(bytes32 peerId, bytes32 commitmentId) external;
 

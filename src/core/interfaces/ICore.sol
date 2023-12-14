@@ -34,6 +34,6 @@ interface ICore is IEpochController, IGlobalConst {
     function market() external view returns (IMarket);
 
     // ------------------ External Mutable Functions ------------------
-    function addCCActiveUnitCount() external;
-    function subCCActiveUnitCount() external;
+    function addCCActiveUnitCount(uint256 unitCount) external;
+    function subCCActiveUnitCount(uint256 unitCount) external;
 }

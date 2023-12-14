@@ -56,10 +56,17 @@ contract CapacityCommitmentTest is Test {
         }
 
         for (uint256 i = 0; i < 10; i++) {
+            bytes32 peerId = Random.pseudoRandom(abi.encode("peerId", i));
+
+            bytes32[] memory unitIds = new bytes32[](5);
+            for (uint256 j = 0; j < unitIds.length; j++) {
+                unitIds[j] = keccak256(abi.encodePacked(Random.pseudoRandom(abi.encode(peerId, "unitId", i, j))));
+            }
+
             registerPeers.push(
                 IOffer.RegisterComputePeer({
-                    peerId: Random.pseudoRandom(abi.encode("peerId", i)),
-                    unitCount: (i + 1) * 5,
+                    peerId: peerId,
+                    unitIds: unitIds,
                     owner: address(bytes20(Random.pseudoRandom(abi.encode("peerId-address", i))))
                 })
             );
@@ -80,7 +87,7 @@ contract CapacityCommitmentTest is Test {
             keccak256(abi.encodePacked(block.number, peerId, ccDuration, ccDelegator, rewardCCDelegationRate));
 
         // expect emit CapacityCommitmentCreated
-        vm.expectEmit(true, true, false, true, address(deployment.market));
+        vm.expectEmit(true, true, false, true, address(deployment.capacity));
         emit CapacityCommitmentCreated(
             peerId, commitmentId, ccDelegator, rewardCCDelegationRate, deployment.core.fltCCCollateralPerUnit()
         );
@@ -115,19 +122,19 @@ contract CapacityCommitmentTest is Test {
 
     function test_DepositCCCollateral() public {
         bytes32 peerId = registerPeers[0].peerId;
-        uint256 unitCount = registerPeers[0].unitCount;
+        uint256 unitCount = registerPeers[0].unitIds.length;
         (bytes32 commitmentId,) = _createCapacityCommitment(peerId);
 
         uint256 activeUnitCountBefore = deployment.core.ccActiveUnitCount();
         uint256 amount = unitCount * deployment.core.fltCCCollateralPerUnit();
 
         vm.startPrank(ccDelegator);
-        deployment.tFLT.approve(address(deployment.core), amount);
+        deployment.tFLT.approve(address(deployment.capacity), amount);
 
-        vm.expectEmit(true, true, false, true, address(deployment.core));
+        vm.expectEmit(true, true, false, true, address(deployment.capacity));
         emit CollateralDeposited(commitmentId, amount);
 
-        vm.expectEmit(true, true, false, true, address(deployment.core));
+        vm.expectEmit(true, true, false, true, address(deployment.capacity));
         emit CapacityCommitmentActivated(commitmentId);
 
         deployment.capacity.depositCapacityCommitmentCollateral(commitmentId);
@@ -157,10 +164,11 @@ contract CapacityCommitmentTest is Test {
 
     function test_SubmitProof() public {
         bytes32 peerId = registerPeers[0].peerId;
-        uint256 unitCount = registerPeers[0].unitCount;
+        uint256 unitCount = registerPeers[0].unitIds.length;
         address peerOwner = registerPeers[0].owner;
+        bytes32 unitId = registerPeers[0].unitIds[0];
+
         (bytes32 commitmentId, bytes32 offerId) = _createAndDepositCapacityCommitment(peerId, unitCount);
-        bytes32 unitId = keccak256(abi.encodePacked(offerId, peerId, uint256(0)));
         bytes memory proof = abi.encodePacked("proof");
 
         // warp to next epoch
@@ -176,10 +184,12 @@ contract CapacityCommitmentTest is Test {
 
     function test_RewardAfterSubmitProofs() public {
         bytes32 peerId = registerPeers[0].peerId;
-        uint256 unitCount = registerPeers[0].unitCount;
+        uint256 unitCount = registerPeers[0].unitIds.length;
         address peerOwner = registerPeers[0].owner;
+        bytes32 unitId = registerPeers[0].unitIds[0];
+
         (bytes32 commitmentId, bytes32 offerId) = _createAndDepositCapacityCommitment(peerId, unitCount);
-        bytes32 unitId = keccak256(abi.encodePacked(offerId, peerId, uint256(0)));
+
         bytes memory proof = abi.encodePacked("proof");
 
         // warp to next epoch
@@ -188,7 +198,7 @@ contract CapacityCommitmentTest is Test {
         vm.startPrank(peerOwner);
         uint256 minRequiredProofsPerEpoch = deployment.core.minCCRequierdProofsPerEpoch();
         for (uint256 i = 0; i < minRequiredProofsPerEpoch; i++) {
-            vm.expectEmit(true, true, false, false, address(deployment.core));
+            vm.expectEmit(true, true, false, false, address(deployment.capacity));
             emit ProofSubmitted(commitmentId, unitId);
 
             deployment.capacity.submitProof(unitId, proof);
@@ -218,7 +228,7 @@ contract CapacityCommitmentTest is Test {
         (commitmentId, offerId) = _createCapacityCommitment(peerId);
 
         vm.startPrank(ccDelegator);
-        deployment.tFLT.approve(address(deployment.core), unitCount * deployment.core.fltCCCollateralPerUnit());
+        deployment.tFLT.approve(address(deployment.capacity), unitCount * deployment.core.fltCCCollateralPerUnit());
         deployment.capacity.depositCapacityCommitmentCollateral(commitmentId);
         vm.stopPrank();
     }

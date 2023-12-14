@@ -10,7 +10,9 @@ import "src/dev/TestERC20.sol";
 import "src/core/Core.sol";
 import "src/deal/Deal.sol";
 import "src/core/modules/market/Market.sol";
+import "src/core/modules/market/interfaces/IMarket.sol";
 import "src/core/modules/capacity/Capacity.sol";
+import "src/core/modules/capacity/interfaces/ICapacity.sol";
 
 library DeployDealSystem {
     // ------------------ Types ------------------
@@ -91,6 +93,8 @@ library DeployDealSystem {
                 )
             )
         );
+
+        deployment.core.initializeModules(deployment.capacity, deployment.market);
 
         deployment.initialized = true;
     }

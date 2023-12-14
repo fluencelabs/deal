@@ -210,10 +210,13 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
 
     function depositCapacityCommitmentCollateral(bytes32 commitmentId) external {
         ICore core = _core();
+        IMarket market = core.market();
 
         CommitmentStorage storage s = _getCommitmentStorage();
         Commitment storage cc = s.commitments[commitmentId];
-        IMarket.ComputePeer memory peer = _core().market().getComputePeer(cc.info.peerId);
+
+        bytes32 peerId = cc.info.peerId;
+        IMarket.ComputePeer memory peer = market.getComputePeer(peerId);
 
         require(cc.info.startEpoch == 0, "Capacity commitment is created");
         require(cc.info.delegator == msg.sender, "Only delegator can lock collateral");
@@ -225,14 +228,16 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
         uint256 unitCount = peer.unitCount;
         uint256 collateral = unitCount * cc.info.collateralPerUnit;
 
-        core.addCCActiveUnitCount();
+        core.addCCActiveUnitCount(unitCount);
 
         IERC20(core.fluenceToken()).safeTransferFrom(msg.sender, address(this), collateral);
 
         cc.info.status = CCStatus.Active;
 
+        market.setCommitmentId(peerId, commitmentId);
+
         emit CollateralDeposited(commitmentId, collateral);
-        emit CapacityCommitmentActivated(commitmentId);
+        emit CapacityCommitmentActivated(commitmentId); //TODO: add peerId, endEpoch, unitIds
     }
 
     function submitProof(bytes32 unitId, bytes calldata proof) external {
@@ -547,7 +552,7 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
         cc.info.snapshotEpoch = epoch;
 
         if (newStatus != CCStatus.Active) {
-            core.subCCActiveUnitCount();
+            core.subCCActiveUnitCount(unitCount);
             cc.info.status = newStatus;
         }
 

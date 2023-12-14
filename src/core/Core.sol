@@ -97,16 +97,16 @@ contract Core is UUPSUpgradeable, GlobalConst, ICore {
     }
 
     // ------------------ External Mutable Functions ------------------
-    function addCCActiveUnitCount() external override {
+    function addCCActiveUnitCount(uint256 unitCount) external override {
         require(msg.sender == address(_getCoreStorage().capacity), "Core: only capacity can call this function");
-        uint256 activeUnitCount = ccActiveUnitCount();
-        _setCCActiveUnitCount(++activeUnitCount);
+        uint256 activeUnitCount = ccActiveUnitCount() + unitCount;
+        _setCCActiveUnitCount(activeUnitCount);
     }
 
-    function subCCActiveUnitCount() external override onlyOwner {
+    function subCCActiveUnitCount(uint256 unitCount) external override onlyOwner {
         require(msg.sender == address(_getCoreStorage().capacity), "Core: only capacity can call this function");
-        uint256 activeUnitCount = ccActiveUnitCount();
-        _setCCActiveUnitCount(--activeUnitCount);
+        uint256 activeUnitCount = ccActiveUnitCount() - unitCount;
+        _setCCActiveUnitCount(activeUnitCount);
     }
 
     // ------------------ Internal Mutable Functions ------------------

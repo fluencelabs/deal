@@ -4,10 +4,18 @@ import {
   Core__factory,
   Deal__factory,
   ERC20__factory,
+  Market__factory,
+  Capacity__factory,
 } from "../typechain-types/index.js";
 import { getDeployment } from "./config.js";
 
-import type { Core, Deal, ERC20 } from "../typechain-types/index.js";
+import type {
+  Capacity,
+  Core,
+  Deal,
+  ERC20,
+  Market,
+} from "../typechain-types/index.js";
 import type { Deployment, ContractsENV } from "./config.js";
 
 export class DealClient {
@@ -27,6 +35,20 @@ export class DealClient {
   async getCore(): Promise<Core> {
     return Core__factory.connect(
       (await this.deployment).core,
+      this.signerOrProvider,
+    );
+  }
+
+  async getMarket(): Promise<Market> {
+    return Market__factory.connect(
+      await (await this.getCore()).market(),
+      this.signerOrProvider,
+    );
+  }
+
+  async getCapacity(): Promise<Capacity> {
+    return Capacity__factory.connect(
+      await (await this.getCore()).market(),
       this.signerOrProvider,
     );
   }
