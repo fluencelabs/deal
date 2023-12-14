@@ -98,13 +98,14 @@ export type DealShort = {
   registeredWorkers: number;
   // Active if CU has worker set.
   status: DealStatus;
-  balance: number;
-  totalEarnings: number;
+  balance: string;
+  totalEarnings: string;
 };
 
 // Collateral deprecated.
 export interface DealDetail extends DealShort {
-  pricePerWorkerEpoch: number;
+  pricePerWorkerEpoch: string;
+  maxWorkersPerProvider: number;
   computeUnits: Array<ComputeUnit>;
   whitelist: Array<string>;
   blacklist: Array<string>;
