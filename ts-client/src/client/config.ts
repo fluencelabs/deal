@@ -13,6 +13,7 @@ export type Deployment = {
   core: string;
   flt: string;
   usdc: string;
+  multicall3: string;
   chainId: number;
 };
 
@@ -53,12 +54,17 @@ async function _getDeployment(
     throw new Error(
       `Could not find usdc token address for network: ${networkName}`,
     );
+  } else if (deployment?.Multicall3?.addr === undefined) {
+    throw new Error(
+      `Could not find multicall3 address for network: ${networkName}`,
+    );
   }
 
   return {
     core: deployment.Core.addr,
     flt: deployment.tFLT.addr,
     usdc: deployment.tUSD.addr,
+    multicall3: deployment.Multicall3.addr,
     chainId: chainId,
   };
 }
