@@ -111,7 +111,8 @@ export interface DealDetail extends DealShort {
   effectors: Array<Effector>;
 }
 
-export type DealStatus = "inactive" | "active" | "ended";
+// Status undefined == problem with networks, etc.
+export type DealStatus = "inactive" | "active" | "ended" | "undefined";
 
 export type ProviderShortOrderBy = "createdAt" | "computeUnitsTotal";
 export type OfferShortOrderBy =
