@@ -66,5 +66,32 @@ export class DealRpcClient extends Multicall3ContractClient {
         )
     }
 
-    //   TODO: Provider earnings: (depositedSum - withdravalSum [withdraw()]) - freeBalance()
+    _txToBigInt(result: Result | null): BigInt | null {
+        if (!result) {
+            return null
+        }
+        return BigInt(result.toString())
+    }
+
+    async getFreeBalanceDealBatch(dealAddresses: Array<string>) {
+        if (!dealAddresses || dealAddresses[0] == undefined) {
+            return []
+        }
+
+        const dealContractForInterface = Deal__factory.connect(dealAddresses[0], this._caller)
+        const contractMethod = 'getFreeBalance'
+        const callEncoded = dealContractForInterface.interface.encodeFunctionData(contractMethod)
+        const callsEncoded: Multicall3ContractCall[] = dealAddresses.map((dealAddress) => ({
+            target: dealAddress,
+            allowFailure: true, // We allow failure for all calls.
+            callData: callEncoded,
+        }));
+
+        return await this._callBatch(
+            callsEncoded,
+            dealContractForInterface.interface,
+            contractMethod,
+            this._txToBigInt,
+        )
+    }
 }
