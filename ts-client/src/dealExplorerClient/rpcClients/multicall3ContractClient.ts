@@ -33,10 +33,6 @@ export abstract class Multicall3ContractClient {
             console.debug('Raw data: %s', rawResult.returnData)
 
             const decoded = callResultsInterface.decodeFunctionResult(contractMethod, rawResult.returnData)
-            // const dealContractForInterface = await this._dealContracts.getFLT()
-            // const decoder = dealContractForInterface.interface
-            // const decoded = decoder.decodeFunctionResult('name', rawResult.returnData)
-
             console.debug('Got after decoding: %s', decoded)
             decodedResults.push(
                 txResultsConverter(decoded)
