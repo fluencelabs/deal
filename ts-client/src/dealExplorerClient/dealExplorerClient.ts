@@ -1,5 +1,3 @@
-// @ts-nocheck
-// TODO: resolve generated files into esm, or insert into all "@ts-nocheck" after generation.
 import { ethers } from "ethers";
 import type {
   DealShort,
@@ -15,7 +13,12 @@ import type {
   DealsShortOrderBy,
   DealDetail,
   Peer,
+  ComputeUnit,
   DealStatus,
+
+  DealShortListView,
+  OfferShortListView,
+  ProviderShortListView
 } from "./types.js";
 import type {
   ByProviderAndStatusFilter,
@@ -34,15 +37,12 @@ import type {
   Offer_Filter,
   Offer_OrderBy,
 } from "./indexerClient/generated.types.js";
-import type { BasicDealFragment } from "./indexerClient/queries/deals-query.generated.js";
+import type { BasicDealFragment, ComputeUnitBasicFragment } from "./indexerClient/queries/deals-query.generated.js";
 import { DealClient } from "../client/client.js";
 import type { Network } from "../client/config.js";
-import type {
-  DealShortListView,
-  OfferShortListView,
-  ProviderShortListView,
-} from "./types.js";
-import { DealRpcClient } from "../index.js";
+import type { BasicPeerFragment } from "./indexerClient/queries/offers-query.generated.js";
+import { DealRpcClient } from "./rpcClients/index.js";
+import {formatTokenValueToFix} from "./utils.js";
 
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
@@ -53,6 +53,7 @@ export class DealExplorerClient {
   DEFAULT_NETWORK: Network = "kras";
   DEFAULT_PAGE_LIMIT = 100;
   DEFAULT_ORDER_TYPE: OrderType = "desc";
+  DEFAULT_DECIMALS = 18 // TODO: add to subgraph
 
   private _caller: ethers.Provider | ethers.Signer;
   private indexerClient: IndexerClient;
@@ -75,7 +76,7 @@ export class DealExplorerClient {
     } else if (provider) {
       this._caller = provider;
     } else {
-      throw Error("One of chainRPCUrl or _caller should be delclared.");
+      throw Error("One of chainRPCUrl or provider should be delclared.");
     }
     this.indexerClient = new IndexerClient(indexerUrl);
     this.dealContractsClient = new DealClient(
@@ -159,6 +160,7 @@ export class DealExplorerClient {
       }
     }
 
+    const total = await this.indexerClient.getTotalProviders({ filters: composedFilters })
     const data = await this.indexerClient.getProviders({
       filters: composedFilters,
       offset,
@@ -173,13 +175,12 @@ export class DealExplorerClient {
       }
     }
     return {
-      // TODO: add real counter.
-      total: res.length,
+      total: total,
       data: res,
     };
   }
 
-  async getProvider(providerId: string): Promise<ProviderDetail> {
+  async getProvider(providerId: string): Promise<ProviderDetail | null> {
     await this._init();
     const options = {
       id: providerId,
@@ -210,17 +211,13 @@ export class DealExplorerClient {
       // TODO.
       console.warn("Status filter is not implemented.");
     }
-    const offers = await this._getOffersImpl(
+    return await this._getOffersImpl(
       { providerId: byProviderAndStatusFilter.providerId },
       offset,
       limit,
       orderBy,
       orderType,
     );
-    return {
-      total: offers.length,
-      data: offers,
-    };
   }
 
   async getDealsByProvider(
@@ -235,44 +232,43 @@ export class DealExplorerClient {
       // TODO.
       console.warn("Status filter is not implemented.");
     }
-    const deals = await this._getDealsImpl(
+    return await this._getDealsImpl(
       { providerId: byProviderAndStatusFilter.providerId },
       offset,
       limit,
       orderBy,
       orderType,
     );
-    return {
-      total: deals.length,
-      data: deals,
-    };
   }
 
-  _composeEffectors(effectors: unknown): Array<Effector> {
-    const effectorsComposed = [];
-    if (effectors) {
-      effectors.map((effector) => {
-        effectorsComposed.push({
-          cid: effector.effector.id,
-          description: effector.effector.description,
-        });
-      });
+  _composeEffectors(
+    manyToManyEffectors: Array<{ effector: { id: string, description: string } }> | null | undefined
+  ): Array<Effector> {
+    const composedEffectors: Array<Effector> = []
+    if (!manyToManyEffectors) {
+      return composedEffectors
     }
-    return effectorsComposed;
+    for (const effector of manyToManyEffectors) {
+      composedEffectors.push({
+        cid: effector.effector.id,
+        description: effector.effector.description,
+      })
+    }
+
+    return composedEffectors;
   }
 
   _composeOfferShort(offer: BasicOfferFragment): OfferShort {
-    const effectors = this._composeEffectors(offer.effectors);
     return {
       id: offer.id,
-      createdAt: offer.createdAt,
+      createdAt: Number(offer.createdAt),
       totalComputeUnits: offer.computeUnitsTotal,
       freeComputeUnits: offer.computeUnitsAvailable,
       paymentToken: {
         address: offer.paymentToken.id,
         symbol: offer.paymentToken.symbol,
       },
-      effectors: effectors,
+      effectors: this._composeEffectors(offer.effectors),
     } as OfferShort;
   }
 
@@ -317,7 +313,7 @@ export class DealExplorerClient {
     if (v.providerId) {
       res.provider = v.providerId;
     }
-    return res as Offer_Filter;
+    return res;
   }
 
   async _getOffersImpl(
@@ -326,12 +322,13 @@ export class DealExplorerClient {
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: OfferShortOrderBy = "createdAt",
     orderType: OrderType = this.DEFAULT_ORDER_TYPE,
-  ): Promise<Array<OfferShort>> {
+  ): Promise<OfferShortListView> {
     const orderByConverted =
       this._convertOfferShortOrderByToIndexerType(orderBy);
-    const filters = this._convertOffersFiltersToIndexerType(offerFilters);
+    const filtersConverted = this._convertOffersFiltersToIndexerType(offerFilters);
+    const total = await this.indexerClient.getTotalOffers({ filters: filtersConverted })
     const data = await this.indexerClient.getOffers({
-      filters,
+      filters: filtersConverted,
       offset,
       limit,
       orderBy: orderByConverted,
@@ -343,7 +340,7 @@ export class DealExplorerClient {
         res.push(this._composeOfferShort(offer));
       }
     }
-    return res;
+    return { data: res, total: total };
   }
 
   /*
@@ -356,7 +353,6 @@ export class DealExplorerClient {
    * @dev - order: renamed to orderBy
    * @dev - paymentToken: array of paymentTokens
    * TODO: remove unused vars.
-   * TODO: use onlyApproved.
    */
   async getOffers(
     offerFilters?: OffersFilters,
@@ -366,32 +362,26 @@ export class DealExplorerClient {
     orderType: OrderType = this.DEFAULT_ORDER_TYPE,
   ): Promise<OfferShortListView> {
     await this._init();
-    const offers = await this._getOffersImpl(
+    return await this._getOffersImpl(
       offerFilters,
       offset,
       limit,
       orderBy,
       orderType,
     );
-    return {
-      total: offers.length,
-      data: offers,
-    };
   }
 
-  _composePeers(peers: unknown): Array<Peer> {
-    const peersComposed = [];
+  _composePeers(peers: Array<BasicPeerFragment>): Array<Peer> {
+    const peersComposed: Array<Peer> = [];
     if (peers) {
       for (const peer of peers) {
-        const computeUnitsComposed = [];
-        for (const cu of peer.computeUnits) {
-          computeUnitsComposed.push({ id: cu.id, workerId: cu.workerId });
-        }
-        peersComposed.push({
-          id: peer.id,
-          offerId: peer.offer.id,
-          computeUnits: computeUnitsComposed,
-        });
+        peersComposed.push(
+          {
+            id: peer.id,
+            offerId: peer.offer.id,
+            computeUnits: peer.computeUnits ? this._composeComputeUnits(peer.computeUnits as Array<ComputeUnitBasicFragment>) : [],
+          }
+        );
       }
     }
     return peersComposed;
@@ -399,16 +389,17 @@ export class DealExplorerClient {
 
   // Return OfferDetail View.
   async getOffer(offerId: string): Promise<OfferDetail | null> {
-    await this._init();
     const options = {
       id: offerId,
     };
     const data = await this.indexerClient.getOffer(options);
-    let res = null;
+    let res: OfferDetail | null = null;
     if (data && data.offer) {
-      res = this._composeOfferShort(data.offer);
-      res["updatedAt"] = data.offer.updatedAt;
-      res["peers"] = this._composePeers(data.offer.peers);
+      res = {
+        ...this._composeOfferShort(data.offer),
+        "peers": this._composePeers(data.offer.peers as Array<BasicPeerFragment>),
+        "updatedAt": Number(data.offer.updatedAt)
+      };
     }
     return res;
   }
@@ -455,7 +446,7 @@ export class DealExplorerClient {
     if (v.providerId) {
       res.addedComputeUnits_ = { provider: v.providerId };
     }
-    return res as Deal_Filter;
+    return res;
   }
 
   async _getDealsImpl(
@@ -464,7 +455,7 @@ export class DealExplorerClient {
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: DealsShortOrderBy = "createdAt",
     orderType: OrderType = this.DEFAULT_ORDER_TYPE,
-  ): Promise<Array<DealShort>> {
+  ): Promise<DealShortListView> {
     await this._init();
 
     const orderByConverted =
@@ -473,6 +464,7 @@ export class DealExplorerClient {
       this._convertDealsFiltersToIndexerType(dealsFilters);
     // TODO: filter by status: fetch from indexer. Filter on frontend, fetch more if needed...
     //  To get total with this filter: fetch total from indexer then filter in frontend.
+    const total = await this.indexerClient.getTotalDeals({ filters: filtersConverted })
     const data = await this.indexerClient.getDeals({
       filters: filtersConverted,
       offset,
@@ -484,12 +476,11 @@ export class DealExplorerClient {
     if (data) {
       const dealAddresses = data.deals.map(deal => { return deal.id })
       // Use several n feature calls instead of limit * n calls to rpc.
-      const dealStatuses: Array<DealStatus> = await this._dealRpcClient?.getStatusDealBatch(dealAddresses)
-      const freeBalances: Array<BigInt | null> = await this._dealRpcClient?.getFreeBalanceDealBatch(dealAddresses)
+      const dealStatuses: Array<DealStatus> = await this._dealRpcClient!.getStatusDealBatch(dealAddresses)
+      const freeBalances: Array<bigint | null> = await this._dealRpcClient!.getFreeBalanceDealBatch(dealAddresses)
 
       for (let i = 0; i < data.deals.length; i++) {
-        const deal = data.deals[i]
-        const status = dealStatuses[i]
+        const deal = data.deals[i] as BasicDealFragment
         res.push(
           this._composeDealsShort(
             deal,
@@ -501,24 +492,22 @@ export class DealExplorerClient {
         );
       }
     }
-    return res;
+    return { data: res, total: total };
   }
 
   _composeDealsShort(
     deal: BasicDealFragment,
     fromRpcForDealShort: {
-      dealStatus: DealStatus,
-      freeBalance: BigInt | null
+      dealStatus: DealStatus | undefined,
+      freeBalance: bigint | null | undefined
     }
   ): DealShort {
-    const effectors = this._composeEffectors(deal.effectors);
-
-    const freeBalance = fromRpcForDealShort.freeBalance
+    const freeBalance = fromRpcForDealShort.freeBalance ? fromRpcForDealShort.freeBalance : BigInt(0)
     const totalEarnings = (BigInt(deal.depositedSum) - BigInt(deal.withdrawalSum)) - freeBalance
 
     return {
       id: deal.id,
-      createdAt: deal.createdAt,
+      createdAt: Number(deal.createdAt),
       client: deal.owner,
       minWorkers: deal.minWorkers,
       targetWorkers: deal.targetWorkers,
@@ -526,14 +515,13 @@ export class DealExplorerClient {
         address: deal.paymentToken.id,
         symbol: deal.paymentToken.symbol,
       },
-      effectors: effectors,
-      // TODO: add missed implementations.
-      balance: freeBalance ? freeBalance : 0,
+      balance: formatTokenValueToFix(freeBalance),
       status: fromRpcForDealShort.dealStatus ? fromRpcForDealShort.dealStatus : "active",
+      totalEarnings: formatTokenValueToFix(totalEarnings),
+      // TODO: add missed implementations. DEFAULT_DECIMALS
       registeredWorkers: 0,
       matchedWorkers: 0,
-      totalEarnings: totalEarnings,
-    } as DealShort;
+    };
   }
 
   async getDeals(
@@ -543,33 +531,53 @@ export class DealExplorerClient {
     orderBy: DealsShortOrderBy = "createdAt",
     orderType: OrderType = this.DEFAULT_ORDER_TYPE,
   ): Promise<DealShortListView> {
-    const deals = await this._getDealsImpl(
+    return await this._getDealsImpl(
       dealFilters,
       offset,
       limit,
       orderBy,
       orderType,
     );
-    return {
-      total: deals.length,
-      data: deals,
-    };
   }
 
-  async getDeal(dealId: string): Promise<DealDetail> {
+  // It composes only compute units with linked workerIds.
+  _composeComputeUnits(fetchedComputeUnits: Array<ComputeUnitBasicFragment>): Array<ComputeUnit> {
+    const res: Array<ComputeUnit> = [];
+    for (const fetched of fetchedComputeUnits) {
+      if (fetched.workerId) {
+        res.push(
+          {
+            id: fetched.id,
+            workerId: fetched.workerId,
+          }
+        )
+      }
+    }
+    return res;
+  }
+
+  async getDeal(dealId: string): Promise<DealDetail | null> {
+    await this._init()
     const options = {
       id: dealId,
     };
     const data = await this.indexerClient.getDeal(options);
-    let res = null;
+    let res: DealDetail | null = null;
     if (data && data.deal) {
       const deal = data.deal;
-      res = this._composeDealsShort(deal);
-      res["pricePerWorkerEpoch"] = deal.pricePerWorkerEpoch;
-      res["computeUnits"] = deal.addedComputeUnits;
-      // TODO: resolve whitelists and blacklists.
-      res["whitelist"] = [];
-      res["blacklist"] = [];
+      const dealStatus = (await this._dealRpcClient!.getStatusDealBatch([dealId]))[0]
+      const freeBalance = (await this._dealRpcClient!.getFreeBalanceDealBatch([dealId]))[0]
+      const effectors = this._composeEffectors(deal.effectors);
+      res = {
+        ...this._composeDealsShort(deal, {dealStatus, freeBalance}),
+        'pricePerWorkerEpoch': formatTokenValueToFix(deal.pricePerWorkerEpoch),
+        'maxWorkersPerProvider': deal.maxWorkersPerProvider,
+        "computeUnits": this._composeComputeUnits(deal.addedComputeUnits as Array<ComputeUnitBasicFragment>),
+        // TODO: resolve whitelists and blacklists.
+        "whitelist": [],
+        "blacklist": [],
+        "effectors": effectors,
+      };
     }
     return res;
   }
