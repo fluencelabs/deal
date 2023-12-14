@@ -66,7 +66,7 @@ export class DealRpcClient extends Multicall3ContractClient {
         )
     }
 
-    _txToBigInt(result: Result | null): BigInt | null {
+    _txToBigInt(result: Result | null): bigint | null {
         if (!result) {
             return null
         }
