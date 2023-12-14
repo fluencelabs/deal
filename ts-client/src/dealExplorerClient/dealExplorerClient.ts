@@ -56,14 +56,14 @@ export class DealExplorerClient {
   DEFAULT_DECIMALS = 18 // TODO: add to subgraph
 
   private _caller: ethers.Provider | ethers.Signer;
-  private indexerClient: IndexerClient;
-  private dealContractsClient: DealClient;
+  private _indexerClient: IndexerClient;
+  private _dealContractsClient: DealClient;
   private _dealRpcClient: DealRpcClient | null;
 
   constructor(
     indexerUrl: string,
     chainRpcUrl?: string,
-    provider?: ethers.Provider | ethers.Signer,
+    caller?: ethers.Provider | ethers.Signer,
     network?: Network,
   ) {
     if (chainRpcUrl) {
@@ -73,13 +73,13 @@ export class DealExplorerClient {
         undefined,
         {},
       );
-    } else if (provider) {
-      this._caller = provider;
+    } else if (caller) {
+      this._caller = caller;
     } else {
       throw Error("One of chainRPCUrl or provider should be delclared.");
     }
-    this.indexerClient = new IndexerClient(indexerUrl);
-    this.dealContractsClient = new DealClient(
+    this._indexerClient = new IndexerClient(indexerUrl);
+    this._dealContractsClient = new DealClient(
       this._caller,
       network || this.DEFAULT_NETWORK,
     );
@@ -93,7 +93,7 @@ export class DealExplorerClient {
     if (this._dealRpcClient) {
       return
     }
-    const multicall3Contract = await this.dealContractsClient.getMulticall3()
+    const multicall3Contract = await this._dealContractsClient.getMulticall3()
     const multicall3ContractAddress = await multicall3Contract.getAddress()
     this._dealRpcClient = new DealRpcClient(this._caller, multicall3ContractAddress)
   }
@@ -103,7 +103,7 @@ export class DealExplorerClient {
   ): ProviderBase {
     return {
       id: provider.id,
-      createdAt: provider.createdAt,
+      createdAt: Number(provider.createdAt),
       totalComputeUnits: provider.computeUnitsTotal,
       freeComputeUnits: provider.computeUnitsAvailable,
       name: provider.name,
@@ -160,8 +160,8 @@ export class DealExplorerClient {
       }
     }
 
-    const total = await this.indexerClient.getTotalProviders({ filters: composedFilters })
-    const data = await this.indexerClient.getProviders({
+    const total = await this._indexerClient.getTotalProviders({ filters: composedFilters })
+    const data = await this._indexerClient.getProviders({
       filters: composedFilters,
       offset,
       limit,
@@ -185,7 +185,7 @@ export class DealExplorerClient {
     const options = {
       id: providerId,
     };
-    const data = await this.indexerClient.getProvider(options);
+    const data = await this._indexerClient.getProvider(options);
     let res = null;
     if (data && data.provider) {
       const providerFetched = data.provider;
@@ -326,8 +326,8 @@ export class DealExplorerClient {
     const orderByConverted =
       this._convertOfferShortOrderByToIndexerType(orderBy);
     const filtersConverted = this._convertOffersFiltersToIndexerType(offerFilters);
-    const total = await this.indexerClient.getTotalOffers({ filters: filtersConverted })
-    const data = await this.indexerClient.getOffers({
+    const total = await this._indexerClient.getTotalOffers({ filters: filtersConverted })
+    const data = await this._indexerClient.getOffers({
       filters: filtersConverted,
       offset,
       limit,
@@ -392,7 +392,7 @@ export class DealExplorerClient {
     const options = {
       id: offerId,
     };
-    const data = await this.indexerClient.getOffer(options);
+    const data = await this._indexerClient.getOffer(options);
     let res: OfferDetail | null = null;
     if (data && data.offer) {
       res = {
@@ -464,8 +464,8 @@ export class DealExplorerClient {
       this._convertDealsFiltersToIndexerType(dealsFilters);
     // TODO: filter by status: fetch from indexer. Filter on frontend, fetch more if needed...
     //  To get total with this filter: fetch total from indexer then filter in frontend.
-    const total = await this.indexerClient.getTotalDeals({ filters: filtersConverted })
-    const data = await this.indexerClient.getDeals({
+    const total = await this._indexerClient.getTotalDeals({ filters: filtersConverted })
+    const data = await this._indexerClient.getDeals({
       filters: filtersConverted,
       offset,
       limit,
@@ -561,7 +561,7 @@ export class DealExplorerClient {
     const options = {
       id: dealId,
     };
-    const data = await this.indexerClient.getDeal(options);
+    const data = await this._indexerClient.getDeal(options);
     let res: DealDetail | null = null;
     if (data && data.deal) {
       const deal = data.deal;
