@@ -109,12 +109,10 @@ contract Depoyments is ScriptBase {
         bytes32 codeHash = keccak256(code);
         bytes32 creationCodeHash = keccak256(creationCode);
 
-        bool isNew = deployedContract.addr == address(0);
+        bool isNew = deployedContract.addr == address(0) || deployedContract.codeHash != codeHash
+            || deployedContract.creationCodeHash != creationCodeHash || _extcodehash(deployedContract.addr) == bytes32(0x00);
 
-        if (
-            !isNew && deployedContract.codeHash == codeHash && deployedContract.creationCodeHash == creationCodeHash
-                && _extcodehash(deployedContract.addr) != bytes32(0x00)
-        ) {
+        if (!isNew) {
             address deployedAddr = deployedContract.addr;
             console.log("Reusing %s at %s", contractName, deployedAddr);
             return (deployedAddr, isNew);

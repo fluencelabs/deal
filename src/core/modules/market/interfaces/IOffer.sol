@@ -58,6 +58,8 @@ interface IOffer {
 
     function getComputeUnit(bytes32 unitId) external view returns (ComputeUnit memory);
 
+    function getComputeUnitIds(bytes32 peerId) external view returns (bytes32[] memory);
+
     // ----------------- Public Mutable -----------------
     // ---- Register offer and units ----
     function registerMarketOffer(

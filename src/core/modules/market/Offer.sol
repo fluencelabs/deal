@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "src/utils/OwnableUpgradableDiamond.sol";
 import "src/utils/LinkedListWithUniqueKeys.sol";
 import "src/deal/base/Types.sol";
@@ -15,6 +16,7 @@ import "forge-std/console.sol";
 contract Offer is BaseModule, IOffer {
     using SafeERC20 for IERC20;
     using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
+    using EnumerableSet for EnumerableSet.Bytes32Set;
 
     // ------------------ Constants ------------------
     bytes32 private constant _OFFER_ID_PREFIX = bytes32(uint256(keccak256("fluence.market.offer")) - 1);
@@ -32,6 +34,7 @@ contract Offer is BaseModule, IOffer {
         mapping(bytes32 => ComputePeer) peers;
         mapping(bytes32 => ComputeUnit) computeUnits;
         mapping(bytes32 => Effectors) effectorsByOfferId;
+        mapping(bytes32 => EnumerableSet.Bytes32Set) computeUnitIdsByPeerId;
         LinkedListWithUniqueKeys.Bytes32List offerIds; //TODO: remove after offer matching implementation
         mapping(bytes32 => LinkedListWithUniqueKeys.Bytes32List) freePeersByOfferId; //TODO: remove after offer matching implementation
         mapping(bytes32 => LinkedListWithUniqueKeys.Bytes32List) freeComputeUnitByPeerId; //TODO: remove after offer matching implementation
@@ -66,6 +69,10 @@ contract Offer is BaseModule, IOffer {
         require(computeUnit.peerId != bytes32(0x00), "Compute unit doesn't exist");
 
         return computeUnit;
+    }
+
+    function getComputeUnitIds(bytes32 peerId) public view returns (bytes32[] memory) {
+        return _getOfferStorage().computeUnitIdsByPeerId[peerId].values();
     }
 
     // ----------------- Public Mutable -----------------
@@ -148,6 +155,8 @@ contract Offer is BaseModule, IOffer {
         computePeer.unitCount--;
 
         offerStorage.freeComputeUnitByPeerId[peerId].remove(unitId);
+        offerStorage.computeUnitIdsByPeerId[peerId].remove(unitId);
+
         delete offerStorage.computeUnits[unitId];
     }
 
@@ -332,6 +341,8 @@ contract Offer is BaseModule, IOffer {
 
             // create compute unit
             offerStorage.computeUnits[unitId] = ComputeUnit({deal: address(0x00), peerId: peerId});
+            offerStorage.computeUnitIdsByPeerId[peerId].add(unitId);
+
             offerStorage.freeComputeUnitByPeerId[peerId].push(unitId);
 
             emit ComputeUnitCreated(peerId, unitId);

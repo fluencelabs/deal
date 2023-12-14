@@ -14,7 +14,9 @@ interface ICapacity {
         uint256 fltCCCollateralPerUnit
     );
     event CapacityCommitmentRemoved(bytes32 indexed commitmentId);
-    event CapacityCommitmentActivated(bytes32 indexed commitmentId);
+    event CapacityCommitmentActivated(
+        bytes32 indexed peerId, bytes32 indexed commitmentId, uint256 endEpoch, bytes32[] unitIds
+    );
     event CapacityCommitmentFinished(bytes32 indexed commitmentId);
 
     event CollateralDeposited(bytes32 indexed commitmentId, uint256 totalCollateral);

@@ -222,7 +222,9 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
         require(cc.info.delegator == msg.sender, "Only delegator can lock collateral");
 
         uint256 currentEpoch_ = core.currentEpoch();
-        cc.info.startEpoch = currentEpoch_ + 1;
+        uint256 startEpoch = currentEpoch_ + 1;
+
+        cc.info.startEpoch = startEpoch;
         cc.info.snapshotEpoch = currentEpoch_;
 
         uint256 unitCount = peer.unitCount;
@@ -237,7 +239,9 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
         market.setCommitmentId(peerId, commitmentId);
 
         emit CollateralDeposited(commitmentId, collateral);
-        emit CapacityCommitmentActivated(commitmentId); //TODO: add peerId, endEpoch, unitIds
+        emit CapacityCommitmentActivated(
+            peerId, commitmentId, startEpoch + cc.info.duration, market.getComputeUnitIds(peerId)
+        );
     }
 
     function submitProof(bytes32 unitId, bytes calldata proof) external {

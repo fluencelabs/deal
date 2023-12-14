@@ -42,8 +42,8 @@ deploy-docker:
 
 deploy-%:
 	@make verify-command program=forge
-	@CONTRACT_ENV_NAME=$* forge script script/Deploy.s.sol --rpc-url $* \
-	--private-key $(PRIVATE_KEY)
+	@CONTRACTS_ENV_NAME=$* forge script script/Deploy.s.sol --rpc-url $* \
+	--private-key $(PRIVATE_KEY) --broadcast
 
 	@echo "\033[0;32mSuccess! Contracts deployed to $* chain.\033[0m"
 

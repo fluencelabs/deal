@@ -94,8 +94,8 @@ contract DeployContracts is Depoyments, Script {
         } else {
             (address faucet, bool isNew) = _deployTestFaucet(tFLT, tUSD);
             if (isNew) {
-                tFLT.safeTransfer(address(faucet), type(uint256).max);
-                tUSD.safeTransfer(address(faucet), type(uint256).max);
+                tFLT.safeTransfer(address(faucet), 1_000_000_000_000 ether);
+                tUSD.safeTransfer(address(faucet), 1_000_000_000_000 ether);
             }
         }
 
@@ -254,6 +254,7 @@ contract DeployContracts is Depoyments, Script {
             abi.encode(capacityImpl, abi.encodeWithSelector(Capacity.initialize.selector, coreAddr));
 
         if (isNewMarket || isNewCapacity) {
+            console.log("Force deploy Core, Market, Capacity");
             coreAddr = _forceDeployContract("Core", "ERC1967Proxy", coreArgs);
             market = _forceDeployContract("Market", "ERC1967Proxy", marketArgs);
             capacity = _forceDeployContract("Capacity", "ERC1967Proxy", capacityArgs);

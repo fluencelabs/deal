@@ -24,7 +24,9 @@ contract CapacityCommitmentTest is Test {
         uint256 fltCCCollateralPerUnit
     );
     event CapacityCommitmentRemoved(bytes32 indexed commitmentId);
-    event CapacityCommitmentActivated(bytes32 indexed commitmentId);
+    event CapacityCommitmentActivated(
+        bytes32 indexed peerId, bytes32 indexed commitmentId, uint256 endEpoch, bytes32[] unitIds
+    );
     event CapacityCommitmentFinished(bytes32 indexed commitmentId);
 
     event CollateralDeposited(bytes32 indexed commitmentId, uint256 totalCollateral);
@@ -134,8 +136,9 @@ contract CapacityCommitmentTest is Test {
         vm.expectEmit(true, true, false, true, address(deployment.capacity));
         emit CollateralDeposited(commitmentId, amount);
 
-        vm.expectEmit(true, true, false, true, address(deployment.capacity));
-        emit CapacityCommitmentActivated(commitmentId);
+        uint256 currentEpoch = deployment.core.currentEpoch();
+        vm.expectEmit(true, true, true, true, address(deployment.capacity));
+        emit CapacityCommitmentActivated(peerId, commitmentId, currentEpoch + 1 + ccDuration, registerPeers[0].unitIds);
 
         deployment.capacity.depositCapacityCommitmentCollateral(commitmentId);
         vm.stopPrank();
