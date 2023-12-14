@@ -18,6 +18,9 @@ import type {
 } from "./queries/providers-query.generated.js";
 import { getSdk as getProvidersSdk } from "./queries/providers-query.generated.js";
 
+/*
+ * @title Client of The Graph/GraphQL backend Service.
+*/
 export class IndexerClient {
   PAGINATOR_ENITIES_LIMIT = 1000;
   public dealsClient: DealsSdk;
@@ -31,7 +34,7 @@ export class IndexerClient {
   }
 
   async getTotalProviders(variables?: ProvidersQueryQueryVariables, offset: number = 0): Promise<number> {
-    const paginatorVars: ProvidersQueryQueryVariables = {...variables} || {};
+    const paginatorVars: ProvidersQueryQueryVariables = { ...variables } || {};
     paginatorVars.limit = this.PAGINATOR_ENITIES_LIMIT
     paginatorVars.offset = offset
 
@@ -53,7 +56,7 @@ export class IndexerClient {
   }
 
   async getTotalOffers(variables?: OffersQueryQueryVariables, offset: number = 0): Promise<number> {
-    const paginatorVars: OffersQueryQueryVariables = {...variables} || {};
+    const paginatorVars: OffersQueryQueryVariables = { ...variables } || {};
     paginatorVars.limit = this.PAGINATOR_ENITIES_LIMIT
     paginatorVars.offset = offset
 
@@ -76,7 +79,7 @@ export class IndexerClient {
 
   // TODO: create generic instead.
   async getTotalDeals(variables?: DealsQueryQueryVariables, offset: number = 0): Promise<number> {
-    const paginatorVars: DealsQueryQueryVariables = {...variables} || {};
+    const paginatorVars: DealsQueryQueryVariables = { ...variables } || {};
     paginatorVars.limit = this.PAGINATOR_ENITIES_LIMIT
     paginatorVars.offset = offset
 
