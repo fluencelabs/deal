@@ -16,6 +16,25 @@ query OffersQuery(
   }
 }
 
+# Ids only for, e.g. pagination purpose.
+query OffersIdQuery(
+  $filters: Offer_filter,
+  $offset: Int,
+  $limit: Int,
+  $orderBy: Offer_orderBy,
+  $orderType: OrderDirection,
+) {
+  offers(
+      where: $filters
+      first: $limit
+      skip: $offset
+      orderBy: $orderBy
+      orderDirection: $orderType
+  ) {
+    id
+  }
+}
+
 query OfferQuery(
   $id: ID!
 ) {
@@ -40,8 +59,7 @@ fragment BasicOffer on Offer {
     computeUnitsAvailable
     effectors {
       effector {
-        id
-        description
+        ...EffectorBasic
       }
     }
 }
@@ -55,7 +73,19 @@ fragment BasicPeer on Peer {
         id
     }
     computeUnits {
-        id
-        workerId
+        ...ComputeUnitBasic
     }
+}
+
+fragment ComputeUnitBasic on ComputeUnit {
+    id
+    workerId
+    provider {
+        id
+    }
+}
+
+fragment EffectorBasic on Effector {
+  id
+  description
 }

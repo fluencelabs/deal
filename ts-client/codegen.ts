@@ -1,6 +1,6 @@
 // This module relates to deal-explorer-client.
 import type { CodegenConfig } from "@graphql-codegen/cli";
-import {exec} from "child_process";
+import { exec } from "child_process";
 
 const config: CodegenConfig = {
     overwrite: true,
