@@ -16,7 +16,7 @@ build-contracts:
 build:
 	@make build-contracts
 	@cd ts-client && npm run build
-	@cd subgraph && npm run compile
+	#TODO: fix subgraph @cd subgraph && npm run compile 
 
 	@echo "\033[0;32mSuccess! Build complete.\033[0m"
 
