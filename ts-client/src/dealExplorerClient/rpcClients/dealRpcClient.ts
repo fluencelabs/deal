@@ -40,11 +40,10 @@ export class DealRpcClient extends Multicall3ContractClient {
         return status;
     }
 
-    // TODO: createMarket with deals.
     // Get statuses for batch of Deals by 1 call.
     // Status depends on maxPaidEpoch to subgraph.
     async getStatusDealBatch(dealAddresses: Array<string>) {
-        if (!dealAddresses || dealAddresses[0] == undefined) {
+        if (!dealAddresses[0] == undefined) {
             return []
         }
 
@@ -74,7 +73,7 @@ export class DealRpcClient extends Multicall3ContractClient {
     }
 
     async getFreeBalanceDealBatch(dealAddresses: Array<string>) {
-        if (!dealAddresses || dealAddresses[0] == undefined) {
+        if (dealAddresses[0] == undefined) {
             return []
         }
 
