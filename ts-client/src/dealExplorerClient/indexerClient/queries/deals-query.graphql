@@ -16,6 +16,25 @@ query DealsQuery(
   }
 }
 
+# Ids only for, e.g. pagination purpose.
+query DealsIdQuery(
+  $filters: Deal_filter,
+  $offset: Int,
+  $limit: Int,
+  $orderBy: Deal_orderBy,
+  $orderType: OrderDirection,
+) {
+  deals(
+      where: $filters
+      first: $limit
+      skip: $offset
+      orderBy: $orderBy
+      orderDirection: $orderType
+  ) {
+    id
+  }
+}
+
 query DealQuery(
   $id: ID!
 ) {
@@ -39,18 +58,26 @@ fragment BasicDeal on Deal {
     }
     effectors {
       effector {
-        id
-        description
+        ...EffectorBasic
       }
     }
     addedComputeUnits {
-        id
-        workerId
-        provider {
-            id
-        }
+        ...ComputeUnitBasic
     }
     maxPaidEpoch
     depositedSum
     withdrawalSum
+}
+
+fragment ComputeUnitBasic on ComputeUnit {
+    id
+    workerId
+    provider {
+        id
+    }
+}
+
+fragment EffectorBasic on Effector {
+    id
+    description
 }

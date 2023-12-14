@@ -49,6 +49,7 @@ export type OfferShort = {
 // TODO: minPricePerWorkerEpoch deprecated
 export interface OfferDetail extends OfferShort {
   peers: Array<Peer>;
+  updatedAt: number;
 }
 
 export type PaymentToken = {
