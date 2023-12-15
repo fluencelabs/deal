@@ -41,7 +41,6 @@ export class DealRpcClient extends Multicall3ContractClient {
     }
 
     // Get statuses for batch of Deals by 1 call.
-    // Status depends on maxPaidEpoch to subgraph.
     async getStatusDealBatch(dealAddresses: Array<string>) {
         if (!dealAddresses[0] == undefined) {
             return []
