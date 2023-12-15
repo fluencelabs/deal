@@ -1,3 +1,5 @@
+import type { DealStatus } from "./types.js";
+
 export type ProviderDetailsStatusFilter = "all" | "active" | "inactive";
 
 export interface OffersFilters {
@@ -33,4 +35,5 @@ export interface DealsFilters {
   createdAtTo?: number | undefined;
   onlyApproved?: boolean;
   providerId?: string | undefined;
+  status?: DealStatus | undefined;
 }

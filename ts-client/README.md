@@ -12,7 +12,14 @@
 
 TODO: about other packages...
 
+
+
 # deal-explorer-client
+This client delivers data for the Explorer Frontend Application. The client consists of 3 ones:
+
+- DealContractsClient - to load env {kras, testnet, stage} and deployed contracts
+- DealRpcClient - with built-in multicall3 contract feature (1 JSON RPC request per several view calls on different Fluence contracts)
+- IndexerClient - to fetch built GraphQL models from the indexer (i.e. The Graph/Subgraph)
 
 ## Install 
 ```bash
@@ -89,6 +96,8 @@ async function main() {
     for (const offer of res.data) {
         console.log(offer.effectors)
     }
+    
+    console.log('Total data [e.g. for pagination]', res.total)
 }
 
 asyncRuntimeDecorator(main);

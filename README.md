@@ -65,6 +65,12 @@ $ forge test
 $ forge fmt
 ```
 
+## Troubleshooting
+
+Error on `make <soemthing>`: `No such file or directory (os error 2); check configured remappings.`
+
+> `git submodule update --init --recursive`
+
 ## Gas Snapshots
 
 ```shell

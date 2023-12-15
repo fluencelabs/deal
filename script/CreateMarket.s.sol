@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "forge-std/Script.sol";
 import "forge-std/Vm.sol";
 import "src/deal/Deal.sol";
+import "src/deal/interfaces/IDeal.sol";
 import "src/core/Core.sol";
 import "src/core/Market.sol";
 import "src/dev/OwnableFaucet.sol";
@@ -22,29 +23,28 @@ contract CreateMarket is Depoyments, Script {
     string private fullDeploymentsPath;
 
     string constant DEFAULT_ANVIL_MNEMONIC = "test test test test test test test test test test test junk";
+    // TODO: get from env as in hardhat?
+    uint MIN_DEPOSITED_EPOCHES = 2;
 
     function setUp() external {
         string memory fileNames = string.concat(Strings.toString(block.chainid), ".json");
         fullDeploymentsPath = string.concat(vm.projectRoot(), DEPLOYMENTS_PATH, fileNames);
     }
 
-    function run() external {
-        _loadDepoyments(fullDeploymentsPath);
+    bytes32[4] effectorSuffixes = [bytes32("Dogu"), "Doge", "Dog", "KotenokGav"];
 
-        Core core = Core(deployments.contracts["Core"].addr);
-        address fltAddress = deployments.contracts["tFLT"].addr;
-        CIDV1[] memory effectors = new CIDV1[](10);
-        for (uint256 i = 0; i < 10; i++) {
-            effectors[i] = CIDV1({prefixes: 0x12345678, hash: _pseudoRandom("effector", i)});
-        }
-
-        uint256 pricePerWorkerEpoch = 0.01 ether;
-        string memory mnemonic = vm.envOr("ANVIL_MNEMONIC", DEFAULT_ANVIL_MNEMONIC);
-        for (uint32 i = 0; i < 10; i++) {
+    function _createOffers(
+        uint32 offersNumber, 
+        Core core, 
+        address fltAddress, 
+        CIDV1[] memory effectors,
+        uint pricePerWorkerEpoch
+    ) internal {
+        for (uint32 i = 0; i < offersNumber; i++) {
             bytes32 offerId = _pseudoRandom("offerId", i);
-
-            uint256 privateKey = vm.deriveKey(mnemonic, i);
-            vm.startBroadcast(privateKey);
+            console.log(StdStyle.blue("current i:"), i);
+            console.log("Register with offerId...");
+            console.logBytes32(offerId);
 
             Market.RegisterComputePeer[] memory registerComputePeers = new Market.RegisterComputePeer[](3);
             for (uint256 j = 0; j < 3; j++) {
@@ -54,10 +54,105 @@ contract CreateMarket is Depoyments, Script {
                 });
             }
 
+            console.log("Call registerMarketOffer...");
             core.registerMarketOffer(offerId, pricePerWorkerEpoch, fltAddress, effectors, registerComputePeers);
-
-            vm.stopBroadcast();
         }
+    }
+
+    function _createDeals(
+        uint dealsToCreate,
+        Core core,
+        ERC20 fltContract,
+        uint minWorkers,
+        uint targetWorkers,
+        uint pricePerWorkerEpoch,
+        uint maxWorkerPerProvider,
+        CIDV1[] memory effectors,
+        IConfig.AccessType accessType,
+        address[] memory accessList
+    ) internal returns(address[] memory) {
+        // TODO: change to another signer. Not deployer could deploy this...
+        address[] memory createdDeals = new address[](dealsToCreate);
+        for (uint32 i = 0; i < dealsToCreate; i++) {
+            uint newMaxWorkerPerProvider = maxWorkerPerProvider + i;
+            uint newMinWorkers = minWorkers + i;
+            uint newTargetWorkers = targetWorkers + i;
+            CIDV1 memory appCID = CIDV1({prefixes: 0x12345678, hash: _pseudoRandom("dealAppCID", i)});
+
+            console.log("Idempotent token approve for minDeposit for Core [in situ there is only 1 transaction].");
+            uint minDeposit = newTargetWorkers * pricePerWorkerEpoch * MIN_DEPOSITED_EPOCHES;
+            fltContract.approve(address(core), minDeposit);
+
+            IDeal dealCreatedContract = core.deployDeal(
+                appCID,
+                fltContract,
+                newMinWorkers,
+                newTargetWorkers,
+                newMaxWorkerPerProvider,
+                pricePerWorkerEpoch,
+                effectors,
+                accessType,
+                accessList
+            );
+            createdDeals[i] = address(dealCreatedContract);
+        }
+
+
+        return createdDeals;
+    }
+
+    function run() external {
+        _loadDepoyments(fullDeploymentsPath);
+
+        address coreAddress = deployments.contracts["Core"].addr;
+        Core core = Core(coreAddress);
+        address fltAddress = deployments.contracts["tFLT"].addr;
+        ERC20 fltContract = ERC20(fltAddress);
+        CIDV1[] memory effectors = new CIDV1[](10);
+        for (uint256 i = 0; i < effectorSuffixes.length; i++) {
+            effectors[i] = CIDV1({prefixes: 0x12345678, hash: effectorSuffixes[i]});
+        }
+
+        uint256 pricePerWorkerEpoch = 0.01 ether;
+//        string memory mnemonic = vm.envOr("ANVIL_MNEMONIC", DEFAULT_ANVIL_MNEMONIC);
+
+        // Setup foundry run.
+        vm.startBroadcast();
+        vm.recordLogs();
+
+        console.log("Register several market offers");
+        _createOffers(
+            10,
+            core,
+            fltAddress,
+            effectors,
+            pricePerWorkerEpoch
+            );
+        console.log("Registered several offers...");
+
+        console.log("Create Deals...");
+        uint minWorkers = 60;
+        uint targetWorkers = 60;
+        uint maxWorkerPerProvider =  3;
+        IConfig.AccessType accessType = IConfig.AccessType.NONE;
+        address[] memory accessList;
+
+        address[] memory createdDeals = _createDeals(
+            10,
+            core,
+            fltContract,
+            minWorkers,
+            targetWorkers,
+            pricePerWorkerEpoch,
+            maxWorkerPerProvider,
+            effectors,
+            accessType,
+            accessList
+        );
+        console.log("The first of created Deals: ", createdDeals[0]);
+
+
+        vm.stopBroadcast();
     }
 
     function _pseudoRandom(string memory seed, uint256 index) internal view returns (bytes32) {
