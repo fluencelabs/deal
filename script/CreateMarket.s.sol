@@ -22,7 +22,6 @@ contract CreateMarket is Depoyments, Script {
     string constant DEPLOYMENTS_PATH = "/deployments/";
     string private fullDeploymentsPath;
 
-    string constant DEFAULT_ANVIL_MNEMONIC = "test test test test test test test test test test test junk";
     // TODO: get from env as in hardhat?
     uint MIN_DEPOSITED_EPOCHES = 2;
 
@@ -79,8 +78,8 @@ contract CreateMarket is Depoyments, Script {
             uint newTargetWorkers = targetWorkers + i;
             CIDV1 memory appCID = CIDV1({prefixes: 0x12345678, hash: _pseudoRandom("dealAppCID", i)});
 
-            console.log("Idempotent token approve for minDeposit for Core [in situ there is only 1 transaction].");
             uint minDeposit = newTargetWorkers * pricePerWorkerEpoch * MIN_DEPOSITED_EPOCHES;
+            console.log("Idempotent FLT token approve for minDeposit = %s for Core [in situ there is only 1 transaction should be done].", minDeposit);
             fltContract.approve(address(core), minDeposit);
 
             IDeal dealCreatedContract = core.deployDeal(
@@ -114,11 +113,13 @@ contract CreateMarket is Depoyments, Script {
         }
 
         uint256 pricePerWorkerEpoch = 0.01 ether;
-//        string memory mnemonic = vm.envOr("ANVIL_MNEMONIC", DEFAULT_ANVIL_MNEMONIC);
 
         // Setup foundry run.
         vm.startBroadcast();
-        vm.recordLogs();
+        console.log("Broadcast from address: %s", address(this));
+        uint tokenBalance = fltContract.balanceOf(address(this));
+        console.log("Token balance of broadcast runner is: %s", tokenBalance);
+
 
         console.log("Register several market offers");
         _createOffers(
