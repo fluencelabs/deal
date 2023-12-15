@@ -130,6 +130,7 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
 
         address provider = offer.provider;
         require(provider != address(0x00), "Offer doesn't exist");
+        //TODO: check msg.sender is provider
 
         require(duration >= core.minCCDuration(), "Duration should be greater than min capacity commitment duration");
         require(rewardDelegationRate > 0, "Reward delegation rate should be greater than 0");

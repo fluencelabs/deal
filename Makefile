@@ -22,7 +22,7 @@ build:
 
 start-local-chain:
 	@make verify-command program=anvil
-	@anvil --host 0.0.0.0 --block-time 1
+	@anvil --host 0.0.0.0 --block-time 15
 
 deploy-local:
 	@make verify-command program=forge
@@ -34,7 +34,7 @@ deploy-local:
 
 deploy-docker:
 	@make verify-command program=forge
-	@forge script script/Deploy.s.sol --rpc-url http://anvil-node:8545  \
+	@CONTRACTS_ENV_NAME=local forge script script/Deploy.s.sol --rpc-url http://anvil-node:8545  \
 	--mnemonics "test test test test test test test test test test test junk" \
 	--sender 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --broadcast
 

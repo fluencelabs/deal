@@ -248,22 +248,30 @@ contract DeployContracts is Depoyments, Script {
                 maxFailedRatio_
             )
         );
-        bytes memory marketArgs =
-            abi.encode(marketImpl, abi.encodeWithSelector(Market.initialize.selector, coreAddr, dealImpl));
-        bytes memory capacityArgs =
-            abi.encode(capacityImpl, abi.encodeWithSelector(Capacity.initialize.selector, coreAddr));
 
         if (isNewMarket || isNewCapacity) {
             console.log("Force deploy Core, Market, Capacity");
             coreAddr = _forceDeployContract("Core", "ERC1967Proxy", coreArgs);
+
+            bytes memory marketArgs =
+                abi.encode(marketImpl, abi.encodeWithSelector(Market.initialize.selector, coreAddr, dealImpl));
             market = _forceDeployContract("Market", "ERC1967Proxy", marketArgs);
+
+            bytes memory capacityArgs =
+                abi.encode(capacityImpl, abi.encodeWithSelector(Capacity.initialize.selector, coreAddr));
             capacity = _forceDeployContract("Capacity", "ERC1967Proxy", capacityArgs);
 
             ICore core = ICore(coreAddr);
             core.initializeModules(ICapacity(capacity), IMarket(market));
         } else {
             coreAddr = _deployContract("Core", "ERC1967Proxy", coreArgs);
+
+            bytes memory marketArgs =
+                abi.encode(marketImpl, abi.encodeWithSelector(Market.initialize.selector, coreAddr, dealImpl));
             market = _deployContract("Market", "ERC1967Proxy", marketArgs);
+
+            bytes memory capacityArgs =
+                abi.encode(capacityImpl, abi.encodeWithSelector(Capacity.initialize.selector, coreAddr));
             capacity = _deployContract("Capacity", "ERC1967Proxy", capacityArgs);
         }
 

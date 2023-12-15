@@ -11,7 +11,8 @@
     "replace-imports": "node replace-imports.js",
     "update-deployments": "rm -rf src/deployments && cp -r ../deployments ./src/deployments",
     "fmt": "prettier 'src/**/*.ts' --w",
-    "codegen:indexerClient": "graphql-codegen --config codegen.ts"
+    "codegen:indexerClient": "graphql-codegen --config codegen.ts",
+    "test": "vitest"
   },
   "dependencies": {
     "@graphql-typed-document-node/core": "^3.2.0",
@@ -46,7 +47,8 @@
     "shx": "^0.3.4",
     "ts-node": "^10.9.1",
     "typechain": "^8.3.1",
-    "typescript": "^5.1.6"
+    "typescript": "^5.1.6",
+    "vitest": "^1.0.4"
   },
   "eslintConfig": {
     "env": {

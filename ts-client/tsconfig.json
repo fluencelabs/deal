@@ -16,5 +16,5 @@
     "esm": true
   },
   "include": ["src/**/*", "src/deployments/**/*.json"],
-  "exclude": ["dist", "node_modules", "src/tests"]
+  "exclude": ["dist", "node_modules", "tests"]
 }

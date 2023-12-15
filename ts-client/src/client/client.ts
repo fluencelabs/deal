@@ -48,7 +48,7 @@ export class DealClient {
 
   async getCapacity(): Promise<Capacity> {
     return Capacity__factory.connect(
-      await (await this.getCore()).market(),
+      await (await this.getCore()).capacity(),
       this.signerOrProvider,
     );
   }
