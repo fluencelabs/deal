@@ -108,12 +108,14 @@ query EffectorQuery(
 }
 
 query TokenQuery(
+  $filters: Token_filter,
   $offset: Int,
   $limit: Int,
   $orderBy: Token_orderBy,
   $orderType: OrderDirection,
 ) {
   tokens(
+    where: $filters
     first: $limit
     skip: $offset
     orderBy: $orderBy

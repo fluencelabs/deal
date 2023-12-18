@@ -54,6 +54,7 @@ export type EffectorQueryQueryVariables = Types.Exact<{
 export type EffectorQueryQuery = { __typename?: 'Query', effectors: Array<{ __typename?: 'Effector', id: string, description: string }> };
 
 export type TokenQueryQueryVariables = Types.Exact<{
+  filters?: Types.InputMaybe<Types.Token_Filter>;
   offset?: Types.InputMaybe<Types.Scalars['Int']['input']>;
   limit?: Types.InputMaybe<Types.Scalars['Int']['input']>;
   orderBy?: Types.InputMaybe<Types.Token_OrderBy>;
@@ -162,8 +163,9 @@ export const EffectorQueryDocument = gql`
 }
     ${EffectorBasicFragmentDoc}`;
 export const TokenQueryDocument = gql`
-    query TokenQuery($offset: Int, $limit: Int, $orderBy: Token_orderBy, $orderType: OrderDirection) {
+    query TokenQuery($filters: Token_filter, $offset: Int, $limit: Int, $orderBy: Token_orderBy, $orderType: OrderDirection) {
   tokens(
+    where: $filters
     first: $limit
     skip: $offset
     orderBy: $orderBy

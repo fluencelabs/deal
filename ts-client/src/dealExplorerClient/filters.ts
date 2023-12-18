@@ -2,6 +2,7 @@ import type { DealStatus } from "./types.js";
 
 export type ProviderDetailsStatusFilter = "all" | "active" | "inactive";
 
+// :param paymentTokens: tokens addresses.
 export interface OffersFilters {
   search?: string | undefined;
   effectorIds?: Array<string> | undefined;

@@ -45,7 +45,10 @@ import { DealClient } from "../client/client.js";
 import type { Network } from "../client/config.js";
 import type { BasicPeerFragment } from "./indexerClient/queries/offers-query.generated.js";
 import { DealRpcClient } from "./rpcClients/index.js";
-import { tokenValueToRounded } from "./utils.js";
+import {tokenValueToRounded, valueToTokenValue} from "./utils.js";
+
+export class FiltersError extends Error {}
+export class ValidTogetherFiltersError extends FiltersError {}
 
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
@@ -59,6 +62,8 @@ export class DealExplorerClient {
   // For MVM we suppose that everything is in USDC.
   //  Used only with filters - if not token selected.
   DEFAULT_FILTER_TOKEN_DECIMALS = 6
+  // Max to select per 1 multiselect filter.
+  FILTER_MULTISELECT_MAX = 100
 
   private _caller: ethers.Provider | ethers.Signer;
   private _indexerClient: IndexerClient;
@@ -286,13 +291,40 @@ export class DealExplorerClient {
   }
 
   /*
+   * @dev Request indexer for common decimals across tokens, thus,
+   * @dev  it checks if symbols across are equal, or throw ValidTogetherFiltersError.
+   */
+  async _getCommonTokenDecimals(tokenAddresses: Array<string>): Promise<number> {
+    if (tokenAddresses.length > this.FILTER_MULTISELECT_MAX) {
+      throw new FiltersError("Too many tokens selected per 1 multiselect.")
+    }
+    const fetched = await this._indexerClient.getTokens({
+      filters: {id_in: tokenAddresses},
+      limit: this.FILTER_MULTISELECT_MAX,
+      orderBy: "id",
+      orderType: this.DEFAULT_ORDER_TYPE,
+    })
+    const tokenModels = fetched.tokens
+    if (tokenModels.length === 0 || tokenModels[0] === undefined) {
+      return this.DEFAULT_FILTER_TOKEN_DECIMALS
+    }
+    const commonDecimals = tokenModels[0].decimals
+    if (tokenModels.some((tokenModel) => tokenModel.decimals !== commonDecimals)) {
+      throw new ValidTogetherFiltersError(
+        "Tokens have different decimals field. It is impossible to filter them together."
+      )
+    }
+    return commonDecimals
+  }
+
+  /*
    * @dev We allow to select paymentTokens and range of values for those tokens.
    * @dev If for selected tokens decimals are not at the same: exception will be raised.
    * @dev Thus, on frontend side this "missmatch" should be avoided by checking selected
    * @dev  tokens on equal "decimals" field.
    * @dev [MVM] If no token is selected DEFAULT_FILTER_TOKEN_DECIMALS is applied.
    */
-  _convertOffersFiltersToIndexerType(v?: OffersFilters): Offer_Filter {
+  async _convertOffersFiltersToIndexerType(v?: OffersFilters): Promise<Offer_Filter> {
     if (!v) {
       return {};
     }
@@ -314,20 +346,22 @@ export class DealExplorerClient {
     if (v.createdAtTo) {
       res.createdAt_lt = v.createdAtTo.toString();
     }
-    if (v.minPricePerWorkerEpoch) {
-      // TODO: convert
-      // if (v.paymentTokens) {}
-      // this.DEFAULT_FILTER_TOKEN_DECIMALS
-      res.pricePerEpoch_gt = v.minPricePerWorkerEpoch.toString();
+    if (v.providerId) {
+      res.provider = v.providerId;
     }
-    if (v.maxPricePerWorkerEpoch) {
-      res.pricePerEpoch_lt = v.maxPricePerWorkerEpoch.toString();
-    }
+    // Filters with relation check below.
+    let tokenDecimals = this.DEFAULT_FILTER_TOKEN_DECIMALS
     if (v.paymentTokens) {
       res.paymentToken_in = v.paymentTokens;
     }
-    if (v.providerId) {
-      res.provider = v.providerId;
+    if ((v.minPricePerWorkerEpoch || v.maxPricePerWorkerEpoch) && v.paymentTokens) {
+      tokenDecimals = await this._getCommonTokenDecimals(v.paymentTokens)
+    }
+    if (v.minPricePerWorkerEpoch) {
+      res.pricePerEpoch_gt = valueToTokenValue(v.minPricePerWorkerEpoch, tokenDecimals);
+    }
+    if (v.maxPricePerWorkerEpoch) {
+      res.pricePerEpoch_lt = valueToTokenValue(v.maxPricePerWorkerEpoch, tokenDecimals);
     }
     return res;
   }
@@ -341,7 +375,7 @@ export class DealExplorerClient {
   ): Promise<OfferShortListView> {
     const orderByConverted =
       this._convertOfferShortOrderByToIndexerType(orderBy);
-    const filtersConverted = this._convertOffersFiltersToIndexerType(offerFilters);
+    const filtersConverted = await this._convertOffersFiltersToIndexerType(offerFilters);
     const total = await this._indexerClient.getTotalOffers({ filters: filtersConverted })
     const data = await this._indexerClient.getOffers({
       filters: filtersConverted,
@@ -425,7 +459,7 @@ export class DealExplorerClient {
     return v as Deal_OrderBy;
   }
 
-  _convertDealsFiltersToIndexerType(v?: DealsFilters): Deal_Filter {
+  async _convertDealsFiltersToIndexerType(v?: DealsFilters): Promise<Deal_Filter> {
     if (!v) {
       return {};
     }
@@ -444,15 +478,6 @@ export class DealExplorerClient {
         effector_in: v.effectorIds,
       };
     }
-    if (v.paymentTokens) {
-      res.paymentToken_in = v.paymentTokens;
-    }
-    if (v.minPricePerWorkerEpoch) {
-      res.pricePerWorkerEpoch_gt = v.minPricePerWorkerEpoch.toString();
-    }
-    if (v.maxPricePerWorkerEpoch) {
-      res.pricePerWorkerEpoch_lt = v.maxPricePerWorkerEpoch.toString();
-    }
     if (v.createdAtFrom) {
       res.createdAt_gt = v.createdAtFrom.toString();
     }
@@ -461,6 +486,20 @@ export class DealExplorerClient {
     }
     if (v.providerId) {
       res.addedComputeUnits_ = { provider: v.providerId };
+    }
+    // Filters with relation check below.
+    let tokenDecimals = this.DEFAULT_FILTER_TOKEN_DECIMALS
+    if (v.paymentTokens) {
+      res.paymentToken_in = v.paymentTokens;
+    }
+    if ((v.minPricePerWorkerEpoch || v.maxPricePerWorkerEpoch) && v.paymentTokens) {
+      tokenDecimals = await this._getCommonTokenDecimals(v.paymentTokens)
+    }
+    if (v.minPricePerWorkerEpoch) {
+      res.pricePerWorkerEpoch_gt =valueToTokenValue(v.minPricePerWorkerEpoch, tokenDecimals);
+    }
+    if (v.maxPricePerWorkerEpoch) {
+      res.pricePerWorkerEpoch_lt = valueToTokenValue(v.maxPricePerWorkerEpoch, tokenDecimals);
     }
     return res;
   }
@@ -477,9 +516,7 @@ export class DealExplorerClient {
     const orderByConverted =
       this._convertDealShortOrderByToIndexerType(orderBy);
     const filtersConverted =
-      this._convertDealsFiltersToIndexerType(dealsFilters);
-    // TODO: filter by status: fetch from indexer. Filter on frontend, fetch more if needed...
-    //  To get total with this filter: fetch total from indexer then filter in frontend.
+      await this._convertDealsFiltersToIndexerType(dealsFilters);
     const total = await this._indexerClient.getTotalDeals({ filters: filtersConverted })
     const data = await this._indexerClient.getDeals({
       filters: filtersConverted,
@@ -653,8 +690,6 @@ export class DealExplorerClient {
     }
     return res
   }
-
-
 }
 
 /*
