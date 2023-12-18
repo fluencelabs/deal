@@ -15,7 +15,6 @@ import type {
   Peer,
   ComputeUnit,
   DealStatus,
-
   DealShortListView,
   OfferShortListView,
   ProviderShortListView
@@ -160,7 +159,6 @@ export class DealExplorerClient {
       }
     }
 
-    const total = await this._indexerClient.getTotalProviders({ filters: composedFilters })
     const data = await this._indexerClient.getProviders({
       filters: composedFilters,
       offset,
@@ -174,10 +172,7 @@ export class DealExplorerClient {
         res.push(this._composeProviderShort(provider));
       }
     }
-    return {
-      total: total,
-      data: res,
-    };
+    return res;
   }
 
   async getProvider(providerId: string): Promise<ProviderDetail | null> {
@@ -326,7 +321,6 @@ export class DealExplorerClient {
     const orderByConverted =
       this._convertOfferShortOrderByToIndexerType(orderBy);
     const filtersConverted = this._convertOffersFiltersToIndexerType(offerFilters);
-    const total = await this._indexerClient.getTotalOffers({ filters: filtersConverted })
     const data = await this._indexerClient.getOffers({
       filters: filtersConverted,
       offset,
@@ -340,7 +334,7 @@ export class DealExplorerClient {
         res.push(this._composeOfferShort(offer));
       }
     }
-    return { data: res, total: total };
+    return res;
   }
 
   /*
@@ -462,9 +456,6 @@ export class DealExplorerClient {
       this._convertDealShortOrderByToIndexerType(orderBy);
     const filtersConverted =
       this._convertDealsFiltersToIndexerType(dealsFilters);
-    // TODO: filter by status: fetch from indexer. Filter on frontend, fetch more if needed...
-    //  To get total with this filter: fetch total from indexer then filter in frontend.
-    const total = await this._indexerClient.getTotalDeals({ filters: filtersConverted })
     const data = await this._indexerClient.getDeals({
       filters: filtersConverted,
       offset,
@@ -492,7 +483,7 @@ export class DealExplorerClient {
         );
       }
     }
-    return { data: res, total: total };
+    return res;
   }
 
   _composeDealsShort(

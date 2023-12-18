@@ -33,20 +33,6 @@ export class IndexerClient {
     this.providersClient = getProvidersSdk(client);
   }
 
-  async getTotalProviders(variables?: ProvidersQueryQueryVariables, offset: number = 0): Promise<number> {
-    const paginatorVars: ProvidersQueryQueryVariables = { ...variables } || {};
-    paginatorVars.limit = this.PAGINATOR_ENITIES_LIMIT
-    paginatorVars.offset = offset
-
-    const entities = await this.providersClient.ProvidersIdQuery(paginatorVars);
-    const fetchedEntities = entities.providers.length
-    // Check if it should request more.
-    if (fetchedEntities == this.PAGINATOR_ENITIES_LIMIT) {
-      return fetchedEntities + await this.getTotalProviders(variables, offset + this.PAGINATOR_ENITIES_LIMIT)
-    }
-    return fetchedEntities
-  }
-
   async getProviders(variables: ProvidersQueryQueryVariables) {
     return await this.providersClient.ProvidersQuery(variables);
   }
@@ -55,41 +41,12 @@ export class IndexerClient {
     return await this.providersClient.ProviderQuery(variables);
   }
 
-  async getTotalOffers(variables?: OffersQueryQueryVariables, offset: number = 0): Promise<number> {
-    const paginatorVars: OffersQueryQueryVariables = { ...variables } || {};
-    paginatorVars.limit = this.PAGINATOR_ENITIES_LIMIT
-    paginatorVars.offset = offset
-
-    const entities = await this.offersClient.OffersIdQuery(paginatorVars);
-    const fetchedEntities = entities.offers.length
-    // Check if it should request more.
-    if (fetchedEntities == this.PAGINATOR_ENITIES_LIMIT) {
-      return fetchedEntities + await this.getTotalOffers(variables, offset + this.PAGINATOR_ENITIES_LIMIT)
-    }
-    return fetchedEntities
-  }
-
   async getOffers(variables: OffersQueryQueryVariables) {
     return await this.offersClient.OffersQuery(variables);
   }
 
   async getOffer(variables: OfferQueryQueryVariables) {
     return await this.offersClient.OfferQuery(variables);
-  }
-
-  // TODO: create generic instead.
-  async getTotalDeals(variables?: DealsQueryQueryVariables, offset: number = 0): Promise<number> {
-    const paginatorVars: DealsQueryQueryVariables = { ...variables } || {};
-    paginatorVars.limit = this.PAGINATOR_ENITIES_LIMIT
-    paginatorVars.offset = offset
-
-    const entities = await this.dealsClient.DealsIdQuery(paginatorVars);
-    const fetchedEntities = entities.deals.length
-    // Check if it should request more.
-    if (fetchedEntities == this.PAGINATOR_ENITIES_LIMIT) {
-      return fetchedEntities + await this.getTotalDeals(variables, offset + this.PAGINATOR_ENITIES_LIMIT)
-    }
-    return fetchedEntities
   }
 
   async getDeals(variables: DealsQueryQueryVariables) {
