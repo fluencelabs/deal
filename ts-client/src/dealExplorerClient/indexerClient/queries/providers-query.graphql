@@ -68,6 +68,7 @@ fragment BasicOffer on Offer {
     paymentToken {
       id
       symbol
+      decimals
     }
     computeUnitsTotal
     computeUnitsAvailable

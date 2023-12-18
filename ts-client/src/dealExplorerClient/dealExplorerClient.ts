@@ -42,7 +42,7 @@ import { DealClient } from "../client/client.js";
 import type { Network } from "../client/config.js";
 import type { BasicPeerFragment } from "./indexerClient/queries/offers-query.generated.js";
 import { DealRpcClient } from "./rpcClients/index.js";
-import {formatTokenValueToFix} from "./utils.js";
+import { tokenValueToRounded } from "./utils.js";
 
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
@@ -53,7 +53,7 @@ export class DealExplorerClient {
   DEFAULT_NETWORK: Network = "kras";
   DEFAULT_PAGE_LIMIT = 100;
   DEFAULT_ORDER_TYPE: OrderType = "desc";
-  DEFAULT_DECIMALS = 18 // TODO: add to subgraph
+  DEFAULT_TOKEN_VALUE_ROUNDING = 3
 
   private _caller: ethers.Provider | ethers.Signer;
   private _indexerClient: IndexerClient;
@@ -515,9 +515,9 @@ export class DealExplorerClient {
         address: deal.paymentToken.id,
         symbol: deal.paymentToken.symbol,
       },
-      balance: formatTokenValueToFix(freeBalance),
+      balance: tokenValueToRounded(freeBalance),
       status: fromRpcForDealShort.dealStatus ? fromRpcForDealShort.dealStatus : "active",
-      totalEarnings: formatTokenValueToFix(totalEarnings),
+      totalEarnings: tokenValueToRounded(totalEarnings, this.DEFAULT_TOKEN_VALUE_ROUNDING, deal.paymentToken.decimals),
       // TODO: add missed implementations. DEFAULT_DECIMALS
       registeredWorkers: 0,
       matchedWorkers: 0,
@@ -570,7 +570,8 @@ export class DealExplorerClient {
       const effectors = this._composeEffectors(deal.effectors);
       res = {
         ...this._composeDealsShort(deal, {dealStatus, freeBalance}),
-        'pricePerWorkerEpoch': formatTokenValueToFix(deal.pricePerWorkerEpoch),
+        'pricePerWorkerEpoch': tokenValueToRounded(
+          deal.pricePerWorkerEpoch, this.DEFAULT_TOKEN_VALUE_ROUNDING, deal.paymentToken.decimals),
         'maxWorkersPerProvider': deal.maxWorkersPerProvider,
         "computeUnits": this._composeComputeUnits(deal.addedComputeUnits as Array<ComputeUnitBasicFragment>),
         // TODO: resolve whitelists and blacklists.
