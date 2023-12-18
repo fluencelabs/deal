@@ -6,6 +6,7 @@ import type {
 } from "./queries/deals-query.generated.js";
 import { getSdk as getDealsSdk } from "./queries/deals-query.generated.js";
 import type {
+  EffectorQueryQueryVariables,
   OfferQueryQueryVariables,
   OffersQueryQueryVariables,
   Sdk as OffersSdk,
@@ -98,5 +99,9 @@ export class IndexerClient {
 
   async getDeal(variables: DealQueryQueryVariables) {
     return await this.dealsClient.DealQuery(variables);
+  }
+
+  async getEffectors(variables: EffectorQueryQueryVariables) {
+    return await this.offersClient.EffectorQuery(variables);
   }
 }

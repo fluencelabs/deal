@@ -18,7 +18,8 @@ import type {
 
   DealShortListView,
   OfferShortListView,
-  ProviderShortListView
+  ProviderShortListView,
+  EffectorsOrderBy,
 } from "./types.js";
 import type {
   ByProviderAndStatusFilter,
@@ -47,13 +48,15 @@ import { tokenValueToRounded } from "./utils.js";
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
  * @dev It supports mainnet, testnet by selecting related contractsEnv.
- * TODO: Note, deprecated: do not use chainRPCUrl, use _caller instead.
  */
 export class DealExplorerClient {
   DEFAULT_NETWORK: Network = "kras";
   DEFAULT_PAGE_LIMIT = 100;
   DEFAULT_ORDER_TYPE: OrderType = "desc";
   DEFAULT_TOKEN_VALUE_ROUNDING = 3
+  // For MVM we suppose that everything is in USDC.
+  //  Used only with filters - if not token selected.
+  DEFAULT_FILTER_TOKEN_DECIMALS = 6
 
   private _caller: ethers.Provider | ethers.Signer;
   private _indexerClient: IndexerClient;
@@ -279,6 +282,13 @@ export class DealExplorerClient {
     return v as Offer_OrderBy;
   }
 
+  /*
+   * @dev We allow to select paymentTokens and range of values for those tokens.
+   * @dev If for selected tokens decimals are not at the same: exception will be raised.
+   * @dev Thus, on frontend side this "missmatch" should be avoided by checking selected
+   * @dev  tokens on equal "decimals" field.
+   * @dev [MVM] If no token is selected DEFAULT_FILTER_TOKEN_DECIMALS is applied.
+   */
   _convertOffersFiltersToIndexerType(v?: OffersFilters): Offer_Filter {
     if (!v) {
       return {};
@@ -582,6 +592,33 @@ export class DealExplorerClient {
     }
     return res;
   }
+
+  async getEffectors(
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: EffectorsOrderBy = "id",
+    orderType: OrderType = this.DEFAULT_ORDER_TYPE,
+  ): Promise<Array<Effector>> {
+    const data = await this._indexerClient.getEffectors(
+      {
+        offset,
+        limit,
+        orderBy,
+        orderType,
+      }
+    )
+    let res: Array<Effector> = []
+    if (data) {
+      // data.deals.map(deal => { return deal.id })
+      res = data.effectors.map(
+        effector => {
+          return {cid: effector.id, description: effector.description}
+        });
+    }
+    return res
+  }
+
+
 }
 
 /*
