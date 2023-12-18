@@ -60,7 +60,7 @@ export class DealExplorerClient {
   DEFAULT_ORDER_TYPE: OrderType = "desc";
   DEFAULT_TOKEN_VALUE_ROUNDING = 3
   // For MVM we suppose that everything is in USDC.
-  //  Used only with filters - if not token selected.
+  //  Used only with filters - if no token selected.
   DEFAULT_FILTER_TOKEN_DECIMALS = 6
   // Max to select per 1 multiselect filter.
   FILTER_MULTISELECT_MAX = 100

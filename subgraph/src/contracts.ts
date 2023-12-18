@@ -7,7 +7,7 @@ import { Deal } from "../generated/Core/Deal";
 import { Address, Bytes } from "@graphprotocol/graph-ts";
 import { ERC20 } from "../generated/Core/ERC20";
 
-// TODO: optimas through multicall (currently 2 calls only per token).
+// TODO: optimise through multicall contract (currently 2 calls only per token).
 export function getTokenSymbol(address: Bytes): string {
   let contract = ERC20.bind(Address.fromBytes(address));
   let symbolValue = "unknown"; // if ERC20 does not support symbol().
