@@ -515,7 +515,7 @@ export class DealExplorerClient {
         address: deal.paymentToken.id,
         symbol: deal.paymentToken.symbol,
       },
-      balance: tokenValueToRounded(freeBalance),
+      balance: tokenValueToRounded(freeBalance, this.DEFAULT_TOKEN_VALUE_ROUNDING, deal.paymentToken.decimals),
       status: fromRpcForDealShort.dealStatus ? fromRpcForDealShort.dealStatus : "active",
       totalEarnings: tokenValueToRounded(totalEarnings, this.DEFAULT_TOKEN_VALUE_ROUNDING, deal.paymentToken.decimals),
       // TODO: add missed implementations. DEFAULT_DECIMALS
