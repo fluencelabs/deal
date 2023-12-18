@@ -43,6 +43,26 @@ export type ComputeUnitBasicFragment = { __typename?: 'ComputeUnit', id: string,
 
 export type EffectorBasicFragment = { __typename?: 'Effector', id: string, description: string };
 
+export type EffectorQueryQueryVariables = Types.Exact<{
+  offset?: Types.InputMaybe<Types.Scalars['Int']['input']>;
+  limit?: Types.InputMaybe<Types.Scalars['Int']['input']>;
+  orderBy?: Types.InputMaybe<Types.Effector_OrderBy>;
+  orderType?: Types.InputMaybe<Types.OrderDirection>;
+}>;
+
+
+export type EffectorQueryQuery = { __typename?: 'Query', effectors: Array<{ __typename?: 'Effector', id: string, description: string }> };
+
+export type TokenQueryQueryVariables = Types.Exact<{
+  offset?: Types.InputMaybe<Types.Scalars['Int']['input']>;
+  limit?: Types.InputMaybe<Types.Scalars['Int']['input']>;
+  orderBy?: Types.InputMaybe<Types.Token_OrderBy>;
+  orderType?: Types.InputMaybe<Types.OrderDirection>;
+}>;
+
+
+export type TokenQueryQuery = { __typename?: 'Query', tokens: Array<{ __typename?: 'Token', id: string, symbol: string, decimals: number }> };
+
 export const EffectorBasicFragmentDoc = gql`
     fragment EffectorBasic on Effector {
   id
@@ -129,6 +149,32 @@ export const OfferQueryDocument = gql`
 }
     ${BasicOfferFragmentDoc}
 ${BasicPeerFragmentDoc}`;
+export const EffectorQueryDocument = gql`
+    query EffectorQuery($offset: Int, $limit: Int, $orderBy: Effector_orderBy, $orderType: OrderDirection) {
+  effectors(
+    first: $limit
+    skip: $offset
+    orderBy: $orderBy
+    orderDirection: $orderType
+  ) {
+    ...EffectorBasic
+  }
+}
+    ${EffectorBasicFragmentDoc}`;
+export const TokenQueryDocument = gql`
+    query TokenQuery($offset: Int, $limit: Int, $orderBy: Token_orderBy, $orderType: OrderDirection) {
+  tokens(
+    first: $limit
+    skip: $offset
+    orderBy: $orderBy
+    orderDirection: $orderType
+  ) {
+    id
+    symbol
+    decimals
+  }
+}
+    `;
 
 export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string, operationType?: string) => Promise<T>;
 
@@ -145,6 +191,12 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     OfferQuery(variables: OfferQueryQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<OfferQueryQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<OfferQueryQuery>(OfferQueryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'OfferQuery', 'query');
+    },
+    EffectorQuery(variables?: EffectorQueryQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<EffectorQueryQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<EffectorQueryQuery>(EffectorQueryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'EffectorQuery', 'query');
+    },
+    TokenQuery(variables?: TokenQueryQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<TokenQueryQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<TokenQueryQuery>(TokenQueryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'TokenQuery', 'query');
     }
   };
 }

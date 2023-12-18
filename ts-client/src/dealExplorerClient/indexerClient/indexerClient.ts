@@ -10,6 +10,7 @@ import type {
   OfferQueryQueryVariables,
   OffersQueryQueryVariables,
   Sdk as OffersSdk,
+  TokenQueryQueryVariables,
 } from "./queries/offers-query.generated.js";
 import { getSdk as getOffersSdk } from "./queries/offers-query.generated.js";
 import type {
@@ -103,5 +104,9 @@ export class IndexerClient {
 
   async getEffectors(variables: EffectorQueryQueryVariables) {
     return await this.offersClient.EffectorQuery(variables);
+  }
+
+  async getTokens(variables: TokenQueryQueryVariables) {
+    return await this.offersClient.TokenQuery(variables);
   }
 }

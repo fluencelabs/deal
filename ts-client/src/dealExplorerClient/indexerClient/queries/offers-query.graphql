@@ -106,3 +106,21 @@ query EffectorQuery(
     ...EffectorBasic
   }
 }
+
+query TokenQuery(
+  $offset: Int,
+  $limit: Int,
+  $orderBy: Token_orderBy,
+  $orderType: OrderDirection,
+) {
+  tokens(
+    first: $limit
+    skip: $offset
+    orderBy: $orderBy
+    orderDirection: $orderType
+  ) {
+    id
+    symbol
+    decimals
+  }
+}

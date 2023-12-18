@@ -55,6 +55,7 @@ export interface OfferDetail extends OfferShort {
 export type PaymentToken = {
   address: string;
   symbol: string;
+  decimals: string;
 };
 
 export type Revenue = {
@@ -122,5 +123,8 @@ export type OfferShortOrderBy =
   | "updatedAt";
 
 export type DealsShortOrderBy = "createdAt";
+
+export type EffectorsOrderBy = "id"
+export type PaymentTokenOrderBy = "id" | "symbol"
 
 export type OrderType = "asc" | "desc";

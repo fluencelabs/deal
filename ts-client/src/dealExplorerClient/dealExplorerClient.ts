@@ -20,6 +20,8 @@ import type {
   OfferShortListView,
   ProviderShortListView,
   EffectorsOrderBy,
+  PaymentTokenOrderBy,
+  PaymentToken,
 } from "./types.js";
 import type {
   ByProviderAndStatusFilter,
@@ -270,6 +272,7 @@ export class DealExplorerClient {
       paymentToken: {
         address: offer.paymentToken.id,
         symbol: offer.paymentToken.symbol,
+        decimals: offer.paymentToken.decimals.toString(),
       },
       effectors: this._composeEffectors(offer.effectors),
     } as OfferShort;
@@ -312,6 +315,9 @@ export class DealExplorerClient {
       res.createdAt_lt = v.createdAtTo.toString();
     }
     if (v.minPricePerWorkerEpoch) {
+      // TODO: convert
+      // if (v.paymentTokens) {}
+      // this.DEFAULT_FILTER_TOKEN_DECIMALS
       res.pricePerEpoch_gt = v.minPricePerWorkerEpoch.toString();
     }
     if (v.maxPricePerWorkerEpoch) {
@@ -524,11 +530,12 @@ export class DealExplorerClient {
       paymentToken: {
         address: deal.paymentToken.id,
         symbol: deal.paymentToken.symbol,
+        decimals: deal.paymentToken.decimals.toString(),
       },
       balance: tokenValueToRounded(freeBalance, this.DEFAULT_TOKEN_VALUE_ROUNDING, deal.paymentToken.decimals),
       status: fromRpcForDealShort.dealStatus ? fromRpcForDealShort.dealStatus : "active",
       totalEarnings: tokenValueToRounded(totalEarnings, this.DEFAULT_TOKEN_VALUE_ROUNDING, deal.paymentToken.decimals),
-      // TODO: add missed implementations. DEFAULT_DECIMALS
+      // TODO: add missed implementations.
       registeredWorkers: 0,
       matchedWorkers: 0,
     };
@@ -613,6 +620,35 @@ export class DealExplorerClient {
       res = data.effectors.map(
         effector => {
           return {cid: effector.id, description: effector.description}
+        });
+    }
+    return res
+  }
+
+  async getPaymentTokens(
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: PaymentTokenOrderBy = "symbol",
+    orderType: OrderType = this.DEFAULT_ORDER_TYPE,
+  ): Promise<Array<PaymentToken>> {
+    const data = await this._indexerClient.getTokens(
+      {
+        offset,
+        limit,
+        orderBy,
+        orderType,
+      }
+    )
+    let res: Array<PaymentToken> = []
+    if (data) {
+      // data.deals.map(deal => { return deal.id })
+      res = data.tokens.map(
+        token => {
+          return {
+            address: token.id,
+            symbol: token.symbol,
+            decimals: token.decimals.toString(),
+          }
         });
     }
     return res
