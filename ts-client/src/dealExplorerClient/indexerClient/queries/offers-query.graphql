@@ -90,3 +90,19 @@ fragment EffectorBasic on Effector {
   id
   description
 }
+
+query EffectorQuery(
+  $offset: Int,
+  $limit: Int,
+  $orderBy: Effector_orderBy,
+  $orderType: OrderDirection,
+) {
+  effectors(
+    first: $limit
+    skip: $offset
+    orderBy: $orderBy
+    orderDirection: $orderType
+  ) {
+    ...EffectorBasic
+  }
+}
