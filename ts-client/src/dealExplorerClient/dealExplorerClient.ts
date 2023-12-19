@@ -462,45 +462,46 @@ export class DealExplorerClient {
     if (!v) {
       return {};
     }
-    if (v.search) {
-      console.warn("Currently search filter does not implemented.");
-    }
     if (v.onlyApproved) {
       console.warn("Currently onlyApproved filter does not implemented.");
     }
     if (v.status) {
       console.warn("Currently status filter does not implemented.");
     }
-    const res: Deal_Filter = {};
+    const convertedFilters: Deal_Filter = {'and': []};
+    if (v.search) {
+      const search = v.search
+      convertedFilters.and?.push(
+        {or: [{id: search}, {owner: search}]}
+      )
+    }
     if (v.effectorIds) {
-      res.effectors_ = {
-        effector_in: v.effectorIds,
-      };
+      convertedFilters.and?.push({effectors_: {effector_in: v.effectorIds}})
     }
     if (v.createdAtFrom) {
-      res.createdAt_gt = v.createdAtFrom.toString();
+      convertedFilters.and?.push({createdAt_gt: v.createdAtFrom.toString()})
     }
     if (v.createdAtTo) {
-      res.createdAt_lt = v.createdAtTo.toString();
+      convertedFilters.and?.push({createdAt_lt: v.createdAtTo.toString()})
     }
     if (v.providerId) {
-      res.addedComputeUnits_ = { provider: v.providerId };
+      convertedFilters.and?.push({addedComputeUnits_: { provider: v.providerId }})
     }
     // Filters with relation check below.
     let tokenDecimals = this.DEFAULT_FILTER_TOKEN_DECIMALS
     if (v.paymentTokens) {
-      res.paymentToken_in = v.paymentTokens;
+      convertedFilters.and?.push({paymentToken_in: v.paymentTokens})
     }
     if ((v.minPricePerWorkerEpoch || v.maxPricePerWorkerEpoch) && v.paymentTokens) {
       tokenDecimals = await this._getCommonTokenDecimals(v.paymentTokens)
     }
     if (v.minPricePerWorkerEpoch) {
-      res.pricePerWorkerEpoch_gt =valueToTokenValue(v.minPricePerWorkerEpoch, tokenDecimals);
+      convertedFilters.and?.push({pricePerWorkerEpoch_gt:valueToTokenValue(v.minPricePerWorkerEpoch, tokenDecimals)})
     }
     if (v.maxPricePerWorkerEpoch) {
-      res.pricePerWorkerEpoch_lt = valueToTokenValue(v.maxPricePerWorkerEpoch, tokenDecimals);
+      convertedFilters.and?.push({pricePerWorkerEpoch_lt: valueToTokenValue(v.maxPricePerWorkerEpoch, tokenDecimals)})
     }
-    return res;
+    return convertedFilters;
   }
 
   async _getDealsImpl(
