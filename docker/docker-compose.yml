@@ -28,7 +28,7 @@ services:
   blockscout:
     depends_on:
       - anvil-node
-    image: blockscout/blockscout:latest
+    image: offchainlabs/blockscout:v1.0.0-c8db5b1
     restart: always
     links:
       - postgres:database
