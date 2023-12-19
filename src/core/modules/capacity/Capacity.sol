@@ -5,15 +5,15 @@ pragma solidity ^0.8.19;
 import "forge-std/console.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
-import "src/core/modules/BaseModule.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
 import "src/deal/base/Types.sol";
 import "src/deal/interfaces/IDeal.sol";
 import "src/utils/OwnableUpgradableDiamond.sol";
 import "src/utils/LinkedListWithUniqueKeys.sol";
 import "./interfaces/ICapacity.sol";
+import "./CapacityConst.sol";
 
-contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
+contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
     using SafeERC20 for IERC20;
     using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
 
@@ -61,9 +61,7 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
     // #endregion
 
     // #region ------------------ Initializer & Upgradeable ------------------
-    function initialize(ICore core) public initializer {
-        __BaseModule_init(core);
-    }
+    constructor(IERC20 fluenceToken_, ICore core_) CapacityConst(fluenceToken_, core_) {}
 
     function _authorizeUpgrade(address newImplementation) internal override onlyCoreOwner {}
     // #endregion
@@ -74,7 +72,7 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
 
         Commitment storage cc = s.commitments[commitmentId];
 
-        uint256 currentEpoch_ = _core().currentEpoch();
+        uint256 currentEpoch_ = core.currentEpoch();
         if (_isFailed(cc, currentEpoch_)) {
             return CCStatus.Failed;
         } else if (currentEpoch_ >= _expiredEpoch(cc)) {
@@ -118,7 +116,6 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
     function createCapacityCommitment(bytes32 peerId, uint256 duration, address delegator, uint256 rewardDelegationRate)
         external
     {
-        ICore core = _core();
         IMarket market = core.market();
 
         CommitmentStorage storage s = _getCommitmentStorage();
@@ -132,13 +129,13 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
         require(provider != address(0x00), "Offer doesn't exist");
         //TODO: check msg.sender is provider
 
-        require(duration >= core.minCCDuration(), "Duration should be greater than min capacity commitment duration");
+        require(duration >= minDuration(), "Duration should be greater than min capacity commitment duration");
         require(rewardDelegationRate > 0, "Reward delegation rate should be greater than 0");
-        require(rewardDelegationRate <= core.PRECISION(), "Reward delegation rate should be less or equal 100");
+        require(rewardDelegationRate <= PRECISION, "Reward delegation rate should be less or equal 100");
 
         bytes32 commitmentId =
             keccak256(abi.encodePacked(block.number, peerId, duration, delegator, rewardDelegationRate));
-        uint256 collateralPerUnit = core.fltCCCollateralPerUnit();
+        uint256 collateralPerUnit = fltCollateralPerUnit();
         s.commitments[commitmentId].info = CommitmentInfo({
             status: CCStatus.WaitDelegation,
             peerId: peerId,
@@ -164,7 +161,7 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
     function removeTempCapacityCommitment(bytes32 commitmentId) external {
         CommitmentStorage storage s = _getCommitmentStorage();
         Commitment storage cc = s.commitments[commitmentId];
-        IMarket.ComputePeer memory peer = _core().market().getComputePeer(cc.info.peerId);
+        IMarket.ComputePeer memory peer = core.market().getComputePeer(cc.info.peerId);
 
         require(cc.info.startEpoch == 0, "Capacity commitment is created");
 
@@ -175,7 +172,6 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
     }
 
     function finishCapacityCommitment(bytes32 commitmentId) external {
-        ICore core = _core();
         IMarket market = core.market();
 
         CommitmentStorage storage s = _getCommitmentStorage();
@@ -210,7 +206,6 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
     }
 
     function depositCapacityCommitmentCollateral(bytes32 commitmentId) external {
-        ICore core = _core();
         IMarket market = core.market();
 
         CommitmentStorage storage s = _getCommitmentStorage();
@@ -231,7 +226,7 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
         uint256 unitCount = peer.unitCount;
         uint256 collateral = unitCount * cc.info.collateralPerUnit;
 
-        core.addCCActiveUnitCount(unitCount);
+        //TODO: core.addCCActiveUnitCount(unitCount);
 
         IERC20(core.fluenceToken()).safeTransferFrom(msg.sender, address(this), collateral);
 
@@ -246,7 +241,6 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
     }
 
     function submitProof(bytes32 unitId, bytes calldata proof) external {
-        ICore core = _core();
         IMarket market = core.market();
 
         CommitmentStorage storage s = _getCommitmentStorage();
@@ -268,13 +262,13 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
         CCStatus status = _commitCCSnapshot(cc, peer, epoch - 1, expiredEpoch);
         require(status == CCStatus.Active, "Capacity commitment is not active");
 
-        uint256 minRequierdCCProofs_ = core.minCCRequierdProofsPerEpoch();
+        uint256 minRequierdCCProofs_ = minRequierdProofsPerEpoch();
 
         UnitProofsInfo storage unitProofsInfo = cc.unitProofsInfoByUnit[unitId];
         uint256 unitProofsCount = unitProofsInfo.proofsCountByEpoch[epoch];
 
         unitProofsCount += 1;
-        require(unitProofsCount <= core.maxCCProofsPerEpoch(), "Too many proofs");
+        require(unitProofsCount <= maxProofsPerEpoch(), "Too many proofs");
 
         if (unitProofsCount == minRequierdCCProofs_) {
             cc.info.currentCUSuccessCount += 1;
@@ -296,7 +290,6 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
     }
 
     function commitCCSnapshot(bytes32 commitmentId) external {
-        ICore core = _core();
         IMarket market = core.market();
 
         CommitmentStorage storage s = _getCommitmentStorage();
@@ -309,7 +302,6 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
     }
 
     function removeCUFromCC(bytes32 commitmentId, bytes32[] calldata unitIds) external {
-        ICore core = _core();
         IMarket market = core.market();
 
         CommitmentStorage storage s = _getCommitmentStorage();
@@ -349,7 +341,6 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
         (int256 index, uint256 length) = _findClosestMinVestingByTimestamp(cc.vestings, block.timestamp);
         require(index >= 0, "Nothing to withdraw");
 
-        ICore core = _core();
         IMarket market = core.market();
 
         IMarket.ComputePeer memory peer = market.getComputePeer(cc.info.peerId);
@@ -369,7 +360,7 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
 
         IERC20 flt = IERC20(core.fluenceToken());
 
-        uint256 delegatorReward = (amount * cc.info.rewardDelegatorRate) / core.PRECISION();
+        uint256 delegatorReward = (amount * cc.info.rewardDelegatorRate) / PRECISION;
         uint256 providerReward = amount - delegatorReward;
 
         flt.safeTransfer(cc.info.delegator, delegatorReward);
@@ -387,12 +378,11 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
     }
 
     function _failedEpoch(Commitment storage cc) private view returns (uint256) {
-        ICore core = _core();
         IMarket market = core.market();
 
         IMarket.ComputePeer memory peer = market.getComputePeer(cc.info.peerId);
 
-        uint256 maxFailedRatio_ = core.maxCCProofsPerEpoch();
+        uint256 maxFailedRatio_ = maxProofsPerEpoch();
         uint256 unitCount = peer.unitCount;
         uint256 maxFails = maxFailedRatio_ * unitCount;
         uint256 failsPerEpoch = unitCount;
@@ -466,17 +456,15 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
         uint256 collateralPerUnit_ = cc.info.collateralPerUnit;
         uint256 currentAmount = collateralPerUnit_ - slashedCollateral;
 
-        ICore core = _core();
-        uint256 PRECISION = core.PRECISION();
-
         uint256 count = prevEpoch - lastSuccessEpoch;
+        uint256 slashingRate_ = slashingRate();
         if (currentAmount > 0) {
-            slashedCollateral += (collateralPerUnit_ * count * core.ccSlashingRate()) / PRECISION;
+            slashedCollateral += (collateralPerUnit_ * count * slashingRate_) / PRECISION;
 
             if (prevEpoch == ccFaildEpoch) {
                 uint256 remainingFailsForLastEpoch = cc.info.remainingFailsForLastEpoch;
                 if (remainingFailsForLastEpoch > 0) {
-                    slashedCollateral += (collateralPerUnit_ * core.ccSlashingRate()) / PRECISION;
+                    slashedCollateral += (collateralPerUnit_ * slashingRate_) / PRECISION;
                     cc.info.remainingFailsForLastEpoch = remainingFailsForLastEpoch - 1;
                 }
             }
@@ -488,7 +476,7 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
 
         RewardInfo storage rewardInfo = s.rewardInfoByEpoch[lastSuccessEpoch];
         uint256 reward = (
-            core.getCCRewardPool(lastSuccessEpoch)
+            getRewardPool(lastSuccessEpoch)
                 * ((unitProofsInfo.proofsCountByEpoch[lastSuccessEpoch] * PRECISION) / rewardInfo.totalSuccessProofs)
         ) / PRECISION;
 
@@ -499,7 +487,7 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
         }
 
         cc.vestings.push(
-            Vesting({timestamp: block.timestamp + core.ccVestingDuration(), cumulativeAmount: cumulativeAmount + reward})
+            Vesting({timestamp: block.timestamp + vestingDuration(), cumulativeAmount: cumulativeAmount + reward})
         );
 
         delete unitProofsInfo.proofsCountByEpoch[lastSuccessEpoch];
@@ -513,8 +501,6 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
         uint256 epoch,
         uint256 expiredEpoch
     ) private returns (CCStatus) {
-        ICore core = _core();
-
         CCStatus storageStatus = cc.info.status;
         if (storageStatus != CCStatus.Active) {
             return storageStatus;
@@ -534,7 +520,7 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
         uint256 reqSuccessCount = unitCount * epochCount;
         uint256 totalFailCountByPeriod = reqSuccessCount - cc.info.currentCUSuccessCount;
 
-        uint256 maxFailedRatio_ = core.maxCCProofsPerEpoch();
+        uint256 maxFailedRatio_ = maxProofsPerEpoch();
         uint256 maxFails = maxFailedRatio_ * peer.unitCount;
 
         uint256 totalCUFailCount = cc.info.totalCUFailCount;
@@ -547,7 +533,7 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
             uint256 failedEpoch = snapshotEpoch + (remainingFails / failsPerEpoch);
             cc.info.failedEpoch = failedEpoch;
             cc.info.remainingFailsForLastEpoch = remainingFails % failsPerEpoch;
-            cc.info.withdrawCCEpochAfterFailed = failedEpoch + core.ccWithdrawEpochesAfterFailed();
+            cc.info.withdrawCCEpochAfterFailed = failedEpoch + withdrawEpochesAfterFailed();
 
             newStatus = CCStatus.Failed;
         }
@@ -557,7 +543,7 @@ contract Capacity is BaseModule, UUPSUpgradeable, ICapacity {
         cc.info.snapshotEpoch = epoch;
 
         if (newStatus != CCStatus.Active) {
-            core.subCCActiveUnitCount(unitCount);
+            //TODO: core.subCCActiveUnitCount(unitCount);
             cc.info.status = newStatus;
         }
 

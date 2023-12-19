@@ -3,8 +3,9 @@
 pragma solidity ^0.8.19;
 
 import "src/core/interfaces/ICore.sol";
+import "./ICapacityConst.sol";
 
-interface ICapacity {
+interface ICapacity is ICapacityConst {
     // ------------------ Events ------------------
     event CapacityCommitmentCreated(
         bytes32 indexed peerId,
@@ -49,7 +50,4 @@ interface ICapacity {
         uint256 exitedUnitCount;
         uint256 totalWithdrawnReward;
     }
-
-    // ------------------ Initializer ------------------
-    function initialize(ICore core) external;
 }

@@ -39,7 +39,6 @@ contract Matcher is Offer, IMatcher {
     // ----------------- External Mutable -----------------
     // TODO: move this logic to offchain. Temp solution
     function matchDeal(IDeal deal) external {
-        ICore core = _core();
         MatcherStorage storage matcherStorage = _getMatcherStorage();
 
         uint256 lastMatchedEpoch = matcherStorage.lastMatchedEpoch[address(deal)];

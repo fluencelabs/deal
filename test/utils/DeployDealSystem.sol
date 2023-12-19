@@ -26,7 +26,6 @@ library DeployDealSystem {
     }
 
     // ------------------ Constants ------------------
-    uint256 public constant PRECISION = 10000000; // min: 0.0000001
     uint256 public constant DEFAULT_EPOCH_DURATION = 1 days;
     uint256 public constant DEFAULT_FLT_PRICE = 10 * PRECISION; // 10 USD
     uint256 public constant DEFAULT_MIN_DEPOSITED_EPOCHES = 2;
@@ -86,13 +85,7 @@ library DeployDealSystem {
             )
         );
 
-        deployment.capacity = Capacity(
-            address(
-                new ERC1967Proxy(
-                    address(new Capacity()), abi.encodeWithSelector(Capacity.initialize.selector, deployment.core)
-                )
-            )
-        );
+        deployment.capacity = Capacity(address(new ERC1967Proxy(address(new Capacity()))));
 
         deployment.core.initializeModules(deployment.capacity, deployment.market);
 

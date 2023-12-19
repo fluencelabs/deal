@@ -12,7 +12,6 @@ import "./interfaces/IMarket.sol";
 contract Market is UUPSUpgradeable, DealFactory, Matcher, IMarket {
     // ------------------ Initializer ------------------
     function initialize(ICore core, IDeal dealImpl) public initializer {
-        __BaseModule_init(core);
         __DealFactory_init(dealImpl);
     }
 

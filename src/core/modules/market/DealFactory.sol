@@ -58,8 +58,6 @@ contract DealFactory is BaseModule, IDealFactory {
     ) external returns (IDeal) {
         DealFactoryStorage storage dealFactoryStorage = _getDealFactoryStorage();
 
-        ICore core = _core();
-
         IDeal deal = IDeal(
             address(
                 new ERC1967Proxy(

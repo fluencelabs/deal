@@ -30,7 +30,6 @@ contract DeployContracts is Depoyments, Script {
     uint256 constant LOCAL_tUSD_BALANCE = 1000000 ether;
 
     // ------------------ Default constant ------------------
-    uint256 constant PRECISION = 10_000_000; // min: 0.0000001
     uint256 constant DEFAULT_EPOCH_DURATION = 15 seconds;
     uint256 constant DEFAULT_FLT_PRICE = 1 * PRECISION; // 1 USD
     uint256 constant DEFAULT_MIN_DEPOSITED_EPOCHES = 2;
@@ -257,9 +256,7 @@ contract DeployContracts is Depoyments, Script {
                 abi.encode(marketImpl, abi.encodeWithSelector(Market.initialize.selector, coreAddr, dealImpl));
             market = _forceDeployContract("Market", "ERC1967Proxy", marketArgs);
 
-            bytes memory capacityArgs =
-                abi.encode(capacityImpl, abi.encodeWithSelector(Capacity.initialize.selector, coreAddr));
-            capacity = _forceDeployContract("Capacity", "ERC1967Proxy", capacityArgs);
+            capacity = _forceDeployContract("Capacity", "ERC1967Proxy", new bytes(0));
 
             ICore core = ICore(coreAddr);
             core.initializeModules(ICapacity(capacity), IMarket(market));
@@ -270,9 +267,7 @@ contract DeployContracts is Depoyments, Script {
                 abi.encode(marketImpl, abi.encodeWithSelector(Market.initialize.selector, coreAddr, dealImpl));
             market = _deployContract("Market", "ERC1967Proxy", marketArgs);
 
-            bytes memory capacityArgs =
-                abi.encode(capacityImpl, abi.encodeWithSelector(Capacity.initialize.selector, coreAddr));
-            capacity = _deployContract("Capacity", "ERC1967Proxy", capacityArgs);
+            capacity = _deployContract("Capacity", "ERC1967Proxy", new bytes(0));
         }
 
         flt.safeTransfer(capacity, 1_000_000 ether);

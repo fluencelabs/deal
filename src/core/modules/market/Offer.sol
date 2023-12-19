@@ -49,6 +49,9 @@ contract Offer is BaseModule, IOffer {
         }
     }
 
+    // ------------------ Initializer ------------------
+    constructor(IERC20 fluenceToken_, ICore core_) BaseModule(fluenceToken_, core_) {}
+
     // ----------------- Public View -----------------
     function getOffer(bytes32 offerId) public view returns (Offer memory) {
         Offer storage offer = _getOfferStorage().offers[offerId];
