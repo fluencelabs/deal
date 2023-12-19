@@ -19,7 +19,7 @@ fi
 # Choose auth string.
 basic_auth=""
 if [ "$BASIC_AUTH_FLUENCE_STAGE" != "" ]; then
-  basic_auth=${BASIC_AUTH_FLUENCE_STAGE}@
+  basic_auth="${BASIC_AUTH_FLUENCE_STAGE}@"
 fi
 
 SUBGRAPH_NAME=fluence-deal-contracts
