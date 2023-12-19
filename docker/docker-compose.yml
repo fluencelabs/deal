@@ -1,3 +1,11 @@
+# This docker-compose is used for DEV purposes.
+# It consists also of deploy script with volume mounting to the host:
+#  thus, you your deployments/<>.json might be changed after contract redeployed.
+#
+# To use from ../: `docker compose -f ./docker/docker-compose.yml up`.
+# Note, if you changed contracts and what to use docker-compose instead of local make command to deploy
+#  - you should rebuild with --build flag.
+# Note, deploy may take some time, check logs.
 services:
   # Anvil node with deployed contracts
   anvil-node:
@@ -13,12 +21,14 @@ services:
       dockerfile: ./docker/Dockerfile.deploy
     depends_on:
       - anvil-node
+    volumes:
+      - ../:/app/
 
   # Blockscout services
   blockscout:
     depends_on:
       - anvil-node
-    image: blockscout/blockscout:latest
+    image: offchainlabs/blockscout:v1.0.0-c8db5b1
     restart: always
     links:
       - postgres:database

@@ -11,15 +11,15 @@ import {
   MarketOfferRegistered,
   MinPricePerEpochUpdated,
   PaymentTokenUpdated,
-  PeerCreated
-} from "../../generated/Core/Core";
+  PeerCreated,
+} from "../../generated/Market/Market";
 import {
   createOrLoadDealEffector,
   createOrLoadEffector,
   createOrLoadOfferEffector,
   createOrLoadToken,
-  ZERO_BIG_INT
-} from "./../models";
+  ZERO_BIG_INT,
+} from "../models";
 
 import { log, store } from "@graphprotocol/graph-ts";
 import {
@@ -28,14 +28,14 @@ import {
   Offer,
   OfferToEffector,
   Peer,
-  Provider
+  Provider,
 } from "../../generated/schema";
 import { Deal as DealTemplate } from "../../generated/templates";
 import { AppCID, getEffectorCID, parseEffectors } from "./utils";
 import { getProviderName } from "../networkConstants";
 
 export function handleMarketOfferRegistered(
-  event: MarketOfferRegistered
+  event: MarketOfferRegistered,
 ): void {
   // Events: MarketOfferRegistered
   // Nested events (event order is important):
@@ -71,7 +71,7 @@ export function handleMarketOfferRegistered(
     // Automatically create link or ensure that exists.
     const createOrLoadOfferEffectorRes = createOrLoadOfferEffector(
       offer.id,
-      effectorId
+      effectorId,
     );
 
     if (createOrLoadOfferEffectorRes.created) {
@@ -126,7 +126,7 @@ export function handlePeerCreated(event: PeerCreated): void {
 
 // ---- Update Methods ----
 export function handleMinPricePerEpochUpdated(
-  event: MinPricePerEpochUpdated
+  event: MinPricePerEpochUpdated,
 ): void {
   const offer = Offer.load(event.params.offerId.toHex()) as Offer;
   offer.pricePerEpoch = event.params.minPricePerWorkerEpoch;
@@ -148,7 +148,7 @@ export function handleEffectorAdded(event: EffectorAdded): void {
 
   const createOrLoadOfferEffectorRes = createOrLoadOfferEffector(
     offer.id,
-    effector.id
+    effector.id,
   );
 
   offer.updatedAt = event.block.timestamp;
@@ -168,7 +168,7 @@ export function handleEffectorRemoved(event: EffectorRemoved): void {
 
   const createOrLoadOfferEffectorRes = createOrLoadOfferEffector(
     offer.id,
-    effector.id
+    effector.id,
   );
   store.remove("OfferToEffector", createOrLoadOfferEffectorRes.entity.id);
   if (createOrLoadOfferEffectorRes.created) {
@@ -186,7 +186,7 @@ export function handleEffectorRemoved(event: EffectorRemoved): void {
 
 // Note, in Deal we also handle ComputeUnitJoined.
 export function handleComputeUnitAddedToDeal(
-  event: ComputeUnitAddedToDeal
+  event: ComputeUnitAddedToDeal,
 ): void {
   // Call the contract to extract peerId of the computeUnit.
   const peer = Peer.load(event.params.peerId.toHex()) as Peer;
@@ -202,7 +202,7 @@ export function handleComputeUnitAddedToDeal(
 
 // Note, in Deal we also handle ComputeUnitRemoved.
 export function handleComputeUnitRemovedFromDeal(
-  event: ComputeUnitRemovedFromDeal
+  event: ComputeUnitRemovedFromDeal,
 ): void {
   // Call the contract to extract peerId of the computeUnit.
   const peer = Peer.load(event.params.peerId.toHex()) as Peer;
@@ -222,7 +222,7 @@ export function handleDealCreated(event: DealCreated): void {
   const dealAddress = event.params.deal;
   log.info("[handleDealCreated] New deal created: {} by: {}", [
     event.params.owner.toString(),
-    dealAddress.toString()
+    dealAddress.toString(),
   ]);
 
   const deal = new Deal(dealAddress.toHex());

@@ -3,5 +3,6 @@ export * from "./client/config.js";
 export * from "./typechain-types/index.js";
 export {
   DealExplorerClient,
-  DealIndexerClient,
+  ValidTogetherFiltersError,
+  FiltersError,
 } from "./dealExplorerClient/dealExplorerClient.js";

@@ -1,5 +1,8 @@
+import type { DealStatus } from "./types.js";
+
 export type ProviderDetailsStatusFilter = "all" | "active" | "inactive";
 
+// :param paymentTokens: tokens addresses.
 export interface OffersFilters {
   search?: string | undefined;
   effectorIds?: Array<string> | undefined;
@@ -33,4 +36,5 @@ export interface DealsFilters {
   createdAtTo?: number | undefined;
   onlyApproved?: boolean;
   providerId?: string | undefined;
+  status?: DealStatus | undefined;
 }

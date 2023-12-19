@@ -16,6 +16,25 @@ query OffersQuery(
   }
 }
 
+# Ids only for, e.g. pagination purpose.
+query OffersIdQuery(
+  $filters: Offer_filter,
+  $offset: Int,
+  $limit: Int,
+  $orderBy: Offer_orderBy,
+  $orderType: OrderDirection,
+) {
+  offers(
+      where: $filters
+      first: $limit
+      skip: $offset
+      orderBy: $orderBy
+      orderDirection: $orderType
+  ) {
+    id
+  }
+}
+
 query OfferQuery(
   $id: ID!
 ) {
@@ -35,13 +54,13 @@ fragment BasicOffer on Offer {
     paymentToken {
       id
       symbol
+      decimals
     }
     computeUnitsTotal
     computeUnitsAvailable
     effectors {
       effector {
-        id
-        description
+        ...EffectorBasic
       }
     }
 }
@@ -55,7 +74,55 @@ fragment BasicPeer on Peer {
         id
     }
     computeUnits {
-        id
-        workerId
+        ...ComputeUnitBasic
     }
+}
+
+fragment ComputeUnitBasic on ComputeUnit {
+    id
+    workerId
+    provider {
+        id
+    }
+}
+
+fragment EffectorBasic on Effector {
+  id
+  description
+}
+
+query EffectorQuery(
+  $offset: Int,
+  $limit: Int,
+  $orderBy: Effector_orderBy,
+  $orderType: OrderDirection,
+) {
+  effectors(
+    first: $limit
+    skip: $offset
+    orderBy: $orderBy
+    orderDirection: $orderType
+  ) {
+    ...EffectorBasic
+  }
+}
+
+query TokenQuery(
+  $filters: Token_filter,
+  $offset: Int,
+  $limit: Int,
+  $orderBy: Token_orderBy,
+  $orderType: OrderDirection,
+) {
+  tokens(
+    where: $filters
+    first: $limit
+    skip: $offset
+    orderBy: $orderBy
+    orderDirection: $orderType
+  ) {
+    id
+    symbol
+    decimals
+  }
 }

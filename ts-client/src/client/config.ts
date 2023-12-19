@@ -6,6 +6,7 @@ export type Deployment = {
   core: string;
   flt: string;
   usdc: string;
+  multicall3: string;
   chainId: number;
 };
 
@@ -47,12 +48,15 @@ export const getDeployment = async (env: ContractsENV) => {
     throw new Error(`Could not find flt token address for env: ${env}`);
   } else if (deployment?.tUSD?.addr === undefined) {
     throw new Error(`Could not find usdc token address for env: ${env}`);
+  } else if (deployment?.Multicall3?.addr === undefined) {
+    throw new Error(`Could not find multicall3 address for network: ${env}`);
   }
 
   return {
     core: deployment.Core.addr,
     flt: deployment.tFLT.addr,
     usdc: deployment.tUSD.addr,
+    multicall3: deployment.Multicall3.addr,
     chainId: chainId,
   };
 };

@@ -5,7 +5,7 @@ import {
   DealToEffector,
 } from "../generated/schema";
 import { BigInt, Bytes } from "@graphprotocol/graph-ts";
-import { getTokenSymbol } from "./contracts";
+import { getTokenDecimals, getTokenSymbol } from "./contracts";
 
 const ZERO_BYTES = Bytes.fromHexString(
   "0x0000000000000000000000000000000000000000",
@@ -18,7 +18,9 @@ export function createOrLoadToken(tokenAddress: string): Token {
 
   if (entity == null) {
     entity = new Token(tokenAddress);
-    entity.symbol = getTokenSymbol(Bytes.fromHexString(tokenAddress));
+    const tokenAddressBytes = Bytes.fromHexString(tokenAddress);
+    entity.symbol = getTokenSymbol(tokenAddressBytes);
+    entity.decimals = getTokenDecimals(tokenAddressBytes);
     entity.save();
   }
   return entity as Token;

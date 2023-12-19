@@ -16,7 +16,7 @@ build-contracts:
 build:
 	@make build-contracts
 	@cd ts-client && npm run build
-	#TODO: fix subgraph @cd subgraph && npm run compile 
+	@cd subgraph && npm run compile 
 
 	@echo "\033[0;32mSuccess! Build complete.\033[0m"
 
@@ -49,7 +49,7 @@ deploy-%:
 
 create-pure-market-local:
 	@make verify-command program=forge
-	@forge script script/CreateMarket.s.sol --rpc-url local  \
+	@CONTRACTS_ENV_NAME=local forge script script/CreateMarket.s.sol --rpc-url local  \
 	--mnemonics "test test test test test test test test test test test junk" \
 	--sender 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --broadcast
 

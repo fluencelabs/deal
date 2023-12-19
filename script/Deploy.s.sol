@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -80,8 +80,11 @@ contract DeployContracts is Depoyments, Script {
         ENV memory env = _loadENV();
 
         _startDeploy();
-        _deployMulticall3();
         (IERC20 tFLT, IERC20 tUSD) = _deployTestTokens();
+
+        // Deploy Multicall3 as **helper** contract to fetch info only from the chain.
+        // Thus, this contract is not belongs to Fluence contract ecosystem.
+        _deployMulticall3();
 
         if (env.chainId == LOCAL_CHAIN_ID) {
             string memory mnemonic = vm.envOr("ANVIL_MNEMONIC", DEFAULT_ANVIL_MNEMONIC);

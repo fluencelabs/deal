@@ -1,19 +1,8 @@
-interface ListViewABC {
-  // define data
-  total: number;
-}
+export interface ProviderShortListView extends Array<ProviderShort> {}
 
-export interface ProviderShortListView extends ListViewABC {
-  data: Array<ProviderShort>;
-}
+export interface OfferShortListView extends Array<OfferShort> {}
 
-export interface OfferShortListView extends ListViewABC {
-  data: Array<OfferShort>;
-}
-
-export interface DealShortListView extends ListViewABC {
-  data: Array<DealShort>;
-}
+export interface DealShortListView extends Array<DealShort> {}
 
 export type ProviderBase = {
   id: string;
@@ -49,11 +38,13 @@ export type OfferShort = {
 // TODO: minPricePerWorkerEpoch deprecated
 export interface OfferDetail extends OfferShort {
   peers: Array<Peer>;
+  updatedAt: number;
 }
 
 export type PaymentToken = {
   address: string;
   symbol: string;
+  decimals: string;
 };
 
 export type Revenue = {
@@ -97,20 +88,22 @@ export type DealShort = {
   registeredWorkers: number;
   // Active if CU has worker set.
   status: DealStatus;
-  balance: number;
-  totalEarnings: number;
+  balance: string;
+  totalEarnings: string;
 };
 
 // Collateral deprecated.
 export interface DealDetail extends DealShort {
-  pricePerWorkerEpoch: number;
+  pricePerWorkerEpoch: string;
+  maxWorkersPerProvider: number;
   computeUnits: Array<ComputeUnit>;
   whitelist: Array<string>;
   blacklist: Array<string>;
   effectors: Array<Effector>;
 }
 
-export type DealStatus = "inactive" | "active" | "ended";
+// Status undefined == problem with networks, etc.
+export type DealStatus = "inactive" | "active" | "ended" | "undefined";
 
 export type ProviderShortOrderBy = "createdAt" | "computeUnitsTotal";
 export type OfferShortOrderBy =
@@ -119,5 +112,8 @@ export type OfferShortOrderBy =
   | "updatedAt";
 
 export type DealsShortOrderBy = "createdAt";
+
+export type EffectorsOrderBy = "id"
+export type PaymentTokenOrderBy = "id" | "symbol"
 
 export type OrderType = "asc" | "desc";

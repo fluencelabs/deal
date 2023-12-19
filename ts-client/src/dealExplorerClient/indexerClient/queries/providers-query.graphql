@@ -16,6 +16,24 @@ query ProvidersQuery(
   }
 }
 
+# Ids only for, e.g. pagination purpose.
+query ProvidersIdQuery(
+  $filters: Provider_filter,
+  $offset: Int,
+  $limit: Int,
+  $orderBy: Provider_orderBy,
+  $orderType: OrderDirection,
+) {
+  providers(
+      where: $filters
+      first: $limit
+      skip: $offset
+      orderBy: $orderBy
+      orderDirection: $orderType
+  ) {
+    id
+  }
+}
 
 fragment ProviderOfProvidersQuery on Provider {
     ...ProviderABC
@@ -50,13 +68,18 @@ fragment BasicOffer on Offer {
     paymentToken {
       id
       symbol
+      decimals
     }
     computeUnitsTotal
     computeUnitsAvailable
     effectors {
       effector {
-        id
-        description
+        ...EffectorBasic
       }
     }
+}
+
+fragment EffectorBasic on Effector {
+    id
+    description
 }

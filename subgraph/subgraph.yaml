@@ -5,10 +5,10 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: Core
+    name: Market
     network: localhost
     source:
-      abi: Core
+      abi: Market
       address: "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f"
       startBlock: 0
     mapping:
@@ -21,9 +21,10 @@ dataSources:
         - Peer
         - OfferToEffector
         - ComputeUnit
+        - Token
       abis:
-        - name: Core
-          file: ../out/Core.sol/Core.json
+        - name: Market
+          file: ../out/Market.sol/Market.json
         - name: Deal
           file: ../out/Deal.sol/Deal.json
         - name: ERC20
@@ -50,7 +51,7 @@ dataSources:
         - event: DealCreated(indexed
             address,address,uint256,address,uint256,uint256,uint256,uint256,(bytes4,bytes32)[],(bytes4,bytes32))
           handler: handleDealCreated
-      file: ./src/mappings/core.ts
+      file: ./src/mappings/market.ts
 templates:
   - name: Deal
     kind: ethereum/contract
