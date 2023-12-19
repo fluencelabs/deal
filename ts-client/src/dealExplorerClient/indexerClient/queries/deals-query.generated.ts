@@ -15,7 +15,7 @@ export type DealsQueryQueryVariables = Types.Exact<{
 }>;
 
 
-export type DealsQueryQuery = { __typename?: 'Query', deals: Array<{ __typename?: 'Deal', id: string, createdAt: any, minWorkers: number, targetWorkers: number, owner: any, maxPaidEpoch?: any | null, depositedSum: any, withdrawalSum: any, paymentToken: { __typename?: 'Token', id: string, symbol: string }, effectors?: Array<{ __typename?: 'DealToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null, addedComputeUnits?: Array<{ __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string } }> | null }> };
+export type DealsQueryQuery = { __typename?: 'Query', deals: Array<{ __typename?: 'Deal', id: string, createdAt: any, minWorkers: number, targetWorkers: number, owner: any, maxPaidEpoch?: any | null, depositedSum: any, withdrawalSum: any, paymentToken: { __typename?: 'Token', id: string, symbol: string, decimals: number }, effectors?: Array<{ __typename?: 'DealToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null, addedComputeUnits?: Array<{ __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string } }> | null }> };
 
 export type DealsIdQueryQueryVariables = Types.Exact<{
   filters?: Types.InputMaybe<Types.Deal_Filter>;
@@ -33,9 +33,9 @@ export type DealQueryQueryVariables = Types.Exact<{
 }>;
 
 
-export type DealQueryQuery = { __typename?: 'Query', deal?: { __typename?: 'Deal', maxWorkersPerProvider: number, appCID: string, pricePerWorkerEpoch: any, id: string, createdAt: any, minWorkers: number, targetWorkers: number, owner: any, maxPaidEpoch?: any | null, depositedSum: any, withdrawalSum: any, paymentToken: { __typename?: 'Token', id: string, symbol: string }, effectors?: Array<{ __typename?: 'DealToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null, addedComputeUnits?: Array<{ __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string } }> | null } | null };
+export type DealQueryQuery = { __typename?: 'Query', deal?: { __typename?: 'Deal', maxWorkersPerProvider: number, appCID: string, pricePerWorkerEpoch: any, id: string, createdAt: any, minWorkers: number, targetWorkers: number, owner: any, maxPaidEpoch?: any | null, depositedSum: any, withdrawalSum: any, paymentToken: { __typename?: 'Token', id: string, symbol: string, decimals: number }, effectors?: Array<{ __typename?: 'DealToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null, addedComputeUnits?: Array<{ __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string } }> | null } | null };
 
-export type BasicDealFragment = { __typename?: 'Deal', id: string, createdAt: any, minWorkers: number, targetWorkers: number, owner: any, maxPaidEpoch?: any | null, depositedSum: any, withdrawalSum: any, paymentToken: { __typename?: 'Token', id: string, symbol: string }, effectors?: Array<{ __typename?: 'DealToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null, addedComputeUnits?: Array<{ __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string } }> | null };
+export type BasicDealFragment = { __typename?: 'Deal', id: string, createdAt: any, minWorkers: number, targetWorkers: number, owner: any, maxPaidEpoch?: any | null, depositedSum: any, withdrawalSum: any, paymentToken: { __typename?: 'Token', id: string, symbol: string, decimals: number }, effectors?: Array<{ __typename?: 'DealToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null, addedComputeUnits?: Array<{ __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string } }> | null };
 
 export type ComputeUnitBasicFragment = { __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string } };
 
@@ -66,6 +66,7 @@ export const BasicDealFragmentDoc = gql`
   paymentToken {
     id
     symbol
+    decimals
   }
   effectors {
     effector {

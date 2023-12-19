@@ -17,7 +17,10 @@ import type {
   DealStatus,
   DealShortListView,
   OfferShortListView,
-  ProviderShortListView
+  ProviderShortListView,
+  EffectorsOrderBy,
+  PaymentTokenOrderBy,
+  PaymentToken,
 } from "./types.js";
 import type {
   ByProviderAndStatusFilter,
@@ -41,18 +44,25 @@ import { DealClient } from "../client/client.js";
 import type { Network } from "../client/config.js";
 import type { BasicPeerFragment } from "./indexerClient/queries/offers-query.generated.js";
 import { DealRpcClient } from "./rpcClients/index.js";
-import {formatTokenValueToFix} from "./utils.js";
+import {tokenValueToRounded, valueToTokenValue} from "./utils.js";
+
+export class FiltersError extends Error {}
+export class ValidTogetherFiltersError extends FiltersError {}
 
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
  * @dev It supports mainnet, testnet by selecting related contractsEnv.
- * TODO: Note, deprecated: do not use chainRPCUrl, use _caller instead.
  */
 export class DealExplorerClient {
   DEFAULT_NETWORK: Network = "kras";
   DEFAULT_PAGE_LIMIT = 100;
   DEFAULT_ORDER_TYPE: OrderType = "desc";
-  DEFAULT_DECIMALS = 18 // TODO: add to subgraph
+  DEFAULT_TOKEN_VALUE_ROUNDING = 3
+  // For MVM we suppose that everything is in USDC.
+  //  Used only with filters - if no token selected.
+  DEFAULT_FILTER_TOKEN_DECIMALS = 6
+  // Max to select per 1 multiselect filter.
+  FILTER_MULTISELECT_MAX = 100
 
   private _caller: ethers.Provider | ethers.Signer;
   private _indexerClient: IndexerClient;
@@ -262,6 +272,7 @@ export class DealExplorerClient {
       paymentToken: {
         address: offer.paymentToken.id,
         symbol: offer.paymentToken.symbol,
+        decimals: offer.paymentToken.decimals.toString(),
       },
       effectors: this._composeEffectors(offer.effectors),
     } as OfferShort;
@@ -274,7 +285,41 @@ export class DealExplorerClient {
     return v as Offer_OrderBy;
   }
 
-  _convertOffersFiltersToIndexerType(v?: OffersFilters): Offer_Filter {
+  /*
+   * @dev Request indexer for common decimals across tokens, thus,
+   * @dev  it checks if symbols across are equal, or throw ValidTogetherFiltersError.
+   */
+  async _getCommonTokenDecimals(tokenAddresses: Array<string>): Promise<number> {
+    if (tokenAddresses.length > this.FILTER_MULTISELECT_MAX) {
+      throw new FiltersError("Too many tokens selected per 1 multiselect.")
+    }
+    const fetched = await this._indexerClient.getTokens({
+      filters: {id_in: tokenAddresses},
+      limit: this.FILTER_MULTISELECT_MAX,
+      orderBy: "id",
+      orderType: this.DEFAULT_ORDER_TYPE,
+    })
+    const tokenModels = fetched.tokens
+    if (tokenModels.length === 0 || tokenModels[0] === undefined) {
+      return this.DEFAULT_FILTER_TOKEN_DECIMALS
+    }
+    const commonDecimals = tokenModels[0].decimals
+    if (tokenModels.some((tokenModel) => tokenModel.decimals !== commonDecimals)) {
+      throw new ValidTogetherFiltersError(
+        "Tokens have different decimals field. It is impossible to filter them together."
+      )
+    }
+    return commonDecimals
+  }
+
+  /*
+   * @dev We allow to select paymentTokens and range of values for those tokens.
+   * @dev If for selected tokens decimals are not at the same: exception will be raised.
+   * @dev Thus, on frontend side this "missmatch" should be avoided by checking selected
+   * @dev  tokens on equal "decimals" field.
+   * @dev [MVM] If no token is selected DEFAULT_FILTER_TOKEN_DECIMALS is applied.
+   */
+  async _convertOffersFiltersToIndexerType(v?: OffersFilters): Promise<Offer_Filter> {
     if (!v) {
       return {};
     }
@@ -296,17 +341,22 @@ export class DealExplorerClient {
     if (v.createdAtTo) {
       res.createdAt_lt = v.createdAtTo.toString();
     }
-    if (v.minPricePerWorkerEpoch) {
-      res.pricePerEpoch_gt = v.minPricePerWorkerEpoch.toString();
+    if (v.providerId) {
+      res.provider = v.providerId;
     }
-    if (v.maxPricePerWorkerEpoch) {
-      res.pricePerEpoch_lt = v.maxPricePerWorkerEpoch.toString();
-    }
+    // Filters with relation check below.
+    let tokenDecimals = this.DEFAULT_FILTER_TOKEN_DECIMALS
     if (v.paymentTokens) {
       res.paymentToken_in = v.paymentTokens;
     }
-    if (v.providerId) {
-      res.provider = v.providerId;
+    if ((v.minPricePerWorkerEpoch || v.maxPricePerWorkerEpoch) && v.paymentTokens) {
+      tokenDecimals = await this._getCommonTokenDecimals(v.paymentTokens)
+    }
+    if (v.minPricePerWorkerEpoch) {
+      res.pricePerEpoch_gt = valueToTokenValue(v.minPricePerWorkerEpoch, tokenDecimals);
+    }
+    if (v.maxPricePerWorkerEpoch) {
+      res.pricePerEpoch_lt = valueToTokenValue(v.maxPricePerWorkerEpoch, tokenDecimals);
     }
     return res;
   }
@@ -320,7 +370,7 @@ export class DealExplorerClient {
   ): Promise<OfferShortListView> {
     const orderByConverted =
       this._convertOfferShortOrderByToIndexerType(orderBy);
-    const filtersConverted = this._convertOffersFiltersToIndexerType(offerFilters);
+    const filtersConverted = await this._convertOffersFiltersToIndexerType(offerFilters);
     const data = await this._indexerClient.getOffers({
       filters: filtersConverted,
       offset,
@@ -403,7 +453,7 @@ export class DealExplorerClient {
     return v as Deal_OrderBy;
   }
 
-  _convertDealsFiltersToIndexerType(v?: DealsFilters): Deal_Filter {
+  async _convertDealsFiltersToIndexerType(v?: DealsFilters): Promise<Deal_Filter> {
     if (!v) {
       return {};
     }
@@ -422,15 +472,6 @@ export class DealExplorerClient {
         effector_in: v.effectorIds,
       };
     }
-    if (v.paymentTokens) {
-      res.paymentToken_in = v.paymentTokens;
-    }
-    if (v.minPricePerWorkerEpoch) {
-      res.pricePerWorkerEpoch_gt = v.minPricePerWorkerEpoch.toString();
-    }
-    if (v.maxPricePerWorkerEpoch) {
-      res.pricePerWorkerEpoch_lt = v.maxPricePerWorkerEpoch.toString();
-    }
     if (v.createdAtFrom) {
       res.createdAt_gt = v.createdAtFrom.toString();
     }
@@ -439,6 +480,20 @@ export class DealExplorerClient {
     }
     if (v.providerId) {
       res.addedComputeUnits_ = { provider: v.providerId };
+    }
+    // Filters with relation check below.
+    let tokenDecimals = this.DEFAULT_FILTER_TOKEN_DECIMALS
+    if (v.paymentTokens) {
+      res.paymentToken_in = v.paymentTokens;
+    }
+    if ((v.minPricePerWorkerEpoch || v.maxPricePerWorkerEpoch) && v.paymentTokens) {
+      tokenDecimals = await this._getCommonTokenDecimals(v.paymentTokens)
+    }
+    if (v.minPricePerWorkerEpoch) {
+      res.pricePerWorkerEpoch_gt =valueToTokenValue(v.minPricePerWorkerEpoch, tokenDecimals);
+    }
+    if (v.maxPricePerWorkerEpoch) {
+      res.pricePerWorkerEpoch_lt = valueToTokenValue(v.maxPricePerWorkerEpoch, tokenDecimals);
     }
     return res;
   }
@@ -455,7 +510,7 @@ export class DealExplorerClient {
     const orderByConverted =
       this._convertDealShortOrderByToIndexerType(orderBy);
     const filtersConverted =
-      this._convertDealsFiltersToIndexerType(dealsFilters);
+      await this._convertDealsFiltersToIndexerType(dealsFilters);
     const data = await this._indexerClient.getDeals({
       filters: filtersConverted,
       offset,
@@ -505,11 +560,12 @@ export class DealExplorerClient {
       paymentToken: {
         address: deal.paymentToken.id,
         symbol: deal.paymentToken.symbol,
+        decimals: deal.paymentToken.decimals.toString(),
       },
-      balance: formatTokenValueToFix(freeBalance),
+      balance: tokenValueToRounded(freeBalance, this.DEFAULT_TOKEN_VALUE_ROUNDING, deal.paymentToken.decimals),
       status: fromRpcForDealShort.dealStatus ? fromRpcForDealShort.dealStatus : "active",
-      totalEarnings: formatTokenValueToFix(totalEarnings),
-      // TODO: add missed implementations. DEFAULT_DECIMALS
+      totalEarnings: tokenValueToRounded(totalEarnings, this.DEFAULT_TOKEN_VALUE_ROUNDING, deal.paymentToken.decimals),
+      // TODO: add missed implementations.
       registeredWorkers: 0,
       matchedWorkers: 0,
     };
@@ -561,7 +617,8 @@ export class DealExplorerClient {
       const effectors = this._composeEffectors(deal.effectors);
       res = {
         ...this._composeDealsShort(deal, {dealStatus, freeBalance}),
-        'pricePerWorkerEpoch': formatTokenValueToFix(deal.pricePerWorkerEpoch),
+        'pricePerWorkerEpoch': tokenValueToRounded(
+          deal.pricePerWorkerEpoch, this.DEFAULT_TOKEN_VALUE_ROUNDING, deal.paymentToken.decimals),
         'maxWorkersPerProvider': deal.maxWorkersPerProvider,
         "computeUnits": this._composeComputeUnits(deal.addedComputeUnits as Array<ComputeUnitBasicFragment>),
         // TODO: resolve whitelists and blacklists.
@@ -571,6 +628,60 @@ export class DealExplorerClient {
       };
     }
     return res;
+  }
+
+  async getEffectors(
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: EffectorsOrderBy = "id",
+    orderType: OrderType = this.DEFAULT_ORDER_TYPE,
+  ): Promise<Array<Effector>> {
+    const data = await this._indexerClient.getEffectors(
+      {
+        offset,
+        limit,
+        orderBy,
+        orderType,
+      }
+    )
+    let res: Array<Effector> = []
+    if (data) {
+      // data.deals.map(deal => { return deal.id })
+      res = data.effectors.map(
+        effector => {
+          return {cid: effector.id, description: effector.description}
+        });
+    }
+    return res
+  }
+
+  async getPaymentTokens(
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: PaymentTokenOrderBy = "symbol",
+    orderType: OrderType = this.DEFAULT_ORDER_TYPE,
+  ): Promise<Array<PaymentToken>> {
+    const data = await this._indexerClient.getTokens(
+      {
+        offset,
+        limit,
+        orderBy,
+        orderType,
+      }
+    )
+    let res: Array<PaymentToken> = []
+    if (data) {
+      // data.deals.map(deal => { return deal.id })
+      res = data.tokens.map(
+        token => {
+          return {
+            address: token.id,
+            symbol: token.symbol,
+            decimals: token.decimals.toString(),
+          }
+        });
+    }
+    return res
   }
 }
 
