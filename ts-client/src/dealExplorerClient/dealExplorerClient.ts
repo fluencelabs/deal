@@ -138,7 +138,7 @@ export class DealExplorerClient {
     } as ProviderShort;
   }
 
-  async _convertProviderFiltersToIndexer(providersFilters?: ProvidersFilters): Provider_Filter {
+  async _convertProviderFiltersToIndexer(providersFilters?: ProvidersFilters): Promise<Provider_Filter> {
     if (!providersFilters) {
       return {}
     }
@@ -148,7 +148,6 @@ export class DealExplorerClient {
       convertedFilters.and?.push(
         {or: [{id: search}, {name: search}]}
       )
-      console.warn("Currently search field does not implemented.");
     }
     // https://github.com/graphprotocol/graph-node/issues/2539
     // https://github.com/graphprotocol/graph-node/issues/4775
@@ -328,42 +327,43 @@ export class DealExplorerClient {
     if (!v) {
       return {};
     }
-    if (v.search) {
-      console.warn("Currently search field does not implemented.");
-    }
     if (v.onlyApproved) {
       console.warn("Currently onlyApproved field does not implemented.");
     }
-    const res: Offer_Filter = {};
+    const convertedFilters: Offer_Filter = {'and': []};
+    if (v.search) {
+      const search = v.search
+      convertedFilters.and?.push(
+        {or: [{id: search}, {provider: search}]}
+      )
+    }
     if (v.effectorIds) {
-      res.effectors_ = {
-        effector_in: v.effectorIds,
-      };
+      convertedFilters.and?.push({effectors_: {effector_in: v.effectorIds}})
     }
     if (v.createdAtFrom) {
-      res.createdAt_gt = v.createdAtFrom.toString();
+      convertedFilters.and?.push({createdAt_gt: v.createdAtFrom.toString()})
     }
     if (v.createdAtTo) {
-      res.createdAt_lt = v.createdAtTo.toString();
+      convertedFilters.and?.push({createdAt_lt: v.createdAtTo.toString()})
     }
     if (v.providerId) {
-      res.provider = v.providerId;
+      convertedFilters.and?.push({provider: v.providerId})
     }
     // Filters with relation check below.
     let tokenDecimals = this.DEFAULT_FILTER_TOKEN_DECIMALS
     if (v.paymentTokens) {
-      res.paymentToken_in = v.paymentTokens;
+      convertedFilters.and?.push({paymentToken_in: v.paymentTokens})
     }
     if ((v.minPricePerWorkerEpoch || v.maxPricePerWorkerEpoch) && v.paymentTokens) {
       tokenDecimals = await this._getCommonTokenDecimals(v.paymentTokens)
     }
     if (v.minPricePerWorkerEpoch) {
-      res.pricePerEpoch_gt = valueToTokenValue(v.minPricePerWorkerEpoch, tokenDecimals);
+      convertedFilters.and?.push({pricePerEpoch_gt: valueToTokenValue(v.minPricePerWorkerEpoch, tokenDecimals)})
     }
     if (v.maxPricePerWorkerEpoch) {
-      res.pricePerEpoch_lt = valueToTokenValue(v.maxPricePerWorkerEpoch, tokenDecimals);
+      convertedFilters.and?.push({pricePerEpoch_lt: valueToTokenValue(v.maxPricePerWorkerEpoch, tokenDecimals)})
     }
-    return res;
+    return convertedFilters;
   }
 
   async _getOffersImpl(
