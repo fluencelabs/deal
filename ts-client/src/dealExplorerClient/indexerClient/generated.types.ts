@@ -427,6 +427,7 @@ export type Deal_OrderBy =
   | 'minWorkers'
   | 'owner'
   | 'paymentToken'
+  | 'paymentToken__decimals'
   | 'paymentToken__id'
   | 'paymentToken__symbol'
   | 'pricePerWorkerEpoch'
@@ -728,6 +729,7 @@ export type Offer_OrderBy =
   | 'effectors'
   | 'id'
   | 'paymentToken'
+  | 'paymentToken__decimals'
   | 'paymentToken__id'
   | 'paymentToken__symbol'
   | 'peers'
@@ -1333,6 +1335,7 @@ export type SubscriptionTokensArgs = {
 
 export type Token = {
   __typename?: 'Token';
+  decimals: Scalars['Int']['output'];
   id: Scalars['ID']['output'];
   symbol: Scalars['String']['output'];
 };
@@ -1341,6 +1344,14 @@ export type Token_Filter = {
   /** Filter for the block changed event. */
   _change_block?: InputMaybe<BlockChangedFilter>;
   and?: InputMaybe<Array<InputMaybe<Token_Filter>>>;
+  decimals?: InputMaybe<Scalars['Int']['input']>;
+  decimals_gt?: InputMaybe<Scalars['Int']['input']>;
+  decimals_gte?: InputMaybe<Scalars['Int']['input']>;
+  decimals_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  decimals_lt?: InputMaybe<Scalars['Int']['input']>;
+  decimals_lte?: InputMaybe<Scalars['Int']['input']>;
+  decimals_not?: InputMaybe<Scalars['Int']['input']>;
+  decimals_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
   id?: InputMaybe<Scalars['ID']['input']>;
   id_gt?: InputMaybe<Scalars['ID']['input']>;
   id_gte?: InputMaybe<Scalars['ID']['input']>;
@@ -1373,6 +1384,7 @@ export type Token_Filter = {
 };
 
 export type Token_OrderBy =
+  | 'decimals'
   | 'id'
   | 'symbol';
 

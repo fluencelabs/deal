@@ -3,7 +3,8 @@ export * from "./client/config.js";
 export * from "./typechain-types/index.js";
 export {
   DealExplorerClient,
-  DealIndexerClient,
+  ValidTogetherFiltersError,
+  FiltersError,
 } from "./dealExplorerClient/dealExplorerClient.js";
 // TODO: rm this dirty hack
 //  (without this - fiels do not included into the package).
