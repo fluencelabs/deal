@@ -38,6 +38,7 @@ import type {
   Deal_OrderBy,
   Offer_Filter,
   Offer_OrderBy,
+  Provider_Filter,
 } from "./indexerClient/generated.types.js";
 import type { BasicDealFragment, ComputeUnitBasicFragment } from "./indexerClient/queries/deals-query.generated.js";
 import { DealClient } from "../client/client.js";
@@ -137,14 +138,32 @@ export class DealExplorerClient {
     } as ProviderShort;
   }
 
+  async _convertProviderFiltersToIndexer(providersFilters?: ProvidersFilters): Provider_Filter {
+    if (!providersFilters) {
+      return {}
+    }
+    const convertedFilters: Provider_Filter = {'and': []}
+    if (providersFilters.search) {
+      const search = providersFilters.search
+      convertedFilters.and?.push(
+        {or: [{id: search}, {name: search}]}
+      )
+      console.warn("Currently search field does not implemented.");
+    }
+    // https://github.com/graphprotocol/graph-node/issues/2539
+    // https://github.com/graphprotocol/graph-node/issues/4775
+    // https://github.com/graphprotocol/graph-node/blob/ad31fd9699b0957abda459340dff093b2a279074/NEWS.md?plain=1#L30
+    // Thus, kinda join should be presented on client side =(.
+    if (providersFilters.effectorIds) {
+      // composedFilters = { offers_: { effectors_: { effector_in: providersFilters.effectorIds } } };
+      console.warn("Currently effectorIds filter does not implemented.");
+    }
+    return convertedFilters
+  }
+
   /*
-   * @dev: search: you could perform search by `provider address` or `provider name`.
+   * @dev search: you could perform strict search by `provider address` or `provider name`
    * @dev Note, deprecation:
-   * @dev - skip: renamed to offset
-   * @dev - take: renamed to limit
-   * @dev - order: renamed to orderBy
-   * @dev - search: provide just a search txt.
-   * @dev - searchValue: deprecated.
    */
   async getProviders(
     providersFilters?: ProvidersFilters,
@@ -154,21 +173,7 @@ export class DealExplorerClient {
     orderType: OrderType = this.DEFAULT_ORDER_TYPE,
   ): Promise<ProviderShortListView> {
     await this._init();
-    const composedFilters = {};
-    if (providersFilters) {
-      if (providersFilters.search) {
-        console.warn("Currently search field does not implemented.");
-      }
-      // https://github.com/graphprotocol/graph-node/issues/2539
-      // https://github.com/graphprotocol/graph-node/issues/4775
-      // https://github.com/graphprotocol/graph-node/blob/ad31fd9699b0957abda459340dff093b2a279074/NEWS.md?plain=1#L30
-      // Thus, kinda join should be presented on client side =(.
-      if (providersFilters.effectorIds) {
-        // composedFilters = { offers_: { effectors_: { effector_in: providersFilters.effectorIds } } };
-        console.warn("Currently effectorIds filter does not implemented.");
-      }
-    }
-
+    const composedFilters = await this._convertProviderFiltersToIndexer(providersFilters);
     const data = await this._indexerClient.getProviders({
       filters: composedFilters,
       offset,
