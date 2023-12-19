@@ -1,5 +1,6 @@
 // This module relates to deal-explorer-client.
 import type { CodegenConfig } from "@graphql-codegen/cli";
+import { exec } from "child_process";
 
 const config: CodegenConfig = {
     overwrite: true,
@@ -37,10 +38,13 @@ const config: CodegenConfig = {
               },
               "typescript-operations", "typescript-graphql-request"
             ],
-            // TODO: add hook on after generation.
             hooks: {
+              // TODO: hook is a kinda trick here because of the graphql-client wrong imports for esm.
+              //  Thus, basically we should migrate to another client.
               afterOneFileWrite: (filenamePath: string) => {
-                console.log(filenamePath);
+                console.log("[afterOneFileWrite] Execute 2 sed to change imports for file:", filenamePath);
+                exec("sed -i '' -e \"s/import { GraphQLClient } from 'graphql-request';/import { GraphQLClient } from 'graphql-request';\\nimport type { RequestOptions } from 'graphql-request';/g\" " + filenamePath)
+                exec("sed -i '' -e \"s/import { GraphQLClientRequestHeaders } from 'graphql-request\\/build\\/esm\\/types.js';/type GraphQLClientRequestHeaders = RequestOptions['requestHeaders'];/g\" " + filenamePath )
               }
             }
         },

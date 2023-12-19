@@ -6,9 +6,11 @@ import type {
 } from "./queries/deals-query.generated.js";
 import { getSdk as getDealsSdk } from "./queries/deals-query.generated.js";
 import type {
+  EffectorQueryQueryVariables,
   OfferQueryQueryVariables,
   OffersQueryQueryVariables,
   Sdk as OffersSdk,
+  TokenQueryQueryVariables,
 } from "./queries/offers-query.generated.js";
 import { getSdk as getOffersSdk } from "./queries/offers-query.generated.js";
 import type {
@@ -18,7 +20,11 @@ import type {
 } from "./queries/providers-query.generated.js";
 import { getSdk as getProvidersSdk } from "./queries/providers-query.generated.js";
 
+/*
+ * @title Client of The Graph/GraphQL backend Service.
+*/
 export class IndexerClient {
+  PAGINATOR_ENITIES_LIMIT = 1000;
   public dealsClient: DealsSdk;
   public offersClient: OffersSdk;
   public providersClient: ProvidersSdk;
@@ -51,5 +57,13 @@ export class IndexerClient {
 
   async getDeal(variables: DealQueryQueryVariables) {
     return await this.dealsClient.DealQuery(variables);
+  }
+
+  async getEffectors(variables: EffectorQueryQueryVariables) {
+    return await this.offersClient.EffectorQuery(variables);
+  }
+
+  async getTokens(variables: TokenQueryQueryVariables) {
+    return await this.offersClient.TokenQuery(variables);
   }
 }

@@ -4,6 +4,7 @@
 type Token @entity(immutable: true) {
   id: ID!  # Token Address
   symbol: String!
+  decimals: Int!
 }
 
 type Provider @entity {

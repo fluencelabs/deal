@@ -6,6 +6,7 @@ import {
   ERC20__factory,
   Market__factory,
   Capacity__factory,
+  Multicall3__factory,
 } from "../typechain-types/index.js";
 import { getDeployment } from "./config.js";
 
@@ -15,6 +16,7 @@ import type {
   Deal,
   ERC20,
   Market,
+  Multicall3,
 } from "../typechain-types/index.js";
 import type { Deployment, ContractsENV } from "./config.js";
 
@@ -63,6 +65,13 @@ export class DealClient {
   async getUSDC(): Promise<ERC20> {
     return ERC20__factory.connect(
       (await this.deployment).usdc,
+      this.signerOrProvider,
+    );
+  }
+
+  async getMulticall3(): Promise<Multicall3> {
+    return Multicall3__factory.connect(
+      (await this.deployment).multicall3,
       this.signerOrProvider,
     );
   }

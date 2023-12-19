@@ -21,6 +21,7 @@ dataSources:
         - Peer
         - OfferToEffector
         - ComputeUnit
+        - Token
       abis:
         - name: Core
           file: ../out/Core.sol/Core.json
