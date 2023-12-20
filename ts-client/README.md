@@ -93,11 +93,9 @@ async function main() {
 
     // No filters example.
     const res = await client.getOffers();
-    for (const offer of res.data) {
+    for (const offer of res) {
         console.log(offer.effectors)
     }
-    
-    console.log('Total data [e.g. for pagination]', res.total)
 }
 
 asyncRuntimeDecorator(main);

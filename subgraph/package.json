@@ -10,6 +10,8 @@
     "remove:local": "graph remove --node http://localhost:8020/ fluence-deal-contracts",
     "deploy:local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 --network localhost --network-file config/networks.json --version-label 0.0.0 fluence-deal-contracts",
     "deploy:mumbai": "graph deploy --product hosted-service --network-file config/networks.json --network mumbai alcibiadescleinias/fluence-deal-contracts",
+    "create:stage": "./fluence-graph.sh create",
+    "deploy:stage": "./fluence-graph.sh deploy",
     "test": "graph test",
     "graph-node": "docker-compose up -d",
     "graph-local-clean": "docker-compose down -v",
