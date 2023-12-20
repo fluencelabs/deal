@@ -113,7 +113,7 @@ export type OfferShortOrderBy =
 
 export type DealsShortOrderBy = "createdAt";
 
-export type EffectorsOrderBy = "id"
-export type PaymentTokenOrderBy = "id" | "symbol"
+export type EffectorsOrderBy = "id";
+export type PaymentTokenOrderBy = "id" | "symbol";
 
 export type OrderType = "asc" | "desc";
