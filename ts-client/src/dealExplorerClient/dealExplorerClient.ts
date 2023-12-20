@@ -45,7 +45,7 @@ import type {
   ComputeUnitBasicFragment,
 } from "./indexerClient/queries/deals-query.generated.js";
 import { DealClient } from "../client/client.js";
-import type { Network } from "../client/config.js";
+import type { ContractsENV } from "../client/config.js";
 import type { BasicPeerFragment } from "./indexerClient/queries/offers-query.generated.js";
 import { DealRpcClient } from "./rpcClients/index.js";
 import { tokenValueToRounded, valueToTokenValue } from "./utils.js";
@@ -58,7 +58,7 @@ export class ValidTogetherFiltersError extends FiltersError {}
  * @dev It supports mainnet, testnet by selecting related contractsEnv.
  */
 export class DealExplorerClient {
-  DEFAULT_NETWORK: Network = "kras";
+  DEFAULT_NETWORK: ContractsENV = "kras";
   DEFAULT_PAGE_LIMIT = 100;
   DEFAULT_ORDER_TYPE: OrderType = "desc";
   DEFAULT_TOKEN_VALUE_ROUNDING = 3;
@@ -77,7 +77,7 @@ export class DealExplorerClient {
     indexerUrl: string,
     chainRpcUrl?: string,
     caller?: ethers.Provider | ethers.Signer,
-    network?: Network,
+    network?: ContractsENV,
   ) {
     if (chainRpcUrl) {
       console.warn("Do not use chainRPCUrl, use provider instead.");
