@@ -28,5 +28,10 @@
     "addr": "0xB877F0F3657Bb89EB37aAC71f1510fc938813834",
     "codeHash": "0xfc444be89c2affe6c6868ac3e7b7c1958222b1723e0a523c3c03268d1e32cdfb",
     "creationCodeHash": "0xae35ee52015249b87c5219c9e95aaca61168450eff4303b0d9fa5af243fb7ef5"
+  },
+  "Multicall3": {
+    "addr": "0xcA11bde05977b3631167028862bE2a173976CA11",
+    "codeHash": "0x6222b1b924ffe635d63668c43af823d7ec79c07a165a576ba9a341150190efad",
+    "creationCodeHash": "0xed40af0a67063fa8d2194cebb2138b92900591c9e6b59749d15187ac7cb9ca4c"
   }
 }
