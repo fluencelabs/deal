@@ -3,15 +3,13 @@ import {
   OfferToEffector,
   Token,
   DealToEffector,
+  GraphNetwork,
 } from "../generated/schema";
 import { BigInt, Bytes } from "@graphprotocol/graph-ts";
 import { getTokenDecimals, getTokenSymbol } from "./contracts";
 
-const ZERO_BYTES = Bytes.fromHexString(
-  "0x0000000000000000000000000000000000000000",
-);
-const ZERO_STRING = "";
 export const ZERO_BIG_INT = BigInt.fromI32(0);
+export const UNO_BIG_INT = BigInt.fromI32(1);
 
 export function createOrLoadToken(tokenAddress: string): Token {
   let entity = Token.load(tokenAddress);
@@ -85,4 +83,16 @@ export function createOrLoadDealEffector(
     entity.save();
   }
   return entity as DealToEffector;
+}
+
+export function createOrLoadGraphNetwork(): GraphNetwork {
+  let graphNetwork = GraphNetwork.load('1')
+  if (graphNetwork == null) {
+    graphNetwork = new GraphNetwork('1')
+    graphNetwork.dealsTotal = ZERO_BIG_INT;
+    graphNetwork.providersTotal = ZERO_BIG_INT;
+    graphNetwork.offersTotal = ZERO_BIG_INT;
+    graphNetwork.save()
+  }
+  return graphNetwork as GraphNetwork
 }
