@@ -1,4 +1,3 @@
-import { GraphQLClient } from "graphql-request";
 import type {
   OffersQueryQueryVariables,
   Sdk as OffersSdk,
@@ -7,17 +6,15 @@ import { getSdk as getOffersSdk } from "./queries/offers-query.generated.js";
 import {
   type DealQueryQueryVariables, getSdk as getDealsSdk, type Sdk as DealsSdk
 } from "./queries/deals-query.generated.js";
+import {IndexerClientABC} from "../../utils/indexerClientABC.js";
 
-/*
- * @title Client of The Graph/GraphQL backend Service.
- */
-export class IndexerClient {
+export class IndexerClient extends IndexerClientABC {
   private dealsClient: DealsSdk;
   private offersClient: OffersSdk;
   constructor(url: string) {
-    const client = new GraphQLClient(url);
-    this.offersClient = getOffersSdk(client);
-    this.dealsClient = getDealsSdk(client);
+    super(url);
+    this.offersClient = getOffersSdk(this._graphqlClient);
+    this.dealsClient = getDealsSdk(this._graphqlClient);
   }
 
   async getOffers(variables: OffersQueryQueryVariables) {
