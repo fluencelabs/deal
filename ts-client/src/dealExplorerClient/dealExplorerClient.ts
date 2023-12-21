@@ -21,6 +21,8 @@ import type {
   EffectorsOrderBy,
   PaymentTokenOrderBy,
   PaymentToken,
+  PaymentTokenListView,
+  EffectorListView,
 } from "./types.js";
 import type {
   ByProviderAndStatusFilter,
@@ -747,7 +749,7 @@ export class DealExplorerClient {
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: EffectorsOrderBy = "id",
     orderType: OrderType = this.DEFAULT_ORDER_TYPE,
-  ): Promise<Array<Effector>> {
+  ): Promise<EffectorListView> {
     const data = await this._indexerClient.getEffectors({
       offset,
       limit,
@@ -761,7 +763,18 @@ export class DealExplorerClient {
         return { cid: effector.id, description: effector.description };
       });
     }
-    return res;
+    let total = null;
+    if (
+      data.graphNetworks.length == 1 &&
+      data.graphNetworks[0] &&
+      data.graphNetworks[0].effectorsTotal
+    ) {
+      total = data.graphNetworks[0].effectorsTotal as string;
+    }
+    return {
+      data: res,
+      total,
+    };
   }
 
   async getPaymentTokens(
@@ -769,7 +782,7 @@ export class DealExplorerClient {
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: PaymentTokenOrderBy = "symbol",
     orderType: OrderType = this.DEFAULT_ORDER_TYPE,
-  ): Promise<Array<PaymentToken>> {
+  ): Promise<PaymentTokenListView> {
     const data = await this._indexerClient.getTokens({
       offset,
       limit,
@@ -787,7 +800,18 @@ export class DealExplorerClient {
         };
       });
     }
-    return res;
+    let total = null;
+    if (
+      data.graphNetworks.length == 1 &&
+      data.graphNetworks[0] &&
+      data.graphNetworks[0].tokensTotal
+    ) {
+      total = data.graphNetworks[0].tokensTotal as string;
+    }
+    return {
+      data: res,
+      total,
+    };
   }
 }
 

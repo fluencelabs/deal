@@ -14,6 +14,14 @@ export interface DealShortListView extends ListViewABC {
   data: Array<DealShort>;
 }
 
+export interface EffectorListView extends ListViewABC {
+  data: Array<Effector>;
+}
+
+export interface PaymentTokenListView extends ListViewABC {
+  data: Array<PaymentToken>;
+}
+
 export type ProviderBase = {
   id: string;
   name: string;
