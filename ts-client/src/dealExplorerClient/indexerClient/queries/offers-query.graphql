@@ -14,24 +14,8 @@ query OffersQuery(
   ) {
     ...BasicOffer
   }
-}
-
-# Ids only for, e.g. pagination purpose.
-query OffersIdQuery(
-  $filters: Offer_filter,
-  $offset: Int,
-  $limit: Int,
-  $orderBy: Offer_orderBy,
-  $orderType: OrderDirection,
-) {
-  offers(
-      where: $filters
-      first: $limit
-      skip: $offset
-      orderBy: $orderBy
-      orderDirection: $orderType
-  ) {
-    id
+  graphNetworks(first: 1) {
+    offersTotal
   }
 }
 
@@ -105,6 +89,9 @@ query EffectorQuery(
   ) {
     ...EffectorBasic
   }
+  graphNetworks(first: 1) {
+    effectorsTotal
+  }
 }
 
 query TokenQuery(
@@ -124,5 +111,8 @@ query TokenQuery(
     id
     symbol
     decimals
+  }
+  graphNetworks(first: 1) {
+    tokensTotal
   }
 }

@@ -9,6 +9,8 @@ type GraphNetwork @entity {
   providersTotal: BigInt!
   dealsTotal: BigInt!
   offersTotal: BigInt!
+  tokensTotal: BigInt!
+  effectorsTotal: BigInt!
 }
 
 type Token @entity(immutable: true) {
