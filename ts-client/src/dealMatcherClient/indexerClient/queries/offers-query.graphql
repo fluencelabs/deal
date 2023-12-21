@@ -1,0 +1,28 @@
+query OffersQuery(
+  $filters: Offer_filter,
+  $peersFilters: Peer_filter,
+  $computeUnitsFilters: ComputeUnit_filter,
+  $offset: Int,
+  $limit: Int,
+  $orderBy: Offer_orderBy,
+  $orderType: OrderDirection,
+) {
+  offers(
+      where: $filters
+      first: $limit
+      skip: $offset
+      orderBy: $orderBy
+      orderDirection: $orderType
+  ) {
+    id
+    peers(
+      where: $peersFilters
+    ) {
+      computeUnits(
+        where: $computeUnitsFilters
+      ) {
+        id
+      }
+    }
+  }
+}

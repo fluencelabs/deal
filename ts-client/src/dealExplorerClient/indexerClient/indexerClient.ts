@@ -24,10 +24,9 @@ import { getSdk as getProvidersSdk } from "./queries/providers-query.generated.j
  * @title Client of The Graph/GraphQL backend Service.
  */
 export class IndexerClient {
-  PAGINATOR_ENITIES_LIMIT = 1000;
-  public dealsClient: DealsSdk;
-  public offersClient: OffersSdk;
-  public providersClient: ProvidersSdk;
+  private dealsClient: DealsSdk;
+  private offersClient: OffersSdk;
+  private providersClient: ProvidersSdk;
   constructor(url: string) {
     const client = new GraphQLClient(url);
     this.dealsClient = getDealsSdk(client);
