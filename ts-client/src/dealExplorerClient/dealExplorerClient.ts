@@ -189,7 +189,19 @@ export class DealExplorerClient {
         res.push(this._composeProviderShort(provider));
       }
     }
-    return res;
+    let total = null;
+    if (
+      !providersFilters &&
+      data.graphNetworks.length == 1 &&
+      data.graphNetworks[0] &&
+      data.graphNetworks[0].providersTotal
+    ) {
+      total = data.graphNetworks[0].providersTotal as string;
+    }
+    return {
+      data: res,
+      total,
+    };
   }
 
   async getProvider(providerId: string): Promise<ProviderDetail | null> {
@@ -417,7 +429,19 @@ export class DealExplorerClient {
         res.push(this._composeOfferShort(offer));
       }
     }
-    return res;
+    let total = null;
+    if (
+      !offerFilters &&
+      data.graphNetworks.length == 1 &&
+      data.graphNetworks[0] &&
+      data.graphNetworks[0].offersTotal
+    ) {
+      total = data.graphNetworks[0].offersTotal as string;
+    }
+    return {
+      data: res,
+      total,
+    };
   }
 
   /*
@@ -592,7 +616,19 @@ export class DealExplorerClient {
         );
       }
     }
-    return res;
+    let total = null;
+    if (
+      !dealsFilters &&
+      data.graphNetworks.length == 1 &&
+      data.graphNetworks[0] &&
+      data.graphNetworks[0].dealsTotal
+    ) {
+      total = data.graphNetworks[0].dealsTotal as string;
+    }
+    return {
+      data: res,
+      total,
+    };
   }
 
   _composeDealsShort(

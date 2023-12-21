@@ -14,24 +14,8 @@ query DealsQuery(
   ) {
     ...BasicDeal
   }
-}
-
-# Ids only for, e.g. pagination purpose.
-query DealsIdQuery(
-  $filters: Deal_filter,
-  $offset: Int,
-  $limit: Int,
-  $orderBy: Deal_orderBy,
-  $orderType: OrderDirection,
-) {
-  deals(
-      where: $filters
-      first: $limit
-      skip: $offset
-      orderBy: $orderBy
-      orderDirection: $orderType
-  ) {
-    id
+  graphNetworks(first: 1) {
+    dealsTotal
   }
 }
 

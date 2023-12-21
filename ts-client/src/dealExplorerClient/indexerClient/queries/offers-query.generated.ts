@@ -15,18 +15,7 @@ export type OffersQueryQueryVariables = Types.Exact<{
 }>;
 
 
-export type OffersQueryQuery = { __typename?: 'Query', offers: Array<{ __typename?: 'Offer', id: string, createdAt: any, pricePerEpoch: any, computeUnitsTotal?: number | null, computeUnitsAvailable?: number | null, paymentToken: { __typename?: 'Token', id: string, symbol: string, decimals: number }, effectors?: Array<{ __typename?: 'OfferToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null }> };
-
-export type OffersIdQueryQueryVariables = Types.Exact<{
-  filters?: Types.InputMaybe<Types.Offer_Filter>;
-  offset?: Types.InputMaybe<Types.Scalars['Int']['input']>;
-  limit?: Types.InputMaybe<Types.Scalars['Int']['input']>;
-  orderBy?: Types.InputMaybe<Types.Offer_OrderBy>;
-  orderType?: Types.InputMaybe<Types.OrderDirection>;
-}>;
-
-
-export type OffersIdQueryQuery = { __typename?: 'Query', offers: Array<{ __typename?: 'Offer', id: string }> };
+export type OffersQueryQuery = { __typename?: 'Query', offers: Array<{ __typename?: 'Offer', id: string, createdAt: any, pricePerEpoch: any, computeUnitsTotal?: number | null, computeUnitsAvailable?: number | null, paymentToken: { __typename?: 'Token', id: string, symbol: string, decimals: number }, effectors?: Array<{ __typename?: 'OfferToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null }>, graphNetworks: Array<{ __typename?: 'GraphNetwork', offersTotal: any }> };
 
 export type OfferQueryQueryVariables = Types.Exact<{
   id: Types.Scalars['ID']['input'];
@@ -51,7 +40,7 @@ export type EffectorQueryQueryVariables = Types.Exact<{
 }>;
 
 
-export type EffectorQueryQuery = { __typename?: 'Query', effectors: Array<{ __typename?: 'Effector', id: string, description: string }> };
+export type EffectorQueryQuery = { __typename?: 'Query', effectors: Array<{ __typename?: 'Effector', id: string, description: string }>, graphNetworks: Array<{ __typename?: 'GraphNetwork', effectorsTotal: any }> };
 
 export type TokenQueryQueryVariables = Types.Exact<{
   filters?: Types.InputMaybe<Types.Token_Filter>;
@@ -62,7 +51,7 @@ export type TokenQueryQueryVariables = Types.Exact<{
 }>;
 
 
-export type TokenQueryQuery = { __typename?: 'Query', tokens: Array<{ __typename?: 'Token', id: string, symbol: string, decimals: number }> };
+export type TokenQueryQuery = { __typename?: 'Query', tokens: Array<{ __typename?: 'Token', id: string, symbol: string, decimals: number }>, graphNetworks: Array<{ __typename?: 'GraphNetwork', tokensTotal: any }> };
 
 export const EffectorBasicFragmentDoc = gql`
     fragment EffectorBasic on Effector {
@@ -123,21 +112,11 @@ export const OffersQueryDocument = gql`
   ) {
     ...BasicOffer
   }
-}
-    ${BasicOfferFragmentDoc}`;
-export const OffersIdQueryDocument = gql`
-    query OffersIdQuery($filters: Offer_filter, $offset: Int, $limit: Int, $orderBy: Offer_orderBy, $orderType: OrderDirection) {
-  offers(
-    where: $filters
-    first: $limit
-    skip: $offset
-    orderBy: $orderBy
-    orderDirection: $orderType
-  ) {
-    id
+  graphNetworks(first: 1) {
+    offersTotal
   }
 }
-    `;
+    ${BasicOfferFragmentDoc}`;
 export const OfferQueryDocument = gql`
     query OfferQuery($id: ID!) {
   offer(id: $id) {
@@ -160,6 +139,9 @@ export const EffectorQueryDocument = gql`
   ) {
     ...EffectorBasic
   }
+  graphNetworks(first: 1) {
+    effectorsTotal
+  }
 }
     ${EffectorBasicFragmentDoc}`;
 export const TokenQueryDocument = gql`
@@ -175,6 +157,9 @@ export const TokenQueryDocument = gql`
     symbol
     decimals
   }
+  graphNetworks(first: 1) {
+    tokensTotal
+  }
 }
     `;
 
@@ -187,9 +172,6 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
   return {
     OffersQuery(variables?: OffersQueryQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<OffersQueryQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<OffersQueryQuery>(OffersQueryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'OffersQuery', 'query');
-    },
-    OffersIdQuery(variables?: OffersIdQueryQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<OffersIdQueryQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<OffersIdQueryQuery>(OffersIdQueryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'OffersIdQuery', 'query');
     },
     OfferQuery(variables: OfferQueryQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<OfferQueryQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<OfferQueryQuery>(OfferQueryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'OfferQuery', 'query');

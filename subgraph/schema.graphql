@@ -1,6 +1,18 @@
 # Comments relates to Figma screen names.
 # Names according to Figma. Suffix according to api list, details
 
+type GraphNetwork @entity {
+  "ID is set to 1"
+  id: ID!  # for example trick thanks to https://github.com/graphprotocol/graph-network-analytics-subgraph/blob/00d32f153f7b6bcef4344b934e3c9a9286304658/schema.graphql#L4.
+  # TODO: remove when total field wil be added by developers.
+  # https://github.com/graphprotocol/graph-node/issues/613
+  providersTotal: BigInt!
+  dealsTotal: BigInt!
+  offersTotal: BigInt!
+  tokensTotal: BigInt!
+  effectorsTotal: BigInt!
+}
+
 type Token @entity(immutable: true) {
   id: ID!  # Token Address
   symbol: String!

@@ -15,18 +15,7 @@ export type ProvidersQueryQueryVariables = Types.Exact<{
 }>;
 
 
-export type ProvidersQueryQuery = { __typename?: 'Query', providers: Array<{ __typename?: 'Provider', id: string, name: string, createdAt: any, computeUnitsAvailable: number, computeUnitsTotal: number, offers?: Array<{ __typename?: 'Offer', id: string, createdAt: any, pricePerEpoch: any, computeUnitsTotal?: number | null, computeUnitsAvailable?: number | null, paymentToken: { __typename?: 'Token', id: string, symbol: string, decimals: number }, effectors?: Array<{ __typename?: 'OfferToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null }> | null }> };
-
-export type ProvidersIdQueryQueryVariables = Types.Exact<{
-  filters?: Types.InputMaybe<Types.Provider_Filter>;
-  offset?: Types.InputMaybe<Types.Scalars['Int']['input']>;
-  limit?: Types.InputMaybe<Types.Scalars['Int']['input']>;
-  orderBy?: Types.InputMaybe<Types.Provider_OrderBy>;
-  orderType?: Types.InputMaybe<Types.OrderDirection>;
-}>;
-
-
-export type ProvidersIdQueryQuery = { __typename?: 'Query', providers: Array<{ __typename?: 'Provider', id: string }> };
+export type ProvidersQueryQuery = { __typename?: 'Query', providers: Array<{ __typename?: 'Provider', id: string, name: string, createdAt: any, computeUnitsAvailable: number, computeUnitsTotal: number, offers?: Array<{ __typename?: 'Offer', id: string, createdAt: any, pricePerEpoch: any, computeUnitsTotal?: number | null, computeUnitsAvailable?: number | null, paymentToken: { __typename?: 'Token', id: string, symbol: string, decimals: number }, effectors?: Array<{ __typename?: 'OfferToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null }> | null }>, graphNetworks: Array<{ __typename?: 'GraphNetwork', providersTotal: any }> };
 
 export type ProviderOfProvidersQueryFragment = { __typename?: 'Provider', id: string, name: string, createdAt: any, computeUnitsAvailable: number, computeUnitsTotal: number, offers?: Array<{ __typename?: 'Offer', id: string, createdAt: any, pricePerEpoch: any, computeUnitsTotal?: number | null, computeUnitsAvailable?: number | null, paymentToken: { __typename?: 'Token', id: string, symbol: string, decimals: number }, effectors?: Array<{ __typename?: 'OfferToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null }> | null };
 
@@ -97,21 +86,11 @@ export const ProvidersQueryDocument = gql`
   ) {
     ...ProviderOfProvidersQuery
   }
-}
-    ${ProviderOfProvidersQueryFragmentDoc}`;
-export const ProvidersIdQueryDocument = gql`
-    query ProvidersIdQuery($filters: Provider_filter, $offset: Int, $limit: Int, $orderBy: Provider_orderBy, $orderType: OrderDirection) {
-  providers(
-    where: $filters
-    first: $limit
-    skip: $offset
-    orderBy: $orderBy
-    orderDirection: $orderType
-  ) {
-    id
+  graphNetworks(first: 1) {
+    providersTotal
   }
 }
-    `;
+    ${ProviderOfProvidersQueryFragmentDoc}`;
 export const ProviderQueryDocument = gql`
     query ProviderQuery($id: ID!) {
   provider(id: $id) {
@@ -131,9 +110,6 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
   return {
     ProvidersQuery(variables?: ProvidersQueryQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<ProvidersQueryQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<ProvidersQueryQuery>(ProvidersQueryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'ProvidersQuery', 'query');
-    },
-    ProvidersIdQuery(variables?: ProvidersIdQueryQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<ProvidersIdQueryQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<ProvidersIdQueryQuery>(ProvidersIdQueryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'ProvidersIdQuery', 'query');
     },
     ProviderQuery(variables: ProviderQueryQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<ProviderQueryQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<ProviderQueryQuery>(ProviderQueryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'ProviderQuery', 'query');

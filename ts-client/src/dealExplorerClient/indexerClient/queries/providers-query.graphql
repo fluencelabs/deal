@@ -14,24 +14,8 @@ query ProvidersQuery(
   ) {
     ...ProviderOfProvidersQuery
   }
-}
-
-# Ids only for, e.g. pagination purpose.
-query ProvidersIdQuery(
-  $filters: Provider_filter,
-  $offset: Int,
-  $limit: Int,
-  $orderBy: Provider_orderBy,
-  $orderType: OrderDirection,
-) {
-  providers(
-      where: $filters
-      first: $limit
-      skip: $offset
-      orderBy: $orderBy
-      orderDirection: $orderType
-  ) {
-    id
+  graphNetworks(first: 1) {
+    providersTotal
   }
 }
 

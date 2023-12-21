@@ -16,8 +16,10 @@ import {
 import {
   createOrLoadDealEffector,
   createOrLoadEffector,
+  createOrLoadGraphNetwork,
   createOrLoadOfferEffector,
   createOrLoadToken,
+  UNO_BIG_INT,
   ZERO_BIG_INT,
 } from "../models";
 
@@ -26,12 +28,11 @@ import {
   ComputeUnit,
   Deal,
   Offer,
-  OfferToEffector,
   Peer,
   Provider,
 } from "../../generated/schema";
 import { Deal as DealTemplate } from "../../generated/templates";
-import { AppCID, getEffectorCID, parseEffectors } from "./utils";
+import {AppCID, getEffectorCID, parseEffectors} from "./utils";
 import { getProviderName } from "../networkConstants";
 
 export function handleMarketOfferRegistered(
@@ -61,6 +62,11 @@ export function handleMarketOfferRegistered(
   offer.createdAt = event.block.timestamp;
   offer.updatedAt = event.block.timestamp;
   offer.save();
+
+  let graphNetwork = createOrLoadGraphNetwork();
+  graphNetwork.providersTotal = graphNetwork.providersTotal.plus(UNO_BIG_INT);
+  graphNetwork.offersTotal = graphNetwork.offersTotal.plus(UNO_BIG_INT);
+  graphNetwork.save();
 
   const appCIDS = changetype<Array<AppCID>>(event.params.effectors);
   const effectorEntities = parseEffectors(appCIDS);
@@ -226,6 +232,7 @@ export function handleDealCreated(event: DealCreated): void {
   ]);
 
   const deal = new Deal(dealAddress.toHex());
+  let graphNetwork = createOrLoadGraphNetwork();
   deal.createdAt = event.block.timestamp;
   deal.owner = event.params.owner;
 
@@ -238,6 +245,8 @@ export function handleDealCreated(event: DealCreated): void {
   deal.appCID = getEffectorCID(appCID);
   deal.withdrawalSum = ZERO_BIG_INT;
   deal.depositedSum = ZERO_BIG_INT;
+  graphNetwork.dealsTotal = graphNetwork.dealsTotal.plus(UNO_BIG_INT);
+  graphNetwork.save();
   deal.save();
 
   // Get effectors.

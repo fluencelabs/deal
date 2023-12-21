@@ -22,6 +22,7 @@ dataSources:
         - OfferToEffector
         - ComputeUnit
         - Token
+        - GraphNetwork
       abis:
         - name: Market
           file: ../out/Market.sol/Market.json
@@ -30,7 +31,8 @@ dataSources:
         - name: ERC20
           file: ../out/ERC20.sol/ERC20.json
       eventHandlers:
-        - event: MarketOfferRegistered(indexed address,bytes32,uint256,address,(bytes4,bytes32)[])
+        - event: MarketOfferRegistered(indexed
+            address,bytes32,uint256,address,(bytes4,bytes32)[])
           handler: handleMarketOfferRegistered
         - event: PeerCreated(indexed bytes32,bytes32,address)
           handler: handlePeerCreated
