@@ -10,9 +10,15 @@
 ## Requirements
 - node version: v18.16.1
 
-TODO: about other packages...
+# client
+To load contract deployments and interfaces for different stands: kras/testnet/stage/etc.
 
+> TODO: rename, because client says nothing.
 
+# deal-mather-client
+To find preferable compute units for the deal and its configuration via indexer (currently)
+
+TODO: example, more info. 
 
 # deal-explorer-client
 This client delivers data for the Explorer Frontend Application. The client consists of 3 ones:
@@ -71,21 +77,18 @@ const asyncRuntimeDecorator: asyncRuntimeDecoratorType = (func) => {
 
 async function main() {
     // For local uncomment below:
-    // const subgraphUrl = "http://localhost:8000/subgraphs/name/fluence-deal-contracts"
     // const rpcUrl = "http://localhost:8545"
     // const stand = "local"
 
     // For Mumbai uncomment below:
-    const subgraphUrl = "https://api.thegraph.com/subgraphs/name/alcibiadescleinias/fluence-deal-contracts"
     const rpcUrl = "https://rpc.ankr.com/polygon_mumbai"
     const stand = "testnet"
 
     // General typed class to use.
     const client = new DealExplorerClient(
-        subgraphUrl,
+        stand,
         rpcUrl,
         undefined,  // TODO: demonstrate on ready.
-        stand,
     );
 
     // With filter example.
@@ -103,7 +106,7 @@ asyncRuntimeDecorator(main);
 
 # Develop
 ## GraphQL Scheme Generation
-It generates typescripts for the graphQl schemes declared in [src/indexerClient/queries](src/indexerClient/queries) via fetched graphql schemes. Instruction rules are defined in [codegen.ts](codegen.ts).
+It generates typescripts for the graphQl schemes declared in [src/indexerClient/queries](src/indexerClient/queries) via fetched graphql schemes. Instruction rules are defined in [codegen-deal-explorer-indexer.ts](codegen-deal-explorer-indexer.ts).
 
 Thus, TS files with `generated` key word you **should not rewrite manually**.
 

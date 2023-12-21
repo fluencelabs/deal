@@ -4,6 +4,7 @@ import {
 import type {
   DealQueryQuery
 } from "./indexerClient/queries/deals-query.generated.js";
+import type {ContractsENV} from "../client/config.js";
 
 export interface GetMatchedOffersResult {
   computeUnits: Array<string>
@@ -14,8 +15,8 @@ export class DealNotFoundError extends Error {}
 
 export class DealMatcherClient {
   private _indexerClient: IndexerClient;
-  constructor(indexerUrl: string,) {
-    this._indexerClient = new IndexerClient(indexerUrl)
+  constructor(network: ContractsENV) {
+    this._indexerClient = new IndexerClient(network)
   }
 
   // Should we check rematching epoch before?

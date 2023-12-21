@@ -6,13 +6,14 @@ import { getSdk as getOffersSdk } from "./queries/offers-query.generated.js";
 import {
   type DealQueryQueryVariables, getSdk as getDealsSdk, type Sdk as DealsSdk
 } from "./queries/deals-query.generated.js";
-import {IndexerClientABC} from "../../utils/indexerClientABC.js";
+import {IndexerClientABC} from "../../indexerClient/indexerClientABC.js";
+import type {ContractsENV} from "../../client/config.js";
 
 export class IndexerClient extends IndexerClientABC {
   private dealsClient: DealsSdk;
   private offersClient: OffersSdk;
-  constructor(url: string) {
-    super(url);
+  constructor(network: ContractsENV) {
+    super(network);
     this.offersClient = getOffersSdk(this._graphqlClient);
     this.dealsClient = getDealsSdk(this._graphqlClient);
   }

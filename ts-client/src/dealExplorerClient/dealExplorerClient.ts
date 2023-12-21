@@ -60,7 +60,6 @@ export class ValidTogetherFiltersError extends FiltersError {}
  * @dev It supports mainnet, testnet by selecting related contractsEnv.
  */
 export class DealExplorerClient {
-  DEFAULT_NETWORK: ContractsENV = "kras";
   DEFAULT_PAGE_LIMIT = 100;
   DEFAULT_ORDER_TYPE: OrderType = "desc";
   DEFAULT_TOKEN_VALUE_ROUNDING = 3;
@@ -76,10 +75,9 @@ export class DealExplorerClient {
   private _dealRpcClient: DealRpcClient | null;
 
   constructor(
-    indexerUrl: string,
+    network: ContractsENV,
     chainRpcUrl?: string,
     caller?: ethers.Provider | ethers.Signer,
-    network?: ContractsENV,
   ) {
     if (chainRpcUrl) {
       console.warn("Do not use chainRPCUrl, use provider instead.");
@@ -89,10 +87,10 @@ export class DealExplorerClient {
     } else {
       throw Error("One of chainRPCUrl or provider should be delclared.");
     }
-    this._indexerClient = new IndexerClient(indexerUrl);
+    this._indexerClient = new IndexerClient(network);
     this._dealContractsClient = new DealClient(
       this._caller,
-      network || this.DEFAULT_NETWORK,
+      network,
     );
     this._dealRpcClient = null;
   }
