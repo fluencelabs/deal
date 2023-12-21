@@ -132,7 +132,4 @@ type Deal @entity {
   "I.e. Matching Result (Figma)."
   addedComputeUnits: [ComputeUnit!] @derivedFrom(field: "deal")
   #   TODO: add matched workers.
-
-  # TODO: remove when total field wil be added by developers.
-  total: BigInt!
 }
