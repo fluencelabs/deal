@@ -19,6 +19,9 @@ type Provider @entity {
   computeUnitsTotal: Int!  # Sum of all compute units registered in the offer. TODO: when CU deleted?
   peerCount: Int!
   effectorCount: Int!
+
+  # TODO: remove when total field wil be added by developers.
+  total: BigInt!
 }
 
 # ---- Core Contract ----
@@ -41,6 +44,9 @@ type Offer @entity {
   # Add Statistics below.
   computeUnitsAvailable: Int  # Sum of all available compute units in the offer (not in the deals).
   computeUnitsTotal: Int  # Sum of all compute units registered in the offer. TODO: when CU deleted?
+
+  # TODO: remove when total field wil be added by developers.
+  total: BigInt!
 }
 
 
@@ -122,4 +128,7 @@ type Deal @entity {
   "I.e. Matching Result (Figma)."
   addedComputeUnits: [ComputeUnit!] @derivedFrom(field: "deal")
   #   TODO: add matched workers.
+
+  # TODO: remove when total field wil be added by developers.
+  total: BigInt!
 }

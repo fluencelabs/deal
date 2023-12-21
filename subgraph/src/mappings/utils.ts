@@ -1,5 +1,8 @@
 import { Bytes, ethereum, log } from "@graphprotocol/graph-ts/index";
 import { createOrLoadEffector } from "../models";
+import { BigInt } from '@graphprotocol/graph-ts'
+
+export const BigIntOne = BigInt.fromString('1');
 
 export class AppCID extends ethereum.Tuple {
   get prefixes(): Bytes {

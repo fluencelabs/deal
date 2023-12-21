@@ -31,7 +31,7 @@ import {
   Provider,
 } from "../../generated/schema";
 import { Deal as DealTemplate } from "../../generated/templates";
-import { AppCID, getEffectorCID, parseEffectors } from "./utils";
+import {AppCID, BigIntOne, getEffectorCID, parseEffectors} from "./utils";
 import { getProviderName } from "../networkConstants";
 
 export function handleMarketOfferRegistered(
@@ -51,6 +51,7 @@ export function handleMarketOfferRegistered(
   provider.computeUnitsTotal = 0;
   provider.peerCount = 0;
   provider.effectorCount = 0;
+  provider.total = provider.total.plus(BigIntOne);
   provider.save();
 
   // Create Offer.
@@ -60,6 +61,7 @@ export function handleMarketOfferRegistered(
   offer.pricePerEpoch = event.params.minPricePerWorkerEpoch;
   offer.createdAt = event.block.timestamp;
   offer.updatedAt = event.block.timestamp;
+  offer.total = offer.total.plus(BigIntOne);
   offer.save();
 
   const appCIDS = changetype<Array<AppCID>>(event.params.effectors);
@@ -238,6 +240,7 @@ export function handleDealCreated(event: DealCreated): void {
   deal.appCID = getEffectorCID(appCID);
   deal.withdrawalSum = ZERO_BIG_INT;
   deal.depositedSum = ZERO_BIG_INT;
+  deal.total = deal.total.plus(BigIntOne);
   deal.save();
 
   // Get effectors.
