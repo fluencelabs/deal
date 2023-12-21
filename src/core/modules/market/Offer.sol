@@ -13,7 +13,7 @@ import "src/core/modules/BaseModule.sol";
 import "./interfaces/IOffer.sol";
 import "forge-std/console.sol";
 
-contract Offer is BaseModule, IOffer {
+abstract contract Offer is BaseModule, IOffer {
     using SafeERC20 for IERC20;
     using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
     using EnumerableSet for EnumerableSet.Bytes32Set;
@@ -48,9 +48,6 @@ contract Offer is BaseModule, IOffer {
             s.slot := storageSlot
         }
     }
-
-    // ------------------ Initializer ------------------
-    constructor(IERC20 fluenceToken_, ICore core_) BaseModule(fluenceToken_, core_) {}
 
     // ----------------- Public View -----------------
     function getOffer(bytes32 offerId) public view returns (Offer memory) {
@@ -253,6 +250,7 @@ contract Offer is BaseModule, IOffer {
         }
 
         deal.removeComputeUnit(unitId);
+        core.capacity().onUnitReturnedFromDeal(computePeer.commitmentId, unitId);
 
         emit ComputeUnitRemovedFromDeal(unitId, deal, peerId);
     }
@@ -375,6 +373,8 @@ contract Offer is BaseModule, IOffer {
         }
 
         deal.addComputeUnit(offer.provider, unitId, peerId);
+
+        core.capacity().onUnitMovedToDeal(computePeer.commitmentId, unitId);
 
         emit ComputeUnitAddedToDeal(unitId, deal, computeUnit.peerId);
     }

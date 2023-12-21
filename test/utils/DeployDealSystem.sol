@@ -48,7 +48,7 @@ library DeployDealSystem {
         deployment.tUSD = IERC20(new TestERC20("Test USD", "tUSD"));
 
         Deal dealImpl = new Deal();
-        Core coreImpl = new Core();
+        Core coreImpl = new Core(deployment.tFLT);
 
         deployment.core = Core(
             address(
@@ -57,10 +57,29 @@ library DeployDealSystem {
                     abi.encodeWithSelector(
                         Core.initialize.selector,
                         DEFAULT_EPOCH_DURATION,
-                        deployment.tFLT,
-                        DEFAULT_FLT_PRICE,
                         DEFAULT_MIN_DEPOSITED_EPOCHES,
-                        DEFAULT_MIN_REMATCHING_EPOCHES,
+                        DEFAULT_MIN_REMATCHING_EPOCHES
+                    )
+                )
+            )
+        );
+
+        deployment.market = Market(
+            address(
+                new ERC1967Proxy(
+                    address(new Market(deployment.tFLT, deployment.core)),
+                    abi.encodeWithSelector(Market.initialize.selector, dealImpl)
+                )
+            )
+        );
+
+        deployment.capacity = Capacity(
+            address(
+                new ERC1967Proxy(
+                    address(new Capacity(deployment.tFLT, deployment.core)),
+                    abi.encodeWithSelector(
+                        Capacity.initialize.selector,
+                        DEFAULT_FLT_PRICE,
                         DEFAULT_USD_COLLATERAL_PER_UNIT,
                         DEFAULT_USD_TARGET_REVENUE_PER_EPOCH,
                         DEFAULT_MIN_DURATION,
@@ -76,16 +95,6 @@ library DeployDealSystem {
                 )
             )
         );
-
-        deployment.market = Market(
-            address(
-                new ERC1967Proxy(
-                    address(new Market()), abi.encodeWithSelector(Market.initialize.selector, deployment.core, dealImpl)
-                )
-            )
-        );
-
-        deployment.capacity = Capacity(address(new ERC1967Proxy(address(new Capacity()))));
 
         deployment.core.initializeModules(deployment.capacity, deployment.market);
 

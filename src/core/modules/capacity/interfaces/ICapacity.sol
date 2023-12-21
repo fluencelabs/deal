@@ -25,12 +25,16 @@ interface ICapacity is ICapacityConst {
     event ProofSubmitted(bytes32 indexed commitmentId, bytes32 indexed unitId);
     event RewardWithdrawn(bytes32 indexed commitmentId, uint256 amount);
 
+    event UnitDeactivated(bytes32 indexed commitmentId, bytes32 indexed unitId);
+    event UnitActivated(bytes32 indexed commitmentId, bytes32 indexed unitId);
+
     // ------------------ Types ------------------
     enum CCStatus {
         Active,
         WaitDelegation,
         Inactive,
-        Failed
+        Failed,
+        Removed
     }
 
     struct CommitmentInfo {
@@ -49,5 +53,27 @@ interface ICapacity is ICapacityConst {
         uint256 remainingFailsForLastEpoch;
         uint256 exitedUnitCount;
         uint256 totalWithdrawnReward;
+        uint256 activeUnitCount;
+        uint256 nextAdditionalActiveUnitCount;
     }
+
+    // ------------------ Initializer ------------------
+    function initialize(
+        uint256 fltPrice_,
+        uint256 usdCollateralPerUnit_,
+        uint256 usdTargetRevenuePerEpoch_,
+        uint256 minDuration_,
+        uint256 minRewardPerEpoch_,
+        uint256 maxRewardPerEpoch_,
+        uint256 vestingDuration_,
+        uint256 slashingRate_,
+        uint256 minRequierdProofsPerEpoch_,
+        uint256 maxProofsPerEpoch_,
+        uint256 withdrawEpochesAfterFailed_,
+        uint256 maxFailedRatio_
+    ) external;
+
+    // ------------------ Mutable ------------------
+    function onUnitMovedToDeal(bytes32 commitmentId, bytes32 unitId) external;
+    function onUnitReturnedFromDeal(bytes32 commitmentId, bytes32 unitId) external;
 }

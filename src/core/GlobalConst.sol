@@ -44,7 +44,7 @@ contract GlobalConst is OwnableUpgradableDiamond, EpochController, IGlobalConst 
     }
 
     // ------------------ External View Functions ------------------
-    function precision() public view override returns (uint256) {
+    function precision() public pure override returns (uint256) {
         return PRECISION;
     }
 

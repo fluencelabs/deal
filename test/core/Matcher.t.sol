@@ -128,14 +128,6 @@ contract DealMock {
         creationBlock = _creationBlock;
     }
 
-    function accessType() external view returns (IConfig.AccessType) {
-        return IConfig.AccessType.NONE;
-    }
-
-    function isInAccessList(address addr) external view returns (bool) {
-        return false;
-    }
-
     function effectors() external view returns (CIDV1[] memory) {
         return _effectors;
     }

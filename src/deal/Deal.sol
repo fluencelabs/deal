@@ -61,9 +61,7 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
         uint256 targetWorkers_,
         uint256 maxWorkersPerProvider_,
         uint256 pricePerWorkerEpoch_,
-        CIDV1[] calldata effectors_,
-        IConfig.AccessType accessType_,
-        address[] calldata accessList_
+        CIDV1[] calldata effectors_
     ) public initializer {
         __WorkerManager_init(
             globalCore_,
@@ -74,8 +72,6 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
             maxWorkersPerProvider_,
             pricePerWorkerEpoch_,
             effectors_,
-            accessType_,
-            accessList_,
             msg.sender
         );
     }

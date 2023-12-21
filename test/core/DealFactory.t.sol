@@ -23,8 +23,6 @@ contract DealFactoryTest is Test {
         uint256 maxWorkersPerProvider;
         uint256 pricePerWorkerEpoch;
         CIDV1[] effectors;
-        IDeal.AccessType accessType;
-        address[] accessList;
     }
 
     // ------------------ Variables ------------------
@@ -46,20 +44,12 @@ contract DealFactoryTest is Test {
         uint256 maxWorkersPerProvider = 1;
         IERC20 paymentToken = IERC20(address(deployment.tUSD));
 
-        IDeal d = deployment.market.deployDeal(
-            appCID,
-            paymentToken,
-            minWorkers,
-            targetWorkers,
-            maxWorkersPerProvider,
-            pricePerWorkerEpoch,
-            effectors,
-            IConfig.AccessType.NONE,
-            new address[](0)
+        IDeal deal = deployment.market.deployDeal(
+            appCID, paymentToken, minWorkers, targetWorkers, maxWorkersPerProvider, pricePerWorkerEpoch, effectors
         );
 
         return (
-            d,
+            deal,
             DealParams({
                 appCID: appCID,
                 paymentToken: paymentToken,
@@ -67,9 +57,7 @@ contract DealFactoryTest is Test {
                 targetWorkers: targetWorkers,
                 maxWorkersPerProvider: maxWorkersPerProvider,
                 pricePerWorkerEpoch: pricePerWorkerEpoch,
-                effectors: effectors,
-                accessType: IConfig.AccessType.NONE,
-                accessList: new address[](0)
+                effectors: effectors
             })
         );
     }
@@ -82,7 +70,7 @@ contract DealFactoryTest is Test {
     function test_Deploy() public {
         uint256 pricePerWorkerEpoch = 1 ether;
         uint256 targetWorkers = 3;
-        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * DeployDealSystem.DEFAULT_MIN_DEPOSITED_EPOCHES;
+        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.core.minDealDepositedEpoches();
 
         uint256 balanceBefore = deployment.tUSD.balanceOf(address(this));
 
@@ -106,12 +94,6 @@ contract DealFactoryTest is Test {
             assertEq(dealParams.effectors[i].prefixes, d.effectors()[i].prefixes, "Should set effector (prefixes)");
             assertEq(dealParams.effectors[i].hash, d.effectors()[i].hash, "Should set effector (hash)");
         }
-        assertEq(uint256(dealParams.accessType), uint256(d.accessType()), "Should set accessType");
-        address[] memory accessList = d.getAccessList();
-        assertEq(dealParams.accessList.length, accessList.length, "Should set accessList (length)");
-        for (uint256 i = 0; i < dealParams.accessList.length; i++) {
-            assertEq(dealParams.accessList[i], accessList[i], "Should set accessList");
-        }
 
         assertEq(deployment.market.hasDeal(d), true, "Should deal set in Core");
 
@@ -129,7 +111,7 @@ contract DealFactoryTest is Test {
     function test_RevertIf_NoEnoughBalance() public {
         uint256 pricePerWorkerEpoch = 1 ether;
         uint256 targetWorkers = 3;
-        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * DeployDealSystem.DEFAULT_MIN_DEPOSITED_EPOCHES;
+        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.core.minDealDepositedEpoches();
 
         vm.startPrank(address(0x01));
 

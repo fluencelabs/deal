@@ -219,61 +219,57 @@ contract DeployContracts is Depoyments, Script {
         uint256 withdrawEpochesAfterFailed_,
         uint256 maxFailedRatio_
     ) internal {
-        address coreImpl = _deployContract("CoreImpl", "Core", new bytes(0));
+        address coreImpl = _deployContract("CoreImpl", "Core", abi.encode(flt));
         address dealImpl = _deployContract("DealImpl", "Deal", new bytes(0));
 
-        (address marketImpl, bool isNewMarket) = _tryDeployContract("MarketImpl", "Market", new bytes(0));
-        (address capacityImpl, bool isNewCapacity) = _tryDeployContract("CapacityImpl", "Capacity", new bytes(0));
+        bool doNeedToRedeployMarket = _doNeedToRedeploy("MarketImpl", "Market");
+        bool doNeedToRedeployCapacity = _doNeedToRedeploy("CapacityImpl", "Capacity");
 
-        address coreAddr;
-        address market;
-        address capacity;
-        bytes memory coreArgs = abi.encode(
-            coreImpl,
-            abi.encodeWithSelector(
-                Core.initialize.selector,
-                epochDuration_,
-                flt,
-                fltPrice_,
-                minDepositedEpoches_,
-                minRematchingEpoches_,
-                usdCollateralPerUnit_,
-                usdTargetRevenuePerEpoch_,
-                minDuration_,
-                minRewardPerEpoch_,
-                maxRewardPerEpoch_,
-                vestingDuration_,
-                slashingRate_,
-                minRequierdProofsPerEpoch_,
-                maxProofsPerEpoch_,
-                withdrawEpochesAfterFailed_,
-                maxFailedRatio_
-            )
+        (address coreAddr, bool isNewCore) = _tryDeployContract(
+            "Core",
+            "ERC1967Proxy",
+            abi.encode(
+                coreImpl,
+                abi.encodeWithSelector(
+                    Core.initialize.selector, epochDuration_, minDepositedEpoches_, minRematchingEpoches_
+                )
+            ),
+            doNeedToRedeployMarket || doNeedToRedeployCapacity
         );
 
-        if (isNewMarket || isNewCapacity) {
-            console.log("Force deploy Core, Market, Capacity");
-            coreAddr = _forceDeployContract("Core", "ERC1967Proxy", coreArgs);
+        (address marketImpl, bool isNewMarket) =
+            _tryDeployContract("MarketImpl", "Market", abi.encode(flt, coreAddr), isNewCore);
+        (address capacityImpl, bool isNewCapacity) =
+            _tryDeployContract("CapacityImpl", "Capacity", abi.encode(flt, coreAddr), isNewCore);
 
-            bytes memory marketArgs =
-                abi.encode(marketImpl, abi.encodeWithSelector(Market.initialize.selector, coreAddr, dealImpl));
-            market = _forceDeployContract("Market", "ERC1967Proxy", marketArgs);
+        _deployContract(
+            "Market",
+            "ERC1967Proxy",
+            abi.encode(marketImpl, abi.encodeWithSelector(Market.initialize.selector, dealImpl))
+        );
 
-            capacity = _forceDeployContract("Capacity", "ERC1967Proxy", new bytes(0));
-
-            ICore core = ICore(coreAddr);
-            core.initializeModules(ICapacity(capacity), IMarket(market));
-        } else {
-            coreAddr = _deployContract("Core", "ERC1967Proxy", coreArgs);
-
-            bytes memory marketArgs =
-                abi.encode(marketImpl, abi.encodeWithSelector(Market.initialize.selector, coreAddr, dealImpl));
-            market = _deployContract("Market", "ERC1967Proxy", marketArgs);
-
-            capacity = _deployContract("Capacity", "ERC1967Proxy", new bytes(0));
-        }
-
-        flt.safeTransfer(capacity, 1_000_000 ether);
+        _deployContract(
+            "Capacity",
+            "ERC1967Proxy",
+            abi.encode(
+                capacityImpl,
+                abi.encodeWithSelector(
+                    Capacity.initialize.selector,
+                    fltPrice_,
+                    usdCollateralPerUnit_,
+                    usdTargetRevenuePerEpoch_,
+                    minDuration_,
+                    minRewardPerEpoch_,
+                    maxRewardPerEpoch_,
+                    vestingDuration_,
+                    slashingRate_,
+                    minRequierdProofsPerEpoch_,
+                    maxProofsPerEpoch_,
+                    withdrawEpochesAfterFailed_,
+                    maxFailedRatio_
+                )
+            )
+        );
     }
 
     function _startDeploy() internal {

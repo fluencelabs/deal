@@ -89,67 +89,67 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
     // #endregion ------------------ Initializer ------------------
 
     // #region ------------------ External View Functions ------------------
-    function fltPrice() public view override returns (uint256) {
+    function fltPrice() public view returns (uint256) {
         return _getConstStorage().fltPrice;
     }
 
-    function fltCollateralPerUnit() public view override returns (uint256) {
+    function fltCollateralPerUnit() public view returns (uint256) {
         return _getConstStorage().fltCollateralPerUnit;
     }
 
-    function usdCollateralPerUnit() public view override returns (uint256) {
+    function usdCollateralPerUnit() public view returns (uint256) {
         return _getConstStorage().usdCollateralPerUnit;
     }
 
-    function fltTargetRevenuePerEpoch() public view override returns (uint256) {
+    function fltTargetRevenuePerEpoch() public view returns (uint256) {
         return _getConstStorage().fltTargetRevenuePerEpoch;
     }
 
-    function usdTargetRevenuePerEpoch() public view override returns (uint256) {
+    function usdTargetRevenuePerEpoch() public view returns (uint256) {
         return _getConstStorage().usdTargetRevenuePerEpoch;
     }
 
-    function minDuration() public view override returns (uint256) {
+    function minDuration() public view returns (uint256) {
         return _getConstStorage().minDuration;
     }
 
-    function minRewardPerEpoch() public view override returns (uint256) {
+    function minRewardPerEpoch() public view returns (uint256) {
         return _getConstStorage().minRewardPerEpoch;
     }
 
-    function maxRewardPerEpoch() public view override returns (uint256) {
+    function maxRewardPerEpoch() public view returns (uint256) {
         return _getConstStorage().maxRewardPerEpoch;
     }
 
-    function vestingDuration() public view override returns (uint256) {
+    function vestingDuration() public view returns (uint256) {
         return _getConstStorage().vestingDuration;
     }
 
-    function slashingRate() public view override returns (uint256) {
+    function slashingRate() public view returns (uint256) {
         return _getConstStorage().slashingRate;
     }
 
-    function minRequierdProofsPerEpoch() public view override returns (uint256) {
+    function minRequierdProofsPerEpoch() public view returns (uint256) {
         return _getConstStorage().minRequierdProofsPerEpoch;
     }
 
-    function maxProofsPerEpoch() public view override returns (uint256) {
+    function maxProofsPerEpoch() public view returns (uint256) {
         return _getConstStorage().maxProofsPerEpoch;
     }
 
-    function withdrawEpochesAfterFailed() public view override returns (uint256) {
+    function withdrawEpochesAfterFailed() public view returns (uint256) {
         return _getConstStorage().withdrawEpochesAfterFailed;
     }
 
-    function maxFailedRatio() public view override returns (uint256) {
+    function maxFailedRatio() public view returns (uint256) {
         return _getConstStorage().maxFailedRatio;
     }
 
-    function activeUnitCount() public view override returns (uint256) {
+    function activeUnitCount() public view returns (uint256) {
         return _getConstStorage().activeUnitCount;
     }
 
-    function getRewardPool(uint256 epoch) public view override returns (uint256) {
+    function getRewardPool(uint256 epoch) public view returns (uint256) {
         ConstStorage storage constantsStorage = _getConstStorage();
 
         uint256 length = constantsStorage.rewardPoolPerEpoches.length;
@@ -224,6 +224,13 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
     // #endregion ------------------ External Mutable Functions ------------------
 
     // #region ------------------ Internal Mutable Functions ------------------
+    function _setActiveUnitCount(uint256 activeUnitCount_) internal {
+        ConstStorage storage constantsStorage = _getConstStorage();
+
+        constantsStorage.activeUnitCount = activeUnitCount_;
+        _setRewardPool(constantsStorage.fltPrice, activeUnitCount_);
+    }
+
     function _setRewardPool(uint256 fltPrice_, uint256 activeUnitCount_) internal {
         ConstStorage storage constantsStorage = _getConstStorage();
 
@@ -274,13 +281,6 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
         } else {
             constantsStorage.rewardPoolPerEpoches.push(RewardPoolPerEpoch({epoch: currentEpoch_, value: newRewardPool}));
         }
-    }
-
-    function _setCCActiveUnitCount(uint256 activeUnitCount_) internal {
-        ConstStorage storage constantsStorage = _getConstStorage();
-
-        constantsStorage.activeUnitCount = activeUnitCount_;
-        _setRewardPool(constantsStorage.fltPrice, activeUnitCount_);
     }
     // #endregion ------------------ Internal Mutable Functions ------------------
 }

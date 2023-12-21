@@ -13,7 +13,7 @@ import "src/utils/LinkedListWithUniqueKeys.sol";
 import "src/core/modules/BaseModule.sol";
 import "./Offer.sol";
 
-contract Matcher is Offer, IMatcher {
+abstract contract Matcher is Offer, IMatcher {
     using SafeERC20 for IERC20;
     using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
 

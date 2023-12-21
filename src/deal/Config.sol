@@ -26,9 +26,6 @@ contract Config is OwnableUpgradableDiamond, IConfig {
         uint256 maxWorkersPerProvider;
         uint256 pricePerWorkerEpoch;
         CIDV1[] effectors;
-        // --- access ---
-        AccessType accessType;
-        LinkedListWithUniqueKeys.Bytes32List accessList;
     }
 
     ConfigStorage private _storage;
@@ -50,8 +47,6 @@ contract Config is OwnableUpgradableDiamond, IConfig {
         uint256 maxWorkersPerProvider_,
         uint256 pricePerWorkerEpoch_,
         CIDV1[] calldata effectors_,
-        AccessType accessType_,
-        address[] calldata accessList_,
         address owner_
     ) internal onlyInitializing {
         __Ownable_init(owner_);
@@ -63,9 +58,7 @@ contract Config is OwnableUpgradableDiamond, IConfig {
             targetWorkers_,
             maxWorkersPerProvider_,
             pricePerWorkerEpoch_,
-            effectors_,
-            accessType_,
-            accessList_
+            effectors_
         );
 
         _setAppCID(appCID_);
@@ -78,9 +71,7 @@ contract Config is OwnableUpgradableDiamond, IConfig {
         uint256 targetWorkers_,
         uint256 maxWorkersPerProvider_,
         uint256 pricePerWorkerEpoch_,
-        CIDV1[] calldata effectors_,
-        AccessType accessType_,
-        address[] calldata accessList_
+        CIDV1[] calldata effectors_
     ) internal onlyInitializing {
         ConfigStorage storage configStorage = _getConfigStorage();
 
@@ -96,12 +87,6 @@ contract Config is OwnableUpgradableDiamond, IConfig {
 
         for (uint256 i = 0; i < effectors_.length; i++) {
             configStorage.effectors.push(effectors_[i]);
-        }
-
-        configStorage.accessType = accessType_;
-
-        for (uint256 i = 0; i < accessList_.length; i++) {
-            configStorage.accessList.push(bytes32(bytes20(accessList_[i])));
         }
     }
 
@@ -148,32 +133,6 @@ contract Config is OwnableUpgradableDiamond, IConfig {
         return _getConfigStorage().effectors;
     }
 
-    function accessType() public view returns (AccessType) {
-        return _getConfigStorage().accessType;
-    }
-
-    function isInAccessList(address addr) public view returns (bool) {
-        return _getConfigStorage().accessList.has(bytes32(bytes20(addr)));
-    }
-
-    function getAccessList() public view returns (address[] memory) {
-        bytes32[] memory result = _getConfigStorage().accessList.toArray();
-
-        /*
-        TODO: mv to assembly
-        uint256 length = result.length;
-        assembly ("memory-safe") {
-            return(result, mul(length, 32))
-        }*/
-
-        address[] memory result2 = new address[](result.length);
-        for (uint256 i = 0; i < result.length; i++) {
-            result2[i] = address(bytes20(result[i]));
-        }
-
-        return result2;
-    }
-
     function appCID() external view returns (CIDV1 memory) {
         return _getConfigStorage().appCID;
     }
@@ -185,13 +144,5 @@ contract Config is OwnableUpgradableDiamond, IConfig {
     // ------------------ Mutable Functions ------------------
     function setAppCID(CIDV1 calldata appCID_) public onlyOwner {
         _setAppCID(appCID_);
-    }
-
-    function changeAccessType(AccessType accessType_) external onlyOwner {
-        _getConfigStorage().accessType = accessType_;
-    }
-
-    function removeFromAccessList(address addr) external onlyOwner {
-        _getConfigStorage().accessList.remove(bytes32(bytes20(addr)));
     }
 }

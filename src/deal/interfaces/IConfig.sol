@@ -29,20 +29,10 @@ interface IConfig {
 
     function effectors() external view returns (CIDV1[] memory);
 
-    function accessType() external view returns (AccessType);
-
-    function isInAccessList(address addr) external view returns (bool);
-
-    function getAccessList() external view returns (address[] memory);
-
     function appCID() external view returns (CIDV1 memory);
 
     function maxWorkersPerProvider() external view returns (uint256);
 
     // ------------------ Mutable Functions ------------------
     function setAppCID(CIDV1 calldata appCID_) external;
-
-    function changeAccessType(AccessType accessType_) external;
-
-    function removeFromAccessList(address addr) external;
 }

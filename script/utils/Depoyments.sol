@@ -86,12 +86,11 @@ contract Depoyments is ScriptBase {
         return addr;
     }
 
-    function _forceDeployContract(string memory contractName, string memory artifactName, bytes memory args)
+    function _deployContract(string memory contractName, string memory artifactName, bytes memory args, bool force)
         internal
         returns (address)
     {
-        delete deployments.contracts[contractName];
-        (address addr,) = _tryDeployContract(contractName, artifactName, args);
+        (address addr,) = _tryDeployContract(contractName, artifactName, args, force);
 
         return addr;
     }
@@ -100,6 +99,17 @@ contract Depoyments is ScriptBase {
         internal
         returns (address, bool)
     {
+        return _tryDeployContract(contractName, artifactName, args, false);
+    }
+
+    function _tryDeployContract(string memory contractName, string memory artifactName, bytes memory args, bool force)
+        internal
+        returns (address, bool)
+    {
+        if (force) {
+            delete deployments.contracts[contractName];
+        }
+
         DeployedContract memory deployedContract = deployments.contracts[contractName];
 
         string memory artifact = string.concat(artifactName, ".sol");
@@ -136,6 +146,19 @@ contract Depoyments is ScriptBase {
         }
 
         return (addr, isNew);
+    }
+
+    function _doNeedToRedeploy(string memory contractName, string memory artifactName) internal returns (bool) {
+        DeployedContract memory deployedContract = deployments.contracts[contractName];
+
+        string memory artifact = string.concat(artifactName, ".sol");
+        bytes memory code = vm.getDeployedCode(artifact);
+        bytes32 codeHash = keccak256(code);
+
+        bool isNew = deployedContract.addr == address(0) || _extcodehash(deployedContract.addr) == bytes32(0x00)
+            || deployedContract.codeHash != codeHash;
+
+        return isNew;
     }
 
     function _printDeployments() internal view {
