@@ -43,8 +43,6 @@ export function handleMarketOfferRegistered(
   // - emit PeerCreated(offerId, peer.peerId);
   // - emit ComputeUnitCreated(offerId, peerId, unitId);
 
-  let graphNetwork = createOrLoadGraphNetwork();
-
   // Create provider.
   const providerAddress = event.params.provider.toHex();
   const provider = new Provider(providerAddress);
@@ -55,7 +53,6 @@ export function handleMarketOfferRegistered(
   provider.peerCount = 0;
   provider.effectorCount = 0;
   provider.save();
-  graphNetwork.providersTotal = graphNetwork.providersTotal.plus(UNO_BIG_INT);
 
   // Create Offer.
   const offer = new Offer(event.params.offerId.toHex());
@@ -65,8 +62,10 @@ export function handleMarketOfferRegistered(
   offer.createdAt = event.block.timestamp;
   offer.updatedAt = event.block.timestamp;
   offer.save();
-  graphNetwork.offersTotal = graphNetwork.offersTotal.plus(UNO_BIG_INT);
 
+  let graphNetwork = createOrLoadGraphNetwork();
+  graphNetwork.providersTotal = graphNetwork.providersTotal.plus(UNO_BIG_INT);
+  graphNetwork.offersTotal = graphNetwork.offersTotal.plus(UNO_BIG_INT);
   graphNetwork.save();
 
   const appCIDS = changetype<Array<AppCID>>(event.params.effectors);

@@ -20,6 +20,10 @@ export function createOrLoadToken(tokenAddress: string): Token {
     entity.symbol = getTokenSymbol(tokenAddressBytes);
     entity.decimals = getTokenDecimals(tokenAddressBytes);
     entity.save();
+
+    let graphNetwork = createOrLoadGraphNetwork();
+    graphNetwork.tokensTotal = graphNetwork.tokensTotal.plus(UNO_BIG_INT);
+    graphNetwork.save()
   }
   return entity as Token;
 }
@@ -34,6 +38,10 @@ export function createOrLoadEffector(cid: string): Effector {
     entity = new Effector(cid);
     entity.description = DEFAULT_EFFECTOR_DESCRIPTION;
     entity.save();
+
+    let graphNetwork = createOrLoadGraphNetwork();
+    graphNetwork.effectorsTotal = graphNetwork.effectorsTotal.plus(UNO_BIG_INT);
+    graphNetwork.save()
   }
   return entity as Effector;
 }
@@ -92,6 +100,8 @@ export function createOrLoadGraphNetwork(): GraphNetwork {
     graphNetwork.dealsTotal = ZERO_BIG_INT;
     graphNetwork.providersTotal = ZERO_BIG_INT;
     graphNetwork.offersTotal = ZERO_BIG_INT;
+    graphNetwork.tokensTotal = ZERO_BIG_INT;
+    graphNetwork.effectorsTotal = ZERO_BIG_INT;
     graphNetwork.save()
   }
   return graphNetwork as GraphNetwork
