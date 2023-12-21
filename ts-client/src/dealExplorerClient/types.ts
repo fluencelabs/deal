@@ -1,17 +1,17 @@
 interface ListViewABC {
-  total: string | null
+  total: string | null;
 }
 
-export interface ProviderShortListView extends ListViewABC{
-  data: Array<ProviderShort>
+export interface ProviderShortListView extends ListViewABC {
+  data: Array<ProviderShort>;
 }
 
 export interface OfferShortListView extends ListViewABC {
-  data: Array<OfferShort>
+  data: Array<OfferShort>;
 }
 
 export interface DealShortListView extends ListViewABC {
-  data: Array<DealShort>
+  data: Array<DealShort>;
 }
 
 export type ProviderBase = {

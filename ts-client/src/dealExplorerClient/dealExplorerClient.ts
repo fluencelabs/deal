@@ -191,9 +191,12 @@ export class DealExplorerClient {
     }
     let total = null;
     if (
-      !providersFilters
-      && data.graphNetworks.length == 1 && data.graphNetworks[0] && data.graphNetworks[0].providersTotal) {
-      total = data.graphNetworks[0].providersTotal as string
+      !providersFilters &&
+      data.graphNetworks.length == 1 &&
+      data.graphNetworks[0] &&
+      data.graphNetworks[0].providersTotal
+    ) {
+      total = data.graphNetworks[0].providersTotal as string;
     }
     return {
       data: res,
@@ -428,9 +431,12 @@ export class DealExplorerClient {
     }
     let total = null;
     if (
-      !offerFilters
-      && data.graphNetworks.length == 1 && data.graphNetworks[0] && data.graphNetworks[0].offersTotal) {
-      total = data.graphNetworks[0].offersTotal as string
+      !offerFilters &&
+      data.graphNetworks.length == 1 &&
+      data.graphNetworks[0] &&
+      data.graphNetworks[0].offersTotal
+    ) {
+      total = data.graphNetworks[0].offersTotal as string;
     }
     return {
       data: res,
@@ -612,9 +618,12 @@ export class DealExplorerClient {
     }
     let total = null;
     if (
-      !dealsFilters
-      && data.graphNetworks.length == 1 && data.graphNetworks[0] && data.graphNetworks[0].dealsTotal) {
-      total = data.graphNetworks[0].dealsTotal as string
+      !dealsFilters &&
+      data.graphNetworks.length == 1 &&
+      data.graphNetworks[0] &&
+      data.graphNetworks[0].dealsTotal
+    ) {
+      total = data.graphNetworks[0].dealsTotal as string;
     }
     return {
       data: res,
