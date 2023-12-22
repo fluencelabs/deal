@@ -4,6 +4,7 @@ query DealQuery(
   deal(id: $id) {
     id
     maxWorkersPerProvider
+    minWorkers
     pricePerWorkerEpoch
     paymentToken {
       id

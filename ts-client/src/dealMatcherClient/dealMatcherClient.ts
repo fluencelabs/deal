@@ -14,6 +14,7 @@ export interface GetMatchedOffersResult {
 export class DealNotFoundError extends Error {}
 
 export class DealMatcherClient {
+  INDEXER_MAX_FIRST = 1000
   private _indexerClient: IndexerClient;
   constructor(network: ContractsENV) {
     this._indexerClient = new IndexerClient(network)
@@ -21,28 +22,43 @@ export class DealMatcherClient {
 
   // Should we check rematching epoch before?
   // Returns offers and compute units matched for the deal.
-  // TODO: on contract maxWorkersPerProvider was ignored.
   async getMatchedOffers(
     pricePerWorkerEpoch: string,
     effectors: Array<string>,
     paymentToken: string,
     targetWorkerSlotToMatch: number,
+    minWorkersToMatch: number,
+    maxWorkersPerProvider: number,
   ): Promise<GetMatchedOffersResult> {
-    console.info('[getMatchedOffers] Try to match the next deal configuration with offers:')
+    console.group('[getMatchedOffers] Try to match the next deal configuration with offers:')
     console.info('pricePerWorkerEpoch = ' + pricePerWorkerEpoch)
     console.info('effectors = ' + JSON.stringify(effectors))
     console.info('paymentToken = ' + paymentToken)
     console.info('targetWorkerSlotToMatch = ' + targetWorkerSlotToMatch)
+    console.info('minWorkersToMatch = ' + minWorkersToMatch)
+
+    // if (maxWorkersPerProvider > this.INDEXER_MAX_FIRST) {
+    //   console.warn(
+    //     `maxWorkersPerProvider param is too high, it will be reduced to ${this.INDEXER_MAX_FIRST}. Create another batch`)
+    // }
 
     const availableOffers = await this._indexerClient.getOffers(
       {
+        limit: maxWorkersPerProvider,
         filters: {
           pricePerEpoch_lte: pricePerWorkerEpoch,
           effectors_: {effector_in: effectors},
           paymentToken: paymentToken,
           // Check if any of compute units are available in the offer.
           computeUnitsAvailable_gt: 0,
-        }
+        },
+        peersFilters: {computeUnits_: {deal: null}},
+        computeUnitsFilters: {deal: null},
+        // Below is not the guarantee that query will be according to the maxWorkersPerProvider rule.
+        // It merely shorten the query response for that rule.
+        // TODO: add guarantee into the code. (resolve after on contract is resolved).
+        peersLimit: maxWorkersPerProvider,
+        computeUnitsLimit: maxWorkersPerProvider,
       }
     )
 
@@ -65,11 +81,18 @@ export class DealMatcherClient {
           // Check if we're still seeking for free compute units.
           if (matchedComputeUnits.computeUnits.length == targetWorkerSlotToMatch) {
             matchedComputeUnits.fulfilled = true;
+            console.groupEnd();
             return matchedComputeUnits
           }
         }
       }
     }
+
+    if (minWorkersToMatch > matchedComputeUnits.computeUnits.length) {
+      console.warn("Transaction will be failed because minWorkersToMatch > matchedComputeUnits. Return [].")
+      matchedComputeUnits.computeUnits = []
+    }
+    console.groupEnd();
     return matchedComputeUnits
   }
 
@@ -80,7 +103,15 @@ export class DealMatcherClient {
     }
 
     const deal = data.deal
-    const targetWorkerToMath = deal.targetWorkers
+    const dealTargetWorkers = deal.targetWorkers
+    const minWorkers = deal.minWorkers as number
+    const alreadyMatchedComputeUnits = deal.addedComputeUnits?.length || 0
+    const targetWorkerToMath = dealTargetWorkers - alreadyMatchedComputeUnits
+    let minWorkersToMatch = minWorkers - alreadyMatchedComputeUnits
+    if (minWorkersToMatch < 0) {
+      minWorkersToMatch = 0
+    }
+
     if (!deal.effectors) {
       throw new Error("Assert: deal: " + dealId + " has no effectors.")
     }
@@ -89,6 +120,8 @@ export class DealMatcherClient {
       deal.effectors.map(effector => {return effector.effector.id}),
       deal.paymentToken.id,
       targetWorkerToMath,
+      minWorkersToMatch,
+      deal.maxWorkersPerProvider,
     )
   }
 }

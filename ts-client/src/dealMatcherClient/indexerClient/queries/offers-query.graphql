@@ -2,6 +2,8 @@ query OffersQuery(
   $filters: Offer_filter,
   $peersFilters: Peer_filter,
   $computeUnitsFilters: ComputeUnit_filter,
+  $peersLimit: Int,
+  $computeUnitsLimit: Int,
   $offset: Int,
   $limit: Int,
   $orderBy: Offer_orderBy,
@@ -17,9 +19,11 @@ query OffersQuery(
     id
     peers(
       where: $peersFilters
+      first: $peersLimit
     ) {
       computeUnits(
         where: $computeUnitsFilters
+        first: $computeUnitsLimit
       ) {
         id
       }

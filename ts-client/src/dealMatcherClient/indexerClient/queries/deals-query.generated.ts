@@ -11,7 +11,7 @@ export type DealQueryQueryVariables = Types.Exact<{
 }>;
 
 
-export type DealQueryQuery = { __typename?: 'Query', deal?: { __typename?: 'Deal', id: string, maxWorkersPerProvider: number, pricePerWorkerEpoch: any, targetWorkers: number, paymentToken: { __typename?: 'Token', id: string }, addedComputeUnits?: Array<{ __typename?: 'ComputeUnit', id: string, provider: { __typename?: 'Provider', id: string } }> | null, effectors?: Array<{ __typename?: 'DealToEffector', effector: { __typename?: 'Effector', id: string } }> | null } | null };
+export type DealQueryQuery = { __typename?: 'Query', deal?: { __typename?: 'Deal', id: string, maxWorkersPerProvider: number, minWorkers: number, pricePerWorkerEpoch: any, targetWorkers: number, paymentToken: { __typename?: 'Token', id: string }, addedComputeUnits?: Array<{ __typename?: 'ComputeUnit', id: string, provider: { __typename?: 'Provider', id: string } }> | null, effectors?: Array<{ __typename?: 'DealToEffector', effector: { __typename?: 'Effector', id: string } }> | null } | null };
 
 
 export const DealQueryDocument = gql`
@@ -19,6 +19,7 @@ export const DealQueryDocument = gql`
   deal(id: $id) {
     id
     maxWorkersPerProvider
+    minWorkers
     pricePerWorkerEpoch
     paymentToken {
       id
