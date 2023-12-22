@@ -35,7 +35,6 @@ contract Offer is BaseModule, IOffer {
         mapping(bytes32 => ComputeUnit) computeUnits;
         mapping(bytes32 => Effectors) effectorsByOfferId;
         mapping(bytes32 => EnumerableSet.Bytes32Set) computeUnitIdsByPeerId;
-        LinkedListWithUniqueKeys.Bytes32List offerIds; //TODO: remove after offer matching implementation
     }
 
     OfferStorage private _storage;
@@ -106,8 +105,6 @@ contract Offer is BaseModule, IOffer {
         for (uint256 i = 0; i < peerLength; i++) {
             _addComputePeerToOffer(offerId, peers[i]);
         }
-
-        offerStorage.offerIds.push(offerId);
 
         return offerId;
     }
@@ -255,10 +252,6 @@ contract Offer is BaseModule, IOffer {
     }
 
     // ----------------- Internal View -----------------
-    function _getOffersList() internal view returns (LinkedListWithUniqueKeys.Bytes32List storage) {
-        return _getOfferStorage().offerIds;
-    }
-
     function _getOffer(bytes32 offerId) internal view returns (Offer storage) {
         return _getOfferStorage().offers[offerId];
     }
@@ -327,7 +320,6 @@ contract Offer is BaseModule, IOffer {
         computePeer.unitCount = indexOffset + unitCount;
     }
 
-    //        offerIds;
     function _mvComputeUnitToDeal(bytes32 unitId, IDeal deal) internal {
         OfferStorage storage offerStorage = _getOfferStorage();
         ComputeUnit storage computeUnit = offerStorage.computeUnits[unitId];
