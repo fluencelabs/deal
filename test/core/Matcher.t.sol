@@ -57,6 +57,25 @@ contract MatcherTest is Test {
         deployment = DeployDealSystem.deployDealSystem();
     }
 
+    function _returnFirstNComputeUnits(
+        uint n, bytes32[] memory offerIds, bytes32[][] memory peerIds, bytes32[][][] memory unitIds) internal returns (bytes32[] memory) {
+        bytes32[] memory chosenComputeUnits = new bytes32[](n);
+        uint currentIdx = 0;
+        for (uint256 i = 0; i < offerIds.length; i++) {
+            for (uint256 j = 0; j < peerIds.length; j++) {
+                for (uint256 k = 0; k < unitIds[i][j].length; k++) {
+                    chosenComputeUnits[currentIdx] = unitIds[i][j][k];
+                    currentIdx += 1;
+                    if (currentIdx == n) {
+                        return chosenComputeUnits;
+                    }
+                }
+            }
+        }
+        return chosenComputeUnits;
+    }
+
+    // Simple positive test.
     function test_Match() public {
         CIDV1[] memory effectors = new CIDV1[](10);
         for (uint256 i = 0; i < effectors.length; i++) {
@@ -69,6 +88,7 @@ contract MatcherTest is Test {
         uint256 offerCount = 3;
         uint256 unitCountPerPeer = 2;
         uint256 peerCountPerOffer = 3;
+        // Total workers: offerCount * unitCountPerPeer * peerCountPerOffer. Thus, we have CU in excess.
         uint256 targetWorkers = offerCount * peerCountPerOffer;
         CIDV1 memory appCID = CIDV1({prefixes: 0x12345678, hash: Random.pseudoRandom(abi.encode("appCID"))});
 
@@ -79,18 +99,34 @@ contract MatcherTest is Test {
             offerCount, peerCountPerOffer, unitCountPerPeer, effectors, paymentToken, pricePerWorkerEpoch
         );
 
-        deployment.market.matchDeal(IDeal(address(dealMock)));
+        // Choose the first targetWorkers CU from already deployed and push them to match.
+        bytes32[] memory unitIdsMatched = _returnFirstNComputeUnits(targetWorkers, offerIds, peerIds, unitIds);
+        deployment.market.matchDeal(IDeal(address(dealMock)), unitIdsMatched);
 
         assertEq(dealMock.getComputeUnitCount(), targetWorkers, "Wrong number of compute units");
+        uint currentUnit = 0;
         for (uint256 i = 0; i < offerIds.length; i++) {
             bytes32 offerId = offerIds[i];
             Market.Offer memory offer = deployment.market.getOffer(offerId);
             for (uint256 j = 0; j < peerIds[i].length; j++) {
-                bytes32 unitId = unitIds[i][j][0];
-                assertEq(deployment.market.getComputeUnit(unitId).deal, address(dealMock), "Wrong deal");
-                assertEq(dealMock.computeProviderByUnitId(unitId), offer.provider, "Wrong compute provider");
-                assertEq(dealMock.peerIdByUnitId(unitId), peerIds[i][j], "Wrong peer id");
-                assertTrue(dealMock.unitExists(unitId), "Unit does not exist");
+                for (uint256 k = 0; k < unitIds[i][j].length; k++) {
+                    bytes32 unitId = unitIds[i][j][k];
+
+                    if (currentUnit < targetWorkers) {
+                        // We should found out that those CU are matched.
+                        assertEq(deployment.market.getComputeUnit(unitId).deal, address(dealMock), "Wrong deal");
+                        assertEq(dealMock.computeProviderByUnitId(unitId), offer.provider, "Wrong compute provider");
+                        assertEq(dealMock.peerIdByUnitId(unitId), peerIds[i][j], "Wrong peer id");
+                        assertTrue(dealMock.unitExists(unitId), "Unit does not exist");
+                    } else {
+                        // We should found out that those CU are still free.
+                        assertEq(deployment.market.getComputeUnit(unitId).deal, address(0), "Expected no deal.");
+                        assertEq(dealMock.computeProviderByUnitId(unitId), address(0), "Expected no provider.");
+                        assertEq(dealMock.peerIdByUnitId(unitId), bytes32(0), "Expected no peer id.");
+                        assertTrue(!dealMock.unitExists(unitId), "Expected unitExists == false.");
+                    }
+                    currentUnit += 1;
+                }
             }
         }
 

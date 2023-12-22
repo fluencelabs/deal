@@ -38,7 +38,7 @@ contract Matcher is Offer, IMatcher {
 
     // ----------------- External Mutable -----------------
     // TODO: move this logic to offchain. Temp solution
-    function matchDeal(IDeal deal) external {
+    function matchDeal(IDeal deal, bytes32[] calldata computeUnits) external {
         ICore core = _core();
         MatcherStorage storage matcherStorage = _getMatcherStorage();
 
@@ -59,48 +59,45 @@ contract Matcher is Offer, IMatcher {
 
         bool isDealMatched = false;
 
-        LinkedListWithUniqueKeys.Bytes32List storage offerList = _getOffersList();
-
-        bytes32 currentOfferId = offerList.first();
-
-        while (currentOfferId != bytes32(0x00) && freeWorkerSlots > 0) {
-            Offer memory offer = getOffer(currentOfferId);
-
-            if (
-                pricePerWorkerEpoch < offer.minPricePerWorkerEpoch || paymentToken != offer.paymentToken
-                    || !_hasOfferEffectors(currentOfferId, effectors)
-            ) {
-                currentOfferId = offerList.next(currentOfferId);
+        for (uint i = 0; i < computeUnits.length; ++i) {
+            bytes32 computeUnitId = computeUnits[i];
+            // Get CU and start checking, if smth wrong - skip.
+            // TODO: notify user that match fulfilled not fully (or discuss and close).
+            ComputeUnit memory computeUnit  = getComputeUnit(computeUnitId);
+            // TODO: Catch CU does not exist and pass.
+            // Check if CU available.
+            if (computeUnit.deal != address(0)) {
                 continue;
             }
 
-            LinkedListWithUniqueKeys.Bytes32List storage peerList = _getFreePeerList(currentOfferId);
+            bytes32 peerId = computeUnit.peerId;
+            ComputePeer memory peer = getComputePeer(peerId);
+            bytes32 offerId = peer.offerId;
+            Offer memory offer = getOffer(offerId);
 
-            bytes32 currentPeerId = peerList.first();
-            while (currentPeerId != bytes32(0x00) && freeWorkerSlots > 0) {
-                // TODO: check peer in capacity commitment
-                LinkedListWithUniqueKeys.Bytes32List storage computeUnitList = _getFreeComputeUnitList(currentPeerId);
-
-                bytes32 currentUnitId = computeUnitList.first();
-                bytes32 nextCurrentPeerId = peerList.next(currentPeerId); // becouse mvComputeUnitToDeal can remove currentPeerId from peerList
-
-                _mvComputeUnitToDeal(currentUnitId, deal);
-
-                freeWorkerSlots--;
-
-                // TODO: only for NOX -- remove in future
-                emit ComputeUnitMatched(currentPeerId, currentUnitId, creationBlock, appCID);
-
-                if (!isDealMatched) {
-                    isDealMatched = true;
-                }
-
-                //TODO: check max peers per provider
-
-                currentPeerId = bytes32(nextCurrentPeerId);
+            if (
+                pricePerWorkerEpoch < offer.minPricePerWorkerEpoch || paymentToken != offer.paymentToken
+                    || !_hasOfferEffectors(offerId, effectors)
+            ) {
+                continue;
             }
 
-            currentOfferId = offerList.next(currentOfferId);
+            // TODO: check peer in capacity commitment
+            // TODO: check max peers per provider
+
+            _mvComputeUnitToDeal(computeUnitId, deal);
+            // TODO: only for NOX -- remove in future
+            emit ComputeUnitMatched(peerId, computeUnitId, creationBlock, appCID);
+            freeWorkerSlots--;
+
+            if (!isDealMatched) {
+                isDealMatched = true;
+            }
+
+            if (freeWorkerSlots == 0) {
+                // TODO: signal to user that matched fully.
+                break;
+            }
         }
 
         if (isDealMatched) {

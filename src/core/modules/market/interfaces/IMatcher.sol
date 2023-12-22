@@ -7,5 +7,5 @@ import "src/deal/interfaces/IDeal.sol";
 
 interface IMatcher {
     // ----------------- Mutables -----------------
-    function matchDeal(IDeal deal) external;
+    function matchDeal(IDeal deal, bytes32[] calldata computeUnits) external;
 }
