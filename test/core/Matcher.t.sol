@@ -88,12 +88,13 @@ contract MatcherTest is Test {
         uint256 offerCount = 3;
         uint256 unitCountPerPeer = 2;
         uint256 peerCountPerOffer = 3;
+        uint minWorkers = 1;
         // Total workers: offerCount * unitCountPerPeer * peerCountPerOffer. Thus, we have CU in excess.
         uint256 targetWorkers = offerCount * peerCountPerOffer;
         CIDV1 memory appCID = CIDV1({prefixes: 0x12345678, hash: Random.pseudoRandom(abi.encode("appCID"))});
 
         DealMock dealMock =
-            new DealMock(pricePerWorkerEpoch, paymentToken, targetWorkers, effectors, appCID, creationBlock);
+            new DealMock(pricePerWorkerEpoch, paymentToken, targetWorkers, minWorkers, effectors, appCID, creationBlock);
 
         (bytes32[] memory offerIds, bytes32[][] memory peerIds, bytes32[][][] memory unitIds) = _registerOffers(
             offerCount, peerCountPerOffer, unitCountPerPeer, effectors, paymentToken, pricePerWorkerEpoch
@@ -141,6 +142,7 @@ contract DealMock {
     uint256 public creationBlock;
     uint256 public getComputeUnitCount;
     uint256 public targetWorkers;
+    uint256 public minWorkers;
 
     CIDV1[] internal _effectors;
 
@@ -152,6 +154,7 @@ contract DealMock {
         uint256 _pricePerWorkerEpoch,
         address _paymentToken,
         uint256 _targetWorkers,
+        uint256 _minWorkers,
         CIDV1[] memory effectors_,
         CIDV1 memory _appCID,
         uint256 _creationBlock
@@ -159,6 +162,7 @@ contract DealMock {
         pricePerWorkerEpoch = _pricePerWorkerEpoch;
         paymentToken = _paymentToken;
         targetWorkers = _targetWorkers;
+        minWorkers = _minWorkers;
         _effectors = effectors_;
         appCID = _appCID;
         creationBlock = _creationBlock;

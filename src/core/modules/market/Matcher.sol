@@ -37,7 +37,6 @@ contract Matcher is Offer, IMatcher {
     }
 
     // ----------------- External Mutable -----------------
-    // TODO: move this logic to offchain. Temp solution
     function matchDeal(IDeal deal, bytes32[] calldata computeUnits) external {
         ICore core = _core();
         MatcherStorage storage matcherStorage = _getMatcherStorage();
@@ -51,7 +50,9 @@ contract Matcher is Offer, IMatcher {
 
         uint256 pricePerWorkerEpoch = deal.pricePerWorkerEpoch();
         address paymentToken = address(deal.paymentToken());
-        uint256 freeWorkerSlots = deal.targetWorkers() - deal.getComputeUnitCount();
+        uint dealComputeUnitCount = deal.getComputeUnitCount();
+        uint256 freeWorkerSlots = deal.targetWorkers() - dealComputeUnitCount;
+        uint256 freeWorkerSlotsCurrent = freeWorkerSlots;
         CIDV1[] memory effectors = deal.effectors();
 
         CIDV1 memory appCID = deal.appCID();
@@ -64,7 +65,7 @@ contract Matcher is Offer, IMatcher {
             // Get CU and start checking, if smth wrong - skip.
             // TODO: notify user that match fulfilled not fully (or discuss and close).
             ComputeUnit memory computeUnit  = getComputeUnit(computeUnitId);
-            // TODO: Catch CU does not exist error and pass.
+            // TODO: Catch CU does not exist error and pass: make _getOfferStorage() as internal.
             // Check if CU available.
             if (computeUnit.deal != address(0)) {
                 continue;
@@ -88,20 +89,24 @@ contract Matcher is Offer, IMatcher {
             _mvComputeUnitToDeal(computeUnitId, deal);
             // TODO: only for NOX -- remove in future
             emit ComputeUnitMatched(peerId, computeUnitId, creationBlock, appCID);
-            freeWorkerSlots--;
+            freeWorkerSlotsCurrent--;
 
             if (!isDealMatched) {
                 isDealMatched = true;
             }
 
-            if (freeWorkerSlots == 0) {
+            if (freeWorkerSlotsCurrent == 0) {
                 // TODO: possible feature of signalling to user that matched fully.
                 break;
             }
         }
+
+        uint minWorkers = deal.minWorkers();
+        if (minWorkers > dealComputeUnitCount + freeWorkerSlots - freeWorkerSlotsCurrent) revert minWorkersNotMatchedError(minWorkers);
 
         if (isDealMatched) {
             _getMatcherStorage().lastMatchedEpoch[address(deal)] = currentEpoch;
         }
     }
 }
+// TODO: include filter problem ni ts-client.
