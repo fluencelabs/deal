@@ -15,18 +15,7 @@ export type DealsQueryQueryVariables = Types.Exact<{
 }>;
 
 
-export type DealsQueryQuery = { __typename?: 'Query', deals: Array<{ __typename?: 'Deal', id: string, createdAt: any, minWorkers: number, targetWorkers: number, owner: any, maxPaidEpoch?: any | null, depositedSum: any, withdrawalSum: any, paymentToken: { __typename?: 'Token', id: string, symbol: string, decimals: number }, effectors?: Array<{ __typename?: 'DealToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null, addedComputeUnits?: Array<{ __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string } }> | null }> };
-
-export type DealsIdQueryQueryVariables = Types.Exact<{
-  filters?: Types.InputMaybe<Types.Deal_Filter>;
-  offset?: Types.InputMaybe<Types.Scalars['Int']['input']>;
-  limit?: Types.InputMaybe<Types.Scalars['Int']['input']>;
-  orderBy?: Types.InputMaybe<Types.Deal_OrderBy>;
-  orderType?: Types.InputMaybe<Types.OrderDirection>;
-}>;
-
-
-export type DealsIdQueryQuery = { __typename?: 'Query', deals: Array<{ __typename?: 'Deal', id: string }> };
+export type DealsQueryQuery = { __typename?: 'Query', deals: Array<{ __typename?: 'Deal', id: string, createdAt: any, minWorkers: number, targetWorkers: number, owner: any, maxPaidEpoch?: any | null, depositedSum: any, withdrawalSum: any, paymentToken: { __typename?: 'Token', id: string, symbol: string, decimals: number }, effectors?: Array<{ __typename?: 'DealToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null, addedComputeUnits?: Array<{ __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string } }> | null }>, graphNetworks: Array<{ __typename?: 'GraphNetwork', dealsTotal: any }> };
 
 export type DealQueryQueryVariables = Types.Exact<{
   id: Types.Scalars['ID']['input'];
@@ -93,21 +82,11 @@ export const DealsQueryDocument = gql`
   ) {
     ...BasicDeal
   }
-}
-    ${BasicDealFragmentDoc}`;
-export const DealsIdQueryDocument = gql`
-    query DealsIdQuery($filters: Deal_filter, $offset: Int, $limit: Int, $orderBy: Deal_orderBy, $orderType: OrderDirection) {
-  deals(
-    where: $filters
-    first: $limit
-    skip: $offset
-    orderBy: $orderBy
-    orderDirection: $orderType
-  ) {
-    id
+  graphNetworks(first: 1) {
+    dealsTotal
   }
 }
-    `;
+    ${BasicDealFragmentDoc}`;
 export const DealQueryDocument = gql`
     query DealQuery($id: ID!) {
   deal(id: $id) {
@@ -128,9 +107,6 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
   return {
     DealsQuery(variables?: DealsQueryQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<DealsQueryQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<DealsQueryQuery>(DealsQueryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'DealsQuery', 'query');
-    },
-    DealsIdQuery(variables?: DealsIdQueryQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<DealsIdQueryQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<DealsIdQueryQuery>(DealsIdQueryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'DealsIdQuery', 'query');
     },
     DealQuery(variables: DealQueryQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<DealQueryQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<DealQueryQuery>(DealQueryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'DealQuery', 'query');

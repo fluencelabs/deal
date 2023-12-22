@@ -1,8 +1,26 @@
-export interface ProviderShortListView extends Array<ProviderShort> {}
+interface ListViewABC {
+  total: string | null;
+}
 
-export interface OfferShortListView extends Array<OfferShort> {}
+export interface ProviderShortListView extends ListViewABC {
+  data: Array<ProviderShort>;
+}
 
-export interface DealShortListView extends Array<DealShort> {}
+export interface OfferShortListView extends ListViewABC {
+  data: Array<OfferShort>;
+}
+
+export interface DealShortListView extends ListViewABC {
+  data: Array<DealShort>;
+}
+
+export interface EffectorListView extends ListViewABC {
+  data: Array<Effector>;
+}
+
+export interface PaymentTokenListView extends ListViewABC {
+  data: Array<PaymentToken>;
+}
 
 export type ProviderBase = {
   id: string;
@@ -113,7 +131,7 @@ export type OfferShortOrderBy =
 
 export type DealsShortOrderBy = "createdAt";
 
-export type EffectorsOrderBy = "id"
-export type PaymentTokenOrderBy = "id" | "symbol"
+export type EffectorsOrderBy = "id";
+export type PaymentTokenOrderBy = "id" | "symbol";
 
 export type OrderType = "asc" | "desc";

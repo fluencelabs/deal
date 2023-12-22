@@ -96,8 +96,6 @@ async function main() {
     for (const offer of res.data) {
         console.log(offer.effectors)
     }
-    
-    console.log('Total data [e.g. for pagination]', res.total)
 }
 
 asyncRuntimeDecorator(main);

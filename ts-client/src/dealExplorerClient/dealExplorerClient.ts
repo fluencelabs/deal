@@ -21,6 +21,8 @@ import type {
   EffectorsOrderBy,
   PaymentTokenOrderBy,
   PaymentToken,
+  PaymentTokenListView,
+  EffectorListView,
 } from "./types.js";
 import type {
   ByProviderAndStatusFilter,
@@ -38,6 +40,7 @@ import type {
   Deal_OrderBy,
   Offer_Filter,
   Offer_OrderBy,
+  Provider_Filter,
 } from "./indexerClient/generated.types.js";
 import type {
   BasicDealFragment,
@@ -139,14 +142,31 @@ export class DealExplorerClient {
     } as ProviderShort;
   }
 
+  async _convertProviderFiltersToIndexer(
+    providersFilters?: ProvidersFilters,
+  ): Promise<Provider_Filter> {
+    if (!providersFilters) {
+      return {};
+    }
+    const convertedFilters: Provider_Filter = { and: [] };
+    if (providersFilters.search) {
+      const search = providersFilters.search;
+      convertedFilters.and?.push({ or: [{ id: search }, { name: search }] });
+    }
+    // https://github.com/graphprotocol/graph-node/issues/2539
+    // https://github.com/graphprotocol/graph-node/issues/4775
+    // https://github.com/graphprotocol/graph-node/blob/ad31fd9699b0957abda459340dff093b2a279074/NEWS.md?plain=1#L30
+    // Thus, kinda join should be presented on client side =(.
+    if (providersFilters.effectorIds) {
+      // composedFilters = { offers_: { effectors_: { effector_in: providersFilters.effectorIds } } };
+      console.warn("Currently effectorIds filter does not implemented.");
+    }
+    return convertedFilters;
+  }
+
   /*
-   * @dev: search: you could perform search by `provider address` or `provider name`.
+   * @dev search: you could perform strict search by `provider address` or `provider name`
    * @dev Note, deprecation:
-   * @dev - skip: renamed to offset
-   * @dev - take: renamed to limit
-   * @dev - order: renamed to orderBy
-   * @dev - search: provide just a search txt.
-   * @dev - searchValue: deprecated.
    */
   async getProviders(
     providersFilters?: ProvidersFilters,
@@ -156,21 +176,8 @@ export class DealExplorerClient {
     orderType: OrderType = this.DEFAULT_ORDER_TYPE,
   ): Promise<ProviderShortListView> {
     await this._init();
-    const composedFilters = {};
-    if (providersFilters) {
-      if (providersFilters.search) {
-        console.warn("Currently search field does not implemented.");
-      }
-      // https://github.com/graphprotocol/graph-node/issues/2539
-      // https://github.com/graphprotocol/graph-node/issues/4775
-      // https://github.com/graphprotocol/graph-node/blob/ad31fd9699b0957abda459340dff093b2a279074/NEWS.md?plain=1#L30
-      // Thus, kinda join should be presented on client side =(.
-      if (providersFilters.effectorIds) {
-        // composedFilters = { offers_: { effectors_: { effector_in: providersFilters.effectorIds } } };
-        console.warn("Currently effectorIds filter does not implemented.");
-      }
-    }
-
+    const composedFilters =
+      await this._convertProviderFiltersToIndexer(providersFilters);
     const data = await this._indexerClient.getProviders({
       filters: composedFilters,
       offset,
@@ -184,7 +191,19 @@ export class DealExplorerClient {
         res.push(this._composeProviderShort(provider));
       }
     }
-    return res;
+    let total = null;
+    if (
+      !providersFilters &&
+      data.graphNetworks.length == 1 &&
+      data.graphNetworks[0] &&
+      data.graphNetworks[0].providersTotal
+    ) {
+      total = data.graphNetworks[0].providersTotal as string;
+    }
+    return {
+      data: res,
+      total,
+    };
   }
 
   async getProvider(providerId: string): Promise<ProviderDetail | null> {
@@ -334,31 +353,34 @@ export class DealExplorerClient {
     if (!v) {
       return {};
     }
-    if (v.search) {
-      console.warn("Currently search field does not implemented.");
-    }
     if (v.onlyApproved) {
       console.warn("Currently onlyApproved field does not implemented.");
     }
-    const res: Offer_Filter = {};
+    const convertedFilters: Offer_Filter = { and: [] };
+    if (v.search) {
+      const search = v.search;
+      convertedFilters.and?.push({
+        or: [{ id: search }, { provider: search }],
+      });
+    }
     if (v.effectorIds) {
-      res.effectors_ = {
-        effector_in: v.effectorIds,
-      };
+      convertedFilters.and?.push({
+        effectors_: { effector_in: v.effectorIds },
+      });
     }
     if (v.createdAtFrom) {
-      res.createdAt_gt = v.createdAtFrom.toString();
+      convertedFilters.and?.push({ createdAt_gt: v.createdAtFrom.toString() });
     }
     if (v.createdAtTo) {
-      res.createdAt_lt = v.createdAtTo.toString();
+      convertedFilters.and?.push({ createdAt_lt: v.createdAtTo.toString() });
     }
     if (v.providerId) {
-      res.provider = v.providerId;
+      convertedFilters.and?.push({ provider: v.providerId });
     }
     // Filters with relation check below.
     let tokenDecimals = this.DEFAULT_FILTER_TOKEN_DECIMALS;
     if (v.paymentTokens) {
-      res.paymentToken_in = v.paymentTokens;
+      convertedFilters.and?.push({ paymentToken_in: v.paymentTokens });
     }
     if (
       (v.minPricePerWorkerEpoch || v.maxPricePerWorkerEpoch) &&
@@ -367,18 +389,22 @@ export class DealExplorerClient {
       tokenDecimals = await this._getCommonTokenDecimals(v.paymentTokens);
     }
     if (v.minPricePerWorkerEpoch) {
-      res.pricePerEpoch_gt = valueToTokenValue(
-        v.minPricePerWorkerEpoch,
-        tokenDecimals,
-      );
+      convertedFilters.and?.push({
+        pricePerEpoch_gt: valueToTokenValue(
+          v.minPricePerWorkerEpoch,
+          tokenDecimals,
+        ),
+      });
     }
     if (v.maxPricePerWorkerEpoch) {
-      res.pricePerEpoch_lt = valueToTokenValue(
-        v.maxPricePerWorkerEpoch,
-        tokenDecimals,
-      );
+      convertedFilters.and?.push({
+        pricePerEpoch_lt: valueToTokenValue(
+          v.maxPricePerWorkerEpoch,
+          tokenDecimals,
+        ),
+      });
     }
-    return res;
+    return convertedFilters;
   }
 
   async _getOffersImpl(
@@ -405,7 +431,19 @@ export class DealExplorerClient {
         res.push(this._composeOfferShort(offer));
       }
     }
-    return res;
+    let total = null;
+    if (
+      !offerFilters &&
+      data.graphNetworks.length == 1 &&
+      data.graphNetworks[0] &&
+      data.graphNetworks[0].offersTotal
+    ) {
+      total = data.graphNetworks[0].offersTotal as string;
+    }
+    return {
+      data: res,
+      total,
+    };
   }
 
   /*
@@ -482,34 +520,37 @@ export class DealExplorerClient {
     if (!v) {
       return {};
     }
-    if (v.search) {
-      console.warn("Currently search filter does not implemented.");
-    }
     if (v.onlyApproved) {
       console.warn("Currently onlyApproved filter does not implemented.");
     }
     if (v.status) {
       console.warn("Currently status filter does not implemented.");
     }
-    const res: Deal_Filter = {};
+    const convertedFilters: Deal_Filter = { and: [] };
+    if (v.search) {
+      const search = v.search;
+      convertedFilters.and?.push({ or: [{ id: search }, { owner: search }] });
+    }
     if (v.effectorIds) {
-      res.effectors_ = {
-        effector_in: v.effectorIds,
-      };
+      convertedFilters.and?.push({
+        effectors_: { effector_in: v.effectorIds },
+      });
     }
     if (v.createdAtFrom) {
-      res.createdAt_gt = v.createdAtFrom.toString();
+      convertedFilters.and?.push({ createdAt_gt: v.createdAtFrom.toString() });
     }
     if (v.createdAtTo) {
-      res.createdAt_lt = v.createdAtTo.toString();
+      convertedFilters.and?.push({ createdAt_lt: v.createdAtTo.toString() });
     }
     if (v.providerId) {
-      res.addedComputeUnits_ = { provider: v.providerId };
+      convertedFilters.and?.push({
+        addedComputeUnits_: { provider: v.providerId },
+      });
     }
     // Filters with relation check below.
     let tokenDecimals = this.DEFAULT_FILTER_TOKEN_DECIMALS;
     if (v.paymentTokens) {
-      res.paymentToken_in = v.paymentTokens;
+      convertedFilters.and?.push({ paymentToken_in: v.paymentTokens });
     }
     if (
       (v.minPricePerWorkerEpoch || v.maxPricePerWorkerEpoch) &&
@@ -518,18 +559,22 @@ export class DealExplorerClient {
       tokenDecimals = await this._getCommonTokenDecimals(v.paymentTokens);
     }
     if (v.minPricePerWorkerEpoch) {
-      res.pricePerWorkerEpoch_gt = valueToTokenValue(
-        v.minPricePerWorkerEpoch,
-        tokenDecimals,
-      );
+      convertedFilters.and?.push({
+        pricePerWorkerEpoch_gt: valueToTokenValue(
+          v.minPricePerWorkerEpoch,
+          tokenDecimals,
+        ),
+      });
     }
     if (v.maxPricePerWorkerEpoch) {
-      res.pricePerWorkerEpoch_lt = valueToTokenValue(
-        v.maxPricePerWorkerEpoch,
-        tokenDecimals,
-      );
+      convertedFilters.and?.push({
+        pricePerWorkerEpoch_lt: valueToTokenValue(
+          v.maxPricePerWorkerEpoch,
+          tokenDecimals,
+        ),
+      });
     }
-    return res;
+    return convertedFilters;
   }
 
   async _getDealsImpl(
@@ -573,7 +618,19 @@ export class DealExplorerClient {
         );
       }
     }
-    return res;
+    let total = null;
+    if (
+      !dealsFilters &&
+      data.graphNetworks.length == 1 &&
+      data.graphNetworks[0] &&
+      data.graphNetworks[0].dealsTotal
+    ) {
+      total = data.graphNetworks[0].dealsTotal as string;
+    }
+    return {
+      data: res,
+      total,
+    };
   }
 
   _composeDealsShort(
@@ -692,7 +749,7 @@ export class DealExplorerClient {
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: EffectorsOrderBy = "id",
     orderType: OrderType = this.DEFAULT_ORDER_TYPE,
-  ): Promise<Array<Effector>> {
+  ): Promise<EffectorListView> {
     const data = await this._indexerClient.getEffectors({
       offset,
       limit,
@@ -706,7 +763,18 @@ export class DealExplorerClient {
         return { cid: effector.id, description: effector.description };
       });
     }
-    return res;
+    let total = null;
+    if (
+      data.graphNetworks.length == 1 &&
+      data.graphNetworks[0] &&
+      data.graphNetworks[0].effectorsTotal
+    ) {
+      total = data.graphNetworks[0].effectorsTotal as string;
+    }
+    return {
+      data: res,
+      total,
+    };
   }
 
   async getPaymentTokens(
@@ -714,7 +782,7 @@ export class DealExplorerClient {
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: PaymentTokenOrderBy = "symbol",
     orderType: OrderType = this.DEFAULT_ORDER_TYPE,
-  ): Promise<Array<PaymentToken>> {
+  ): Promise<PaymentTokenListView> {
     const data = await this._indexerClient.getTokens({
       offset,
       limit,
@@ -732,7 +800,18 @@ export class DealExplorerClient {
         };
       });
     }
-    return res;
+    let total = null;
+    if (
+      data.graphNetworks.length == 1 &&
+      data.graphNetworks[0] &&
+      data.graphNetworks[0].tokensTotal
+    ) {
+      total = data.graphNetworks[0].tokensTotal as string;
+    }
+    return {
+      data: res,
+      total,
+    };
   }
 }
 
