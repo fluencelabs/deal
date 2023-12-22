@@ -14,7 +14,7 @@ fs_permissions = [
 ]
 gas_reports = ["*"]
 optimizer = true
-optimizer_runs = 10000
+optimizer_runs = 5000
 
 [rpc_endpoints]
 local = "http://0.0.0.0:8545"

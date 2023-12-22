@@ -10,6 +10,7 @@ import "test/utils/DeployDealSystem.sol";
 import "src/core/modules/market/Market.sol";
 import "src/core/modules/market/interfaces/IOffer.sol";
 import "test/utils/Random.sol";
+import "forge-std/StdCheats.sol";
 
 contract MatcherTest is Test {
     using SafeERC20 for IERC20;
@@ -19,7 +20,7 @@ contract MatcherTest is Test {
 
     // ------------------ Internals ------------------
 
-    function _registerOffers(
+    function _registerOffersAndCC(
         uint256 offerCount,
         uint256 peerCountPerOffer,
         uint256 unitCountPerPeer,
@@ -49,6 +50,17 @@ contract MatcherTest is Test {
             }
 
             offerIds[i] = deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, peers);
+
+            for (uint256 j = 0; j < peerCountPerOffer; j++) {
+                bytes32 commitmentId = deployment.capacity.createCapacityCommitment(
+                    peerIds[i][j], deployment.capacity.minDuration(), address(this), 1
+                );
+
+                uint256 amount =
+                    deployment.capacity.getCapacityCommitment(commitmentId).collateralPerUnit * unitIds[i][j].length;
+                deployment.tFLT.safeApprove(address(deployment.capacity), amount);
+                deployment.capacity.depositCapacityCommitmentCollateral(commitmentId);
+            }
         }
     }
 
@@ -75,9 +87,11 @@ contract MatcherTest is Test {
         DealMock dealMock =
             new DealMock(pricePerWorkerEpoch, paymentToken, targetWorkers, effectors, appCID, creationBlock);
 
-        (bytes32[] memory offerIds, bytes32[][] memory peerIds, bytes32[][][] memory unitIds) = _registerOffers(
+        (bytes32[] memory offerIds, bytes32[][] memory peerIds, bytes32[][][] memory unitIds) = _registerOffersAndCC(
             offerCount, peerCountPerOffer, unitCountPerPeer, effectors, paymentToken, pricePerWorkerEpoch
         );
+
+        StdCheats.skip(uint256(deployment.core.epochDuration()));
 
         deployment.market.matchDeal(IDeal(address(dealMock)));
 
@@ -85,6 +99,7 @@ contract MatcherTest is Test {
         for (uint256 i = 0; i < offerIds.length; i++) {
             bytes32 offerId = offerIds[i];
             Market.Offer memory offer = deployment.market.getOffer(offerId);
+
             for (uint256 j = 0; j < peerIds[i].length; j++) {
                 bytes32 unitId = unitIds[i][j][0];
                 assertEq(deployment.market.getComputeUnit(unitId).deal, address(dealMock), "Wrong deal");
@@ -133,7 +148,6 @@ contract DealMock {
     }
 
     function addComputeUnit(address computeProvider, bytes32 unitId, bytes32 peerId) external {
-        console.logBytes32(unitId);
         require(!unitExists[unitId], "Unit already exists");
 
         unitExists[unitId] = true;

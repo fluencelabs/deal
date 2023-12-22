@@ -149,6 +149,7 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
     // #region ----------------- Public Mutable -----------------
     function createCapacityCommitment(bytes32 peerId, uint256 duration, address delegator, uint256 rewardDelegationRate)
         external
+        returns (bytes32)
     {
         IMarket market = core.market();
 
@@ -192,6 +193,8 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
         peer.commitmentId = commitmentId;
 
         emit CapacityCommitmentCreated(peerId, commitmentId, delegator, rewardDelegationRate, collateralPerUnit);
+
+        return commitmentId;
     }
 
     function removeTempCapacityCommitment(bytes32 commitmentId) external {
@@ -292,7 +295,9 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
 
         uint256 epoch = core.currentEpoch() - 1;
         uint256 expiredEpoch = _expiredEpoch(cc);
-        _commitCCSnapshot(cc, peer, epoch, expiredEpoch);
+        CCStatus status = _commitCCSnapshot(cc, peer, epoch, expiredEpoch);
+        require(status == CCStatus.Active, "Capacity commitment is not active");
+
         _commitCUSnapshot(cc, unitProofsInfo, epoch, expiredEpoch, cc.info.failedEpoch);
 
         unitProofsInfo.isInactive = true;
@@ -314,16 +319,20 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
 
         uint256 epoch = core.currentEpoch();
         uint256 expiredEpoch = _expiredEpoch(cc);
-        _commitCCSnapshot(cc, peer, epoch - 1, expiredEpoch);
+        CCStatus status = _commitCCSnapshot(cc, peer, epoch - 1, expiredEpoch);
 
         unitProofsInfo.isInactive = false;
-        uint256 activeUnitCount_ = cc.info.activeUnitCount;
-        cc.info.nextAdditionalActiveUnitCount += 1;
         unitProofsInfo.lastSuccessEpoch = epoch;
 
-        _setActiveUnitCount(activeUnitCount() + 1);
-
         emit UnitActivated(commitmentId, unitId);
+
+        if (status == CCStatus.Inactive || status == CCStatus.Failed) {
+            return;
+        }
+
+        cc.info.nextAdditionalActiveUnitCount += 1;
+
+        _setActiveUnitCount(activeUnitCount() + 1);
     }
 
     function submitProof(bytes32 unitId, bytes calldata proof) external {
@@ -489,9 +498,12 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
         uint256 nextAdditionalActiveUnitCount_,
         uint256 totalCUFailCount_,
         uint256 lastSnapshotEpoch_
-    ) private pure returns (uint256 failedEpoch, uint256 remainingFailsForLastEpoch, uint256 maxFails) {
+    ) private view returns (uint256 failedEpoch, uint256 remainingFailsForLastEpoch, uint256 maxFails) {
         maxFails = maxFailedRatio_ * unitCount_;
-        uint256 remainingFails = maxFails - totalCUFailCount_;
+        uint256 remainingFails = 0;
+        if (totalCUFailCount_ < maxFails) {
+            remainingFails = maxFails - totalCUFailCount_;
+        }
 
         if (activeUnitCount_ > remainingFails) {
             failedEpoch = lastSnapshotEpoch_ + 1;

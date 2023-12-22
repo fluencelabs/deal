@@ -133,7 +133,7 @@ abstract contract Offer is BaseModule, IOffer {
         bytes32 offerId = computePeer.offerId;
         Offer storage offer = offerStorage.offers[offerId];
 
-        require(computePeer.owner == address(0x00), "Peer doesn't exist");
+        require(computePeer.owner != address(0x00), "Peer doesn't exist");
         require(offer.provider == msg.sender, "Only owner can change offer");
         require(computePeer.commitmentId == bytes32(0x00), "Peer has commitment");
 

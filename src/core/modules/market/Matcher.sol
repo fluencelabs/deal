@@ -62,6 +62,7 @@ abstract contract Matcher is Offer, IMatcher {
 
         bytes32 currentOfferId = offerList.first();
 
+        ICapacity capacity = core.capacity();
         while (currentOfferId != bytes32(0x00) && freeWorkerSlots > 0) {
             Offer memory offer = getOffer(currentOfferId);
 
@@ -79,6 +80,16 @@ abstract contract Matcher is Offer, IMatcher {
             while (currentPeerId != bytes32(0x00) && freeWorkerSlots > 0) {
                 // TODO: check peer in capacity commitment
                 LinkedListWithUniqueKeys.Bytes32List storage computeUnitList = _getFreeComputeUnitList(currentPeerId);
+
+                ComputePeer memory peer = getComputePeer(currentPeerId);
+                ICapacity.CommitmentInfo memory capacityCommitment = capacity.getCapacityCommitment(peer.commitmentId);
+
+                if (peer.commitmentId == bytes32(0x000000000) || currentEpoch < capacityCommitment.startEpoch) {
+                    currentPeerId = peerList.next(currentPeerId);
+                    continue;
+                }
+
+                // TODO: for offchain matching task - add check to has peer capacity commitment
 
                 bytes32 currentUnitId = computeUnitList.first();
                 bytes32 nextCurrentPeerId = peerList.next(currentPeerId); // becouse mvComputeUnitToDeal can remove currentPeerId from peerList

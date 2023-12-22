@@ -73,7 +73,24 @@ interface ICapacity is ICapacityConst {
         uint256 maxFailedRatio_
     ) external;
 
-    // ------------------ Mutable ------------------
+    // ------------------ Views ------------------
+    function getCCStatus(bytes32 commitmentId) external view returns (CCStatus);
+    function getCapacityCommitment(bytes32 commitmentId) external view returns (CommitmentInfo memory);
+    function totalRewards(bytes32 commitmentId) external view returns (uint256);
+    function unlockedRewards(bytes32 commitmentId) external view returns (uint256);
+
+    // ----------------- Mutables -----------------
+    function createCapacityCommitment(bytes32 peerId, uint256 duration, address delegator, uint256 rewardDelegationRate)
+        external
+        returns (bytes32);
+
+    function removeTempCapacityCommitment(bytes32 commitmentId) external;
+    function finishCapacityCommitment(bytes32 commitmentId) external;
+    function depositCapacityCommitmentCollateral(bytes32 commitmentId) external;
     function onUnitMovedToDeal(bytes32 commitmentId, bytes32 unitId) external;
     function onUnitReturnedFromDeal(bytes32 commitmentId, bytes32 unitId) external;
+    function submitProof(bytes32 unitId, bytes calldata proof) external;
+    function commitCCSnapshot(bytes32 commitmentId) external;
+    function removeCUFromCC(bytes32 commitmentId, bytes32[] calldata unitIds) external;
+    function withdrawCCReward(bytes32 commitmentId) external;
 }
