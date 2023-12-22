@@ -64,7 +64,7 @@ contract Matcher is Offer, IMatcher {
             // Get CU and start checking, if smth wrong - skip.
             // TODO: notify user that match fulfilled not fully (or discuss and close).
             ComputeUnit memory computeUnit  = getComputeUnit(computeUnitId);
-            // TODO: Catch CU does not exist and pass.
+            // TODO: Catch CU does not exist error and pass.
             // Check if CU available.
             if (computeUnit.deal != address(0)) {
                 continue;
@@ -95,7 +95,7 @@ contract Matcher is Offer, IMatcher {
             }
 
             if (freeWorkerSlots == 0) {
-                // TODO: signal to user that matched fully.
+                // TODO: possible feature of signalling to user that matched fully.
                 break;
             }
         }
