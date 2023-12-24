@@ -13,6 +13,8 @@ export type OffersQueryQueryVariables = Types.Exact<{
   peersLimit?: Types.InputMaybe<Types.Scalars['Int']['input']>;
   computeUnitsLimit?: Types.InputMaybe<Types.Scalars['Int']['input']>;
   offset?: Types.InputMaybe<Types.Scalars['Int']['input']>;
+  peersOffset?: Types.InputMaybe<Types.Scalars['Int']['input']>;
+  computeUnitsOffset?: Types.InputMaybe<Types.Scalars['Int']['input']>;
   limit?: Types.InputMaybe<Types.Scalars['Int']['input']>;
   orderBy?: Types.InputMaybe<Types.Offer_OrderBy>;
   orderType?: Types.InputMaybe<Types.OrderDirection>;
@@ -23,7 +25,7 @@ export type OffersQueryQuery = { __typename?: 'Query', offers: Array<{ __typenam
 
 
 export const OffersQueryDocument = gql`
-    query OffersQuery($filters: Offer_filter, $peersFilters: Peer_filter, $computeUnitsFilters: ComputeUnit_filter, $peersLimit: Int, $computeUnitsLimit: Int, $offset: Int, $limit: Int, $orderBy: Offer_orderBy, $orderType: OrderDirection) {
+    query OffersQuery($filters: Offer_filter, $peersFilters: Peer_filter, $computeUnitsFilters: ComputeUnit_filter, $peersLimit: Int, $computeUnitsLimit: Int, $offset: Int, $peersOffset: Int, $computeUnitsOffset: Int, $limit: Int, $orderBy: Offer_orderBy, $orderType: OrderDirection) {
   offers(
     where: $filters
     first: $limit
@@ -32,8 +34,12 @@ export const OffersQueryDocument = gql`
     orderDirection: $orderType
   ) {
     id
-    peers(where: $peersFilters, first: $peersLimit) {
-      computeUnits(where: $computeUnitsFilters, first: $computeUnitsLimit) {
+    peers(where: $peersFilters, first: $peersLimit, skip: $peersOffset) {
+      computeUnits(
+        where: $computeUnitsFilters
+        first: $computeUnitsLimit
+        skip: $computeUnitsOffset
+      ) {
         id
       }
     }
