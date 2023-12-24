@@ -109,4 +109,3 @@ contract Matcher is Offer, IMatcher {
         }
     }
 }
-// TODO: include filter problem ni ts-client.
