@@ -364,10 +364,10 @@ export class DealExplorerClient {
       });
     }
     if (v.createdAtFrom) {
-      convertedFilters.and?.push({ createdAt_gt: v.createdAtFrom.toString() });
+      convertedFilters.and?.push({ createdAt_gte: v.createdAtFrom.toString() });
     }
     if (v.createdAtTo) {
-      convertedFilters.and?.push({ createdAt_lt: v.createdAtTo.toString() });
+      convertedFilters.and?.push({ createdAt_lte: v.createdAtTo.toString() });
     }
     if (v.providerId) {
       convertedFilters.and?.push({ provider: v.providerId });
@@ -385,7 +385,7 @@ export class DealExplorerClient {
     }
     if (v.minPricePerWorkerEpoch) {
       convertedFilters.and?.push({
-        pricePerEpoch_gt: valueToTokenValue(
+        pricePerEpoch_gte: valueToTokenValue(
           v.minPricePerWorkerEpoch,
           tokenDecimals,
         ),
@@ -393,7 +393,7 @@ export class DealExplorerClient {
     }
     if (v.maxPricePerWorkerEpoch) {
       convertedFilters.and?.push({
-        pricePerEpoch_lt: valueToTokenValue(
+        pricePerEpoch_lte: valueToTokenValue(
           v.maxPricePerWorkerEpoch,
           tokenDecimals,
         ),
@@ -532,10 +532,10 @@ export class DealExplorerClient {
       });
     }
     if (v.createdAtFrom) {
-      convertedFilters.and?.push({ createdAt_gt: v.createdAtFrom.toString() });
+      convertedFilters.and?.push({ createdAt_gte: v.createdAtFrom.toString() });
     }
     if (v.createdAtTo) {
-      convertedFilters.and?.push({ createdAt_lt: v.createdAtTo.toString() });
+      convertedFilters.and?.push({ createdAt_lte: v.createdAtTo.toString() });
     }
     if (v.providerId) {
       convertedFilters.and?.push({
@@ -555,7 +555,7 @@ export class DealExplorerClient {
     }
     if (v.minPricePerWorkerEpoch) {
       convertedFilters.and?.push({
-        pricePerWorkerEpoch_gt: valueToTokenValue(
+        pricePerWorkerEpoch_gte: valueToTokenValue(
           v.minPricePerWorkerEpoch,
           tokenDecimals,
         ),
@@ -563,7 +563,7 @@ export class DealExplorerClient {
     }
     if (v.maxPricePerWorkerEpoch) {
       convertedFilters.and?.push({
-        pricePerWorkerEpoch_lt: valueToTokenValue(
+        pricePerWorkerEpoch_lte: valueToTokenValue(
           v.maxPricePerWorkerEpoch,
           tokenDecimals,
         ),
