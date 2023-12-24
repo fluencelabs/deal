@@ -9,20 +9,6 @@ export interface GetMatchedOffersResult {
 
 export class DealNotFoundError extends Error {}
 
-// async getTotalProviders(variables?: ProvidersQueryQueryVariables, offset: number = 0): Promise<number> {
-//   const paginatorVars: ProvidersQueryQueryVariables = { ...variables } || {};
-//   paginatorVars.limit = this.PAGINATOR_ENITIES_LIMIT
-//   paginatorVars.offset = offset
-//
-//   const entities = await this.providersClient.ProvidersIdQuery(paginatorVars);
-//   const fetchedEntities = entities.providers.length
-//   // Check if it should request more.
-//   if (fetchedEntities == this.PAGINATOR_ENITIES_LIMIT) {
-//     return fetchedEntities + await this.getTotalProviders(variables, offset + this.PAGINATOR_ENITIES_LIMIT)
-//   }
-//   return fetchedEntities
-// }
-
 export class DealMatcherClient {
   private _indexerClient: IndexerClient;
   public MAX_PER_PAGE: number;
