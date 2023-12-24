@@ -86,7 +86,7 @@ describe('#getMatchedOffers', () => {
     expect(matchedOffers.computeUnits.length).toEqual(callImplProps.expectedCU)
   }
 
-  test(`It returns exact CUs when indexer has offers less than INDEXER_MAX_FIRST`, async () => {
+  test(`It returns exact CUs when indexer has offers less than MAX_PER_PAGE`, async () => {
     await _callImpl(
       {
         targetWorkerSlotToMatch: 1,
@@ -104,19 +104,19 @@ describe('#getMatchedOffers', () => {
     )
   })
 
-  test(`It returns INDEXER_MAX_FIRST when indexer has offers equal INDEXER_MAX_FIRST`, async () => {
+  test(`It returns MAX_PER_PAGE when indexer has offers equal MAX_PER_PAGE`, async () => {
     const client = new DealMatcherClient(TEST_NETWORK)
     await _callImpl(
       {
-        targetWorkerSlotToMatch: client.INDEXER_MAX_FIRST,
+        targetWorkerSlotToMatch: client.MAX_PER_PAGE,
         minWorkersToMatch: 1,
         offersMockedPage1: 1,
         peersMockedPage1: 1,
         offersMockedPage2: 0,
         peersMockedPage2: 0,
         CUsMockedPage2: 0,
-        CUsMockedPage1: client.INDEXER_MAX_FIRST,
-        expectedCU: client.INDEXER_MAX_FIRST,
+        CUsMockedPage1: client.MAX_PER_PAGE,
+        expectedCU: client.MAX_PER_PAGE,
         exceptedIndexerCalls: 1,
         expectedFulfilled: true,
       }
@@ -127,15 +127,15 @@ describe('#getMatchedOffers', () => {
     const client = new DealMatcherClient(TEST_NETWORK)
     await _callImpl(
       {
-        targetWorkerSlotToMatch: client.INDEXER_MAX_FIRST + 1,
+        targetWorkerSlotToMatch: client.MAX_PER_PAGE + 1,
         minWorkersToMatch: 1,
         offersMockedPage1: 1,
         peersMockedPage1: 1,
-        CUsMockedPage1: client.INDEXER_MAX_FIRST,
+        CUsMockedPage1: client.MAX_PER_PAGE,
         offersMockedPage2: 1,
         peersMockedPage2: 1,
         CUsMockedPage2: 1,
-        expectedCU: client.INDEXER_MAX_FIRST + 1,
+        expectedCU: client.MAX_PER_PAGE + 1,
         exceptedIndexerCalls: 2,
         expectedFulfilled: true,
       }
@@ -146,15 +146,15 @@ describe('#getMatchedOffers', () => {
     const client = new DealMatcherClient(TEST_NETWORK)
     await _callImpl(
       {
-        targetWorkerSlotToMatch: client.INDEXER_MAX_FIRST + 1,
+        targetWorkerSlotToMatch: client.MAX_PER_PAGE + 1,
         minWorkersToMatch: 1,
         offersMockedPage1: 1,
-        peersMockedPage1: client.INDEXER_MAX_FIRST,
+        peersMockedPage1: client.MAX_PER_PAGE,
         CUsMockedPage1: 1,
         offersMockedPage2: 1,
         peersMockedPage2: 1,
         CUsMockedPage2: 1,
-        expectedCU: client.INDEXER_MAX_FIRST + 1,
+        expectedCU: client.MAX_PER_PAGE + 1,
         exceptedIndexerCalls: 2,
         expectedFulfilled: true,
       }
@@ -165,15 +165,15 @@ describe('#getMatchedOffers', () => {
     const client = new DealMatcherClient(TEST_NETWORK)
     await _callImpl(
       {
-        targetWorkerSlotToMatch: client.INDEXER_MAX_FIRST + 1,
+        targetWorkerSlotToMatch: client.MAX_PER_PAGE + 1,
         minWorkersToMatch: 1,
-        offersMockedPage1: client.INDEXER_MAX_FIRST,
+        offersMockedPage1: client.MAX_PER_PAGE,
         peersMockedPage1: 1,
         CUsMockedPage1: 1,
         offersMockedPage2: 1,
         peersMockedPage2: 1,
         CUsMockedPage2: 1,
-        expectedCU: client.INDEXER_MAX_FIRST + 1,
+        expectedCU: client.MAX_PER_PAGE + 1,
         exceptedIndexerCalls: 2,
         expectedFulfilled: true,
       }
@@ -184,15 +184,15 @@ describe('#getMatchedOffers', () => {
     const client = new DealMatcherClient(TEST_NETWORK)
     await _callImpl(
       {
-        targetWorkerSlotToMatch: client.INDEXER_MAX_FIRST + 1,
+        targetWorkerSlotToMatch: client.MAX_PER_PAGE + 1,
         minWorkersToMatch: 1,
         offersMockedPage1: 1,
         peersMockedPage1: 1,
-        CUsMockedPage1: client.INDEXER_MAX_FIRST - 1,
+        CUsMockedPage1: client.MAX_PER_PAGE - 1,
         offersMockedPage2: 0,
         peersMockedPage2: 0,
         CUsMockedPage2: 0,
-        expectedCU: client.INDEXER_MAX_FIRST - 1,
+        expectedCU: client.MAX_PER_PAGE - 1,
         exceptedIndexerCalls: 1,
         expectedFulfilled: false,
       }

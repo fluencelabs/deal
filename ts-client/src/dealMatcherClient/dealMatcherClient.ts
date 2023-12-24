@@ -24,11 +24,11 @@ export class DealNotFoundError extends Error {}
 // }
 
 export class DealMatcherClient {
-  INDEXER_MAX_FIRST = 5;
-  // TODO: private
-  public _indexerClient: IndexerClient;
+  private _indexerClient: IndexerClient;
+  public MAX_PER_PAGE: number;
   constructor(network: ContractsENV) {
     this._indexerClient = new IndexerClient(network);
+    this.MAX_PER_PAGE = this._indexerClient.INDEXER_MAX_FIRST
   }
 
   async _getMatchedOffersPage(
@@ -65,8 +65,6 @@ export class DealMatcherClient {
     return fetched.offers;
   }
 
-  // Should we check rematching epoch before?
-  // Returns offers and compute units matched for the deal.
   async getMatchedOffers(
     pricePerWorkerEpoch: string,
     effectors: Array<string>,
@@ -89,9 +87,9 @@ export class DealMatcherClient {
       `maxWorkersPerProvider = ${maxWorkersPerProvider} currently ignored.`,
     );
 
-    if (targetWorkerSlotToMatch > this.INDEXER_MAX_FIRST) {
+    if (targetWorkerSlotToMatch > this.MAX_PER_PAGE) {
       console.warn(
-        `targetWorkerSlotToMatch param is too high, it is better to reduce large query to ${this.INDEXER_MAX_FIRST} per batch.`,
+        `targetWorkerSlotToMatch param is too high, it is better to reduce large query to ${this.MAX_PER_PAGE} per batch.`,
       );
     }
     const matchedComputeUnitsData: GetMatchedOffersResult = {
@@ -115,8 +113,8 @@ export class DealMatcherClient {
     ) {
       // Request page, but remember about indexer limit.
       let perPageLimit = targetWorkerSlotToMatch;
-      if (targetWorkerSlotToMatch > this.INDEXER_MAX_FIRST) {
-        perPageLimit = this.INDEXER_MAX_FIRST;
+      if (targetWorkerSlotToMatch > this.MAX_PER_PAGE) {
+        perPageLimit = this.MAX_PER_PAGE;
       }
       const offers = await this._getMatchedOffersPage(
         pricePerWorkerEpoch,
@@ -159,22 +157,22 @@ export class DealMatcherClient {
           }
 
           // Have we reached the end for the compute units?
-          if (peerComputeUnits.length < this.INDEXER_MAX_FIRST) {
+          if (peerComputeUnits.length < this.MAX_PER_PAGE) {
             computeUnitsLastPageReached = true;
           } else {
             // Prepare to fetch next peer page.
-            computeUnitsOffset += this.INDEXER_MAX_FIRST;
+            computeUnitsOffset += this.MAX_PER_PAGE;
           }
         }
 
         // Only we reached the end for the compute units, we check the end for the peers.
         if (computeUnitsLastPageReached) {
           // Have we reached the end for the peer?
-          if (peers.length < this.INDEXER_MAX_FIRST) {
+          if (peers.length < this.MAX_PER_PAGE) {
             peersLastPageReached = true;
           } else {
             // Prepare to fetch next peer page.
-            peersOffset += this.INDEXER_MAX_FIRST;
+            peersOffset += this.MAX_PER_PAGE;
             computeUnitsOffset = 0;
             computeUnitsLastPageReached = false;
           }
@@ -184,11 +182,11 @@ export class DealMatcherClient {
       // Only we reached the end for the peer, we check the end for the offer.
       if (peersLastPageReached) {
         // Have we reached the end of offers?
-        if (offers.length < this.INDEXER_MAX_FIRST) {
+        if (offers.length < this.MAX_PER_PAGE) {
           offersLastPageReached = true;
         } else {
           // Prepare to fetch the next offer page.
-          offersOffset += this.INDEXER_MAX_FIRST;
+          offersOffset += this.MAX_PER_PAGE;
           peersOffset = 0;
           peersLastPageReached = false;
           computeUnitsOffset = 0;
@@ -207,6 +205,14 @@ export class DealMatcherClient {
     return matchedComputeUnitsData;
   }
 
+  /**
+   * Get compute units to match provided DealId (address).
+   *
+   * It fetches the deal and its configuration from the Indexer backend firstly.
+   * After, it scraps compute units (page by page) until one of the conditions:
+   * - the end of matched offers/peers/compute units
+   * - all target compute units found.
+   */
   async getMatchedOffersByDeal(
     dealId: string,
   ): Promise<GetMatchedOffersResult> {
