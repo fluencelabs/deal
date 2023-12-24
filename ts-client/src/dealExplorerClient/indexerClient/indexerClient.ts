@@ -18,10 +18,8 @@ import type {
   Sdk as ProvidersSdk,
 } from "./queries/providers-query.generated.js";
 import { getSdk as getProvidersSdk } from "./queries/providers-query.generated.js";
-import {
-  IndexerClientABC
-} from "../../indexerClient/indexerClientABC.js";
-import type {ContractsENV} from "../../client/config.js";
+import { IndexerClientABC } from "../../indexerClient/indexerClientABC.js";
+import type { ContractsENV } from "../../client/config.js";
 
 export class IndexerClient extends IndexerClientABC {
   private dealsClient: DealsSdk;

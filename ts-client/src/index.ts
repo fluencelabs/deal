@@ -6,3 +6,8 @@ export {
   ValidTogetherFiltersError,
   FiltersError,
 } from "./dealExplorerClient/dealExplorerClient.js";
+export {
+  DealMatcherClient,
+  type GetMatchedOffersResult,
+  DealNotFoundError,
+} from "./dealMatcherClient/dealMatcherClient.js";

@@ -88,10 +88,7 @@ export class DealExplorerClient {
       throw Error("One of chainRPCUrl or provider should be delclared.");
     }
     this._indexerClient = new IndexerClient(network);
-    this._dealContractsClient = new DealClient(
-      this._caller,
-      network,
-    );
+    this._dealContractsClient = new DealClient(this._caller, network);
     this._dealRpcClient = null;
   }
 

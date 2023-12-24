@@ -5,6 +5,8 @@ query OffersQuery(
   $peersLimit: Int,
   $computeUnitsLimit: Int,
   $offset: Int,
+  $peersOffset: Int,
+  $computeUnitsOffset: Int,
   $limit: Int,
   $orderBy: Offer_orderBy,
   $orderType: OrderDirection,
@@ -20,10 +22,12 @@ query OffersQuery(
     peers(
       where: $peersFilters
       first: $peersLimit
+      skip: $peersOffset
     ) {
       computeUnits(
         where: $computeUnitsFilters
         first: $computeUnitsLimit
+        skip: $computeUnitsOffset
       ) {
         id
       }
