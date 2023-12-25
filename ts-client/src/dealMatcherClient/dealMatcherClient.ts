@@ -2,9 +2,18 @@ import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type { DealQueryQuery } from "./indexerClient/queries/deals-query.generated.js";
 import type { ContractsENV } from "../client/config.js";
 
-export interface GetMatchedOffersResult {
+export interface GetMatchedOffersOut {
   computeUnits: Array<string>;
   fulfilled: boolean;
+}
+
+export interface GetMatchedOffersIn {
+  pricePerWorkerEpoch: string,
+  effectors: Array<string>,
+  paymentToken: string,
+  targetWorkerSlotToMatch: number,
+  minWorkersToMatch: number,
+  maxWorkersPerProvider: number,
 }
 
 export class DealNotFoundError extends Error {
@@ -58,13 +67,16 @@ export class DealMatcherClient {
   }
 
   async getMatchedOffers(
-    pricePerWorkerEpoch: string,
-    effectors: Array<string>,
-    paymentToken: string,
-    targetWorkerSlotToMatch: number,
-    minWorkersToMatch: number,
-    maxWorkersPerProvider: number,
-  ): Promise<GetMatchedOffersResult> {
+    getMatchedOffersIn: GetMatchedOffersIn,
+  ): Promise<GetMatchedOffersOut> {
+    const {
+      pricePerWorkerEpoch,
+      effectors,
+      paymentToken,
+      targetWorkerSlotToMatch,
+      minWorkersToMatch,
+      maxWorkersPerProvider,
+    } = getMatchedOffersIn
     console.group(
       "[getMatchedOffers] Try to match the next deal configuration with offers:",
     );
@@ -229,15 +241,17 @@ export class DealMatcherClient {
       throw new Error("Assert: deal: " + dealId + " has no effectors.");
     }
     return await this.getMatchedOffers(
-      // TODO: after migrate to another indexer, rm as string.
-      deal.pricePerWorkerEpoch as string,
-      deal.effectors.map((effector) => {
-        return effector.effector.id;
-      }),
-      deal.paymentToken.id,
-      targetWorkerToMath,
-      minWorkersToMatch,
-      deal.maxWorkersPerProvider,
+      {
+        // TODO: after migrate to another indexer, rm as string.
+        pricePerWorkerEpoch: deal.pricePerWorkerEpoch as string,
+        effectors: deal.effectors.map((effector) => {
+          return effector.effector.id;
+        }),
+        paymentToken: deal.paymentToken.id,
+        targetWorkerSlotToMatch: targetWorkerToMath,
+        minWorkersToMatch: minWorkersToMatch,
+        maxWorkersPerProvider: deal.maxWorkersPerProvider,
+      }
     );
   }
 }

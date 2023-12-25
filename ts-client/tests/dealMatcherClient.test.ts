@@ -73,12 +73,14 @@ describe('#getMatchedOffers', () => {
     const maxWorkersPerProvider = 1
 
     const matchedOffers = await client.getMatchedOffers(
-      pricePerWorkerEpoch,
-      effectors,
-      paymentToken,
-      callImplProps.targetWorkerSlotToMatch,
-      callImplProps.minWorkersToMatch,
-      maxWorkersPerProvider,
+      {
+        pricePerWorkerEpoch: pricePerWorkerEpoch,
+        effectors: effectors,
+        paymentToken: paymentToken,
+        targetWorkerSlotToMatch: callImplProps.targetWorkerSlotToMatch,
+        minWorkersToMatch: callImplProps.minWorkersToMatch,
+        maxWorkersPerProvider: maxWorkersPerProvider,
+      }
     )
 
     expect(_getMatchedOffersPageSpy.mock.calls.length).toEqual(callImplProps.exceptedIndexerCalls)
