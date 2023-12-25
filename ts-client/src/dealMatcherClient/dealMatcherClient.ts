@@ -80,11 +80,7 @@ export class DealMatcherClient {
     console.group(
       "[getMatchedOffers] Try to match the next deal configuration with offers:",
     );
-    console.info("pricePerWorkerEpoch = " + pricePerWorkerEpoch);
-    console.info("effectors = " + JSON.stringify(effectors));
-    console.info("paymentToken = " + paymentToken);
-    console.info("targetWorkerSlotToMatch = " + targetWorkerSlotToMatch);
-    console.info("minWorkersToMatch = " + minWorkersToMatch);
+    console.info(JSON.stringify(getMatchedOffersIn, null, 2));
 
     // TODO.
     console.warn(
