@@ -7,7 +7,13 @@ export interface GetMatchedOffersResult {
   fulfilled: boolean;
 }
 
-export class DealNotFoundError extends Error {}
+export class DealNotFoundError extends Error {
+  public static DEAL_NOT_FOUND_ERROR_PREFIX = "Deal not found. Searched for:";
+  constructor(dealId: string) {
+    super(DealNotFoundError.DEAL_NOT_FOUND_ERROR_PREFIX + " " + dealId);
+    Object.setPrototypeOf(this, DealNotFoundError.prototype);
+  }
+}
 
 export class DealMatcherClient {
   private _indexerClient: IndexerClient;
