@@ -1,5 +1,4 @@
 import { IndexerClient } from "./indexerClient/indexerClient.js";
-import type { DealQueryQuery } from "./indexerClient/queries/deals-query.generated.js";
 import type { ContractsENV } from "../client/config.js";
 
 export interface GetMatchedOffersOut {
@@ -92,7 +91,7 @@ export class DealMatcherClient {
         `targetWorkerSlotToMatch param is too high, it is better to reduce large query to ${this.MAX_PER_PAGE} per batch.`,
       );
     }
-    const matchedComputeUnitsData: GetMatchedOffersResult = {
+    const matchedComputeUnitsData: GetMatchedOffersOut = {
       computeUnits: [],
       fulfilled: false,
     };
@@ -206,35 +205,28 @@ export class DealMatcherClient {
   }
 
   /**
-   * Get compute units to match provided DealId (address).
-   *
-   * It fetches the deal and its configuration from the Indexer backend firstly.
-   * After, it scraps compute units (page by page) until one of the conditions:
-   * - the end of matched offers/peers/compute units
-   * - all target compute units found.
-   */
-  async getMatchedOffersByDeal(
+  * Get compute units to match provided DealId (address).
+  *
+  * 1. Fetches the deal and its configuration from the Indexer backend
+  * 2. Scraps compute units (page by page) until one of the conditions:
+  * - the end of matched offers/peers/compute units
+  * - all target compute units found.
+  */
+  async getMatchedOffersByDealId(
     dealId: string,
-  ): Promise<GetMatchedOffersResult> {
-    const data: DealQueryQuery = await this._indexerClient.getDeal({
-      id: dealId,
-    });
-    if (!data.deal) {
+  ): Promise<GetMatchedOffersOut> {
+    const { deal } = await this._indexerClient.getDeal({ id: dealId });
+    if (!deal) {
       throw new DealNotFoundError(dealId);
     }
-
-    const deal = data.deal;
-    const dealTargetWorkers = deal.targetWorkers;
-    const minWorkers = deal.minWorkers;
-    const alreadyMatchedComputeUnits = deal.addedComputeUnits?.length || 0;
-    const targetWorkerToMath = dealTargetWorkers - alreadyMatchedComputeUnits;
-    let minWorkersToMatch = minWorkers - alreadyMatchedComputeUnits;
-    if (minWorkersToMatch < 0) {
-      minWorkersToMatch = 0;
-    }
-
-    if (!deal.effectors) {
-      throw new Error("Assert: deal: " + dealId + " has no effectors.");
+    const alreadyMatchedComputeUnits = deal.addedComputeUnits?.length ?? 0;
+    const targetWorkerToMath = deal.targetWorkers - alreadyMatchedComputeUnits;
+    const minWorkersToMatch = Math.max(
+      deal.minWorkers - alreadyMatchedComputeUnits,
+      0,
+    );
+    if (deal.effectors == null) {
+      throw new Error(`Effectors of a deal: ${dealId} are null - assert.`);
     }
     return await this.getMatchedOffers(
       {
