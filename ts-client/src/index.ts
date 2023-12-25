@@ -8,6 +8,6 @@ export {
 } from "./dealExplorerClient/dealExplorerClient.js";
 export {
   DealMatcherClient,
-  type GetMatchedOffersResult,
+  type GetMatchedOffersOut,
   DealNotFoundError,
 } from "./dealMatcherClient/dealMatcherClient.js";
