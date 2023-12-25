@@ -229,6 +229,7 @@ export class DealMatcherClient {
       throw new Error("Assert: deal: " + dealId + " has no effectors.");
     }
     return await this.getMatchedOffers(
+      // TODO: after migrate to another indexer, rm as string.
       deal.pricePerWorkerEpoch as string,
       deal.effectors.map((effector) => {
         return effector.effector.id;
