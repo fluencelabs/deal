@@ -102,7 +102,7 @@ contract Matcher is Offer, IMatcher {
         }
 
         uint minWorkers = deal.minWorkers();
-        if (minWorkers > dealComputeUnitCount + freeWorkerSlots - freeWorkerSlotsCurrent) revert minWorkersNotMatchedError(minWorkers);
+        if (minWorkers > dealComputeUnitCount + freeWorkerSlots - freeWorkerSlotsCurrent) revert minWorkersNotMatched(minWorkers);
 
         if (isDealMatched) {
             _getMatcherStorage().lastMatchedEpoch[address(deal)] = currentEpoch;
