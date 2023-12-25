@@ -1,4 +1,4 @@
-import {BigDecimal, BigInt} from "@graphprotocol/graph-ts";
+import { BigDecimal, BigInt } from "@graphprotocol/graph-ts";
 
 const ZERO_BI = BigInt.fromI32(0);
 const ONE_BI = BigInt.fromI32(1);
@@ -13,7 +13,7 @@ export function exponentToBigDecimal(decimals: BigInt): BigDecimal {
 
 export function convertTokenToDecimal(
   tokenAmount: BigInt,
-  exchangeDecimals: BigInt
+  exchangeDecimals: BigInt,
 ): BigDecimal {
   if (exchangeDecimals == ZERO_BI) {
     return tokenAmount.toBigDecimal();

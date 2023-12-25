@@ -5,10 +5,10 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: Core
+    name: Market
     network: localhost
     source:
-      abi: Core
+      abi: Market
       address: "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f"
       startBlock: 0
     mapping:
@@ -22,36 +22,38 @@ dataSources:
         - OfferToEffector
         - ComputeUnit
         - Token
+        - GraphNetwork
       abis:
-        - name: Core
-          file: ../out/Core.sol/Core.json
+        - name: Market
+          file: ../out/Market.sol/Market.json
         - name: Deal
           file: ../out/Deal.sol/Deal.json
         - name: ERC20
           file: ../out/ERC20.sol/ERC20.json
       eventHandlers:
-        - event: MarketOfferRegistered(bytes32,address,uint256,address,(bytes4,bytes32)[])
+        - event: MarketOfferRegistered(indexed
+            address,bytes32,uint256,address,(bytes4,bytes32)[])
           handler: handleMarketOfferRegistered
-        - event: PeerCreated(bytes32,bytes32)
+        - event: PeerCreated(indexed bytes32,bytes32,address)
           handler: handlePeerCreated
-        - event: ComputeUnitCreated(bytes32,bytes32,bytes32)
+        - event: ComputeUnitCreated(indexed bytes32,bytes32)
           handler: handleComputeUnitCreated
-        - event: MinPricePerEpochUpdated(bytes32,uint256)
+        - event: MinPricePerEpochUpdated(indexed bytes32,uint256)
           handler: handleMinPricePerEpochUpdated
-        - event: PaymentTokenUpdated(bytes32,address)
+        - event: PaymentTokenUpdated(indexed bytes32,address)
           handler: handlePaymentTokenUpdated
-        - event: EffectorAdded(bytes32,(bytes4,bytes32))
+        - event: EffectorAdded(indexed bytes32,(bytes4,bytes32))
           handler: handleEffectorAdded
-        - event: EffectorRemoved(bytes32,(bytes4,bytes32))
+        - event: EffectorRemoved(indexed bytes32,(bytes4,bytes32))
           handler: handleEffectorRemoved
-        - event: ComputeUnitAddedToDeal(bytes32,address,bytes32)
+        - event: ComputeUnitAddedToDeal(indexed bytes32,address,bytes32)
           handler: handleComputeUnitAddedToDeal
-        - event: ComputeUnitRemovedFromDeal(bytes32,address,bytes32)
+        - event: ComputeUnitRemovedFromDeal(indexed bytes32,address,bytes32)
           handler: handleComputeUnitRemovedFromDeal
         - event: DealCreated(indexed
             address,address,uint256,address,uint256,uint256,uint256,uint256,(bytes4,bytes32)[],(bytes4,bytes32))
           handler: handleDealCreated
-      file: ./src/mappings/core.ts
+      file: ./src/mappings/market.ts
 templates:
   - name: Deal
     kind: ethereum/contract

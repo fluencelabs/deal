@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -81,7 +81,17 @@ contract Depoyments is ScriptBase {
         internal
         returns (address)
     {
-        (address addr, bool isNew) = _tryDeployContract(contractName, artifactName, args);
+        (address addr,) = _tryDeployContract(contractName, artifactName, args);
+
+        return addr;
+    }
+
+    function _forceDeployContract(string memory contractName, string memory artifactName, bytes memory args)
+        internal
+        returns (address)
+    {
+        delete deployments.contracts[contractName];
+        (address addr,) = _tryDeployContract(contractName, artifactName, args);
 
         return addr;
     }
@@ -99,12 +109,10 @@ contract Depoyments is ScriptBase {
         bytes32 codeHash = keccak256(code);
         bytes32 creationCodeHash = keccak256(creationCode);
 
-        bool isNew = deployedContract.addr == address(0);
+        bool isNew = deployedContract.addr == address(0) || deployedContract.codeHash != codeHash
+            || deployedContract.creationCodeHash != creationCodeHash || _extcodehash(deployedContract.addr) == bytes32(0x00);
 
-        if (
-            !isNew && deployedContract.codeHash == codeHash && deployedContract.creationCodeHash == creationCodeHash
-                && _extcodehash(deployedContract.addr) != bytes32(0x00)
-        ) {
+        if (!isNew) {
             address deployedAddr = deployedContract.addr;
             console.log("Reusing %s at %s", contractName, deployedAddr);
             return (deployedAddr, isNew);
@@ -112,7 +120,7 @@ contract Depoyments is ScriptBase {
 
         address addr;
 
-        assembly {
+        assembly ("memory-safe") {
             addr := create(0, add(creationCode, 0x20), mload(creationCode))
         }
 
@@ -130,7 +138,8 @@ contract Depoyments is ScriptBase {
         return (addr, isNew);
     }
 
-    function _printDeployments() internal {
+    function _printDeployments() internal view {
+        console.log("\n");
         console.log("----------------- Deployments -----------------");
         for (uint256 i = 0; i < deployments.contractNames.length; i++) {
             string memory name = deployments.contractNames[i];

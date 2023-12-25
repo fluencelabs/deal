@@ -22,7 +22,7 @@ import { getSdk as getProvidersSdk } from "./queries/providers-query.generated.j
 
 /*
  * @title Client of The Graph/GraphQL backend Service.
-*/
+ */
 export class IndexerClient {
   PAGINATOR_ENITIES_LIMIT = 1000;
   public dealsClient: DealsSdk;

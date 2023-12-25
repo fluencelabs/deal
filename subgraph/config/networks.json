@@ -1,20 +1,20 @@
 {
-    "mumbai": {
-        "Core": {
-            "address": "0x496640DDcBA39192D4797B8d3435ef2806BCFAB7",
-            "startBlock": 43334846
-        }
-    },
-    "stage": {
+  "mumbai": {
+    "Market": {
+      "address": "0x1CD7D91eF82DE5f7ddfBc759Deb7b6Ed7Eb79a61",
+      "startBlock": 43833258
+    }
+  },
+  "localhost": {
+    "Market": {
+      "address": "0x4A679253410272dd5232B3Ff7cF5dbB88f295319",
+      "startBlock": 0
+    }
+  },
+  "stage": {
         "Core": {
             "address": "0x496640DDcBA39192D4797B8d3435ef2806BCFAB7",
             "startBlock": 42946617
-        }
-    },
-    "localhost": {
-        "Core": {
-            "address": "0x5f3f1dBD7B74C6B46e8c44f98792A1dAf8d69154",
-            "startBlock": 0
         }
     }
 }

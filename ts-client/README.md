@@ -93,7 +93,7 @@ async function main() {
 
     // No filters example.
     const res = await client.getOffers();
-    for (const offer of res) {
+    for (const offer of res.data) {
         console.log(offer.effectors)
     }
 }

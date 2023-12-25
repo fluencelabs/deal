@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 import "src/core/interfaces/ICore.sol";
+import "src/core/modules/market/interfaces/IMarket.sol";
 import "src/utils/OwnableUpgradableDiamond.sol";
 import "./DealStorageUtils.sol";
 import "./WorkerManager.sol";
@@ -24,7 +25,7 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
     }
 
     // ------------------ Storage ------------------
-    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.deal.storage.v1.deal")) - 1);
+    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.deal.storage.v1")) - 1);
 
     struct DealStorage {
         uint256 totalBalance;
@@ -236,7 +237,7 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
 
         if (dealStorage.isEnded) {
             require(
-                currentEpoch > dealStorage.endedEpoch + _globalCore().minDepositedEpoches(),
+                currentEpoch > dealStorage.endedEpoch + _globalCore().minDealDepositedEpoches(),
                 "Can't withdraw before 2 epochs after deal end"
             );
             dealStorage.totalBalance -= amount;
@@ -253,7 +254,7 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
 
             balance.setTotalBalance(balance.getTotalBalance() - amount);
 
-            uint256 minBalance = _globalCore().minDepositedEpoches() * pricePerWorkerEpoch_ * targetWorkers();
+            uint256 minBalance = _globalCore().minDealDepositedEpoches() * pricePerWorkerEpoch_ * targetWorkers();
             require(balance.getTotalBalance() >= minBalance, "Free balance needs to cover minimum 2 epochs");
 
             _postCommitPeriod(balance, currentEpoch, workerCount, workerCount, minWorkers(), pricePerWorkerEpoch_);
@@ -304,8 +305,8 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
         emit RewardWithdrawn(computeUnitId, reward);
     }
 
-    function addComputeUnit(address computeProvider, bytes32 computeUnitId) public onlyCore {
-        _addComputeUnit(computeProvider, computeUnitId);
+    function addComputeUnit(address computeProvider, bytes32 computeUnitId, bytes32 peerId) public onlyCore {
+        _addComputeUnit(computeProvider, computeUnitId, peerId);
     }
 
     function removeComputeUnit(bytes32 computeUnitId) public onlyCore {
@@ -329,11 +330,17 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
     function setWorker(bytes32 computeUnitId, bytes32 workerId) public {
         DealStorage storage dealStorage = _getDealStorage();
 
+        ICore core = _globalCore();
+        ComputeUnit memory unit = getComputeUnit(computeUnitId);
+        IMarket.ComputePeer memory marketPeer = core.market().getComputePeer(unit.peerId);
+
+        require(msg.sender == unit.provider || msg.sender == marketPeer.owner, "Only provider or owner can set worker");
+
         //TODO: fix double get worker count
         uint256 prevWorkerCount = getWorkerCount();
         uint256 newWorkerCounts = _setWorker(computeUnitId, workerId);
 
-        uint256 currentEpoch = _globalCore().currentEpoch();
+        uint256 currentEpoch = core.currentEpoch();
         uint256 pricePerWorkerEpoch_ = pricePerWorkerEpoch();
 
         ComputeUnitPaymentInfo storage computeUnitPaymentInfo = dealStorage.cUnitPaymentInfo[computeUnitId];

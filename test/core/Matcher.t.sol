@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.19;
 
 import {Test, console2} from "forge-std/Test.sol";
@@ -7,7 +7,8 @@ import "src/core/Core.sol";
 import "src/deal/interfaces/IConfig.sol";
 import "src/deal/interfaces/IDeal.sol";
 import "test/utils/DeployDealSystem.sol";
-import "src/core/Market.sol";
+import "src/core/modules/market/Market.sol";
+import "src/core/modules/market/interfaces/IOffer.sol";
 import "test/utils/Random.sol";
 
 contract MatcherTest is Test {
@@ -31,25 +32,23 @@ contract MatcherTest is Test {
         unitIds = new bytes32[][][](offerCount);
 
         for (uint256 i = 0; i < offerCount; i++) {
-            bytes32 offerId = Random.pseudoRandom(abi.encode("offerId", i));
-            offerIds[i] = offerId;
-
             peerIds[i] = new bytes32[](peerCountPerOffer);
             unitIds[i] = new bytes32[][](peerCountPerOffer);
 
-            Market.RegisterComputePeer[] memory peers = new Market.RegisterComputePeer[](peerCountPerOffer);
+            IOffer.RegisterComputePeer[] memory peers = new IOffer.RegisterComputePeer[](peerCountPerOffer);
             for (uint256 j = 0; j < peerCountPerOffer; j++) {
-                bytes32 peerId = Random.pseudoRandom(abi.encode(offerId, "peerId", j));
+                bytes32 peerId = Random.pseudoRandom(abi.encode(i, "peerId", j));
                 peerIds[i][j] = peerId;
-                peers[j] = Market.RegisterComputePeer({peerId: peerId, freeUnits: unitCountPerPeer});
 
                 unitIds[i][j] = new bytes32[](unitCountPerPeer);
-                for (uint256 k = 0; k < unitCountPerPeer; k++) {
-                    unitIds[i][j][k] = keccak256(abi.encodePacked(offerId, peerId, k));
+                for (uint256 k = 0; k < unitIds[i][j].length; k++) {
+                    unitIds[i][j][k] = Random.pseudoRandom(abi.encode(peerId, "unitId", k));
                 }
+
+                peers[j] = IOffer.RegisterComputePeer({peerId: peerId, unitIds: unitIds[i][j], owner: address(this)});
             }
 
-            deployment.core.registerMarketOffer(offerId, minPricePerWorkerEpoch, paymentToken, effectors, peers);
+            offerIds[i] = deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, peers);
         }
     }
 
@@ -80,16 +79,17 @@ contract MatcherTest is Test {
             offerCount, peerCountPerOffer, unitCountPerPeer, effectors, paymentToken, pricePerWorkerEpoch
         );
 
-        deployment.core.matchDeal(IDeal(address(dealMock)));
+        deployment.market.matchDeal(IDeal(address(dealMock)));
 
         assertEq(dealMock.getComputeUnitCount(), targetWorkers, "Wrong number of compute units");
         for (uint256 i = 0; i < offerIds.length; i++) {
             bytes32 offerId = offerIds[i];
-            Market.OfferInfo memory offer = deployment.core.getOffer(offerId);
+            Market.Offer memory offer = deployment.market.getOffer(offerId);
             for (uint256 j = 0; j < peerIds[i].length; j++) {
                 bytes32 unitId = unitIds[i][j][0];
-                assertEq(deployment.core.getComputeUnit(unitId).deal, address(dealMock));
-                assertEq(dealMock.computeProviderByUnitId(unitId), offer.owner, "Wrong compute provider");
+                assertEq(deployment.market.getComputeUnit(unitId).deal, address(dealMock), "Wrong deal");
+                assertEq(dealMock.computeProviderByUnitId(unitId), offer.provider, "Wrong compute provider");
+                assertEq(dealMock.peerIdByUnitId(unitId), peerIds[i][j], "Wrong peer id");
                 assertTrue(dealMock.unitExists(unitId), "Unit does not exist");
             }
         }
@@ -110,6 +110,7 @@ contract DealMock {
 
     mapping(bytes32 => bool) public unitExists;
     mapping(bytes32 => address) public computeProviderByUnitId;
+    mapping(bytes32 => bytes32) public peerIdByUnitId;
 
     constructor(
         uint256 _pricePerWorkerEpoch,
@@ -139,11 +140,13 @@ contract DealMock {
         return _effectors;
     }
 
-    function addComputeUnit(address computeProvider, bytes32 unitId) external {
+    function addComputeUnit(address computeProvider, bytes32 unitId, bytes32 peerId) external {
+        console.logBytes32(unitId);
         require(!unitExists[unitId], "Unit already exists");
 
         unitExists[unitId] = true;
         computeProviderByUnitId[unitId] = computeProvider;
+        peerIdByUnitId[unitId] = peerId;
 
         getComputeUnitCount++;
     }

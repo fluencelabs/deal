@@ -14,13 +14,23 @@
     "deploy:stage": "./fluence-graph.sh deploy",
     "test": "graph test",
     "graph-node": "docker-compose up -d",
-    "graph-local-clean": "docker-compose down -v"
+    "graph-local-clean": "docker-compose down -v",
+    "fmt": "prettier 'src/**/*.ts' --w"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.60.0",
     "@graphprotocol/graph-ts": "0.30.0"
   },
   "devDependencies": {
-    "matchstick-as": "0.5.0"
+    "matchstick-as": "0.5.0",
+    "@typescript-eslint/eslint-plugin": "^6.9.0",
+    "@typescript-eslint/parser": "^6.9.0",
+    "eslint": "^8.52.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-import": "^2.29.0",
+    "eslint-plugin-license-header": "^0.6.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-unused-imports": "^3.0.0",
+    "prettier": "^3.0.2"
   }
 }

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.19;
 
 import {Test, console2} from "forge-std/Test.sol";
@@ -105,18 +105,20 @@ contract ConfigContract is Test {
 
         ERC1967Proxy proxy = new ERC1967Proxy(
             address(configImpl),
-            abi.encodeWithSelector(configImpl.Config_init.selector, 
-                configParams.globalCore, 
-                configParams.appCID, 
-                configParams.paymentToken, 
-                configParams.minWorkers, 
-                configParams.targetWorkers, 
+            abi.encodeWithSelector(
+                configImpl.Config_init.selector,
+                configParams.globalCore,
+                configParams.appCID,
+                configParams.paymentToken,
+                configParams.minWorkers,
+                configParams.targetWorkers,
                 configParams.maxWorkersPerProvider,
                 configParams.pricePerWorkerEpoch,
-                configParams.effectors, 
+                configParams.effectors,
                 configParams.accessType,
-                configParams.accessList, address(this)
-         )
+                configParams.accessList,
+                address(this)
+            )
         );
 
         config = ConfigTestContract(address(proxy));

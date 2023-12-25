@@ -494,6 +494,80 @@ export type Effector_OrderBy =
   | 'id'
   | 'offers';
 
+export type GraphNetwork = {
+  __typename?: 'GraphNetwork';
+  dealsTotal: Scalars['BigInt']['output'];
+  effectorsTotal: Scalars['BigInt']['output'];
+  /** ID is set to 1 */
+  id: Scalars['ID']['output'];
+  offersTotal: Scalars['BigInt']['output'];
+  providersTotal: Scalars['BigInt']['output'];
+  tokensTotal: Scalars['BigInt']['output'];
+};
+
+export type GraphNetwork_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>;
+  and?: InputMaybe<Array<InputMaybe<GraphNetwork_Filter>>>;
+  dealsTotal?: InputMaybe<Scalars['BigInt']['input']>;
+  dealsTotal_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  dealsTotal_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  dealsTotal_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  dealsTotal_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  dealsTotal_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  dealsTotal_not?: InputMaybe<Scalars['BigInt']['input']>;
+  dealsTotal_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  effectorsTotal?: InputMaybe<Scalars['BigInt']['input']>;
+  effectorsTotal_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  effectorsTotal_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  effectorsTotal_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  effectorsTotal_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  effectorsTotal_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  effectorsTotal_not?: InputMaybe<Scalars['BigInt']['input']>;
+  effectorsTotal_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  id_gt?: InputMaybe<Scalars['ID']['input']>;
+  id_gte?: InputMaybe<Scalars['ID']['input']>;
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  id_lt?: InputMaybe<Scalars['ID']['input']>;
+  id_lte?: InputMaybe<Scalars['ID']['input']>;
+  id_not?: InputMaybe<Scalars['ID']['input']>;
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  offersTotal?: InputMaybe<Scalars['BigInt']['input']>;
+  offersTotal_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  offersTotal_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  offersTotal_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  offersTotal_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  offersTotal_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  offersTotal_not?: InputMaybe<Scalars['BigInt']['input']>;
+  offersTotal_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  or?: InputMaybe<Array<InputMaybe<GraphNetwork_Filter>>>;
+  providersTotal?: InputMaybe<Scalars['BigInt']['input']>;
+  providersTotal_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  providersTotal_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  providersTotal_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  providersTotal_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  providersTotal_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  providersTotal_not?: InputMaybe<Scalars['BigInt']['input']>;
+  providersTotal_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  tokensTotal?: InputMaybe<Scalars['BigInt']['input']>;
+  tokensTotal_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  tokensTotal_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  tokensTotal_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  tokensTotal_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  tokensTotal_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  tokensTotal_not?: InputMaybe<Scalars['BigInt']['input']>;
+  tokensTotal_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+};
+
+export type GraphNetwork_OrderBy =
+  | 'dealsTotal'
+  | 'effectorsTotal'
+  | 'id'
+  | 'offersTotal'
+  | 'providersTotal'
+  | 'tokensTotal';
+
 export type Offer = {
   __typename?: 'Offer';
   computeUnitsAvailable?: Maybe<Scalars['Int']['output']>;
@@ -963,6 +1037,8 @@ export type Query = {
   deals: Array<Deal>;
   effector?: Maybe<Effector>;
   effectors: Array<Effector>;
+  graphNetwork?: Maybe<GraphNetwork>;
+  graphNetworks: Array<GraphNetwork>;
   offer?: Maybe<Offer>;
   offerToEffector?: Maybe<OfferToEffector>;
   offerToEffectors: Array<OfferToEffector>;
@@ -1050,6 +1126,24 @@ export type QueryEffectorsArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>;
   subgraphError?: _SubgraphErrorPolicy_;
   where?: InputMaybe<Effector_Filter>;
+};
+
+
+export type QueryGraphNetworkArgs = {
+  block?: InputMaybe<Block_Height>;
+  id: Scalars['ID']['input'];
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type QueryGraphNetworksArgs = {
+  block?: InputMaybe<Block_Height>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<GraphNetwork_OrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  subgraphError?: _SubgraphErrorPolicy_;
+  where?: InputMaybe<GraphNetwork_Filter>;
 };
 
 
@@ -1154,6 +1248,8 @@ export type Subscription = {
   deals: Array<Deal>;
   effector?: Maybe<Effector>;
   effectors: Array<Effector>;
+  graphNetwork?: Maybe<GraphNetwork>;
+  graphNetworks: Array<GraphNetwork>;
   offer?: Maybe<Offer>;
   offerToEffector?: Maybe<OfferToEffector>;
   offerToEffectors: Array<OfferToEffector>;
@@ -1241,6 +1337,24 @@ export type SubscriptionEffectorsArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>;
   subgraphError?: _SubgraphErrorPolicy_;
   where?: InputMaybe<Effector_Filter>;
+};
+
+
+export type SubscriptionGraphNetworkArgs = {
+  block?: InputMaybe<Block_Height>;
+  id: Scalars['ID']['input'];
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type SubscriptionGraphNetworksArgs = {
+  block?: InputMaybe<Block_Height>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<GraphNetwork_OrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  subgraphError?: _SubgraphErrorPolicy_;
+  where?: InputMaybe<GraphNetwork_Filter>;
 };
 
 

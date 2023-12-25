@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.19;
 
 import {Test, console2} from "forge-std/Test.sol";
@@ -46,7 +46,7 @@ contract DealFactoryTest is Test {
         uint256 maxWorkersPerProvider = 1;
         IERC20 paymentToken = IERC20(address(deployment.tUSD));
 
-        IDeal d = deployment.core.deployDeal(
+        IDeal d = deployment.market.deployDeal(
             appCID,
             paymentToken,
             minWorkers,
@@ -86,34 +86,36 @@ contract DealFactoryTest is Test {
 
         uint256 balanceBefore = deployment.tUSD.balanceOf(address(this));
 
-        deployment.tUSD.safeApprove(address(deployment.core), minAmount);
+        deployment.tUSD.safeApprove(address(deployment.market), minAmount);
         (IDeal d, DealParams memory dealParams) = _deployDeal(pricePerWorkerEpoch, targetWorkers);
 
         uint256 balanceDiff = balanceBefore - deployment.tUSD.balanceOf(address(this));
 
-        assertEq(balanceDiff, minAmount);
-        assertEq(deployment.tUSD.balanceOf(address(d)), minAmount);
-        assertEq(deployment.tUSD.allowance(address(this), address(deployment.core)), 0);
-        assertEq(dealParams.appCID.prefixes, d.appCID().prefixes);
-        assertEq(dealParams.appCID.hash, d.appCID().hash);
-        assertEq(address(dealParams.paymentToken), address(d.paymentToken()));
-        assertEq(dealParams.minWorkers, d.minWorkers());
-        assertEq(dealParams.targetWorkers, d.targetWorkers());
-        assertEq(dealParams.maxWorkersPerProvider, d.maxWorkersPerProvider());
-        assertEq(dealParams.pricePerWorkerEpoch, d.pricePerWorkerEpoch());
-        assertEq(dealParams.effectors.length, d.effectors().length);
+        assertEq(balanceDiff, minAmount, "Should transfer minAmount from msg.sender to Core");
+        assertEq(deployment.tUSD.balanceOf(address(d)), minAmount, "Should deposit minAmount to Deal");
+        assertEq(deployment.tUSD.allowance(address(this), address(deployment.core)), 0, "Should reset allowance");
+        assertEq(dealParams.appCID.prefixes, d.appCID().prefixes, "Should set appCID (prefixes)");
+        assertEq(dealParams.appCID.hash, d.appCID().hash, "Should set appCID (hash)");
+        assertEq(address(dealParams.paymentToken), address(d.paymentToken()), "Should set paymentToken");
+        assertEq(dealParams.minWorkers, d.minWorkers(), "Should set minWorkers");
+        assertEq(dealParams.targetWorkers, d.targetWorkers(), "Should set targetWorkers");
+        assertEq(dealParams.maxWorkersPerProvider, d.maxWorkersPerProvider(), "Should set maxWorkersPerProvider");
+        assertEq(dealParams.pricePerWorkerEpoch, d.pricePerWorkerEpoch(), "Should set pricePerWorkerEpoch");
+        assertEq(dealParams.effectors.length, d.effectors().length, "Should set effectors");
         for (uint256 i = 0; i < dealParams.effectors.length; i++) {
-            assertEq(dealParams.effectors[i].prefixes, d.effectors()[i].prefixes);
-            assertEq(dealParams.effectors[i].hash, d.effectors()[i].hash);
+            assertEq(dealParams.effectors[i].prefixes, d.effectors()[i].prefixes, "Should set effector (prefixes)");
+            assertEq(dealParams.effectors[i].hash, d.effectors()[i].hash, "Should set effector (hash)");
         }
-        assertEq(uint256(dealParams.accessType), uint256(d.accessType()));
+        assertEq(uint256(dealParams.accessType), uint256(d.accessType()), "Should set accessType");
         address[] memory accessList = d.getAccessList();
-        assertEq(dealParams.accessList.length, accessList.length);
+        assertEq(dealParams.accessList.length, accessList.length, "Should set accessList (length)");
         for (uint256 i = 0; i < dealParams.accessList.length; i++) {
-            assertEq(dealParams.accessList[i], accessList[i]);
+            assertEq(dealParams.accessList[i], accessList[i], "Should set accessList");
         }
 
-        assertEq(deployment.core.hasDeal(d), true);
+        assertEq(deployment.market.hasDeal(d), true, "Should deal set in Core");
+
+        //TODO: Check events
     }
 
     function test_RevertIf_NoTokenAllowance() public {
@@ -131,7 +133,7 @@ contract DealFactoryTest is Test {
 
         vm.startPrank(address(0x01));
 
-        deployment.tUSD.safeApprove(address(deployment.core), minAmount * 100);
+        deployment.tUSD.safeApprove(address(deployment.market), minAmount * 100);
 
         vm.expectRevert("ERC20: transfer amount exceeds balance");
         _deployDeal(pricePerWorkerEpoch, targetWorkers);

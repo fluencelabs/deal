@@ -93,7 +93,7 @@ contract WorkerManager is Config, IWorkerManager {
         return workerCount;
     }
 
-    function _addComputeUnit(address computeProvider, bytes32 computeUnit) internal {
+    function _addComputeUnit(address computeProvider, bytes32 computeUnit, bytes32 peerId) internal {
         WorkerManagerStorage storage workerStorage = _getWorkerManagerStorage();
 
         // check target compute units count
@@ -102,7 +102,7 @@ contract WorkerManager is Config, IWorkerManager {
 
         // check peerId isn't exist
         bytes32 id = computeUnit;
-        require(workerStorage.computeUnitById[id].owner == address(0x00), "Id already used");
+        require(workerStorage.computeUnitById[id].provider == address(0x00), "Id already used");
 
         // check max units per compute provider
         uint256 computeUnitCountByCP = workerStorage.computeProviderInfo[computeProvider].computeUnitCount;
@@ -116,7 +116,8 @@ contract WorkerManager is Config, IWorkerManager {
         workerStorage.computeUnitById[id] = ComputeUnit({
             id: id,
             workerId: bytes32(0),
-            owner: computeProvider,
+            peerId: peerId,
+            provider: computeProvider,
             joinedEpoch: _globalCore().currentEpoch()
         });
 
@@ -130,7 +131,7 @@ contract WorkerManager is Config, IWorkerManager {
         WorkerManagerStorage storage workerStorage = _getWorkerManagerStorage();
 
         // check owner
-        address computeProvider = workerStorage.computeUnitById[computeUnitId].owner;
+        address computeProvider = workerStorage.computeUnitById[computeUnitId].provider;
         require(computeProvider != address(0x00), "ComputeUnit not found");
 
         // change computeUnit count

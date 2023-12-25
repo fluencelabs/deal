@@ -3,16 +3,18 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "src/deal/interfaces/IDeal.sol";
 import "src/utils/OwnableUpgradableDiamond.sol";
+import "src/core/modules/BaseModule.sol";
 import "./interfaces/IDealFactory.sol";
-import "./GlobalConst.sol";
-import "./EpochController.sol";
 
 /*
  * @dev On init mas.sender becomes owner.
  */
-contract DealFactory is EpochController, GlobalConst, IDealFactory {
+contract DealFactory is BaseModule, IDealFactory {
+    using SafeERC20 for IERC20;
+
     // ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.market.storage.v1.dealFactory")) - 1);
 
@@ -32,7 +34,9 @@ contract DealFactory is EpochController, GlobalConst, IDealFactory {
 
     // ------------------ Initializer ------------------
     function __DealFactory_init(IDeal dealImpl_) internal onlyInitializing {
-        _getDealFactoryStorage().dealImpl = dealImpl_;
+        DealFactoryStorage storage dealFactoryStorage = _getDealFactoryStorage();
+
+        dealFactoryStorage.dealImpl = dealImpl_;
     }
 
     // ----------------- View -----------------
@@ -41,7 +45,6 @@ contract DealFactory is EpochController, GlobalConst, IDealFactory {
     }
 
     // ----------------- Mutable -----------------
-
     function deployDeal(
         CIDV1 calldata appCID_,
         IERC20 paymentToken_,
@@ -55,13 +58,15 @@ contract DealFactory is EpochController, GlobalConst, IDealFactory {
     ) external returns (IDeal) {
         DealFactoryStorage storage dealFactoryStorage = _getDealFactoryStorage();
 
+        ICore core = _core();
+
         IDeal deal = IDeal(
             address(
                 new ERC1967Proxy(
                     address(dealFactoryStorage.dealImpl),
                     abi.encodeWithSelector(
                         IDeal.initialize.selector,
-                        address(this),
+                        core,
                         appCID_,
                         paymentToken_,
                         minWorkers_,
@@ -79,17 +84,17 @@ contract DealFactory is EpochController, GlobalConst, IDealFactory {
 
         dealFactoryStorage.hasDeal[deal] = true;
 
-        uint256 amount = pricePerWorkerEpoch_ * targetWorkers_ * minDepositedEpoches();
-        paymentToken_.transferFrom(msg.sender, address(this), amount);
+        uint256 amount = pricePerWorkerEpoch_ * targetWorkers_ * core.minDealDepositedEpoches();
+        paymentToken_.safeTransferFrom(msg.sender, address(this), amount);
         paymentToken_.approve(address(deal), amount);
-
         deal.deposit(amount);
+
         OwnableUpgradableDiamond(address(deal)).transferOwnership(msg.sender);
 
         emit DealCreated(
             msg.sender,
             deal,
-            currentEpoch(),
+            core.currentEpoch(),
             paymentToken_,
             minWorkers_,
             targetWorkers_,

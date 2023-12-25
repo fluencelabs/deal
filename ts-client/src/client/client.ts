@@ -4,21 +4,30 @@ import {
   Core__factory,
   Deal__factory,
   ERC20__factory,
+  Market__factory,
+  Capacity__factory,
   Multicall3__factory,
 } from "../typechain-types/index.js";
 import { getDeployment } from "./config.js";
 
-import type { Core, Deal, ERC20, Multicall3 } from "../typechain-types/index.js";
-import type { Deployment, Network } from "./config.js";
+import type {
+  Capacity,
+  Core,
+  Deal,
+  ERC20,
+  Market,
+  Multicall3,
+} from "../typechain-types/index.js";
+import type { Deployment, ContractsENV } from "./config.js";
 
 export class DealClient {
   private deployment: Promise<Deployment>;
 
   constructor(
     private signerOrProvider: ethers.Signer | ethers.Provider,
-    network: Network,
+    env: ContractsENV,
   ) {
-    this.deployment = getDeployment(network);
+    this.deployment = getDeployment(env);
   }
 
   getDeal(address: string): Deal {
@@ -28,6 +37,20 @@ export class DealClient {
   async getCore(): Promise<Core> {
     return Core__factory.connect(
       (await this.deployment).core,
+      this.signerOrProvider,
+    );
+  }
+
+  async getMarket(): Promise<Market> {
+    return Market__factory.connect(
+      await (await this.getCore()).market(),
+      this.signerOrProvider,
+    );
+  }
+
+  async getCapacity(): Promise<Capacity> {
+    return Capacity__factory.connect(
+      await (await this.getCore()).capacity(),
       this.signerOrProvider,
     );
   }

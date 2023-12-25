@@ -7,8 +7,7 @@ import "./interfaces/IEpochController.sol";
 
 contract EpochController is Initializable, IEpochController {
     // ------------------ Storage ------------------
-    bytes32 private constant _STORAGE_SLOT =
-        bytes32(uint256(keccak256("fluence.market.storage.v1.epochController")) - 1);
+    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.core.storage.v1.epochController")) - 1);
 
     struct EpochControllerStorage {
         uint256 initTimestamp;
@@ -36,7 +35,7 @@ contract EpochController is Initializable, IEpochController {
     function currentEpoch() public view returns (uint256) {
         EpochControllerStorage storage epochControllerStorage = _getEpochControllerStorage();
 
-        return (block.timestamp - epochControllerStorage.initTimestamp) / epochControllerStorage.epochDuration;
+        return 1 + (block.timestamp - epochControllerStorage.initTimestamp) / epochControllerStorage.epochDuration;
     }
 
     function epochDuration() public view returns (uint256) {

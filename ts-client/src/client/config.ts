@@ -1,14 +1,7 @@
-import path from "path";
+export const CONTRACTS_ENV = ["kras", "testnet", "stage", "local"];
 
-export declare const NETWORL_NAME: readonly [
-  "kras",
-  "testnet",
-  "stage",
-  "local",
-];
-
-export const DEPLOYMENTS_DIR = path.join("../deployments");
-export type Network = (typeof NETWORL_NAME)[number];
+export const DEPLOYMENTS_DIR = "src/deployments";
+export type ContractsENV = (typeof CONTRACTS_ENV)[number];
 export type Deployment = {
   core: string;
   flt: string;
@@ -17,47 +10,46 @@ export type Deployment = {
   chainId: number;
 };
 
-export const getDeployment = async (network: Network): Promise<Deployment> => {
-  switch (network) {
+import stage from "./../deployments/stage.json" assert { type: "json" };
+import testnet from "./../deployments/testnet.json" assert { type: "json" };
+import kras from "./../deployments/kras.json" assert { type: "json" };
+import local from "./../deployments/local.json" assert { type: "json" };
+
+export const getDeployment = async (env: ContractsENV) => {
+  let chainId = 0;
+  let deployment: any | undefined = undefined;
+
+  switch (env) {
     case "kras":
-      return await _getDeployment("kras", 80001);
+      deployment = kras;
+      chainId = 80001;
+      break;
     case "testnet":
-      return await _getDeployment("testnet", 80001);
+      deployment = testnet;
+      chainId = 80001;
+      break;
     case "stage":
-      return await _getDeployment("stage", 80001);
+      deployment = stage;
+      chainId = 80001;
+      break;
     case "local":
-      return await _getDeployment("local", 31337);
+      deployment = local;
+      chainId = 31337;
+      break;
     default:
-      throw new Error(`Unknown network: ${network}`);
+      throw new Error(`Unknown chain env: ${env}`);
   }
-};
 
-async function _getDeployment(
-  networkName: Network,
-  chainId: number,
-): Promise<Deployment> {
-  let deployment = await import(
-    path.join(DEPLOYMENTS_DIR, String(chainId) + ".json"),
-    { assert: { type: "json" } }
-  );
-  deployment = deployment?.default;
-
-  if (deployment?.Core?.addr === undefined) {
-    throw new Error(
-      `Could not find global core address for network: ${networkName}`,
-    );
+  if (deployment === undefined) {
+    throw new Error(`Could not find deployment for env: ${env}`);
+  } else if (deployment?.Core?.addr === undefined) {
+    throw new Error(`Could not find core address for env: ${env}`);
   } else if (deployment?.tFLT?.addr === undefined) {
-    throw new Error(
-      `Could not find flt token address for network: ${networkName}`,
-    );
+    throw new Error(`Could not find flt token address for env: ${env}`);
   } else if (deployment?.tUSD?.addr === undefined) {
-    throw new Error(
-      `Could not find usdc token address for network: ${networkName}`,
-    );
+    throw new Error(`Could not find usdc token address for env: ${env}`);
   } else if (deployment?.Multicall3?.addr === undefined) {
-    throw new Error(
-      `Could not find multicall3 address for network: ${networkName}`,
-    );
+    throw new Error(`Could not find multicall3 address for network: ${env}`);
   }
 
   return {
@@ -67,4 +59,4 @@ async function _getDeployment(
     multicall3: deployment.Multicall3.addr,
     chainId: chainId,
   };
-}
+};
