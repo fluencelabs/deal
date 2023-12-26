@@ -55,6 +55,7 @@ interface CallImplProps {
   peersMockedPage2: number,
   CUsMockedPage2: number,
   expectedCU: number,
+  expectedOffers: number
   exceptedIndexerCalls: number,
   expectedFulfilled: boolean
 }
@@ -64,6 +65,7 @@ describe('#getMatchedOffers', () => {
     const _getMatchedOffersPageSpy = vi.spyOn(DealMatcherClient.prototype, '_getMatchedOffersPage')
     const client = new DealMatcherClient(TEST_NETWORK)
     const data = createRandomIndexerOffersData(callImplProps.offersMockedPage1, callImplProps.peersMockedPage1, callImplProps.CUsMockedPage1)
+    // TODO: add possibility to add compute units to the same offer.
     const data2 = createRandomIndexerOffersData(callImplProps.offersMockedPage2, callImplProps.peersMockedPage2, callImplProps.CUsMockedPage2)
     IndexerClient.prototype.getOffers = vi.fn().mockReturnValueOnce(data).mockReturnValueOnce(data2)
 
@@ -85,7 +87,13 @@ describe('#getMatchedOffers', () => {
 
     expect(_getMatchedOffersPageSpy.mock.calls.length).toEqual(callImplProps.exceptedIndexerCalls)
     expect(matchedOffers.fulfilled).toEqual(callImplProps.expectedFulfilled)
-    expect(matchedOffers.computeUnits.length).toEqual(callImplProps.expectedCU)
+    let total = 0;
+    for (const computeUnits of matchedOffers.computeUnitsPerOffers) {
+      total += computeUnits.length
+    }
+    expect(total).toEqual(callImplProps.expectedCU)
+    expect(matchedOffers.offers.length).toEqual(callImplProps.expectedOffers)
+    console.log(matchedOffers)
   }
 
   test(`It returns exact CUs when indexer has offers less than MAX_PER_PAGE`, async () => {
@@ -102,6 +110,7 @@ describe('#getMatchedOffers', () => {
         expectedCU: 1,
         exceptedIndexerCalls: 1,
         expectedFulfilled: true,
+        expectedOffers: 1,
       }
     )
   })
@@ -121,6 +130,7 @@ describe('#getMatchedOffers', () => {
         expectedCU: client.MAX_PER_PAGE,
         exceptedIndexerCalls: 1,
         expectedFulfilled: true,
+        expectedOffers: 1,
       }
     )
   })
@@ -140,6 +150,7 @@ describe('#getMatchedOffers', () => {
         expectedCU: client.MAX_PER_PAGE + 1,
         exceptedIndexerCalls: 2,
         expectedFulfilled: true,
+        expectedOffers: 2,
       }
     )
   })
@@ -159,6 +170,7 @@ describe('#getMatchedOffers', () => {
         expectedCU: client.MAX_PER_PAGE + 1,
         exceptedIndexerCalls: 2,
         expectedFulfilled: true,
+        expectedOffers: 2,
       }
     )
   })
@@ -178,6 +190,7 @@ describe('#getMatchedOffers', () => {
         expectedCU: client.MAX_PER_PAGE + 1,
         exceptedIndexerCalls: 2,
         expectedFulfilled: true,
+        expectedOffers: client.MAX_PER_PAGE + 1,
       }
     )
   })
@@ -197,6 +210,7 @@ describe('#getMatchedOffers', () => {
         expectedCU: client.MAX_PER_PAGE - 1,
         exceptedIndexerCalls: 1,
         expectedFulfilled: false,
+        expectedOffers: 1,
       }
     )
   })
@@ -215,6 +229,7 @@ describe('#getMatchedOffers', () => {
         expectedCU: 0,
         exceptedIndexerCalls: 1,
         expectedFulfilled: false,
+        expectedOffers: 0
       }
     )
   })

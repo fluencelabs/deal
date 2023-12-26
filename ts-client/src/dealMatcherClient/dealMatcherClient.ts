@@ -1,8 +1,11 @@
 import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type { ContractsENV } from "../client/config.js";
 
+// Structure should match matchDeal() arguments.
+// Currently: bytes32[] calldata offers, bytes32[][] calldata computeUnits.
 export interface GetMatchedOffersOut {
-  computeUnits: Array<string>;
+  offers: Array<string>
+  computeUnitsPerOffers: Array<Array<string>>;
   fulfilled: boolean;
 }
 
@@ -92,9 +95,12 @@ export class DealMatcherClient {
       );
     }
     const matchedComputeUnitsData: GetMatchedOffersOut = {
-      computeUnits: [],
+      offers: [],
+      computeUnitsPerOffers: [],
       fulfilled: false,
     };
+    const offerToOfferCursor: { [id: string]: number } = {};
+    let computeUnitsMatchedTotal = 0;
 
     // Go through indexer pages until the end condition: one of {fulfilled | end of offers, and peers, and CUs.}
     let offersLastPageReached = false;
@@ -129,6 +135,16 @@ export class DealMatcherClient {
 
       // Analise fetched data.
       for (const offer of offers) {
+        // Get the offer cursor to save compute units accordingly.
+        let offerCursor = 0;
+        const offerId = offer.id;
+        if (offerId in offerToOfferCursor) {
+          offerCursor = offerToOfferCursor[offerId] as number
+        } else {
+          offerCursor = matchedComputeUnitsData.offers.length;
+          offerToOfferCursor[offerId] = offerCursor;
+          matchedComputeUnitsData.offers.push(offerId)
+        }
         const peers = offer.peers;
         if (!peers) {
           continue;
@@ -141,13 +157,19 @@ export class DealMatcherClient {
           }
 
           for (const computeUnit of peerComputeUnits) {
-            // Finally found free compute unit.
-            matchedComputeUnitsData.computeUnits.push(computeUnit.id);
+            computeUnitsMatchedTotal += 1;
+
+            if (matchedComputeUnitsData.computeUnitsPerOffers.length <= offerCursor) {
+              matchedComputeUnitsData.computeUnitsPerOffers.push([computeUnit.id]);
+            } else {
+              // @ts-ignore
+              (matchedComputeUnitsData.computeUnitsPerOffers[offerCursor]).push(computeUnit.id);
+            }
 
             // Check if we're still seeking for free compute units.
             // If yes - early return.
             if (
-              matchedComputeUnitsData.computeUnits.length ==
+              computeUnitsMatchedTotal ==
               targetWorkerSlotToMatch
             ) {
               matchedComputeUnitsData.fulfilled = true;
@@ -194,18 +216,20 @@ export class DealMatcherClient {
       }
     }
 
-    if (minWorkersToMatch > matchedComputeUnitsData.computeUnits.length) {
+    if (minWorkersToMatch > computeUnitsMatchedTotal) {
       console.warn(
         "Transaction will be failed because minWorkersToMatch > matchedComputeUnits. Return [].",
       );
-      matchedComputeUnitsData.computeUnits = [];
+      matchedComputeUnitsData.offers = [];
+      matchedComputeUnitsData.computeUnitsPerOffers = [];
     }
     console.groupEnd();
     return matchedComputeUnitsData;
   }
 
   /**
-  * Get compute units to match provided DealId (address).
+  * Get compute units and their offers to match provided DealId (address).
+   * Notice, current structure should match matchDeal() contract arguments.
   *
   * 1. Fetches the deal and its configuration from the Indexer backend
   * 2. Scraps compute units (page by page) until one of the conditions:
