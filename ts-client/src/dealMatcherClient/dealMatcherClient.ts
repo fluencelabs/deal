@@ -162,8 +162,14 @@ export class DealMatcherClient {
             if (matchedComputeUnitsData.computeUnitsPerOffers.length <= offerCursor) {
               matchedComputeUnitsData.computeUnitsPerOffers.push([computeUnit.id]);
             } else {
-              // @ts-ignore
-              matchedComputeUnitsData.computeUnitsPerOffers[offerCursor].push(computeUnit.id);
+              const computeUnitsPerOffers = matchedComputeUnitsData.computeUnitsPerOffers[offerCursor];
+              if (computeUnitsPerOffers === undefined) {
+                throw new Error(
+                  `Assertion failed: computeUnitsPerOffers is undefined for offerCursor = ${offerCursor}. 
+                  The data structure is broken: ${matchedComputeUnitsData.computeUnitsPerOffers}.`
+                )
+              }
+              computeUnitsPerOffers.push(computeUnit.id);
             }
 
             // Check if we're still seeking for free compute units.
