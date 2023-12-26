@@ -9,5 +9,5 @@ interface IMatcher {
     // ------------------ Errors ------------------
     error minWorkersNotMatched(uint _minWorkers);
     // ----------------- Mutables -----------------
-    function matchDeal(IDeal deal, bytes32[] calldata computeUnits) external;
+    function matchDeal(IDeal deal, bytes32[] calldata offers, bytes32[][] calldata computeUnits) external;
 }

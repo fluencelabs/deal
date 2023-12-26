@@ -37,7 +37,15 @@ contract Matcher is Offer, IMatcher {
     }
 
     // ----------------- External Mutable -----------------
-    function matchDeal(IDeal deal, bytes32[] calldata computeUnits) external {
+    /**
+     * @notice Match deal with offers and compute units (peers checks through compute units).
+     * @dev There should be `bytes32[][] calldata peers` as well, but it is not supported by subgraph codegen.
+     * @dev  Ref to https://github.com/graphprotocol/graph-tooling/issues/342.
+     * @param deal Deal to match.
+     * @param offers Offers to match with.
+     * @param computeUnits Compute units to match with.
+     */
+    function matchDeal(IDeal deal, bytes32[] calldata offers, bytes32[][] calldata computeUnits) external {
         ICore core = _core();
         MatcherStorage storage matcherStorage = _getMatcherStorage();
 
@@ -60,44 +68,52 @@ contract Matcher is Offer, IMatcher {
 
         bool isDealMatched = false;
 
-        for (uint i = 0; i < computeUnits.length; ++i) {
-            bytes32 computeUnitId = computeUnits[i];
-            // Get CU and start checking, if smth wrong - skip.
-            // TODO: notify user that match fulfilled not fully (or discuss and close).
-            ComputeUnit memory computeUnit  = getComputeUnit(computeUnitId);
-            // TODO: Catch CU does not exist error and pass: make _getOfferStorage() as internal.
-            // Check if CU available.
-            if (computeUnit.deal != address(0)) {
-                continue;
-            }
-
-            bytes32 peerId = computeUnit.peerId;
-            ComputePeer memory peer = getComputePeer(peerId);
-            bytes32 offerId = peer.offerId;
+        // Go through offers.
+        for (uint i = 0; i < offers.length; ++i) {
+            bytes32 offerId = offers[i];
             Offer memory offer = getOffer(offerId);
-
             if (
                 pricePerWorkerEpoch < offer.minPricePerWorkerEpoch || paymentToken != offer.paymentToken
                     || !_hasOfferEffectors(offerId, effectors)
             ) {
                 continue;
             }
+            // Go through compute units.
+            for (uint k = 0; k < computeUnits[i].length; ++k) {
+                bytes32 computeUnitId = computeUnits[i][k];
 
-            // TODO: check peer in capacity commitment
-            // TODO: check max peers per provider
+                // Get CU and start checking, if smth wrong - skip.
+                // It throws if CU does not exist.
+                ComputeUnit memory computeUnit  = getComputeUnit(computeUnitId);
+                bytes32 peerId = computeUnit.peerId;
+                ComputePeer memory peer = getComputePeer(peerId);
 
-            _mvComputeUnitToDeal(computeUnitId, deal);
-            // TODO: only for NOX -- remove in future
-            emit ComputeUnitMatched(peerId, computeUnitId, creationBlock, appCID);
-            freeWorkerSlotsCurrent--;
+                // Check if no one tries to trick us with indexes of passed args.
+                if (peer.offerId != offerId) {
+                    continue;
+                }
 
-            if (!isDealMatched) {
-                isDealMatched = true;
-            }
+                // Check if CU available.
+                if (computeUnit.deal != address(0)) {
+                    continue;
+                }
 
-            if (freeWorkerSlotsCurrent == 0) {
-                // TODO: possible feature of signalling to user that matched fully.
-                break;
+                // TODO: check peer in capacity commitment
+                // TODO: check max peers per provider
+
+                _mvComputeUnitToDeal(computeUnitId, deal);
+                // TODO: only for NOX -- remove in future
+                emit ComputeUnitMatched(peerId, computeUnitId, creationBlock, appCID);
+                freeWorkerSlotsCurrent--;
+
+                if (!isDealMatched) {
+                    isDealMatched = true;
+                }
+
+                if (freeWorkerSlotsCurrent == 0) {
+                    // TODO: possible feature of signalling to user that matched fully.
+                    break;
+                }
             }
         }
 
