@@ -163,7 +163,7 @@ export class DealMatcherClient {
               matchedComputeUnitsData.computeUnitsPerOffers.push([computeUnit.id]);
             } else {
               // @ts-ignore
-              (matchedComputeUnitsData.computeUnitsPerOffers[offerCursor]).push(computeUnit.id);
+              matchedComputeUnitsData.computeUnitsPerOffers[offerCursor].push(computeUnit.id);
             }
 
             // Check if we're still seeking for free compute units.
