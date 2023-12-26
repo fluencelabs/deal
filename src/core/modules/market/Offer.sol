@@ -35,9 +35,6 @@ contract Offer is BaseModule, IOffer {
         mapping(bytes32 => ComputeUnit) computeUnits;
         mapping(bytes32 => Effectors) effectorsByOfferId;
         mapping(bytes32 => EnumerableSet.Bytes32Set) computeUnitIdsByPeerId;
-        LinkedListWithUniqueKeys.Bytes32List offerIds; //TODO: remove after offer matching implementation
-        mapping(bytes32 => LinkedListWithUniqueKeys.Bytes32List) freePeersByOfferId; //TODO: remove after offer matching implementation
-        mapping(bytes32 => LinkedListWithUniqueKeys.Bytes32List) freeComputeUnitByPeerId; //TODO: remove after offer matching implementation
     }
 
     OfferStorage private _storage;
@@ -109,8 +106,6 @@ contract Offer is BaseModule, IOffer {
             _addComputePeerToOffer(offerId, peers[i]);
         }
 
-        offerStorage.offerIds.push(offerId);
-
         return offerId;
     }
 
@@ -154,10 +149,10 @@ contract Offer is BaseModule, IOffer {
 
         computePeer.unitCount--;
 
-        offerStorage.freeComputeUnitByPeerId[peerId].remove(unitId);
         offerStorage.computeUnitIdsByPeerId[peerId].remove(unitId);
 
         delete offerStorage.computeUnits[unitId];
+        // TODO: event and support in the subgraph.
     }
 
     // Change offer
@@ -244,11 +239,6 @@ contract Offer is BaseModule, IOffer {
 
         computeUnit.deal = address(0x00);
 
-        offerStorage.freeComputeUnitByPeerId[peerId].push(unitId);
-        if (offerStorage.freeComputeUnitByPeerId[peerId].length() == 0) {
-            offerStorage.freePeersByOfferId[offerId].push(computePeer.offerId);
-        }
-
         deal.removeComputeUnit(unitId);
 
         emit ComputeUnitRemovedFromDeal(unitId, deal, peerId);
@@ -262,22 +252,6 @@ contract Offer is BaseModule, IOffer {
     }
 
     // ----------------- Internal View -----------------
-    function _getOffersList() internal view returns (LinkedListWithUniqueKeys.Bytes32List storage) {
-        return _getOfferStorage().offerIds;
-    }
-
-    function _getFreeComputeUnitList(bytes32 peerId)
-        internal
-        view
-        returns (LinkedListWithUniqueKeys.Bytes32List storage)
-    {
-        return _getOfferStorage().freeComputeUnitByPeerId[peerId];
-    }
-
-    function _getFreePeerList(bytes32 offerId) internal view returns (LinkedListWithUniqueKeys.Bytes32List storage) {
-        return _getOfferStorage().freePeersByOfferId[offerId];
-    }
-
     function _getOffer(bytes32 offerId) internal view returns (Offer storage) {
         return _getOfferStorage().offers[offerId];
     }
@@ -320,9 +294,6 @@ contract Offer is BaseModule, IOffer {
         _addComputeUnitsToPeer(peer.peerId, peer.unitIds);
 
         computePeer.unitCount = peer.unitIds.length;
-
-        // add peer to offer
-        offerStorage.freePeersByOfferId[offerId].push(peer.peerId);
     }
 
     function _addComputeUnitsToPeer(bytes32 peerId, bytes32[] memory unitIds) internal {
@@ -342,8 +313,6 @@ contract Offer is BaseModule, IOffer {
             // create compute unit
             offerStorage.computeUnits[unitId] = ComputeUnit({deal: address(0x00), peerId: peerId});
             offerStorage.computeUnitIdsByPeerId[peerId].add(unitId);
-
-            offerStorage.freeComputeUnitByPeerId[peerId].push(unitId);
 
             emit ComputeUnitCreated(peerId, unitId);
         }
@@ -365,11 +334,6 @@ contract Offer is BaseModule, IOffer {
         require(computeUnit.deal == address(0x00), "Compute unit already reserved");
 
         computeUnit.deal = address(deal);
-
-        offerStorage.freeComputeUnitByPeerId[peerId].remove(unitId);
-        if (offerStorage.freeComputeUnitByPeerId[peerId].length() == 0) {
-            offerStorage.freePeersByOfferId[offerId].remove(peerId);
-        }
 
         deal.addComputeUnit(offer.provider, unitId, peerId);
 

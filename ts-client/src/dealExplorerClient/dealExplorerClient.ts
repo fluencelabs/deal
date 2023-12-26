@@ -60,7 +60,6 @@ export class ValidTogetherFiltersError extends FiltersError {}
  * @dev It supports mainnet, testnet by selecting related contractsEnv.
  */
 export class DealExplorerClient {
-  DEFAULT_NETWORK: ContractsENV = "kras";
   DEFAULT_PAGE_LIMIT = 100;
   DEFAULT_ORDER_TYPE: OrderType = "desc";
   DEFAULT_TOKEN_VALUE_ROUNDING = 3;
@@ -76,10 +75,9 @@ export class DealExplorerClient {
   private _dealRpcClient: DealRpcClient | null;
 
   constructor(
-    indexerUrl: string,
+    network: ContractsENV,
     chainRpcUrl?: string,
     caller?: ethers.Provider | ethers.Signer,
-    network?: ContractsENV,
   ) {
     if (chainRpcUrl) {
       console.warn("Do not use chainRPCUrl, use provider instead.");
@@ -89,11 +87,8 @@ export class DealExplorerClient {
     } else {
       throw Error("One of chainRPCUrl or provider should be delclared.");
     }
-    this._indexerClient = new IndexerClient(indexerUrl);
-    this._dealContractsClient = new DealClient(
-      this._caller,
-      network || this.DEFAULT_NETWORK,
-    );
+    this._indexerClient = new IndexerClient(network);
+    this._dealContractsClient = new DealClient(this._caller, network);
     this._dealRpcClient = null;
   }
 
@@ -369,10 +364,10 @@ export class DealExplorerClient {
       });
     }
     if (v.createdAtFrom) {
-      convertedFilters.and?.push({ createdAt_gt: v.createdAtFrom.toString() });
+      convertedFilters.and?.push({ createdAt_gte: v.createdAtFrom.toString() });
     }
     if (v.createdAtTo) {
-      convertedFilters.and?.push({ createdAt_lt: v.createdAtTo.toString() });
+      convertedFilters.and?.push({ createdAt_lte: v.createdAtTo.toString() });
     }
     if (v.providerId) {
       convertedFilters.and?.push({ provider: v.providerId });
@@ -390,7 +385,7 @@ export class DealExplorerClient {
     }
     if (v.minPricePerWorkerEpoch) {
       convertedFilters.and?.push({
-        pricePerEpoch_gt: valueToTokenValue(
+        pricePerEpoch_gte: valueToTokenValue(
           v.minPricePerWorkerEpoch,
           tokenDecimals,
         ),
@@ -398,7 +393,7 @@ export class DealExplorerClient {
     }
     if (v.maxPricePerWorkerEpoch) {
       convertedFilters.and?.push({
-        pricePerEpoch_lt: valueToTokenValue(
+        pricePerEpoch_lte: valueToTokenValue(
           v.maxPricePerWorkerEpoch,
           tokenDecimals,
         ),
@@ -537,10 +532,10 @@ export class DealExplorerClient {
       });
     }
     if (v.createdAtFrom) {
-      convertedFilters.and?.push({ createdAt_gt: v.createdAtFrom.toString() });
+      convertedFilters.and?.push({ createdAt_gte: v.createdAtFrom.toString() });
     }
     if (v.createdAtTo) {
-      convertedFilters.and?.push({ createdAt_lt: v.createdAtTo.toString() });
+      convertedFilters.and?.push({ createdAt_lte: v.createdAtTo.toString() });
     }
     if (v.providerId) {
       convertedFilters.and?.push({
@@ -560,7 +555,7 @@ export class DealExplorerClient {
     }
     if (v.minPricePerWorkerEpoch) {
       convertedFilters.and?.push({
-        pricePerWorkerEpoch_gt: valueToTokenValue(
+        pricePerWorkerEpoch_gte: valueToTokenValue(
           v.minPricePerWorkerEpoch,
           tokenDecimals,
         ),
@@ -568,7 +563,7 @@ export class DealExplorerClient {
     }
     if (v.maxPricePerWorkerEpoch) {
       convertedFilters.and?.push({
-        pricePerWorkerEpoch_lt: valueToTokenValue(
+        pricePerWorkerEpoch_lte: valueToTokenValue(
           v.maxPricePerWorkerEpoch,
           tokenDecimals,
         ),

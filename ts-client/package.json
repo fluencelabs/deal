@@ -11,7 +11,8 @@
     "replace-imports": "node replace-imports.js",
     "update-deployments": "rm -rf src/deployments && cp -r ../deployments ./src/deployments",
     "fmt": "prettier 'src/**/*.ts' --w",
-    "codegen:indexerClient": "graphql-codegen --config codegen.ts",
+    "codegen:explorerIndexerClient": "graphql-codegen --config codegen-deal-explorer-indexer.ts",
+    "codegen:matcherIndexerClient": "graphql-codegen --config codegen-deal-matcher-indexer.ts",
     "test": "vitest"
   },
   "dependencies": {
@@ -69,7 +70,9 @@
     "parserOptions": {
       "ecmaVersion": "latest",
       "sourceType": "module",
-      "project": ["tsconfig.json"]
+      "project": [
+        "tsconfig.json"
+      ]
     },
     "plugins": [
       "@typescript-eslint"

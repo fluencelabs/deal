@@ -90,7 +90,7 @@ contract CreateMarket is Depoyments, Script {
 
         address[] memory createdDeals = new address[](dealCount);
         for (uint32 i = 0; i < dealCount; i++) {
-            uint256 newMinWorkers = startMinWorkers + i;
+            uint256 newMinWorkers = 1 + i;
             uint256 newTargetWorkers = startTargetWorkers + i;
             uint256 newMaxWorkerPerProvider = startMaxWorkerPerProvider + i;
 

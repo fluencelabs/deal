@@ -1,0 +1,25 @@
+query DealQuery(
+  $id: ID!
+) {
+  deal(id: $id) {
+    id
+    maxWorkersPerProvider
+    minWorkers
+    pricePerWorkerEpoch
+    paymentToken {
+      id
+    }
+    targetWorkers
+    addedComputeUnits {
+      id
+      provider {
+        id
+      }
+    }
+    effectors {
+      effector {
+        id
+      }
+    }
+  }
+}
