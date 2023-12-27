@@ -50,6 +50,7 @@ export type OfferShort = {
   freeComputeUnits: number;
   paymentToken: PaymentToken;
   effectors: Array<Effector>;
+  pricePerEpoch: string;
 };
 
 // TODO: maxCollateralPerWorker deprecated

@@ -289,15 +289,16 @@ export class DealExplorerClient {
     return {
       id: offer.id,
       createdAt: Number(offer.createdAt),
-      totalComputeUnits: offer.computeUnitsTotal,
-      freeComputeUnits: offer.computeUnitsAvailable,
+      totalComputeUnits: Number(offer.computeUnitsTotal ?? 0),
+      freeComputeUnits: Number(offer.computeUnitsAvailable ?? 0),
       paymentToken: {
         address: offer.paymentToken.id,
         symbol: offer.paymentToken.symbol,
         decimals: offer.paymentToken.decimals.toString(),
       },
+      pricePerEpoch: tokenValueToRounded(offer.pricePerEpoch, this.DEFAULT_TOKEN_VALUE_ROUNDING, offer.paymentToken.decimals),
       effectors: this._composeEffectors(offer.effectors),
-    } as OfferShort;
+    };
   }
 
   _convertOfferShortOrderByToIndexerType(v: OfferShortOrderBy): Offer_OrderBy {
