@@ -31,11 +31,8 @@ import type {
   ProvidersFilters,
 } from "./filters.js";
 import { IndexerClient } from "./indexerClient/indexerClient.js";
-import type {
-  BasicOfferFragment,
-} from "./indexerClient/queries/offers-query.generated.js";
-import type { ProviderOfProvidersQueryFragment,
-} from "./indexerClient/queries/providers-query.generated.js";
+import type { BasicOfferFragment } from "./indexerClient/queries/offers-query.generated.js";
+import type { ProviderOfProvidersQueryFragment } from "./indexerClient/queries/providers-query.generated.js";
 import type {
   Deal_Filter,
   Deal_OrderBy,
@@ -129,7 +126,9 @@ export class DealExplorerClient {
     const composedOffers = [];
     if (provider.offers) {
       for (const offer of provider.offers) {
-        composedOffers.push(this._composeOfferShort(offer as BasicOfferFragment));
+        composedOffers.push(
+          this._composeOfferShort(offer as BasicOfferFragment),
+        );
       }
     }
     return {
@@ -297,7 +296,11 @@ export class DealExplorerClient {
         symbol: offer.paymentToken.symbol,
         decimals: offer.paymentToken.decimals.toString(),
       },
-      pricePerEpoch: tokenValueToRounded(offer.pricePerEpoch, this.DEFAULT_TOKEN_VALUE_ROUNDING, offer.paymentToken.decimals),
+      pricePerEpoch: tokenValueToRounded(
+        offer.pricePerEpoch,
+        this.DEFAULT_TOKEN_VALUE_ROUNDING,
+        offer.paymentToken.decimals,
+      ),
       effectors: this._composeEffectors(offer.effectors),
       providerId: offer.provider.id,
     };
