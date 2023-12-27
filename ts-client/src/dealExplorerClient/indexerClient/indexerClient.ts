@@ -1,4 +1,3 @@
-import { GraphQLClient } from "graphql-request";
 import type {
   DealQueryQueryVariables,
   DealsQueryQueryVariables,
@@ -19,20 +18,18 @@ import type {
   Sdk as ProvidersSdk,
 } from "./queries/providers-query.generated.js";
 import { getSdk as getProvidersSdk } from "./queries/providers-query.generated.js";
+import { IndexerClientABC } from "../../indexerClient/indexerClientABC.js";
+import type { ContractsENV } from "../../client/config.js";
 
-/*
- * @title Client of The Graph/GraphQL backend Service.
- */
-export class IndexerClient {
-  PAGINATOR_ENITIES_LIMIT = 1000;
-  public dealsClient: DealsSdk;
-  public offersClient: OffersSdk;
-  public providersClient: ProvidersSdk;
-  constructor(url: string) {
-    const client = new GraphQLClient(url);
-    this.dealsClient = getDealsSdk(client);
-    this.offersClient = getOffersSdk(client);
-    this.providersClient = getProvidersSdk(client);
+export class IndexerClient extends IndexerClientABC {
+  private dealsClient: DealsSdk;
+  private offersClient: OffersSdk;
+  private providersClient: ProvidersSdk;
+  constructor(network: ContractsENV) {
+    super(network);
+    this.dealsClient = getDealsSdk(this._graphqlClient);
+    this.offersClient = getOffersSdk(this._graphqlClient);
+    this.providersClient = getProvidersSdk(this._graphqlClient);
   }
 
   async getProviders(variables: ProvidersQueryQueryVariables) {
