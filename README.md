@@ -7,18 +7,30 @@ Deal Contracts System
 
 https://book.getfoundry.sh/
 
-## Build
-
-### Build contracts and ts-client
+## Install NPM packages
 
 ```shell
-$ make build
+$ make install-npms
+```
+
+## Build
+
+### Build contracts and ts-client and subgraph
+
+```shell
+$ make build-all
 ```
 
 ### Build only contracts
 
 ```shell
 $ make build-contracts
+```
+
+### Build only in npm packages
+
+```shell
+$ make build-npms
 ```
 
 ### Update abi for subgraph and ts-client

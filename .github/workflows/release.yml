@@ -79,7 +79,7 @@ jobs:
         with:
           version: nightly
 
-      - run: make build
+      - run: make build-all
 
       - name: Publish to npm registry
         run: npm publish --access public
