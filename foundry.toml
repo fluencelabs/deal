@@ -18,6 +18,7 @@ optimizer_runs = 5000
 
 [rpc_endpoints]
 local = "http://0.0.0.0:8545"
+local-ipc = "http://0.0.0.0:8545"
 stage = "https://rpc.ankr.com/polygon_mumbai"
 testnet = "https://rpc.ankr.com/polygon_mumbai"
 kras = "https://rpc.ankr.com/polygon_mumbai"
