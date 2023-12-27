@@ -95,11 +95,11 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
   computeUnit.peer = peer.id;
   computeUnit.save();
 
-  provider.computeUnitsAvailable += 1;
-  provider.computeUnitsTotal += 1;
+  provider.computeUnitsAvailable = provider.computeUnitsAvailable + 1;
+  provider.computeUnitsTotal = provider.computeUnitsTotal + 1;
   provider.save();
-  offer.computeUnitsAvailable += 1;
-  offer.computeUnitsTotal += 1;
+  offer.computeUnitsAvailable = offer.computeUnitsAvailable + 1;
+  offer.computeUnitsTotal = offer.computeUnitsTotal + 1;
   offer.updatedAt = event.block.timestamp;
   offer.save();
 }
@@ -188,9 +188,9 @@ export function handleComputeUnitAddedToDeal(
   const offer = Offer.load(peer.offer) as Offer;
   const provider = Provider.load(offer.provider) as Provider;
 
-  provider.computeUnitsAvailable -= 1;
+  provider.computeUnitsAvailable = provider.computeUnitsAvailable - 1;
   provider.save();
-  offer.computeUnitsAvailable -= 1;
+  offer.computeUnitsAvailable = offer.computeUnitsAvailable - 1;
   offer.updatedAt = event.block.timestamp;
   offer.save();
 }
@@ -204,10 +204,10 @@ export function handleComputeUnitRemovedFromDeal(
   const offer = Offer.load(peer.offer) as Offer;
   const provider = Provider.load(offer.provider) as Provider;
 
-  provider.computeUnitsAvailable += 1;
-  provider.computeUnitsTotal += 1;
+  provider.computeUnitsAvailable = provider.computeUnitsAvailable + 1;
+  provider.computeUnitsTotal = provider.computeUnitsTotal + 1;
   provider.save();
-  offer.computeUnitsAvailable += 1;
+  offer.computeUnitsAvailable = offer.computeUnitsAvailable + 1;
   offer.updatedAt = event.block.timestamp;
   offer.save();
 }
