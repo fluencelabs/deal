@@ -95,7 +95,6 @@ contract MatcherTest is Test {
         );
 
         StdCheats.skip(uint256(deployment.core.epochDuration()));
-        deployment.market.matchDeal(IDeal(address(dealMock)));
 
         // Convert units 3D array to 2D array.
         // Choose the first targetWorkers.

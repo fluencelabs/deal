@@ -20,6 +20,13 @@ build:
 
 	@echo "\033[0;32mSuccess! Build complete.\033[0m"
 
+run-tests:
+	@make verify-command program=forge
+	@forge test
+	@cd ts-client && npm run test
+
+	@echo "\033[0;32mSuccess! Tests passed.\033[0m"
+
 start-local-chain:
 	@make verify-command program=anvil
 	@anvil --host 0.0.0.0 --block-time 15

@@ -46,7 +46,6 @@ abstract contract Matcher is Offer, IMatcher {
      * @param computeUnits Compute units to match with.
      */
     function matchDeal(IDeal deal, bytes32[] calldata offers, bytes32[][] calldata computeUnits) external {
-        ICore core = _core();
         ICapacity capacity = core.capacity();
         MatcherStorage storage matcherStorage = _getMatcherStorage();
 
