@@ -33,7 +33,8 @@ import type {
 import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type {
   BasicOfferFragment,
-  ProviderOfProvidersQueryFragment,
+} from "./indexerClient/queries/offers-query.generated.js";
+import type { ProviderOfProvidersQueryFragment,
 } from "./indexerClient/queries/providers-query.generated.js";
 import type {
   Deal_Filter,
@@ -128,7 +129,7 @@ export class DealExplorerClient {
     const composedOffers = [];
     if (provider.offers) {
       for (const offer of provider.offers) {
-        composedOffers.push(this._composeOfferShort(offer));
+        composedOffers.push(this._composeOfferShort(offer as BasicOfferFragment));
       }
     }
     return {
@@ -298,6 +299,7 @@ export class DealExplorerClient {
       },
       pricePerEpoch: tokenValueToRounded(offer.pricePerEpoch, this.DEFAULT_TOKEN_VALUE_ROUNDING, offer.paymentToken.decimals),
       effectors: this._composeEffectors(offer.effectors),
+      providerId: offer.provider.id,
     };
   }
 
