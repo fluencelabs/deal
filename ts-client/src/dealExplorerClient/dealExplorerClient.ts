@@ -143,6 +143,9 @@ export class DealExplorerClient {
     if (!providersFilters) {
       return {};
     }
+    if (providersFilters.onlyApproved) {
+      console.warn("Currently onlyApproved field does not implemented.");
+    }
     const convertedFilters: Provider_Filter = { and: [] };
     if (providersFilters.search) {
       const search = providersFilters.search;
