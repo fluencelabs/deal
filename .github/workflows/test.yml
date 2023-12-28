@@ -5,7 +5,7 @@ on:
     paths-ignore:
       - "**.md"
       - ".github/**"
-      - "!.github/workflows/ci.yml"
+      - "!.github/workflows/test.yml"
     types:
       - "labeled"
       - "synchronize"
@@ -17,7 +17,7 @@ on:
     paths-ignore:
       - "**.md"
       - ".github/**"
-      - "!.github/workflows/ci.yml"
+      - "!.github/workflows/test.yml"
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"

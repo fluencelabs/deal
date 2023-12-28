@@ -40,8 +40,9 @@ jobs:
     runs-on: ${{ matrix.runner }}
 
     outputs:
-      chain-rpc-image: "docker.fluence.dev/chain-rpc@${{ steps.version.outputs.versions.id }}"
-      deal-deploy-script-image: "docker.fluence.dev/deal-deploy-script@${{ steps.version.outputs.id }}"
+      chain-rpc-image: "docker.fluence.dev/chain-rpc:${{ steps.version.outputs.id }}"
+      deal-deploy-script-image: "docker.fluence.dev/deal-deploy-script:${{ steps.version.outputs.id }}"
+      version: "${{ steps.version.outputs.id }}"
 
     permissions:
       contents: read
@@ -94,7 +95,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          dockerfile: docker/Dockerfile
+          file: docker/Dockerfile
           target: contracts
           platforms: linux/${{ matrix.arch }}
 
@@ -105,7 +106,7 @@ jobs:
           context: .
           push: true
           provenance: false
-          dockerfile: docker/Dockerfile
+          file: docker/Dockerfile
           target: chain-rpc
           platforms: linux/${{ matrix.arch }}
           tags: |
@@ -120,7 +121,7 @@ jobs:
           context: .
           push: true
           provenance: false
-          dockerfile: docker/Dockerfile
+          file: docker/Dockerfile
           target: chain-rpc
           platforms: linux/${{ matrix.arch }}
           tags: |
@@ -163,16 +164,16 @@ jobs:
       - name: Merge chain-rpc containers
         uses: Noelware/docker-manifest-action@0.4.0
         with:
-          inputs: docker.fluence.dev/chain-rpc:${{ needs.containers.outputs.version }}
-          images: docker.fluence.dev/chain-rpc:${{ needs.containers.outputs.version }}-amd64,docker.fluence.dev/chain-rpc:${{ needs.container.outputs.version }}-arm64
+          inputs: ${{ needs.containers.outputs.chain-rpc-image }}
+          images: ${{ needs.containers.outputs.chain-rpc-image }}-amd64,${{ needs.container.outputs.chain-rpc-image }}-arm64
           push: true
           amend: true
 
       - name: Merge deal-deploy-script containers
         uses: Noelware/docker-manifest-action@0.4.0
         with:
-          inputs: docker.fluence.dev/deal-deploy-script:${{ needs.containers.outputs.version }}
-          images: docker.fluence.dev/deal-deploy-script:${{ needs.containers.outputs.version }}-amd64,docker.fluence.dev/deal-deploy-script:${{ needs.container.outputs.version }}-arm64
+          inputs: ${{ needs.containers.outputs.deal-deploy-script }}
+          images: ${{ needs.containers.outputs.deal-deploy-script }}-amd64,${{ needs.container.outputs.deal-deploy-script }}-arm64
           push: true
           amend: true
 
@@ -214,8 +215,8 @@ jobs:
 
       - name: Run deployment script
         env:
-          CHAIN_RPC_IMAGE: docker.fluence.dev/chain-rpc:${{ needs.containers.outputs.version }}
-          DEAL_DEPLOY_SCRIPT_IMAGE: docker.fluence.dev/deal-deploy-script:${{ needs.containers.outputs.version }}
+          CHAIN_RPC_IMAGE: ${{ needs.containers.outputs.chain-rpc-image }}
+          DEAL_DEPLOY_SCRIPT_IMAGE: ${{ needs.containers.outputs.deal-deploy-script-image }}
         working-directory: docker
         run: docker-compose up deal-deploy-script
 
@@ -233,8 +234,8 @@ jobs:
     needs: deploy
 
     outputs:
-      deal-ts-clients: "${{ steps.deal-ts-clients.outputs.version }}"
-      subgraph: "${{ steps.subgraph.outputs.version }}"
+      deal-ts-clients-version: "${{ steps.deal-ts-clients.outputs.version }}"
+      subgraph-version: "${{ steps.subgraph.outputs.version }}"
 
     permissions:
       contents: read
