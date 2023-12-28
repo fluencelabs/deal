@@ -30,6 +30,6 @@ jobs:
         with:
           version: nightly
 
-      - run: make install
+      - run: make install-npms
 
-      - run: make build
+      - run: make build-all
