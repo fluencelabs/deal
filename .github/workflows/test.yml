@@ -1,21 +1,64 @@
-name: test
+name: "test"
 
-on: workflow_dispatch
+on:
+  pull_request:
+    paths-ignore:
+      - "**.md"
+      - ".github/**"
+      - "!.github/workflows/ci.yml"
+    types:
+      - "labeled"
+      - "synchronize"
+      - "opened"
+      - "reopened"
+  push:
+    branches:
+      - "main"
+    paths-ignore:
+      - "**.md"
+      - ".github/**"
+      - "!.github/workflows/ci.yml"
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
 
 env:
-  FOUNDRY_PROFILE: ci
+  FORCE_COLOR: true
+  FOUNDRY_PROFILE: "ci"
 
 jobs:
-  check:
-    strategy:
-      fail-fast: true
+  build:
+    name: "Build contracts and npm packages"
+    runs-on: ubuntu-latest
 
-    name: Foundry project
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          registry-url: "https://registry.npmjs.org"
+          cache: "npm"
+          cache-dependency-path: |
+            ts-client/package-lock.json
+            subgraph/package-lock.json
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - run: make install-npms
+      - run: make build-all
+
+  foundry:
+    name: "Foundry unit tests"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
@@ -26,9 +69,6 @@ jobs:
         run: |
           forge --version
           forge build --sizes
-        id: build
 
       - name: Run Forge tests
-        run: |
-          forge test -vvv
-        id: test
+        run: forge test -vvv
