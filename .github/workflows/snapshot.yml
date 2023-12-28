@@ -211,6 +211,8 @@ jobs:
 
       - name: Setup docker-compose
         uses: KengoTODA/actions-setup-docker-compose@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run deployment script
         env:
