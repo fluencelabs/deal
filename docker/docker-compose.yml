@@ -11,14 +11,16 @@ services:
   anvil-node:
     build:
       context: ../
-      dockerfile: ./docker/Dockerfile.anvil
+      dockerfile: ./docker/Dockerfile
+      target: anvil
     ports:
       - "8545:8545"
 
   deploy-script:
     build:
       context: ../
-      dockerfile: ./docker/Dockerfile.deploy
+      dockerfile: ./docker/Dockerfile
+      target: deploy
     depends_on:
       - anvil-node
     volumes:

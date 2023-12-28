@@ -4,6 +4,7 @@ services:
   foundry-container:
     build:
       context: ../
-      dockerfile: ./docker/dev.Dockerfile
+      dockerfile: ./docker/Dockerfile
+      target: dev
     volumes:
       - ../:/app/
