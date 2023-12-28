@@ -81,11 +81,7 @@ contract Depoyments is ScriptBase {
 
         json.write(path);
 
-        // Solve stack mem problem with this hack.
-        string memory name = deployments.contractNames[0];
-        DeployedContract memory deployedContract = deployments.contracts[name];
-        string memory deployedContractObject = name.serialize("blockNumber", deployedContract.blockNumber);
-        json = mainJsonKey.serialize(name, deployedContractObject);
+        // No hack. here
     }
 
     function _deployContract(string memory contractName, string memory artifactName, bytes memory args)
