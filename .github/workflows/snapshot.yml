@@ -165,15 +165,15 @@ jobs:
         uses: Noelware/docker-manifest-action@0.4.0
         with:
           inputs: ${{ needs.containers.outputs.chain-rpc-image }}
-          images: ${{ needs.containers.outputs.chain-rpc-image }}-amd64,${{ needs.container.outputs.chain-rpc-image }}-arm64
+          images: ${{ needs.containers.outputs.chain-rpc-image }}-amd64,${{ needs.containers.outputs.chain-rpc-image }}-arm64
           push: true
           amend: true
 
       - name: Merge deal-deploy-script containers
         uses: Noelware/docker-manifest-action@0.4.0
         with:
-          inputs: ${{ needs.containers.outputs.deal-deploy-script }}
-          images: ${{ needs.containers.outputs.deal-deploy-script }}-amd64,${{ needs.container.outputs.deal-deploy-script }}-arm64
+          inputs: ${{ needs.containers.outputs.deal-deploy-script-image }}
+          images: ${{ needs.containers.outputs.deal-deploy-script-image }}-amd64,${{ needs.containers.outputs.deal-deploy-script-image }}-arm64
           push: true
           amend: true
 
