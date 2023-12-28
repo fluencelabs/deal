@@ -9,6 +9,7 @@
 services:
   # Anvil node with deployed contracts
   anvil-node:
+    image: ${ANVIL_IMAGE:-anvil}
     build:
       context: ../
       dockerfile: ./docker/Dockerfile
@@ -16,7 +17,8 @@ services:
     ports:
       - "8545:8545"
 
-  deploy-script:
+  deal-deploy-script:
+    image: ${DEAL_DEPLOY_SCRIPT_IMAGE:-deal-deploy-script}
     build:
       context: ../
       dockerfile: ./docker/Dockerfile
@@ -24,7 +26,7 @@ services:
     depends_on:
       - anvil-node
     volumes:
-      - ../:/app/
+      - ../deployments:/app/deployments
 
   # Blockscout services
   blockscout:

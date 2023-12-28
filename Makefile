@@ -10,7 +10,7 @@ install-npms:
 	@cd subgraph && npm install
 	@echo "\033[0;32mSuccess! Run npm install in both npm modules: ts-client and subgraph.\033[0m"
 
-build-contracts: 
+build-contracts:
 	@make verify-command program=forge
 	@forge build
 	@echo "\033[0;32mSuccess! Build of contracts completed.\033[0m"
