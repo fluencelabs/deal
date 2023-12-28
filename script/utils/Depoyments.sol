@@ -81,7 +81,7 @@ contract Depoyments is ScriptBase {
 
         json.write(path);
 
-        // Solve stack mem problem with this hack.
+        // TODO: rm hack below on solving https://github.com/foundry-rs/forge-std/issues/488.
         string memory name = deployments.contractNames[0];
         DeployedContract memory deployedContract = deployments.contracts[name];
         string memory deployedContractObject = name.serialize("blockNumber", deployedContract.blockNumber);
