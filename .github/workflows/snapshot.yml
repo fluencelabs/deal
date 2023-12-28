@@ -42,7 +42,6 @@ jobs:
     outputs:
       chain-rpc-image: "docker.fluence.dev/chain-rpc:${{ steps.version.outputs.id }}"
       deal-deploy-script-image: "docker.fluence.dev/deal-deploy-script:${{ steps.version.outputs.id }}"
-      version: "${{ steps.version.outputs.id }}"
 
     permissions:
       contents: read
@@ -178,7 +177,7 @@ jobs:
           amend: true
 
   deploy:
-    name: "Generate deployments/local.json"
+    name: "Generate local.json"
     needs:
       - manifest
       - containers
