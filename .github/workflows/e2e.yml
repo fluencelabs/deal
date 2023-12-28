@@ -36,8 +36,6 @@ jobs:
     uses: ./.github/workflows/snapshot.yml
     with:
       ref: ${{ github.ref }}
-    secrets:
-      PRIVATE_KEY: ${{ secrets.DEAL_TESNET_PRIVATE_KEY }}
 
   # cli:
   #   needs:
