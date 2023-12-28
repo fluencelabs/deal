@@ -15,10 +15,10 @@ on:
         description: "@fluencelabs/subgraph version"
         value: ${{ jobs.npm.outputs.subgraph-version }}
       deal-deploy-script-image:
-        description: "deal deploy script container image"
+        description: "deal-deploy-script container image"
         value: ${{ jobs.containers.outputs.deal-deploy-script-image }}
       chain-rpc-image:
-        description: "chain RPC container image"
+        description: "chain-rpc container image"
         value: ${{ jobs.containers.outputs.chain-rpc-image }}
 
 env:

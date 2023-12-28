@@ -5,11 +5,11 @@ WORKDIR /app
 COPY . /app
 RUN make build-contracts
 
-FROM contracts as anvil
+FROM contracts as chain-rpc
 ENTRYPOINT ["make"]
 CMD ["start-local-chain"]
 
-FROM contracts as deploy
+FROM contracts as deal-deploy-script
 ENTRYPOINT ["make"]
 CMD ["deploy-docker"]
 

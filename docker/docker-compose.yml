@@ -8,12 +8,12 @@
 # Note, deploy may take some time, check logs.
 services:
   # Anvil node with deployed contracts
-  anvil-node:
-    image: ${ANVIL_IMAGE:-anvil}
+  chain-rpc:
+    image: ${CHAIN_RPC_IMAGE:-chain-rpc}
     build:
       context: ../
       dockerfile: ./docker/Dockerfile
-      target: anvil
+      target: chain-rpc
     ports:
       - "8545:8545"
 
@@ -22,16 +22,16 @@ services:
     build:
       context: ../
       dockerfile: ./docker/Dockerfile
-      target: deploy
+      target: deal-deploy-script
     depends_on:
-      - anvil-node
+      - chain-rpc
     volumes:
       - ../deployments:/app/deployments
 
   # Blockscout services
   blockscout:
     depends_on:
-      - anvil-node
+      - chain-rpc
     image: offchainlabs/blockscout:v1.0.0-c8db5b1
     restart: always
     links:
