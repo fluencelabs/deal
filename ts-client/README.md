@@ -25,7 +25,7 @@ To find preferable compute units for the deal and its configuration via Subgraph
 ```mermaid
 sequenceDiagram
 
-    box to integrate into fCli
+    box integration of DealMatcherClient into fCli
         participant fCli
         participant newClient as DealMatcherClient (deal-ts-clients package)
     end
@@ -35,7 +35,7 @@ sequenceDiagram
         participant matcher as Matcher Contract
     end
 
-    Note over indexer,Other Contracts: ...polling data...
+    Note over indexer,matcher: ...polling data...
     Note over fCli,Other Contracts: already acknowledged about "DealId"
     
     fCli -->> newClient: getMatchedOffersByDealId
