@@ -1,5 +1,7 @@
 # ts-clients
 
+* [deal-matcher-client](#deal-explorer-client)
+   * [Context Diagram](#context-diagram)
 * [deal-explorer-client](#deal-explorer-client)
    * [Install](#install)
    * [Example UseCase](#example-usecase)
