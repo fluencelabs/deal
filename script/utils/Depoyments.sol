@@ -50,9 +50,7 @@ contract Depoyments is ScriptBase {
 
             deployedContract.addr = abi.decode(vm.parseJson(file, string.concat(".", key, ".addr")), (address));
             deployedContract.codeHash = abi.decode(vm.parseJson(file, string.concat(".", key, ".codeHash")), (bytes32));
-            {
-                deployedContract.blockNumber = abi.decode(vm.parseJson(file, string.concat(".", key, ".blockNumber")), (uint));
-            }
+            deployedContract.blockNumber = abi.decode(vm.parseJson(file, string.concat(".", key, ".blockNumber")), (uint));
             deployedContract.creationCodeHash =
                 abi.decode(vm.parseJson(file, string.concat(".", key, ".creationCodeHash")), (bytes32));
 
