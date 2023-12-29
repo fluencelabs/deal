@@ -16,9 +16,33 @@ To load contract deployments and interfaces for different stands: kras/testnet/s
 > TODO: rename, because client says nothing.
 
 # deal-mather-client
-To find preferable compute units for the deal and its configuration via indexer (currently)
+To find preferable compute units for the deal and its configuration via Subgraph (indexer).
 
-TODO: example, more info. 
+## Context Diagram
+
+```mermaid
+sequenceDiagram
+
+    box to integrate into fCli
+        participant fCli
+        participant newClient as DealMatcherClient (deal-ts-clients package)
+    end
+    participant indexer as Subgraph Node
+    box Blockchain
+        participant Other Contracts
+        participant matcher as Matcher Contract
+    end
+
+    Note over indexer,Other Contracts: ...polling data...
+    Note over fCli,Other Contracts: already acknowledged about "DealId"
+    
+    fCli -->> newClient: getMatchedOffersByDealId
+    newClient -) indexer: fetch deal configuration
+    newClient -) indexer: fetch matched offers
+    newClient -->> fCli: data structure that should match Matcher contract matchDeal()
+    Note right of fCli: ...logging, showing, salting, other business logic...
+    fCli -) matcher: send data structure to matchDeal()
+```
 
 # deal-explorer-client
 This client delivers data for the Explorer Frontend Application. The client consists of 3 ones:
