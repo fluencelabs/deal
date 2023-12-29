@@ -1,6 +1,17 @@
-https://book.getfoundry.sh/
-
 Deal Contracts System
+---
+
+This repo consists of 3 main parts:
+- `contracts` - Foundry (read more https://book.getfoundry.sh/). Generally, repo follow structure of Foundry repo.
+- `subgraph` - javascript client to interact with the graph node (read more https://thegraph.com/docs/quick-start)
+- `ts-client` - npm package from contract developers to interact with contracts
+
+To access to the general points of the each part in the repo root **makefile** is presented. Below are main commands of the makefile.
+
+# Requirement
+- foundry
+- makefile (TODO)
+- node version 18.16
 
 # Contract
 ## Install Foundry
