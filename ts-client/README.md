@@ -46,6 +46,65 @@ sequenceDiagram
     fCli -) matcher: send data structure to matchDeal()
 ```
 
+## Example Use with Dependencies
+- local network
+- node version v18.16.1
+- TS
+
+## Start Dependencies
+TODO: @nashi could prepare new flow or better containers as result of https://github.com/fluencelabs/deal/pull/180
+
+1. You are in root of the Deal repo.
+2. Start chain node containers:
+```bash
+docker compose -f ./docker/docker-compose.yml up
+```
+3. Wait for **deploy** docker container script.
+4. 
+```bash 
+make install-npms
+make build-npms
+```
+5. Start subgpraph
+```bash
+docker compose -f ./subgraph/docker-compose.yml up -d
+```
+6. Wait subgraph to start
+7. 
+```bash
+make start-local-subgraph
+```
+
+main.js (to run with e.g. via `node --loader ts-node/esm main.ts`):
+```typescript
+import { DealMatcherClient } from "@fluencelabs/deal-aurora";
+
+type asyncRuntimeDecoratorType = (func: Function) => void;
+
+const asyncRuntimeDecorator: asyncRuntimeDecoratorType = (func) => {
+    func()
+        .then(() => process.exit(0))
+        .catch((error: unknown) => {
+            console.error(error);
+            process.exit(1);
+        });
+};
+
+async function main() {
+    const stand = "local"
+    const dealId = "0x00...0"
+
+    // General typed class to use.
+    const client = new DealMatcherClient(
+        stand,
+    );
+
+    console.log(await client.getMatchedOffersByDealId(dealId))
+}
+
+asyncRuntimeDecorator(main);
+```
+
 # deal-explorer-client
 This client delivers data for the Explorer Frontend Application. The client consists of 3 ones:
 
