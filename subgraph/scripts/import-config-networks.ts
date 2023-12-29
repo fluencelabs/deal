@@ -24,13 +24,16 @@ const STAND_TO_SUBGRAPH_NETWORK = {
   "local": "localhost",
 }
 
-async function saveNetworksConfig(standName: keyof typeof STAND_TO_SUBGRAPH_CONFIG, addr: string, blockNumber: number) {
+async function saveNetworksConfig(
+  contractName: string, standName: keyof typeof STAND_TO_SUBGRAPH_CONFIG, addr: string, blockNumber: number) {
   const networksConfigPath = path.join(__dirname, CONFIGS_DIR, STAND_TO_SUBGRAPH_CONFIG[standName])
   let res: any = {}
-  res[STAND_TO_SUBGRAPH_NETWORK[standName]] = {
+  let contractsConfig: any = {}
+  contractsConfig[contractName] = {
     address: addr,
     startBlock: blockNumber ?? 0,
   }
+  res[STAND_TO_SUBGRAPH_NETWORK[standName]] = contractsConfig
   fs.writeFileSync(
     networksConfigPath,
     JSON.stringify(res, null, 2)
@@ -53,16 +56,16 @@ async function main() {
     const readJson = fs.readFileSync(deploymentPath, { encoding: 'utf-8' })
     const deploymentJson = JSON.parse(readJson)
     if (!(REQUIRED_DEPLOYED_CONTRACT_NAME in deploymentJson)) {
-      console.warn(`${REQUIRED_DEPLOYED_CONTRACT_NAME} not found in deployments for stand ${standName}, skip...`)
+      console.warn(`${REQUIRED_DEPLOYED_CONTRACT_NAME} not found for stand ${standName} in deployments, skip...`)
       continue;
     }
     const contractDeployment = deploymentJson[REQUIRED_DEPLOYED_CONTRACT_NAME]
     if (!(contractDeployment.addr && contractDeployment.blockNumber)) {
-      console.warn(`addr or blockNumber not found in ${JSON.stringify(contractDeployment)} deployment for stand ${standName}, skip...`)
+      console.warn(`addr or blockNumber not found for stand ${standName} in ${JSON.stringify(contractDeployment)} deployment, skip...`)
       continue;
     }
 
-    await saveNetworksConfig(standName, contractDeployment.addr, Number(contractDeployment.blockNumber))
+    await saveNetworksConfig(REQUIRED_DEPLOYED_CONTRACT_NAME, standName, contractDeployment.addr, Number(contractDeployment.blockNumber))
   }
 }
 

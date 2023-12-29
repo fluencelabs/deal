@@ -1,6 +1,8 @@
 {
   "localhost": {
-    "address": "0xdB05A386810c809aD5a77422eb189D36c7f24402",
-    "startBlock": 444
+    "Market": {
+      "address": "0xc5a5C42992dECbae36851359345FE25997F5C42d",
+      "startBlock": 12
+    }
   }
 }

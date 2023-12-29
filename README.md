@@ -33,10 +33,10 @@ $ make build-contracts
 $ make build-npms
 ```
 
-### Update abi for subgraph and ts-client
+## Start Local Subgraph
 
 ```shell
-$ make update-abi
+$ make start-local-subgraph
 ```
 
 ## Start local network using docker
@@ -94,10 +94,7 @@ It is a backend for the contracts that collects info from contract events into g
 
 For more info check out [README.md](subgraph/README.md).
 
-# ToDo
-- [ ] we could not be certain that on docker compose up it will deploy on the same addresses, as stated in [ts-client/deployments](ts-client/deployments): mount volume? compose deployments? use the same script that will update in the same format in deployments.
-
-## Develop
+## Develop Tricks & Tips
 After [starting local network](#start-local-network-locally) you could create market on our contracts:
 
 ```shell
