@@ -18,7 +18,7 @@ To load contract deployments and interfaces for different stands: kras/testnet/s
 > TODO: rename, because client says nothing.
 
 # deal-mather-client
-To find preferable compute units for the deal and its configuration via Subgraph (indexer).
+To find preferable compute units for the deal and its configuration via Subgraph (indexer). The main user of the client is https://github.com/fluencelabs/cli (fCli).
 
 ## Context Diagram
 
