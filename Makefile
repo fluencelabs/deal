@@ -18,7 +18,7 @@ build-contracts:
 build-npms:
 	@make verify-command program=npm
 	@cd ts-client && npm run build
-	@cd subgraph && npm run compile
+	@cd subgraph && npm run compile && npm run import-config-networks
 	@echo "\033[0;32mSuccess! Build of all NPM packages completed.\033[0m"
 
 build-all: build-contracts build-npms
@@ -26,6 +26,10 @@ build-all: build-contracts build-npms
 start-local-chain:
 	@make verify-command program=anvil
 	@anvil --host 0.0.0.0 --block-time 15
+
+start-local-subgraph:
+	@make verify-command program=npm
+	@cd subgraph && npm run create:local && npm run deploy:local
 
 deploy-local:
 	@make verify-command program=forge
