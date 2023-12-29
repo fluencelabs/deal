@@ -35,6 +35,8 @@ sequenceDiagram
         participant matcher as Matcher Contract
     end
 
+    loop ...pulling...
+        indexer -) Other Contracts: pull data
     Note over indexer,matcher: ...polling data...
     Note over fCli,Other Contracts: already acknowledged about "DealId"
     
