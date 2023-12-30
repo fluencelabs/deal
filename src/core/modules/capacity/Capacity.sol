@@ -107,12 +107,12 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
         uint256 currentEpoch_ = core.currentEpoch();
         if (cc.info.status == CCStatus.Removed) {
             return CCStatus.Removed;
+        } else if (cc.info.startEpoch == 0) {
+            return CCStatus.WaitDelegation;
         } else if (_isFailed(cc, currentEpoch_)) {
             return CCStatus.Failed;
         } else if (currentEpoch_ >= _expiredEpoch(cc)) {
             return CCStatus.Inactive;
-        } else if (cc.info.startEpoch == 0) {
-            return CCStatus.WaitDelegation;
         } else {
             return CCStatus.Active;
         }
