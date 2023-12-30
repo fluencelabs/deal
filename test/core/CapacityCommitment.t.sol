@@ -96,7 +96,7 @@ contract CapacityCommitmentTest is Test {
         );
 
         // call createCapacityCommitment
-        deployment.capacity.createCapacityCommitment(peerId, ccDuration, ccDelegator, rewardCCDelegationRate);
+        deployment.capacity.createCommitment(peerId, ccDuration, ccDelegator, rewardCCDelegationRate);
     }
 
     function test_GetCapacityCommitment() public {
@@ -104,23 +104,19 @@ contract CapacityCommitmentTest is Test {
 
         (bytes32 commitmentId,) = _createCapacityCommitment(peerId);
 
-        Capacity.CommitmentInfo memory commitment = deployment.capacity.getCapacityCommitment(commitmentId);
+        Capacity.CommitmentView memory commitment = deployment.capacity.getCommitment(commitmentId);
 
+        console.logBytes32(commitment.peerId);
         assertEq(uint256(commitment.status), uint256(ICapacity.CCStatus.WaitDelegation), "Status mismatch");
         assertEq(commitment.peerId, peerId, "PeerId mismatch");
         assertEq(commitment.collateralPerUnit, deployment.capacity.fltCollateralPerUnit(), "CollateralPerUnit mismatch");
-        assertEq(commitment.duration, ccDuration, "Duration mismatch");
+        assertEq(commitment.endEpoch, commitment.startEpoch + ccDuration, "Duration mismatch");
         assertEq(commitment.rewardDelegatorRate, rewardCCDelegationRate, "RewardDelegatorRate mismatch");
         assertEq(commitment.delegator, ccDelegator, "Delegator mismatch");
-        assertEq(commitment.currentCUSuccessCount, 0, "CurrentCUSuccessCount mismatch");
         assertEq(commitment.totalCUFailCount, 0, "TotalCUFailCount mismatch");
-        assertEq(commitment.snapshotEpoch, 0, "SnapshotEpoch mismatch");
         assertEq(commitment.startEpoch, 0, "StartEpoch mismatch");
         assertEq(commitment.failedEpoch, 0, "FailedEpoch mismatch");
-        assertEq(commitment.withdrawCCEpochAfterFailed, 0, "WithdrawCCEpochAfterFailed mismatch");
-        assertEq(commitment.remainingFailsForLastEpoch, 0, "RemainingFailsForLastEpoch mismatch");
         assertEq(commitment.exitedUnitCount, 0, "ExitedUnitCount mismatch");
-        assertEq(commitment.totalWithdrawnReward, 0, "TotalWithdrawnReward mismatch");
     }
 
     function test_DepositCollateral() public {
@@ -141,29 +137,23 @@ contract CapacityCommitmentTest is Test {
         vm.expectEmit(true, true, true, true, address(deployment.capacity));
         emit CapacityCommitmentActivated(peerId, commitmentId, currentEpoch + 1 + ccDuration, registerPeers[0].unitIds);
 
-        deployment.capacity.depositCapacityCommitmentCollateral(commitmentId);
+        deployment.capacity.depositCollateral(commitmentId);
         vm.stopPrank();
 
         uint256 activeUnitCountAfter = deployment.capacity.activeUnitCount();
         assertEq(activeUnitCountAfter, activeUnitCountBefore + unitCount, "ActiveUnitCount mismatch");
 
         // Verify commitment info
-        Capacity.CommitmentInfo memory commitment = deployment.capacity.getCapacityCommitment(commitmentId);
+        Capacity.CommitmentView memory commitment = deployment.capacity.getCommitment(commitmentId);
         assertEq(uint256(commitment.status), uint256(ICapacity.CCStatus.Active), "Status mismatch");
         assertEq(commitment.peerId, peerId, "PeerId mismatch");
         assertEq(commitment.collateralPerUnit, deployment.capacity.fltCollateralPerUnit(), "CollateralPerUnit mismatch");
-        assertEq(commitment.duration, ccDuration, "Duration mismatch");
+        assertEq(commitment.endEpoch, deployment.core.currentEpoch() + 1 + ccDuration, "Duration mismatch");
         assertEq(commitment.rewardDelegatorRate, rewardCCDelegationRate, "RewardDelegatorRate mismatch");
         assertEq(commitment.delegator, ccDelegator, "Delegator mismatch");
-        assertEq(commitment.currentCUSuccessCount, 0, "CurrentCUSuccessCount mismatch");
-        assertEq(commitment.totalCUFailCount, 0, "TotalCUFailCount mismatch");
-        assertEq(commitment.snapshotEpoch, deployment.core.currentEpoch(), "SnapshotEpoch mismatch");
         assertEq(commitment.startEpoch, deployment.core.currentEpoch() + 1, "StartEpoch mismatch");
         assertEq(commitment.failedEpoch, 0, "FailedEpoch mismatch");
-        assertEq(commitment.withdrawCCEpochAfterFailed, 0, "WithdrawCCEpochAfterFailed mismatch");
-        assertEq(commitment.remainingFailsForLastEpoch, 0, "RemainingFailsForLastEpoch mismatch");
         assertEq(commitment.exitedUnitCount, 0, "ExitedUnitCount mismatch");
-        assertEq(commitment.totalWithdrawnReward, 0, "TotalWithdrawnReward mismatch");
     }
 
     function test_SubmitProof() public {
@@ -174,7 +164,8 @@ contract CapacityCommitmentTest is Test {
 
         (bytes32 commitmentId,) = _createAndDepositCapacityCommitment(peerId, unitCount);
 
-        bytes memory proof = abi.encodePacked("proof");
+        bytes32 localK = keccak256(abi.encodePacked("proof"));
+        bytes32 h = keccak256(abi.encodePacked("h"));
 
         StdCheats.skip(uint256(deployment.core.epochDuration()));
 
@@ -183,7 +174,7 @@ contract CapacityCommitmentTest is Test {
         vm.expectEmit(true, true, true, false, address(deployment.capacity));
         emit ProofSubmitted(commitmentId, unitId);
 
-        deployment.capacity.submitProof(unitId, proof);
+        deployment.capacity.submitProof(unitId, localK, h);
 
         vm.stopPrank();
     }
@@ -196,7 +187,8 @@ contract CapacityCommitmentTest is Test {
 
         (bytes32 commitmentId,) = _createAndDepositCapacityCommitment(peerId, unitCount);
 
-        bytes memory proof = abi.encodePacked("proof");
+        bytes32 localK = keccak256(abi.encodePacked("proof"));
+        bytes32 h = keccak256(abi.encodePacked("h"));
 
         // warp to next epoch
         StdCheats.skip(deployment.core.epochDuration());
@@ -207,7 +199,7 @@ contract CapacityCommitmentTest is Test {
             vm.expectEmit(true, true, true, false, address(deployment.capacity));
             emit ProofSubmitted(commitmentId, unitId);
 
-            deployment.capacity.submitProof(unitId, proof);
+            deployment.capacity.submitProof(unitId, localK, h);
         }
 
         StdCheats.skip(deployment.core.epochDuration());
@@ -222,7 +214,7 @@ contract CapacityCommitmentTest is Test {
         offerId = deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, registerPeers);
 
         vm.recordLogs();
-        deployment.capacity.createCapacityCommitment(peerId, ccDuration, ccDelegator, rewardCCDelegationRate);
+        deployment.capacity.createCommitment(peerId, ccDuration, ccDelegator, rewardCCDelegationRate);
 
         Vm.Log[] memory entries = vm.getRecordedLogs();
 
@@ -239,7 +231,7 @@ contract CapacityCommitmentTest is Test {
 
         vm.startPrank(ccDelegator);
         deployment.tFLT.approve(address(deployment.capacity), unitCount * deployment.capacity.fltCollateralPerUnit());
-        deployment.capacity.depositCapacityCommitmentCollateral(commitmentId);
+        deployment.capacity.depositCollateral(commitmentId);
         vm.stopPrank();
     }
 }

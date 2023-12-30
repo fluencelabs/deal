@@ -99,7 +99,7 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
     // #endregion
 
     // #region ----------------- Public View -----------------
-    function getCCStatus(bytes32 commitmentId) external view returns (CCStatus) {
+    function getStatus(bytes32 commitmentId) public view returns (CCStatus) {
         CommitmentStorage storage s = _getCommitmentStorage();
 
         Commitment storage cc = s.commitments[commitmentId];
@@ -118,9 +118,23 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
         }
     }
 
-    function getCapacityCommitment(bytes32 commitmentId) external view returns (CommitmentInfo memory) {
+    function getCommitment(bytes32 commitmentId) external view returns (CommitmentView memory) {
         CommitmentStorage storage s = _getCommitmentStorage();
-        return s.commitments[commitmentId].info;
+        Commitment storage cc = s.commitments[commitmentId];
+
+        return CommitmentView({
+            status: getStatus(commitmentId),
+            peerId: cc.info.peerId,
+            collateralPerUnit: cc.info.collateralPerUnit,
+            unitCount: core.market().getComputePeer(cc.info.peerId).unitCount,
+            startEpoch: cc.info.startEpoch,
+            endEpoch: cc.info.startEpoch + cc.info.duration,
+            rewardDelegatorRate: cc.info.rewardDelegatorRate,
+            delegator: cc.info.delegator,
+            totalCUFailCount: cc.info.totalCUFailCount,
+            failedEpoch: cc.info.failedEpoch,
+            exitedUnitCount: cc.info.exitedUnitCount
+        });
     }
 
     function totalRewards(bytes32 commitmentId) external view returns (uint256) {
@@ -144,10 +158,67 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
 
         return cc.vestings[uint256(index)].cumulativeAmount - cc.info.totalWithdrawnReward;
     }
+
+    function getK() external view returns (bytes32) {
+        return bytes32(0x00);
+    }
+    // #endregion
+
+    // region ----------------- Deal Callbacks -----------------
+    function onUnitMovedToDeal(bytes32 commitmentId, bytes32 unitId) external {
+        IMarket market = core.market();
+
+        CommitmentStorage storage s = _getCommitmentStorage();
+        Commitment storage cc = s.commitments[commitmentId];
+        IMarket.ComputePeer memory peer = market.getComputePeer(cc.info.peerId);
+
+        UnitProofsInfo storage unitProofsInfo = cc.unitProofsInfoByUnit[unitId];
+
+        uint256 epoch = core.currentEpoch() - 1;
+        uint256 expiredEpoch = _expiredEpoch(cc);
+        CCStatus status = _commitCommitmentSnapshot(cc, peer, epoch, expiredEpoch);
+        require(status == CCStatus.Active, "Capacity commitment is not active");
+
+        _commitUnitSnapshot(cc, unitProofsInfo, epoch, expiredEpoch, cc.info.failedEpoch);
+
+        unitProofsInfo.isInactive = true;
+        cc.info.activeUnitCount--;
+
+        _setActiveUnitCount(activeUnitCount() - 1);
+
+        emit UnitDeactivated(commitmentId, unitId);
+    }
+
+    function onUnitReturnedFromDeal(bytes32 commitmentId, bytes32 unitId) external {
+        IMarket market = core.market();
+
+        CommitmentStorage storage s = _getCommitmentStorage();
+        Commitment storage cc = s.commitments[commitmentId];
+        IMarket.ComputePeer memory peer = market.getComputePeer(cc.info.peerId);
+
+        UnitProofsInfo storage unitProofsInfo = cc.unitProofsInfoByUnit[unitId];
+
+        uint256 epoch = core.currentEpoch();
+        uint256 expiredEpoch = _expiredEpoch(cc);
+        CCStatus status = _commitCommitmentSnapshot(cc, peer, epoch - 1, expiredEpoch);
+
+        unitProofsInfo.isInactive = false;
+        unitProofsInfo.lastSuccessEpoch = epoch;
+
+        emit UnitActivated(commitmentId, unitId);
+
+        if (status == CCStatus.Inactive || status == CCStatus.Failed) {
+            return;
+        }
+
+        cc.info.nextAdditionalActiveUnitCount += 1;
+
+        _setActiveUnitCount(activeUnitCount() + 1);
+    }
     // #endregion
 
     // #region ----------------- Public Mutable -----------------
-    function createCapacityCommitment(bytes32 peerId, uint256 duration, address delegator, uint256 rewardDelegationRate)
+    function createCommitment(bytes32 peerId, uint256 duration, address delegator, uint256 rewardDelegationRate)
         external
         returns (bytes32)
     {
@@ -197,7 +268,7 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
         return commitmentId;
     }
 
-    function removeTempCapacityCommitment(bytes32 commitmentId) external {
+    function removeCommitment(bytes32 commitmentId) external {
         CommitmentStorage storage s = _getCommitmentStorage();
         Commitment storage cc = s.commitments[commitmentId];
         IMarket.ComputePeer memory peer = core.market().getComputePeer(cc.info.peerId);
@@ -210,7 +281,7 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
         emit CapacityCommitmentRemoved(commitmentId);
     }
 
-    function finishCapacityCommitment(bytes32 commitmentId) external {
+    function finishCommitment(bytes32 commitmentId) external {
         IMarket market = core.market();
 
         CommitmentStorage storage s = _getCommitmentStorage();
@@ -220,7 +291,7 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
 
         uint256 currentEpoch_ = core.currentEpoch();
         uint256 expiredEpoch = _expiredEpoch(cc);
-        CCStatus status = _commitCCSnapshot(cc, peer, currentEpoch_ - 1, expiredEpoch);
+        CCStatus status = _commitCommitmentSnapshot(cc, peer, currentEpoch_ - 1, expiredEpoch);
 
         require(status == CCStatus.Inactive || status == CCStatus.Failed, "Capacity commitment is active");
         if (status == CCStatus.Failed) {
@@ -248,7 +319,7 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
         emit CapacityCommitmentFinished(commitmentId);
     }
 
-    function depositCapacityCommitmentCollateral(bytes32 commitmentId) external {
+    function depositCollateral(bytes32 commitmentId) external {
         IMarket market = core.market();
 
         CommitmentStorage storage s = _getCommitmentStorage();
@@ -258,7 +329,13 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
         IMarket.ComputePeer memory peer = market.getComputePeer(peerId);
 
         require(cc.info.startEpoch == 0, "Capacity commitment is created");
-        require(cc.info.delegator == msg.sender, "Only delegator can lock collateral");
+
+        address delegator = cc.info.delegator;
+        if (delegator != address(0x00)) {
+            require(delegator == msg.sender, "Only delegator can lock collateral");
+        } else {
+            cc.info.delegator = msg.sender;
+        }
 
         uint256 currentEpoch_ = core.currentEpoch();
         uint256 startEpoch = currentEpoch_ + 1;
@@ -284,58 +361,7 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
         );
     }
 
-    function onUnitMovedToDeal(bytes32 commitmentId, bytes32 unitId) external {
-        IMarket market = core.market();
-
-        CommitmentStorage storage s = _getCommitmentStorage();
-        Commitment storage cc = s.commitments[commitmentId];
-        IMarket.ComputePeer memory peer = market.getComputePeer(cc.info.peerId);
-
-        UnitProofsInfo storage unitProofsInfo = cc.unitProofsInfoByUnit[unitId];
-
-        uint256 epoch = core.currentEpoch() - 1;
-        uint256 expiredEpoch = _expiredEpoch(cc);
-        CCStatus status = _commitCCSnapshot(cc, peer, epoch, expiredEpoch);
-        require(status == CCStatus.Active, "Capacity commitment is not active");
-
-        _commitCUSnapshot(cc, unitProofsInfo, epoch, expiredEpoch, cc.info.failedEpoch);
-
-        unitProofsInfo.isInactive = true;
-        cc.info.activeUnitCount--;
-
-        _setActiveUnitCount(activeUnitCount() - 1);
-
-        emit UnitDeactivated(commitmentId, unitId);
-    }
-
-    function onUnitReturnedFromDeal(bytes32 commitmentId, bytes32 unitId) external {
-        IMarket market = core.market();
-
-        CommitmentStorage storage s = _getCommitmentStorage();
-        Commitment storage cc = s.commitments[commitmentId];
-        IMarket.ComputePeer memory peer = market.getComputePeer(cc.info.peerId);
-
-        UnitProofsInfo storage unitProofsInfo = cc.unitProofsInfoByUnit[unitId];
-
-        uint256 epoch = core.currentEpoch();
-        uint256 expiredEpoch = _expiredEpoch(cc);
-        CCStatus status = _commitCCSnapshot(cc, peer, epoch - 1, expiredEpoch);
-
-        unitProofsInfo.isInactive = false;
-        unitProofsInfo.lastSuccessEpoch = epoch;
-
-        emit UnitActivated(commitmentId, unitId);
-
-        if (status == CCStatus.Inactive || status == CCStatus.Failed) {
-            return;
-        }
-
-        cc.info.nextAdditionalActiveUnitCount += 1;
-
-        _setActiveUnitCount(activeUnitCount() + 1);
-    }
-
-    function submitProof(bytes32 unitId, bytes calldata proof) external {
+    function submitProof(bytes32 unitId, bytes32 localK, bytes32 h) external {
         IMarket market = core.market();
 
         CommitmentStorage storage s = _getCommitmentStorage();
@@ -355,7 +381,7 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
 
         require(epoch >= cc.info.startEpoch, "Capacity commitment is not started");
 
-        CCStatus status = _commitCCSnapshot(cc, peer, epoch - 1, expiredEpoch);
+        CCStatus status = _commitCommitmentSnapshot(cc, peer, epoch - 1, expiredEpoch);
 
         require(status == CCStatus.Active, "Capacity commitment is not active");
 
@@ -369,7 +395,7 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
 
         if (unitProofsCount == minRequierdCCProofs_) {
             cc.info.currentCUSuccessCount += 1;
-            _commitCUSnapshot(cc, unitProofsInfo, epoch, expiredEpoch, cc.info.failedEpoch);
+            _commitUnitSnapshot(cc, unitProofsInfo, epoch, expiredEpoch, cc.info.failedEpoch);
 
             uint256 totalSuccessProofs = s.rewardInfoByEpoch[epoch].totalSuccessProofs;
             if (totalSuccessProofs == 0) {
@@ -386,7 +412,7 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
         emit ProofSubmitted(commitmentId, unitId);
     }
 
-    function commitCCSnapshot(bytes32 commitmentId) external {
+    function commitSnapshot(bytes32 commitmentId) external {
         IMarket market = core.market();
 
         CommitmentStorage storage s = _getCommitmentStorage();
@@ -395,7 +421,7 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
 
         uint256 epoch = core.currentEpoch() - 1;
         uint256 expiredEpoch = _expiredEpoch(cc);
-        _commitCCSnapshot(cc, peer, epoch, expiredEpoch);
+        _commitCommitmentSnapshot(cc, peer, epoch, expiredEpoch);
     }
 
     function removeCUFromCC(bytes32 commitmentId, bytes32[] calldata unitIds) external {
@@ -409,7 +435,7 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
         bytes32 peerId = cc.info.peerId;
         IMarket.ComputePeer memory peer = market.getComputePeer(peerId);
 
-        CCStatus status = _commitCCSnapshot(cc, peer, currentEpoch_ - 1, expiredEpoch);
+        CCStatus status = _commitCommitmentSnapshot(cc, peer, currentEpoch_ - 1, expiredEpoch);
         require(status == CCStatus.Inactive || status == CCStatus.Failed, "Capacity commitment is active");
 
         uint256 failedEpoch = cc.info.failedEpoch;
@@ -425,14 +451,14 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
             }
 
             bool success =
-                _commitCUSnapshot(cc, cc.unitProofsInfoByUnit[unitId], currentEpoch_, expiredEpoch, failedEpoch);
+                _commitUnitSnapshot(cc, cc.unitProofsInfoByUnit[unitId], currentEpoch_, expiredEpoch, failedEpoch);
             if (success) {
                 cc.info.exitedUnitCount += 1;
             }
         }
     }
 
-    function withdrawCCReward(bytes32 commitmentId) external {
+    function withdrawReward(bytes32 commitmentId) external {
         CommitmentStorage storage s = _getCommitmentStorage();
         Commitment storage cc = s.commitments[commitmentId];
         uint256 epoch = core.currentEpoch();
@@ -440,11 +466,12 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
         IMarket market = core.market();
         IMarket.ComputePeer memory peer = market.getComputePeer(cc.info.peerId);
 
-        _commitCCSnapshot(cc, peer, core.currentEpoch() - 1, _expiredEpoch(cc));
+        _commitCommitmentSnapshot(cc, peer, core.currentEpoch() - 1, _expiredEpoch(cc));
         if (cc.info.failedEpoch != 0) {
             epoch = cc.info.failedEpoch;
         }
 
+        // mv find closest min vesting to offchain
         (int256 index, uint256 length) = _findClosestMinVesting(cc.vestings, epoch);
         require(index >= 0, "Nothing to withdraw");
 
@@ -498,7 +525,7 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
         uint256 nextAdditionalActiveUnitCount_,
         uint256 totalCUFailCount_,
         uint256 lastSnapshotEpoch_
-    ) private view returns (uint256 failedEpoch, uint256 remainingFailsForLastEpoch, uint256 maxFails) {
+    ) private pure returns (uint256 failedEpoch, uint256 remainingFailsForLastEpoch, uint256 maxFails) {
         maxFails = maxFailedRatio_ * unitCount_;
         uint256 remainingFails = 0;
         if (totalCUFailCount_ < maxFails) {
@@ -551,7 +578,7 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
     // #endregion
 
     // #region ----------------- Internal Mutable -----------------
-    function _commitCUSnapshot(
+    function _commitUnitSnapshot(
         Commitment storage cc,
         UnitProofsInfo storage unitProofsInfo,
         uint256 epoch,
@@ -623,7 +650,7 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
         return true;
     }
 
-    function _commitCCSnapshot(
+    function _commitCommitmentSnapshot(
         Commitment storage cc,
         IMarket.ComputePeer memory peer,
         uint256 epoch,

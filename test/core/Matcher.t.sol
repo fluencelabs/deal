@@ -52,14 +52,14 @@ contract MatcherTest is Test {
             offerIds[i] = deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, peers);
 
             for (uint256 j = 0; j < peerCountPerOffer; j++) {
-                bytes32 commitmentId = deployment.capacity.createCapacityCommitment(
+                bytes32 commitmentId = deployment.capacity.createCommitment(
                     peerIds[i][j], deployment.capacity.minDuration(), address(this), 1
                 );
 
                 uint256 amount =
-                    deployment.capacity.getCapacityCommitment(commitmentId).collateralPerUnit * unitIds[i][j].length;
+                    deployment.capacity.getCommitment(commitmentId).collateralPerUnit * unitIds[i][j].length;
                 deployment.tFLT.safeApprove(address(deployment.capacity), amount);
-                deployment.capacity.depositCapacityCommitmentCollateral(commitmentId);
+                deployment.capacity.depositCollateral(commitmentId);
             }
         }
     }

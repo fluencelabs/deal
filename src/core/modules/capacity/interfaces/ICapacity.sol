@@ -57,6 +57,20 @@ interface ICapacity is ICapacityConst {
         uint256 nextAdditionalActiveUnitCount;
     }
 
+    struct CommitmentView {
+        CCStatus status;
+        bytes32 peerId;
+        uint256 collateralPerUnit;
+        uint256 unitCount;
+        uint256 startEpoch;
+        uint256 endEpoch;
+        uint256 rewardDelegatorRate;
+        address delegator;
+        uint256 totalCUFailCount;
+        uint256 failedEpoch;
+        uint256 exitedUnitCount;
+    }
+
     // ------------------ Initializer ------------------
     function initialize(
         uint256 fltPrice_,
@@ -74,23 +88,25 @@ interface ICapacity is ICapacityConst {
     ) external;
 
     // ------------------ Views ------------------
-    function getCCStatus(bytes32 commitmentId) external view returns (CCStatus);
-    function getCapacityCommitment(bytes32 commitmentId) external view returns (CommitmentInfo memory);
+    function getStatus(bytes32 commitmentId) external view returns (CCStatus);
+    function getCommitment(bytes32 commitmentId) external view returns (CommitmentView memory);
     function totalRewards(bytes32 commitmentId) external view returns (uint256);
     function unlockedRewards(bytes32 commitmentId) external view returns (uint256);
+    function getK() external view returns (bytes32);
 
-    // ----------------- Mutables -----------------
-    function createCapacityCommitment(bytes32 peerId, uint256 duration, address delegator, uint256 rewardDelegationRate)
-        external
-        returns (bytes32);
-
-    function removeTempCapacityCommitment(bytes32 commitmentId) external;
-    function finishCapacityCommitment(bytes32 commitmentId) external;
-    function depositCapacityCommitmentCollateral(bytes32 commitmentId) external;
+    // ----------------- Deal Callbacks -----------------
     function onUnitMovedToDeal(bytes32 commitmentId, bytes32 unitId) external;
     function onUnitReturnedFromDeal(bytes32 commitmentId, bytes32 unitId) external;
-    function submitProof(bytes32 unitId, bytes calldata proof) external;
-    function commitCCSnapshot(bytes32 commitmentId) external;
+
+    // ----------------- Mutables -----------------
+    function createCommitment(bytes32 peerId, uint256 duration, address delegator, uint256 rewardDelegationRate)
+        external
+        returns (bytes32);
+    function removeCommitment(bytes32 commitmentId) external;
+    function finishCommitment(bytes32 commitmentId) external;
+    function depositCollateral(bytes32 commitmentId) external;
+    function submitProof(bytes32 unitId, bytes32 localK, bytes32 h) external;
+    function commitSnapshot(bytes32 commitmentId) external;
     function removeCUFromCC(bytes32 commitmentId, bytes32[] calldata unitIds) external;
-    function withdrawCCReward(bytes32 commitmentId) external;
+    function withdrawReward(bytes32 commitmentId) external;
 }

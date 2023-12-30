@@ -72,6 +72,21 @@ abstract contract Offer is BaseModule, IOffer {
         return _getOfferStorage().computeUnitIdsByPeerId[peerId].values();
     }
 
+    function getComputeUnits(bytes32 peerId) public view returns (ComputeUnitView[] memory) {
+        OfferStorage storage offerStorage = _getOfferStorage();
+
+        bytes32[] memory unitIds = _getOfferStorage().computeUnitIdsByPeerId[peerId].values();
+        ComputeUnitView[] memory units = new ComputeUnitView[](unitIds.length);
+
+        for (uint256 i = 0; i < unitIds.length; i++) {
+            bytes32 unitId = unitIds[i];
+            ComputeUnit storage computeUnit = offerStorage.computeUnits[unitId];
+            units[i] = ComputeUnitView({id: unitId, deal: computeUnit.deal});
+        }
+
+        return units;
+    }
+
     // ----------------- Public Mutable -----------------
     //Register offer and units
     function registerMarketOffer(
@@ -90,8 +105,12 @@ abstract contract Offer is BaseModule, IOffer {
         require(address(paymentToken) != address(0x00), "Payment token should be not zero address");
 
         // create market offer
-        offerStorage.offers[offerId] =
-            Offer({provider: provider, minPricePerWorkerEpoch: minPricePerWorkerEpoch, paymentToken: paymentToken});
+        offerStorage.offers[offerId] = Offer({
+            provider: provider,
+            minPricePerWorkerEpoch: minPricePerWorkerEpoch,
+            paymentToken: paymentToken,
+            peerCount: 0
+        });
 
         // add effectors to offer
         for (uint256 j = 0; j < effectors.length; j++) {
@@ -109,6 +128,15 @@ abstract contract Offer is BaseModule, IOffer {
         return offerId;
     }
 
+    function removeOffer(bytes32 offerId) public {
+        OfferStorage storage offerStorage = _getOfferStorage();
+        Offer storage offer = offerStorage.offers[offerId];
+
+        require(offer.peerCount == 0, "Offer has compute peers");
+
+        delete offerStorage.offers[offerId];
+    }
+
     function addComputePeers(bytes32 offerId, RegisterComputePeer[] calldata peers) external {
         OfferStorage storage offerStorage = _getOfferStorage();
 
@@ -122,13 +150,31 @@ abstract contract Offer is BaseModule, IOffer {
         }
     }
 
-    function addComputeUnits(bytes32 peerId, bytes32[] calldata unitIds) external {
+    function removeComputePeer(bytes32 peerId) external {
         OfferStorage storage offerStorage = _getOfferStorage();
         ComputePeer storage computePeer = offerStorage.peers[peerId];
         bytes32 offerId = computePeer.offerId;
         Offer storage offer = offerStorage.offers[offerId];
 
-        require(computePeer.owner != address(0x00), "Peer doesn't exist");
+        require(offerId != bytes32(0x00), "Peer doesn't exist");
+        require(offer.provider == msg.sender, "Only owner can change offer");
+
+        require(computePeer.unitCount == 0, "Peer has compute units");
+
+        offer.peerCount--;
+        delete offerStorage.peers[peerId];
+
+        emit PeerRemoved(offerId, peerId);
+    }
+
+    function addComputeUnits(bytes32 peerId, bytes32[] calldata unitIds) external {
+        OfferStorage storage offerStorage = _getOfferStorage();
+        ComputePeer storage computePeer = offerStorage.peers[peerId];
+
+        bytes32 offerId = computePeer.offerId;
+        require(offerId != bytes32(0x00), "Peer doesn't exist");
+
+        Offer storage offer = offerStorage.offers[offerId];
         require(offer.provider == msg.sender, "Only owner can change offer");
         require(computePeer.commitmentId == bytes32(0x00), "Peer has commitment");
 
@@ -140,6 +186,8 @@ abstract contract Offer is BaseModule, IOffer {
         ComputeUnit storage computeUnit = offerStorage.computeUnits[unitId];
 
         bytes32 peerId = computeUnit.peerId;
+        require(peerId != bytes32(0x00), "Compute unit doesn't exist");
+
         ComputePeer storage computePeer = offerStorage.peers[peerId];
         Offer storage offer = offerStorage.offers[computePeer.offerId];
 
@@ -284,6 +332,7 @@ abstract contract Offer is BaseModule, IOffer {
         OfferStorage storage offerStorage = _getOfferStorage();
 
         ComputePeer storage computePeer = offerStorage.peers[peer.peerId];
+        Offer storage offer = offerStorage.offers[offerId];
 
         require(computePeer.offerId == bytes32(0x00), "Peer already exists in another offer");
 
@@ -291,6 +340,7 @@ abstract contract Offer is BaseModule, IOffer {
         computePeer.owner = peer.owner;
 
         emit PeerCreated(offerId, peer.peerId, peer.owner);
+        offer.peerCount++;
 
         _addComputeUnitsToPeer(peer.peerId, peer.unitIds);
 

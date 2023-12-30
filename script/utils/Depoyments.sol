@@ -148,7 +148,7 @@ contract Depoyments is ScriptBase {
         return (addr, isNew);
     }
 
-    function _doNeedToRedeploy(string memory contractName, string memory artifactName) internal returns (bool) {
+    function _doNeedToRedeploy(string memory contractName, string memory artifactName) internal view returns (bool) {
         DeployedContract memory deployedContract = deployments.contracts[contractName];
 
         string memory artifact = string.concat(artifactName, ".sol");

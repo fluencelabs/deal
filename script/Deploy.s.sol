@@ -237,10 +237,8 @@ contract DeployContracts is Depoyments, Script {
             doNeedToRedeployMarket || doNeedToRedeployCapacity
         );
 
-        (address marketImpl, bool isNewMarket) =
-            _tryDeployContract("MarketImpl", "Market", abi.encode(flt, coreAddr), isNewCore);
-        (address capacityImpl, bool isNewCapacity) =
-            _tryDeployContract("CapacityImpl", "Capacity", abi.encode(flt, coreAddr), isNewCore);
+        address marketImpl = _deployContract("MarketImpl", "Market", abi.encode(flt, coreAddr), isNewCore);
+        address capacityImpl = _deployContract("CapacityImpl", "Capacity", abi.encode(flt, coreAddr), isNewCore);
 
         _deployContract(
             "Market",

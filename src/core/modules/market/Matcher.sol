@@ -98,7 +98,7 @@ abstract contract Matcher is Offer, IMatcher {
                     continue;
                 }
 
-                if (currentEpoch < capacity.getCapacityCommitment(peer.commitmentId).startEpoch) {
+                if (currentEpoch < capacity.getCommitment(peer.commitmentId).startEpoch) {
                     continue;
                 }
 
