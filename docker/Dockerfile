@@ -42,7 +42,11 @@ FROM contracts as chain-rpc
 ENTRYPOINT ["make"]
 CMD ["start-local-chain"]
 
-FROM contracts as deal-deploy-script
+FROM contracts as chain-deploy-script
+ENTRYPOINT ["make"]
+CMD ["depoy-docker"]
+
+FROM contracts as subgraph-deploy-script
 
 RUN \
  apt-get update && \
@@ -68,9 +72,11 @@ RUN \
 	/var/lib/apt/lists/* \
 	/var/tmp/*
 
+COPY ./deployments /app/deploymens
 RUN cd subgraph && npm install && npm run compile && npm run import-config-networks
 
 ENTRYPOINT ["make"]
+CMD ["start-local-subgraph"]
 
 FROM contracts as dev
 ENTRYPOINT ["sleep", "infinity"]

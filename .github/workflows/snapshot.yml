@@ -14,20 +14,23 @@ on:
       subgraph-version:
         description: "@fluencelabs/subgraph version"
         value: ${{ jobs.npm.outputs.subgraph-version }}
-      deal-deploy-script-image:
-        description: "deal-deploy-script container image"
-        value: ${{ jobs.containers.outputs.deal-deploy-script-image }}
+      subgraph-deploy-script-image:
+        description: "subgraph-deploy-script image"
+        value: ${{ jobs.subgraph.outputs.subgraph-deploy-script-image }}
+      chain-deploy-script-image:
+        description: "chain-deploy-script container image"
+        value: ${{ jobs.chain-rpc.outputs.chain-deploy-script-image }}
       chain-rpc-image:
         description: "chain-rpc container image"
-        value: ${{ jobs.containers.outputs.chain-rpc-image }}
+        value: ${{ jobs.chain-rpc.outputs.chain-rpc-image }}
 
 env:
   FORCE_COLOR: true
   FOUNDRY_PROFILE: "ci"
 
 jobs:
-  containers:
-    name: "Publish ${{ matrix.arch }} containers"
+  chain-rpc:
+    name: "Publish ${{ matrix.arch }} chain-rpc"
 
     strategy:
       matrix:
@@ -41,7 +44,7 @@ jobs:
 
     outputs:
       chain-rpc-image: "docker.fluence.dev/chain-rpc:${{ steps.version.outputs.id }}"
-      deal-deploy-script-image: "docker.fluence.dev/deal-deploy-script:${{ steps.version.outputs.id }}"
+      chain-deploy-script-image: "docker.fluence.dev/chain-deploy-script:${{ steps.version.outputs.id }}"
 
     permissions:
       contents: read
@@ -97,6 +100,8 @@ jobs:
           file: docker/Dockerfile
           target: contracts
           platforms: linux/${{ matrix.arch }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Build and push chain-rpc image
         id: chain-rpc
@@ -110,77 +115,24 @@ jobs:
           platforms: linux/${{ matrix.arch }}
           tags: |
             docker.fluence.dev/chain-rpc:${{ steps.version.outputs.id }}-${{ matrix.arch }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
-      - name: Build and push deal-deploy-script image
-        id: deal-deploy-script
+      - name: Build and push chain-deploy-script image
+        id: chain-deploy-script
         uses: docker/build-push-action@v4
         with:
           context: .
           push: true
           provenance: false
           file: docker/Dockerfile
-          target: chain-rpc
+          target: chain-deploy-script
           platforms: linux/${{ matrix.arch }}
           tags: |
-            docker.fluence.dev/deal-deploy-script:${{ steps.version.outputs.id }}-${{ matrix.arch }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  manifest:
-    name: "Merge arch images"
-    needs: containers
-
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      id-token: write
-
-    steps:
-      - name: Import secrets
-        uses: hashicorp/vault-action@v2.7.3
-        with:
-          url: https://vault.fluence.dev
-          path: jwt/github
-          role: ci
-          method: jwt
-          jwtGithubAudience: "https://github.com/fluencelabs"
-          jwtTtl: 300
-          exportToken: false
-          secrets: |
-            kv/docker-registry/basicauth/ci username | DOCKER_USERNAME ;
-            kv/docker-registry/basicauth/ci password | DOCKER_PASSWORD
-
-      - name: Login to private docker registry
-        uses: docker/login-action@v3
-        with:
-          registry: docker.fluence.dev
-          username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ env.DOCKER_PASSWORD }}
-
-      - name: Merge chain-rpc containers
-        uses: Noelware/docker-manifest-action@0.4.0
-        with:
-          inputs: ${{ needs.containers.outputs.chain-rpc-image }}
-          images: ${{ needs.containers.outputs.chain-rpc-image }}-amd64,${{ needs.containers.outputs.chain-rpc-image }}-arm64
-          push: true
-          amend: true
-
-      - name: Merge deal-deploy-script containers
-        uses: Noelware/docker-manifest-action@0.4.0
-        with:
-          inputs: ${{ needs.containers.outputs.deal-deploy-script-image }}
-          images: ${{ needs.containers.outputs.deal-deploy-script-image }}-amd64,${{ needs.containers.outputs.deal-deploy-script-image }}-arm64
-          push: true
-          amend: true
+            docker.fluence.dev/chain-deploy-script:${{ steps.version.outputs.id }}-${{ matrix.arch }}
 
   deploy:
     name: "Generate local.json"
     needs:
-      - manifest
-      - containers
+      - chain-rpc
 
     runs-on: ubuntu-latest
 
@@ -216,8 +168,8 @@ jobs:
 
       - name: Run deployment script
         env:
-          CHAIN_RPC_IMAGE: ${{ needs.containers.outputs.chain-rpc-image }}
-          DEAL_DEPLOY_SCRIPT_IMAGE: ${{ needs.containers.outputs.deal-deploy-script-image }}
+          CHAIN_RPC_IMAGE: "${{ needs.containers.outputs.chain-rpc-image }}-amd64"
+          CHAIN_DEPLOY_SCRIPT_IMAGE: "${{ needs.containers.outputs.chain-deploy-script-image }}-amd64"
         working-directory: docker
         run: docker-compose up deal-deploy-script
 
@@ -309,3 +261,153 @@ jobs:
         with:
           id: ${{ steps.version.outputs.id }}
           working-directory: subgraph/
+
+  subgraph:
+    name: "Publish ${{ matrix.arch }} subgraph"
+    needs: deploy
+
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            runner: linux-amd64-m-xlarge
+          - arch: arm64
+            runner: linux-arm64-m-xlarge
+
+    runs-on: ${{ matrix.runner }}
+
+    outputs:
+      subgraph-deploy-script-image: "docker.fluence.dev/subgraph-deploy-script:${{ steps.version.outputs.id }}"
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: fluencelabs/deal
+          ref: ${{ inputs.ref }}
+
+      - name: Import secrets
+        uses: hashicorp/vault-action@v2.7.3
+        with:
+          url: https://vault.fluence.dev
+          path: jwt/github
+          role: ci
+          method: jwt
+          jwtGithubAudience: "https://github.com/fluencelabs"
+          jwtTtl: 300
+          exportToken: false
+          secrets: |
+            kv/hub.docker.com/fluencebot username | DOCKER_HUB_USERNAME ;
+            kv/hub.docker.com/fluencebot password | DOCKER_HUB_PASSWORD ;
+            kv/docker-registry/basicauth/ci username | DOCKER_USERNAME ;
+            kv/docker-registry/basicauth/ci password | DOCKER_PASSWORD
+
+      - name: Generate snapshot version
+        id: version
+        uses: fluencelabs/github-actions/generate-snapshot-id@main
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKER_HUB_USERNAME }}
+          password: ${{ env.DOCKER_HUB_PASSWORD }}
+
+      - name: Login to private docker registry
+        uses: docker/login-action@v3
+        with:
+          registry: docker.fluence.dev
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+
+      - name: Download deployments/local.json
+        uses: actions/download-artifact@v4
+        with:
+          name: local.json
+          path: deployments/
+
+      - name: Build contracts
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: docker/Dockerfile
+          target: contracts
+          platforms: linux/${{ matrix.arch }}
+          cache-from: type=gha
+
+      - name: Build and push subgraph-deploy-script image
+        id: subgraph-deploy-script
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          provenance: false
+          file: docker/Dockerfile
+          target: subgraph-deploy-script
+          platforms: linux/${{ matrix.arch }}
+          tags: |
+            docker.fluence.dev/subgraph-deploy-script:${{ steps.version.outputs.id }}-${{ matrix.arch }}
+
+  manifest:
+    name: "Merge chain-rpc images"
+    needs:
+      - chain-rpc
+      - sugraph
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Import secrets
+        uses: hashicorp/vault-action@v2.7.3
+        with:
+          url: https://vault.fluence.dev
+          path: jwt/github
+          role: ci
+          method: jwt
+          jwtGithubAudience: "https://github.com/fluencelabs"
+          jwtTtl: 300
+          exportToken: false
+          secrets: |
+            kv/docker-registry/basicauth/ci username | DOCKER_USERNAME ;
+            kv/docker-registry/basicauth/ci password | DOCKER_PASSWORD
+
+      - name: Login to private docker registry
+        uses: docker/login-action@v3
+        with:
+          registry: docker.fluence.dev
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+
+      - name: Merge chain-rpc images
+        uses: Noelware/docker-manifest-action@0.4.0
+        with:
+          inputs: ${{ needs.containers.outputs.chain-rpc-image }}
+          images: ${{ needs.containers.outputs.chain-rpc-image }}-amd64,${{ needs.containers.outputs.chain-rpc-image }}-arm64
+          push: true
+          amend: true
+
+      - name: Merge chain-deploy-script images
+        uses: Noelware/docker-manifest-action@0.4.0
+        with:
+          inputs: ${{ needs.chain-rpc.outputs.chain-deploy-script-image }}
+          images: ${{ needs.chain-rpc.outputs.chain-deploy-script-image }}-amd64,${{ needs.chain-rpc.outputs.chain-deploy-script-image }}-arm64
+          push: true
+          amend: true
+
+      - name: Merge subgraph-deploy-script images
+        uses: Noelware/docker-manifest-action@0.4.0
+        with:
+          inputs: ${{ needs.subgraph.outputs.subgraph-deploy-script-image }}
+          images: ${{ needs.subgraph.outputs.subgraph-deploy-script-image }}-amd64,${{ needs.subgraph.outputs.subgraph-deploy-script-image }}-arm64
+          push: true
+          amend: true

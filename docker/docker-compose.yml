@@ -17,8 +17,8 @@ services:
     ports:
       - "8545:8545"
 
-  deal-deploy-script:
-    image: ${DEAL_DEPLOY_SCRIPT_IMAGE:-deal-deploy-script}
+  chain-deploy-script:
+    image: ${CHAIN_DEPLOY_SCRIPT_IMAGE:-chain-deploy-script}
     build:
       context: ../
       dockerfile: ./docker/Dockerfile
