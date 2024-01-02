@@ -29,7 +29,7 @@ env:
   FOUNDRY_PROFILE: "ci"
 
 jobs:
-  forge:
+  contracts:
     name: "Build contracts (${{ matrix.arch }})"
 
     strategy:

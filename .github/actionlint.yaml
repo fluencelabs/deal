@@ -2,3 +2,5 @@ self-hosted-runner:
   labels:
     - linux-amd64-m-xlarge
     - linux-arm64-m-xlarge
+    - linux-amd64-m-2xlarge
+    - linux-arm64-m-2xlarge
