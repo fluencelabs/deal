@@ -78,7 +78,7 @@ jobs:
   chain-rpc:
     name: "Publish chain-rpc (${{ matrix.arch }})"
 
-    depends:
+    needs:
       - contracts
 
     strategy:
