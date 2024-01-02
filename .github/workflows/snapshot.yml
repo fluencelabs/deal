@@ -30,7 +30,7 @@ env:
 
 jobs:
   chain-rpc:
-    name: "Publish ${{ matrix.arch }} chain-rpc"
+    name: "Publish chain-rpc (${{ matrix.arch }})"
 
     strategy:
       matrix:
@@ -263,7 +263,7 @@ jobs:
           working-directory: subgraph/
 
   subgraph:
-    name: "Publish ${{ matrix.arch }} subgraph"
+    name: "Publish subgraph-deploy-script (${{ matrix.arch }})"
     needs: deploy
 
     strategy:
