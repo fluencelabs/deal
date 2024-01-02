@@ -50,6 +50,17 @@ jobs:
         with:
           version: nightly
 
+      - name: Restore cached contract artifacts
+        uses: actions/cache@v3
+        with:
+          path: |
+            cache
+            out
+          key: ${{ runner.os }}-${{ matrix.arch }}-contracts-${{ hashFiles('foundry.toml', 'src/**/*') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.arch }}-contracts-
+          cache-if: false
+
       - run: make install-npms
       - run: make build-all
 
@@ -64,6 +75,17 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
+
+      - name: Restore cached contract artifacts
+        uses: actions/cache@v3
+        with:
+          path: |
+            cache
+            out
+          key: ${{ runner.os }}-${{ matrix.arch }}-contracts-${{ hashFiles('foundry.toml', 'src/**/*') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.arch }}-contracts-
+          cache-if: false
 
       - name: Run Forge build
         run: |
