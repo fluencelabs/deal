@@ -85,9 +85,9 @@ jobs:
       matrix:
         include:
           - arch: amd64
-            runner: linux-amd64-m-2xlarge
+            runner: linux-amd64-m-xlarge
           - arch: arm64
-            runner: linux-arm64-m-2xlarge
+            runner: linux-arm64-m-xlarge
 
     runs-on: ${{ matrix.runner }}
 
@@ -284,11 +284,6 @@ jobs:
           cache-dependency-path: |
             ts-client/package-lock.json
             subgraph/package-lock.json
-
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: nightly
 
       - name: Download contract artifacts
         uses: actions/download-artifact@v4
