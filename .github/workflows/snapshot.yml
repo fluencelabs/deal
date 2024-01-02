@@ -299,7 +299,7 @@ jobs:
       - name: Download contract artifacts
         uses: actions/download-artifact@v4
         with:
-          name: contracts-${{ matrix.arch }}
+          name: contracts-amd64
 
       - name: Download deployments/local.json
         uses: actions/download-artifact@v4
@@ -503,7 +503,7 @@ jobs:
 
           ## subraph-seploy-script
           ```
-          ${{ needs.subgraph-deploy-script.outputs.chain-deploy-script-image }}
+          ${{ needs.subgraph-deploy-script.outputs.subgraph-deploy-script-image }}
           ```
 
           ## Access to Fluence docker registry
