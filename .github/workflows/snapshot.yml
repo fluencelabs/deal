@@ -237,6 +237,11 @@ jobs:
       - name: Delete local.json
         run: rm deployments/local.json
 
+      - name: Download contract artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: contracts-amd64
+
       - name: Run deployment script
         env:
           CHAIN_RPC_IMAGE: "${{ needs.chain-rpc.outputs.chain-rpc-image }}-amd64"

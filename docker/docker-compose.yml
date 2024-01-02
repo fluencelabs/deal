@@ -30,6 +30,7 @@ services:
     volumes:
       - ../deployments/:/app/deployments/
       - ../out/:/app/out/
+      - ../cache/:/app/cache/
 
   # Blockscout services
   blockscout:
