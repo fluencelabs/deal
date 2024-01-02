@@ -195,7 +195,7 @@ jobs:
     needs:
       - chain-rpc
 
-    runs-on: ubuntu-latest
+    runs-on: linux-amd64-m-xlarge
 
     permissions:
       contents: read
