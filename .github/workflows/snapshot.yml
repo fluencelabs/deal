@@ -353,11 +353,11 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: contracts-image-${{ matrix.arch }}
-          path: ${{ runners.temp }}
+          path: ${{ runner.temp }}
 
       - name: Load contracts image
         run: |
-          docker load --input ${{ runners.temp }}/contracts.tar
+          docker load --input ${{ runner.temp }}/contracts.tar
           docker image ls -a
 
       - name: Build and push subgraph-deploy-script image
