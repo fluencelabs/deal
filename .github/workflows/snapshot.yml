@@ -100,6 +100,8 @@ jobs:
           file: docker/Dockerfile
           target: contracts
           platforms: linux/${{ matrix.arch }}
+          tags: contracts
+          outputs: type=docker,dest=${{ runner.temp }}/contracts.tar
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -128,6 +130,12 @@ jobs:
           platforms: linux/${{ matrix.arch }}
           tags: |
             docker.fluence.dev/chain-deploy-script:${{ steps.version.outputs.id }}-${{ matrix.arch }}
+
+      - name: Upload contracts artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: contracts-image-${{ matrix.arch }}
+          path: ${{ runner.temp }}/contracts.tar
 
   deploy:
     name: "Generate local.json"
@@ -340,6 +348,17 @@ jobs:
           target: contracts
           platforms: linux/${{ matrix.arch }}
           cache-from: type=gha
+
+      - name: Download contracts image
+        uses: actions/download-artifact@v3
+        with:
+          name: contracts-image-${{ matrix.arch }}
+          path: ${{ runners.temp }}
+
+      - name: Load contracts image
+        run: |
+          docker load --input ${{ runners.temp }}/contracts.tar
+          docker image ls -a
 
       - name: Build and push subgraph-deploy-script image
         id: subgraph-deploy-script
