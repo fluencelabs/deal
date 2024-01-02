@@ -38,7 +38,7 @@ deploy-local: ## Deploy contracts to local
 	@make verify-command program=forge
 	@CONTRACTS_ENV_NAME=local forge script script/Deploy.s.sol --rpc-url local  \
 	--mnemonics "test test test test test test test test test test test junk" \
-	--sender 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --broadcast
+	--sender 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --broadcast || exit 1
 
 	@echo "\033[0;32mSuccess! Contracts deployed to local chain.\033[0m"
 
@@ -46,7 +46,7 @@ deploy-docker: ## Deploy contracts to docker
 	@make verify-command program=forge
 	@CONTRACTS_ENV_NAME=local forge script script/Deploy.s.sol --rpc-url http://anvil-node:8545  \
 	--mnemonics "test test test test test test test test test test test junk" \
-	--sender 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --broadcast
+	--sender 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --broadcast || exit 1
 
 	@echo "\033[0;32mSuccess! Contracts deployed to local chain.\033[0m"
 
@@ -61,7 +61,7 @@ create-pure-market-local: ## Create market on a local blockchain
 	@make verify-command program=forge
 	@CONTRACTS_ENV_NAME=local forge script script/CreateMarket.s.sol --rpc-url local  \
 	--mnemonics "test test test test test test test test test test test junk" \
-	--sender 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --broadcast
+	--sender 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --broadcast || exit 1
 
 	@echo "\033[0;32mSuccess! Pure market created on local chain - check it out.\033[0m"
 
