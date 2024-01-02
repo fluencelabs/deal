@@ -30,7 +30,7 @@ build-all: build-contracts build-npms ## Build contracts and npms
 
 start-local-chain: ## Start local chain
 	@make verify-command program=anvil
-	@anvil --host 0.0.0.0 --block-time 15
+	@anvil --host 0.0.0.0 --block-time 15 --state /data/state.db
 
 start-local-subgraph: ## Start local subgraph
 	@make verify-command program=npm
