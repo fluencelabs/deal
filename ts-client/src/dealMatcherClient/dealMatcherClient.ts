@@ -4,18 +4,18 @@ import type { ContractsENV } from "../client/config.js";
 // Structure should match matchDeal() arguments.
 // Currently: bytes32[] calldata offers, bytes32[][] calldata computeUnits.
 export interface GetMatchedOffersOut {
-  offers: Array<string>
+  offers: Array<string>;
   computeUnitsPerOffers: Array<Array<string>>;
   fulfilled: boolean;
 }
 
 export interface GetMatchedOffersIn {
-  pricePerWorkerEpoch: string,
-  effectors: Array<string>,
-  paymentToken: string,
-  targetWorkerSlotToMatch: number,
-  minWorkersToMatch: number,
-  maxWorkersPerProvider: number,
+  pricePerWorkerEpoch: string;
+  effectors: Array<string>;
+  paymentToken: string;
+  targetWorkerSlotToMatch: number;
+  minWorkersToMatch: number;
+  maxWorkersPerProvider: number;
 }
 
 export class DealNotFoundError extends Error {
@@ -31,7 +31,7 @@ export class DealMatcherClient {
   public MAX_PER_PAGE: number;
   constructor(network: ContractsENV) {
     this._indexerClient = new IndexerClient(network);
-    this.MAX_PER_PAGE = this._indexerClient.INDEXER_MAX_FIRST
+    this.MAX_PER_PAGE = this._indexerClient.INDEXER_MAX_FIRST;
   }
 
   async _getMatchedOffersPage(
@@ -78,7 +78,7 @@ export class DealMatcherClient {
       targetWorkerSlotToMatch,
       minWorkersToMatch,
       maxWorkersPerProvider,
-    } = getMatchedOffersIn
+    } = getMatchedOffersIn;
     console.group(
       "[getMatchedOffers] Try to match the next deal configuration with offers:",
     );
@@ -139,11 +139,11 @@ export class DealMatcherClient {
         let offerCursor = 0;
         const offerId = offer.id;
         if (offerId in offerToOfferCursor) {
-          offerCursor = offerToOfferCursor[offerId] as number
+          offerCursor = offerToOfferCursor[offerId] as number;
         } else {
           offerCursor = matchedComputeUnitsData.offers.length;
           offerToOfferCursor[offerId] = offerCursor;
-          matchedComputeUnitsData.offers.push(offerId)
+          matchedComputeUnitsData.offers.push(offerId);
         }
         const peers = offer.peers;
         if (!peers) {
@@ -159,25 +159,28 @@ export class DealMatcherClient {
           for (const computeUnit of peerComputeUnits) {
             computeUnitsMatchedTotal += 1;
 
-            if (matchedComputeUnitsData.computeUnitsPerOffers.length <= offerCursor) {
-              matchedComputeUnitsData.computeUnitsPerOffers.push([computeUnit.id]);
+            if (
+              matchedComputeUnitsData.computeUnitsPerOffers.length <=
+              offerCursor
+            ) {
+              matchedComputeUnitsData.computeUnitsPerOffers.push([
+                computeUnit.id,
+              ]);
             } else {
-              const computeUnitsPerOffers = matchedComputeUnitsData.computeUnitsPerOffers[offerCursor];
+              const computeUnitsPerOffers =
+                matchedComputeUnitsData.computeUnitsPerOffers[offerCursor];
               if (computeUnitsPerOffers === undefined) {
                 throw new Error(
                   `Assertion failed: computeUnitsPerOffers is undefined for offerCursor = ${offerCursor}. 
-                  The data structure is broken: ${matchedComputeUnitsData.computeUnitsPerOffers}.`
-                )
+                  The data structure is broken: ${matchedComputeUnitsData.computeUnitsPerOffers}.`,
+                );
               }
               computeUnitsPerOffers.push(computeUnit.id);
             }
 
             // Check if we're still seeking for free compute units.
             // If yes - early return.
-            if (
-              computeUnitsMatchedTotal ==
-              targetWorkerSlotToMatch
-            ) {
+            if (computeUnitsMatchedTotal == targetWorkerSlotToMatch) {
               matchedComputeUnitsData.fulfilled = true;
               return matchedComputeUnitsData;
             }
@@ -234,17 +237,15 @@ export class DealMatcherClient {
   }
 
   /**
-  * Get compute units and their offers to match provided DealId (address).
+   * Get compute units and their offers to match provided DealId (address).
    * Notice, current structure should match matchDeal() contract arguments.
-  *
-  * 1. Fetches the deal and its configuration from the Indexer backend
-  * 2. Scraps compute units (page by page) until one of the conditions:
-  * - the end of matched offers/peers/compute units
-  * - all target compute units found.
-  */
-  async getMatchedOffersByDealId(
-    dealId: string,
-  ): Promise<GetMatchedOffersOut> {
+   *
+   * 1. Fetches the deal and its configuration from the Indexer backend
+   * 2. Scraps compute units (page by page) until one of the conditions:
+   * - the end of matched offers/peers/compute units
+   * - all target compute units found.
+   */
+  async getMatchedOffersByDealId(dealId: string): Promise<GetMatchedOffersOut> {
     const { deal } = await this._indexerClient.getDeal({ id: dealId });
     if (!deal) {
       throw new DealNotFoundError(dealId);
@@ -258,18 +259,16 @@ export class DealMatcherClient {
     if (deal.effectors == null) {
       throw new Error(`Effectors of a deal: ${dealId} are null - assert.`);
     }
-    return await this.getMatchedOffers(
-      {
-        // TODO: after migrate to another indexer, rm as string.
-        pricePerWorkerEpoch: deal.pricePerWorkerEpoch as string,
-        effectors: deal.effectors.map((effector) => {
-          return effector.effector.id;
-        }),
-        paymentToken: deal.paymentToken.id,
-        targetWorkerSlotToMatch: targetWorkerToMath,
-        minWorkersToMatch: minWorkersToMatch,
-        maxWorkersPerProvider: deal.maxWorkersPerProvider,
-      }
-    );
+    return await this.getMatchedOffers({
+      // TODO: after migrate to another indexer, rm as string.
+      pricePerWorkerEpoch: deal.pricePerWorkerEpoch as string,
+      effectors: deal.effectors.map((effector) => {
+        return effector.effector.id;
+      }),
+      paymentToken: deal.paymentToken.id,
+      targetWorkerSlotToMatch: targetWorkerToMath,
+      minWorkersToMatch: minWorkersToMatch,
+      maxWorkersPerProvider: deal.maxWorkersPerProvider,
+    });
   }
 }
