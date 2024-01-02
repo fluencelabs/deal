@@ -44,7 +44,7 @@ deploy-local: ## Deploy contracts to local
 
 deploy-docker: ## Deploy contracts to docker
 	@make verify-command program=forge
-	@CONTRACTS_ENV_NAME=local forge script script/Deploy.s.sol --rpc-url http://anvil-node:8545  \
+	@CONTRACTS_ENV_NAME=local forge script script/Deploy.s.sol --rpc-url http://chain-rpc:8545  \
 	--mnemonics "test test test test test test test test test test test junk" \
 	--sender 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --broadcast
 
