@@ -56,9 +56,9 @@ jobs:
           path: |
             cache
             out
-          key: ${{ runner.os }}-${{ matrix.arch }}-contracts-${{ hashFiles('foundry.toml', 'src/**/*') }}
+          key: ${{ runner.os }}-amd64-contracts-${{ hashFiles('foundry.toml', 'src/**/*') }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.arch }}-contracts-
+            ${{ runner.os }}-amd64-contracts-
           cache-if: false
 
       - run: make install-npms
@@ -82,9 +82,9 @@ jobs:
           path: |
             cache
             out
-          key: ${{ runner.os }}-${{ matrix.arch }}-contracts-${{ hashFiles('foundry.toml', 'src/**/*') }}
+          key: ${{ runner.os }}-amd64-contracts-${{ hashFiles('foundry.toml', 'src/**/*') }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.arch }}-contracts-
+            ${{ runner.os }}-amd64-contracts-
           cache-if: false
 
       - name: Run Forge build

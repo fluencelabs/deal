@@ -234,6 +234,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Delete local.json
+        run: rm deployments/local.json
+
       - name: Run deployment script
         env:
           CHAIN_RPC_IMAGE: "${{ needs.chain-rpc.outputs.chain-rpc-image }}-amd64"
@@ -246,6 +249,7 @@ jobs:
         with:
           name: local.json
           path: deployments/local.json
+          if-no-files-found: error
 
   npm:
     name: "Publish npm snapshots"
