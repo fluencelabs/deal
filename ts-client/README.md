@@ -1,7 +1,11 @@
 # ts-clients
 
-* [deal-matcher-client](#deal-explorer-client)
+* [Requirements](#requirements)
+* [client](#client)
+* [deal-mather-client](#deal-mather-client)
    * [Context Diagram](#context-diagram)
+   * [Example Local Package Use](#example-local-package-use)
+   * [Start Dependencies](#start-dependencies)
 * [deal-explorer-client](#deal-explorer-client)
    * [Install](#install)
    * [Example UseCase](#example-usecase)
@@ -47,15 +51,14 @@ sequenceDiagram
 ```
 
 ## Example Local Package Use
-From here I suppose you want to develop locally with this package. Thus, you need to prepare all package dependencies to be awaiable locally.
+From here I suppose you want to develop locally with this package. Thus, you need to prepare all package dependencies to run locally.
 
 Thus, we suppose you use:
 - local network
 - node version v18.16.1 (example below is checked with this version)
 - TS with installed package TODO: name. 
 
-## Start Dependencies
-Check completed instruction: [#Develop with Deal Infrastructure](../README.md#Develop-with-Deal-Infrastructure)
+Check completed instruction on how to boot local deal infra: [#Develop with Deal Infrastructure](../README.md#Develop-with-Deal-Infrastructure)
 
 main.js (to run with e.g. via `node --loader ts-node/esm main.ts`) with random dealId:
 ```typescript
@@ -191,6 +194,6 @@ Thus, TS files with `generated` key word you **should not rewrite manually**.
 - [ ] resolve registered workers! (separate class?)
 - [ ] page counter (thanks to graphQL for no paginators)?
 - [x] optional filtering in `.graphql` schemes (discord solution processing...) [currently unsolved]
-- [ ] convert values: timestamps, eths
+- [x] convert values: timestamps, eths
 - [x] move to simple client
 - [ ] codegen - get url from env
