@@ -355,7 +355,7 @@ jobs:
             docker.fluence.dev/subgraph-deploy-script:${{ steps.version.outputs.id }}-${{ matrix.arch }}
 
   manifest:
-    name: "Merge chain-rpc images"
+    name: "Merge container arch images"
     needs:
       - chain-rpc
       - subgraph
