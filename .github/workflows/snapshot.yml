@@ -242,7 +242,7 @@ jobs:
           CHAIN_RPC_IMAGE: "${{ needs.chain-rpc.outputs.chain-rpc-image }}-amd64"
           CHAIN_DEPLOY_SCRIPT_IMAGE: "${{ needs.chain-rpc.outputs.chain-deploy-script-image }}-amd64"
         working-directory: docker
-        run: docker-compose up --no-build chain-deploy-script
+        run: docker-compose run chain-deploy-script
 
       - name: Upload deployments/local.json
         uses: actions/upload-artifact@v4
