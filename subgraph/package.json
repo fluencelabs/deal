@@ -1,5 +1,5 @@
 {
-  "name": "Fluence Deal Subgraph",
+  "name": "fluence-deal-subgraph",
   "license": "UNLICENSED",
   "scripts": {
     "compile": "graph codegen && graph build",
