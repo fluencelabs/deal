@@ -43,8 +43,34 @@ ENTRYPOINT ["make"]
 CMD ["start-local-chain"]
 
 FROM contracts as deal-deploy-script
+
+RUN \
+ apt-get update && \
+ apt-get install -y --no-install-recommends \
+   curl \
+   gpg && \
+ apt-get clean && \
+ rm -rf \
+	/tmp/* \
+	/var/lib/apt/lists/* \
+	/var/tmp/*
+
+# install nodejs 18.x
+RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | gpg --dearmor > /usr/share/keyrings/nodesource.gpg \
+    && echo "deb [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x jammy main" > /etc/apt/sources.list.d/nodesource.list
+RUN \
+ apt-get update && \
+ apt-get install -y --no-install-recommends \
+   nodejs && \
+ apt-get clean && \
+ rm -rf \
+	/tmp/* \
+	/var/lib/apt/lists/* \
+	/var/tmp/*
+
+RUN cd subgraph && npm install && npm run compile && npm run import-config-networks
+
 ENTRYPOINT ["make"]
-CMD ["deploy-docker"]
 
 FROM contracts as dev
 ENTRYPOINT ["sleep", "infinity"]
