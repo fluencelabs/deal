@@ -22,7 +22,7 @@ services:
     build:
       context: ../
       dockerfile: ./docker/Dockerfile
-      target: deal-deploy-script
+      target: chain-deploy-script
     command: ["deploy-docker"]
     depends_on:
       - chain-rpc
