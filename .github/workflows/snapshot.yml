@@ -54,17 +54,14 @@ jobs:
         with:
           version: nightly
 
-      - name: Restore cached contract artifacts
-        id: cache
-        uses: actions/cache/restore@v3
+      - name: Cache contract artifacts
+        uses: actions/cache@v3
         with:
           path: |
             cache
             out
-          key: |
-            ${{ runner.os }}-${{ matrix.arch }}-contracts-${{ hashFiles('foundry.toml', 'src/**/*') }}
+          key: ${{ runner.os }}-${{ matrix.arch }}-contracts-${{ hashFiles('foundry.toml', 'src/**/*') }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.arch }}-contracts-${{ hashFiles('foundry.toml', 'src/**/*') }}
             ${{ runner.os }}-${{ matrix.arch }}-contracts-
 
       - name: Build contracts
@@ -77,14 +74,6 @@ jobs:
           path: |
             cache/**
             out/**
-
-      - name: Cache contract artifacts
-        uses: actions/cache/save@v3
-        with:
-          path: |
-            cache
-            out
-          key: ${{ steps.cache.outputs.cache-primary-key }}
 
   chain-rpc:
     name: "Publish chain-rpc (${{ matrix.arch }})"
