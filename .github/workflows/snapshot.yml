@@ -411,3 +411,29 @@ jobs:
           images: ${{ needs.subgraph.outputs.subgraph-deploy-script-image }}-amd64,${{ needs.subgraph.outputs.subgraph-deploy-script-image }}-arm64
           push: true
           amend: true
+
+      - name: Print image names to check summary
+        if: always()
+        run: |
+          cat <<'SNAPSHOT' >> $GITHUB_STEP_SUMMARY
+          ## chain-rpc
+          ```
+          ${{ needs.chain-rpc.outputs.chain-rpc-image }}
+          ```
+
+          ## chain-deploy-script
+          ```
+          ${{ needs.chain-rpc.outputs.chain-deploy-script-image }}
+          ```
+
+          ## subraph-seploy-script
+          ```
+          ${{ needs.subgraph-deploy-script.outputs.chain-deploy-script-image }}
+          ```
+
+          ## Access to Fluence docker registry
+          ```
+          vault read kv/basicauth/dev
+          docker login docker.fluence.dev
+          ```
+          SNAPSHOT
