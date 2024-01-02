@@ -184,12 +184,6 @@ jobs:
           tags: |
             docker.fluence.dev/chain-deploy-script:${{ steps.version.outputs.id }}-${{ matrix.arch }}
 
-      - name: Upload contracts artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: contracts-image-${{ matrix.arch }}
-          path: ${{ runner.temp }}/contracts.tar
-
   deploy:
     name: "Generate local.json"
     needs:
