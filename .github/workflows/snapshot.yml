@@ -61,6 +61,7 @@ jobs:
             foundry/cache
             foundry/out
           key: |
+            ${{ runner.os }}-${{ matrix.arch }}-contracts-${{ hashFiles('foundry.toml', 'src/**/*') }}
             ${{ runner.os }}-${{ matrix.arch }}-contracts-
 
       - name: Build contracts
@@ -80,7 +81,9 @@ jobs:
           path: |
             foundry/cache
             foundry/out
-          key: ${{ runner.os }}-${{ matrix.arch }}-contracts-${{ hashFiles('foundry.toml', 'src/**/*') }}
+          key: |
+            ${{ runner.os }}-${{ matrix.arch }}-contracts-${{ hashFiles('foundry.toml', 'src/**/*') }}
+            ${{ runner.os }}-${{ matrix.arch }}-contracts-
 
   chain-rpc:
     name: "Publish chain-rpc (${{ matrix.arch }})"
