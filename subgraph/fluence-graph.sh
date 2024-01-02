@@ -17,6 +17,9 @@ Examples:
 HELP
 }
 
+# Print help if no arguments provided
+! (($#)) && help && exit 0
+
 # Parse script arguments
 while (($#)); do
   case "$1" in
