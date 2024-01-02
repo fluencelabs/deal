@@ -500,9 +500,9 @@ jobs:
           ${{ needs.chain-rpc.outputs.chain-deploy-script-image }}
           ```
 
-          ## subraph-seploy-script
+          ## subgraph-seploy-script
           ```
-          ${{ needs.subgraph-deploy-script.outputs.subgraph-deploy-script-image }}
+          ${{ needs.subgraph.outputs.subgraph-deploy-script-image }}
           ```
 
           ## Access to Fluence docker registry
