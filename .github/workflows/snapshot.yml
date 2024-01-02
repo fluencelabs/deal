@@ -29,16 +29,65 @@ env:
   FOUNDRY_PROFILE: "ci"
 
 jobs:
-  chain-rpc:
-    name: "Publish chain-rpc (${{ matrix.arch }})"
+  forge:
+    name: "Build contracts (${{ matrix.arch }})"
 
     strategy:
       matrix:
         include:
           - arch: amd64
-            runner: linux-amd64-m-xlarge
+            runner: linux-amd64-m-2xlarge
           - arch: arm64
-            runner: linux-arm64-m-xlarge
+            runner: linux-arm64-m-2xlarge
+
+    runs-on: ${{ matrix.runner }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: fluencelabs/deal
+          ref: ${{ inputs.ref }}
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Build contracts
+        run: make build-contracts
+
+      - name: Upload contracts
+        uses: actions/upload-artifact@v4
+        with:
+          name: contracts-${{ matrix.arch }}
+          path: |
+            cache/**
+            out/**
+
+      - name: Cache contract artifacts
+        uses: actions/cache@v3
+        with:
+          path: |
+            foundry/cache
+            foundry/out
+          key: ${{ runner.os }}-${{ matrix.arch }}-contracts-${{ hashFiles('foundry.toml', 'src/**/*') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.arch }}-contracts-
+
+  chain-rpc:
+    name: "Publish chain-rpc (${{ matrix.arch }})"
+
+    depends:
+      - contracts
+
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            runner: linux-amd64-m-2xlarge
+          - arch: arm64
+            runner: linux-arm64-m-2xlarge
 
     runs-on: ${{ matrix.runner }}
 
@@ -93,6 +142,11 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
 
+      - name: Download contract artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: contracts-${{ matrix.arch }}
+
       - name: Build contracts
         uses: docker/build-push-action@v4
         with:
@@ -101,7 +155,6 @@ jobs:
           target: contracts
           platforms: linux/${{ matrix.arch }}
           tags: contracts
-          outputs: type=docker,dest=${{ runner.temp }}/contracts.tar
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -189,7 +242,7 @@ jobs:
 
   npm:
     name: "Publish npm snapshots"
-    runs-on: linux-amd64-m-xlarge
+    runs-on: linux-amd64-m-2xlarge
     timeout-minutes: 60
 
     needs: deploy
@@ -237,16 +290,18 @@ jobs:
         with:
           version: nightly
 
+      - name: Download contract artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: contracts-${{ matrix.arch }}
+
       - name: Download deployments/local.json
         uses: actions/download-artifact@v4
         with:
           name: local.json
           path: deployments/
 
-      - name: Build contracts
-        run: make build-contracts
-
-      - name: Build contracts and npm packages
+      - name: Install npm dependencies
         run: make install-npms
 
       - name: Build npm packages
@@ -334,22 +389,26 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
 
+      - name: Download contract artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: contracts-${{ matrix.arch }}
+
       - name: Download deployments/local.json
         uses: actions/download-artifact@v4
         with:
           name: local.json
           path: deployments/
 
-      - name: Download contracts image
-        uses: actions/download-artifact@v3
+      - name: Build contracts
+        uses: docker/build-push-action@v4
         with:
-          name: contracts-image-${{ matrix.arch }}
-          path: ${{ runner.temp }}
-
-      - name: Load contracts image
-        run: |
-          docker load --input ${{ runner.temp }}/contracts.tar
-          docker image ls -a
+          context: .
+          file: docker/Dockerfile
+          target: contracts
+          platforms: linux/${{ matrix.arch }}
+          tags: contracts
+          cache-from: type=gha
 
       - name: Build and push subgraph-deploy-script image
         id: subgraph-deploy-script
