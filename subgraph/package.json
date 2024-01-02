@@ -16,7 +16,7 @@
     "graph-node": "docker-compose up -d",
     "graph-local-clean": "docker-compose down -v",
     "fmt": "prettier 'src/**/*.ts' --w",
-    "impors-config-networks": "npx ts-node --esm scripts/import-config-networks.ts"
+    "import-config-networks": "npx ts-node --esm scripts/import-config-networks.ts"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.64.1",
