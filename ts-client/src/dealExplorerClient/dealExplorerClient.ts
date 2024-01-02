@@ -31,10 +31,8 @@ import type {
   ProvidersFilters,
 } from "./filters.js";
 import { IndexerClient } from "./indexerClient/indexerClient.js";
-import type {
-  BasicOfferFragment,
-  ProviderOfProvidersQueryFragment,
-} from "./indexerClient/queries/providers-query.generated.js";
+import type { BasicOfferFragment } from "./indexerClient/queries/offers-query.generated.js";
+import type { ProviderOfProvidersQueryFragment } from "./indexerClient/queries/providers-query.generated.js";
 import type {
   Deal_Filter,
   Deal_OrderBy,
@@ -128,7 +126,9 @@ export class DealExplorerClient {
     const composedOffers = [];
     if (provider.offers) {
       for (const offer of provider.offers) {
-        composedOffers.push(this._composeOfferShort(offer));
+        composedOffers.push(
+          this._composeOfferShort(offer as BasicOfferFragment),
+        );
       }
     }
     return {
@@ -142,6 +142,9 @@ export class DealExplorerClient {
   ): Promise<Provider_Filter> {
     if (!providersFilters) {
       return {};
+    }
+    if (providersFilters.onlyApproved) {
+      console.warn("Currently onlyApproved field does not implemented.");
     }
     const convertedFilters: Provider_Filter = { and: [] };
     if (providersFilters.search) {
@@ -286,15 +289,21 @@ export class DealExplorerClient {
     return {
       id: offer.id,
       createdAt: Number(offer.createdAt),
-      totalComputeUnits: offer.computeUnitsTotal,
-      freeComputeUnits: offer.computeUnitsAvailable,
+      totalComputeUnits: Number(offer.computeUnitsTotal ?? 0),
+      freeComputeUnits: Number(offer.computeUnitsAvailable ?? 0),
       paymentToken: {
         address: offer.paymentToken.id,
         symbol: offer.paymentToken.symbol,
         decimals: offer.paymentToken.decimals.toString(),
       },
+      pricePerEpoch: tokenValueToRounded(
+        offer.pricePerEpoch,
+        this.DEFAULT_TOKEN_VALUE_ROUNDING,
+        offer.paymentToken.decimals,
+      ),
       effectors: this._composeEffectors(offer.effectors),
-    } as OfferShort;
+      providerId: offer.provider.id,
+    };
   }
 
   _convertOfferShortOrderByToIndexerType(v: OfferShortOrderBy): Offer_OrderBy {

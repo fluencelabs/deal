@@ -1,6 +1,17 @@
-https://book.getfoundry.sh/
-
 Deal Contracts System
+---
+
+This repo consists of 3 main parts:
+- `contracts` - Foundry (read more https://book.getfoundry.sh/). Generally, repo follow structure of Foundry repo.
+- `subgraph` - javascript client to interact with the graph node (read more https://thegraph.com/docs/quick-start)
+- `ts-client` - npm package from contract developers to interact with contracts
+
+To access to the general points of the each part in the repo root **makefile** is presented. Below are main commands of the makefile.
+
+# Requirement
+- foundry
+- makefile (TODO)
+- node version 18.16
 
 # Contract
 ## Install Foundry
@@ -33,10 +44,10 @@ $ make build-contracts
 $ make build-npms
 ```
 
-### Update abi for subgraph and ts-client
+## Start Local Subgraph
 
 ```shell
-$ make update-abi
+$ make start-local-subgraph
 ```
 
 ## Start local network using docker
@@ -94,10 +105,7 @@ It is a backend for the contracts that collects info from contract events into g
 
 For more info check out [README.md](subgraph/README.md).
 
-# ToDo
-- [ ] we could not be certain that on docker compose up it will deploy on the same addresses, as stated in [ts-client/deployments](ts-client/deployments): mount volume? compose deployments? use the same script that will update in the same format in deployments.
-
-## Develop
+## Develop Tricks & Tips
 After [starting local network](#start-local-network-locally) you could create market on our contracts:
 
 ```shell

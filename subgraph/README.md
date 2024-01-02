@@ -8,11 +8,13 @@
 - `mappings.ts` - consists of event handlers and populating logic of `schema.graphql` above.
 - `build/` - The auto-generated folder by The Graph's CLI
 - `generated/` - The auto-generated folder by The Graph's CLI
+- `scripts/`
+  - [import-config-networks.ts](scripts/import-config-networks.ts) - to populate configs with networks from Foundry deployments for contrasts needed to be indexed (script should be used via `nom run import-config-networks` command).
 
 # Develop
 To start local development with TheGraph and Hardhat:
 
-> Note, that when you are working with upgradeble contracts - you leave addresses of proxies, but ABIs of real implementations. Thus, [importContractsAbi.ts](scripts/importContractsAbi.ts) should be maintained with implementations only, and [subgraph.yaml](subgraph.yaml) with addresses of proxies only.
+> Note, that when you are working with upgradable contracts - you leave addresses of proxies, but ABIs of real implementations.
 
 ## Setup Environment for Local Subgraph
 1. Run hardhat node from the **root** of the project:
@@ -100,7 +102,7 @@ npm run deploy:studio:stage
 ```
 
 ## To Hosted Service [not for subnets]
-> Note, this solution for deploy only on supported testnets, and instead of  **Studio** deploy it gives you full featured query API for free (not simple dev quiery). 
+> Note, this solution for deploy only on supported testnets, and instead of  **Studio** deploy it gives you full featured query API for free (not simple dev query). 
 
 0. Get your token: https://thegraph.com/docs/en/deploying/deploying-a-subgraph-to-hosted/#store-the-access-token
 ```bash
