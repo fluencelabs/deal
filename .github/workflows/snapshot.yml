@@ -392,7 +392,7 @@ jobs:
         uses: Noelware/docker-manifest-action@0.4.0
         with:
           inputs: ${{ needs.chain-rpc.outputs.chain-rpc-image }}
-          images: ${{ needs.chaon-rpc.outputs.chain-rpc-image }}-amd64,${{ needs.chain-rpc.outputs.chain-rpc-image }}-arm64
+          images: ${{ needs.chain-rpc.outputs.chain-rpc-image }}-amd64,${{ needs.chain-rpc.outputs.chain-rpc-image }}-arm64
           push: true
           amend: true
 
