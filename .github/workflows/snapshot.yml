@@ -340,15 +340,6 @@ jobs:
           name: local.json
           path: deployments/
 
-      - name: Build contracts
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: docker/Dockerfile
-          target: contracts
-          platforms: linux/${{ matrix.arch }}
-          cache-from: type=gha
-
       - name: Download contracts image
         uses: actions/download-artifact@v3
         with:
