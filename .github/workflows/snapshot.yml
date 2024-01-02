@@ -168,8 +168,8 @@ jobs:
 
       - name: Run deployment script
         env:
-          CHAIN_RPC_IMAGE: "${{ needs.containers.outputs.chain-rpc-image }}-amd64"
-          CHAIN_DEPLOY_SCRIPT_IMAGE: "${{ needs.containers.outputs.chain-deploy-script-image }}-amd64"
+          CHAIN_RPC_IMAGE: "${{ needs.chain-rpc.outputs.chain-rpc-image }}-amd64"
+          CHAIN_DEPLOY_SCRIPT_IMAGE: "${{ needs.chain-rpc.outputs.chain-deploy-script-image }}-amd64"
         working-directory: docker
         run: docker-compose up deal-deploy-script
 
@@ -358,7 +358,7 @@ jobs:
     name: "Merge chain-rpc images"
     needs:
       - chain-rpc
-      - sugraph
+      - subgraph
 
     runs-on: ubuntu-latest
 
@@ -391,8 +391,8 @@ jobs:
       - name: Merge chain-rpc images
         uses: Noelware/docker-manifest-action@0.4.0
         with:
-          inputs: ${{ needs.containers.outputs.chain-rpc-image }}
-          images: ${{ needs.containers.outputs.chain-rpc-image }}-amd64,${{ needs.containers.outputs.chain-rpc-image }}-arm64
+          inputs: ${{ needs.chain-rpc.outputs.chain-rpc-image }}
+          images: ${{ needs.chaon-rpc.outputs.chain-rpc-image }}-amd64,${{ needs.chain-rpc.outputs.chain-rpc-image }}-arm64
           push: true
           amend: true
 
