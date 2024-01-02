@@ -4,6 +4,8 @@ export
 .DEFAULT_GOAL := help
 .PHONY: help
 
+CHAIN_RPC_URL ?= http://chain-rpc:8545
+
 verify-command: ## Verify command
 	@command -v $(program) > /dev/null || (echo "\033[0;31m$(program) is not installed. Please install $(program) and try again.\033[0m" && exit 1)
 
@@ -44,7 +46,7 @@ deploy-local: ## Deploy contracts to local
 
 deploy-docker: ## Deploy contracts to docker
 	@make verify-command program=forge
-	@CONTRACTS_ENV_NAME=local forge script script/Deploy.s.sol --rpc-url http://chain-rpc:8545  \
+	@CONTRACTS_ENV_NAME=local forge script script/Deploy.s.sol --rpc-url $(CHAIN_RPC_URL) \
 	--mnemonics "test test test test test test test test test test test junk" \
 	--sender 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --broadcast
 
