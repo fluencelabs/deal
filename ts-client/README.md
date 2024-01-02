@@ -46,36 +46,18 @@ sequenceDiagram
     fCli -) matcher: send data structure to matchDeal()
 ```
 
-## Example Use with Dependencies
+## Example Local Package Use
+From here I suppose you want to develop locally with this package. Thus, you need to prepare all package dependencies to be awaiable locally.
+
+Thus, we suppose you use:
 - local network
-- node version v18.16.1
-- TS
+- node version v18.16.1 (example below is checked with this version)
+- TS with installed package TODO: name. 
 
 ## Start Dependencies
-TODO: @nashi could prepare new flow or better containers as result of https://github.com/fluencelabs/deal/pull/180
+Check completed instruction: [#Develop with Deal Infrastructure](../README.md#Develop-with-Deal-Infrastructure)
 
-1. You are in root of the Deal repo.
-2. Start chain node containers:
-```bash
-docker compose -f ./docker/docker-compose.yml up
-```
-3. Wait for **deploy** docker container script.
-4. 
-```bash 
-make install-npms
-make build-npms
-```
-5. Start subgpraph
-```bash
-docker compose -f ./subgraph/docker-compose.yml up -d
-```
-6. Wait subgraph to start
-7. 
-```bash
-make start-local-subgraph
-```
-
-main.js (to run with e.g. via `node --loader ts-node/esm main.ts`):
+main.js (to run with e.g. via `node --loader ts-node/esm main.ts`) with random dealId:
 ```typescript
 import { DealMatcherClient } from "@fluencelabs/deal-aurora";
 
@@ -92,6 +74,7 @@ const asyncRuntimeDecorator: asyncRuntimeDecoratorType = (func) => {
 
 async function main() {
     const stand = "local"
+    // TODO: place your dealID below.
     const dealId = "0x00...0"
 
     // General typed class to use.
