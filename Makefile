@@ -24,8 +24,7 @@ build-npms: ## Build npms
 	@cd subgraph && npm run compile && npm run import-config-networks
 	@echo "\033[0;32mSuccess! Build of all NPM packages completed.\033[0m"
 
-build-all: ## Build contracts and npms
-	build-contracts build-npms
+build-all: build-contracts build-npms ## Build contracts and npms
 
 start-local-chain: ## Start local chain
 	@make verify-command program=anvil
