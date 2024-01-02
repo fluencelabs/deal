@@ -60,7 +60,7 @@ async function main() {
       continue;
     }
     const contractDeployment = deploymentJson[REQUIRED_DEPLOYED_CONTRACT_NAME]
-    if (!(contractDeployment.addr && contractDeployment.blockNumber)) {
+    if (!(contractDeployment.addr != null && contractDeployment.blockNumber != null)) {
       console.warn(`addr or blockNumber not found for stand ${standName} in ${JSON.stringify(contractDeployment)} deployment, skip...`)
       continue;
     }
