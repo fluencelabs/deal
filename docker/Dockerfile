@@ -18,8 +18,7 @@ RUN \
   	/var/lib/apt/lists/* \
   	/var/tmp/*
 ENV FOUNDRY_DIR /opt/foundry
-ADD https://raw.githubusercontent.com/foundry-rs/foundry/master/foundryup/install /opt/foundry/install
-RUN bash /opt/foundry/install && /opt/foundry/bin/foundryup
+RUN curl -sS https://raw.githubusercontent.com/foundry-rs/foundry/master/foundryup/install | bash && /opt/foundry/bin/foundryup
 
 # Base image with compiled contracts that is used by anvil and by deploy scripts
 FROM ubuntu:22.04 as contracts

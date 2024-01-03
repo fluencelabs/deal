@@ -161,17 +161,6 @@ jobs:
         with:
           name: contracts-${{ matrix.arch }}
 
-      - name: Prepare foundry container
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: docker/Dockerfile
-          target: foundry
-          platforms: linux/${{ matrix.arch }}
-          tags: foundry
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
       - name: Build contracts
         uses: docker/build-push-action@v4
         with:
@@ -480,16 +469,6 @@ jobs:
         with:
           name: local.json
           path: deployments/
-
-      - name: Prepare foundry container
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: docker/Dockerfile
-          target: foundry
-          platforms: linux/${{ matrix.arch }}
-          tags: foundry
-          cache-from: type=gha
 
       - name: Build contracts
         uses: docker/build-push-action@v4
