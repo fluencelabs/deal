@@ -380,7 +380,7 @@ jobs:
           release: ${{ inputs.release }}
         run: |
           if [[ $release ]]; then
-            echo "deal-ts-clients=${{ steps.version.outputs.id }}.0" >> "$GITHUB_OUTPUT"
+            echo "deal-ts-clients=${{ steps.deal-ts-clients.outputs.version }}" >> "$GITHUB_OUTPUT"
           else
             version="$(jq -r .[] .github/release-please/manifest.json)"
             echo "deal-ts-clients=${version}" >> "$GITHUB_OUTPUT"
