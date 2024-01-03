@@ -44,3 +44,14 @@ jobs:
         uses: tj-actions/renovate-config-validator@v2
         with:
           config_file: .github/renovate.json
+
+  bump-version:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+        cat<<EXPL
+        bump-version is added to required checks but only runs when release PR
+        is opened.
+        It is needed to to disallow merging release PR before bump-version job
+        is finished.
+        EXPL
