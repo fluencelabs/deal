@@ -66,6 +66,7 @@ while [[ $retries > 0 ]]; do
   status_code=$(curl -o /dev/null -s -w "%{http_code}\n" -X POST -H "Content-Type: application/json" -d '{"foo":"bar"}' ${GRAPHNODE_URL})
   if [[ $status_code == "200" ]]; then
     echo "Succesfully connected to Graph Node."
+    sleep 10
     break
   else
     echo "Couldn't connect to Graph Node. Retrying in 5 seconds (retries left: ${retries})"
