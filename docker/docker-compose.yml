@@ -1,11 +1,15 @@
-# This docker-compose is used for DEV purposes.
-# It consists of deploy-script container with volume mounting to the host:
+# This docker-compose is used for DEV purposes. It is also used in CI
+# to generate deployments/local.json file.
+#
+# It consists of chain-deploy-script container with volume mounting to the host:
 #  - thus, your deployments/<>.json might be changed after contract redeployed;
-#  - also, out/ with contract artifacts is mounted to the host as well.
+#  - also, cache/ and out/ with contract artifacts is mounted to the host as well.
 #
 # To use from ../: `docker compose -f ./docker/docker-compose.yml up`.
+#
 # Note, if you changed contracts and what to use docker-compose instead of local make command to deploy
 #  - you should rebuild with --build flag.
+#
 # Note, deploy may take some time, check logs.
 services:
   # Anvil node with deployed contracts
