@@ -1,4 +1,4 @@
-name: Publish snapshots
+name: Publish artifacts
 
 on:
   workflow_call:
@@ -6,14 +6,14 @@ on:
       ref:
         description: "GitHub ref to checkout to"
         type: string
-        default: "master"
+        default: "main"
+      release:
+        type: boolean
+        default: false
     outputs:
       deal-ts-clients-version:
         description: "@fluencelabs/deal-ts-clients version"
-        value: ${{ jobs.npm.outputs.deal-ts-clients-version }}
-      subgraph-version:
-        description: "@fluencelabs/subgraph version"
-        value: ${{ jobs.npm.outputs.subgraph-version }}
+        value: ${{ jobs.deal-ts-clients.outputs.version }}
       subgraph-deploy-script-image:
         description: "subgraph-deploy-script image"
         value: ${{ jobs.subgraph.outputs.subgraph-deploy-script-image }}
@@ -92,8 +92,8 @@ jobs:
     runs-on: ${{ matrix.runner }}
 
     outputs:
-      chain-rpc-image: "docker.fluence.dev/chain-rpc:${{ steps.version.outputs.id }}"
-      chain-deploy-script-image: "docker.fluence.dev/chain-deploy-script:${{ steps.version.outputs.id }}"
+      chain-rpc-image: "${{ steps.artifacts.outputs.chain-rpc-image }}"
+      chain-deploy-script-image: "${{ steps.artifacts.outputs.chain-deploy-script-image }}"
 
     permissions:
       contents: read
@@ -126,6 +126,20 @@ jobs:
         id: version
         uses: fluencelabs/github-actions/generate-snapshot-id@main
 
+      - name: Construct artifacts names
+        id: artifacts
+        env:
+          release: ${{ inputs.release }}
+        run: |
+          if [[ ${release} ]]; then
+            echo "chain-rpc-image=docker.fluence.dev/chain-rpc:${{ steps.version.outputs.id }}" >> "$GITHUB_OUTPUT"
+            echo "chain-deploy-script-image=docker.fluence.dev/chain-deploy-script:${{ steps.version.outputs.id }}" >> "$GITHUB_OUTPUT"
+          else
+            version="$(jq -r .[] .github/release-please/manifest.json)"
+            echo "chain-rpc-image=fluencelabs/chain-rpc:${version}" >> "$GITHUB_OUTPUT"
+            echo "chain-deploy-script-image=fluencelabs/chain-deploy-script:${version}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -146,6 +160,17 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: contracts-${{ matrix.arch }}
+
+      - name: Prepare foundry container
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: docker/Dockerfile
+          target: foundry
+          platforms: linux/${{ matrix.arch }}
+          tags: foundry
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Build contracts
         uses: docker/build-push-action@v4
@@ -169,7 +194,7 @@ jobs:
           target: chain-rpc
           platforms: linux/${{ matrix.arch }}
           tags: |
-            docker.fluence.dev/chain-rpc:${{ steps.version.outputs.id }}-${{ matrix.arch }}
+            ${{ steps.artifacts.outputs.chain-rpc-image }}-${{ matrix.arch }}
 
       - name: Build and push chain-deploy-script image
         id: chain-deploy-script
@@ -182,7 +207,7 @@ jobs:
           target: chain-deploy-script
           platforms: linux/${{ matrix.arch }}
           tags: |
-            docker.fluence.dev/chain-deploy-script:${{ steps.version.outputs.id }}-${{ matrix.arch }}
+            ${{ steps.artifacts.outputs.chain-deploy-script-image }}-${{ matrix.arch }}
 
   deploy:
     name: "Generate local.json"
@@ -213,8 +238,16 @@ jobs:
           jwtTtl: 300
           exportToken: false
           secrets: |
+            kv/hub.docker.com/fluencebot username | DOCKER_HUB_USERNAME ;
+            kv/hub.docker.com/fluencebot password | DOCKER_HUB_PASSWORD ;
             kv/docker-registry/basicauth/ci username | DOCKER_USERNAME ;
             kv/docker-registry/basicauth/ci password | DOCKER_PASSWORD
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKER_HUB_USERNAME }}
+          password: ${{ env.DOCKER_HUB_PASSWORD }}
 
       - name: Login to private docker registry
         uses: docker/login-action@v3
@@ -250,16 +283,23 @@ jobs:
           path: deployments/local.json
           if-no-files-found: error
 
-  npm:
-    name: "Publish npm snapshots"
-    runs-on: linux-amd64-m-2xlarge
-    timeout-minutes: 60
+      - name: Commit local.json
+        if: github.event_name == 'pull_request'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update local.json"
+          commit_user_name: fluencebot
+          commit_user_email: devops@fluence.one
+          commit_author: fluencebot <devops@fluence.one>
+
+  deal-ts-clients:
+    name: "Publish deal-ts-clients snapshot"
+    runs-on: ubuntu-latest
 
     needs: deploy
 
     outputs:
-      deal-ts-clients-version: "${{ steps.deal-ts-clients.outputs.version }}"
-      subgraph-version: "${{ steps.subgraph.outputs.version }}"
+      version: "${{ steps.artifacts.outputs.deal-ts-clients }}"
 
     permissions:
       contents: read
@@ -283,17 +323,30 @@ jobs:
           jwtTtl: 300
           exportToken: false
           secrets: |
-            kv/npm-registry/basicauth/ci token | NODE_AUTH_TOKEN
+            kv/npm-registry/basicauth/ci token | NODE_AUTH_SNAPSHOT_TOKEN ;
+            kv/npmjs/fluencebot token | NODE_AUTH_RELEASE_TOKEN
 
       - name: Setup node with self-hosted npm registry
+        if: inputs.release == false
         uses: actions/setup-node@v3
+        env:
+          NODE_AUTH_TOKEN: "${{ env.NODE_AUTH_SNAPSHOT_TOKEN }}"
         with:
           node-version: "18"
           registry-url: "https://npm.fluence.dev"
           cache: "npm"
-          cache-dependency-path: |
-            ts-client/package-lock.json
-            subgraph/package-lock.json
+          cache-dependency-path: ts-client/package-lock.json
+
+      - name: Setup node with official npm registry
+        if: inputs.release == false
+        uses: actions/setup-node@v3
+        env:
+          NODE_AUTH_TOKEN: "${{ env.NODE_AUTH_RELEASE_TOKEN }}"
+        with:
+          node-version: "18"
+          registry-url: "https://registry.npmjs.org"
+          cache: "npm"
+          cache-dependency-path: ts-client/package-lock.json
 
       - name: Download contract artifacts
         uses: actions/download-artifact@v4
@@ -306,29 +359,40 @@ jobs:
           name: local.json
           path: deployments/
 
-      - name: Install npm dependencies
-        run: make install-npms
+      - working-directory: ts-client/
+        run: npm install
 
-      - name: Build npm packages
-        run: make build-npms
+      - working-directory: ts-client/
+        run: npm run build
 
       - name: Generate snapshot version
         id: version
         uses: fluencelabs/github-actions/generate-snapshot-id@main
 
       - name: Publish deal-ts-clients snapshot
+        if: inputs.release == false
         id: deal-ts-clients
         uses: fluencelabs/github-actions/npm-publish-snapshot@main
         with:
           id: ${{ steps.version.outputs.id }}
           working-directory: ts-client/
 
-      - name: Publish subgraph snapshot
-        id: subgraph
-        uses: fluencelabs/github-actions/npm-publish-snapshot@main
-        with:
-          id: ${{ steps.version.outputs.id }}
-          working-directory: subgraph/
+      - name: Publish deal-ts-clients release
+        if: inputs.release == true
+        working-directory: ts-client/
+        run: npm publish --access public --tag unstable
+
+      - name: Construct artifacts names
+        id: artifacts
+        env:
+          release: ${{ inputs.release }}
+        run: |
+          if [[ $release ]]; then
+            echo "deal-ts-clients-version=${{ steps.version.outputs.id }}-1.0" >> "$GITHUB_OUTPUT"
+          else
+            version="$(jq -r .[] .github/release-please/manifest.json)"
+            echo "deal-ts-clients-version=${version}" >> "$GITHUB_OUTPUT"
+          fi
 
   subgraph:
     name: "Publish subgraph-deploy-script (${{ matrix.arch }})"
@@ -345,7 +409,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
 
     outputs:
-      subgraph-deploy-script-image: "docker.fluence.dev/subgraph-deploy-script:${{ steps.version.outputs.id }}"
+      subgraph-deploy-script-image: "${{ steps.artifacts.outputs.subgraph-deploy-script-image }}"
 
     permissions:
       contents: read
@@ -394,6 +458,18 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
 
+      - name: Construct artifacts names
+        id: artifacts
+        env:
+          release: ${{ inputs.release }}
+        run: |
+          if [[ $release ]]; then
+            echo "subgraph-deploy-script-image=docker.fluence.dev/subgraph-deploy-script-image:${{ steps.version.outputs.id }}" >> "$GITHUB_OUTPUT"
+          else
+            version="$(jq -r .[] .github/release-please/manifest.json)"
+            echo "subgraph-deploy-script-image=fluencelabs/subgraph-deploy-script-image:${version}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Download contract artifacts
         uses: actions/download-artifact@v4
         with:
@@ -404,6 +480,16 @@ jobs:
         with:
           name: local.json
           path: deployments/
+
+      - name: Prepare foundry container
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: docker/Dockerfile
+          target: foundry
+          platforms: linux/${{ matrix.arch }}
+          tags: foundry
+          cache-from: type=gha
 
       - name: Build contracts
         uses: docker/build-push-action@v4
@@ -426,7 +512,7 @@ jobs:
           target: subgraph-deploy-script
           platforms: linux/${{ matrix.arch }}
           tags: |
-            docker.fluence.dev/subgraph-deploy-script:${{ steps.version.outputs.id }}-${{ matrix.arch }}
+            ${{ steps.artifacts.outputs.subgraph-deploy-script-image }}-${{ matrix.arch }}
 
   manifest:
     name: "Merge container arch images"
@@ -452,8 +538,16 @@ jobs:
           jwtTtl: 300
           exportToken: false
           secrets: |
+            kv/hub.docker.com/fluencebot username | DOCKER_HUB_USERNAME ;
+            kv/hub.docker.com/fluencebot password | DOCKER_HUB_PASSWORD ;
             kv/docker-registry/basicauth/ci username | DOCKER_USERNAME ;
             kv/docker-registry/basicauth/ci password | DOCKER_PASSWORD
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKER_HUB_USERNAME }}
+          password: ${{ env.DOCKER_HUB_PASSWORD }}
 
       - name: Login to private docker registry
         uses: docker/login-action@v3
