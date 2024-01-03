@@ -168,6 +168,17 @@ jobs:
         with:
           name: contracts-${{ matrix.arch }}
 
+      - name: Build contracts
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile
+          target: contracts
+          platforms: linux/${{ matrix.arch }}
+          tags: contracts
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
       - name: Build and push chain-rpc image
         id: chain-rpc
         uses: docker/build-push-action@v5
@@ -468,6 +479,16 @@ jobs:
         with:
           name: local.json
           path: deployments/
+
+      - name: Build contracts
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile
+          target: contracts
+          platforms: linux/${{ matrix.arch }}
+          tags: contracts
+          cache-from: type=gha
 
       - name: Build and push subgraph-deploy-script image
         id: subgraph-deploy-script
