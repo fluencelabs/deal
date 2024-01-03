@@ -44,7 +44,7 @@ CMD ["start-local-chain"]
 
 FROM contracts as chain-deploy-script
 ENTRYPOINT ["make"]
-CMD ["depoy-docker"]
+CMD ["deploy-docker"]
 
 FROM contracts as subgraph-deploy-script
 
