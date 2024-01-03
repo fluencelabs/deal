@@ -1,4 +1,4 @@
-name: Publish snapshots
+name: Publish artifacts
 
 on:
   workflow_call:
@@ -92,8 +92,8 @@ jobs:
     runs-on: ${{ matrix.runner }}
 
     outputs:
-      chain-rpc-image: "docker.fluence.dev/chain-rpc:${{ steps.version.outputs.id }}"
-      chain-deploy-script-image: "docker.fluence.dev/chain-deploy-script:${{ steps.version.outputs.id }}"
+      chain-rpc-image: "${{ steps.artifacts.outputs.chain-rpc-image }}"
+      chain-deploy-script-image: "${{ steps.artifacts.outputs.chain-deploy-script-image }}"
 
     permissions:
       contents: read
@@ -125,6 +125,18 @@ jobs:
       - name: Generate snapshot version
         id: version
         uses: fluencelabs/github-actions/generate-snapshot-id@main
+
+      - name: Construct artifacts name
+        id: artifacts
+        run: |
+          if [[ ${{ inputs.release }} ]]; then
+            echo "chain-rpc-image=docker.fluence.dev/chain-rpc:${{ steps.version.outputs.id }}" >> "$GITHUB_OUTPUT"
+            echo "chain-deploy-script-image=docker.fluence.dev/chain-deploy-script:${{ steps.version.outputs.id }}" >> "$GITHUB_OUTPUT"
+          else
+            version="$(jq -r .[] .github/release-please/manifest.json)"
+            echo "chain-rpc-image=fluencelabs/chain-rpc:${version}" >> "$GITHUB_OUTPUT"
+            echo "chain-deploy-script-image=fluencelabs/chain-deploy-script:${version}" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -169,7 +181,7 @@ jobs:
           target: chain-rpc
           platforms: linux/${{ matrix.arch }}
           tags: |
-            docker.fluence.dev/chain-rpc:${{ steps.version.outputs.id }}-${{ matrix.arch }}
+            ${{ steps.artifacts.outputs.chain-rpc-image }}-${{ matrix.arch }}
 
       - name: Build and push chain-deploy-script image
         id: chain-deploy-script
@@ -182,7 +194,7 @@ jobs:
           target: chain-deploy-script
           platforms: linux/${{ matrix.arch }}
           tags: |
-            docker.fluence.dev/chain-deploy-script:${{ steps.version.outputs.id }}-${{ matrix.arch }}
+            ${{ steps.artifacts.outputs.chain-deploy-script-image }}-${{ matrix.arch }}
 
   deploy:
     name: "Generate local.json"
@@ -213,8 +225,16 @@ jobs:
           jwtTtl: 300
           exportToken: false
           secrets: |
+            kv/hub.docker.com/fluencebot username | DOCKER_HUB_USERNAME ;
+            kv/hub.docker.com/fluencebot password | DOCKER_HUB_PASSWORD ;
             kv/docker-registry/basicauth/ci username | DOCKER_USERNAME ;
             kv/docker-registry/basicauth/ci password | DOCKER_PASSWORD
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKER_HUB_USERNAME }}
+          password: ${{ env.DOCKER_HUB_PASSWORD }}
 
       - name: Login to private docker registry
         uses: docker/login-action@v3
@@ -250,6 +270,15 @@ jobs:
           path: deployments/local.json
           if-no-files-found: error
 
+      - name: Commit local.json
+        if: github.event_name == 'pull_request'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update local.json"
+          commit_user_name: fluencebot
+          commit_user_email: devops@fluence.one
+          commit_author: fluencebot <devops@fluence.one>
+
   npm:
     name: "Publish npm snapshots"
     runs-on: linux-amd64-m-2xlarge
@@ -258,8 +287,10 @@ jobs:
     needs: deploy
 
     outputs:
-      deal-ts-clients-version: "${{ steps.deal-ts-clients.outputs.version }}"
-      subgraph-version: "${{ steps.subgraph.outputs.version }}"
+      # deal-ts-clients-version: "${{ steps.deal-ts-clients.outputs.version }}"
+      # subgraph-version: "${{ steps.subgraph.outputs.version }}"
+      # deal-ts-clients-version: "${{ steps.deal-ts-clients.outputs.version }}"
+      # subgraph-version: "${{ steps.subgraph.outputs.version }}"
 
     permissions:
       contents: read
