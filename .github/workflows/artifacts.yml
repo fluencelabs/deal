@@ -338,7 +338,7 @@ jobs:
           cache-dependency-path: ts-client/package-lock.json
 
       - name: Setup node with official npm registry
-        if: inputs.release == false
+        if: inputs.release == true
         uses: actions/setup-node@v3
         env:
           NODE_AUTH_TOKEN: "${{ env.NODE_AUTH_RELEASE_TOKEN }}"
