@@ -128,8 +128,10 @@ jobs:
 
       - name: Construct artifacts names
         id: artifacts
+        env:
+          release: ${{ inputs.release }}
         run: |
-          if [[ ${{ inputs.release }} ]]; then
+          if [[ ${release} ]]; then
             echo "chain-rpc-image=docker.fluence.dev/chain-rpc:${{ steps.version.outputs.id }}" >> "$GITHUB_OUTPUT"
             echo "chain-deploy-script-image=docker.fluence.dev/chain-deploy-script:${{ steps.version.outputs.id }}" >> "$GITHUB_OUTPUT"
           else
@@ -382,8 +384,10 @@ jobs:
 
       - name: Construct artifacts names
         id: artifacts
+        env:
+          release: ${{ inputs.release }}
         run: |
-          if [[ ${{ inputs.release }} ]]; then
+          if [[ $release ]]; then
             echo "deal-ts-clients-version=${{ steps.version.outputs.id }}-1.0" >> "$GITHUB_OUTPUT"
           else
             version="$(jq -r .[] .github/release-please/manifest.json)"
@@ -456,8 +460,10 @@ jobs:
 
       - name: Construct artifacts names
         id: artifacts
+        env:
+          release: ${{ inputs.release }}
         run: |
-          if [[ ${{ inputs.release }} ]]; then
+          if [[ $release ]]; then
             echo "subgraph-deploy-script-image=docker.fluence.dev/subgraph-deploy-script-image:${{ steps.version.outputs.id }}" >> "$GITHUB_OUTPUT"
           else
             version="$(jq -r .[] .github/release-please/manifest.json)"
