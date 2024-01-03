@@ -25,8 +25,13 @@ on:
         value: ${{ jobs.chain-rpc.outputs.chain-rpc-image }}
 
 env:
-  FORCE_COLOR: true
   FOUNDRY_PROFILE: "ci"
+
+  # some colors
+  FORCE_COLOR: true
+  DEBUG_COLORS: "true"
+  TERM: xterm-256color
+  COLORTERM: truecolor
 
 jobs:
   contracts:
@@ -162,7 +167,7 @@ jobs:
           name: contracts-${{ matrix.arch }}
 
       - name: Build contracts
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: docker/Dockerfile
@@ -174,7 +179,7 @@ jobs:
 
       - name: Build and push chain-rpc image
         id: chain-rpc
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: true
@@ -187,7 +192,7 @@ jobs:
 
       - name: Build and push chain-deploy-script image
         id: chain-deploy-script
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: true
@@ -215,6 +220,7 @@ jobs:
         with:
           repository: fluencelabs/deal
           ref: ${{ inputs.ref }}
+          submodules: true
 
       - name: Import secrets
         uses: hashicorp/vault-action@v2.7.3
@@ -263,7 +269,7 @@ jobs:
           CHAIN_RPC_IMAGE: "${{ needs.chain-rpc.outputs.chain-rpc-image }}-amd64"
           CHAIN_DEPLOY_SCRIPT_IMAGE: "${{ needs.chain-rpc.outputs.chain-deploy-script-image }}-amd64"
         working-directory: docker
-        run: docker-compose run chain-deploy-script
+        run: docker-compose run --quiet-pull chain-deploy-script
 
       - name: Upload deployments/local.json
         uses: actions/upload-artifact@v4
@@ -300,6 +306,7 @@ jobs:
         with:
           repository: fluencelabs/deal
           ref: ${{ inputs.ref }}
+          submodules: true
 
       - name: Import secrets
         uses: hashicorp/vault-action@v2.7.3
@@ -410,6 +417,7 @@ jobs:
         with:
           repository: fluencelabs/deal
           ref: ${{ inputs.ref }}
+          submodules: true
 
       - name: Import secrets
         uses: hashicorp/vault-action@v2.7.3
@@ -471,7 +479,7 @@ jobs:
           path: deployments/
 
       - name: Build contracts
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: docker/Dockerfile
@@ -482,7 +490,7 @@ jobs:
 
       - name: Build and push subgraph-deploy-script image
         id: subgraph-deploy-script
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: true
