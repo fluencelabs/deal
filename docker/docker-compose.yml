@@ -1,13 +1,48 @@
-# This docker-compose is used for DEV purposes.
-# It consists of deploy-script container with volume mounting to the host:
+# This docker-compose is used for DEV purposes. It is also used in CI
+# to generate deployments/local.json file.
+#
+# It consists of chain-deploy-script container with volume mounting to the host:
 #  - thus, your deployments/<>.json might be changed after contract redeployed;
-#  - also, out/ with contract artifacts is mounted to the host as well.
+#  - also, cache/ and out/ with contract artifacts is mounted to the host as well.
 #
 # To use from ../: `docker compose -f ./docker/docker-compose.yml up`.
+#
 # Note, if you changed contracts and what to use docker-compose instead of local make command to deploy
 #  - you should rebuild with --build flag.
+#
 # Note, deploy may take some time, check logs.
+#
+volumes:
+  postgres:
+  ipfs:
+  chain-rpc:
+
 services:
+  ipfs:
+    image: ipfs/go-ipfs
+    ports:
+      - "5001:5001"
+    volumes:
+      - ipfs:/data/ipfs
+
+  postgres:
+    image: postgres:14
+    ports:
+      - "5432:5432"
+    command:
+      [
+        "postgres",
+        "-cshared_preload_libraries=pg_stat_statements"
+      ]
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: ""
+      PGDATA: "/var/lib/postgresql/data"
+      POSTGRES_INITDB_ARGS: "-E UTF8 --locale=C"
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
   # Anvil node with deployed contracts
   chain-rpc:
     image: ${CHAIN_RPC_IMAGE:-chain-rpc}
@@ -15,6 +50,8 @@ services:
       context: ../
       dockerfile: ./docker/Dockerfile
       target: chain-rpc
+    volumes:
+      - chain-rpc:/data
     ports:
       - "8545:8545"
 
@@ -36,6 +73,7 @@ services:
   blockscout:
     depends_on:
       - chain-rpc
+      - postgres
     image: offchainlabs/blockscout:v1.0.0-c8db5b1
     restart: always
     links:
@@ -49,8 +87,8 @@ services:
         bin/blockscout start
     environment:
       ETHEREUM_JSONRPC_VARIANT: "geth"
-      ETHEREUM_JSONRPC_HTTP_URL: http://anvil-node:8545/
-      ETHEREUM_JSONRPC_TRACE_URL: http://anvil-node:8545/
+      ETHEREUM_JSONRPC_HTTP_URL: http://chain-rpc:8545/
+      ETHEREUM_JSONRPC_TRACE_URL: http://chain-rpc:8545/
       INDEXER_DISABLE_PENDING_TRANSACTIONS_FETCHER: "true"
       DATABASE_URL: postgresql://postgres:@postgres:5432/blockscout
       ECTO_USE_SSL: "false"
@@ -61,10 +99,26 @@ services:
     ports:
       - "127.0.0.1:4000:4000"
 
-  postgres:
-    image: postgres:13.6
-    restart: always
+  graph-node:
+    image: graphprotocol/graph-node:v0.33.0
+    ports:
+      - '8000:8000'
+      - '8001:8001'
+      - '8020:8020'
+      - '8030:8030'
+      - '8040:8040'
+    depends_on:
+      - ipfs
+      - postgres
+      - chain-rpc
     environment:
-      POSTGRES_PASSWORD: ""
-      POSTGRES_USER: "postgres"
-      POSTGRES_HOST_AUTH_METHOD: "trust"
+      postgres_host: postgres
+      postgres_user: postgres
+      postgres_pass: ""
+      postgres_db: postgres
+      ipfs: 'ipfs:5001'
+      ethereum: 'local:http://chain-rpc:8545'
+      GRAPH_LOG: info
+      # https://github.com/graphprotocol/graph-node/issues/3159#issuecomment-1062827725
+      ETHEREUM_REORG_THRESHOLD: 1
+      ETHEREUM_ANCESTOR_COUNT: 1
