@@ -186,6 +186,8 @@ jobs:
           platforms: linux/${{ matrix.arch }}
           tags: |
             ${{ steps.artifacts.outputs.chain-rpc-image }}-${{ matrix.arch }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Build and push chain-deploy-script image
         id: chain-deploy-script
@@ -199,6 +201,8 @@ jobs:
           platforms: linux/${{ matrix.arch }}
           tags: |
             ${{ steps.artifacts.outputs.chain-deploy-script-image }}-${{ matrix.arch }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   deploy:
     name: "Generate local.json"
@@ -492,6 +496,8 @@ jobs:
           platforms: linux/${{ matrix.arch }}
           tags: |
             ${{ steps.artifacts.outputs.subgraph-deploy-script-image }}-${{ matrix.arch }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   manifest:
     name: "Merge container arch images"
