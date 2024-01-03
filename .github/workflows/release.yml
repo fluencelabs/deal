@@ -81,15 +81,7 @@ jobs:
 
   deal:
     if: needs.release-please.outputs.release-created
-    runs-on: ubuntu-lates
-
-    needs:
-      - release-please
-
-    permissions:
-      contents: read
-      id-token: write
-
+    needs: release-please
     uses: ./.github/workflows/artifacts.yml
     with:
       ref: ${{ needs.release-please.outputs.tag-name }}
