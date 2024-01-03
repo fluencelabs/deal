@@ -53,7 +53,7 @@ jobs:
         with:
           repository: fluencelabs/deal
           ref: ${{ inputs.ref }}
-          submodules: true
+          submodules: recursive
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
@@ -111,7 +111,7 @@ jobs:
         with:
           repository: fluencelabs/deal
           ref: ${{ inputs.ref }}
-          submodules: true
+          submodules: recursive
 
       - name: Import secrets
         uses: hashicorp/vault-action@v2.7.3
@@ -222,7 +222,7 @@ jobs:
         with:
           repository: fluencelabs/deal
           ref: ${{ inputs.ref }}
-          submodules: true
+          submodules: recursive
 
       - name: Import secrets
         uses: hashicorp/vault-action@v2.7.3
@@ -308,7 +308,7 @@ jobs:
         with:
           repository: fluencelabs/deal
           ref: ${{ inputs.ref }}
-          submodules: true
+          submodules: recursive
 
       - name: Import secrets
         uses: hashicorp/vault-action@v2.7.3
@@ -419,7 +419,7 @@ jobs:
         with:
           repository: fluencelabs/deal
           ref: ${{ inputs.ref }}
-          submodules: true
+          submodules: recursive
 
       - name: Import secrets
         uses: hashicorp/vault-action@v2.7.3
