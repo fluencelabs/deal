@@ -59,6 +59,26 @@ case "$network" in
     IPFS_URL="https://${basic_auth}graph-node-ipfs.fluence.dev"
 esac
 
+# Wait for graph-node to be up
+retries=20
+echo "Trying to connect to Graph Node at ${GRAPHNODE_URL}..."
+while [[ $retries > 0 ]]; do
+  status_code=$(curl -o /dev/null -s -w "%{http_code}\n" -X POST -H "Content-Type: application/json" -d '{"foo":"bar"}' ${GRAPHNODE_URL})
+  if [[ $status_code == "200" ]]; then
+    echo "Succesfully connected to Graph Node."
+    break
+  else
+    echo "Couldn't connect to Graph Node. Retrying in 5 seconds (retries left: ${retries})"
+    sleep 5
+    ((retries--))
+  fi
+
+  if [[ $retries == 0 ]]; then
+    echo "Failed to connect to Graph Node."
+    exit 1
+  fi
+done
+
 case "$action" in
   deploy)
     echo "Deploying subgraph on Fluence ${network} network with subgraph name: $SUBGRAPH_NAME..."
