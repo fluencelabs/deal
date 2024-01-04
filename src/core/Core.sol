@@ -49,9 +49,10 @@ contract Core is UUPSUpgradeable, GlobalConst, ICore {
     function initializeModules(ICapacity capacity_, IMarket market_) external onlyOwner {
         CoreStorage storage coreStorage = _getCoreStorage();
 
-        require(address(coreStorage.capacity) == address(0), "GlobalConst: already initialized");
-        require(address(capacity_) != address(0), "GlobalConst: capacity is zero address");
-        require(address(market_) != address(0), "GlobalConst: market is zero address");
+        require(address(coreStorage.capacity) == address(0), "Core: capacity already initialized");
+        require(address(coreStorage.market) == address(0), "Core: market already initialized");
+        require(address(capacity_) != address(0), "Core: capacity is zero address");
+        require(address(market_) != address(0), "Core: market is zero address");
 
         coreStorage.capacity = capacity_;
         coreStorage.market = market_;

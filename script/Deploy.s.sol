@@ -222,8 +222,8 @@ contract DeployContracts is Depoyments, Script {
         address coreImpl = _deployContract("CoreImpl", "Core", abi.encode(flt));
         address dealImpl = _deployContract("DealImpl", "Deal", new bytes(0));
 
-        bool doNeedToRedeployMarket = _doNeedToRedeploy("MarketImpl", "Market");
-        bool doNeedToRedeployCapacity = _doNeedToRedeploy("CapacityImpl", "Capacity");
+        bool needToRedeployMarket = _doNeedToRedeploy("MarketImpl", "Market");
+        bool needToRedeployCapacity = _doNeedToRedeploy("CapacityImpl", "Capacity");
 
         (address coreAddr, bool isNewCore) = _tryDeployContract(
             "Core",
@@ -234,19 +234,19 @@ contract DeployContracts is Depoyments, Script {
                     Core.initialize.selector, epochDuration_, minDepositedEpoches_, minRematchingEpoches_
                 )
             ),
-            doNeedToRedeployMarket || doNeedToRedeployCapacity
+            needToRedeployMarket || needToRedeployCapacity
         );
 
         address marketImpl = _deployContract("MarketImpl", "Market", abi.encode(flt, coreAddr), isNewCore);
         address capacityImpl = _deployContract("CapacityImpl", "Capacity", abi.encode(flt, coreAddr), isNewCore);
 
-        _deployContract(
+        address marketProxy = _deployContract(
             "Market",
             "ERC1967Proxy",
             abi.encode(marketImpl, abi.encodeWithSelector(Market.initialize.selector, dealImpl))
         );
 
-        _deployContract(
+        address capacityProxy = _deployContract(
             "Capacity",
             "ERC1967Proxy",
             abi.encode(
@@ -268,6 +268,17 @@ contract DeployContracts is Depoyments, Script {
                 )
             )
         );
+
+        if (isNewCore) {
+            console.log("\nCore deployed, initializing modules as well...");
+            ICore(coreAddr).initializeModules(ICapacity(capacityProxy), IMarket(marketProxy));
+        }
+
+        // TODO: if needToRedeployMarket or needToRedeployCapacity - impl proxy should be update with impl.
+        if (isNewCore && (needToRedeployMarket || needToRedeployCapacity)) {
+            revert("Update not implemented yet.");
+        }
+
     }
 
     function _startDeploy() internal {
