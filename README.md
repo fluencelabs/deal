@@ -180,7 +180,7 @@ make start-local-subgraph
    data:
 
 ```bash
-make make create-pure-market-local
+make create-pure-market-local
 ```
 
 To stop and cleanup dev environment run:
