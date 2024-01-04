@@ -7,7 +7,8 @@ import "src/deal/interfaces/IDeal.sol";
 
 interface IMatcher {
     // ------------------ Errors ------------------
-    error minWorkersNotMatched(uint _minWorkers);
+    error MinWorkersNotMatched(uint256 _minWorkers);
     // ----------------- Mutables -----------------
+
     function matchDeal(IDeal deal, bytes32[] calldata offers, bytes32[][] calldata computeUnits) external;
 }

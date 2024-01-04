@@ -122,7 +122,7 @@ abstract contract Matcher is Offer, IMatcher {
 
         uint256 minWorkers = deal.minWorkers();
         if (minWorkers > dealComputeUnitCount + freeWorkerSlots - freeWorkerSlotsCurrent) {
-            revert minWorkersNotMatched(minWorkers);
+            revert MinWorkersNotMatched(minWorkers);
         }
 
         if (isDealMatched) {
