@@ -44,7 +44,7 @@ deploy-local: ## Deploy contracts to local
 
 	@echo "\033[0;32mSuccess! Contracts deployed to local chain.\033[0m"
 
-deploy-docker: ## Deploy contracts to docker
+deploy-contracts-in-docker: ## Deploy contracts in docker
 	@make verify-command program=forge
 	@CONTRACTS_ENV_NAME=local forge script script/Deploy.s.sol --rpc-url $(CHAIN_RPC_URL) \
 	--mnemonics "test test test test test test test test test test test junk" \
