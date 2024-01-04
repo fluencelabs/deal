@@ -1,35 +1,114 @@
-#!/bin/sh
-# Deploy on FluenceLabs stand (Currently only on stage).
-#
-# Example Run:
-# >> export BASIC_AUTH_FLUENCE_STAGE=<check .example.env> && ./fluence-graph.sh
+#! /usr/bin/env bash
 
-# Args:
-# $1 - action {deploy, create}.
+SUBGRAPH_NAME="fluence-deal-contracts"
 
-# Envs:
-# - BASIC_AUTH_FLUENCE_STAGE
+help() {
+script_name="$(basename $0)"
+cat<<HELP
+Usage: [BASIC_AUTH_SUBGRAPH] ${script_name} network action
+Deploy subgraph to Fluence.
 
-# Validate envs.
-if [ "$BASIC_AUTH_FLUENCE_STAGE" = "" ]; then
-  echo "Please provide 'BASIC_AUTH_FLUENCE_STAGE' env."
-  exit 0
-fi
+  network       Fluence network to run against - local, stage, testnet or kras
+  action        action to run - create, deploy or remove
 
-# Choose auth string.
-basic_auth=""
-if [ "$BASIC_AUTH_FLUENCE_STAGE" != "" ]; then
-  basic_auth="${BASIC_AUTH_FLUENCE_STAGE}@"
-fi
+Examples:
+  BASIC_AUTH_SUBGRAPH=user:pass ${script_name} stage deploy     Deploy subgraph to stage
+  ${script_name} local deploy                                   Deploy subgraph to local
+HELP
+}
 
-SUBGRAPH_NAME=fluence-deal-contracts
+# Print help if no arguments provided
+! (($#)) && help && exit 0
 
-if [ "$1" = "deploy" ]; then
-  echo "Deploy subgraph on Fluence for stage env with subgraph name: $SUBGRAPH_NAME..."
-  graph deploy --node https://${basic_auth}graph-node-admin.fluence.dev/ --ipfs https://${basic_auth}graph-node-ipfs.fluence.dev --network stage --network-file config/networks.json --version-label 0.0.0 ${SUBGRAPH_NAME}
-elif [ "$1" = "create" ]; then
-  echo "Create subgraph on Fluence with name: $SUBGRAPH_NAME..."
-  graph create --node https://${basic_auth}graph-node-admin.fluence.dev ${SUBGRAPH_NAME}
-else
-  echo "Action: $1 is not allowed."
-fi
+# Parse script arguments
+while (($#)); do
+  case "$1" in
+    deploy|create|remove)
+      action="$1"
+      shift
+      ;;
+    local|stage|testnet|kras)
+      network="$1"
+      shift
+      ;;
+    -h|--help)
+      help
+      exit 0
+      ;;
+    *)
+      echo "Unknown argument '$1'."
+      help
+      exit 1
+  esac
+done
+
+# Prepare variables depending on network
+case "$network" in
+  local)
+    GRAPHNODE_URL="${GRAPHNODE_URL:-http://localhost:8020}"
+    IPFS_URL="${IPFS_URL:-http://localhost:5001}"
+    ;;
+  stage|testnet|kras)
+    if [[ -z $BASIC_AUTH_SUBGRAPH ]]; then
+      echo "Please provide credentials with 'BASIC_AUTH_SUBGRAPH' variable."
+      exit 1
+    else
+      basic_auth="${BASIC_AUTH_SUBGRAPH}@"
+    fi
+    GRAPHNODE_URL="https://${basic_auth}graph-node-admin.fluence.dev"
+    IPFS_URL="https://${basic_auth}graph-node-ipfs.fluence.dev"
+esac
+
+# Prepare subgraph version label.
+SUBGRAPH_VERSION_LABEL="${SUBGRAPH_VERSION_LABEL:-0.0.0}"
+
+# Wait for graph-node to be up
+retries=20
+echo "Trying to connect to Graph Node at ${GRAPHNODE_URL}..."
+while [[ $retries > 0 ]]; do
+  status_code=$(curl -o /dev/null -s -w "%{http_code}\n" -X POST -H "Content-Type: application/json" -d '{"foo":"bar"}' ${GRAPHNODE_URL})
+  if [[ $status_code == "200" ]]; then
+    echo "Succesfully connected to Graph Node."
+    sleep 10
+    break
+  else
+    echo "Couldn't connect to Graph Node. Retrying in 5 seconds (retries left: ${retries})"
+    sleep 5
+    ((retries--))
+  fi
+
+  if [[ $retries == 0 ]]; then
+    echo "Failed to connect to Graph Node."
+    exit 1
+  fi
+done
+
+# STAND_TO_SUBGRAPH_NETWORK mapping.
+# The same as in the scripts/import-config-networks.ts.
+# Kinda TODO: locate to 1 place.
+case "$network" in
+  local)
+    SUBGRAPH_NETWORK="local"
+    ;;
+  stage)
+    SUBGRAPH_NETWORK="stage"
+    ;;
+  testnet|kras)
+    SUBGRAPH_NETWORK="mumbai"
+    ;;
+esac
+
+case "$action" in
+  deploy)
+    echo "Deploying subgraph on ${network} stand with subgraph name: $SUBGRAPH_NAME and version label $SUBGRAPH_VERSION_LABEL..."
+    graph deploy --node ${GRAPHNODE_URL} --ipfs ${IPFS_URL} --network ${SUBGRAPH_NETWORK} --network-file configs/${network}-networks-config.json --version-label ${SUBGRAPH_VERSION_LABEL} ${SUBGRAPH_NAME}
+    ;;
+  create)
+    echo "Creating subgraph on Fluence with name: $SUBGRAPH_NAME..."
+    graph create --node ${GRAPHNODE_URL} ${SUBGRAPH_NAME}
+    ;;
+  remove)
+    echo "Removing subgraph on Fluence with name: $SUBGRAPH_NAME..."
+    graph remove --node ${GRAPHNODE_URL} ${SUBGRAPH_NAME}
+    ;;
+esac

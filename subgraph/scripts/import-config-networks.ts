@@ -1,4 +1,4 @@
-import path from "path";
+import * as path from "path";
 import * as fs from "fs";
 
 
@@ -21,7 +21,7 @@ const STAND_TO_SUBGRAPH_NETWORK = {
   "kras": "mumbai",
   "testnet": "mumbai",
   "stage": "stage",
-  "local": "localhost",
+  "local": "local",
 }
 
 async function saveNetworksConfig(

@@ -1,29 +1,29 @@
 {
-  "name": "Fluence Deal Subgraph",
+  "name": "fluence-deal-subgraph",
   "license": "UNLICENSED",
   "scripts": {
     "compile": "graph codegen && graph build",
     "codegen": "graph codegen",
     "build": "graph build",
     "deploy:studio:stage": "graph deploy --network mumbai --network-file config/networks.json fluence-deal-contracts",
-    "create:local": "graph create --node http://localhost:8020/ fluence-deal-contracts",
-    "remove:local": "graph remove --node http://localhost:8020/ fluence-deal-contracts",
-    "deploy:local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 --network localhost --network-file configs/local-networks-config.json --version-label 0.0.0 fluence-deal-contracts",
+    "create:local": "./fluence-graph.sh create local",
+    "remove:local": "./fluence-graph.sh remove local",
+    "deploy:local": "./fluence-graph.sh deploy local",
     "deploy:testnet": "graph deploy --product hosted-service --network-file configs/testnet-networks-config.json --network mumbai alcibiadescleinias/fluence-deal-contracts",
-    "create:stage": "./fluence-graph.sh create",
-    "deploy:stage": "./fluence-graph.sh deploy",
+    "create:stage": "./fluence-graph.sh create stage",
+    "deploy:stage": "./fluence-graph.sh deploy stage",
     "test": "graph test",
     "graph-node": "docker-compose up -d",
     "graph-local-clean": "docker-compose down -v",
     "fmt": "prettier 'src/**/*.ts' --w",
-    "import-config-networks": "node --loader ts-node/esm scripts/import-config-networks.ts"
+    "import-config-networks": "tsc scripts/import-config-networks.ts && node scripts/import-config-networks.js"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.64.1",
     "@graphprotocol/graph-ts": "0.32.0"
   },
   "devDependencies": {
-    "matchstick-as": "0.5.0",
+    "typescript": "^5.3.3",
     "@typescript-eslint/eslint-plugin": "^6.9.0",
     "@typescript-eslint/parser": "^6.9.0",
     "eslint": "^8.52.0",
@@ -32,6 +32,7 @@
     "eslint-plugin-license-header": "^0.6.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-unused-imports": "^3.0.0",
+    "matchstick-as": "0.5.0",
     "prettier": "^3.0.2"
   }
 }
