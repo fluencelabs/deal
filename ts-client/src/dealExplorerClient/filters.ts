@@ -22,6 +22,7 @@ export interface OffersFilters {
 export interface ProvidersFilters {
   search?: string | undefined;
   effectorIds?: Array<string> | undefined;
+  onlyApproved?: boolean;
 }
 
 export interface ByProviderAndStatusFilter {

@@ -17,7 +17,7 @@ import {
   createOrLoadDealEffector,
   createOrLoadEffector,
   createOrLoadGraphNetwork,
-  createOrLoadOfferEffector,
+  createOrLoadOfferEffector, createOrLoadProvider,
   createOrLoadToken,
   UNO_BIG_INT,
   ZERO_BIG_INT,
@@ -44,15 +44,7 @@ export function handleMarketOfferRegistered(
   // - emit ComputeUnitCreated(offerId, peerId, unitId);
 
   // Create provider.
-  const providerAddress = event.params.provider.toHex();
-  const provider = new Provider(providerAddress);
-  provider.name = getProviderName(providerAddress);
-  provider.createdAt = event.block.timestamp;
-  provider.computeUnitsAvailable = 0;
-  provider.computeUnitsTotal = 0;
-  provider.peerCount = 0;
-  provider.effectorCount = 0;
-  provider.save();
+  const provider = createOrLoadProvider(event.params.provider.toHex(), event.block.timestamp);
 
   // Create Offer.
   const offer = new Offer(event.params.offerId.toHex());
@@ -64,7 +56,6 @@ export function handleMarketOfferRegistered(
   offer.save();
 
   let graphNetwork = createOrLoadGraphNetwork();
-  graphNetwork.providersTotal = graphNetwork.providersTotal.plus(UNO_BIG_INT);
   graphNetwork.offersTotal = graphNetwork.offersTotal.plus(UNO_BIG_INT);
   graphNetwork.save();
 
@@ -84,8 +75,6 @@ export function handleMarketOfferRegistered(
       createdOfferToEffector = createdOfferToEffector + 1;
     }
   }
-  // const createdOfferToEffectorf32 = reinterpret<f32>(createdOfferToEffector);
-  // const createdOfferToEffectori32 = reinterpret<i32>(createdOfferToEffectorf32);
 
   provider.effectorCount = provider.effectorCount + createdOfferToEffector;
   provider.save();
@@ -106,11 +95,11 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
   computeUnit.peer = peer.id;
   computeUnit.save();
 
-  provider.computeUnitsAvailable += 1;
-  provider.computeUnitsTotal += 1;
+  provider.computeUnitsAvailable = provider.computeUnitsAvailable + 1;
+  provider.computeUnitsTotal = provider.computeUnitsTotal + 1;
   provider.save();
-  offer.computeUnitsAvailable += 1;
-  offer.computeUnitsTotal += 1;
+  offer.computeUnitsAvailable = offer.computeUnitsAvailable + 1;
+  offer.computeUnitsTotal = offer.computeUnitsTotal + 1;
   offer.updatedAt = event.block.timestamp;
   offer.save();
 }
@@ -199,9 +188,9 @@ export function handleComputeUnitAddedToDeal(
   const offer = Offer.load(peer.offer) as Offer;
   const provider = Provider.load(offer.provider) as Provider;
 
-  provider.computeUnitsAvailable -= 1;
+  provider.computeUnitsAvailable = provider.computeUnitsAvailable - 1;
   provider.save();
-  offer.computeUnitsAvailable -= 1;
+  offer.computeUnitsAvailable = offer.computeUnitsAvailable - 1;
   offer.updatedAt = event.block.timestamp;
   offer.save();
 }
@@ -215,10 +204,10 @@ export function handleComputeUnitRemovedFromDeal(
   const offer = Offer.load(peer.offer) as Offer;
   const provider = Provider.load(offer.provider) as Provider;
 
-  provider.computeUnitsAvailable += 1;
-  provider.computeUnitsTotal += 1;
+  provider.computeUnitsAvailable = provider.computeUnitsAvailable + 1;
+  provider.computeUnitsTotal = provider.computeUnitsTotal + 1;
   provider.save();
-  offer.computeUnitsAvailable += 1;
+  offer.computeUnitsAvailable = offer.computeUnitsAvailable + 1;
   offer.updatedAt = event.block.timestamp;
   offer.save();
 }

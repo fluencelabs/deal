@@ -1,6 +1,7 @@
 # This docker-compose is used for DEV purposes.
-# It consists also of deploy script with volume mounting to the host:
-#  thus, you your deployments/<>.json might be changed after contract redeployed.
+# It consists of deploy-script container with volume mounting to the host:
+#  - thus, your deployments/<>.json might be changed after contract redeployed;
+#  - also, out/ with contract artifacts is mounted to the host as well.
 #
 # To use from ../: `docker compose -f ./docker/docker-compose.yml up`.
 # Note, if you changed contracts and what to use docker-compose instead of local make command to deploy
@@ -22,7 +23,8 @@ services:
     depends_on:
       - anvil-node
     volumes:
-      - ../:/app/
+      - ../deployments/:/app/deployments/
+      - ../out/:/app/out/
 
   # Blockscout services
   blockscout:

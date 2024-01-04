@@ -4,21 +4,24 @@ export
 verify-command:
 	@command -v $(program) > /dev/null || (echo "\033[0;31m$(program) is not installed. Please install $(program) and try again.\033[0m" && exit 1)
 
-install:
+install-npms:
 	@make verify-command program=npm
 	@cd ts-client && npm install
 	@cd subgraph && npm install
+	@echo "\033[0;32mSuccess! Run npm install in both npm modules: ts-client and subgraph.\033[0m"
 
 build-contracts: 
 	@make verify-command program=forge
 	@forge build
+	@echo "\033[0;32mSuccess! Build of contracts completed.\033[0m"
 
-build:
-	@make build-contracts
+build-npms:
+	@make verify-command program=npm
 	@cd ts-client && npm run build
-	@cd subgraph && npm run compile 
+	@cd subgraph && npm run compile && npm run import-config-networks
+	@echo "\033[0;32mSuccess! Build of all NPM packages completed.\033[0m"
 
-	@echo "\033[0;32mSuccess! Build complete.\033[0m"
+build-all: build-contracts build-npms
 
 run-tests:
 	@make verify-command program=forge
@@ -30,6 +33,10 @@ run-tests:
 start-local-chain:
 	@make verify-command program=anvil
 	@anvil --host 0.0.0.0 --block-time 15
+
+start-local-subgraph:
+	@make verify-command program=npm
+	@cd subgraph && npm run create:local && npm run deploy:local
 
 deploy-local:
 	@make verify-command program=forge

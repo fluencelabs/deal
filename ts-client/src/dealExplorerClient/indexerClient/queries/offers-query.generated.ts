@@ -15,16 +15,16 @@ export type OffersQueryQueryVariables = Types.Exact<{
 }>;
 
 
-export type OffersQueryQuery = { __typename?: 'Query', offers: Array<{ __typename?: 'Offer', id: string, createdAt: any, pricePerEpoch: any, computeUnitsTotal?: number | null, computeUnitsAvailable?: number | null, paymentToken: { __typename?: 'Token', id: string, symbol: string, decimals: number }, effectors?: Array<{ __typename?: 'OfferToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null }>, graphNetworks: Array<{ __typename?: 'GraphNetwork', offersTotal: any }> };
+export type OffersQueryQuery = { __typename?: 'Query', offers: Array<{ __typename?: 'Offer', id: string, createdAt: any, pricePerEpoch: any, computeUnitsTotal?: number | null, computeUnitsAvailable?: number | null, paymentToken: { __typename?: 'Token', id: string, symbol: string, decimals: number }, effectors?: Array<{ __typename?: 'OfferToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null, provider: { __typename?: 'Provider', id: string } }>, graphNetworks: Array<{ __typename?: 'GraphNetwork', offersTotal: any }> };
 
 export type OfferQueryQueryVariables = Types.Exact<{
   id: Types.Scalars['ID']['input'];
 }>;
 
 
-export type OfferQueryQuery = { __typename?: 'Query', offer?: { __typename?: 'Offer', updatedAt: any, id: string, createdAt: any, pricePerEpoch: any, computeUnitsTotal?: number | null, computeUnitsAvailable?: number | null, peers?: Array<{ __typename?: 'Peer', id: string, offer: { __typename?: 'Offer', id: string }, provider: { __typename?: 'Provider', id: string }, computeUnits?: Array<{ __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string } }> | null }> | null, paymentToken: { __typename?: 'Token', id: string, symbol: string, decimals: number }, effectors?: Array<{ __typename?: 'OfferToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null } | null };
+export type OfferQueryQuery = { __typename?: 'Query', offer?: { __typename?: 'Offer', updatedAt: any, id: string, createdAt: any, pricePerEpoch: any, computeUnitsTotal?: number | null, computeUnitsAvailable?: number | null, peers?: Array<{ __typename?: 'Peer', id: string, offer: { __typename?: 'Offer', id: string }, provider: { __typename?: 'Provider', id: string }, computeUnits?: Array<{ __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string } }> | null }> | null, paymentToken: { __typename?: 'Token', id: string, symbol: string, decimals: number }, effectors?: Array<{ __typename?: 'OfferToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null, provider: { __typename?: 'Provider', id: string } } | null };
 
-export type BasicOfferFragment = { __typename?: 'Offer', id: string, createdAt: any, pricePerEpoch: any, computeUnitsTotal?: number | null, computeUnitsAvailable?: number | null, paymentToken: { __typename?: 'Token', id: string, symbol: string, decimals: number }, effectors?: Array<{ __typename?: 'OfferToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null };
+export type BasicOfferFragment = { __typename?: 'Offer', id: string, createdAt: any, pricePerEpoch: any, computeUnitsTotal?: number | null, computeUnitsAvailable?: number | null, paymentToken: { __typename?: 'Token', id: string, symbol: string, decimals: number }, effectors?: Array<{ __typename?: 'OfferToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null, provider: { __typename?: 'Provider', id: string } };
 
 export type BasicPeerFragment = { __typename?: 'Peer', id: string, offer: { __typename?: 'Offer', id: string }, provider: { __typename?: 'Provider', id: string }, computeUnits?: Array<{ __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string } }> | null };
 
@@ -75,6 +75,9 @@ export const BasicOfferFragmentDoc = gql`
     effector {
       ...EffectorBasic
     }
+  }
+  provider {
+    id
   }
 }
     ${EffectorBasicFragmentDoc}`;

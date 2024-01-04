@@ -22,7 +22,9 @@ query ProvidersQuery(
 fragment ProviderOfProvidersQuery on Provider {
     ...ProviderABC
     offers {
-      ...BasicOffer
+      # TODO: resolve Not all fragments have an unique name: ProvidersBasicOffer
+      #  by migrating to another engine.
+      ...ProvidersBasicOffer
     }
 }
 
@@ -45,7 +47,7 @@ fragment ProviderABC on Provider {
     computeUnitsTotal
 }
 
-fragment BasicOffer on Offer {
+fragment ProvidersBasicOffer on Offer {
     id
     createdAt
     pricePerEpoch

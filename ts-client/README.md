@@ -1,5 +1,11 @@
 # ts-clients
 
+* [Requirements](#requirements)
+* [client](#client)
+* [deal-mather-client](#deal-mather-client)
+   * [Context Diagram](#context-diagram)
+   * [Example Local Package Use](#example-local-package-use)
+   * [Start Dependencies](#start-dependencies)
 * [deal-explorer-client](#deal-explorer-client)
    * [Install](#install)
    * [Example UseCase](#example-usecase)
@@ -16,9 +22,74 @@ To load contract deployments and interfaces for different stands: kras/testnet/s
 > TODO: rename, because client says nothing.
 
 # deal-mather-client
-To find preferable compute units for the deal and its configuration via indexer (currently)
+To find preferable compute units for the deal and its configuration via Subgraph (indexer). The main user of the client is https://github.com/fluencelabs/cli (fCli).
 
-TODO: example, more info. 
+## Context Diagram
+
+```mermaid
+sequenceDiagram
+
+    box integration of DealMatcherClient into fCli
+        participant fCli
+        participant newClient as DealMatcherClient (deal-ts-clients package)
+    end
+    participant indexer as Subgraph Node
+    box Blockchain
+        participant Other Contracts
+        participant matcher as Matcher Contract
+    end
+
+    Note over indexer,Other Contracts: ...pulling data...
+    Note over fCli,Other Contracts: ...already acknowledged about "DealId"...
+    
+    fCli -->> newClient: getMatchedOffersByDealId
+    newClient -) indexer: fetch deal configuration
+    newClient -) indexer: fetch matched offers
+    newClient -->> fCli: data structure that should match Matcher contract matchDeal()
+    Note right of fCli: ...logging, showing, salting, other business logic...
+    fCli -) matcher: send data structure to matchDeal()
+```
+
+## Example Local Package Use
+From here I suppose you want to develop locally with this package. Thus, you need to prepare all package dependencies to run locally.
+
+Thus, we suppose you use:
+- local network
+- node version v18.16.1 (example below is checked with this version)
+- TS with installed package TODO: name. 
+
+Check completed instruction on how to boot local deal infra: [#Develop with Deal Infrastructure](../README.md#Develop-with-Deal-Infrastructure)
+
+main.js (to run with e.g. via `node --loader ts-node/esm main.ts`) with random dealId:
+```typescript
+import { DealMatcherClient } from "@fluencelabs/deal-aurora";
+
+type asyncRuntimeDecoratorType = (func: Function) => void;
+
+const asyncRuntimeDecorator: asyncRuntimeDecoratorType = (func) => {
+    func()
+        .then(() => process.exit(0))
+        .catch((error: unknown) => {
+            console.error(error);
+            process.exit(1);
+        });
+};
+
+async function main() {
+    const stand = "local"
+    // TODO: place your dealID below.
+    const dealId = "0x00...0"
+
+    // General typed class to use.
+    const client = new DealMatcherClient(
+        stand,
+    );
+
+    console.log(await client.getMatchedOffersByDealId(dealId))
+}
+
+asyncRuntimeDecorator(main);
+```
 
 # deal-explorer-client
 This client delivers data for the Explorer Frontend Application. The client consists of 3 ones:
@@ -123,6 +194,6 @@ Thus, TS files with `generated` key word you **should not rewrite manually**.
 - [ ] resolve registered workers! (separate class?)
 - [ ] page counter (thanks to graphQL for no paginators)?
 - [x] optional filtering in `.graphql` schemes (discord solution processing...) [currently unsolved]
-- [ ] convert values: timestamps, eths
+- [x] convert values: timestamps, eths
 - [x] move to simple client
 - [ ] codegen - get url from env
