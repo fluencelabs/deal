@@ -82,8 +82,8 @@ done
 
 case "$action" in
   deploy)
-    echo "Deploying subgraph on Fluence ${network} network with subgraph name: $SUBGRAPH_NAME..."
-    graph deploy ${GRAPHNODE_URL} --ipfs ${IPFS_URL} --network ${network} --network-file config/networks.json --version-label 0.0.0 ${SUBGRAPH_NAME}
+    echo "Deploying subgraph on ${network} network with subgraph name: $SUBGRAPH_NAME..."
+    graph deploy --node ${GRAPHNODE_URL} --ipfs ${IPFS_URL} --network ${network} --network-file config/networks.json --version-label 0.0.0 ${SUBGRAPH_NAME}
     ;;
   create)
     echo "Creating subgraph on Fluence with name: $SUBGRAPH_NAME..."
