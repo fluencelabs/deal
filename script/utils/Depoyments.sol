@@ -21,7 +21,7 @@ contract Depoyments is ScriptBase {
     struct DeployedContract {
         address addr;
         bytes32 codeHash;
-        uint blockNumber;
+        uint256 blockNumber;
         bytes32 creationCodeHash;
     }
 
@@ -50,7 +50,8 @@ contract Depoyments is ScriptBase {
 
             deployedContract.addr = abi.decode(vm.parseJson(file, string.concat(".", key, ".addr")), (address));
             deployedContract.codeHash = abi.decode(vm.parseJson(file, string.concat(".", key, ".codeHash")), (bytes32));
-            deployedContract.blockNumber = abi.decode(vm.parseJson(file, string.concat(".", key, ".blockNumber")), (uint));
+            deployedContract.blockNumber =
+                abi.decode(vm.parseJson(file, string.concat(".", key, ".blockNumber")), (uint256));
             deployedContract.creationCodeHash =
                 abi.decode(vm.parseJson(file, string.concat(".", key, ".creationCodeHash")), (bytes32));
 
@@ -147,8 +148,12 @@ contract Depoyments is ScriptBase {
 
         console.log("Deploy %s at %s", contractName, addr);
 
-        deployedContract = DeployedContract(
-            {addr: addr, codeHash: codeHash, blockNumber: block.number, creationCodeHash: creationCodeHash});
+        deployedContract = DeployedContract({
+            addr: addr,
+            codeHash: codeHash,
+            blockNumber: block.number,
+            creationCodeHash: creationCodeHash
+        });
         deployments.contracts[contractName] = deployedContract;
 
         if (isNew) {
