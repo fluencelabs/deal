@@ -59,6 +59,9 @@ case "$network" in
     IPFS_URL="https://${basic_auth}graph-node-ipfs.fluence.dev"
 esac
 
+# Prepare subgraph version label.
+SUBGRAPH_VERSION_LABEL="${SUBGRAPH_VERSION_LABEL:-0.0.0}"
+
 # Wait for graph-node to be up
 retries=20
 echo "Trying to connect to Graph Node at ${GRAPHNODE_URL}..."
@@ -80,10 +83,25 @@ while [[ $retries > 0 ]]; do
   fi
 done
 
+# STAND_TO_SUBGRAPH_NETWORK mapping.
+# The same as in the scripts/import-config-networks.ts.
+# Kinda TODO: locate to 1 place.
+case "$network" in
+  local)
+    SUBGRAPH_NETWORK="localhost"
+    ;;
+  stage)
+    SUBGRAPH_NETWORK="stage"
+    ;;
+  testnet|kras)
+    SUBGRAPH_NETWORK="mumbai"
+    ;;
+esac
+
 case "$action" in
   deploy)
-    echo "Deploying subgraph on ${network} network with subgraph name: $SUBGRAPH_NAME..."
-    graph deploy --node ${GRAPHNODE_URL} --ipfs ${IPFS_URL} --network ${network} --network-file config/networks.json --version-label 0.0.0 ${SUBGRAPH_NAME}
+    echo "Deploying subgraph on ${network} stand with subgraph name: $SUBGRAPH_NAME and version label $SUBGRAPH_VERSION_LABEL..."
+    graph deploy --node ${GRAPHNODE_URL} --ipfs ${IPFS_URL} --network ${SUBGRAPH_NETWORK} --network-file configs/${network}-networks-config.json --version-label ${SUBGRAPH_VERSION_LABEL} ${SUBGRAPH_NAME}
     ;;
   create)
     echo "Creating subgraph on Fluence with name: $SUBGRAPH_NAME..."
