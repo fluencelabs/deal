@@ -146,10 +146,14 @@ $ make create-pure-market-local
 
 # Development with Deal Infrastructure
 
+> TODO: add flow on how to work with already built images from registry.
+
 Let`s suppose you want to boot up local network and subgraph to develop on the
 infrastructure of the repo locally.
 
-1. Clone this repo
+1. Clone this repo. Clone with submodules, e.g.: `git submodule update --init --recursive`
+
+```bash
 2. Start local chain node containers (chain, explorer, deploy script):
 
 ```bash
@@ -157,7 +161,7 @@ docker compose -f docker/docker-compose.yml up -d
 ```
 
 `chain-deploy-script` will produce `deployment/local.json` file that is used in
-next steps.
+the next steps.
 
 3. Prepare npm packages:
 
