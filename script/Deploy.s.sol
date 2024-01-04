@@ -275,7 +275,7 @@ contract DeployContracts is Depoyments, Script {
         }
 
         // TODO: if needToRedeployMarket or needToRedeployCapacity - impl proxy should be update with impl.
-        if (isNewCore && (needToRedeployMarket || needToRedeployCapacity)) {
+        if (!isNewCore && (needToRedeployMarket || needToRedeployCapacity)) {
             revert("Update not implemented yet.");
         }
 
