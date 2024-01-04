@@ -53,7 +53,7 @@ CMD ["start-local-chain"]
 # image that deploys contracts to chain-rpc
 FROM contracts as chain-deploy-script
 ENTRYPOINT ["make"]
-CMD ["deploy-docker"]
+CMD ["deploy-contracts-in-docker"]
 
 # image that deploys subgraph
 FROM contracts as subgraph-deploy-script
