@@ -61,7 +61,7 @@ services:
       context: ../
       dockerfile: ./docker/Dockerfile
       target: chain-deploy-script
-    command: ["deploy-docker"]
+    command: ["deploy-contracts-in-docker"]
     depends_on:
       - chain-rpc
     volumes:
