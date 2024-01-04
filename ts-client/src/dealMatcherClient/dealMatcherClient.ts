@@ -80,7 +80,7 @@ export class DealMatcherClient {
       maxWorkersPerProvider,
     } = getMatchedOffersIn;
     console.group(
-      "[getMatchedOffers] Try to match the next deal configuration with offers:",
+      "[getMatchedOffers] Try to find matched offers with the next deal configuration:",
     );
     console.info(JSON.stringify(getMatchedOffersIn, null, 2));
 
