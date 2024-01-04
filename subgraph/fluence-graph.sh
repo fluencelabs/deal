@@ -88,7 +88,7 @@ done
 # Kinda TODO: locate to 1 place.
 case "$network" in
   local)
-    SUBGRAPH_NETWORK="localhost"
+    SUBGRAPH_NETWORK="local"
     ;;
   stage)
     SUBGRAPH_NETWORK="stage"
