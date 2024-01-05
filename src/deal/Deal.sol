@@ -305,11 +305,11 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
         emit RewardWithdrawn(computeUnitId, reward);
     }
 
-    function addComputeUnit(address computeProvider, bytes32 computeUnitId, bytes32 peerId) public onlyCore {
+    function addComputeUnit(address computeProvider, bytes32 computeUnitId, bytes32 peerId) public onlyMarket {
         _addComputeUnit(computeProvider, computeUnitId, peerId);
     }
 
-    function removeComputeUnit(bytes32 computeUnitId) public onlyCore {
+    function removeComputeUnit(bytes32 computeUnitId) public onlyMarket {
         DealStorage storage dealStorage = _getDealStorage();
 
         uint256 currentEpoch = _globalCore().currentEpoch();
