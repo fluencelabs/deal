@@ -246,7 +246,9 @@ export class DealMatcherClient {
    * - all target compute units found.
    */
   async getMatchedOffersByDealId(dealId: string): Promise<GetMatchedOffersOut> {
-    const { deal } = await this._indexerClient.getDeal({ id: dealId.toLowerCase() });
+    const { deal } = await this._indexerClient.getDeal({
+      id: dealId.toLowerCase(),
+    });
     if (!deal) {
       throw new DealNotFoundError(dealId);
     }
