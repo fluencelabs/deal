@@ -149,7 +149,9 @@ export class DealExplorerClient {
     const convertedFilters: Provider_Filter = { and: [] };
     if (providersFilters.search) {
       const search = providersFilters.search;
-      convertedFilters.and?.push({ or: [{ id: search }, { name: search }] });
+      convertedFilters.and?.push({
+        or: [{ id: search.toLowerCase() }, { name: search }],
+      });
     }
     // https://github.com/graphprotocol/graph-node/issues/2539
     // https://github.com/graphprotocol/graph-node/issues/4775
@@ -236,7 +238,7 @@ export class DealExplorerClient {
       console.warn("Status filter is not implemented.");
     }
     return await this._getOffersImpl(
-      { providerId: byProviderAndStatusFilter.providerId },
+      { providerId: byProviderAndStatusFilter.providerId?.toLowerCase() },
       offset,
       limit,
       orderBy,
@@ -257,7 +259,7 @@ export class DealExplorerClient {
       console.warn("Status filter is not implemented.");
     }
     return await this._getDealsImpl(
-      { providerId: byProviderAndStatusFilter.providerId },
+      { providerId: byProviderAndStatusFilter.providerId?.toLowerCase() },
       offset,
       limit,
       orderBy,
@@ -364,7 +366,7 @@ export class DealExplorerClient {
     if (v.search) {
       const search = v.search;
       convertedFilters.and?.push({
-        or: [{ id: search }, { provider: search }],
+        or: [{ id: search }, { provider: search.toLowerCase() }],
       });
     }
     if (v.effectorIds) {
@@ -383,14 +385,19 @@ export class DealExplorerClient {
     }
     // Filters with relation check below.
     let tokenDecimals = this.DEFAULT_FILTER_TOKEN_DECIMALS;
-    if (v.paymentTokens) {
-      convertedFilters.and?.push({ paymentToken_in: v.paymentTokens });
+    const paymentTokensLowerCase = v.paymentTokens?.map((tokenAddress) => {
+      return tokenAddress.toLowerCase();
+    });
+    if (paymentTokensLowerCase) {
+      convertedFilters.and?.push({ paymentToken_in: paymentTokensLowerCase });
     }
     if (
       (v.minPricePerWorkerEpoch || v.maxPricePerWorkerEpoch) &&
-      v.paymentTokens
+      paymentTokensLowerCase
     ) {
-      tokenDecimals = await this._getCommonTokenDecimals(v.paymentTokens);
+      tokenDecimals = await this._getCommonTokenDecimals(
+        paymentTokensLowerCase,
+      );
     }
     if (v.minPricePerWorkerEpoch) {
       convertedFilters.and?.push({
@@ -532,7 +539,7 @@ export class DealExplorerClient {
     }
     const convertedFilters: Deal_Filter = { and: [] };
     if (v.search) {
-      const search = v.search;
+      const search = v.search.toLowerCase();
       convertedFilters.and?.push({ or: [{ id: search }, { owner: search }] });
     }
     if (v.effectorIds) {
@@ -548,19 +555,24 @@ export class DealExplorerClient {
     }
     if (v.providerId) {
       convertedFilters.and?.push({
-        addedComputeUnits_: { provider: v.providerId },
+        addedComputeUnits_: { provider: v.providerId.toLowerCase() },
       });
     }
     // Filters with relation check below.
     let tokenDecimals = this.DEFAULT_FILTER_TOKEN_DECIMALS;
-    if (v.paymentTokens) {
-      convertedFilters.and?.push({ paymentToken_in: v.paymentTokens });
+    const paymentTokensLowerCase = v.paymentTokens?.map((tokenAddress) => {
+      return tokenAddress.toLowerCase();
+    });
+    if (paymentTokensLowerCase) {
+      convertedFilters.and?.push({ paymentToken_in: paymentTokensLowerCase });
     }
     if (
       (v.minPricePerWorkerEpoch || v.maxPricePerWorkerEpoch) &&
-      v.paymentTokens
+      paymentTokensLowerCase
     ) {
-      tokenDecimals = await this._getCommonTokenDecimals(v.paymentTokens);
+      tokenDecimals = await this._getCommonTokenDecimals(
+        paymentTokensLowerCase,
+      );
     }
     if (v.minPricePerWorkerEpoch) {
       convertedFilters.and?.push({
@@ -715,7 +727,7 @@ export class DealExplorerClient {
   async getDeal(dealId: string): Promise<DealDetail | null> {
     await this._init();
     const options = {
-      id: dealId,
+      id: dealId.toLowerCase(),
     };
     const data = await this._indexerClient.getDeal(options);
     let res: DealDetail | null = null;

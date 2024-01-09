@@ -1,12 +1,12 @@
 import { describe, expect, test, vi } from "vitest";
-import {DealMatcherClient} from "../src";
+import {DealMatcherClient} from "../../src";
 import {
   IndexerClient
-} from "../src/dealMatcherClient/indexerClient/indexerClient";
+} from "../../src/dealMatcherClient/indexerClient/indexerClient";
 import {ethers} from "ethers";
 import {
   OffersQueryQuery
-} from "../src/dealMatcherClient/indexerClient/queries/offers-query.generated";
+} from "../../src/dealMatcherClient/indexerClient/queries/offers-query.generated";
 
 async function createRandomIndexerOffersData(offers: number, peers: number, computeUnits: number): Promise<OffersQueryQuery> {
   let offersData: OffersQueryQuery = {offers: []}
