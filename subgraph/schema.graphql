@@ -113,7 +113,7 @@ type Deal @entity {
   id: ID!  # Ref to offerId in contract.
   appCID: String!
   createdAt: BigInt!
-  owner: String!
+  owner: Bytes!
   # Settings from public methods.
   minWorkers: Int!
   targetWorkers: Int!

@@ -1,6 +1,5 @@
 import { Bytes, ethereum, log } from "@graphprotocol/graph-ts/index";
 import { createOrLoadEffector } from "../models";
-import { Address } from "@graphprotocol/graph-ts";
 
 export class AppCID extends ethereum.Tuple {
   get prefixes(): Bytes {
@@ -34,8 +33,4 @@ export function getEffectorCID(effectorTuple: AppCID): string {
   const cid = effectorTuple.prefixes.toString() + effectorTuple.hash.toString();
   log.info("[getEffectorCID] Extract CID from effector: {}", [cid]);
   return cid;
-}
-
-export function formatAddress(address: Address): string {
-  return address.toHex().toLowerCase();
 }
