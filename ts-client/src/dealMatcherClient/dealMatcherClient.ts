@@ -50,7 +50,7 @@ export class DealMatcherClient {
       filters: {
         pricePerEpoch_lte: pricePerWorkerEpoch,
         effectors_: { effector_in: effectors },
-        paymentToken: paymentToken,
+        paymentToken: paymentToken.toLowerCase(),
         // Check if any of compute units are available in the offer.
         computeUnitsAvailable_gt: 0,
       },
@@ -171,7 +171,7 @@ export class DealMatcherClient {
                 matchedComputeUnitsData.computeUnitsPerOffers[offerCursor];
               if (computeUnitsPerOffers === undefined) {
                 throw new Error(
-                  `Assertion failed: computeUnitsPerOffers is undefined for offerCursor = ${offerCursor}. 
+                  `Assertion failed: computeUnitsPerOffers is undefined for offerCursor = ${offerCursor}.
                   The data structure is broken: ${matchedComputeUnitsData.computeUnitsPerOffers}.`,
                 );
               }
@@ -246,7 +246,9 @@ export class DealMatcherClient {
    * - all target compute units found.
    */
   async getMatchedOffersByDealId(dealId: string): Promise<GetMatchedOffersOut> {
-    const { deal } = await this._indexerClient.getDeal({ id: dealId });
+    const { deal } = await this._indexerClient.getDeal({
+      id: dealId.toLowerCase(),
+    });
     if (!deal) {
       throw new DealNotFoundError(dealId);
     }

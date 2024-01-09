@@ -36,12 +36,12 @@ build-npms: ## Build all npms: subgraph and ts-clients
 	@echo "\033[0;32mSuccess! Build of all NPM packages completed.\033[0m"
 
 build-all: build-contracts build-npms ## Build contracts and npms
+build-all: build-contracts build-npms ## Build contracts and npms
 
 run-tests:  ## Test for solidity contracts & ts-clients
 	@make verify-command program=forge
 	@forge test
 	@cd ts-client && npm run test
-
 	@echo "\033[0;32mSuccess! Tests passed.\033[0m"
 
 start-local-chain: ## Start local chain
