@@ -14,8 +14,8 @@ import type { ContractsENV } from "../../client/config.js";
 export class IndexerClient extends IndexerClientABC {
   private dealsClient: DealsSdk;
   private offersClient: OffersSdk;
-  constructor(network: ContractsENV) {
-    super(network);
+  constructor(network?: ContractsENV, indexerUrl?: string) {
+    super(network, indexerUrl);
     this.offersClient = getOffersSdk(this._graphqlClient);
     this.dealsClient = getDealsSdk(this._graphqlClient);
   }

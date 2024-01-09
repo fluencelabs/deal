@@ -1,5 +1,6 @@
 import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type { ContractsENV } from "../client/config.js";
+import type { OffersQueryQueryVariables } from "./indexerClient/queries/offers-query.generated.js";
 
 // Structure should match matchDeal() arguments.
 // Currently: bytes32[] calldata offers, bytes32[][] calldata computeUnits.
@@ -29,42 +30,58 @@ export class DealNotFoundError extends Error {
 export class DealMatcherClient {
   private _indexerClient: IndexerClient;
   public MAX_PER_PAGE: number;
-  constructor(network: ContractsENV) {
-    this._indexerClient = new IndexerClient(network);
+  constructor(network?: ContractsENV, indexerUrl?: string) {
+    this._indexerClient = new IndexerClient(network, indexerUrl);
     this.MAX_PER_PAGE = this._indexerClient.INDEXER_MAX_FIRST;
   }
 
   async _getMatchedOffersPage(
-    pricePerWorkerEpoch: string,
-    effectors: Array<string>,
-    paymentToken: string,
-    // targetWorkerSlotToMatch: number,
-    // minWorkersToMatch: number,
-    maxWorkersPerProvider: number,
+    getMatchedOffersIn: GetMatchedOffersIn,
+    perPageLimit: number,
     offersOffset: number = 0,
     peersOffset: number = 0,
     computeUnitsOffset: number = 0,
   ) {
-    const fetched = await this._indexerClient.getOffers({
-      limit: maxWorkersPerProvider,
+    let indexerGetOffersParams: OffersQueryQueryVariables = {
+      limit: perPageLimit,
       filters: {
-        pricePerEpoch_lte: pricePerWorkerEpoch,
-        effectors_: { effector_in: effectors },
-        paymentToken: paymentToken.toLowerCase(),
+        pricePerEpoch_lte: getMatchedOffersIn.pricePerWorkerEpoch,
+        paymentToken: getMatchedOffersIn.paymentToken.toLowerCase(),
         // Check if any of compute units are available in the offer.
         computeUnitsAvailable_gt: 0,
       },
       peersFilters: { computeUnits_: { deal: null } },
       computeUnitsFilters: { deal: null },
-      // Below is not the guarantee that query will be according to the maxWorkersPerProvider rule.
+      // Below is not the guarantee that query will be according to the perPageLimit rule.
       // It merely shorten the query response for that rule.
       // TODO: add guarantee into the code. (resolve after on contract is resolved).
-      peersLimit: maxWorkersPerProvider,
-      computeUnitsLimit: maxWorkersPerProvider,
+      peersLimit: perPageLimit,
+      computeUnitsLimit: perPageLimit,
       offset: offersOffset,
       peersOffset: peersOffset,
       computeUnitsOffset: computeUnitsOffset,
-    });
+    };
+    if (getMatchedOffersIn.effectors.length > 0) {
+      indexerGetOffersParams.filters!["effectors_"] = {
+        effector_in: getMatchedOffersIn.effectors,
+      };
+    }
+    console.info(
+      `[_getMatchedOffersPage] Requesting indexer for page with page params: ${JSON.stringify(
+        indexerGetOffersParams,
+        null,
+        2,
+      )}...`,
+    );
+    const fetched = await this._indexerClient.getOffers(indexerGetOffersParams);
+    console.info(`[_getMatchedOffersPage] Got response from indexer.`);
+    console.debug(
+      `[_getMatchedOffersPage] Fetched data: ${JSON.stringify(
+        fetched,
+        null,
+        2,
+      )}`,
+    );
     return fetched.offers;
   }
 
@@ -72,9 +89,6 @@ export class DealMatcherClient {
     getMatchedOffersIn: GetMatchedOffersIn,
   ): Promise<GetMatchedOffersOut> {
     const {
-      pricePerWorkerEpoch,
-      effectors,
-      paymentToken,
       targetWorkerSlotToMatch,
       minWorkersToMatch,
       maxWorkersPerProvider,
@@ -122,16 +136,17 @@ export class DealMatcherClient {
         perPageLimit = this.MAX_PER_PAGE;
       }
       const offers = await this._getMatchedOffersPage(
-        pricePerWorkerEpoch,
-        effectors,
-        paymentToken,
-        // targetWorkerSlotToMatch,
-        // minWorkersToMatch,
+        getMatchedOffersIn,
         perPageLimit,
         offersOffset,
         peersOffset,
         computeUnitsOffset,
       );
+
+      if (offers.length == 0) {
+        console.debug("Got empty data from indexer, break search.");
+        break;
+      }
 
       // Analise fetched data.
       for (const offer of offers) {

@@ -1,15 +1,15 @@
 import { describe, expect, test, vi } from "vitest";
-import {DealMatcherClient} from "../../src";
+import { DealMatcherClient } from "../../src";
 import {
   IndexerClient
 } from "../../src/dealMatcherClient/indexerClient/indexerClient";
-import {ethers} from "ethers";
+import { ethers } from "ethers";
 import {
   OffersQueryQuery
 } from "../../src/dealMatcherClient/indexerClient/queries/offers-query.generated";
 
 async function createRandomIndexerOffersData(offers: number, peers: number, computeUnits: number): Promise<OffersQueryQuery> {
-  let offersData: OffersQueryQuery = {offers: []}
+  let offersData: OffersQueryQuery = { offers: [] }
   for (let i = 0; i < offers; i++) {
     let createdPeers = []
     for (let j = 0; j < peers; j++) {
@@ -93,7 +93,6 @@ describe('#getMatchedOffers', () => {
     }
     expect(total).toEqual(callImplProps.expectedCU)
     expect(matchedOffers.offers.length).toEqual(callImplProps.expectedOffers)
-    console.log(matchedOffers)
   }
 
   test(`It returns exact CUs when indexer has offers less than MAX_PER_PAGE`, async () => {
@@ -223,6 +222,25 @@ describe('#getMatchedOffers', () => {
         offersMockedPage1: 1,
         peersMockedPage1: 1,
         CUsMockedPage1: 1,
+        offersMockedPage2: 0,
+        peersMockedPage2: 0,
+        CUsMockedPage2: 0,
+        expectedCU: 0,
+        exceptedIndexerCalls: 1,
+        expectedFulfilled: false,
+        expectedOffers: 0
+      }
+    )
+  })
+
+  test(`It returns [] if nothing to match with`, async () => {
+    await _callImpl(
+      {
+        targetWorkerSlotToMatch: 1,
+        minWorkersToMatch: 1,
+        offersMockedPage1: 0,
+        peersMockedPage1: 0,
+        CUsMockedPage1: 0,
         offersMockedPage2: 0,
         peersMockedPage2: 0,
         CUsMockedPage2: 0,
