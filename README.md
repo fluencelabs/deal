@@ -105,9 +105,17 @@ $ PRIVATE_KEY=${} make deploy-{network_name}
 
 ## Test
 
+- Contracts
 ```shell
 $ forge test
 ```
+
+- TS Clients
+```shell
+cd ts-client && npm test unittests
+cd ts-client && npm test integrational-tests
+```
+
 
 ## Format
 
