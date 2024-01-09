@@ -2,7 +2,7 @@ import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type { ContractsENV } from "../client/config.js";
 import type { OffersQueryQueryVariables } from "./indexerClient/queries/offers-query.generated.js";
 
-// Structure should match matchDeal() arguments.
+// Structure match matchDeal() arguments.
 // Currently: bytes32[] calldata offers, bytes32[][] calldata computeUnits.
 export interface GetMatchedOffersOut {
   offers: Array<string>;
@@ -30,6 +30,10 @@ export class DealNotFoundError extends Error {
 export class DealMatcherClient {
   private _indexerClient: IndexerClient;
   public MAX_PER_PAGE: number;
+  /*
+    * @param network - network name: {kras/stage/...}.
+    * @param indexerUrl - indexer url (if you want to manually set url for the indexer to use).
+   */
   constructor(network?: ContractsENV, indexerUrl?: string) {
     this._indexerClient = new IndexerClient(network, indexerUrl);
     this.MAX_PER_PAGE = this._indexerClient.INDEXER_MAX_FIRST;
