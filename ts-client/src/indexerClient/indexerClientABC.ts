@@ -9,7 +9,14 @@ export abstract class IndexerClientABC {
   // There is a limitation for the 1 page.
   INDEXER_MAX_FIRST = 1000;
   protected _graphqlClient: GraphQLClient;
-  constructor(network: ContractsENV) {
+  constructor(network?: ContractsENV, indexerUrl?: string) {
+    if (indexerUrl) {
+      this._graphqlClient = new GraphQLClient(indexerUrl);
+      return;
+    }
+    if (!network) {
+      throw new Error("Provide rather indexerUrl or network.");
+    }
     this._graphqlClient = new GraphQLClient(getIndexerUrl(network));
   }
 }
