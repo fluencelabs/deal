@@ -1,10 +1,15 @@
-// International tests for e2e:
+// International tests for e2e with dealMatcherClient: test until a deal matched with an offer.
+// # Dependencies:
 // - deployed contracts
 // - subgraph indexes contracts
-// - it creates offers/deals
+// # Test itself consists of:
+// - it creates Offers
+// - it creates CC (and approve, and deposited collateral)
+// - it waits 1 core epoch (before we could start to match)
+// - it creates Deals
 // - it finds match via subgraph client
-// - it send mathcDeal tx.
-// TODO: more variatives.
+// - it send mathcDeal tx finally.
+// TODO: more variates not only 1to1 match.
 import {describe, test, expect} from "vitest";
 
 import {ContractsENV, DealClient, DealMatcherClient} from "../../src";
@@ -15,7 +20,13 @@ const TEST_NETWORK: ContractsENV = "local";
 const TEST_RPC_URL = "http://localhost:8545";
 const DEFAULT_SUBGRAPH_TIME_INDEXING = 10000;
 const DEFAULT_CONFIRMATIONS = 1;
-const TESTS_TIMEOUT = 70000;
+// Test timeout should include:
+// - time for confirmations waits (1 confirmation is setup on anvil chain start)
+// - time for subgraph indexing
+// - time for core epoch
+// - other eps.
+// TODO: get core.epochDuration instead of 15000
+const TESTS_TIMEOUT = 90000 + 15000;
 
 async function getDefaultOfferFixture(owner: string, paymentToken: string, timestamp: number) {
   const offerFixture = {
@@ -38,13 +49,14 @@ const provider = new ethers.JsonRpcProvider(TEST_RPC_URL);
  * e2e test with dependencies:
  * - locally deployed contracts,
  * - integrated indexer to the deployed contracts.
- * Notice: snapshot is not going to work correctly since we connect indexer to the chain as well.
+ * Notice: chain snapshot is not going to work correctly since we connect indexer
+ *  to the chain as well and indexer should be snapshoted as well.
  */
 describe('#getMatchedOffersByDealId', () => {
   // TODO: check that infra is running.
   async function createOffer(signer: ethers.Signer, timestamp: number, paymentTokenAddress: string) {
-    const contractClient = new DealClient(signer, TEST_NETWORK);
-    const marketContract = await contractClient.getMarket()
+    const contractsClient = new DealClient(signer, TEST_NETWORK);
+    const marketContract = await contractsClient.getMarket()
     const signerAddress = await signer.getAddress()
 
     const {offerFixture} = await getDefaultOfferFixture(signerAddress, paymentTokenAddress, timestamp)
@@ -63,27 +75,71 @@ describe('#getMatchedOffersByDealId', () => {
   test(`Check that it matched successfully for 1:1 configuration.`, async () => {
     const signer = await provider.getSigner();
     const signerAddress = await signer.getAddress()
-    console.log('Init contractClient as signer:', signerAddress);
-    const contractClient = new DealClient(signer, TEST_NETWORK);
-    const paymentToken = await contractClient.getUSDC()
+    console.log('Init contractsClient as signer:', signerAddress);
+    const contractsClient = new DealClient(signer, TEST_NETWORK);
+    const paymentToken = await contractsClient.getUSDC()
     const paymentTokenAddress = await (paymentToken).getAddress()
 
     const blockNumber = await provider.getBlockNumber()
     const timestamp = (await provider.getBlock(blockNumber))?.timestamp
 
-    console.info('Register default offer...')
+    console.info('---- Offer Creation ----')
     const registeredOffer = await createOffer(signer, timestamp, paymentTokenAddress)
 
-    // Deal setup.
+    console.log('---- CC Creation ----')
+    const capacityContract = await contractsClient.getCapacity()
+    const capacityContractAddress = await capacityContract.getAddress()
+    const capacityMinDuration = await capacityContract.minDuration()
+    for (let i = 0; i < registeredOffer.peers.length; i++) {
+      const peer = registeredOffer.peers[i]
+      // bytes32 peerId, uint256 duration, address delegator, uint256 rewardDelegationRate
+      console.log('Create commitment for peer: ', peer.peerId, ' with duration: ', capacityMinDuration, '...')
+      const createCommitmentTx = await capacityContract.createCommitment(peer.peerId, capacityMinDuration, signerAddress, 1)
+      await createCommitmentTx.wait(DEFAULT_CONFIRMATIONS)
+    }
+    console.log('Approve collateral for all sent CC...')
+    // Fetch created commitmentIds from chain.
+    const filterCreatedCC = capacityContract.filters.CapacityCommitmentCreated
+    const capacityCommitmentCreatedEvents = (await capacityContract.queryFilter(filterCreatedCC))
+    const capacityCommitmentCreatedEventsLast = capacityCommitmentCreatedEvents.reverse().slice(0, registeredOffer.peers.length)
+    // 1 CC for each peer.
+    expect(capacityCommitmentCreatedEventsLast.length).toBe(registeredOffer.peers.length)
+    const commitmentIds = capacityCommitmentCreatedEventsLast.map((event) => event.args.commitmentId)
+    let collateralToApproveCommitments = 0n
+    for (let i = 0; i < commitmentIds.length; i++) {
+      const commitmentId = commitmentIds[i]
+      const commitment = await capacityContract.getCommitment(commitmentId)
+      const collateralToApproveCommitment = commitment.collateralPerUnit * commitment.unitCount
+      console.log('Collateral for commitmentId: ', commitmentId, ' = ', collateralToApproveCommitment, '...')
+      collateralToApproveCommitments += collateralToApproveCommitment
+    }
+    console.info(`Send approve of FLT for all commitments for value: ${collateralToApproveCommitments}...`)
+    const fltContract = await contractsClient.getFLT()
+    const collateralToApproveCommitmentsTx = await fltContract.approve(capacityContractAddress, collateralToApproveCommitments);
+    await collateralToApproveCommitmentsTx.wait(DEFAULT_CONFIRMATIONS)
+
+    console.info('Deposit collateral for all sent CC...')
+    for (let i = 0; i < commitmentIds.length; i++) {
+      const commitmentId = commitmentIds[i]
+      console.info('Deposit collateral for commitmentId: ', commitmentId, '...')
+      const depositCollateralTx = await capacityContract.depositCollateral(commitmentId);
+      await depositCollateralTx.wait(DEFAULT_CONFIRMATIONS)
+    }
+
+    console.log('---- Deal Creation ----')
+    const coreContract = await contractsClient.getCore()
+    const epochMilliseconds = await coreContract.epochDuration() * 1000n
+    console.log(`Wait for core epoch to pass: ${epochMilliseconds} milliseconds...`)
+    await new Promise((resolve) => setTimeout(resolve, Number(epochMilliseconds)))
+
     const minWorkersDeal = 1
     const targetWorkersDeal = 1
     const maxWorkerPerProviderDeal = 1
     const pricePerWorkerEpochDeal = registeredOffer.minPricePerWorkerEpoch
 
-    const coreContract = await contractClient.getCore()
     const minDealDepositedEpoches = await coreContract.minDealDepositedEpoches()
     const toApproveFromDeployer = BigInt(targetWorkersDeal) * pricePerWorkerEpochDeal * minDealDepositedEpoches
-    const marketContract = await contractClient.getMarket();
+    const marketContract = await contractsClient.getMarket();
 
     console.info('Send approve of payment token for amount = ', toApproveFromDeployer.toString())
     expect(await paymentToken.balanceOf(signerAddress)).toBeGreaterThan(toApproveFromDeployer)
@@ -102,8 +158,6 @@ describe('#getMatchedOffersByDealId', () => {
       maxWorkerPerProviderDeal,
       pricePerWorkerEpochDeal,
       registeredOffer.effectors,
-      0,
-      []
     );
     await deployDealTx.wait(DEFAULT_CONFIRMATIONS)
 
@@ -111,9 +165,10 @@ describe('#getMatchedOffersByDealId', () => {
     expect(lastDealsCreatedAfter.length - lastDealsCreatedBefore.length).toBe(1)
     const dealId = lastDealsCreatedAfter[lastDealsCreatedAfter.length - 1].args.deal
 
-    console.info('Wait indexer to process transactions above...')
+    console.info(`Wait indexer ${DEFAULT_SUBGRAPH_TIME_INDEXING} to process transactions with Deal...`)
     await new Promise((resolve) => setTimeout(resolve, DEFAULT_SUBGRAPH_TIME_INDEXING))
 
+    console.log('---- Deal Matching ----')
     console.info(`Find matched offers for dealId: ${dealId}...`)
     const dealMatcherClient = new DealMatcherClient(TEST_NETWORK)
     const matchedOffersOut = await dealMatcherClient.getMatchedOffersByDealId(dealId)
