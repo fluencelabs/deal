@@ -20,16 +20,25 @@ build-contracts: ## Build contracts
 	@forge build
 	@echo "\033[0;32mSuccess! Build of contracts completed.\033[0m"
 
-build-npms: ## Build npms
+build-ts-client: ## Run build in node package: ts-client/
 	@make verify-command program=npm
 	@cd ts-client && npm run build
+	@echo "\033[0;32mSuccess! Build of ts-clients completed.\033[0m"
+
+build-subgraph: ## Build subgraph
+	@make verify-command program=npm
 	@cd subgraph && npm run compile && npm run import-config-networks
+	@echo "\033[0;32mSuccess! Build of subgraph completed.\033[0m"
+
+build-npms: ## Build all npms: subgraph and ts-clients
+	@make build-ts-client
+	@make build-subgraph
 	@echo "\033[0;32mSuccess! Build of all NPM packages completed.\033[0m"
 
 build-all: build-contracts build-npms ## Build contracts and npms
 build-all: build-contracts build-npms ## Build contracts and npms
 
-run-tests:  ## Test for ts-clients
+run-tests:  ## Test for solidity contracts & ts-clients
 	@make verify-command program=forge
 	@forge test
 	@cd ts-client && npm run test
