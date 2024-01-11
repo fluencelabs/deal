@@ -20,7 +20,7 @@ build-contracts: ## Build contracts
 	@forge build
 	@echo "\033[0;32mSuccess! Build of contracts completed.\033[0m"
 
-build-ts-clients: ## Build ts-clients
+build-ts-client: ## Run build in node package: ts-client/
 	@make verify-command program=npm
 	@cd ts-client && npm run build
 	@echo "\033[0;32mSuccess! Build of ts-clients completed.\033[0m"
@@ -31,7 +31,7 @@ build-subgraph: ## Build subgraph
 	@echo "\033[0;32mSuccess! Build of subgraph completed.\033[0m"
 
 build-npms: ## Build all npms: subgraph and ts-clients
-	@make build-ts-clients
+	@make build-ts-client
 	@make build-subgraph
 	@echo "\033[0;32mSuccess! Build of all NPM packages completed.\033[0m"
 
