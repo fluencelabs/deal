@@ -20,7 +20,7 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
     // #region ------------------ Types ------------------
     struct UnitProofsInfo {
         bool isInactive;
-        uint256 lastSuccessEpoch;
+        uint256 lastMinProofsEpoch;
         uint256 slashedCollateral;
         mapping(uint256 => uint256) proofsCountByEpoch;
     }
@@ -203,7 +203,7 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
         CCStatus status = _commitCommitmentSnapshot(cc, peer, epoch - 1, expiredEpoch);
 
         unitProofsInfo.isInactive = false;
-        unitProofsInfo.lastSuccessEpoch = epoch;
+        unitProofsInfo.lastMinProofsEpoch = epoch;
 
         emit UnitActivated(commitmentId, unitId);
 
@@ -263,7 +263,7 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
         });
         peer.commitmentId = commitmentId;
 
-        emit CapacityCommitmentCreated(peerId, commitmentId, delegator, rewardDelegationRate, collateralPerUnit);
+        emit CommitmentCreated(peerId, commitmentId, delegator, rewardDelegationRate, collateralPerUnit);
 
         return commitmentId;
     }
@@ -278,7 +278,7 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
         delete s.commitments[commitmentId];
         peer.commitmentId = bytes32(0x00);
 
-        emit CapacityCommitmentRemoved(commitmentId);
+        emit CommitmentRemoved(commitmentId);
     }
 
     function finishCommitment(bytes32 commitmentId) external {
@@ -316,7 +316,7 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
         IERC20(core.fluenceToken()).safeTransfer(delegator, totalCollateral);
         market.setCommitmentId(peerId, bytes32(0x00));
 
-        emit CapacityCommitmentFinished(commitmentId);
+        emit CommitmentFinished(commitmentId);
     }
 
     function depositCollateral(bytes32 commitmentId) external {
@@ -356,9 +356,7 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
         market.setCommitmentId(peerId, commitmentId);
 
         emit CollateralDeposited(commitmentId, collateral);
-        emit CapacityCommitmentActivated(
-            peerId, commitmentId, startEpoch + cc.info.duration, market.getComputeUnitIds(peerId)
-        );
+        emit CommitmentActivated(peerId, commitmentId, startEpoch + cc.info.duration, market.getComputeUnitIds(peerId));
     }
 
     function submitProof(bytes32 unitId, bytes32 localK, bytes32 h) external {
@@ -600,12 +598,12 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
             prevEpoch = ccFaildEpoch;
         }
 
-        uint256 lastSuccessEpoch = unitProofsInfo.lastSuccessEpoch;
-        if (lastSuccessEpoch == 0) {
-            lastSuccessEpoch = cc.info.startEpoch - 1;
+        uint256 lastMinProofsEpoch = unitProofsInfo.lastMinProofsEpoch;
+        if (lastMinProofsEpoch == 0) {
+            lastMinProofsEpoch = cc.info.startEpoch - 1;
         }
 
-        if (prevEpoch <= lastSuccessEpoch) {
+        if (prevEpoch <= lastMinProofsEpoch) {
             return false;
         }
 
@@ -613,7 +611,7 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
         uint256 collateralPerUnit_ = cc.info.collateralPerUnit;
         uint256 currentAmount = collateralPerUnit_ - slashedCollateral;
 
-        uint256 count = prevEpoch - lastSuccessEpoch;
+        uint256 count = prevEpoch - lastMinProofsEpoch;
         uint256 slashingRate_ = slashingRate();
         if (currentAmount > 0) {
             slashedCollateral += (collateralPerUnit_ * count * slashingRate_) / PRECISION;
@@ -629,12 +627,12 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
             unitProofsInfo.slashedCollateral = slashedCollateral;
         }
 
-        unitProofsInfo.lastSuccessEpoch = prevEpoch;
+        unitProofsInfo.lastMinProofsEpoch = prevEpoch;
 
-        RewardInfo storage rewardInfo = s.rewardInfoByEpoch[lastSuccessEpoch];
+        RewardInfo storage rewardInfo = s.rewardInfoByEpoch[lastMinProofsEpoch];
         uint256 reward = (
-            getRewardPool(lastSuccessEpoch)
-                * ((unitProofsInfo.proofsCountByEpoch[lastSuccessEpoch] * PRECISION) / rewardInfo.totalSuccessProofs)
+            getRewardPool(lastMinProofsEpoch)
+                * ((unitProofsInfo.proofsCountByEpoch[lastMinProofsEpoch] * PRECISION) / rewardInfo.totalSuccessProofs)
         ) / PRECISION;
 
         uint256 vestingLength = cc.vestings.length;
@@ -645,7 +643,7 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
 
         cc.vestings.push(Vesting({epoch: prevEpoch + vestingDuration(), cumulativeAmount: cumulativeAmount + reward}));
 
-        delete unitProofsInfo.proofsCountByEpoch[lastSuccessEpoch];
+        delete unitProofsInfo.proofsCountByEpoch[lastMinProofsEpoch];
 
         return true;
     }

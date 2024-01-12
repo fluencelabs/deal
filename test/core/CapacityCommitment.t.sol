@@ -17,18 +17,18 @@ contract CapacityCommitmentTest is Test {
     using SafeERC20 for IERC20;
 
     // ------------------ Events ------------------
-    event CapacityCommitmentCreated(
+    event CommitmentCreated(
         bytes32 indexed peerId,
         bytes32 commitmentId,
         address delegator,
         uint256 rewardDelegationRate,
         uint256 fltCCCollateralPerUnit
     );
-    event CapacityCommitmentRemoved(bytes32 indexed commitmentId);
-    event CapacityCommitmentActivated(
+    event CommitmentRemoved(bytes32 indexed commitmentId);
+    event CommitmentActivated(
         bytes32 indexed peerId, bytes32 indexed commitmentId, uint256 endEpoch, bytes32[] unitIds
     );
-    event CapacityCommitmentFinished(bytes32 indexed commitmentId);
+    event CommitmentFinished(bytes32 indexed commitmentId);
 
     event CollateralDeposited(bytes32 indexed commitmentId, uint256 totalCollateral);
 
@@ -89,9 +89,9 @@ contract CapacityCommitmentTest is Test {
         bytes32 commitmentId =
             keccak256(abi.encodePacked(block.number, peerId, ccDuration, ccDelegator, rewardCCDelegationRate));
 
-        // expect emit CapacityCommitmentCreated
+        // expect emit CommitmentCreated
         vm.expectEmit(true, true, false, true, address(deployment.capacity));
-        emit CapacityCommitmentCreated(
+        emit CommitmentCreated(
             peerId, commitmentId, ccDelegator, rewardCCDelegationRate, deployment.capacity.fltCollateralPerUnit()
         );
 
@@ -135,7 +135,7 @@ contract CapacityCommitmentTest is Test {
         emit CollateralDeposited(commitmentId, amount);
 
         vm.expectEmit(true, true, true, true, address(deployment.capacity));
-        emit CapacityCommitmentActivated(peerId, commitmentId, currentEpoch + 1 + ccDuration, registerPeers[0].unitIds);
+        emit CommitmentActivated(peerId, commitmentId, currentEpoch + 1 + ccDuration, registerPeers[0].unitIds);
 
         deployment.capacity.depositCollateral(commitmentId);
         vm.stopPrank();
