@@ -33,7 +33,7 @@ is presented. Below are main commands of the makefile.
   - [Develop Tricks &amp; Tips](#develop-tricks--tips)
 - [Develop with Deal Infrastructure](#develop-with-deal-infrastructure)
 
-# Requirement
+# Requirements
 
 - foundry
 - makefile (TODO)
