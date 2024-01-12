@@ -26,7 +26,6 @@ library DeployDealSystem {
     }
 
     // ------------------ Constants ------------------
-    uint256 public constant PRECISION = 10000000; // min: 0.0000001
     uint256 public constant DEFAULT_EPOCH_DURATION = 1 days;
     uint256 public constant DEFAULT_FLT_PRICE = 10 * PRECISION; // 10 USD
     uint256 public constant DEFAULT_MIN_DEPOSITED_EPOCHES = 2;
@@ -49,7 +48,7 @@ library DeployDealSystem {
         deployment.tUSD = IERC20(new TestERC20("Test USD", "tUSD"));
 
         Deal dealImpl = new Deal();
-        Core coreImpl = new Core();
+        Core coreImpl = new Core(deployment.tFLT);
 
         deployment.core = Core(
             address(
@@ -58,10 +57,29 @@ library DeployDealSystem {
                     abi.encodeWithSelector(
                         Core.initialize.selector,
                         DEFAULT_EPOCH_DURATION,
-                        deployment.tFLT,
-                        DEFAULT_FLT_PRICE,
                         DEFAULT_MIN_DEPOSITED_EPOCHES,
-                        DEFAULT_MIN_REMATCHING_EPOCHES,
+                        DEFAULT_MIN_REMATCHING_EPOCHES
+                    )
+                )
+            )
+        );
+
+        deployment.market = Market(
+            address(
+                new ERC1967Proxy(
+                    address(new Market(deployment.tFLT, deployment.core)),
+                    abi.encodeWithSelector(Market.initialize.selector, dealImpl)
+                )
+            )
+        );
+
+        deployment.capacity = Capacity(
+            address(
+                new ERC1967Proxy(
+                    address(new Capacity(deployment.tFLT, deployment.core)),
+                    abi.encodeWithSelector(
+                        Capacity.initialize.selector,
+                        DEFAULT_FLT_PRICE,
                         DEFAULT_USD_COLLATERAL_PER_UNIT,
                         DEFAULT_USD_TARGET_REVENUE_PER_EPOCH,
                         DEFAULT_MIN_DURATION,
@@ -74,22 +92,6 @@ library DeployDealSystem {
                         DEFAULT_WITHDRAW_EPOCHES_AFTER_FAILED,
                         DEFAULT_MAX_FAILED_RATIO
                     )
-                )
-            )
-        );
-
-        deployment.market = Market(
-            address(
-                new ERC1967Proxy(
-                    address(new Market()), abi.encodeWithSelector(Market.initialize.selector, deployment.core, dealImpl)
-                )
-            )
-        );
-
-        deployment.capacity = Capacity(
-            address(
-                new ERC1967Proxy(
-                    address(new Capacity()), abi.encodeWithSelector(Capacity.initialize.selector, deployment.core)
                 )
             )
         );

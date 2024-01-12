@@ -21,8 +21,6 @@ contract ConfigTestContract is Initializable, Config {
         uint256 maxWorkersPerProvider_,
         uint256 pricePerWorkerEpoch_,
         CIDV1[] calldata effectors_,
-        AccessType accessType_,
-        address[] calldata accessList_,
         address owner_
     ) public initializer {
         __Config_init(
@@ -34,8 +32,6 @@ contract ConfigTestContract is Initializable, Config {
             maxWorkersPerProvider_,
             pricePerWorkerEpoch_,
             effectors_,
-            accessType_,
-            accessList_,
             owner_
         );
     }
@@ -57,8 +53,6 @@ contract ConfigContract is Test {
         uint256 maxWorkersPerProvider;
         uint256 pricePerWorkerEpoch;
         CIDV1[] effectors;
-        IConfig.AccessType accessType;
-        address[] accessList;
     }
 
     // ------------------ Types ------------------
@@ -70,8 +64,6 @@ contract ConfigContract is Test {
         uint256 maxWorkersPerProvider;
         uint256 pricePerWorkerEpoch;
         CIDV1[] effectors;
-        IDeal.AccessType accessType;
-        address[] accessList;
     }
 
     // ------------------ Variables ------------------
@@ -96,9 +88,7 @@ contract ConfigContract is Test {
             targetWorkers: 2,
             maxWorkersPerProvider: 3,
             pricePerWorkerEpoch: 4,
-            effectors: effectors,
-            accessType: IConfig.AccessType.NONE,
-            accessList: new address[](0)
+            effectors: effectors
         });
 
         ConfigTestContract configImpl = new ConfigTestContract();
@@ -115,8 +105,6 @@ contract ConfigContract is Test {
                 configParams.maxWorkersPerProvider,
                 configParams.pricePerWorkerEpoch,
                 configParams.effectors,
-                configParams.accessType,
-                configParams.accessList,
                 address(this)
             )
         );
@@ -143,13 +131,6 @@ contract ConfigContract is Test {
         for (uint256 i = 0; i < configParams.effectors.length; i++) {
             assertEq(effectors[i].prefixes, configParams.effectors[i].prefixes);
             assertEq(effectors[i].hash, configParams.effectors[i].hash);
-        }
-
-        assertEq(uint256(config.accessType()), uint256(configParams.accessType));
-        address[] memory accessList = config.getAccessList();
-        assertEq(accessList.length, configParams.accessList.length);
-        for (uint256 i = 0; i < configParams.accessList.length; i++) {
-            assertEq(accessList[i], configParams.accessList[i]);
         }
     }
 

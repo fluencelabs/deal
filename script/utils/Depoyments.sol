@@ -21,6 +21,7 @@ contract Depoyments is ScriptBase {
     struct DeployedContract {
         address addr;
         bytes32 codeHash;
+        uint256 blockNumber;
         bytes32 creationCodeHash;
     }
 
@@ -49,6 +50,8 @@ contract Depoyments is ScriptBase {
 
             deployedContract.addr = abi.decode(vm.parseJson(file, string.concat(".", key, ".addr")), (address));
             deployedContract.codeHash = abi.decode(vm.parseJson(file, string.concat(".", key, ".codeHash")), (bytes32));
+            deployedContract.blockNumber =
+                abi.decode(vm.parseJson(file, string.concat(".", key, ".blockNumber")), (uint256));
             deployedContract.creationCodeHash =
                 abi.decode(vm.parseJson(file, string.concat(".", key, ".creationCodeHash")), (bytes32));
 
@@ -65,6 +68,7 @@ contract Depoyments is ScriptBase {
             DeployedContract memory deployedContract = deployments.contracts[name];
             name.serialize("addr", deployedContract.addr);
             name.serialize("codeHash", deployedContract.codeHash);
+            name.serialize("blockNumber", deployedContract.blockNumber);
             string memory deployedContractObject = name.serialize("creationCodeHash", deployedContract.creationCodeHash);
 
             json = mainJsonKey.serialize(name, deployedContractObject);
@@ -75,6 +79,12 @@ contract Depoyments is ScriptBase {
         }
 
         json.write(path);
+
+        // TODO: rm hack below on solving https://github.com/foundry-rs/forge-std/issues/488.
+        string memory name = deployments.contractNames[0];
+        DeployedContract memory deployedContract = deployments.contracts[name];
+        string memory deployedContractObject = name.serialize("blockNumber", deployedContract.blockNumber);
+        json = mainJsonKey.serialize(name, deployedContractObject);
     }
 
     function _deployContract(string memory contractName, string memory artifactName, bytes memory args)
@@ -86,12 +96,11 @@ contract Depoyments is ScriptBase {
         return addr;
     }
 
-    function _forceDeployContract(string memory contractName, string memory artifactName, bytes memory args)
+    function _deployContract(string memory contractName, string memory artifactName, bytes memory args, bool force)
         internal
         returns (address)
     {
-        delete deployments.contracts[contractName];
-        (address addr,) = _tryDeployContract(contractName, artifactName, args);
+        (address addr,) = _tryDeployContract(contractName, artifactName, args, force);
 
         return addr;
     }
@@ -100,6 +109,17 @@ contract Depoyments is ScriptBase {
         internal
         returns (address, bool)
     {
+        return _tryDeployContract(contractName, artifactName, args, false);
+    }
+
+    function _tryDeployContract(string memory contractName, string memory artifactName, bytes memory args, bool force)
+        internal
+        returns (address, bool)
+    {
+        if (force) {
+            delete deployments.contracts[contractName];
+        }
+
         DeployedContract memory deployedContract = deployments.contracts[contractName];
 
         string memory artifact = string.concat(artifactName, ".sol");
@@ -128,7 +148,12 @@ contract Depoyments is ScriptBase {
 
         console.log("Deploy %s at %s", contractName, addr);
 
-        deployedContract = DeployedContract({addr: addr, codeHash: codeHash, creationCodeHash: creationCodeHash});
+        deployedContract = DeployedContract({
+            addr: addr,
+            codeHash: codeHash,
+            blockNumber: block.number,
+            creationCodeHash: creationCodeHash
+        });
         deployments.contracts[contractName] = deployedContract;
 
         if (isNew) {
@@ -136,6 +161,19 @@ contract Depoyments is ScriptBase {
         }
 
         return (addr, isNew);
+    }
+
+    function _doNeedToRedeploy(string memory contractName, string memory artifactName) internal view returns (bool) {
+        DeployedContract memory deployedContract = deployments.contracts[contractName];
+
+        string memory artifact = string.concat(artifactName, ".sol");
+        bytes memory code = vm.getDeployedCode(artifact);
+        bytes32 codeHash = keccak256(code);
+
+        bool isNew = deployedContract.addr == address(0) || _extcodehash(deployedContract.addr) == bytes32(0x00)
+            || deployedContract.codeHash != codeHash;
+
+        return isNew;
     }
 
     function _printDeployments() internal view {

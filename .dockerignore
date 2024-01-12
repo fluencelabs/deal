@@ -1,0 +1,14 @@
+# Ignore everything
+*
+
+# Allow specific directories and files
+!foundry.toml
+!remappings.txt
+!src/
+!deployments/
+!subgraph/
+!Makefile
+!lib/
+!script/
+!out/
+!cache/

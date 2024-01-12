@@ -1,9 +1,9 @@
 {
   "bootstrap-sha": "ebba07a443b3682c9016f2f999d073c9a230037f",
-  "release-type": "node",
+  "release-type": "simple",
   "bump-minor-pre-major": true,
   "bump-patch-for-minor-pre-major": true,
   "packages": {
-    "ts-client": {}
+    ".": {}
   }
 }

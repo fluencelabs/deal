@@ -30,7 +30,6 @@ contract DeployContracts is Depoyments, Script {
     uint256 constant LOCAL_tUSD_BALANCE = 1000000 ether;
 
     // ------------------ Default constant ------------------
-    uint256 constant PRECISION = 10_000_000; // min: 0.0000001
     uint256 constant DEFAULT_EPOCH_DURATION = 15 seconds;
     uint256 constant DEFAULT_FLT_PRICE = 1 * PRECISION; // 1 USD
     uint256 constant DEFAULT_MIN_DEPOSITED_EPOCHES = 2;
@@ -220,65 +219,66 @@ contract DeployContracts is Depoyments, Script {
         uint256 withdrawEpochesAfterFailed_,
         uint256 maxFailedRatio_
     ) internal {
-        address coreImpl = _deployContract("CoreImpl", "Core", new bytes(0));
+        address coreImpl = _deployContract("CoreImpl", "Core", abi.encode(flt));
         address dealImpl = _deployContract("DealImpl", "Deal", new bytes(0));
 
-        (address marketImpl, bool isNewMarket) = _tryDeployContract("MarketImpl", "Market", new bytes(0));
-        (address capacityImpl, bool isNewCapacity) = _tryDeployContract("CapacityImpl", "Capacity", new bytes(0));
+        bool needToRedeployMarket = _doNeedToRedeploy("MarketImpl", "Market");
+        bool needToRedeployCapacity = _doNeedToRedeploy("CapacityImpl", "Capacity");
 
-        address coreAddr;
-        address market;
-        address capacity;
-        bytes memory coreArgs = abi.encode(
-            coreImpl,
-            abi.encodeWithSelector(
-                Core.initialize.selector,
-                epochDuration_,
-                flt,
-                fltPrice_,
-                minDepositedEpoches_,
-                minRematchingEpoches_,
-                usdCollateralPerUnit_,
-                usdTargetRevenuePerEpoch_,
-                minDuration_,
-                minRewardPerEpoch_,
-                maxRewardPerEpoch_,
-                vestingDuration_,
-                slashingRate_,
-                minRequierdProofsPerEpoch_,
-                maxProofsPerEpoch_,
-                withdrawEpochesAfterFailed_,
-                maxFailedRatio_
+        (address coreAddr, bool isNewCore) = _tryDeployContract(
+            "Core",
+            "ERC1967Proxy",
+            abi.encode(
+                coreImpl,
+                abi.encodeWithSelector(
+                    Core.initialize.selector, epochDuration_, minDepositedEpoches_, minRematchingEpoches_
+                )
+            ),
+            needToRedeployMarket || needToRedeployCapacity
+        );
+
+        address marketImpl = _deployContract("MarketImpl", "Market", abi.encode(flt, coreAddr), isNewCore);
+        address capacityImpl = _deployContract("CapacityImpl", "Capacity", abi.encode(flt, coreAddr), isNewCore);
+
+        address marketProxy = _deployContract(
+            "Market",
+            "ERC1967Proxy",
+            abi.encode(marketImpl, abi.encodeWithSelector(Market.initialize.selector, dealImpl))
+        );
+
+        address capacityProxy = _deployContract(
+            "Capacity",
+            "ERC1967Proxy",
+            abi.encode(
+                capacityImpl,
+                abi.encodeWithSelector(
+                    Capacity.initialize.selector,
+                    fltPrice_,
+                    usdCollateralPerUnit_,
+                    usdTargetRevenuePerEpoch_,
+                    minDuration_,
+                    minRewardPerEpoch_,
+                    maxRewardPerEpoch_,
+                    vestingDuration_,
+                    slashingRate_,
+                    minRequierdProofsPerEpoch_,
+                    maxProofsPerEpoch_,
+                    withdrawEpochesAfterFailed_,
+                    maxFailedRatio_
+                )
             )
         );
 
-        if (isNewMarket || isNewCapacity) {
-            console.log("Force deploy Core, Market, Capacity");
-            coreAddr = _forceDeployContract("Core", "ERC1967Proxy", coreArgs);
-
-            bytes memory marketArgs =
-                abi.encode(marketImpl, abi.encodeWithSelector(Market.initialize.selector, coreAddr, dealImpl));
-            market = _forceDeployContract("Market", "ERC1967Proxy", marketArgs);
-
-            bytes memory capacityArgs =
-                abi.encode(capacityImpl, abi.encodeWithSelector(Capacity.initialize.selector, coreAddr));
-            capacity = _forceDeployContract("Capacity", "ERC1967Proxy", capacityArgs);
-
-            ICore core = ICore(coreAddr);
-            core.initializeModules(ICapacity(capacity), IMarket(market));
-        } else {
-            coreAddr = _deployContract("Core", "ERC1967Proxy", coreArgs);
-
-            bytes memory marketArgs =
-                abi.encode(marketImpl, abi.encodeWithSelector(Market.initialize.selector, coreAddr, dealImpl));
-            market = _deployContract("Market", "ERC1967Proxy", marketArgs);
-
-            bytes memory capacityArgs =
-                abi.encode(capacityImpl, abi.encodeWithSelector(Capacity.initialize.selector, coreAddr));
-            capacity = _deployContract("Capacity", "ERC1967Proxy", capacityArgs);
+        if (isNewCore) {
+            console.log("\nCore deployed, initializing modules as well...");
+            ICore(coreAddr).initializeModules(ICapacity(capacityProxy), IMarket(marketProxy));
         }
 
-        flt.safeTransfer(capacity, 1_000_000 ether);
+        // TODO: if needToRedeployMarket or needToRedeployCapacity - impl proxy should be update with impl.
+        if (!isNewCore && (needToRedeployMarket || needToRedeployCapacity)) {
+            revert("Update not implemented yet.");
+        }
+
     }
 
     function _startDeploy() internal {

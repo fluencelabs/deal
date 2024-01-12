@@ -28,7 +28,7 @@ export type ProviderQueryQuery = { __typename?: 'Query', provider?: { __typename
 
 export type ProviderAbcFragment = { __typename?: 'Provider', id: string, name: string, createdAt: any, computeUnitsAvailable: number, computeUnitsTotal: number };
 
-export type BasicOfferFragment = { __typename?: 'Offer', id: string, createdAt: any, pricePerEpoch: any, computeUnitsTotal?: number | null, computeUnitsAvailable?: number | null, paymentToken: { __typename?: 'Token', id: string, symbol: string, decimals: number }, effectors?: Array<{ __typename?: 'OfferToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null };
+export type ProvidersBasicOfferFragment = { __typename?: 'Offer', id: string, createdAt: any, pricePerEpoch: any, computeUnitsTotal?: number | null, computeUnitsAvailable?: number | null, paymentToken: { __typename?: 'Token', id: string, symbol: string, decimals: number }, effectors?: Array<{ __typename?: 'OfferToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null };
 
 export type EffectorBasicFragment = { __typename?: 'Effector', id: string, description: string };
 
@@ -47,8 +47,8 @@ export const EffectorBasicFragmentDoc = gql`
   description
 }
     `;
-export const BasicOfferFragmentDoc = gql`
-    fragment BasicOffer on Offer {
+export const ProvidersBasicOfferFragmentDoc = gql`
+    fragment ProvidersBasicOffer on Offer {
   id
   createdAt
   pricePerEpoch
@@ -70,11 +70,11 @@ export const ProviderOfProvidersQueryFragmentDoc = gql`
     fragment ProviderOfProvidersQuery on Provider {
   ...ProviderABC
   offers {
-    ...BasicOffer
+    ...ProvidersBasicOffer
   }
 }
     ${ProviderAbcFragmentDoc}
-${BasicOfferFragmentDoc}`;
+${ProvidersBasicOfferFragmentDoc}`;
 export const ProvidersQueryDocument = gql`
     query ProvidersQuery($filters: Provider_filter, $offset: Int, $limit: Int, $orderBy: Provider_orderBy, $orderType: OrderDirection) {
   providers(

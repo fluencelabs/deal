@@ -14,10 +14,11 @@ fs_permissions = [
 ]
 gas_reports = ["*"]
 optimizer = true
-optimizer_runs = 4294967295
+optimizer_runs = 0 # TODO: add 
 
 [rpc_endpoints]
 local = "http://0.0.0.0:8545"
+local-ipc = "http://0.0.0.0:8545"
 stage = "https://rpc.ankr.com/polygon_mumbai"
 testnet = "https://rpc.ankr.com/polygon_mumbai"
 kras = "https://rpc.ankr.com/polygon_mumbai"

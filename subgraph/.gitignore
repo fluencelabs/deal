@@ -2,3 +2,4 @@ node_modules
 build
 generated
 !subgraph.yaml
+scripts/import-config-networks.js

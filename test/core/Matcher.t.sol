@@ -10,6 +10,7 @@ import "test/utils/DeployDealSystem.sol";
 import "src/core/modules/market/Market.sol";
 import "src/core/modules/market/interfaces/IOffer.sol";
 import "test/utils/Random.sol";
+import "forge-std/StdCheats.sol";
 
 contract MatcherTest is Test {
     using SafeERC20 for IERC20;
@@ -19,7 +20,7 @@ contract MatcherTest is Test {
 
     // ------------------ Internals ------------------
 
-    function _registerOffers(
+    function _registerOffersAndCC(
         uint256 offerCount,
         uint256 peerCountPerOffer,
         uint256 unitCountPerPeer,
@@ -49,6 +50,17 @@ contract MatcherTest is Test {
             }
 
             offerIds[i] = deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, peers);
+
+            for (uint256 j = 0; j < peerCountPerOffer; j++) {
+                bytes32 commitmentId = deployment.capacity.createCommitment(
+                    peerIds[i][j], deployment.capacity.minDuration(), address(this), 1
+                );
+
+                uint256 amount =
+                    deployment.capacity.getCommitment(commitmentId).collateralPerUnit * unitIds[i][j].length;
+                deployment.tFLT.safeApprove(address(deployment.capacity), amount);
+                deployment.capacity.depositCollateral(commitmentId);
+            }
         }
     }
 
@@ -57,6 +69,7 @@ contract MatcherTest is Test {
         deployment = DeployDealSystem.deployDealSystem();
     }
 
+    // Simple positive test.
     function test_Match() public {
         CIDV1[] memory effectors = new CIDV1[](10);
         for (uint256 i = 0; i < effectors.length; i++) {
@@ -69,28 +82,74 @@ contract MatcherTest is Test {
         uint256 offerCount = 3;
         uint256 unitCountPerPeer = 2;
         uint256 peerCountPerOffer = 3;
-        uint256 targetWorkers = offerCount * peerCountPerOffer;
+        uint256 minWorkers = 1;
+        // Total workers: offerCount * unitCountPerPeer * peerCountPerOffer. Thus, we have CU in excess.
+        uint256 targetWorkers = offerCount * peerCountPerOffer * 1;
         CIDV1 memory appCID = CIDV1({prefixes: 0x12345678, hash: Random.pseudoRandom(abi.encode("appCID"))});
 
         DealMock dealMock =
-            new DealMock(pricePerWorkerEpoch, paymentToken, targetWorkers, effectors, appCID, creationBlock);
+            new DealMock(pricePerWorkerEpoch, paymentToken, targetWorkers, minWorkers, effectors, appCID, creationBlock);
 
-        (bytes32[] memory offerIds, bytes32[][] memory peerIds, bytes32[][][] memory unitIds) = _registerOffers(
+        (bytes32[] memory offerIds, bytes32[][] memory peerIds, bytes32[][][] memory unitIds) = _registerOffersAndCC(
             offerCount, peerCountPerOffer, unitCountPerPeer, effectors, paymentToken, pricePerWorkerEpoch
         );
 
-        deployment.market.matchDeal(IDeal(address(dealMock)));
+        StdCheats.skip(uint256(deployment.core.epochDuration()));
+
+        // Convert units 3D array to 2D array.
+        // Choose the first targetWorkers.
+        bytes32[][] memory unitIds2D = new bytes32[][](offerIds.length);
+        uint256 chosenComputeUnits = 0;
+        for (uint256 i = 0; i < offerIds.length; i++) {
+            // Dynamically choose array size.
+            if ((peerCountPerOffer * unitCountPerPeer) < (targetWorkers - chosenComputeUnits)) {
+                unitIds2D[i] = new bytes32[](peerCountPerOffer * unitCountPerPeer);
+            } else {
+                unitIds2D[i] = new bytes32[](targetWorkers - chosenComputeUnits);
+            }
+
+            uint256 currentUnitIdx = 0;
+            for (uint256 j = 0; j < peerIds[i].length; j++) {
+                if (chosenComputeUnits == targetWorkers) {
+                    break;
+                }
+                for (uint256 k = 0; k < unitIds[i][j].length; k++) {
+                    if (chosenComputeUnits == targetWorkers) {
+                        break;
+                    }
+                    unitIds2D[i][currentUnitIdx] = unitIds[i][j][k];
+                    currentUnitIdx += 1;
+                    chosenComputeUnits += 1;
+                }
+            }
+        }
+        deployment.market.matchDeal(IDeal(address(dealMock)), offerIds, unitIds2D);
 
         assertEq(dealMock.getComputeUnitCount(), targetWorkers, "Wrong number of compute units");
+        uint256 currentUnit = 0;
         for (uint256 i = 0; i < offerIds.length; i++) {
             bytes32 offerId = offerIds[i];
             Market.Offer memory offer = deployment.market.getOffer(offerId);
+
             for (uint256 j = 0; j < peerIds[i].length; j++) {
-                bytes32 unitId = unitIds[i][j][0];
-                assertEq(deployment.market.getComputeUnit(unitId).deal, address(dealMock), "Wrong deal");
-                assertEq(dealMock.computeProviderByUnitId(unitId), offer.provider, "Wrong compute provider");
-                assertEq(dealMock.peerIdByUnitId(unitId), peerIds[i][j], "Wrong peer id");
-                assertTrue(dealMock.unitExists(unitId), "Unit does not exist");
+                for (uint256 k = 0; k < unitIds[i][j].length; k++) {
+                    bytes32 unitId = unitIds[i][j][k];
+
+                    if (currentUnit < targetWorkers) {
+                        // We should found out that those CU are matched.
+                        assertEq(deployment.market.getComputeUnit(unitId).deal, address(dealMock), "Wrong deal");
+                        assertEq(dealMock.computeProviderByUnitId(unitId), offer.provider, "Wrong compute provider");
+                        assertEq(dealMock.peerIdByUnitId(unitId), peerIds[i][j], "Wrong peer id");
+                        assertTrue(dealMock.unitExists(unitId), "Unit does not exist");
+                    } else {
+                        // We should found out that those CU are still free.
+                        assertEq(deployment.market.getComputeUnit(unitId).deal, address(0), "Expected no deal.");
+                        assertEq(dealMock.computeProviderByUnitId(unitId), address(0), "Expected no provider.");
+                        assertEq(dealMock.peerIdByUnitId(unitId), bytes32(0), "Expected no peer id.");
+                        assertTrue(!dealMock.unitExists(unitId), "Expected unitExists == false.");
+                    }
+                    currentUnit += 1;
+                }
             }
         }
 
@@ -105,6 +164,7 @@ contract DealMock {
     uint256 public creationBlock;
     uint256 public getComputeUnitCount;
     uint256 public targetWorkers;
+    uint256 public minWorkers;
 
     CIDV1[] internal _effectors;
 
@@ -116,6 +176,7 @@ contract DealMock {
         uint256 _pricePerWorkerEpoch,
         address _paymentToken,
         uint256 _targetWorkers,
+        uint256 _minWorkers,
         CIDV1[] memory effectors_,
         CIDV1 memory _appCID,
         uint256 _creationBlock
@@ -123,17 +184,10 @@ contract DealMock {
         pricePerWorkerEpoch = _pricePerWorkerEpoch;
         paymentToken = _paymentToken;
         targetWorkers = _targetWorkers;
+        minWorkers = _minWorkers;
         _effectors = effectors_;
         appCID = _appCID;
         creationBlock = _creationBlock;
-    }
-
-    function accessType() external view returns (IConfig.AccessType) {
-        return IConfig.AccessType.NONE;
-    }
-
-    function isInAccessList(address addr) external view returns (bool) {
-        return false;
     }
 
     function effectors() external view returns (CIDV1[] memory) {
@@ -141,7 +195,6 @@ contract DealMock {
     }
 
     function addComputeUnit(address computeProvider, bytes32 unitId, bytes32 peerId) external {
-        console.logBytes32(unitId);
         require(!unitExists[unitId], "Unit already exists");
 
         unitExists[unitId] = true;

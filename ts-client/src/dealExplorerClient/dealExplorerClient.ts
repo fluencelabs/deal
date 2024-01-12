@@ -31,10 +31,8 @@ import type {
   ProvidersFilters,
 } from "./filters.js";
 import { IndexerClient } from "./indexerClient/indexerClient.js";
-import type {
-  BasicOfferFragment,
-  ProviderOfProvidersQueryFragment,
-} from "./indexerClient/queries/providers-query.generated.js";
+import type { BasicOfferFragment } from "./indexerClient/queries/offers-query.generated.js";
+import type { ProviderOfProvidersQueryFragment } from "./indexerClient/queries/providers-query.generated.js";
 import type {
   Deal_Filter,
   Deal_OrderBy,
@@ -60,7 +58,6 @@ export class ValidTogetherFiltersError extends FiltersError {}
  * @dev It supports mainnet, testnet by selecting related contractsEnv.
  */
 export class DealExplorerClient {
-  DEFAULT_NETWORK: ContractsENV = "kras";
   DEFAULT_PAGE_LIMIT = 100;
   DEFAULT_ORDER_TYPE: OrderType = "desc";
   DEFAULT_TOKEN_VALUE_ROUNDING = 3;
@@ -76,10 +73,9 @@ export class DealExplorerClient {
   private _dealRpcClient: DealRpcClient | null;
 
   constructor(
-    indexerUrl: string,
+    network: ContractsENV,
     chainRpcUrl?: string,
     caller?: ethers.Provider | ethers.Signer,
-    network?: ContractsENV,
   ) {
     if (chainRpcUrl) {
       console.warn("Do not use chainRPCUrl, use provider instead.");
@@ -89,11 +85,8 @@ export class DealExplorerClient {
     } else {
       throw Error("One of chainRPCUrl or provider should be delclared.");
     }
-    this._indexerClient = new IndexerClient(indexerUrl);
-    this._dealContractsClient = new DealClient(
-      this._caller,
-      network || this.DEFAULT_NETWORK,
-    );
+    this._indexerClient = new IndexerClient(network);
+    this._dealContractsClient = new DealClient(this._caller, network);
     this._dealRpcClient = null;
   }
 
@@ -133,7 +126,9 @@ export class DealExplorerClient {
     const composedOffers = [];
     if (provider.offers) {
       for (const offer of provider.offers) {
-        composedOffers.push(this._composeOfferShort(offer));
+        composedOffers.push(
+          this._composeOfferShort(offer as BasicOfferFragment),
+        );
       }
     }
     return {
@@ -148,10 +143,15 @@ export class DealExplorerClient {
     if (!providersFilters) {
       return {};
     }
+    if (providersFilters.onlyApproved) {
+      console.warn("Currently onlyApproved field does not implemented.");
+    }
     const convertedFilters: Provider_Filter = { and: [] };
     if (providersFilters.search) {
       const search = providersFilters.search;
-      convertedFilters.and?.push({ or: [{ id: search }, { name: search }] });
+      convertedFilters.and?.push({
+        or: [{ id: search.toLowerCase() }, { name: search }],
+      });
     }
     // https://github.com/graphprotocol/graph-node/issues/2539
     // https://github.com/graphprotocol/graph-node/issues/4775
@@ -238,7 +238,7 @@ export class DealExplorerClient {
       console.warn("Status filter is not implemented.");
     }
     return await this._getOffersImpl(
-      { providerId: byProviderAndStatusFilter.providerId },
+      { providerId: byProviderAndStatusFilter.providerId?.toLowerCase() },
       offset,
       limit,
       orderBy,
@@ -259,7 +259,7 @@ export class DealExplorerClient {
       console.warn("Status filter is not implemented.");
     }
     return await this._getDealsImpl(
-      { providerId: byProviderAndStatusFilter.providerId },
+      { providerId: byProviderAndStatusFilter.providerId?.toLowerCase() },
       offset,
       limit,
       orderBy,
@@ -291,15 +291,21 @@ export class DealExplorerClient {
     return {
       id: offer.id,
       createdAt: Number(offer.createdAt),
-      totalComputeUnits: offer.computeUnitsTotal,
-      freeComputeUnits: offer.computeUnitsAvailable,
+      totalComputeUnits: Number(offer.computeUnitsTotal ?? 0),
+      freeComputeUnits: Number(offer.computeUnitsAvailable ?? 0),
       paymentToken: {
         address: offer.paymentToken.id,
         symbol: offer.paymentToken.symbol,
         decimals: offer.paymentToken.decimals.toString(),
       },
+      pricePerEpoch: tokenValueToRounded(
+        offer.pricePerEpoch,
+        this.DEFAULT_TOKEN_VALUE_ROUNDING,
+        offer.paymentToken.decimals,
+      ),
       effectors: this._composeEffectors(offer.effectors),
-    } as OfferShort;
+      providerId: offer.provider.id,
+    };
   }
 
   _convertOfferShortOrderByToIndexerType(v: OfferShortOrderBy): Offer_OrderBy {
@@ -360,7 +366,7 @@ export class DealExplorerClient {
     if (v.search) {
       const search = v.search;
       convertedFilters.and?.push({
-        or: [{ id: search }, { provider: search }],
+        or: [{ id: search }, { provider: search.toLowerCase() }],
       });
     }
     if (v.effectorIds) {
@@ -369,28 +375,33 @@ export class DealExplorerClient {
       });
     }
     if (v.createdAtFrom) {
-      convertedFilters.and?.push({ createdAt_gt: v.createdAtFrom.toString() });
+      convertedFilters.and?.push({ createdAt_gte: v.createdAtFrom.toString() });
     }
     if (v.createdAtTo) {
-      convertedFilters.and?.push({ createdAt_lt: v.createdAtTo.toString() });
+      convertedFilters.and?.push({ createdAt_lte: v.createdAtTo.toString() });
     }
     if (v.providerId) {
       convertedFilters.and?.push({ provider: v.providerId });
     }
     // Filters with relation check below.
     let tokenDecimals = this.DEFAULT_FILTER_TOKEN_DECIMALS;
-    if (v.paymentTokens) {
-      convertedFilters.and?.push({ paymentToken_in: v.paymentTokens });
+    const paymentTokensLowerCase = v.paymentTokens?.map((tokenAddress) => {
+      return tokenAddress.toLowerCase();
+    });
+    if (paymentTokensLowerCase) {
+      convertedFilters.and?.push({ paymentToken_in: paymentTokensLowerCase });
     }
     if (
       (v.minPricePerWorkerEpoch || v.maxPricePerWorkerEpoch) &&
-      v.paymentTokens
+      paymentTokensLowerCase
     ) {
-      tokenDecimals = await this._getCommonTokenDecimals(v.paymentTokens);
+      tokenDecimals = await this._getCommonTokenDecimals(
+        paymentTokensLowerCase,
+      );
     }
     if (v.minPricePerWorkerEpoch) {
       convertedFilters.and?.push({
-        pricePerEpoch_gt: valueToTokenValue(
+        pricePerEpoch_gte: valueToTokenValue(
           v.minPricePerWorkerEpoch,
           tokenDecimals,
         ),
@@ -398,7 +409,7 @@ export class DealExplorerClient {
     }
     if (v.maxPricePerWorkerEpoch) {
       convertedFilters.and?.push({
-        pricePerEpoch_lt: valueToTokenValue(
+        pricePerEpoch_lte: valueToTokenValue(
           v.maxPricePerWorkerEpoch,
           tokenDecimals,
         ),
@@ -528,7 +539,7 @@ export class DealExplorerClient {
     }
     const convertedFilters: Deal_Filter = { and: [] };
     if (v.search) {
-      const search = v.search;
+      const search = v.search.toLowerCase();
       convertedFilters.and?.push({ or: [{ id: search }, { owner: search }] });
     }
     if (v.effectorIds) {
@@ -537,30 +548,35 @@ export class DealExplorerClient {
       });
     }
     if (v.createdAtFrom) {
-      convertedFilters.and?.push({ createdAt_gt: v.createdAtFrom.toString() });
+      convertedFilters.and?.push({ createdAt_gte: v.createdAtFrom.toString() });
     }
     if (v.createdAtTo) {
-      convertedFilters.and?.push({ createdAt_lt: v.createdAtTo.toString() });
+      convertedFilters.and?.push({ createdAt_lte: v.createdAtTo.toString() });
     }
     if (v.providerId) {
       convertedFilters.and?.push({
-        addedComputeUnits_: { provider: v.providerId },
+        addedComputeUnits_: { provider: v.providerId.toLowerCase() },
       });
     }
     // Filters with relation check below.
     let tokenDecimals = this.DEFAULT_FILTER_TOKEN_DECIMALS;
-    if (v.paymentTokens) {
-      convertedFilters.and?.push({ paymentToken_in: v.paymentTokens });
+    const paymentTokensLowerCase = v.paymentTokens?.map((tokenAddress) => {
+      return tokenAddress.toLowerCase();
+    });
+    if (paymentTokensLowerCase) {
+      convertedFilters.and?.push({ paymentToken_in: paymentTokensLowerCase });
     }
     if (
       (v.minPricePerWorkerEpoch || v.maxPricePerWorkerEpoch) &&
-      v.paymentTokens
+      paymentTokensLowerCase
     ) {
-      tokenDecimals = await this._getCommonTokenDecimals(v.paymentTokens);
+      tokenDecimals = await this._getCommonTokenDecimals(
+        paymentTokensLowerCase,
+      );
     }
     if (v.minPricePerWorkerEpoch) {
       convertedFilters.and?.push({
-        pricePerWorkerEpoch_gt: valueToTokenValue(
+        pricePerWorkerEpoch_gte: valueToTokenValue(
           v.minPricePerWorkerEpoch,
           tokenDecimals,
         ),
@@ -568,7 +584,7 @@ export class DealExplorerClient {
     }
     if (v.maxPricePerWorkerEpoch) {
       convertedFilters.and?.push({
-        pricePerWorkerEpoch_lt: valueToTokenValue(
+        pricePerWorkerEpoch_lte: valueToTokenValue(
           v.maxPricePerWorkerEpoch,
           tokenDecimals,
         ),
@@ -711,7 +727,7 @@ export class DealExplorerClient {
   async getDeal(dealId: string): Promise<DealDetail | null> {
     await this._init();
     const options = {
-      id: dealId,
+      id: dealId.toLowerCase(),
     };
     const data = await this._indexerClient.getDeal(options);
     let res: DealDetail | null = null;

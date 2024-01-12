@@ -61,9 +61,7 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
         uint256 targetWorkers_,
         uint256 maxWorkersPerProvider_,
         uint256 pricePerWorkerEpoch_,
-        CIDV1[] calldata effectors_,
-        IConfig.AccessType accessType_,
-        address[] calldata accessList_
+        CIDV1[] calldata effectors_
     ) public initializer {
         __WorkerManager_init(
             globalCore_,
@@ -74,8 +72,6 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
             maxWorkersPerProvider_,
             pricePerWorkerEpoch_,
             effectors_,
-            accessType_,
-            accessList_,
             msg.sender
         );
     }
@@ -305,11 +301,11 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
         emit RewardWithdrawn(computeUnitId, reward);
     }
 
-    function addComputeUnit(address computeProvider, bytes32 computeUnitId, bytes32 peerId) public onlyCore {
+    function addComputeUnit(address computeProvider, bytes32 computeUnitId, bytes32 peerId) public onlyMarket {
         _addComputeUnit(computeProvider, computeUnitId, peerId);
     }
 
-    function removeComputeUnit(bytes32 computeUnitId) public onlyCore {
+    function removeComputeUnit(bytes32 computeUnitId) public onlyMarket {
         DealStorage storage dealStorage = _getDealStorage();
 
         uint256 currentEpoch = _globalCore().currentEpoch();

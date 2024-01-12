@@ -12,7 +12,7 @@ import "./interfaces/IDealFactory.sol";
 /*
  * @dev On init mas.sender becomes owner.
  */
-contract DealFactory is BaseModule, IDealFactory {
+abstract contract DealFactory is BaseModule, IDealFactory {
     using SafeERC20 for IERC20;
 
     // ------------------ Storage ------------------
@@ -52,13 +52,9 @@ contract DealFactory is BaseModule, IDealFactory {
         uint256 targetWorkers_,
         uint256 maxWorkersPerProvider_,
         uint256 pricePerWorkerEpoch_,
-        CIDV1[] calldata effectors_,
-        IDeal.AccessType accessType_,
-        address[] calldata accessList_
+        CIDV1[] calldata effectors_
     ) external returns (IDeal) {
         DealFactoryStorage storage dealFactoryStorage = _getDealFactoryStorage();
-
-        ICore core = _core();
 
         IDeal deal = IDeal(
             address(
@@ -74,8 +70,6 @@ contract DealFactory is BaseModule, IDealFactory {
                         maxWorkersPerProvider_,
                         pricePerWorkerEpoch_,
                         effectors_,
-                        accessType_,
-                        accessList_,
                         msg.sender
                     )
                 )

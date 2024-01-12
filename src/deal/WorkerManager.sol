@@ -49,8 +49,6 @@ contract WorkerManager is Config, IWorkerManager {
         uint256 maxWorkersPerProvider_,
         uint256 pricePerWorkerEpoch_,
         CIDV1[] calldata effectors_,
-        AccessType accessType_,
-        address[] calldata accessList_,
         address owner_
     ) internal onlyInitializing {
         __Config_init(
@@ -62,8 +60,6 @@ contract WorkerManager is Config, IWorkerManager {
             maxWorkersPerProvider_,
             pricePerWorkerEpoch_,
             effectors_,
-            accessType_,
-            accessList_,
             owner_
         );
 

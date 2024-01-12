@@ -18,6 +18,7 @@ interface IOffer {
         address provider;
         uint256 minPricePerWorkerEpoch;
         address paymentToken;
+        uint256 peerCount;
     }
 
     struct ComputePeer {
@@ -32,6 +33,11 @@ interface IOffer {
         bytes32 peerId;
     }
 
+    struct ComputeUnitView {
+        bytes32 id;
+        address deal;
+    }
+
     // ------------------ Events ------------------
     event MarketOfferRegistered(
         address indexed provider,
@@ -41,7 +47,9 @@ interface IOffer {
         CIDV1[] effectors
     );
     event PeerCreated(bytes32 indexed offerId, bytes32 peerId, address owner);
+    event PeerRemoved(bytes32 indexed offerId, bytes32 indexed peerId);
     event ComputeUnitCreated(bytes32 indexed peerId, bytes32 unitId);
+    event ComputeUnitRemoved(bytes32 indexed peerId, bytes32 indexed unitId);
 
     event MinPricePerEpochUpdated(bytes32 indexed offerId, uint256 minPricePerWorkerEpoch);
     event PaymentTokenUpdated(bytes32 indexed offerId, address paymentToken);
@@ -53,39 +61,32 @@ interface IOffer {
 
     // ----------------- Public View -----------------
     function getOffer(bytes32 offerId) external view returns (Offer memory);
-
     function getComputePeer(bytes32 peerId) external view returns (ComputePeer memory);
-
     function getComputeUnit(bytes32 unitId) external view returns (ComputeUnit memory);
-
     function getComputeUnitIds(bytes32 peerId) external view returns (bytes32[] memory);
+    function getComputeUnits(bytes32 peerId) external view returns (ComputeUnitView[] memory);
 
     // ----------------- Public Mutable -----------------
-    // ---- Register offer and units ----
+    //Register offer and units
     function registerMarketOffer(
         uint256 minPricePerWorkerEpoch,
         address paymentToken,
         CIDV1[] calldata effectors,
         RegisterComputePeer[] calldata peers
-    ) external returns (bytes32 offerId);
-
+    ) external returns (bytes32);
+    function removeOffer(bytes32 offerId) external;
     function addComputePeers(bytes32 offerId, RegisterComputePeer[] calldata peers) external;
-
+    function removeComputePeer(bytes32 peerId) external;
     function addComputeUnits(bytes32 peerId, bytes32[] calldata unitIds) external;
-
     function removeComputeUnit(bytes32 unitId) external;
 
-    function setCommitmentId(bytes32 peerId, bytes32 commitmentId) external;
-
-    // ---- Change offer ----
+    // Change offer
     function changeMinPricePerWorkerEpoch(bytes32 offerId, uint256 newMinPricePerWorkerEpoch) external;
-
     function changePaymentToken(bytes32 offerId, address newPaymentToken) external;
-
     function addEffector(bytes32 offerId, CIDV1[] calldata newEffectors) external;
-
     function removeEffector(bytes32 offerId, CIDV1[] calldata effectors) external;
 
-    // ---- Unit management ----
+    // Unit management
     function returnComputeUnitFromDeal(bytes32 unitId) external;
+    function setCommitmentId(bytes32 peerId, bytes32 commitmentId) external;
 }

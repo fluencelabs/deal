@@ -1,5 +1,5 @@
 {
-  "name": "@fluencelabs/deal-aurora",
+  "name": "@fluencelabs/deal-ts-clients",
   "version": "0.2.22",
   "main": "dist/index.js",
   "type": "module",
@@ -11,8 +11,10 @@
     "replace-imports": "node replace-imports.js",
     "update-deployments": "rm -rf src/deployments && cp -r ../deployments ./src/deployments",
     "fmt": "prettier 'src/**/*.ts' --w",
-    "codegen:indexerClient": "graphql-codegen --config codegen.ts",
-    "test": "vitest"
+    "codegen:explorerIndexerClient": "graphql-codegen --config codegen-deal-explorer-indexer.ts",
+    "codegen:matcherIndexerClient": "graphql-codegen --config codegen-deal-matcher-indexer.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@graphql-typed-document-node/core": "^3.2.0",
@@ -69,7 +71,9 @@
     "parserOptions": {
       "ecmaVersion": "latest",
       "sourceType": "module",
-      "project": ["tsconfig.json"]
+      "project": [
+        "tsconfig.json"
+      ]
     },
     "plugins": [
       "@typescript-eslint"

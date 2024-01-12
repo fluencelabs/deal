@@ -90,21 +90,13 @@ contract CreateMarket is Depoyments, Script {
 
         address[] memory createdDeals = new address[](dealCount);
         for (uint32 i = 0; i < dealCount; i++) {
-            uint256 newMinWorkers = startMinWorkers + i;
+            uint256 newMinWorkers = 1 + i;
             uint256 newTargetWorkers = startTargetWorkers + i;
             uint256 newMaxWorkerPerProvider = startMaxWorkerPerProvider + i;
 
             CIDV1 memory appCID = CIDV1({prefixes: 0x12345678, hash: pseudoRandom(abi.encode("dealAppCID", i))});
             IDeal dealCreatedContract = market.deployDeal(
-                appCID,
-                tFLT,
-                newMinWorkers,
-                newTargetWorkers,
-                newMaxWorkerPerProvider,
-                pricePerWorkerEpoch,
-                effectors,
-                IConfig.AccessType.NONE,
-                new address[](0)
+                appCID, tFLT, newMinWorkers, newTargetWorkers, newMaxWorkerPerProvider, pricePerWorkerEpoch, effectors
             );
             createdDeals[i] = address(dealCreatedContract);
         }

@@ -31,8 +31,6 @@ interface IDealFactory {
         uint256 targetWorkers_,
         uint256 maxWorkersPerProvider_,
         uint256 pricePerWorkerEpoch_,
-        CIDV1[] calldata effectors_,
-        IDeal.AccessType accessType_,
-        address[] calldata accessList_
+        CIDV1[] calldata effectors_
     ) external returns (IDeal);
 }

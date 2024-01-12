@@ -3,10 +3,11 @@ import {
   OfferToEffector,
   Token,
   DealToEffector,
-  GraphNetwork,
+  GraphNetwork, Provider,
 } from "../generated/schema";
 import { BigInt, Bytes } from "@graphprotocol/graph-ts";
 import { getTokenDecimals, getTokenSymbol } from "./contracts";
+import {getProviderName} from "./networkConstants";
 
 export const ZERO_BIG_INT = BigInt.fromI32(0);
 export const UNO_BIG_INT = BigInt.fromI32(1);
@@ -29,7 +30,27 @@ export function createOrLoadToken(tokenAddress: string): Token {
 }
 
 // TODO: add description mapper.
-const DEFAULT_EFFECTOR_DESCRIPTION = "DEFAULT_EFFECTOR_DESCRIPTION";
+const DEFAULT_EFFECTOR_DESCRIPTION = "DEFAULT";
+
+export function createOrLoadProvider(providerAddress: string, timestamp: BigInt): Provider {
+  let entity = Provider.load(providerAddress);
+
+  if (entity == null) {
+    entity = new Provider(providerAddress);
+    entity.name = getProviderName(providerAddress);
+    entity.createdAt = timestamp;
+    entity.computeUnitsAvailable = 0;
+    entity.computeUnitsTotal = 0;
+    entity.peerCount = 0;
+    entity.effectorCount = 0;
+    entity.save();
+
+    let graphNetwork = createOrLoadGraphNetwork();
+    graphNetwork.providersTotal = graphNetwork.providersTotal.plus(UNO_BIG_INT);
+    graphNetwork.save()
+  }
+  return entity as Provider;
+}
 
 export function createOrLoadEffector(cid: string): Effector {
   let entity = Effector.load(cid);

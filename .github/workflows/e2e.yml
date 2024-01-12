@@ -6,7 +6,7 @@ on:
       - "**.md"
       - ".github/**"
       - "!.github/workflows/e2e.yml"
-      - "!.github/workflows/snapshot.yml"
+      - "!.github/workflows/artifacts.yml"
     types:
       - "labeled"
       - "synchronize"
@@ -19,7 +19,7 @@ on:
       - "**.md"
       - ".github/**"
       - "!.github/workflows/e2e.yml"
-      - "!.github/workflows/snapshot.yml"
+      - "!.github/workflows/artifacts.yml"
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
@@ -33,16 +33,17 @@ jobs:
         contains(github.event.pull_request.labels.*.name, 'e2e') &&
         !github.event.pull_request.head.repo.fork
       )
-    uses: ./.github/workflows/snapshot.yml
+    uses: ./.github/workflows/artifacts.yml
     with:
       ref: ${{ github.ref }}
-    secrets:
-      PRIVATE_KEY: ${{ secrets.DEAL_TESNET_PRIVATE_KEY }}
 
-  # cli:
-  #   needs:
-  #     - deal
-  #   uses: fluencelabs/cli/.github/workflows/tests.yml@main
-  #   with:
-  #     deal-aurora-image: "${{ needs.deal.outputs.image }}"
-  #     deal-aurora-version: "${{ needs.deal.outputs.version }}"
+  cli:
+    needs:
+      - deal
+    uses: fluencelabs/cli/.github/workflows/tests.yml@main
+    with:
+      ref: main
+      chain-rpc-image: "${{ needs.deal.outputs.chain-rpc-image }}"
+      chain-deploy-script-image: "${{ needs.deal.outputs.chain-deploy-script-image }}"
+      subgraph-deploy-script-image: "${{ needs.deal.outputs.subgraph-deploy-script-image }}"
+      deal-ts-clients-version: "${{ needs.deal.outputs.deal-ts-clients-version }}"

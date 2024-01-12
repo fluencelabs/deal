@@ -47,6 +47,9 @@ fragment BasicOffer on Offer {
         ...EffectorBasic
       }
     }
+    provider {
+      id
+    }
 }
 
 fragment BasicPeer on Peer {
