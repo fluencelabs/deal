@@ -52,7 +52,9 @@ abstract contract DealFactory is BaseModule, IDealFactory {
         uint256 targetWorkers_,
         uint256 maxWorkersPerProvider_,
         uint256 pricePerWorkerEpoch_,
-        CIDV1[] calldata effectors_
+        CIDV1[] calldata effectors_,
+        IConfig.AccessType providersAccessType_,
+        address[] calldata providersAccessList_
     ) external returns (IDeal) {
         DealFactoryStorage storage dealFactoryStorage = _getDealFactoryStorage();
 
@@ -70,7 +72,8 @@ abstract contract DealFactory is BaseModule, IDealFactory {
                         maxWorkersPerProvider_,
                         pricePerWorkerEpoch_,
                         effectors_,
-                        msg.sender
+                        providersAccessType_,
+                        providersAccessList_
                     )
                 )
             )
@@ -95,7 +98,9 @@ abstract contract DealFactory is BaseModule, IDealFactory {
             maxWorkersPerProvider_,
             pricePerWorkerEpoch_,
             effectors_,
-            appCID_
+            appCID_,
+            providersAccessType_,
+            providersAccessList_
         );
 
         return deal;

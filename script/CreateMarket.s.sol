@@ -96,7 +96,15 @@ contract CreateMarket is Depoyments, Script {
 
             CIDV1 memory appCID = CIDV1({prefixes: 0x12345678, hash: pseudoRandom(abi.encode("dealAppCID", i))});
             IDeal dealCreatedContract = market.deployDeal(
-                appCID, tFLT, newMinWorkers, newTargetWorkers, newMaxWorkerPerProvider, pricePerWorkerEpoch, effectors
+                appCID,
+                tFLT,
+                newMinWorkers,
+                newTargetWorkers,
+                newMaxWorkerPerProvider,
+                pricePerWorkerEpoch,
+                effectors,
+                IConfig.AccessType.NONE,
+                new address[](0)
             );
             createdDeals[i] = address(dealCreatedContract);
         }

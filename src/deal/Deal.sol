@@ -61,7 +61,9 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
         uint256 targetWorkers_,
         uint256 maxWorkersPerProvider_,
         uint256 pricePerWorkerEpoch_,
-        CIDV1[] calldata effectors_
+        CIDV1[] calldata effectors_,
+        AccessType providersAccessType_,
+        address[] calldata providersAccessList_
     ) public initializer {
         __WorkerManager_init(
             globalCore_,
@@ -72,7 +74,9 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
             maxWorkersPerProvider_,
             pricePerWorkerEpoch_,
             effectors_,
-            msg.sender
+            msg.sender,
+            providersAccessType_,
+            providersAccessList_
         );
     }
 
@@ -210,6 +214,8 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
 
         uint256 maxPaidEpoch = dealStorage.maxPaidEpoch;
 
+        require(getStatus() != Status.ENDED, "Deal is ended");
+
         DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
         _preCommitPeriod(
             balance, currentEpoch, maxPaidEpoch, dealStorage.lastCommitedEpoch, workerCount, pricePerWorkerEpoch_
@@ -302,6 +308,8 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
     }
 
     function addComputeUnit(address computeProvider, bytes32 computeUnitId, bytes32 peerId) public onlyMarket {
+        require(getStatus() == Status.ACTIVE, "Deal is not active");
+
         _addComputeUnit(computeProvider, computeUnitId, peerId);
     }
 
@@ -324,6 +332,8 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
     }
 
     function setWorker(bytes32 computeUnitId, bytes32 workerId) public {
+        require(getStatus() == Status.ACTIVE, "Deal is not active");
+
         DealStorage storage dealStorage = _getDealStorage();
 
         ICore core = _globalCore();
@@ -354,18 +364,21 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
     }
 
     function stop() external onlyOwner {
+        require(getStatus() == Status.ACTIVE, "Deal is not active");
+
         DealStorage storage dealStorage = _getDealStorage();
 
         DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
         uint256 currentEpoch = _globalCore().currentEpoch();
         uint256 maxPaidEpoch = _getDealStorage().maxPaidEpoch;
+        uint256 pricePerWorkerEpoch_ = pricePerWorkerEpoch();
 
         uint256 workerCount = getWorkerCount();
 
         _preCommitPeriod(
-            balance, currentEpoch, maxPaidEpoch, dealStorage.lastCommitedEpoch, workerCount, pricePerWorkerEpoch()
+            balance, currentEpoch, maxPaidEpoch, dealStorage.lastCommitedEpoch, workerCount, pricePerWorkerEpoch_
         );
-        _postCommitPeriod(balance, currentEpoch, workerCount, workerCount, minWorkers(), pricePerWorkerEpoch());
+        _postCommitPeriod(balance, currentEpoch, workerCount, workerCount, minWorkers(), pricePerWorkerEpoch_);
 
         //TODO: fix double write maxPaidEpoch
         dealStorage.maxPaidEpoch = 0;

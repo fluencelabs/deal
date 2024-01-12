@@ -12,8 +12,9 @@ import "src/utils/OwnableUpgradableDiamond.sol";
 import "src/utils/LinkedListWithUniqueKeys.sol";
 import "./interfaces/ICapacity.sol";
 import "./CapacityConst.sol";
+import "./Whitelist.sol";
 
-contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
+contract Capacity is CapacityConst, Whitelist, UUPSUpgradeable, ICapacity {
     using SafeERC20 for IERC20;
     using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
 
@@ -40,7 +41,6 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
         uint256 epoch;
         uint256 cumulativeAmount;
     }
-
     // #endregion
 
     // #region ------------------ Storage ------------------
@@ -76,9 +76,11 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
         uint256 minRequierdProofsPerEpoch_,
         uint256 maxProofsPerEpoch_,
         uint256 withdrawEpochesAfterFailed_,
-        uint256 maxFailedRatio_
+        uint256 maxFailedRatio_,
+        bool isWhitelistEnabled_
     ) external initializer {
         __Ownable_init(msg.sender);
+        __Whitelist_init(isWhitelistEnabled_);
         __CapacityConst_init(
             fltPrice_,
             usdCollateralPerUnit_,

@@ -84,7 +84,8 @@ interface ICapacity is ICapacityConst {
         uint256 minRequierdProofsPerEpoch_,
         uint256 maxProofsPerEpoch_,
         uint256 withdrawEpochesAfterFailed_,
-        uint256 maxFailedRatio_
+        uint256 maxFailedRatio_,
+        bool isWhitelistEnabled_
     ) external;
 
     // ------------------ Views ------------------

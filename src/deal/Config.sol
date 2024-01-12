@@ -26,6 +26,8 @@ contract Config is OwnableUpgradableDiamond, IConfig {
         uint256 maxWorkersPerProvider;
         uint256 pricePerWorkerEpoch;
         CIDV1[] effectors;
+        AccessType providersAccessType;
+        mapping(address => bool) providersAccessMap;
     }
 
     ConfigStorage private _storage;
@@ -47,7 +49,9 @@ contract Config is OwnableUpgradableDiamond, IConfig {
         uint256 maxWorkersPerProvider_,
         uint256 pricePerWorkerEpoch_,
         CIDV1[] calldata effectors_,
-        address owner_
+        address owner_,
+        AccessType providersAccessType_,
+        address[] calldata providersAccessList_
     ) internal onlyInitializing {
         __Ownable_init(owner_);
 
@@ -58,7 +62,9 @@ contract Config is OwnableUpgradableDiamond, IConfig {
             targetWorkers_,
             maxWorkersPerProvider_,
             pricePerWorkerEpoch_,
-            effectors_
+            effectors_,
+            providersAccessType_,
+            providersAccessList_
         );
 
         _setAppCID(appCID_);
@@ -71,7 +77,9 @@ contract Config is OwnableUpgradableDiamond, IConfig {
         uint256 targetWorkers_,
         uint256 maxWorkersPerProvider_,
         uint256 pricePerWorkerEpoch_,
-        CIDV1[] calldata effectors_
+        CIDV1[] calldata effectors_,
+        AccessType providersAccessType_,
+        address[] calldata providersAccessList_
     ) internal onlyInitializing {
         ConfigStorage storage configStorage = _getConfigStorage();
 
@@ -87,6 +95,11 @@ contract Config is OwnableUpgradableDiamond, IConfig {
 
         for (uint256 i = 0; i < effectors_.length; i++) {
             configStorage.effectors.push(effectors_[i]);
+        }
+
+        configStorage.providersAccessType = providersAccessType_;
+        for (uint256 i = 0; i < providersAccessList_.length; i++) {
+            configStorage.providersAccessMap[providersAccessList_[i]] = true;
         }
     }
 
@@ -146,8 +159,59 @@ contract Config is OwnableUpgradableDiamond, IConfig {
         return _getConfigStorage().maxWorkersPerProvider;
     }
 
+    function providersAccessType() external view returns (AccessType) {
+        return _getConfigStorage().providersAccessType;
+    }
+
+    function hasProviderAccess(address account) external view returns (bool) {
+        ConfigStorage storage configStorage = _getConfigStorage();
+
+        AccessType accessType = configStorage.providersAccessType;
+        if (accessType == AccessType.NONE) {
+            return true;
+        }
+
+        if (accessType == AccessType.WHITELIST) {
+            return configStorage.providersAccessMap[account];
+        }
+
+        if (accessType == AccessType.BLACKLIST) {
+            return !configStorage.providersAccessMap[account];
+        }
+
+        return false;
+    }
+
     // ------------------ Mutable Functions ------------------
     function setAppCID(CIDV1 calldata appCID_) public onlyOwner {
         _setAppCID(appCID_);
+    }
+
+    function changeProvidersAccessType(AccessType accessType) public onlyOwner {
+        ConfigStorage storage configStorage = _getConfigStorage();
+
+        require(configStorage.providersAccessType != accessType, "Config: access type is already set");
+
+        configStorage.providersAccessType = accessType;
+
+        emit ProvidersAccessTypeChanged(accessType);
+    }
+
+    function addProviderToAccessList(address provider) public onlyOwner {
+        ConfigStorage storage configStorage = _getConfigStorage();
+
+        require(configStorage.providersAccessType != AccessType.NONE, "Config: access type is NONE");
+
+        configStorage.providersAccessMap[provider] = true;
+
+        emit ProviderAddedToAccessList(provider);
+    }
+
+    function removeProviderFromAccessList(address provider) public onlyOwner {
+        ConfigStorage storage configStorage = _getConfigStorage();
+
+        delete configStorage.providersAccessMap[provider];
+
+        emit ProviderRemovedFromAccessList(provider);
     }
 }
