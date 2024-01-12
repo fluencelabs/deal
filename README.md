@@ -11,7 +11,7 @@ This repo consists of 3 main parts:
 To access to the general points of the each part in the repo root **makefile**
 is presented. Below are main commands of the makefile.
 
-# Agenda
+# Table of contents
 
 - [Requirement](#requirement)
 - [Contract](#contract)
