@@ -127,3 +127,13 @@ export function createOrLoadGraphNetwork(): GraphNetwork {
   }
   return graphNetwork as GraphNetwork
 }
+
+// We have to mirror enums according to
+//  https://ethereum.stackexchange.com/questions/139078/how-to-use-subgraph-enums-in-the-mapping.
+export class CapacityCommitmentStatus {
+  static Active: string = "Active";
+  static WaitDelegation: string = "WaitDelegation";
+  static Inactive: string = "Inactive";
+  static Failed: string = "Failed";
+  static Removed: string = "Removed";
+}

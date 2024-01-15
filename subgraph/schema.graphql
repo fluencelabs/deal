@@ -135,3 +135,28 @@ type Deal @entity {
   addedComputeUnits: [ComputeUnit!] @derivedFrom(field: "deal")
   #   TODO: add matched workers.
 }
+
+enum CapacityCommitmentStatus {
+  Active
+  WaitDelegation
+  Inactive
+  Failed
+  Removed
+}
+
+"""To represent that Peer has capacity commitment for some time."""
+type CapacityCommitment @entity {
+  id: ID!
+  peer: Peer!
+  CCStatus: CapacityCommitmentStatus!
+  collateralPerUnit: BigInt!
+  duration: BigInt!
+  rewardDelegatorRate: Int!
+  delegator: String!
+  startEpoch: BigInt!
+  endEpoch: BigInt!
+  totalCUFailCount: Int!
+  failedEpoch: BigInt!
+  exitedUnitCount: Int!
+  unitCount: Int!
+}

@@ -5,6 +5,31 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
+    name: Capacity
+    network: localhost
+    source:
+      abi: Capacity
+      address: "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f"
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - CapacityCommitment
+      abis:
+        - name: Capacity
+          file: ../out/Capacity.sol/Capacity.json
+      eventHandlers:
+        - event: CommitmentCreated(indexed bytes32,bytes32,uint256,address,uint256,uint256)
+          handler: handleCommitmentCreated
+#        - event: CollateralDeposited(indexed bytes32,uint256)
+#          handler: handleCollateralDeposited
+        - event: CommitmentActivated(indexed bytes32,indexed bytes32,uint256,uint256,bytes32[])
+          handler: handleCommitmentActivated
+      file: ./src/mappings/capacity.ts
+
+  - kind: ethereum/contract
     name: Market
     network: localhost
     source:
