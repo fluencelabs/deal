@@ -12,7 +12,7 @@ export function handleCommitmentCreated(event: CommitmentCreated): void {
   commitment.CCStatus = CapacityCommitmentStatus.WaitDelegation
   commitment.collateralPerUnit = event.params.fltCCCollateralPerUnit
   commitment.duration = event.params.duration
-  commitment.rewardDelegatorRate = event.params.rewardDelegationRate
+  commitment.rewardDelegatorRate = event.params.rewardDelegationRate.toI32()
   commitment.delegator = event.params.delegator.toHex()
   commitment.unitCount = 0
   commitment.startEpoch = ZERO_BIG_INT

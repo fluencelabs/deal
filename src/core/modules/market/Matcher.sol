@@ -108,6 +108,7 @@ abstract contract Matcher is Offer, IMatcher {
                     continue;
                 }
 
+                // Check if deposit collateral send (and CCStatus.Active? TODO: use status Active).
                 if (currentEpoch < capacity.getCommitment(peer.commitmentId).startEpoch) {
                     continue;
                 }
