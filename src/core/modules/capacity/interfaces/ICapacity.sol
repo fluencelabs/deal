@@ -10,13 +10,14 @@ interface ICapacity is ICapacityConst {
     event CommitmentCreated(
         bytes32 indexed peerId,
         bytes32 commitmentId,
+        uint256 duration,
         address delegator,
         uint256 rewardDelegationRate,
         uint256 fltCCCollateralPerUnit
     );
     event CommitmentRemoved(bytes32 indexed commitmentId);
     event CommitmentActivated(
-        bytes32 indexed peerId, bytes32 indexed commitmentId, uint256 endEpoch, bytes32[] unitIds
+        bytes32 indexed peerId, bytes32 indexed commitmentId, uint256 startEpoch, uint256 endEpoch, bytes32[] unitIds
     );
     event CommitmentFinished(bytes32 indexed commitmentId);
 

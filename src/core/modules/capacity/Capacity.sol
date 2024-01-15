@@ -263,7 +263,7 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
         });
         peer.commitmentId = commitmentId;
 
-        emit CommitmentCreated(peerId, commitmentId, delegator, rewardDelegationRate, collateralPerUnit);
+        emit CommitmentCreated(peerId, commitmentId, duration, delegator, rewardDelegationRate, collateralPerUnit);
 
         return commitmentId;
     }
@@ -356,7 +356,7 @@ contract Capacity is CapacityConst, UUPSUpgradeable, ICapacity {
         market.setCommitmentId(peerId, commitmentId);
 
         emit CollateralDeposited(commitmentId, collateral);
-        emit CommitmentActivated(peerId, commitmentId, startEpoch + cc.info.duration, market.getComputeUnitIds(peerId));
+        emit CommitmentActivated(peerId, commitmentId, startEpoch, startEpoch + cc.info.duration, market.getComputeUnitIds(peerId));
     }
 
     function submitProof(bytes32 unitId, bytes32 localK, bytes32 h) external {
