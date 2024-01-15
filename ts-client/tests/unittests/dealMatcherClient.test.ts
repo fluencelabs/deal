@@ -82,6 +82,8 @@ describe('#getMatchedOffers', () => {
         targetWorkerSlotToMatch: callImplProps.targetWorkerSlotToMatch,
         minWorkersToMatch: callImplProps.minWorkersToMatch,
         maxWorkersPerProvider: maxWorkersPerProvider,
+        // Currently, this epoch does not matter.
+        currentEpoch: 999,
       }
     )
 
