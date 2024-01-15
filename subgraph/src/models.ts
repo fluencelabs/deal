@@ -6,7 +6,7 @@ import {
   GraphNetwork, Provider,
 } from "../generated/schema";
 import { BigInt, Bytes } from "@graphprotocol/graph-ts";
-import { getTokenDecimals, getTokenSymbol } from "./contracts";
+import {getTokenDecimals, getTokenSymbol} from "./contracts";
 import {getProviderName} from "./networkConstants";
 
 export const ZERO_BIG_INT = BigInt.fromI32(0);

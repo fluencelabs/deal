@@ -1,5 +1,5 @@
 import {CapacityCommitmentStatus, ZERO_BIG_INT} from "../models";
-import {CapacityCommitment} from "../../generated/schema";
+import {CapacityCommitment, Peer} from "../../generated/schema";
 import {
   CollateralDeposited, CommitmentActivated,
   CommitmentCreated
@@ -21,17 +21,29 @@ export function handleCommitmentCreated(event: CommitmentCreated): void {
   commitment.failedEpoch = ZERO_BIG_INT
   commitment.exitedUnitCount = 0
   commitment.save()
+
+  let peer = Peer.load(event.params.peerId.toHex()) as Peer;
+  peer.currentCapacityCommitment = commitment.id
+  peer.save()
 }
 
+// It is supposed that collateral deposited at the same time as commitment activated
+//  (the same tx).
 export function handleCommitmentActivated(event: CommitmentActivated): void {
   let commitment = CapacityCommitment.load(event.params.commitmentId.toHex()) as CapacityCommitment;
-  commitment.CCStatus = CapacityCommitmentStatus.Active
+  // TODO: resolve when on chain resolved problem of waiting for collateral status.
+  // commitment.CCStatus = CapacityCommitmentStatus.Active
   commitment.startEpoch = event.params.startEpoch
   commitment.endEpoch = event.params.endEpoch
   commitment.unitCount = event.params.unitIds.length
   commitment.save()
+
+  let peer = Peer.load(event.params.peerId.toHex()) as Peer;
+  peer.collateralDepositedAt = event.params.startEpoch
+  peer.save()
 }
 
-export function handleCollateralDeposited(event: CollateralDeposited): void {
-  let commitment = new CapacityCommitment(event.params.commitmentId.toHex());
-}
+// @deprecated. Currently, no use for the event as it is used in handleCommitmentActivated.
+export function handleCollateralDeposited(event: CollateralDeposited): void {}
+
+// TODO: commitment expired and other events.

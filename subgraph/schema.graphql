@@ -11,6 +11,8 @@ type GraphNetwork @entity {
   offersTotal: BigInt!
   tokensTotal: BigInt!
   effectorsTotal: BigInt!
+  # Add constants from Core contract below.
+  coreEpochDuration: Int
 }
 
 type Token @entity(immutable: true) {
@@ -89,12 +91,20 @@ type Peer @entity {
   offer: Offer!
   provider: Provider!
   computeUnits: [ComputeUnit!] @derivedFrom(field: "peer")
+
+  currentCapacityCommitment: CapacityCommitment
+  "To access history of capacity commitments."
+  capacityCommitments: [CapacityCommitment!] @derivedFrom(field: "peer")
+
+  # Indexer query helper fields below.
+  "To understand if collateral for peer have been submitted. This field should be use in conjunction with currentCapacityCommitment."
+  collateralDepositedAt: BigInt
 }
 
 type ComputeUnit @entity {
   id: ID!
   peer: Peer!
-  "In order to simplify relation."
+  "In order to simplify relation for query."
   provider: Provider!
 
   deal: Deal
@@ -148,7 +158,9 @@ enum CapacityCommitmentStatus {
 type CapacityCommitment @entity {
   id: ID!
   peer: Peer!
-  CCStatus: CapacityCommitmentStatus!
+  # TODO: status on storage does not give right status as it is from getStatus() method.
+  # TODO: add required property.
+  CCStatus: CapacityCommitmentStatus
   collateralPerUnit: BigInt!
   duration: BigInt!
   rewardDelegatorRate: Int!
@@ -158,5 +170,6 @@ type CapacityCommitment @entity {
   totalCUFailCount: Int!
   failedEpoch: BigInt!
   exitedUnitCount: Int!
+  #  TODO: store CUs.
   unitCount: Int!
 }

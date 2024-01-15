@@ -123,7 +123,6 @@ abstract contract Matcher is Offer, IMatcher {
                 }
 
                 if (freeWorkerSlotsCurrent == 0) {
-                    // TODO: possible feature of signalling to user that matched fully.
                     break;
                 }
             }

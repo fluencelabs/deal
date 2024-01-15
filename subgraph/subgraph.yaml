@@ -5,37 +5,57 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
+    name: Core
+    network: local
+    source:
+      abi: Core
+      address: "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650"
+      startBlock: 1
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - GraphNetwork
+      abis:
+        - name: Core
+          file: ../out/Core.sol/Core.json
+      eventHandlers:
+        - event: Initialized(uint8)
+          handler: handleInitialized
+      file: ./src/mappings/core.ts
+  - kind: ethereum/contract
     name: Capacity
-    network: localhost
+    network: local
     source:
       abi: Capacity
-      address: "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f"
-      startBlock: 0
+      address: "0x1429859428C0aBc9C2C47C8Ee9FBaf82cFA0F20f"
+      startBlock: 1
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - CapacityCommitment
+        - Peer
       abis:
         - name: Capacity
           file: ../out/Capacity.sol/Capacity.json
       eventHandlers:
-        - event: CommitmentCreated(indexed bytes32,bytes32,uint256,address,uint256,uint256)
+        - event: CommitmentCreated(indexed
+            bytes32,bytes32,uint256,address,uint256,uint256)
           handler: handleCommitmentCreated
-#        - event: CollateralDeposited(indexed bytes32,uint256)
-#          handler: handleCollateralDeposited
-        - event: CommitmentActivated(indexed bytes32,indexed bytes32,uint256,uint256,bytes32[])
+        - event: CommitmentActivated(indexed bytes32,indexed
+            bytes32,uint256,uint256,bytes32[])
           handler: handleCommitmentActivated
       file: ./src/mappings/capacity.ts
-
   - kind: ethereum/contract
     name: Market
-    network: localhost
+    network: local
     source:
       abi: Market
-      address: "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f"
-      startBlock: 0
+      address: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc"
+      startBlock: 1
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -82,7 +102,7 @@ dataSources:
 templates:
   - name: Deal
     kind: ethereum/contract
-    network: localhost
+    network: local
     source:
       abi: Deal
     mapping:
