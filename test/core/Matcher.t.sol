@@ -83,12 +83,22 @@ contract MatcherTest is Test {
         uint256 unitCountPerPeer = 2;
         uint256 peerCountPerOffer = 3;
         uint256 minWorkers = 1;
+        uint maxWorkersPerProvider = unitCountPerPeer * peerCountPerOffer;
         // Total workers: offerCount * unitCountPerPeer * peerCountPerOffer. Thus, we have CU in excess.
         uint256 targetWorkers = offerCount * peerCountPerOffer * 1;
         CIDV1 memory appCID = CIDV1({prefixes: 0x12345678, hash: Random.pseudoRandom(abi.encode("appCID"))});
 
         DealMock dealMock =
-            new DealMock(pricePerWorkerEpoch, paymentToken, targetWorkers, minWorkers, effectors, appCID, creationBlock);
+            new DealMock(
+                pricePerWorkerEpoch,
+                paymentToken,
+                targetWorkers,
+                maxWorkersPerProvider,
+                minWorkers,
+                effectors,
+                appCID,
+                creationBlock
+            );
 
         (bytes32[] memory offerIds, bytes32[][] memory peerIds, bytes32[][][] memory unitIds) = _registerOffersAndCC(
             offerCount, peerCountPerOffer, unitCountPerPeer, effectors, paymentToken, pricePerWorkerEpoch
@@ -164,6 +174,7 @@ contract DealMock {
     uint256 public creationBlock;
     uint256 public getComputeUnitCount;
     uint256 public targetWorkers;
+    uint256 public maxWorkersPerProvider;
     uint256 public minWorkers;
 
     CIDV1[] internal _effectors;
@@ -176,6 +187,7 @@ contract DealMock {
         uint256 _pricePerWorkerEpoch,
         address _paymentToken,
         uint256 _targetWorkers,
+        uint256 _maxWorkersPerProvider,
         uint256 _minWorkers,
         CIDV1[] memory effectors_,
         CIDV1 memory _appCID,
@@ -184,6 +196,7 @@ contract DealMock {
         pricePerWorkerEpoch = _pricePerWorkerEpoch;
         paymentToken = _paymentToken;
         targetWorkers = _targetWorkers;
+        maxWorkersPerProvider = _maxWorkersPerProvider;
         minWorkers = _minWorkers;
         _effectors = effectors_;
         appCID = _appCID;
