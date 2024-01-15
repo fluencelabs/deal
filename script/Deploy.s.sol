@@ -126,7 +126,6 @@ contract DeployContracts is Depoyments, Script {
     }
 
     // ------------------ Internal functions ------------------
-
     function _loadENV() internal returns (ENV memory) {
         uint256 chainId = block.chainid;
         uint256 epochDuration = vm.envOr("EPOCH_DURATION", DEFAULT_EPOCH_DURATION);
@@ -288,7 +287,7 @@ contract DeployContracts is Depoyments, Script {
         }
     }
 
-    function _startDeploy() internal {
+    function _startDeploy() internal virtual {
         bool isTestnet = vm.envOr("TEST", false);
         if (!isTestnet) {
             _loadDepoyments(fullDeploymentsPath);
@@ -298,7 +297,7 @@ contract DeployContracts is Depoyments, Script {
         console.log("\nStart deploying...");
     }
 
-    function _stopDeploy() internal {
+    function _stopDeploy() internal virtual {
         bool isTestnet = vm.envOr("TEST", false);
 
         if (!isTestnet) {
