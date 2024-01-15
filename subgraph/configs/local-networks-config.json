@@ -1,16 +1,16 @@
 {
   "local": {
     "Market": {
-      "address": "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc",
-      "startBlock": 1
+      "address": "0x22753E4264FDDc6181dc7cce468904A80a363E44",
+      "startBlock": 395
     },
     "Capacity": {
-      "address": "0x1429859428C0aBc9C2C47C8Ee9FBaf82cFA0F20f",
-      "startBlock": 1
+      "address": "0xA7c59f010700930003b33aB25a7a0679C860f29c",
+      "startBlock": 395
     },
     "Core": {
-      "address": "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650",
-      "startBlock": 1
+      "address": "0x34B40BA116d5Dec75548a9e9A8f15411461E8c70",
+      "startBlock": 395
     }
   }
 }
