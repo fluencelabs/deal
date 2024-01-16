@@ -11,36 +11,6 @@ import "src/deal/interfaces/IConfig.sol";
 import "test/utils/DeployDealSystem.sol";
 import "test/utils/Random.sol";
 
-contract ConfigTestContract is Initializable, Config {
-    function Config_init(
-        ICore globalCore_,
-        CIDV1 calldata appCID_,
-        IERC20 paymentToken_,
-        uint256 minWorkers_,
-        uint256 targetWorkers_,
-        uint256 maxWorkersPerProvider_,
-        uint256 pricePerWorkerEpoch_,
-        CIDV1[] calldata effectors_,
-        address owner_
-    ) public initializer {
-        __Config_init(
-            globalCore_,
-            appCID_,
-            paymentToken_,
-            minWorkers_,
-            targetWorkers_,
-            maxWorkersPerProvider_,
-            pricePerWorkerEpoch_,
-            effectors_,
-            owner_
-        );
-    }
-
-    function globalCore() public view returns (ICore) {
-        return _globalCore();
-    }
-}
-
 contract ConfigContract is Test {
     using SafeERC20 for IERC20;
 
@@ -105,7 +75,9 @@ contract ConfigContract is Test {
                 configParams.maxWorkersPerProvider,
                 configParams.pricePerWorkerEpoch,
                 configParams.effectors,
-                address(this)
+                address(this),
+                IConfig.AccessType.NONE,
+                new address[](0)
             )
         );
 
@@ -141,5 +113,39 @@ contract ConfigContract is Test {
         CIDV1 memory appCID = config.appCID();
         assertEq(appCID.prefixes, newAppCID.prefixes);
         assertEq(appCID.hash, newAppCID.hash);
+    }
+}
+
+contract ConfigTestContract is Initializable, Config {
+    function Config_init(
+        ICore globalCore_,
+        CIDV1 calldata appCID_,
+        IERC20 paymentToken_,
+        uint256 minWorkers_,
+        uint256 targetWorkers_,
+        uint256 maxWorkersPerProvider_,
+        uint256 pricePerWorkerEpoch_,
+        CIDV1[] calldata effectors_,
+        address owner_,
+        AccessType providersAccessType_,
+        address[] calldata providersAccessList_
+    ) public initializer {
+        __Config_init(
+            globalCore_,
+            appCID_,
+            paymentToken_,
+            minWorkers_,
+            targetWorkers_,
+            maxWorkersPerProvider_,
+            pricePerWorkerEpoch_,
+            effectors_,
+            owner_,
+            providersAccessType_,
+            providersAccessList_
+        );
+    }
+
+    function globalCore() public view returns (ICore) {
+        return _globalCore();
     }
 }

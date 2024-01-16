@@ -10,10 +10,10 @@
 // - it finds match via subgraph client
 // - it send mathcDeal tx finally.
 // TODO: more variates not only 1to1 match.
-import {describe, test, expect} from "vitest";
+import { describe, test, expect } from "vitest";
 
-import {ContractsENV, DealClient, DealMatcherClient} from "../../src";
-import {ethers} from "ethers";
+import { ContractsENV, DealClient, DealMatcherClient } from "../../src";
+import { ethers } from "ethers";
 
 // TODO: from env.
 const TEST_NETWORK: ContractsENV = "local";
@@ -28,19 +28,27 @@ const DEFAULT_CONFIRMATIONS = 1;
 // TODO: get core.epochDuration instead of 15000
 const TESTS_TIMEOUT = 90000 + 15000;
 
-async function getDefaultOfferFixture(owner: string, paymentToken: string, timestamp: number) {
+async function getDefaultOfferFixture(
+  owner: string,
+  paymentToken: string,
+  timestamp: number,
+) {
   const offerFixture = {
     minPricePerWorkerEpoch: ethers.parseEther("0.01"),
     paymentToken: paymentToken,
-    effectors: [{prefixes: "0x12345678", hash: ethers.encodeBytes32String("Dogu")}],
-    peers: [{
-      peerId: ethers.encodeBytes32String(`peerId0:${timestamp}`),
-      unitIds: [ethers.encodeBytes32String(`unitId0:${timestamp}`)],
+    effectors: [
+      { prefixes: "0x12345678", hash: ethers.encodeBytes32String("Dogu") },
+    ],
+    peers: [
+      {
+        peerId: ethers.encodeBytes32String(`peerId0:${timestamp}`),
+        unitIds: [ethers.encodeBytes32String(`unitId0:${timestamp}`)],
 
-      owner: owner,
-    }],
-  }
-  return {offerFixture}
+        owner: owner,
+      },
+    ],
+  };
+  return { offerFixture };
 }
 
 const provider = new ethers.JsonRpcProvider(TEST_RPC_URL);
@@ -52,39 +60,53 @@ const provider = new ethers.JsonRpcProvider(TEST_RPC_URL);
  * Notice: chain snapshot is not going to work correctly since we connect indexer
  *  to the chain as well and indexer should be snapshoted as well.
  */
-describe('#getMatchedOffersByDealId', () => {
+describe("#getMatchedOffersByDealId", () => {
   // TODO: check that infra is running.
-  async function createOffer(signer: ethers.Signer, timestamp: number, paymentTokenAddress: string) {
+  async function createOffer(
+    signer: ethers.Signer,
+    timestamp: number,
+    paymentTokenAddress: string,
+  ) {
     const contractsClient = new DealClient(signer, TEST_NETWORK);
-    const marketContract = await contractsClient.getMarket()
-    const signerAddress = await signer.getAddress()
+    const marketContract = await contractsClient.getMarket();
+    const signerAddress = await signer.getAddress();
 
-    const {offerFixture} = await getDefaultOfferFixture(signerAddress, paymentTokenAddress, timestamp)
+    const { offerFixture } = await getDefaultOfferFixture(
+      signerAddress,
+      paymentTokenAddress,
+      timestamp,
+    );
 
     const tx = await marketContract.registerMarketOffer(
       offerFixture.minPricePerWorkerEpoch,
       offerFixture.paymentToken,
       offerFixture.effectors,
-      offerFixture.peers
-    )
-    await tx.wait(DEFAULT_CONFIRMATIONS)
+      offerFixture.peers,
+    );
+    await tx.wait(DEFAULT_CONFIRMATIONS);
 
-    return offerFixture
+    return offerFixture;
   }
 
-  test(`Check that it matched successfully for 1:1 configuration.`, async () => {
-    const signer = await provider.getSigner();
-    const signerAddress = await signer.getAddress()
-    console.log('Init contractsClient as signer:', signerAddress);
-    const contractsClient = new DealClient(signer, TEST_NETWORK);
-    const paymentToken = await contractsClient.getUSDC()
-    const paymentTokenAddress = await (paymentToken).getAddress()
+  test(
+    `Check that it matched successfully for 1:1 configuration.`,
+    async () => {
+      const signer = await provider.getSigner();
+      const signerAddress = await signer.getAddress();
+      console.log("Init contractsClient as signer:", signerAddress);
+      const contractsClient = new DealClient(signer, TEST_NETWORK);
+      const paymentToken = await contractsClient.getUSDC();
+      const paymentTokenAddress = await paymentToken.getAddress();
 
-    const blockNumber = await provider.getBlockNumber()
-    const timestamp = (await provider.getBlock(blockNumber))?.timestamp
+      const blockNumber = await provider.getBlockNumber();
+      const timestamp = (await provider.getBlock(blockNumber))?.timestamp;
 
-    console.info('---- Offer Creation ----')
-    const registeredOffer = await createOffer(signer, timestamp, paymentTokenAddress)
+      console.info("---- Offer Creation ----");
+      const registeredOffer = await createOffer(
+        signer,
+        timestamp,
+        paymentTokenAddress,
+      );
 
     console.log('---- CC Creation ----')
     const capacityContract = await contractsClient.getCapacity()
@@ -118,71 +140,108 @@ describe('#getMatchedOffersByDealId', () => {
     const collateralToApproveCommitmentsTx = await fltContract.approve(capacityContractAddress, collateralToApproveCommitments);
     await collateralToApproveCommitmentsTx.wait(DEFAULT_CONFIRMATIONS)
 
-    console.info('Deposit collateral for all sent CC...')
-    for (let i = 0; i < commitmentIds.length; i++) {
-      const commitmentId = commitmentIds[i]
-      console.info('Deposit collateral for commitmentId: ', commitmentId, '...')
-      const depositCollateralTx = await capacityContract.depositCollateral(commitmentId);
-      await depositCollateralTx.wait(DEFAULT_CONFIRMATIONS)
-    }
+      console.info("Deposit collateral for all sent CC...");
+      for (let i = 0; i < commitmentIds.length; i++) {
+        const commitmentId = commitmentIds[i];
+        console.info(
+          "Deposit collateral for commitmentId: ",
+          commitmentId,
+          "...",
+        );
+        const depositCollateralTx =
+          await capacityContract.depositCollateral(commitmentId);
+        await depositCollateralTx.wait(DEFAULT_CONFIRMATIONS);
+      }
 
-    console.log('---- Deal Creation ----')
-    const coreContract = await contractsClient.getCore()
-    const epochMilliseconds = await coreContract.epochDuration() * 1000n
-    console.log(`Wait for core epoch to pass: ${epochMilliseconds} milliseconds...`)
-    await new Promise((resolve) => setTimeout(resolve, Number(epochMilliseconds)))
+      console.log("---- Deal Creation ----");
+      const coreContract = await contractsClient.getCore();
+      const epochMilliseconds = (await coreContract.epochDuration()) * 1000n;
+      console.log(
+        `Wait for core epoch to pass: ${epochMilliseconds} milliseconds...`,
+      );
+      await new Promise((resolve) =>
+        setTimeout(resolve, Number(epochMilliseconds)),
+      );
 
-    const minWorkersDeal = 1
-    const targetWorkersDeal = 1
-    const maxWorkerPerProviderDeal = 1
-    const pricePerWorkerEpochDeal = registeredOffer.minPricePerWorkerEpoch
+      const minWorkersDeal = 1;
+      const targetWorkersDeal = 1;
+      const maxWorkerPerProviderDeal = 1;
+      const pricePerWorkerEpochDeal = registeredOffer.minPricePerWorkerEpoch;
 
-    const minDealDepositedEpoches = await coreContract.minDealDepositedEpoches()
-    const toApproveFromDeployer = BigInt(targetWorkersDeal) * pricePerWorkerEpochDeal * minDealDepositedEpoches
-    const marketContract = await contractsClient.getMarket();
+      const minDealDepositedEpoches =
+        await coreContract.minDealDepositedEpoches();
+      const toApproveFromDeployer =
+        BigInt(targetWorkersDeal) *
+        pricePerWorkerEpochDeal *
+        minDealDepositedEpoches;
+      const marketContract = await contractsClient.getMarket();
 
-    console.info('Send approve of payment token for amount = ', toApproveFromDeployer.toString())
-    expect(await paymentToken.balanceOf(signerAddress)).toBeGreaterThan(toApproveFromDeployer)
-    const marketAddress = await marketContract.getAddress()
-    expect(marketAddress).not.toBe("0x0000000000000000000000000000")
-    await paymentToken.approve(marketAddress, toApproveFromDeployer);
+      console.info(
+        "Send approve of payment token for amount = ",
+        toApproveFromDeployer.toString(),
+      );
+      expect(await paymentToken.balanceOf(signerAddress)).toBeGreaterThan(
+        toApproveFromDeployer,
+      );
+      const marketAddress = await marketContract.getAddress();
+      expect(marketAddress).not.toBe("0x0000000000000000000000000000");
+      await paymentToken.approve(marketAddress, toApproveFromDeployer);
 
-    console.info('Create deal that match default offer...')
-    const filter = marketContract.filters.DealCreated
-    const lastDealsCreatedBefore = (await marketContract.queryFilter(filter))
-    const deployDealTx = await marketContract.deployDeal(
-      {prefixes: "0x12345678", hash: ethers.encodeBytes32String(`appCID:${timestamp}`)},
-      registeredOffer.paymentToken,
-      minWorkersDeal,
-      targetWorkersDeal,
-      maxWorkerPerProviderDeal,
-      pricePerWorkerEpochDeal,
-      registeredOffer.effectors,
-    );
-    await deployDealTx.wait(DEFAULT_CONFIRMATIONS)
+      console.info("Create deal that match default offer...");
+      const filter = marketContract.filters.DealCreated;
+      const lastDealsCreatedBefore = await marketContract.queryFilter(filter);
 
-    const lastDealsCreatedAfter = (await marketContract.queryFilter(filter))
-    expect(lastDealsCreatedAfter.length - lastDealsCreatedBefore.length).toBe(1)
-    const dealId = lastDealsCreatedAfter[lastDealsCreatedAfter.length - 1].args.deal
+      const deployDealTx = await marketContract.deployDeal(
+        {
+          prefixes: "0x12345678",
+          hash: ethers.encodeBytes32String(`appCID:${timestamp}`),
+        },
+        registeredOffer.paymentToken,
+        minWorkersDeal,
+        targetWorkersDeal,
+        maxWorkerPerProviderDeal,
+        pricePerWorkerEpochDeal,
+        registeredOffer.effectors,
+        0,
+        [],
+      );
+      await deployDealTx.wait(DEFAULT_CONFIRMATIONS);
 
-    console.info(`Wait indexer ${DEFAULT_SUBGRAPH_TIME_INDEXING} to process transactions with Deal...`)
-    await new Promise((resolve) => setTimeout(resolve, DEFAULT_SUBGRAPH_TIME_INDEXING))
+      const lastDealsCreatedAfter = await marketContract.queryFilter(filter);
+      expect(lastDealsCreatedAfter.length - lastDealsCreatedBefore.length).toBe(
+        1,
+      );
+      const dealId =
+        lastDealsCreatedAfter[lastDealsCreatedAfter.length - 1].args.deal;
 
-    console.log('---- Deal Matching ----')
-    console.info(`Find matched offers for dealId: ${dealId}...`)
-    const dealMatcherClient = new DealMatcherClient(TEST_NETWORK)
-    const matchedOffersOut = await dealMatcherClient.getMatchedOffersByDealId(dealId)
-    expect(matchedOffersOut.offers.length).toBe(1)  // At least with one previously created offer it matched.
+      console.info(
+        `Wait indexer ${DEFAULT_SUBGRAPH_TIME_INDEXING} to process transactions with Deal...`,
+      );
+      await new Promise((resolve) =>
+        setTimeout(resolve, DEFAULT_SUBGRAPH_TIME_INDEXING),
+      );
 
-    console.info(`Match deal with offers structure proposed by indexer: ${JSON.stringify(matchedOffersOut)}...`)
-    const matchDealTx = await marketContract.matchDeal(
-      dealId,
-      matchedOffersOut.offers,
-      matchedOffersOut.computeUnitsPerOffers,
-    )
-    // await matchDealTx.wait(DEFAULT_CONFIRMATIONS)
-    console.log(matchDealTx)
-  //   TODO: check further.
+      console.log("---- Deal Matching ----");
+      console.info(`Find matched offers for dealId: ${dealId}...`);
+      const dealMatcherClient = new DealMatcherClient(TEST_NETWORK);
+      const matchedOffersOut =
+        await dealMatcherClient.getMatchedOffersByDealId(dealId);
+      expect(matchedOffersOut.offers.length).toBe(1); // At least with one previously created offer it matched.
 
-  }, TESTS_TIMEOUT)
-})
+      console.info(
+        `Match deal with offers structure proposed by indexer: ${JSON.stringify(
+          matchedOffersOut,
+        )}...`,
+      );
+      const matchDealTx = await marketContract.matchDeal(
+        dealId,
+        matchedOffersOut.offers,
+        matchedOffersOut.computeUnitsPerOffers,
+      );
+      // await matchDealTx.wait(DEFAULT_CONFIRMATIONS)
+      console.log(matchDealTx);
+      //   TODO: check further.
+    },
+    TESTS_TIMEOUT,
+  );
+});

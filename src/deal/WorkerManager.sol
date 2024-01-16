@@ -49,7 +49,9 @@ contract WorkerManager is Config, IWorkerManager {
         uint256 maxWorkersPerProvider_,
         uint256 pricePerWorkerEpoch_,
         CIDV1[] calldata effectors_,
-        address owner_
+        address owner_,
+        AccessType providersAccessType_,
+        address[] calldata providersAccessList_
     ) internal onlyInitializing {
         __Config_init(
             globalCore_,
@@ -60,7 +62,9 @@ contract WorkerManager is Config, IWorkerManager {
             maxWorkersPerProvider_,
             pricePerWorkerEpoch_,
             effectors_,
-            owner_
+            owner_,
+            providersAccessType_,
+            providersAccessList_
         );
 
         __WorkerManager_init_unchained();
@@ -69,7 +73,6 @@ contract WorkerManager is Config, IWorkerManager {
     function __WorkerManager_init_unchained() internal onlyInitializing {}
 
     // ------------------ Internal Mutable Functions ------------------
-
     function _setWorker(bytes32 computeUnitId, bytes32 workerId) internal returns (uint256) {
         WorkerManagerStorage storage workerStorage = _getWorkerManagerStorage();
         ComputeUnit storage computeUnit = workerStorage.computeUnitById[computeUnitId];

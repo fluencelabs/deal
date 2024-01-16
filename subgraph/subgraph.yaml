@@ -96,7 +96,7 @@ dataSources:
         - event: ComputeUnitRemovedFromDeal(indexed bytes32,address,bytes32)
           handler: handleComputeUnitRemovedFromDeal
         - event: DealCreated(indexed
-            address,address,uint256,address,uint256,uint256,uint256,uint256,(bytes4,bytes32)[],(bytes4,bytes32))
+            address,address,uint256,address,uint256,uint256,uint256,uint256,(bytes4,bytes32)[],(bytes4,bytes32),uint8,address[])
           handler: handleDealCreated
       file: ./src/mappings/market.ts
 templates:

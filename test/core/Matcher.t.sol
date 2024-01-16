@@ -83,22 +83,22 @@ contract MatcherTest is Test {
         uint256 unitCountPerPeer = 2;
         uint256 peerCountPerOffer = 3;
         uint256 minWorkers = 1;
-        uint maxWorkersPerProvider = unitCountPerPeer * peerCountPerOffer;
+        uint256 maxWorkersPerProvider = unitCountPerPeer * peerCountPerOffer * offerCount;
+
         // Total workers: offerCount * unitCountPerPeer * peerCountPerOffer. Thus, we have CU in excess.
         uint256 targetWorkers = offerCount * peerCountPerOffer * 1;
         CIDV1 memory appCID = CIDV1({prefixes: 0x12345678, hash: Random.pseudoRandom(abi.encode("appCID"))});
 
-        DealMock dealMock =
-            new DealMock(
-                pricePerWorkerEpoch,
-                paymentToken,
-                targetWorkers,
-                maxWorkersPerProvider,
-                minWorkers,
-                effectors,
-                appCID,
-                creationBlock
-            );
+        DealMock dealMock = new DealMock(
+            pricePerWorkerEpoch,
+            paymentToken,
+            targetWorkers,
+            maxWorkersPerProvider,
+            minWorkers,
+            effectors,
+            appCID,
+            creationBlock
+        );
 
         (bytes32[] memory offerIds, bytes32[][] memory peerIds, bytes32[][][] memory unitIds) = _registerOffersAndCC(
             offerCount, peerCountPerOffer, unitCountPerPeer, effectors, paymentToken, pricePerWorkerEpoch
@@ -217,6 +217,14 @@ contract DealMock {
 
         computeUnitCountByProvider[computeProvider]++;
         computeUnitCount++;
+    }
+
+    function providersAccessType() external pure returns (IConfig.AccessType) {
+        return IConfig.AccessType.NONE;
+    }
+
+    function isProviderAllowed(address) external pure returns (bool) {
+        return true;
     }
 
     function getComputeUnitCount() external view returns (uint256) {

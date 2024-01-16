@@ -200,7 +200,8 @@ abstract contract Offer is BaseModule, IOffer {
         offerStorage.computeUnitIdsByPeerId[peerId].remove(unitId);
 
         delete offerStorage.computeUnits[unitId];
-        // TODO: event and support in the subgraph.
+
+        emit ComputeUnitRemoved(peerId, unitId);
     }
 
     // Change offer

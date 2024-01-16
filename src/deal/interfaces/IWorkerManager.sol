@@ -17,17 +17,12 @@ interface IWorkerManager {
     // ------------------ Events ------------------
     event ComputeUnitJoined(bytes32 unitId);
     event ComputeUnitRemoved(bytes32 unitId);
-
     event WorkerIdUpdated(bytes32 computeUnitId, bytes32 workerId);
 
     // ------------------ Public View Functions ---------------------
     function getComputeUnit(bytes32 id) external view returns (ComputeUnit memory);
-
     function getComputeUnitCount() external view returns (uint256);
-
     function getComputeUnitCount(address provider) external view returns (uint256);
-
     function getComputeUnits() external view returns (ComputeUnit[] memory);
-
     function getWorkerCount() external view returns (uint256);
 }

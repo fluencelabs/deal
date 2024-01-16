@@ -64,11 +64,13 @@ abstract contract Matcher is Offer, IMatcher {
         uint256 dealComputeUnitCount = deal.getComputeUnitCount();
         uint256 freeWorkerSlots = deal.targetWorkers() - dealComputeUnitCount;
         uint256 freeWorkerSlotsCurrent = freeWorkerSlots;
-        uint maxWorkersPerProvider = deal.maxWorkersPerProvider();
+        uint256 maxWorkersPerProvider = deal.maxWorkersPerProvider();
+
         CIDV1[] memory effectors = deal.effectors();
 
         CIDV1 memory appCID = deal.appCID();
         uint256 creationBlock = deal.creationBlock();
+        IConfig.AccessType providersAccessType = deal.providersAccessType();
 
         bool isDealMatched = false;
 
@@ -76,9 +78,10 @@ abstract contract Matcher is Offer, IMatcher {
         for (uint256 i = 0; i < offers.length; ++i) {
             bytes32 offerId = offers[i];
             Offer memory offer = getOffer(offerId);
+
             if (
-                pricePerWorkerEpoch < offer.minPricePerWorkerEpoch || paymentToken != offer.paymentToken
-                    || !_hasOfferEffectors(offerId, effectors)
+                !deal.isProviderAllowed(offer.provider) || pricePerWorkerEpoch < offer.minPricePerWorkerEpoch
+                    || paymentToken != offer.paymentToken || !_hasOfferEffectors(offerId, effectors)
             ) {
                 continue;
             }
@@ -91,6 +94,7 @@ abstract contract Matcher is Offer, IMatcher {
                 if (computeUnitCountInDealByProvider > maxWorkersPerProvider || freeWorkerSlotsCurrent == 0) {
                     break;
                 }
+
                 bytes32 computeUnitId = computeUnits[i][k];
 
                 // Get CU and start checking, if smth wrong - skip.
@@ -105,7 +109,13 @@ abstract contract Matcher is Offer, IMatcher {
                 }
 
                 // Check if CU available.
-                if (computeUnit.deal != address(0) || peer.commitmentId == bytes32(0x000000000)) {
+                if (
+                    providersAccessType == IConfig.AccessType.WHITELIST
+                        && (
+                            computeUnit.deal != address(0) || peer.commitmentId == bytes32(0x000000000)
+                                || currentEpoch < capacity.getCommitment(peer.commitmentId).startEpoch
+                        )
+                ) {
                     continue;
                 }
 
@@ -115,8 +125,11 @@ abstract contract Matcher is Offer, IMatcher {
                 }
 
                 _mvComputeUnitToDeal(computeUnitId, deal);
+
                 // TODO: only for NOX -- remove in future
                 emit ComputeUnitMatched(peerId, computeUnitId, creationBlock, appCID);
+
+                computeUnitCountInDealByProvider++;
                 freeWorkerSlotsCurrent--;
 
                 if (!isDealMatched) {

@@ -45,7 +45,15 @@ contract DealFactoryTest is Test {
         IERC20 paymentToken = IERC20(address(deployment.tUSD));
 
         IDeal deal = deployment.market.deployDeal(
-            appCID, paymentToken, minWorkers, targetWorkers, maxWorkersPerProvider, pricePerWorkerEpoch, effectors
+            appCID,
+            paymentToken,
+            minWorkers,
+            targetWorkers,
+            maxWorkersPerProvider,
+            pricePerWorkerEpoch,
+            effectors,
+            IConfig.AccessType.NONE,
+            new address[](0)
         );
 
         return (
