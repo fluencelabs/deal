@@ -210,7 +210,7 @@ contract DealMock {
         return IConfig.AccessType.NONE;
     }
 
-    function hasProviderAccess(address provider) external pure returns (bool) {
+    function isProviderAllowed(address) external pure returns (bool) {
         return true;
     }
 

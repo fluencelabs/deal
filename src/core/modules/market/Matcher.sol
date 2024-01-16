@@ -76,7 +76,7 @@ abstract contract Matcher is Offer, IMatcher {
             Offer memory offer = getOffer(offerId);
 
             if (
-                !deal.hasProviderAccess(offer.provider) || pricePerWorkerEpoch < offer.minPricePerWorkerEpoch
+                !deal.isProviderAllowed(offer.provider) || pricePerWorkerEpoch < offer.minPricePerWorkerEpoch
                     || paymentToken != offer.paymentToken || !_hasOfferEffectors(offerId, effectors)
             ) {
                 continue;

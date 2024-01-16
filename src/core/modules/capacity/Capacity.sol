@@ -10,9 +10,9 @@ import "src/deal/base/Types.sol";
 import "src/deal/interfaces/IDeal.sol";
 import "src/utils/OwnableUpgradableDiamond.sol";
 import "src/utils/LinkedListWithUniqueKeys.sol";
+import "src/utils/Whitelist.sol";
 import "./interfaces/ICapacity.sol";
 import "./CapacityConst.sol";
-import "./Whitelist.sol";
 
 contract Capacity is CapacityConst, Whitelist, UUPSUpgradeable, ICapacity {
     using SafeERC20 for IERC20;
@@ -161,7 +161,7 @@ contract Capacity is CapacityConst, Whitelist, UUPSUpgradeable, ICapacity {
         return cc.vestings[uint256(index)].cumulativeAmount - cc.info.totalWithdrawnReward;
     }
 
-    function getK() external view returns (bytes32) {
+    function getK() external pure returns (bytes32) {
         return bytes32(0x00);
     }
     // #endregion

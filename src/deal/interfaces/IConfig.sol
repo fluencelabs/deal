@@ -29,7 +29,7 @@ interface IConfig {
     function appCID() external view returns (CIDV1 memory);
     function maxWorkersPerProvider() external view returns (uint256);
     function providersAccessType() external view returns (AccessType);
-    function hasProviderAccess(address account) external view returns (bool);
+    function isProviderAllowed(address account) external view returns (bool);
 
     // ------------------ Mutable Functions ------------------
     function setAppCID(CIDV1 calldata appCID_) external;
