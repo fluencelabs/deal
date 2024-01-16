@@ -159,6 +159,10 @@ contract WorkerManager is Config, IWorkerManager {
         return _getWorkerManagerStorage().computeUnitCount;
     }
 
+    function getComputeUnitCount(address provider) public view returns (uint256) {
+        return _getWorkerManagerStorage().computeProviderInfo[provider].computeUnitCount;
+    }
+
     function getComputeUnits() public view returns (ComputeUnit[] memory) {
         WorkerManagerStorage storage workerStorage = _getWorkerManagerStorage();
 

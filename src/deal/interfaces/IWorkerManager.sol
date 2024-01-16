@@ -25,6 +25,8 @@ interface IWorkerManager {
 
     function getComputeUnitCount() external view returns (uint256);
 
+    function getComputeUnitCount(address provider) external view returns (uint256);
+
     function getComputeUnits() external view returns (ComputeUnit[] memory);
 
     function getWorkerCount() external view returns (uint256);

@@ -83,12 +83,13 @@ abstract contract Matcher is Offer, IMatcher {
                 continue;
             }
 
+            // To validate that match will be not more than with maxWorkersPerProvider CUs.
+            uint256 computeUnitCountInDealByProvider = deal.getComputeUnitCount(offer.provider);
+
             // Go through compute units.
             for (uint256 k = 0; k < computeUnits[i].length; ++k) {
-                // Validate that user provided not more than maxWorkersPerProvider CUs.
-                //  Thus, if user send invalid data, on contract it will be skipped.
-                if (computeUnits[i].length > maxWorkersPerProvider) {
-                    continue;
+                if (computeUnitCountInDealByProvider > maxWorkersPerProvider || freeWorkerSlotsCurrent == 0) {
+                    break;
                 }
                 bytes32 computeUnitId = computeUnits[i][k];
 
@@ -120,10 +121,6 @@ abstract contract Matcher is Offer, IMatcher {
 
                 if (!isDealMatched) {
                     isDealMatched = true;
-                }
-
-                if (freeWorkerSlotsCurrent == 0) {
-                    break;
                 }
             }
         }
