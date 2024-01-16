@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import {getDeployment} from "../../src";
+import { getDeployment } from "../../src";
 import { ethers } from "ethers";
 //  TODO: it is better to have integration tests for DealClient for calls: getMarket/etc.
 
