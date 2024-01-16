@@ -162,7 +162,7 @@ contract DealMock {
     address public paymentToken;
     CIDV1 public appCID;
     uint256 public creationBlock;
-    uint256 public getComputeUnitCount;
+    uint256 public computeUnitCount;
     uint256 public targetWorkers;
     uint256 public minWorkers;
 
@@ -171,6 +171,7 @@ contract DealMock {
     mapping(bytes32 => bool) public unitExists;
     mapping(bytes32 => address) public computeProviderByUnitId;
     mapping(bytes32 => bytes32) public peerIdByUnitId;
+    mapping(address => uint256) public computeUnitCountByProvider;
 
     constructor(
         uint256 _pricePerWorkerEpoch,
@@ -201,6 +202,27 @@ contract DealMock {
         computeProviderByUnitId[unitId] = computeProvider;
         peerIdByUnitId[unitId] = peerId;
 
-        getComputeUnitCount++;
+        computeUnitCountByProvider[computeProvider]++;
+        computeUnitCount++;
+    }
+
+    function providersAccessType() external pure returns (IConfig.AccessType) {
+        return IConfig.AccessType.NONE;
+    }
+
+    function isProviderAllowed(address) external pure returns (bool) {
+        return true;
+    }
+
+    function getComputeUnitCount() external view returns (uint256) {
+        return computeUnitCount;
+    }
+
+    function getComputeUnitCount(address provider) external view returns (uint256) {
+        return computeUnitCountByProvider[provider];
+    }
+
+    function maxWorkersPerProvider() external pure returns (uint256) {
+        return type(uint256).max;
     }
 }

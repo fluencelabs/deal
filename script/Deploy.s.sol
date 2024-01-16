@@ -45,6 +45,7 @@ contract DeployContracts is Depoyments, Script {
     uint256 constant DEFAULT_MAX_PROOFS_PER_EPOCH = 5;
     uint256 constant DEFAULT_WITHDRAW_EPOCHES_AFTER_FAILED = 2;
     uint256 constant DEFAULT_MAX_FAILED_RATIO = 10;
+    bool constant IS_WHITELIST_ENABLED = false;
 
     // ------------------ Deploy result ------------------
     string constant DEPLOYMENTS_PATH = "/deployments/";
@@ -68,6 +69,7 @@ contract DeployContracts is Depoyments, Script {
         uint256 maxProofsPerEpoch;
         uint256 withdrawEpochesAfterFailed;
         uint256 maxFailedRatio;
+        bool isWhitelistEnabled;
     }
 
     function setUp() external {
@@ -117,7 +119,8 @@ contract DeployContracts is Depoyments, Script {
             env.minRequierdProofsPerEpoch,
             env.maxProofsPerEpoch,
             env.withdrawEpochesAfterFailed,
-            env.maxFailedRatio
+            env.maxFailedRatio,
+            env.isWhitelistEnabled
         );
         _stopDeploy();
     }
@@ -144,6 +147,7 @@ contract DeployContracts is Depoyments, Script {
         uint256 withdrawEpochesAfterFailed =
             vm.envOr("WITHDRAW_EPOCHES_AFTER_FAILED", DEFAULT_WITHDRAW_EPOCHES_AFTER_FAILED);
         uint256 maxFailedRatio = vm.envOr("MAX_FAILED_RATIO", DEFAULT_MAX_FAILED_RATIO);
+        bool isWhitelistEnabled = vm.envOr("IS_WHITELIST_ENABLED", IS_WHITELIST_ENABLED);
 
         console.log("----------------- ENV -----------------");
         console.log(StdStyle.blue("CHAIN_ID:"), block.chainid);
@@ -161,6 +165,7 @@ contract DeployContracts is Depoyments, Script {
         console.log(StdStyle.blue("MAX_PROOFS_PER_EPOCH:"), maxProofsPerEpoch);
         console.log(StdStyle.blue("WITHDRAW_EPOCHES_AFTER_FAILED:"), withdrawEpochesAfterFailed);
         console.log(StdStyle.blue("MAX_FAILED_RATIO:"), maxFailedRatio);
+        console.log(StdStyle.blue("IS_WHITELIST_ENABLED:"), isWhitelistEnabled);
         console.log("---------------------------------------");
 
         return ENV({
@@ -179,7 +184,8 @@ contract DeployContracts is Depoyments, Script {
             minRequierdProofsPerEpoch: minRequierdProofsPerEpoch,
             maxProofsPerEpoch: maxProofsPerEpoch,
             withdrawEpochesAfterFailed: withdrawEpochesAfterFailed,
-            maxFailedRatio: maxFailedRatio
+            maxFailedRatio: maxFailedRatio,
+            isWhitelistEnabled: isWhitelistEnabled
         });
     }
 
@@ -217,7 +223,8 @@ contract DeployContracts is Depoyments, Script {
         uint256 minRequierdProofsPerEpoch_,
         uint256 maxProofsPerEpoch_,
         uint256 withdrawEpochesAfterFailed_,
-        uint256 maxFailedRatio_
+        uint256 maxFailedRatio_,
+        bool isWhitelistEnabled_
     ) internal {
         address coreImpl = _deployContract("CoreImpl", "Core", abi.encode(flt));
         address dealImpl = _deployContract("DealImpl", "Deal", new bytes(0));
@@ -264,7 +271,8 @@ contract DeployContracts is Depoyments, Script {
                     minRequierdProofsPerEpoch_,
                     maxProofsPerEpoch_,
                     withdrawEpochesAfterFailed_,
-                    maxFailedRatio_
+                    maxFailedRatio_,
+                    isWhitelistEnabled_
                 )
             )
         );
@@ -278,7 +286,6 @@ contract DeployContracts is Depoyments, Script {
         if (!isNewCore && (needToRedeployMarket || needToRedeployCapacity)) {
             revert("Update not implemented yet.");
         }
-
     }
 
     function _startDeploy() internal {

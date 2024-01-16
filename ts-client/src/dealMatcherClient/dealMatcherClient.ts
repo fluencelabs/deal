@@ -31,8 +31,8 @@ export class DealMatcherClient {
   private _indexerClient: IndexerClient;
   public MAX_PER_PAGE: number;
   /*
-    * @param network - network name: {kras/stage/...}.
-    * @param indexerUrl - indexer url (if you want to manually set url for the indexer to use).
+   * @param network - network name: {kras/stage/...}.
+   * @param indexerUrl - indexer url (if you want to manually set url for the indexer to use).
    */
   constructor(network?: ContractsENV, indexerUrl?: string) {
     this._indexerClient = new IndexerClient(network, indexerUrl);

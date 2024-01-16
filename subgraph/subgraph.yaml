@@ -6,11 +6,11 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: Market
-    network: localhost
+    network: local
     source:
       abi: Market
-      address: "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f"
-      startBlock: 0
+      address: "0xc5a5C42992dECbae36851359345FE25997F5C42d"
+      startBlock: 2
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -51,13 +51,13 @@ dataSources:
         - event: ComputeUnitRemovedFromDeal(indexed bytes32,address,bytes32)
           handler: handleComputeUnitRemovedFromDeal
         - event: DealCreated(indexed
-            address,address,uint256,address,uint256,uint256,uint256,uint256,(bytes4,bytes32)[],(bytes4,bytes32))
+            address,address,uint256,address,uint256,uint256,uint256,uint256,(bytes4,bytes32)[],(bytes4,bytes32),uint8,address[])
           handler: handleDealCreated
       file: ./src/mappings/market.ts
 templates:
   - name: Deal
     kind: ethereum/contract
-    network: localhost
+    network: local
     source:
       abi: Deal
     mapping:
