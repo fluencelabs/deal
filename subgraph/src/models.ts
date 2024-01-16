@@ -6,7 +6,7 @@ import {
   GraphNetwork, Provider,
 } from "../generated/schema";
 import { BigInt, Bytes } from "@graphprotocol/graph-ts";
-import { getTokenDecimals, getTokenSymbol } from "./contracts";
+import {getTokenDecimals, getTokenSymbol} from "./contracts";
 import {getProviderName} from "./networkConstants";
 
 export const ZERO_BIG_INT = BigInt.fromI32(0);
@@ -126,4 +126,14 @@ export function createOrLoadGraphNetwork(): GraphNetwork {
     graphNetwork.save()
   }
   return graphNetwork as GraphNetwork
+}
+
+// We have to mirror enums according to
+//  https://ethereum.stackexchange.com/questions/139078/how-to-use-subgraph-enums-in-the-mapping.
+export class CapacityCommitmentStatus {
+  static Active: string = "Active";
+  static WaitDelegation: string = "WaitDelegation";
+  static Inactive: string = "Inactive";
+  static Failed: string = "Failed";
+  static Removed: string = "Removed";
 }

@@ -108,68 +108,37 @@ describe("#getMatchedOffersByDealId", () => {
         paymentTokenAddress,
       );
 
-      console.log("---- CC Creation ----");
-      const capacityContract = await contractsClient.getCapacity();
-      const capacityContractAddress = await capacityContract.getAddress();
-      const capacityMinDuration = await capacityContract.minDuration();
-      for (let i = 0; i < registeredOffer.peers.length; i++) {
-        const peer = registeredOffer.peers[i];
-        // bytes32 peerId, uint256 duration, address delegator, uint256 rewardDelegationRate
-        console.log(
-          "Create commitment for peer: ",
-          peer.peerId,
-          " with duration: ",
-          capacityMinDuration,
-          "...",
-        );
-        const createCommitmentTx = await capacityContract.createCommitment(
-          peer.peerId,
-          capacityMinDuration,
-          signerAddress,
-          1,
-        );
-        await createCommitmentTx.wait(DEFAULT_CONFIRMATIONS);
-      }
-      console.log("Approve collateral for all sent CC...");
-      // Fetch created commitmentIds from chain.
-      const filterCreatedCC = capacityContract.filters.CommitmentCreated;
-      const capacityCommitmentCreatedEvents =
-        await capacityContract.queryFilter(filterCreatedCC);
-      const capacityCommitmentCreatedEventsLast =
-        capacityCommitmentCreatedEvents
-          .reverse()
-          .slice(0, registeredOffer.peers.length);
-      // 1 CC for each peer.
-      expect(capacityCommitmentCreatedEventsLast.length).toBe(
-        registeredOffer.peers.length,
-      );
-      const commitmentIds = capacityCommitmentCreatedEventsLast.map(
-        (event) => event.args.commitmentId,
-      );
-      let collateralToApproveCommitments = 0n;
-      for (let i = 0; i < commitmentIds.length; i++) {
-        const commitmentId = commitmentIds[i];
-        const commitment = await capacityContract.getCommitment(commitmentId);
-        const collateralToApproveCommitment =
-          commitment.collateralPerUnit * commitment.unitCount;
-        console.log(
-          "Collateral for commitmentId: ",
-          commitmentId,
-          " = ",
-          collateralToApproveCommitment,
-          "...",
-        );
-        collateralToApproveCommitments += collateralToApproveCommitment;
-      }
-      console.info(
-        `Send approve of FLT for all commitments for value: ${collateralToApproveCommitments}...`,
-      );
-      const fltContract = await contractsClient.getFLT();
-      const collateralToApproveCommitmentsTx = await fltContract.approve(
-        capacityContractAddress,
-        collateralToApproveCommitments,
-      );
-      await collateralToApproveCommitmentsTx.wait(DEFAULT_CONFIRMATIONS);
+    console.log('---- CC Creation ----')
+    const capacityContract = await contractsClient.getCapacity()
+    const capacityContractAddress = await capacityContract.getAddress()
+    const capacityMinDuration = await capacityContract.minDuration()
+    for (let i = 0; i < registeredOffer.peers.length; i++) {
+      const peer = registeredOffer.peers[i]
+      // bytes32 peerId, uint256 duration, address delegator, uint256 rewardDelegationRate
+      console.log('Create commitment for peer: ', peer.peerId, ' with duration: ', capacityMinDuration, '...')
+      const createCommitmentTx = await capacityContract.createCommitment(peer.peerId, capacityMinDuration, signerAddress, 1)
+      await createCommitmentTx.wait(DEFAULT_CONFIRMATIONS)
+    }
+    console.log('Approve collateral for all sent CC...')
+    // Fetch created commitmentIds from chain.
+    const filterCreatedCC = capacityContract.filters.CommitmentCreated
+    const capacityCommitmentCreatedEvents = (await capacityContract.queryFilter(filterCreatedCC))
+    const capacityCommitmentCreatedEventsLast = capacityCommitmentCreatedEvents.reverse().slice(0, registeredOffer.peers.length)
+    // 1 CC for each peer.
+    expect(capacityCommitmentCreatedEventsLast.length).toBe(registeredOffer.peers.length)
+    const commitmentIds = capacityCommitmentCreatedEventsLast.map((event) => event.args.commitmentId)
+    let collateralToApproveCommitments = 0n
+    for (let i = 0; i < commitmentIds.length; i++) {
+      const commitmentId = commitmentIds[i]
+      const commitment = await capacityContract.getCommitment(commitmentId)
+      const collateralToApproveCommitment = commitment.collateralPerUnit * commitment.unitCount
+      console.log('Collateral for commitmentId: ', commitmentId, ' = ', collateralToApproveCommitment, '...')
+      collateralToApproveCommitments += collateralToApproveCommitment
+    }
+    console.info(`Send approve of FLT for all commitments for value: ${collateralToApproveCommitments}...`)
+    const fltContract = await contractsClient.getFLT()
+    const collateralToApproveCommitmentsTx = await fltContract.approve(capacityContractAddress, collateralToApproveCommitments);
+    await collateralToApproveCommitmentsTx.wait(DEFAULT_CONFIRMATIONS)
 
       console.info("Deposit collateral for all sent CC...");
       for (let i = 0; i < commitmentIds.length; i++) {

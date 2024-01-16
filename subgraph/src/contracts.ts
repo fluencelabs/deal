@@ -6,6 +6,7 @@ import {
 import { Deal } from "../generated/Market/Deal";
 import { Address, Bytes } from "@graphprotocol/graph-ts";
 import { ERC20 } from "../generated/Market/ERC20";
+import {Core} from "../generated/Core/Core";
 
 // TODO: optimise through multicall contract (currently 2 calls only per token).
 export function getTokenSymbol(address: Bytes): string {
@@ -51,4 +52,8 @@ export function getComputeUnit(
 // @deprecated.
 export function getDealContract(contractAddress: Address): Deal {
   return Deal.bind(contractAddress);
+}
+
+export function getEpochDuration(contractAddress: Address): i32 {
+  return Core.bind(contractAddress).epochDuration().toI32();
 }
