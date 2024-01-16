@@ -33,7 +33,6 @@ import {
 } from "../../generated/schema";
 import { Deal as DealTemplate } from "../../generated/templates";
 import {AppCID, formatAddress, getEffectorCID, parseEffectors} from "./utils";
-import { getProviderName } from "../networkConstants";
 
 export function handleMarketOfferRegistered(
   event: MarketOfferRegistered,
