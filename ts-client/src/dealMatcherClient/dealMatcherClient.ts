@@ -284,9 +284,6 @@ export class DealMatcherClient {
    * - all target compute units found.
    */
   async getMatchedOffersByDealId(dealId: string): Promise<GetMatchedOffersOut> {
-    // What is current epoch?
-    // need to fetch core.
-
     const { deal, _meta, graphNetworks } = await this._indexerClient.getDeal({
       id: dealId.toLowerCase(),
     });
