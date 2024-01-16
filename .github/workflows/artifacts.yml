@@ -542,7 +542,7 @@ jobs:
           password: ${{ env.DOCKER_PASSWORD }}
 
       - name: Merge chain-rpc images
-        uses: Noelware/docker-manifest-action@0.4.0
+        uses: Noelware/docker-manifest-action@0.4.1
         with:
           inputs: ${{ needs.chain-rpc.outputs.chain-rpc-image }}
           images: ${{ needs.chain-rpc.outputs.chain-rpc-image }}-amd64,${{ needs.chain-rpc.outputs.chain-rpc-image }}-arm64
@@ -550,7 +550,7 @@ jobs:
           amend: true
 
       - name: Merge chain-deploy-script images
-        uses: Noelware/docker-manifest-action@0.4.0
+        uses: Noelware/docker-manifest-action@0.4.1
         with:
           inputs: ${{ needs.chain-rpc.outputs.chain-deploy-script-image }}
           images: ${{ needs.chain-rpc.outputs.chain-deploy-script-image }}-amd64,${{ needs.chain-rpc.outputs.chain-deploy-script-image }}-arm64
@@ -558,7 +558,7 @@ jobs:
           amend: true
 
       - name: Merge subgraph-deploy-script images
-        uses: Noelware/docker-manifest-action@0.4.0
+        uses: Noelware/docker-manifest-action@0.4.1
         with:
           inputs: ${{ needs.subgraph.outputs.subgraph-deploy-script-image }}
           images: ${{ needs.subgraph.outputs.subgraph-deploy-script-image }}-amd64,${{ needs.subgraph.outputs.subgraph-deploy-script-image }}-arm64
