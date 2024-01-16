@@ -308,7 +308,7 @@ contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
     }
 
     function addComputeUnit(address computeProvider, bytes32 computeUnitId, bytes32 peerId) public onlyMarket {
-        require(getStatus() == Status.ACTIVE, "Deal is not active");
+        require(getStatus() != Status.ENDED, "Deal is ended");
 
         _addComputeUnit(computeProvider, computeUnitId, peerId);
     }
