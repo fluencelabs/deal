@@ -99,7 +99,7 @@ describe('#getMatchedOffersByDealId', () => {
     }
     console.log('Approve collateral for all sent CC...')
     // Fetch created commitmentIds from chain.
-    const filterCreatedCC = capacityContract.filters.CapacityCommitmentCreated
+    const filterCreatedCC = capacityContract.filters.CommitmentCreated
     const capacityCommitmentCreatedEvents = (await capacityContract.queryFilter(filterCreatedCC))
     const capacityCommitmentCreatedEventsLast = capacityCommitmentCreatedEvents.reverse().slice(0, registeredOffer.peers.length)
     // 1 CC for each peer.

@@ -49,6 +49,7 @@ export class DealMatcherClient {
     peersOffset: number = 0,
     computeUnitsOffset: number = 0,
   ) {
+    const currentEpochString = Math.floor(getMatchedOffersIn.currentEpoch).toString()
     let indexerGetOffersParams: OffersQueryQueryVariables = {
       limit: offersPerPageLimit,
       filters: {
@@ -60,14 +61,14 @@ export class DealMatcherClient {
         //  Status is Active when current epoch is > that deposited epoch.
         peers_: {
           currentCapacityCommitment_not: null,
-          collateralDepositedAt_lt: getMatchedOffersIn.currentEpoch.toString(),
+          collateralDepositedAt_lt: currentEpochString,
         },
       },
       peersFilters: {
         computeUnits_: { deal: null },
         currentCapacityCommitment_not: null,
         currentCapacityCommitment_: {
-          startEpoch_lt: getMatchedOffersIn.currentEpoch.toString(),
+          startEpoch_lt: currentEpochString,
         },
       },
       computeUnitsFilters: { deal: null },
