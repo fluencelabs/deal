@@ -4,7 +4,7 @@ import * as fs from "fs";
 
 const DEPLOYMENTS_DIR = '../../deployments'
 const CONFIGS_DIR =  "../configs"
-const REQUIRED_DEPLOYED_CONTRACT_NAME = "Market"
+const REQUIRED_DEPLOYED_CONTRACT_NAMES = ["Market", "Capacity", "Core"]
 const STANDS = ["kras", "testnet", "stage", "local"]
 // Subgraph repo pattern used to have config dir with networks.json to support
 //  deploy on different networks: {mainnet, mumbai, etc}.
@@ -24,16 +24,12 @@ const STAND_TO_SUBGRAPH_NETWORK = {
   "local": "local",
 }
 
+// Save subgraph networks config from info of several contracts.
 async function saveNetworksConfig(
-  contractName: string, standName: keyof typeof STAND_TO_SUBGRAPH_CONFIG, addr: string, blockNumber: number) {
+  standName: keyof typeof STAND_TO_SUBGRAPH_CONFIG, subgraphContractsDataToStore: any) {
   const networksConfigPath = path.join(__dirname, CONFIGS_DIR, STAND_TO_SUBGRAPH_CONFIG[standName])
   let res: any = {}
-  let contractsConfig: any = {}
-  contractsConfig[contractName] = {
-    address: addr,
-    startBlock: blockNumber ?? 0,
-  }
-  res[STAND_TO_SUBGRAPH_NETWORK[standName]] = contractsConfig
+  res[STAND_TO_SUBGRAPH_NETWORK[standName]] = subgraphContractsDataToStore
   fs.writeFileSync(
     networksConfigPath,
     JSON.stringify(res, null, 2)
@@ -55,17 +51,31 @@ async function main() {
     const deploymentPath = path.join(deploymentsPath, deployment)
     const readJson = fs.readFileSync(deploymentPath, { encoding: 'utf-8' })
     const deploymentJson = JSON.parse(readJson)
-    if (!(REQUIRED_DEPLOYED_CONTRACT_NAME in deploymentJson)) {
-      console.warn(`${REQUIRED_DEPLOYED_CONTRACT_NAME} not found for stand ${standName} in deployments, skip...`)
-      continue;
+
+    let subgraphContractsDataToStore = {}
+    for (const contractName of REQUIRED_DEPLOYED_CONTRACT_NAMES) {
+      if (!(contractName in deploymentJson)) {
+        console.warn(`${contractName} not found for stand ${standName} in deployments, skip...`)
+        continue;
+      }
+      const contractDeployment = deploymentJson[contractName]
+      if (!(contractDeployment.addr != null && contractDeployment.blockNumber != null)) {
+        console.warn(`addr or blockNumber not found for stand ${standName} in ${JSON.stringify(contractDeployment)} deployment, skip...`)
+        continue;
+      }
+
+      subgraphContractsDataToStore[contractName] = {
+        address: contractDeployment.addr,
+        startBlock: Number(contractDeployment.blockNumber ?? 0),
+      }
     }
-    const contractDeployment = deploymentJson[REQUIRED_DEPLOYED_CONTRACT_NAME]
-    if (!(contractDeployment.addr != null && contractDeployment.blockNumber != null)) {
-      console.warn(`addr or blockNumber not found for stand ${standName} in ${JSON.stringify(contractDeployment)} deployment, skip...`)
+
+    if (Object.keys(subgraphContractsDataToStore).length !== REQUIRED_DEPLOYED_CONTRACT_NAMES.length) {
+      console.warn(`subgraphContractsDataToStore for stand ${standName} is not consists of all required contracts, skip...`)
       continue;
     }
 
-    await saveNetworksConfig(REQUIRED_DEPLOYED_CONTRACT_NAME, standName, contractDeployment.addr, Number(contractDeployment.blockNumber))
+    await saveNetworksConfig(standName, subgraphContractsDataToStore)
   }
 }
 

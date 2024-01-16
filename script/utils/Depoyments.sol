@@ -81,10 +81,8 @@ contract Depoyments is ScriptBase {
         json.write(path);
 
         // TODO: rm hack below on solving https://github.com/foundry-rs/forge-std/issues/488.
-        string memory name = deployments.contractNames[0];
-        DeployedContract memory deployedContract = deployments.contracts[name];
-        string memory deployedContractObject = name.serialize("blockNumber", deployedContract.blockNumber);
-        json = mainJsonKey.serialize(name, deployedContractObject);
+        string memory a = "";
+        json = a.serialize(a, a.serialize("creationCodeHash", a));
     }
 
     function _deployContract(string memory contractName, string memory artifactName, bytes memory args)

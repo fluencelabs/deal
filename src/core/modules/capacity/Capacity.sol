@@ -11,9 +11,9 @@ import "src/deal/base/Types.sol";
 import "src/deal/interfaces/IDeal.sol";
 import "src/utils/OwnableUpgradableDiamond.sol";
 import "src/utils/RandomXActor.sol";
+import "src/utils/Whitelist.sol";
 import "./interfaces/ICapacity.sol";
 import "./CapacityConst.sol";
-import "./Whitelist.sol";
 
 contract Capacity is CapacityConst, Whitelist, UUPSUpgradeable, ICapacity {
     using SafeERC20 for IERC20;
@@ -281,7 +281,7 @@ contract Capacity is CapacityConst, Whitelist, UUPSUpgradeable, ICapacity {
         });
         peer.commitmentId = commitmentId;
 
-        emit CommitmentCreated(peerId, commitmentId, delegator, rewardDelegationRate, collateralPerUnit);
+        emit CommitmentCreated(peerId, commitmentId, duration, delegator, rewardDelegationRate, collateralPerUnit);
 
         return commitmentId;
     }
@@ -374,7 +374,9 @@ contract Capacity is CapacityConst, Whitelist, UUPSUpgradeable, ICapacity {
         market.setCommitmentId(peerId, commitmentId);
 
         emit CollateralDeposited(commitmentId, collateral);
-        emit CommitmentActivated(peerId, commitmentId, startEpoch + cc.info.duration, market.getComputeUnitIds(peerId));
+        emit CommitmentActivated(
+            peerId, commitmentId, startEpoch, startEpoch + cc.info.duration, market.getComputeUnitIds(peerId)
+        );
     }
 
     function submitProof(bytes32 unitId, bytes32 globalUnitNonce, bytes32 localUnitNonce, bytes32 targetHash)

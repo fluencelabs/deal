@@ -38,12 +38,15 @@ abstract contract Matcher is Offer, IMatcher {
 
     // ----------------- External Mutable -----------------
     /**
+     * @dev Match Deal with Compute Units provided.
      * @notice Match deal with offers and compute units (peers checks through compute units).
+     * @notice It validates maxWorkersPerProvider and fails silently if more CUs provided for an offer.
+     * @dev If Offer, or Peer, or CU are not allowed to match - them are silently ignored.
      * @dev There should be `bytes32[][] calldata peers` as well, but it is not supported by subgraph codegen.
      * @dev  Ref to https://github.com/graphprotocol/graph-tooling/issues/342.
-     * @param deal Deal to match.
-     * @param offers Offers to match with.
-     * @param computeUnits Compute units to match with.
+     * @param deal: Deal to match.
+     * @param offers: Offers array that represents offers  in computeUnits 2D array.
+     * @param computeUnits: Compute Units per offer id (2D array) to match with.
      */
     function matchDeal(IDeal deal, bytes32[] calldata offers, bytes32[][] calldata computeUnits) external {
         ICapacity capacity = core.capacity();
@@ -76,12 +79,13 @@ abstract contract Matcher is Offer, IMatcher {
             Offer memory offer = getOffer(offerId);
 
             if (
-                !deal.hasProviderAccess(offer.provider) || pricePerWorkerEpoch < offer.minPricePerWorkerEpoch
+                !deal.isProviderAllowed(offer.provider) || pricePerWorkerEpoch < offer.minPricePerWorkerEpoch
                     || paymentToken != offer.paymentToken || !_hasOfferEffectors(offerId, effectors)
             ) {
                 continue;
             }
 
+            // To validate that match will be not more than with maxWorkersPerProvider CUs.
             uint256 computeUnitCountInDealByProvider = deal.getComputeUnitCount(offer.provider);
 
             // Go through compute units.
@@ -111,6 +115,11 @@ abstract contract Matcher is Offer, IMatcher {
                                 || currentEpoch < capacity.getCommitment(peer.commitmentId).startEpoch
                         )
                 ) {
+                    continue;
+                }
+
+                // Check if deposit collateral send (and CCStatus.Active? TODO: use status Active).
+                if (currentEpoch < capacity.getCommitment(peer.commitmentId).startEpoch) {
                     continue;
                 }
 

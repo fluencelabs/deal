@@ -24,13 +24,14 @@ contract CapacityCommitmentTest is Test {
     event CommitmentCreated(
         bytes32 indexed peerId,
         bytes32 commitmentId,
+        uint256 duration,
         address delegator,
         uint256 rewardDelegationRate,
         uint256 fltCCCollateralPerUnit
     );
     event CommitmentRemoved(bytes32 indexed commitmentId);
     event CommitmentActivated(
-        bytes32 indexed peerId, bytes32 indexed commitmentId, uint256 endEpoch, bytes32[] unitIds
+        bytes32 indexed peerId, bytes32 indexed commitmentId, uint256 startEpoch, uint256 endEpoch, bytes32[] unitIds
     );
     event CommitmentFinished(bytes32 indexed commitmentId);
 
@@ -98,7 +99,7 @@ contract CapacityCommitmentTest is Test {
         // expect emit CommitmentCreated
         vm.expectEmit(true, true, false, true, address(deployment.capacity));
         emit CommitmentCreated(
-            peerId, commitmentId, ccDelegator, rewardCCDelegationRate, deployment.capacity.fltCollateralPerUnit()
+            peerId, commitmentId, ccDuration, ccDelegator, rewardCCDelegationRate, deployment.capacity.fltCollateralPerUnit()
         );
 
         // call createCapacityCommitment
@@ -141,7 +142,7 @@ contract CapacityCommitmentTest is Test {
         emit CollateralDeposited(commitmentId, amount);
 
         vm.expectEmit(true, true, true, true, address(deployment.capacity));
-        emit CommitmentActivated(peerId, commitmentId, currentEpoch + 1 + ccDuration, registerPeers[0].unitIds);
+        emit CommitmentActivated(peerId, commitmentId, currentEpoch + 1, currentEpoch + 1 + ccDuration, registerPeers[0].unitIds);
 
         deployment.capacity.depositCollateral(commitmentId);
         vm.stopPrank();

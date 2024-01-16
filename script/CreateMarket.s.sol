@@ -136,7 +136,6 @@ contract CreateMarket is Depoyments, Script {
 
         console.log("Create Deals...");
         uint256 dealCount = 10;
-        uint256 startMinWorkers = 60;
         uint256 startTargetWorkers = 60;
         uint256 startMaxWorkerPerProvider = 3;
 

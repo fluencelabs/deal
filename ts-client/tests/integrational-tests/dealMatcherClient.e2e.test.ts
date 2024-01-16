@@ -14,7 +14,6 @@ import { describe, test, expect } from "vitest";
 
 import { ContractsENV, DealClient, DealMatcherClient } from "../../src";
 import { ethers } from "ethers";
-import { aw } from "vitest/dist/reporters-OH1c16Kq";
 
 // TODO: from env.
 const TEST_NETWORK: ContractsENV = "local";
@@ -245,14 +244,6 @@ describe("#getMatchedOffersByDealId", () => {
       );
       const dealId =
         lastDealsCreatedAfter[lastDealsCreatedAfter.length - 1].args.deal;
-
-      //TODO: double deposit becouse there is a bug with deal activation.
-      await paymentToken.approve(marketAddress, toApproveFromDeployer);
-      await (
-        await (
-          await contractsClient.getDeal(dealId)
-        ).deposit(toApproveFromDeployer)
-      ).wait(DEFAULT_CONFIRMATIONS);
 
       console.info(
         `Wait indexer ${DEFAULT_SUBGRAPH_TIME_INDEXING} to process transactions with Deal...`,

@@ -163,7 +163,7 @@ contract Config is OwnableUpgradableDiamond, IConfig {
         return _getConfigStorage().providersAccessType;
     }
 
-    function hasProviderAccess(address account) external view returns (bool) {
+    function isProviderAllowed(address account) external view returns (bool) {
         ConfigStorage storage configStorage = _getConfigStorage();
 
         AccessType accessType = configStorage.providersAccessType;
