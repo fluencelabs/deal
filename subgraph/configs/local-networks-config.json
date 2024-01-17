@@ -3,6 +3,14 @@
     "Market": {
       "address": "0xc5a5C42992dECbae36851359345FE25997F5C42d",
       "startBlock": 0
+    },
+    "Capacity": {
+      "address": "0x67d269191c92Caf3cD7723F116c85e6E9bf55933",
+      "startBlock": 0
+    },
+    "Core": {
+      "address": "0x4A679253410272dd5232B3Ff7cF5dbB88f295319",
+      "startBlock": 0
     }
   }
 }

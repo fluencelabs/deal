@@ -10,13 +10,14 @@ interface ICapacity is ICapacityConst {
     event CommitmentCreated(
         bytes32 indexed peerId,
         bytes32 commitmentId,
+        uint256 duration,
         address delegator,
         uint256 rewardDelegationRate,
         uint256 fltCCCollateralPerUnit
     );
     event CommitmentRemoved(bytes32 indexed commitmentId);
     event CommitmentActivated(
-        bytes32 indexed peerId, bytes32 indexed commitmentId, uint256 endEpoch, bytes32[] unitIds
+        bytes32 indexed peerId, bytes32 indexed commitmentId, uint256 startEpoch, uint256 endEpoch, bytes32[] unitIds
     );
     event CommitmentFinished(bytes32 indexed commitmentId);
 
@@ -84,7 +85,8 @@ interface ICapacity is ICapacityConst {
         uint256 minRequierdProofsPerEpoch_,
         uint256 maxProofsPerEpoch_,
         uint256 withdrawEpochesAfterFailed_,
-        uint256 maxFailedRatio_
+        uint256 maxFailedRatio_,
+        bool isWhitelistEnabled_
     ) external;
 
     // ------------------ Views ------------------

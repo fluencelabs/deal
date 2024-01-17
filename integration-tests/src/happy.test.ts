@@ -234,7 +234,6 @@ describe("#getMatchedOffersByDealId", () => {
         maxWorkerPerProviderDeal,
         pricePerWorkerEpochDeal,
         registeredOffer.effectors,
-        // TODO: Need to find good defaults for these
         0n,
         [],
         // providersAccessType: BigNumberish,

@@ -83,12 +83,22 @@ contract MatcherTest is Test {
         uint256 unitCountPerPeer = 2;
         uint256 peerCountPerOffer = 3;
         uint256 minWorkers = 1;
+        uint256 maxWorkersPerProvider = unitCountPerPeer * peerCountPerOffer * offerCount;
+
         // Total workers: offerCount * unitCountPerPeer * peerCountPerOffer. Thus, we have CU in excess.
         uint256 targetWorkers = offerCount * peerCountPerOffer * 1;
         CIDV1 memory appCID = CIDV1({prefixes: 0x12345678, hash: Random.pseudoRandom(abi.encode("appCID"))});
 
-        DealMock dealMock =
-            new DealMock(pricePerWorkerEpoch, paymentToken, targetWorkers, minWorkers, effectors, appCID, creationBlock);
+        DealMock dealMock = new DealMock(
+            pricePerWorkerEpoch,
+            paymentToken,
+            targetWorkers,
+            maxWorkersPerProvider,
+            minWorkers,
+            effectors,
+            appCID,
+            creationBlock
+        );
 
         (bytes32[] memory offerIds, bytes32[][] memory peerIds, bytes32[][][] memory unitIds) = _registerOffersAndCC(
             offerCount, peerCountPerOffer, unitCountPerPeer, effectors, paymentToken, pricePerWorkerEpoch
@@ -162,8 +172,9 @@ contract DealMock {
     address public paymentToken;
     CIDV1 public appCID;
     uint256 public creationBlock;
-    uint256 public getComputeUnitCount;
+    uint256 public computeUnitCount;
     uint256 public targetWorkers;
+    uint256 public maxWorkersPerProvider;
     uint256 public minWorkers;
 
     CIDV1[] internal _effectors;
@@ -171,11 +182,13 @@ contract DealMock {
     mapping(bytes32 => bool) public unitExists;
     mapping(bytes32 => address) public computeProviderByUnitId;
     mapping(bytes32 => bytes32) public peerIdByUnitId;
+    mapping(address => uint256) public computeUnitCountByProvider;
 
     constructor(
         uint256 _pricePerWorkerEpoch,
         address _paymentToken,
         uint256 _targetWorkers,
+        uint256 _maxWorkersPerProvider,
         uint256 _minWorkers,
         CIDV1[] memory effectors_,
         CIDV1 memory _appCID,
@@ -184,6 +197,7 @@ contract DealMock {
         pricePerWorkerEpoch = _pricePerWorkerEpoch;
         paymentToken = _paymentToken;
         targetWorkers = _targetWorkers;
+        maxWorkersPerProvider = _maxWorkersPerProvider;
         minWorkers = _minWorkers;
         _effectors = effectors_;
         appCID = _appCID;
@@ -201,6 +215,23 @@ contract DealMock {
         computeProviderByUnitId[unitId] = computeProvider;
         peerIdByUnitId[unitId] = peerId;
 
-        getComputeUnitCount++;
+        computeUnitCountByProvider[computeProvider]++;
+        computeUnitCount++;
+    }
+
+    function providersAccessType() external pure returns (IConfig.AccessType) {
+        return IConfig.AccessType.NONE;
+    }
+
+    function isProviderAllowed(address) external pure returns (bool) {
+        return true;
+    }
+
+    function getComputeUnitCount() external view returns (uint256) {
+        return computeUnitCount;
+    }
+
+    function getComputeUnitCount(address provider) external view returns (uint256) {
+        return computeUnitCountByProvider[provider];
     }
 }

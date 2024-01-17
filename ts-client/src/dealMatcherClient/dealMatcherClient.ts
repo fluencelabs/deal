@@ -17,6 +17,7 @@ export interface GetMatchedOffersIn {
   targetWorkerSlotToMatch: number;
   minWorkersToMatch: number;
   maxWorkersPerProvider: number;
+  currentEpoch: number;
 }
 
 export class DealNotFoundError extends Error {
@@ -31,36 +32,48 @@ export class DealMatcherClient {
   private _indexerClient: IndexerClient;
   public MAX_PER_PAGE: number;
   /*
-    * @param network - network name: {kras/stage/...}.
-    * @param indexerUrl - indexer url (if you want to manually set url for the indexer to use).
+   * @param network - network name: {kras/stage/...}.
+   * @param indexerUrl - indexer url (if you want to manually set url for the indexer to use).
    */
   constructor(network?: ContractsENV, indexerUrl?: string) {
     this._indexerClient = new IndexerClient(network, indexerUrl);
     this.MAX_PER_PAGE = this._indexerClient.INDEXER_MAX_FIRST;
   }
 
+  // Represents the way to query indexer for available compute units (subgraph).
   async _getMatchedOffersPage(
     getMatchedOffersIn: GetMatchedOffersIn,
-    perPageLimit: number,
+    offersPerPageLimit: number, // Possibility to optimise query size.
+    peersPerPageLimit: number, // Possibility to control, e.g. maxWorkersPerProvider.
     offersOffset: number = 0,
     peersOffset: number = 0,
     computeUnitsOffset: number = 0,
   ) {
+    const currentEpochString = Math.floor(getMatchedOffersIn.currentEpoch).toString()
     let indexerGetOffersParams: OffersQueryQueryVariables = {
-      limit: perPageLimit,
+      limit: offersPerPageLimit,
       filters: {
         pricePerEpoch_lte: getMatchedOffersIn.pricePerWorkerEpoch,
         paymentToken: getMatchedOffersIn.paymentToken.toLowerCase(),
         // Check if any of compute units are available in the offer.
         computeUnitsAvailable_gt: 0,
+        // Do not fetch peers with no any of compute units in "active" status at all.
+        //  Status is Active when current epoch is > that deposited epoch.
+        peers_: {
+          currentCapacityCommitment_not: null,
+          collateralDepositedAt_lt: currentEpochString,
+        },
       },
-      peersFilters: { computeUnits_: { deal: null } },
+      peersFilters: {
+        computeUnits_: { deal: null },
+        currentCapacityCommitment_not: null,
+        currentCapacityCommitment_: {
+          startEpoch_lt: currentEpochString,
+        },
+      },
       computeUnitsFilters: { deal: null },
-      // Below is not the guarantee that query will be according to the perPageLimit rule.
-      // It merely shorten the query response for that rule.
-      // TODO: add guarantee into the code. (resolve after on contract is resolved).
-      peersLimit: perPageLimit,
-      computeUnitsLimit: perPageLimit,
+      peersLimit: peersPerPageLimit,
+      computeUnitsLimit: peersPerPageLimit,
       offset: offersOffset,
       peersOffset: peersOffset,
       computeUnitsOffset: computeUnitsOffset,
@@ -89,6 +102,8 @@ export class DealMatcherClient {
     return fetched.offers;
   }
 
+  // It requests indexer page by page until it fullfils the getMatchedOffersIn
+  //  config or until reached the end of potentially matched compute units.
   async getMatchedOffers(
     getMatchedOffersIn: GetMatchedOffersIn,
   ): Promise<GetMatchedOffersOut> {
@@ -101,11 +116,6 @@ export class DealMatcherClient {
       "[getMatchedOffers] Try to find matched offers with the next deal configuration:",
     );
     console.info(JSON.stringify(getMatchedOffersIn, null, 2));
-
-    // TODO.
-    console.warn(
-      `maxWorkersPerProvider = ${maxWorkersPerProvider} currently ignored.`,
-    );
 
     if (targetWorkerSlotToMatch > this.MAX_PER_PAGE) {
       console.warn(
@@ -134,14 +144,21 @@ export class DealMatcherClient {
         computeUnitsLastPageReached
       )
     ) {
-      // Request page, but remember about indexer limit.
-      let perPageLimit = targetWorkerSlotToMatch;
-      if (targetWorkerSlotToMatch > this.MAX_PER_PAGE) {
-        perPageLimit = this.MAX_PER_PAGE;
+      // Request page as big as allowed (remember about indexer limit).
+      // Shortens the query response for that rule as additional query size optimisation.
+      let offersPerPageLimit = targetWorkerSlotToMatch;
+      if (offersPerPageLimit > this.MAX_PER_PAGE) {
+        offersPerPageLimit = this.MAX_PER_PAGE;
+      }
+      let peersPerPageLimit = maxWorkersPerProvider;
+      // Request page of peers and CUs as big as allowed (remember about indexer limit).
+      if (peersPerPageLimit > this.MAX_PER_PAGE) {
+        peersPerPageLimit = this.MAX_PER_PAGE;
       }
       const offers = await this._getMatchedOffersPage(
         getMatchedOffersIn,
-        perPageLimit,
+        offersPerPageLimit,
+        peersPerPageLimit,
         offersOffset,
         peersOffset,
         computeUnitsOffset,
@@ -152,7 +169,8 @@ export class DealMatcherClient {
         break;
       }
 
-      // Analise fetched data.
+      // Analise fetched data to understand if we need to fetch next page and what
+      //  params {offset, ...} to use for the next page.
       for (const offer of offers) {
         // Get the offer cursor to save compute units accordingly.
         let offerCursor = 0;
@@ -198,7 +216,7 @@ export class DealMatcherClient {
             }
 
             // Check if we're still seeking for free compute units.
-            // If yes - early return.
+            // If already found all - early return.
             if (computeUnitsMatchedTotal == targetWorkerSlotToMatch) {
               matchedComputeUnitsData.fulfilled = true;
               return matchedComputeUnitsData;
@@ -209,12 +227,12 @@ export class DealMatcherClient {
           if (peerComputeUnits.length < this.MAX_PER_PAGE) {
             computeUnitsLastPageReached = true;
           } else {
-            // Prepare to fetch next peer page.
+            // Prepare to fetch next CU page.
             computeUnitsOffset += this.MAX_PER_PAGE;
           }
         }
 
-        // Only we reached the end for the compute units, we check the end for the peers.
+        // Only if we reaches the end for the compute units, we check the end for the peers.
         if (computeUnitsLastPageReached) {
           // Have we reached the end for the peer?
           if (peers.length < this.MAX_PER_PAGE) {
@@ -228,7 +246,7 @@ export class DealMatcherClient {
         }
       }
 
-      // Only we reached the end for the peer, we check the end for the offer.
+      // Only if we reaches the end for the peer, we check the end for the offer.
       if (peersLastPageReached) {
         // Have we reached the end of offers?
         if (offers.length < this.MAX_PER_PAGE) {
@@ -257,7 +275,8 @@ export class DealMatcherClient {
 
   /**
    * Get compute units and their offers to match provided DealId (address).
-   * Notice, current structure should match matchDeal() contract arguments.
+   * Notice, current structure should match matchDeal(..., offers, computeUnits)
+   *  contract arguments.
    *
    * 1. Fetches the deal and its configuration from the Indexer backend
    * 2. Scraps compute units (page by page) until one of the conditions:
@@ -265,11 +284,20 @@ export class DealMatcherClient {
    * - all target compute units found.
    */
   async getMatchedOffersByDealId(dealId: string): Promise<GetMatchedOffersOut> {
-    const { deal } = await this._indexerClient.getDeal({
+    const { deal, _meta, graphNetworks } = await this._indexerClient.getDeal({
       id: dealId.toLowerCase(),
     });
     if (!deal) {
       throw new DealNotFoundError(dealId);
+    }
+    if (
+      graphNetworks.length == 0 ||
+      graphNetworks[0]?.coreEpochDuration == null ||
+      _meta?.block.timestamp == null
+    ) {
+      throw new Error(
+        `Inconsistent states of the Subgraph: server error. Retry later.`,
+      );
     }
     const alreadyMatchedComputeUnits = deal.addedComputeUnits?.length ?? 0;
     const targetWorkerToMath = deal.targetWorkers - alreadyMatchedComputeUnits;
@@ -290,6 +318,7 @@ export class DealMatcherClient {
       targetWorkerSlotToMatch: targetWorkerToMath,
       minWorkersToMatch: minWorkersToMatch,
       maxWorkersPerProvider: deal.maxWorkersPerProvider,
+      currentEpoch: _meta.block.timestamp / graphNetworks[0].coreEpochDuration,
     });
   }
 }

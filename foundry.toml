@@ -18,10 +18,8 @@ optimizer_runs = 0 # TODO: add
 
 [rpc_endpoints]
 local = "http://0.0.0.0:8545"
-local-ipc = "http://0.0.0.0:8545"
+arbutrum = "http://0.0.0.0:8545"
 stage = "https://rpc.ankr.com/polygon_mumbai"
 testnet = "https://rpc.ankr.com/polygon_mumbai"
 kras = "https://rpc.ankr.com/polygon_mumbai"
 mumbai = "https://rpc.ankr.com/polygon_mumbai"
-ipcsubnet = "http://139.162.187.214:8545"
-calibration = "https://api.calibration.node.glif.io/rpc/v1"

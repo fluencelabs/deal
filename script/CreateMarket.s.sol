@@ -75,7 +75,6 @@ contract CreateMarket is Depoyments, Script {
 
     function _createDeals(
         uint256 dealCount,
-        uint256 startMinWorkers,
         uint256 startTargetWorkers,
         uint256 startMaxWorkerPerProvider,
         uint256 pricePerWorkerEpoch,
@@ -96,7 +95,15 @@ contract CreateMarket is Depoyments, Script {
 
             CIDV1 memory appCID = CIDV1({prefixes: 0x12345678, hash: pseudoRandom(abi.encode("dealAppCID", i))});
             IDeal dealCreatedContract = market.deployDeal(
-                appCID, tFLT, newMinWorkers, newTargetWorkers, newMaxWorkerPerProvider, pricePerWorkerEpoch, effectors
+                appCID,
+                tFLT,
+                newMinWorkers,
+                newTargetWorkers,
+                newMaxWorkerPerProvider,
+                pricePerWorkerEpoch,
+                effectors,
+                IConfig.AccessType.NONE,
+                new address[](0)
             );
             createdDeals[i] = address(dealCreatedContract);
         }
@@ -129,13 +136,11 @@ contract CreateMarket is Depoyments, Script {
 
         console.log("Create Deals...");
         uint256 dealCount = 10;
-        uint256 startMinWorkers = 60;
         uint256 startTargetWorkers = 60;
         uint256 startMaxWorkerPerProvider = 3;
 
-        address[] memory createdDeals = _createDeals(
-            dealCount, startMinWorkers, startTargetWorkers, startMaxWorkerPerProvider, minPricePerWorkerEpoch, effectors
-        );
+        address[] memory createdDeals =
+            _createDeals(dealCount, startTargetWorkers, startMaxWorkerPerProvider, minPricePerWorkerEpoch, effectors);
 
         console.log("Created deals:");
         for (uint256 i = 0; i < createdDeals.length; i++) {

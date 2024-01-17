@@ -41,6 +41,7 @@ library DeployDealSystem {
     uint256 public constant DEFAULT_MAX_PROOFS_PER_EPOCH = 5;
     uint256 public constant DEFAULT_WITHDRAW_EPOCHES_AFTER_FAILED = 2;
     uint256 public constant DEFAULT_MAX_FAILED_RATIO = 1;
+    bool public constant IS_WHITELIST_ENABLED = false;
 
     // ------------------ Variables ------------------
     function deployDealSystem() internal returns (Deployment memory deployment) {
@@ -90,7 +91,8 @@ library DeployDealSystem {
                         DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH,
                         DEFAULT_MAX_PROOFS_PER_EPOCH,
                         DEFAULT_WITHDRAW_EPOCHES_AFTER_FAILED,
-                        DEFAULT_MAX_FAILED_RATIO
+                        DEFAULT_MAX_FAILED_RATIO,
+                        IS_WHITELIST_ENABLED
                     )
                 )
             )
