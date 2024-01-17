@@ -234,7 +234,7 @@ describe("#getMatchedOffersByDealId", () => {
         maxWorkerPerProviderDeal,
         pricePerWorkerEpochDeal,
         registeredOffer.effectors,
-        0n,
+        0,
         [],
         // providersAccessType: BigNumberish,
         // providersAccessList: AddressLike[]
