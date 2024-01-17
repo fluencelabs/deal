@@ -99,7 +99,12 @@ contract CapacityCommitmentTest is Test {
         // expect emit CommitmentCreated
         vm.expectEmit(true, true, false, true, address(deployment.capacity));
         emit CommitmentCreated(
-            peerId, commitmentId, ccDuration, ccDelegator, rewardCCDelegationRate, deployment.capacity.fltCollateralPerUnit()
+            peerId,
+            commitmentId,
+            ccDuration,
+            ccDelegator,
+            rewardCCDelegationRate,
+            deployment.capacity.fltCollateralPerUnit()
         );
 
         // call createCapacityCommitment
@@ -142,7 +147,9 @@ contract CapacityCommitmentTest is Test {
         emit CollateralDeposited(commitmentId, amount);
 
         vm.expectEmit(true, true, true, true, address(deployment.capacity));
-        emit CommitmentActivated(peerId, commitmentId, currentEpoch + 1, currentEpoch + 1 + ccDuration, registerPeers[0].unitIds);
+        emit CommitmentActivated(
+            peerId, commitmentId, currentEpoch + 1, currentEpoch + 1 + ccDuration, registerPeers[0].unitIds
+        );
 
         deployment.capacity.depositCollateral(commitmentId);
         vm.stopPrank();
@@ -171,9 +178,6 @@ contract CapacityCommitmentTest is Test {
 
         (bytes32 commitmentId,) = _createAndDepositCapacityCommitment(peerId, unitCount);
 
-        bytes32 localK = keccak256(abi.encodePacked("proof"));
-        bytes32 h = keccak256(abi.encodePacked("h"));
-
         StdCheats.skip(uint256(deployment.core.epochDuration()));
 
         vm.startPrank(peerOwner);
@@ -185,18 +189,8 @@ contract CapacityCommitmentTest is Test {
         vm.expectEmit(true, true, true, false, address(deployment.capacity));
         emit ProofSubmitted(commitmentId, unitId, globalUnitNonce, localUnitNonce);
 
-        // vm.mockCall(
-        //     address(Actor.CALL_ACTOR_ID),
-        //     abi.encode(
-        //         uint64(RandomXActor.RunRandomX),
-        //         0,
-        //         Actor.DEFAULT_FLAG,
-        //         Misc.CBOR_CODEC,
-        //         RandomXActor.serializeRandomXParameters(globalUnitNonce.toBytes(), localUnitNonce.toBytes()),
-        //         RandomXActor.ActorID
-        //     ),
-        //     abi.encodePacked(bytes1(0xC2), bytes1(0x58), bytes1(0x20), targetHash) // CBOR bytes32
-        // );
+        //TODO: vm mock not working here :(
+        vm.etch(address(Actor.CALL_ACTOR_ID), address(new MockActorCallActorPrecompile(targetHash)).code);
 
         deployment.capacity.submitProof(unitId, globalUnitNonce, localUnitNonce, targetHash);
 
@@ -204,33 +198,37 @@ contract CapacityCommitmentTest is Test {
     }
 
     function test_RewardAfterSubmitProofs() public {
-        // bytes32 peerId = registerPeers[0].peerId;
-        // uint256 unitCount = registerPeers[0].unitIds.length;
-        // address peerOwner = registerPeers[0].owner;
-        // bytes32 unitId = registerPeers[0].unitIds[0];
+        bytes32 peerId = registerPeers[0].peerId;
+        uint256 unitCount = registerPeers[0].unitIds.length;
+        address peerOwner = registerPeers[0].owner;
+        bytes32 unitId = registerPeers[0].unitIds[0];
 
-        // (bytes32 commitmentId,) = _createAndDepositCapacityCommitment(peerId, unitCount);
+        (bytes32 commitmentId,) = _createAndDepositCapacityCommitment(peerId, unitCount);
 
-        // bytes32 localK = keccak256(abi.encodePacked("proof"));
-        // bytes32 h = keccak256(abi.encodePacked("h"));
+        // warp to next epoch
+        StdCheats.skip(deployment.core.epochDuration());
 
-        // // warp to next epoch
-        // StdCheats.skip(deployment.core.epochDuration());
+        bytes32 targetHash = bytes32(uint256(deployment.capacity.difficulty()) - 1);
+        //TODO: vm mock not working here :(
+        vm.etch(address(Actor.CALL_ACTOR_ID), address(new MockActorCallActorPrecompile(targetHash)).code);
 
-        // vm.startPrank(peerOwner);
-        // uint256 minRequiredProofsPerEpoch = deployment.capacity.minRequierdProofsPerEpoch();
-        // for (uint256 i = 0; i < minRequiredProofsPerEpoch; i++) {
-        //     vm.expectEmit(true, true, true, false, address(deployment.capacity));
-        //     emit ProofSubmitted(commitmentId, unitId);
+        vm.startPrank(peerOwner);
+        uint256 minRequiredProofsPerEpoch = deployment.capacity.minRequierdProofsPerEpoch();
+        for (uint256 i = 0; i < minRequiredProofsPerEpoch; i++) {
+            bytes32 globalUnitNonce = keccak256(abi.encodePacked(deployment.capacity.getGlobalNonce(), i, unitId));
+            bytes32 localUnitNonce = keccak256(abi.encodePacked("localUnitNonce", i));
 
-        //     deployment.capacity.submitProof(unitId, localK, h);
-        // }
+            vm.expectEmit(true, true, true, false, address(deployment.capacity));
+            emit ProofSubmitted(commitmentId, unitId, globalUnitNonce, localUnitNonce);
 
-        // StdCheats.skip(deployment.core.epochDuration());
+            deployment.capacity.submitProof(unitId, globalUnitNonce, localUnitNonce, targetHash);
+        }
 
-        // assertGe(deployment.capacity.totalRewards(commitmentId), 0, "TotalRewards mismatch");
+        StdCheats.skip(deployment.core.epochDuration());
 
-        // vm.stopPrank();
+        assertGe(deployment.capacity.totalRewards(commitmentId), 0, "TotalRewards mismatch");
+
+        vm.stopPrank();
     }
 
     // ------------------ Internals ------------------
@@ -257,5 +255,24 @@ contract CapacityCommitmentTest is Test {
         deployment.tFLT.approve(address(deployment.capacity), unitCount * deployment.capacity.fltCollateralPerUnit());
         deployment.capacity.depositCollateral(commitmentId);
         vm.stopPrank();
+    }
+}
+
+contract MockActorCallActorPrecompile {
+    bytes32 immutable targetHash;
+
+    fallback() external {
+        bytes memory cborEncoded = abi.encodePacked(bytes1(0x81), bytes1(0xC2), bytes1(0x58), bytes1(0x20), targetHash);
+
+        bytes memory ret = abi.encode(int256(0), uint64(Misc.CBOR_CODEC), cborEncoded);
+        uint256 length = ret.length;
+
+        assembly {
+            return(add(ret, 0x20), length)
+        }
+    }
+
+    constructor(bytes32 targetHash_) {
+        targetHash = targetHash_;
     }
 }

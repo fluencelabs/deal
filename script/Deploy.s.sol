@@ -126,7 +126,7 @@ contract DeployContracts is Depoyments, Script {
     }
 
     // ------------------ Internal functions ------------------
-    function _loadENV() internal returns (ENV memory) {
+    function _loadENV() internal view returns (ENV memory) {
         uint256 chainId = block.chainid;
         uint256 epochDuration = vm.envOr("EPOCH_DURATION", DEFAULT_EPOCH_DURATION);
         uint256 fltPice = vm.envOr("FLT_PRICE", DEFAULT_FLT_PRICE);
