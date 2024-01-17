@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+  chain-rpc:
+    image: docker.fluence.dev/chain-rpc:main-4b53776-1043-1
+    ports:
+      - 8545:8545
+  chain-deploy-script:
+    image: docker.fluence.dev/chain-deploy-script:main-4b53776-1043-1
+    environment:
+      CHAIN_RPC_URL: http://chain-rpc:8545
+    depends_on:
+      - chain-rpc
