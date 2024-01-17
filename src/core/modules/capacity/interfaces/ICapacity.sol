@@ -93,7 +93,8 @@ interface ICapacity is ICapacityConst {
         uint256 maxFailedRatio_,
         bool isWhitelistEnabled_,
         bytes32 initGlobalNonce_,
-        bytes32 difficulty_
+        bytes32 difficulty_,
+        address randomXProxy_
     ) external;
 
     // ------------------ Views ------------------

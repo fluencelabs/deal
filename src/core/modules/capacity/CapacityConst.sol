@@ -44,6 +44,7 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
         bytes32 nextDifficulty;
         uint256 difficultyChangeEpoch;
         RewardPoolPerEpoch[] rewardPoolPerEpoches;
+        address randomXProxy;
     }
 
     ConstStorage private _storage;
@@ -72,7 +73,8 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
         uint256 maxProofsPerEpoch_,
         uint256 withdrawEpochesAfterFailed_,
         uint256 maxFailedRatio_,
-        bytes32 difficulty_
+        bytes32 difficulty_,
+        address randomXProxy_
     ) internal onlyInitializing {
         ConstStorage storage constantsStorage = _getConstStorage();
 
@@ -89,6 +91,7 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
         constantsStorage.maxFailedRatio = maxFailedRatio_;
         constantsStorage.difficulty = difficulty_;
         constantsStorage.nextDifficulty = difficulty_;
+        constantsStorage.randomXProxy = randomXProxy_;
 
         setFLTPrice(fltPrice_);
     }
@@ -162,6 +165,10 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
         }
 
         return _getConstStorage().difficulty;
+    }
+
+    function randomXProxy() public view returns (address) {
+        return _getConstStorage().randomXProxy;
     }
 
     function getRewardPool(uint256 epoch) public view returns (uint256) {

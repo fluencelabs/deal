@@ -10,7 +10,6 @@ import "src/core/Core.sol";
 import "src/core/modules/capacity/Capacity.sol";
 import "src/core/modules/capacity/interfaces/ICapacity.sol";
 import "src/utils/BytesConverter.sol";
-import "src/utils/RandomXActor.sol";
 import "test/utils/DeployDealSystem.sol";
 import "src/core/modules/market/Market.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";

@@ -2,21 +2,19 @@
 
 pragma solidity ^0.8.19;
 
-import "forge-std/console.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
 import "src/deal/base/Types.sol";
-import "src/deal/interfaces/IDeal.sol";
-import "src/utils/OwnableUpgradableDiamond.sol";
-import "src/utils/RandomXActor.sol";
+import "src/utils/RandomXProxy.sol";
 import "src/utils/Whitelist.sol";
+import "src/utils/BytesConverter.sol";
 import "./interfaces/ICapacity.sol";
 import "./CapacityConst.sol";
 
 contract Capacity is CapacityConst, Whitelist, UUPSUpgradeable, ICapacity {
     using SafeERC20 for IERC20;
+    using BytesConverter for bytes;
 
     // #region ------------------ Types ------------------
     struct UnitProofsInfo {
@@ -83,7 +81,8 @@ contract Capacity is CapacityConst, Whitelist, UUPSUpgradeable, ICapacity {
         uint256 maxFailedRatio_,
         bool isWhitelistEnabled_,
         bytes32 initGlobalNonce_,
-        bytes32 difficulty_
+        bytes32 difficulty_,
+        address randomXProxy_
     ) external initializer {
         __Ownable_init(msg.sender);
         __Whitelist_init(isWhitelistEnabled_);
@@ -100,7 +99,8 @@ contract Capacity is CapacityConst, Whitelist, UUPSUpgradeable, ICapacity {
             maxProofsPerEpoch_,
             withdrawEpochesAfterFailed_,
             maxFailedRatio_,
-            difficulty_
+            difficulty_,
+            randomXProxy_
         );
 
         CommitmentStorage storage s = _getCommitmentStorage();
@@ -412,11 +412,6 @@ contract Capacity is CapacityConst, Whitelist, UUPSUpgradeable, ICapacity {
         require(!s.isProofSubmittedByUnit[globalUnitNonce_][localUnitNonce], "Proof is already submitted for this unit");
         s.isProofSubmittedByUnit[globalUnitNonce_][localUnitNonce] = true;
 
-        // check proof
-        bytes32 randomXTargetHash = RandomXActor.run(globalUnitNonce_, localUnitNonce);
-        require(randomXTargetHash == targetHash, "Proof is not valid");
-        require(targetHash <= difficulty(), "Proof is bigger than difficulty");
-
         // save info about proof
         UnitProofsInfo storage unitProofsInfo = cc.unitProofsInfoByUnit[unitId];
         uint256 unitProofsCount = unitProofsInfo.proofsCountByEpoch[epoch];
@@ -441,6 +436,14 @@ contract Capacity is CapacityConst, Whitelist, UUPSUpgradeable, ICapacity {
         }
 
         unitProofsInfo.proofsCountByEpoch[epoch] = unitProofsCount;
+
+        // check proof
+        (bool success, bytes memory randomXTargetHash) = randomXProxy().delegatecall(
+            abi.encodeWithSelector(RandomXProxy.run.selector, globalUnitNonce_, localUnitNonce)
+        );
+
+        require(randomXTargetHash.toBytes32() == targetHash, "Proof is not valid");
+        require(targetHash <= difficulty(), "Proof is bigger than difficulty");
 
         emit ProofSubmitted(commitmentId, unitId, globalUnitNonce, localUnitNonce);
     }

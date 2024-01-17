@@ -8,7 +8,7 @@ import "filecoin-solidity/v0.8/utils/Actor.sol";
 import "filecoin-solidity/v0.8/utils/CborDecode.sol";
 import "src/utils/BytesConverter.sol";
 
-library RandomXActor {
+contract RandomXProxy {
     using CBOR for CBOR.CBORBuffer;
     using BytesConverter for bytes32;
     using BytesConverter for bytes;
@@ -19,17 +19,17 @@ library RandomXActor {
     /// @notice runs the Fluence actor which runs RandomX with provided K and H and returns it's result.
     /// @param k the K parameter (aka "global" nonce) for RandomX, could up to 60 bytes.
     /// @param h the H parameter (aka "local" nonce) for RandomX, could be an arbitrary string.
-    function run(bytes32 k, bytes32 h) internal returns (bytes32) {
-        bytes memory se_request = serializeRandomXParameters(k.toBytes(), h.toBytes());
+    function run(bytes32 k, bytes32 h) public returns (bytes32) {
+        bytes memory se_request = _serializeRandomXParameters(k.toBytes(), h.toBytes());
 
         (int256 ret_code, bytes memory actor_result) =
             Actor.callByID(ActorID, RunRandomX, Misc.CBOR_CODEC, se_request, 0, false);
         require(ret_code == 0, "Fluence actor failed");
 
-        return deserializeActorResult(actor_result).toBytes32();
+        return _deserializeActorResult(actor_result).toBytes32();
     }
 
-    function serializeRandomXParameters(bytes memory k, bytes memory h) internal pure returns (bytes memory) {
+    function _serializeRandomXParameters(bytes memory k, bytes memory h) private pure returns (bytes memory) {
         uint256 capacity = 0;
 
         capacity += Misc.getPrefixSize(2);
@@ -44,7 +44,7 @@ library RandomXActor {
         return buf.data();
     }
 
-    function deserializeActorResult(bytes memory actor_result) internal pure returns (bytes memory) {
+    function _deserializeActorResult(bytes memory actor_result) private pure returns (bytes memory) {
         (uint256 len, uint256 byteIdx) = CBORDecoder.readFixedArray(actor_result, 0);
         require(len == 1, "There should be only one element");
 

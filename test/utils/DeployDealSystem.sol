@@ -97,7 +97,8 @@ library DeployDealSystem {
                         DEFAULT_MAX_FAILED_RATIO,
                         DEFAULT_IS_WHITELIST_ENABLED,
                         DEFAULT_INIT_GLOBAL_NONCE,
-                        DEFAULT_DIFFICULTY_TARGET
+                        DEFAULT_DIFFICULTY_TARGET,
+                        new RandomXProxy()
                     )
                 )
             )

@@ -59,6 +59,8 @@ interface ICapacityConst {
 
     function difficulty() external view returns (bytes32);
 
+    function randomXProxy() external view returns (address);
+
     function getRewardPool(uint256 epoch) external view returns (uint256);
     // #endregion ------------------ External View Functions ------------------
 
