@@ -1,6 +1,30 @@
 version: "3"
 
 services:
+  ipfs:
+    image: ipfs/kubo
+    ports:
+      - 5001:5001
+      - 4001:4001
+    environment:
+      IPFS_PROFILE: server
+    volumes:
+      - ipfs:/data/ipfs
+  postgres:
+    image: postgres:14
+    ports:
+      - 5432:5432
+    command:
+      - postgres
+      - -cshared_preload_libraries=pg_stat_statements
+    environment:
+      POSTGRES_USER: graph-node
+      POSTGRES_PASSWORD: let-me-in
+      POSTGRES_DB: graph-node
+      PGDATA: /var/lib/postgresql/data
+      POSTGRES_INITDB_ARGS: -E UTF8 --locale=C
+    volumes:
+      - postgres:/var/lib/postgresql/data
   chain-rpc:
     image: docker.fluence.dev/chain-rpc:main-4b53776-1043-1
     ports:
@@ -11,3 +35,36 @@ services:
       CHAIN_RPC_URL: http://chain-rpc:8545
     depends_on:
       - chain-rpc
+  graph-node:
+    image: graphprotocol/graph-node:v0.33.0
+    ports:
+      - 8000:8000
+      - 8001:8001
+      - 8020:8020
+      - 8030:8030
+      - 8040:8040
+    depends_on:
+      - ipfs
+      - postgres
+      - chain-rpc
+    environment:
+      postgres_host: postgres
+      postgres_user: graph-node
+      postgres_pass: let-me-in
+      postgres_db: graph-node
+      ipfs: ipfs:5001
+      ethereum: local:http://chain-rpc:8545
+      GRAPH_LOG: info
+      ETHEREUM_REORG_THRESHOLD: 1
+      ETHEREUM_ANCESTOR_COUNT: 1
+  subgraph-deploy-script:
+    image: docker.fluence.dev/subgraph-deploy-script-image:main-4b53776-1043-1
+    environment:
+      GRAPHNODE_URL: http://graph-node:8020
+      IPFS_URL: http://ipfs:5001
+    depends_on:
+      - graph-node
+
+volumes:
+  ipfs: null
+  postgres: null
