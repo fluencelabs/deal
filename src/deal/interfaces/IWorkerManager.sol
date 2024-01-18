@@ -25,4 +25,5 @@ interface IWorkerManager {
     function getComputeUnitCount(address provider) external view returns (uint256);
     function getComputeUnits() external view returns (ComputeUnit[] memory);
     function getWorkerCount() external view returns (uint256);
+    function isComputePeerExist(bytes32 peerId) external view returns (bool);
 }

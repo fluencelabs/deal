@@ -38,6 +38,7 @@ interface ICapacity is ICapacityConst {
     enum CCStatus {
         Active,
         WaitDelegation,
+        WaitStart,
         Inactive,
         Failed,
         Removed

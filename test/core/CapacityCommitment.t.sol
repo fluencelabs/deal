@@ -14,6 +14,7 @@ import "test/utils/DeployDealSystem.sol";
 import "src/core/modules/market/Market.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
 import "test/utils/Random.sol";
+import "forge-std/StdCheats.sol";
 
 contract CapacityCommitmentTest is Test {
     using SafeERC20 for IERC20;
@@ -153,6 +154,8 @@ contract CapacityCommitmentTest is Test {
         deployment.capacity.depositCollateral(commitmentId);
         vm.stopPrank();
 
+        StdCheats.skip(uint256(deployment.core.epochDuration()));
+
         uint256 activeUnitCountAfter = deployment.capacity.activeUnitCount();
         assertEq(activeUnitCountAfter, activeUnitCountBefore + unitCount, "ActiveUnitCount mismatch");
 
@@ -161,10 +164,10 @@ contract CapacityCommitmentTest is Test {
         assertEq(uint256(commitment.status), uint256(ICapacity.CCStatus.Active), "Status mismatch");
         assertEq(commitment.peerId, peerId, "PeerId mismatch");
         assertEq(commitment.collateralPerUnit, deployment.capacity.fltCollateralPerUnit(), "CollateralPerUnit mismatch");
-        assertEq(commitment.endEpoch, deployment.core.currentEpoch() + 1 + ccDuration, "Duration mismatch");
+        assertEq(commitment.endEpoch, deployment.core.currentEpoch() + ccDuration, "Duration mismatch");
         assertEq(commitment.rewardDelegatorRate, rewardCCDelegationRate, "RewardDelegatorRate mismatch");
         assertEq(commitment.delegator, ccDelegator, "Delegator mismatch");
-        assertEq(commitment.startEpoch, deployment.core.currentEpoch() + 1, "StartEpoch mismatch");
+        assertEq(commitment.startEpoch, deployment.core.currentEpoch(), "StartEpoch mismatch");
         assertEq(commitment.failedEpoch, 0, "FailedEpoch mismatch");
         assertEq(commitment.exitedUnitCount, 0, "ExitedUnitCount mismatch");
     }

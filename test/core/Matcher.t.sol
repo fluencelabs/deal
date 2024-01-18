@@ -80,7 +80,7 @@ contract MatcherTest is Test {
         uint256 creationBlock = block.number;
         uint256 pricePerWorkerEpoch = 1 ether;
         uint256 offerCount = 3;
-        uint256 unitCountPerPeer = 2;
+        uint256 unitCountPerPeer = 1;
         uint256 peerCountPerOffer = 3;
         uint256 minWorkers = 1;
         uint256 maxWorkersPerProvider = unitCountPerPeer * peerCountPerOffer * offerCount;
@@ -183,6 +183,7 @@ contract DealMock {
     mapping(bytes32 => address) public computeProviderByUnitId;
     mapping(bytes32 => bytes32) public peerIdByUnitId;
     mapping(address => uint256) public computeUnitCountByProvider;
+    mapping(bytes32 => bool) public isComputePeerExist;
 
     constructor(
         uint256 _pricePerWorkerEpoch,
@@ -214,6 +215,7 @@ contract DealMock {
         unitExists[unitId] = true;
         computeProviderByUnitId[unitId] = computeProvider;
         peerIdByUnitId[unitId] = peerId;
+        isComputePeerExist[peerId] = true;
 
         computeUnitCountByProvider[computeProvider]++;
         computeUnitCount++;

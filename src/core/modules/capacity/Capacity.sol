@@ -122,6 +122,8 @@ contract Capacity is CapacityConst, Whitelist, UUPSUpgradeable, ICapacity {
             return CCStatus.Removed;
         } else if (cc.info.startEpoch == 0) {
             return CCStatus.WaitDelegation;
+        } else if (cc.info.startEpoch > currentEpoch_) {
+            return CCStatus.WaitStart;
         } else if (_isFailed(cc, currentEpoch_)) {
             return CCStatus.Failed;
         } else if (currentEpoch_ >= _expiredEpoch(cc)) {
@@ -442,6 +444,7 @@ contract Capacity is CapacityConst, Whitelist, UUPSUpgradeable, ICapacity {
             abi.encodeWithSelector(RandomXProxy.run.selector, globalUnitNonce_, localUnitNonce)
         );
 
+        require(success, "RandomXProxy.run failed");
         require(randomXTargetHash.toBytes32() == targetHash, "Proof is not valid");
         require(targetHash <= difficulty(), "Proof is bigger than difficulty");
 
