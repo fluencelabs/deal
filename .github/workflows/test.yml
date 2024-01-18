@@ -53,7 +53,7 @@ jobs:
           version: nightly
 
       - name: Restore cached contract artifacts
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         with:
           path: |
             cache
@@ -80,7 +80,7 @@ jobs:
           version: nightly
 
       - name: Restore cached contract artifacts
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         with:
           path: |
             cache
