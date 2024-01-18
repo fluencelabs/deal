@@ -17,9 +17,6 @@ abstract contract Matcher is Offer, IMatcher {
     using SafeERC20 for IERC20;
     using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
 
-    // ----------------- Events -----------------
-    event ComputeUnitMatched(bytes32 indexed peerId, bytes32 unitId, uint256 dealCreationBlock, CIDV1 appCID);
-
     // ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.market.storage.v1.matcher")) - 1);
 
@@ -112,21 +109,20 @@ abstract contract Matcher is Offer, IMatcher {
                     providersAccessType == IConfig.AccessType.WHITELIST
                         && (
                             computeUnit.deal != address(0) || peer.commitmentId == bytes32(0x000000000)
-                                || currentEpoch < capacity.getCommitment(peer.commitmentId).startEpoch
+                                || capacity.getStatus(peer.commitmentId) == ICapacity.CCStatus.Active
                         )
                 ) {
                     continue;
                 }
 
-                // Check if deposit collateral send (and CCStatus.Active? TODO: use status Active).
-                if (currentEpoch < capacity.getCommitment(peer.commitmentId).startEpoch) {
+                if (deal.isComputePeerExist(peerId)) {
                     continue;
                 }
 
                 _mvComputeUnitToDeal(computeUnitId, deal);
 
                 // TODO: only for NOX -- remove in future
-                emit ComputeUnitMatched(peerId, computeUnitId, creationBlock, appCID);
+                emit ComputeUnitMatched(peerId, deal, computeUnitId, creationBlock, appCID);
 
                 computeUnitCountInDealByProvider++;
                 freeWorkerSlotsCurrent--;
