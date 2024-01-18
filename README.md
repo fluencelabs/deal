@@ -2,6 +2,7 @@
 
 This repo consists of 3 main parts:
 
+
 - `contracts` - Foundry (read more https://book.getfoundry.sh/). Generally, repo
   follow structure of Foundry repo.
 - `subgraph` - javascript client to interact with the graph node (read more
