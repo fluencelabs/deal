@@ -23,11 +23,16 @@ interface ICapacity is ICapacityConst {
 
     event CollateralDeposited(bytes32 indexed commitmentId, uint256 totalCollateral);
 
-    event ProofSubmitted(bytes32 indexed commitmentId, bytes32 indexed unitId);
+    event ProofSubmitted(
+        bytes32 indexed commitmentId, bytes32 indexed unitId, bytes32 globalUnitNonce, bytes32 localUnitNonce
+    );
     event RewardWithdrawn(bytes32 indexed commitmentId, uint256 amount);
 
     event UnitDeactivated(bytes32 indexed commitmentId, bytes32 indexed unitId);
     event UnitActivated(bytes32 indexed commitmentId, bytes32 indexed unitId);
+
+    // ------------------ Errors ------------------
+    error TooManyProofs();
 
     // ------------------ Types ------------------
     enum CCStatus {
@@ -86,7 +91,10 @@ interface ICapacity is ICapacityConst {
         uint256 maxProofsPerEpoch_,
         uint256 withdrawEpochesAfterFailed_,
         uint256 maxFailedRatio_,
-        bool isWhitelistEnabled_
+        bool isWhitelistEnabled_,
+        bytes32 initGlobalNonce_,
+        bytes32 difficulty_,
+        address randomXProxy_
     ) external;
 
     // ------------------ Views ------------------
@@ -94,7 +102,7 @@ interface ICapacity is ICapacityConst {
     function getCommitment(bytes32 commitmentId) external view returns (CommitmentView memory);
     function totalRewards(bytes32 commitmentId) external view returns (uint256);
     function unlockedRewards(bytes32 commitmentId) external view returns (uint256);
-    function getK() external view returns (bytes32);
+    function getGlobalNonce() external view returns (bytes32);
 
     // ----------------- Deal Callbacks -----------------
     function onUnitMovedToDeal(bytes32 commitmentId, bytes32 unitId) external;
@@ -107,7 +115,8 @@ interface ICapacity is ICapacityConst {
     function removeCommitment(bytes32 commitmentId) external;
     function finishCommitment(bytes32 commitmentId) external;
     function depositCollateral(bytes32 commitmentId) external;
-    function submitProof(bytes32 unitId, bytes32 localK, bytes32 h) external;
+    function submitProof(bytes32 unitId, bytes32 globalUnitNonce, bytes32 localUnitNonce, bytes32 targetHash)
+        external;
     function commitSnapshot(bytes32 commitmentId) external;
     function removeCUFromCC(bytes32 commitmentId, bytes32[] calldata unitIds) external;
     function withdrawReward(bytes32 commitmentId) external;

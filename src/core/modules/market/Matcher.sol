@@ -65,7 +65,6 @@ abstract contract Matcher is Offer, IMatcher {
         uint256 freeWorkerSlots = deal.targetWorkers() - dealComputeUnitCount;
         uint256 freeWorkerSlotsCurrent = freeWorkerSlots;
         uint256 maxWorkersPerProvider = deal.maxWorkersPerProvider();
-
         CIDV1[] memory effectors = deal.effectors();
 
         CIDV1 memory appCID = deal.appCID();

@@ -2,5 +2,11 @@
     path = lib/openzeppelin-contracts
     url = https://github.com/OpenZeppelin/openzeppelin-contracts
 [submodule "lib/forge-std"]
-    path = lib/forge-std
-    url = https://github.com/foundry-rs/forge-std
+	path = lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "lib/filecoin-solidity"]
+	path = lib/filecoin-solidity
+	url = https://github.com/filecoin-project/filecoin-solidity
+[submodule "lib/solidity-cborutils"]
+	path = lib/solidity-cborutils
+	url = https://github.com/smartcontractkit/solidity-cborutils

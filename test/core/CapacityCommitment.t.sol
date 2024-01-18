@@ -5,9 +5,11 @@ import {Test, console2} from "forge-std/Test.sol";
 import "forge-std/console.sol";
 import "forge-std/Vm.sol";
 import "forge-std/StdCheats.sol";
+import "filecoin-solidity/v0.8/utils/Actor.sol";
 import "src/core/Core.sol";
 import "src/core/modules/capacity/Capacity.sol";
 import "src/core/modules/capacity/interfaces/ICapacity.sol";
+import "src/utils/BytesConverter.sol";
 import "test/utils/DeployDealSystem.sol";
 import "src/core/modules/market/Market.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
@@ -15,6 +17,7 @@ import "test/utils/Random.sol";
 
 contract CapacityCommitmentTest is Test {
     using SafeERC20 for IERC20;
+    using BytesConverter for bytes32;
 
     // ------------------ Events ------------------
     event CommitmentCreated(
@@ -33,7 +36,9 @@ contract CapacityCommitmentTest is Test {
 
     event CollateralDeposited(bytes32 indexed commitmentId, uint256 totalCollateral);
 
-    event ProofSubmitted(bytes32 indexed commitmentId, bytes32 indexed unitId);
+    event ProofSubmitted(
+        bytes32 indexed commitmentId, bytes32 indexed unitId, bytes32 globalUnitNonce, bytes32 localUnitNonce
+    );
     event RewardWithdrawn(bytes32 indexed commitmentId, uint256 amount);
 
     // ------------------ Variables ------------------
@@ -93,7 +98,12 @@ contract CapacityCommitmentTest is Test {
         // expect emit CommitmentCreated
         vm.expectEmit(true, true, false, true, address(deployment.capacity));
         emit CommitmentCreated(
-            peerId, commitmentId, ccDuration, ccDelegator, rewardCCDelegationRate, deployment.capacity.fltCollateralPerUnit()
+            peerId,
+            commitmentId,
+            ccDuration,
+            ccDelegator,
+            rewardCCDelegationRate,
+            deployment.capacity.fltCollateralPerUnit()
         );
 
         // call createCapacityCommitment
@@ -136,7 +146,9 @@ contract CapacityCommitmentTest is Test {
         emit CollateralDeposited(commitmentId, amount);
 
         vm.expectEmit(true, true, true, true, address(deployment.capacity));
-        emit CommitmentActivated(peerId, commitmentId, currentEpoch + 1, currentEpoch + 1 + ccDuration, registerPeers[0].unitIds);
+        emit CommitmentActivated(
+            peerId, commitmentId, currentEpoch + 1, currentEpoch + 1 + ccDuration, registerPeers[0].unitIds
+        );
 
         deployment.capacity.depositCollateral(commitmentId);
         vm.stopPrank();
@@ -165,17 +177,21 @@ contract CapacityCommitmentTest is Test {
 
         (bytes32 commitmentId,) = _createAndDepositCapacityCommitment(peerId, unitCount);
 
-        bytes32 localK = keccak256(abi.encodePacked("proof"));
-        bytes32 h = keccak256(abi.encodePacked("h"));
-
         StdCheats.skip(uint256(deployment.core.epochDuration()));
 
         vm.startPrank(peerOwner);
 
-        vm.expectEmit(true, true, true, false, address(deployment.capacity));
-        emit ProofSubmitted(commitmentId, unitId);
+        bytes32 globalUnitNonce = keccak256(abi.encodePacked(deployment.capacity.getGlobalNonce(), unitId));
+        bytes32 localUnitNonce = keccak256(abi.encodePacked("localUnitNonce"));
+        bytes32 targetHash = bytes32(uint256(deployment.capacity.difficulty()) - 1);
 
-        deployment.capacity.submitProof(unitId, localK, h);
+        vm.expectEmit(true, true, true, false, address(deployment.capacity));
+        emit ProofSubmitted(commitmentId, unitId, globalUnitNonce, localUnitNonce);
+
+        //TODO: vm mock not working here :(
+        vm.etch(address(Actor.CALL_ACTOR_ID), address(new MockActorCallActorPrecompile(targetHash)).code);
+
+        deployment.capacity.submitProof(unitId, globalUnitNonce, localUnitNonce, targetHash);
 
         vm.stopPrank();
     }
@@ -188,19 +204,23 @@ contract CapacityCommitmentTest is Test {
 
         (bytes32 commitmentId,) = _createAndDepositCapacityCommitment(peerId, unitCount);
 
-        bytes32 localK = keccak256(abi.encodePacked("proof"));
-        bytes32 h = keccak256(abi.encodePacked("h"));
-
         // warp to next epoch
         StdCheats.skip(deployment.core.epochDuration());
+
+        bytes32 targetHash = bytes32(uint256(deployment.capacity.difficulty()) - 1);
+        //TODO: vm mock not working here :(
+        vm.etch(address(Actor.CALL_ACTOR_ID), address(new MockActorCallActorPrecompile(targetHash)).code);
 
         vm.startPrank(peerOwner);
         uint256 minRequiredProofsPerEpoch = deployment.capacity.minRequierdProofsPerEpoch();
         for (uint256 i = 0; i < minRequiredProofsPerEpoch; i++) {
-            vm.expectEmit(true, true, true, false, address(deployment.capacity));
-            emit ProofSubmitted(commitmentId, unitId);
+            bytes32 globalUnitNonce = keccak256(abi.encodePacked(deployment.capacity.getGlobalNonce(), i, unitId));
+            bytes32 localUnitNonce = keccak256(abi.encodePacked("localUnitNonce", i));
 
-            deployment.capacity.submitProof(unitId, localK, h);
+            vm.expectEmit(true, true, true, false, address(deployment.capacity));
+            emit ProofSubmitted(commitmentId, unitId, globalUnitNonce, localUnitNonce);
+
+            deployment.capacity.submitProof(unitId, globalUnitNonce, localUnitNonce, targetHash);
         }
 
         StdCheats.skip(deployment.core.epochDuration());
@@ -234,5 +254,24 @@ contract CapacityCommitmentTest is Test {
         deployment.tFLT.approve(address(deployment.capacity), unitCount * deployment.capacity.fltCollateralPerUnit());
         deployment.capacity.depositCollateral(commitmentId);
         vm.stopPrank();
+    }
+}
+
+contract MockActorCallActorPrecompile {
+    bytes32 immutable targetHash;
+
+    fallback() external {
+        bytes memory cborEncoded = abi.encodePacked(bytes1(0x81), bytes1(0xC2), bytes1(0x58), bytes1(0x20), targetHash);
+
+        bytes memory ret = abi.encode(int256(0), uint64(Misc.CBOR_CODEC), cborEncoded);
+        uint256 length = ret.length;
+
+        assembly {
+            return(add(ret, 0x20), length)
+        }
+    }
+
+    constructor(bytes32 targetHash_) {
+        targetHash = targetHash_;
     }
 }
