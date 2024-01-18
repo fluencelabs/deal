@@ -26,11 +26,11 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
   chain-rpc:
-    image: docker.fluence.dev/chain-rpc:main-4b53776-1043-1
+    image: docker.fluence.dev/chain-rpc:CHAIN-282-27384f1-1056-1
     ports:
       - 8545:8545
   chain-deploy-script:
-    image: docker.fluence.dev/chain-deploy-script:main-4b53776-1043-1
+    image: docker.fluence.dev/chain-deploy-script:CHAIN-282-27384f1-1056-1
     environment:
       CHAIN_RPC_URL: http://chain-rpc:8545
     depends_on:
@@ -58,7 +58,7 @@ services:
       ETHEREUM_REORG_THRESHOLD: 1
       ETHEREUM_ANCESTOR_COUNT: 1
   subgraph-deploy-script:
-    image: docker.fluence.dev/subgraph-deploy-script-image:main-4b53776-1043-1
+    image: docker.fluence.dev/subgraph-deploy-script-image:CHAIN-282-27384f1-1056-1
     environment:
       GRAPHNODE_URL: http://graph-node:8020
       IPFS_URL: http://ipfs:5001
