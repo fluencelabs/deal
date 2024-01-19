@@ -3,13 +3,14 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/utils/Multicall.sol";
 import "src/core/interfaces/ICore.sol";
 import "src/deal/interfaces/IDeal.sol";
 import "./Matcher.sol";
 import "./DealFactory.sol";
 import "./interfaces/IMarket.sol";
 
-contract Market is UUPSUpgradeable, DealFactory, Matcher, IMarket {
+contract Market is UUPSUpgradeable, Multicall, DealFactory, Matcher, IMarket {
     // ------------------ Initializer ------------------
     constructor(IERC20 fluenceToken_, ICore core_) BaseModule(fluenceToken_, core_) {}
 
