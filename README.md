@@ -68,7 +68,7 @@ $ make build-contracts
 ### Build only in npm packages
 
 ```shell
-$ make  build-npms
+$ make build-npms
 ```
 
 ## Start Local Subgraph
