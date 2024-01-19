@@ -5,6 +5,7 @@ pragma solidity ^0.8.19;
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
+import "@openzeppelin/contracts/utils/Multicall.sol";
 import "src/core/interfaces/ICore.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
 import "src/utils/OwnableUpgradableDiamond.sol";
@@ -13,7 +14,7 @@ import "./WorkerManager.sol";
 import "./interfaces/IDeal.sol";
 import "./interfaces/IConfig.sol";
 
-contract Deal is UUPSUpgradeable, WorkerManager, IDeal {
+contract Deal is UUPSUpgradeable, Multicall, WorkerManager, IDeal {
     using BitMaps for BitMaps.BitMap;
     using SafeERC20 for IERC20;
     using DealStorageUtils for DealStorageUtils.Balance;
