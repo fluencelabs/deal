@@ -65,6 +65,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-${{ matrix.arch }}-contracts-
 
+      - name: Invalidate cache
+        if: contains(github.event.pull_request.labels.*.name, 'clean-cache')
+        run: forge clean
+
+      - name: Remove "clean-cache" label
+        if: contains(github.event.pull_request.labels.*.name, 'clean-cache')
+        uses: buildsville/add-remove-label@v2.0.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          labels: clean-cache
+          type: remove
+
       - name: Build contracts
         run: make build-contracts
 
