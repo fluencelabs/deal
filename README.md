@@ -9,6 +9,7 @@ This repo consists of 3 main parts:
   https://thegraph.com/docs/quick-start)
 - `ts-client` - npm package from contract developers to interact with contracts
 
+
 To access to the general points of the each part in the repo root **makefile**
 is presented. Below are main commands of the makefile.
 
