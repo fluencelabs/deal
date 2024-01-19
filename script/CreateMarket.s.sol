@@ -117,7 +117,7 @@ contract CreateMarket is Depoyments, Script {
             effectors[i] = CIDV1({prefixes: 0x12345678, hash: effectorSuffixes[i]});
         }
 
-        uint256 offerCount = 10;
+        uint256 offerCount = 12;
         uint256 peerCountPerOffer = 3;
         uint256 unitCountPerPeer = 2;
         uint256 minPricePerWorkerEpoch = 0.01 ether;
