@@ -1,16 +1,16 @@
 {
   "mumbai": {
     "Market": {
-      "address": "0x748aF34d1781247bc2764FbBc417Aeb314968C51",
-      "startBlock": 44843458
+      "address": "0x4bbbDFde629ddBA9413DE6B471efc0a0587f2E50",
+      "startBlock": 44915716
     },
     "Capacity": {
-      "address": "0xBca4066fe7E14084e0EA7CF2d277fb578284756b",
-      "startBlock": 44843458
+      "address": "0x526ec98827509Cd5479618B5afFf076ae45DdB6E",
+      "startBlock": 44915716
     },
     "Core": {
-      "address": "0x59d2FAE0071151A9ee9dc041b0051281849356Ac",
-      "startBlock": 44843458
+      "address": "0xc1ed53ec56204928C509638a1ecADC7E0D5b4A22",
+      "startBlock": 44915716
     }
   }
 }
