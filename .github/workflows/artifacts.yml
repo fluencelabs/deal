@@ -50,6 +50,10 @@ jobs:
           ref: ${{ inputs.ref }}
           submodules: recursive
 
+      - name: Get PR labels
+        id: labels
+        uses: joerick/pr-labels-action@v1.0.9
+
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
@@ -64,6 +68,21 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.arch }}-contracts-${{ hashFiles('foundry.toml', 'src/**/*') }}
           restore-keys: |
             ${{ runner.os }}-${{ matrix.arch }}-contracts-
+
+      - name: Invalidate cache
+        if: contains(github.event.pull_request.labels.*.name, 'cache-clean')
+        run: forge clean
+
+      - name: Remove "cache-clean" label
+        if: contains(github.event.pull_request.labels.*.name, 'cache-clean')
+        uses: buildsville/add-remove-label@v2.0.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          labels: cache-clean
+          type: remove
+
+      - name: Build contracts
+        run: make build-contracts
 
       - name: Build contracts
         run: make build-contracts
