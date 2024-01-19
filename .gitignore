@@ -4,6 +4,7 @@ out/
 
 # Ignores development broadcast logs
 /broadcast
+/deployments/local.json
 
 # Docs
 docs/
