@@ -11,7 +11,6 @@ import "src/deal/base/Types.sol";
 import "src/deal/interfaces/IDeal.sol";
 import "src/core/modules/BaseModule.sol";
 import "./interfaces/IOffer.sol";
-import "forge-std/console.sol";
 
 abstract contract Offer is BaseModule, IOffer {
     using SafeERC20 for IERC20;
@@ -25,16 +24,18 @@ abstract contract Offer is BaseModule, IOffer {
     struct Effectors {
         mapping(bytes32 => bool) hasEffector;
     }
-
     // ------------------ Storage ------------------
+
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.market.storage.v1")) - 1);
 
     struct OfferStorage {
+        mapping(address => ProviderInfo) providers;
         mapping(bytes32 => Offer) offers;
         mapping(bytes32 => ComputePeer) peers;
         mapping(bytes32 => ComputeUnit) computeUnits;
         mapping(bytes32 => Effectors) effectorsByOfferId;
         mapping(bytes32 => EnumerableSet.Bytes32Set) computeUnitIdsByPeerId;
+        mapping(bytes32 => EffectorInfo) effectorInfoById;
     }
 
     OfferStorage private _storage;
@@ -47,6 +48,10 @@ abstract contract Offer is BaseModule, IOffer {
     }
 
     // ----------------- Public View -----------------
+    function getProviderInfo(address provider) external view returns (ProviderInfo memory) {
+        return _getOfferStorage().providers[provider];
+    }
+
     function getOffer(bytes32 offerId) public view returns (Offer memory) {
         Offer storage offer = _getOfferStorage().offers[offerId];
         require(offer.provider != address(0x00), "Offer doesn't exist");
@@ -87,8 +92,20 @@ abstract contract Offer is BaseModule, IOffer {
         return units;
     }
 
+    function getEffectorInfo(CIDV1 calldata id) public view returns (EffectorInfo memory) {
+        return _getOfferStorage().effectorInfoById[_hashEffectorCID(id)];
+    }
+
     // ----------------- Public Mutable -----------------
     //Register offer and units
+    function setProviderInfo(string calldata name, CIDV1 calldata metadata) external {
+        require(bytes(name).length > 0, "Name should be not empty");
+
+        _getOfferStorage().providers[msg.sender] = ProviderInfo({name: name, metadata: metadata});
+
+        emit ProviderInfoUpdated(msg.sender, name, metadata);
+    }
+
     function registerMarketOffer(
         uint256 minPricePerWorkerEpoch,
         address paymentToken,
@@ -100,6 +117,7 @@ abstract contract Offer is BaseModule, IOffer {
         address provider = msg.sender;
         bytes32 offerId = keccak256(abi.encodePacked(_OFFER_ID_PREFIX, provider, block.number, msg.data));
 
+        require(bytes(offerStorage.providers[provider].name).length > 0, "Provider doesn't exist");
         require(offerStorage.offers[offerId].paymentToken == address(0x00), "Offer already exists");
         require(minPricePerWorkerEpoch > 0, "Min price per epoch should be greater than 0");
         require(address(paymentToken) != address(0x00), "Payment token should be not zero address");
@@ -114,7 +132,7 @@ abstract contract Offer is BaseModule, IOffer {
 
         // add effectors to offer
         for (uint256 j = 0; j < effectors.length; j++) {
-            bytes32 effector = keccak256(abi.encodePacked(effectors[j].prefixes, effectors[j].hash));
+            bytes32 effector = _hashEffectorCID(effectors[j]);
             offerStorage.effectorsByOfferId[offerId].hasEffector[effector] = true;
         }
 
@@ -237,7 +255,7 @@ abstract contract Offer is BaseModule, IOffer {
 
         for (uint256 i = 0; i < newEffectors.length; i++) {
             CIDV1 calldata effectorCID = newEffectors[i];
-            bytes32 effectorHash = keccak256(abi.encodePacked(effectorCID.prefixes, effectorCID.hash));
+            bytes32 effectorHash = _hashEffectorCID(effectorCID);
 
             require(!offerStorage.effectorsByOfferId[offerId].hasEffector[effectorHash], "Effector already exists");
 
@@ -255,7 +273,7 @@ abstract contract Offer is BaseModule, IOffer {
 
         for (uint256 i = 0; i < effectors.length; i++) {
             CIDV1 calldata effectorCID = effectors[i];
-            bytes32 effectorHash = keccak256(abi.encodePacked(effectorCID.prefixes, effectorCID.hash));
+            bytes32 effectorHash = _hashEffectorCID(effectorCID);
 
             require(offerStorage.effectorsByOfferId[offerId].hasEffector[effectorHash], "Effector  doesn't exist");
 
@@ -301,6 +319,36 @@ abstract contract Offer is BaseModule, IOffer {
         computePeer.commitmentId = commitmentId;
     }
 
+    // Effector info
+    function setEffectorInfo(CIDV1 calldata id, string calldata description, CIDV1 calldata metadata)
+        external
+        onlyCoreOwner
+    {
+        OfferStorage storage offerStorage = _getOfferStorage();
+        require(bytes(description).length > 0, "Description should be not empty");
+
+        bytes32 effectorHash = _hashEffectorCID(id);
+        EffectorInfo storage effectorInfo = offerStorage.effectorInfoById[effectorHash];
+
+        effectorInfo.description = description;
+        effectorInfo.metadata = metadata;
+
+        emit EffectorInfoSet(id, description, metadata);
+    }
+
+    function removeEffectorInfo(CIDV1 calldata id) external onlyCoreOwner {
+        OfferStorage storage offerStorage = _getOfferStorage();
+
+        bytes32 effectorHash = _hashEffectorCID(id);
+        EffectorInfo storage effectorInfo = offerStorage.effectorInfoById[effectorHash];
+
+        require(bytes(effectorInfo.description).length > 0, "Effector info doesn't exist");
+
+        delete offerStorage.effectorInfoById[effectorHash];
+
+        emit EffectorInfoRemoved(id);
+    }
+
     // ----------------- Internal View -----------------
     function _getOffer(bytes32 offerId) internal view returns (Offer storage) {
         return _getOfferStorage().offers[offerId];
@@ -318,7 +366,7 @@ abstract contract Offer is BaseModule, IOffer {
         OfferStorage storage offerStorage = _getOfferStorage();
 
         for (uint256 i = 0; i < effectors.length; i++) {
-            bytes32 effectorHash = keccak256(abi.encodePacked(effectors[i].prefixes, effectors[i].hash));
+            bytes32 effectorHash = _hashEffectorCID(effectors[i]);
 
             if (!offerStorage.effectorsByOfferId[offerId].hasEffector[effectorHash]) {
                 return false;
@@ -329,6 +377,10 @@ abstract contract Offer is BaseModule, IOffer {
     }
 
     // ----------------- Internal Mutable -----------------
+    function _hashEffectorCID(CIDV1 memory effectorCID) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked(effectorCID.prefixes, effectorCID.hash));
+    }
+
     function _addComputePeerToOffer(bytes32 offerId, RegisterComputePeer calldata peer) internal {
         OfferStorage storage offerStorage = _getOfferStorage();
 

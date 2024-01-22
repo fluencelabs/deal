@@ -82,6 +82,9 @@ contract MarketTest is Test {
             )
         );
 
+        // Register offer
+        deployment.market.setProviderInfo("test", CIDV1({prefixes: 0x12345678, hash: bytes32(0x00)}));
+
         vm.expectEmit(true, true, false, true, address(deployment.market));
         emit MarketOfferRegistered(address(this), offerId, minPricePerWorkerEpoch, paymentToken, effectors);
 
@@ -99,7 +102,6 @@ contract MarketTest is Test {
             }
         }
 
-        // Register offer
         bytes32 retOfferId =
             deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, registerPeers);
 
@@ -107,6 +109,7 @@ contract MarketTest is Test {
     }
 
     function test_GetOfferPeersUnits() public {
+        deployment.market.setProviderInfo("test", CIDV1({prefixes: 0x12345678, hash: bytes32(0x00)}));
         bytes32 offerId =
             deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, registerPeers);
 
