@@ -8,6 +8,11 @@ import "src/deal/base/Types.sol";
 
 interface IOffer {
     // ------------------ Types ------------------
+    struct ProviderInfo {
+        string name;
+        CIDV1 metadata;
+    }
+
     struct RegisterComputePeer {
         bytes32 peerId;
         address owner;
@@ -38,7 +43,14 @@ interface IOffer {
         address deal;
     }
 
+    struct EffectorInfo {
+        string description;
+        CIDV1 metadata;
+    }
+
     // ------------------ Events ------------------
+    event ProviderInfoUpdated(address indexed provider, string name, CIDV1 metadata);
+
     event MarketOfferRegistered(
         address indexed provider,
         bytes32 offerId,
@@ -59,15 +71,21 @@ interface IOffer {
     event ComputeUnitAddedToDeal(bytes32 indexed unitId, IDeal deal, bytes32 peerId);
     event ComputeUnitRemovedFromDeal(bytes32 indexed unitId, IDeal deal, bytes32 peerId);
 
+    event EffectorInfoSet(CIDV1 indexed id, string description, CIDV1 metadata);
+    event EffectorInfoRemoved(CIDV1 indexed id);
+
     // ----------------- Public View -----------------
+    function getProviderInfo(address provider) external view returns (ProviderInfo memory);
     function getOffer(bytes32 offerId) external view returns (Offer memory);
     function getComputePeer(bytes32 peerId) external view returns (ComputePeer memory);
     function getComputeUnit(bytes32 unitId) external view returns (ComputeUnit memory);
     function getComputeUnitIds(bytes32 peerId) external view returns (bytes32[] memory);
     function getComputeUnits(bytes32 peerId) external view returns (ComputeUnitView[] memory);
+    function getEffectorInfo(CIDV1 calldata id) external view returns (EffectorInfo memory);
 
     // ----------------- Public Mutable -----------------
     //Register offer and units
+    function setProviderInfo(string calldata name, CIDV1 calldata metadata) external;
     function registerMarketOffer(
         uint256 minPricePerWorkerEpoch,
         address paymentToken,
@@ -89,4 +107,8 @@ interface IOffer {
     // Unit management
     function returnComputeUnitFromDeal(bytes32 unitId) external;
     function setCommitmentId(bytes32 peerId, bytes32 commitmentId) external;
+
+    // Effector info
+    function setEffectorInfo(CIDV1 calldata id, string calldata description, CIDV1 calldata metadata) external;
+    function removeEffectorInfo(CIDV1 calldata id) external;
 }

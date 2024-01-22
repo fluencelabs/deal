@@ -90,6 +90,7 @@ contract CapacityCommitmentTest is Test {
     }
 
     function test_CreateCapacityCommitment() public {
+        deployment.market.setProviderInfo("name", CIDV1({prefixes: 0x12345678, hash: bytes32(0)}));
         deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, registerPeers);
 
         bytes32 peerId = registerPeers[0].peerId;
@@ -235,6 +236,7 @@ contract CapacityCommitmentTest is Test {
 
     // ------------------ Internals ------------------
     function _createCapacityCommitment(bytes32 peerId) internal returns (bytes32 commitmentId, bytes32 offerId) {
+        deployment.market.setProviderInfo("name", CIDV1({prefixes: 0x12345678, hash: bytes32(0)}));
         offerId = deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, registerPeers);
 
         vm.recordLogs();

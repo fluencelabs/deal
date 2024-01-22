@@ -49,6 +49,7 @@ contract MatcherTest is Test {
                 peers[j] = IOffer.RegisterComputePeer({peerId: peerId, unitIds: unitIds[i][j], owner: address(this)});
             }
 
+            deployment.market.setProviderInfo("test", CIDV1({prefixes: 0x12345678, hash: bytes32(0x00)}));
             offerIds[i] = deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, peers);
 
             for (uint256 j = 0; j < peerCountPerOffer; j++) {
