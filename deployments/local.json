@@ -8,8 +8,8 @@
   "CapacityImpl": {
     "addr": "0xc5a5C42992dECbae36851359345FE25997F5C42d",
     "blockNumber": 0,
-    "codeHash": "0xd5917715b9d010f21955a2f5fd4fdc40c1e44af9639994308b971d728527a94f",
-    "creationCodeHash": "0xdd3431d8f155e55c91f7689064924d534f6d4ce4e8ea1b83172d946635532539"
+    "codeHash": "0x1e6ef9ae7787accf8a20e06a5aaa9be706e30255241c8bc896da2ac5e32a8632",
+    "creationCodeHash": "0xb28b714016d074c921c9518973492fc002c97ee8ac37e358677d8360e9447437"
   },
   "Core": {
     "addr": "0x7a2088a1bFc9d81c55368AE168C2C02570cB814F",
@@ -26,8 +26,8 @@
   "DealImpl": {
     "addr": "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
     "blockNumber": 0,
-    "codeHash": "0xddc1e5326d0af56ffcc27bcb9e1ba8902e42067aa9c69a617a484d265902ad91",
-    "creationCodeHash": "0x007d09673bbd0bed9d71c7c075be781adade7a16da3b22229c31e4fe03fa4bd2"
+    "codeHash": "0x15ebe3704e460f82ac47588d9fc16f44b50beef955baba943e71803803f03d36",
+    "creationCodeHash": "0x7a7bfe4c12b6055da115d45ee67163df0204e22053da5246258a9cbedadca108"
   },
   "Market": {
     "addr": "0x67d269191c92Caf3cD7723F116c85e6E9bf55933",
@@ -38,8 +38,8 @@
   "MarketImpl": {
     "addr": "0x09635F643e140090A9A8Dcd712eD6285858ceBef",
     "blockNumber": 0,
-    "codeHash": "0x81f5e2c0221dcd3d516664b4f4b9e22cc0731cbf891213020027bd21183ded11",
-    "creationCodeHash": "0xbd660ae212093b0d04824dfa1f539441a86a6d175f7f365fe6ba199dc35fc820"
+    "codeHash": "0x9cc217cca774be1a5a27511aa9d98f698c8d592284618f9cc50e02162ad2eee5",
+    "creationCodeHash": "0x26ea2438cd61dddf6da5ff8b8d472acd818be129610b44279767e6027a412575"
   },
   "Multicall3": {
     "addr": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
@@ -50,8 +50,8 @@
   "RandomXProxy": {
     "addr": "0x4A679253410272dd5232B3Ff7cF5dbB88f295319",
     "blockNumber": 0,
-    "codeHash": "0x66a7d7e72361acca82349558c6727568dc99f00602e90326d2c85860516ee725",
-    "creationCodeHash": "0x8135f51bec842a991d95bb522437dfd82369f33aea772ef61772ea70ddc88ed7"
+    "codeHash": "0x0f48385b6dff7339e75b007f90652a89e2b4c569f1caf9c8d87158abb43275f8",
+    "creationCodeHash": "0x8e3949b6c9856c7e018e1f0e6374d8b354b6283492a3cfc933afe0b3ab77d342"
   },
   "tFLT": {
     "addr": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
