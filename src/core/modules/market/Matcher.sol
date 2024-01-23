@@ -118,7 +118,7 @@ abstract contract Matcher is Offer, IMatcher {
                     continue;
                 }
 
-                // Currently, protocol does not allow more than one CU per peer for same Deal.
+                // Currently, protocol does not allow more than one CU per peer for the same Deal.
                 if (deal.isComputePeerExist(peerId)) {
                     continue;
                 }
