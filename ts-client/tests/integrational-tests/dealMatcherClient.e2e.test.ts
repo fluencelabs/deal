@@ -270,7 +270,7 @@ describe("#getMatchedOffersByDealId", () => {
       expect(matchedOffersOut.offers.length).toBe(1); // At least with one previously created offer it matched.
 
       const ccId = matchedOffersOut.computeUnitsPerOffers[0][0]
-      console.log(`Additional check for status of matched CC: ${ccId} from chain...`)
+      // Additional check for status of matched CC from chain perspective
       expect(await capacityContract.getStatus(ccId)).eq(0)  // e.g. 4 == Failed; 0 - Active.
 
       console.info(
