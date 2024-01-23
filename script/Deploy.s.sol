@@ -44,7 +44,7 @@ contract DeployContracts is Depoyments, Script {
     uint256 constant DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH = 2;
     uint256 constant DEFAULT_MAX_PROOFS_PER_EPOCH = 5;
     uint256 constant DEFAULT_WITHDRAW_EPOCHES_AFTER_FAILED = 2;
-    uint256 constant DEFAULT_MAX_FAILED_RATIO = 10;
+    uint256 constant DEFAULT_MAX_FAILED_RATIO = 40;
     bool constant DEFAULT_IS_WHITELIST_ENABLED = false;
     bytes32 public constant DEFAULT_DIFFICULTY = 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
     bytes32 public constant DEFAULT_INIT_GLOBAL_NONCE = keccak256("init_global_nonce");

@@ -1,9 +1,9 @@
 {
   "Capacity": {
-    "addr": "0x1107490C3Ebebd9ac62075c7b070c727d209f8C4",
-    "blockNumber": 45078395,
+    "addr": "0xCCAFAddc84210b06dC6c89E6cA41d53d497d0801",
+    "blockNumber": 45079324,
     "codeHash": "0x69c05db4084d78771e66c79965830c54f4f020df8880c049581b7085370b79b7",
-    "creationCodeHash": "0xf506135be2f73aab1f8f7f9b96c4c969d76b3be86a519026b48a05f2c2798014"
+    "creationCodeHash": "0x32bf3991bcb9fb9d884c83ec9ac51fc2085d3f99b3dce62101451400d4ac2ac8"
   },
   "CapacityImpl": {
     "addr": "0xc81777E28b805Ec7C9f7f5D9892417F548d1782f",
