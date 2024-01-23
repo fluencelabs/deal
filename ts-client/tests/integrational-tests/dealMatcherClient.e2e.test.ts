@@ -271,7 +271,7 @@ describe("#getMatchedOffersByDealId", () => {
 
       const ccId = matchedOffersOut.computeUnitsPerOffers[0][0]
       console.log(`Additional check for status of matched CC: ${ccId} from chain...`)
-      console.log(await capacityContract.getStatus(ccId))  // e.g. 4 == Failed.
+      expect(await capacityContract.getStatus(ccId)).eq(0)  // e.g. 4 == Failed; 0 - Active.
 
       console.info(
         `Match deal with offers structure proposed by indexer: ${JSON.stringify(
