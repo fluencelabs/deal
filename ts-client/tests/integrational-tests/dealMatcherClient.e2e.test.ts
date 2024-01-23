@@ -3,6 +3,7 @@
 // - deployed contracts
 // - subgraph indexes contracts
 // # Test itself consists of:
+// - it creates provider info: market.setProviderInfo
 // - it creates Offers
 // - it creates CC (and approve, and deposited collateral)
 // - it waits 1 core epoch (before we could start to match)
@@ -76,6 +77,13 @@ describe("#getMatchedOffersByDealId", () => {
       paymentTokenAddress,
       timestamp,
     );
+
+    console.log('Register Provider by setProviderInfo...')
+    const setProviderInfoTx = await marketContract.setProviderInfo('CI_PROVIDER', {
+      prefixes: "0x12345678",
+      hash: ethers.encodeBytes32String(`CI_PROVIDER:${timestamp}`),
+    });
+    await setProviderInfoTx.wait(DEFAULT_CONFIRMATIONS)
 
     const tx = await marketContract.registerMarketOffer(
       offerFixture.minPricePerWorkerEpoch,
