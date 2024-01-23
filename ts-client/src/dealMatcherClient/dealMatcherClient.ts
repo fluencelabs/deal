@@ -52,7 +52,7 @@ export class DealMatcherClient {
     peersOffset: number = 0,
     computeUnitsOffset: number = 0,
   ) {
-    const currentEpochString = getMatchedOffersIn.currentEpoch.toString()
+    const currentEpochString = getMatchedOffersIn.currentEpoch.toString();
     // Some filters per peers, capacity commitments and compute units are copied
     //  and implemented with different fields for the same filtration - it is so
     //  in major because in subgraph it is impossible to filter on nested fields
@@ -74,8 +74,8 @@ export class DealMatcherClient {
           // Since it is not possible to filter by currentCapacityCommitment_.startEpoch_lt
           //  we use this help field.
           collateralDepositedAt_lt: currentEpochString,
-        // TODO: optimise query - mirror endEpoch check
-        // TODO: optimise query - mirror nextCCFailedEpoch check
+          // TODO: optimise query - mirror endEpoch check
+          // TODO: optimise query - mirror nextCCFailedEpoch check
         },
       },
       peersFilters: {
@@ -103,10 +103,10 @@ export class DealMatcherClient {
               },
               {
                 isAnyJoinedDeals: false,
-              }
+              },
             ],
-          }
-        ]
+          },
+        ],
       },
       computeUnitsFilters: { deal: null },
       peersLimit: peersPerPageLimit,
@@ -223,7 +223,7 @@ export class DealMatcherClient {
           matchedComputeUnitsData.offers.push(offerId);
         }
         const peers = offer.peers;
-        console.log("TODO: peers", peers)
+        console.log("TODO: peers", peers);
         // Check if peers are empty and need to fetch next offer page.
         //  It could happen because we have after fetch filter: not more than 1 CU per peer
         //  that filters
@@ -248,7 +248,7 @@ export class DealMatcherClient {
               break;
             }
 
-            peersOfMatchedComputeUnits.add(peer.id)
+            peersOfMatchedComputeUnits.add(peer.id);
             computeUnitsMatchedTotal += 1;
 
             if (
@@ -335,7 +335,11 @@ export class DealMatcherClient {
     epochControllerStorageInitTimestamp: number,
     epochControllerStorageEpochDuration: number,
   ) {
-    return Math.floor(1 + (timestamp - epochControllerStorageInitTimestamp) / epochControllerStorageEpochDuration);
+    return Math.floor(
+      1 +
+        (timestamp - epochControllerStorageInitTimestamp) /
+          epochControllerStorageEpochDuration,
+    );
   }
 
   /**
@@ -387,7 +391,7 @@ export class DealMatcherClient {
       currentEpoch: this.calculateEpoch(
         _meta.block.timestamp,
         Number(graphNetworks[0].initTimestamp),
-        graphNetworks[0].coreEpochDuration
+        graphNetworks[0].coreEpochDuration,
       ),
     });
   }
