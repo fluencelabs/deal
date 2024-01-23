@@ -13,6 +13,7 @@ type GraphNetwork @entity {
   effectorsTotal: BigInt!
   # Add constants from Core contract below.
   coreEpochDuration: Int
+  initTimestamp: Int
 }
 
 type Token @entity(immutable: true) {
@@ -55,6 +56,10 @@ type Offer @entity {
   # Add Statistics below.
   computeUnitsAvailable: Int  # Sum of all available compute units in the offer (not in the deals).
   computeUnitsTotal: Int  # Sum of all compute units registered in the offer. TODO: when CU deleted?
+
+  # Add helpers fields to support some queries below.
+  "To support check that a peer already in a deal."
+  joinedOfferPeers: [DealToJoinedOfferPeer!] @derivedFrom(field: "offer")
 }
 
 
@@ -99,6 +104,12 @@ type Peer @entity {
   # Indexer query helper fields below.
   "To understand if collateral for peer have been submitted. This field should be use in conjunction with currentCapacityCommitment."
   collateralDepositedAt: BigInt
+
+  # We need field to query from perspective of Peer on deal field.
+  joinedDeals: [DealToPeer!] @derivedFrom(field: "peer")
+  # To make query with OR to retrieve even entities with joinedDeals == [].
+  # TODO: create issue on Subgraph for the feature and past here.
+  isAnyJoinedDeals: Boolean!
 }
 
 type ComputeUnit @entity {
@@ -113,10 +124,28 @@ type ComputeUnit @entity {
 }
 
 # ---- Deal Contract ----
-type DealToEffector @entity {
+type DealToEffector @entity(immutable: true) {
     id: ID! # Set to `deal.id.concat(effector.id)`
     deal: Deal!
     effector: Effector!
+}
+
+type DealToPeer @entity(immutable: true) {
+    id: ID! # Set to `deal.id.concat(peer.id)`
+    deal: Deal!
+    peer: Peer!
+}
+
+"""
+TODO: deprecate.
+To add possibility to filter already joined peers into a Deal from perspective of an Offer
+(protocol does not allow more than one CU per peer for the same Deal).
+"""
+type DealToJoinedOfferPeer @entity(immutable: true) {
+    id: ID! # Set to `deal.id.concat(offer.id.concat(peer.id))`
+    deal: Deal!
+    offer: Offer!  # search offers initially using this fk relation.
+    peer: Peer!
 }
 
 type Deal @entity {
@@ -131,6 +160,8 @@ type Deal @entity {
   paymentToken: Token!
   pricePerWorkerEpoch: BigInt!
   effectors: [DealToEffector!] @derivedFrom(field: "deal")
+  "Many to many to access joined peers to maintain protocol restrictions"
+  joinedPeers: [DealToPeer!] @derivedFrom(field: "deal")
   # TODO: add whitelists...
   # TODO: add blacklists...
   #  balance: BigInt!  # on-request via frontend
@@ -172,4 +203,5 @@ type CapacityCommitment @entity {
   exitedUnitCount: Int!
   #  TODO: store CUs.
   unitCount: Int!
+  nextCCFailedEpoch: BigInt!
 }

@@ -17,7 +17,7 @@ interface ICapacity is ICapacityConst {
     );
     event CommitmentRemoved(bytes32 indexed commitmentId);
     event CommitmentActivated(
-        bytes32 indexed peerId, bytes32 indexed commitmentId, uint256 startEpoch, uint256 endEpoch, bytes32[] unitIds
+        bytes32 indexed peerId, bytes32 indexed commitmentId, uint256 startEpoch, uint256 endEpoch, bytes32[] unitIds, uint256 nextCCFailedEpoch
     );
     event CommitmentFinished(bytes32 indexed commitmentId);
 
@@ -30,6 +30,9 @@ interface ICapacity is ICapacityConst {
 
     event UnitDeactivated(bytes32 indexed commitmentId, bytes32 indexed unitId);
     event UnitActivated(bytes32 indexed commitmentId, bytes32 indexed unitId);
+
+    // nextCCFailedEpoch is the epoch when the commitment will be failed if no correct proofs will be submitted.
+    event CommitmentSnapshotCommitted(bytes32 peerId, uint256 nextCCFailedEpoch);
 
     // ------------------ Errors ------------------
     error TooManyProofs();

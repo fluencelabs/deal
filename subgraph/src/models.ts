@@ -3,7 +3,7 @@ import {
   OfferToEffector,
   Token,
   DealToEffector,
-  GraphNetwork, Provider,
+  GraphNetwork, Provider, DealToPeer, DealToJoinedOfferPeer,
 } from "../generated/schema";
 import { BigInt, Bytes } from "@graphprotocol/graph-ts";
 import {getTokenDecimals, getTokenSymbol} from "./contracts";
@@ -112,6 +112,41 @@ export function createOrLoadDealEffector(
     entity.save();
   }
   return entity as DealToEffector;
+}
+
+export function createOrLoadDealToPeer(
+  dealId: string,
+  peerId: string,
+): DealToPeer {
+  const concattedIds = dealId.concat(peerId);
+  let entity = DealToPeer.load(concattedIds);
+
+  if (entity == null) {
+    entity = new DealToPeer(concattedIds);
+    entity.deal = dealId;
+    entity.peer = peerId;
+    entity.save();
+  }
+  return entity as DealToPeer;
+}
+
+export function createOrLoadDealToJoinedOfferPeer(
+  dealId: string,
+  offerId: string,
+  peerId: string,
+): DealToJoinedOfferPeer {
+  // // deal.id.concat(offer.id.concat(peer.id)).
+  const concattedIds = dealId.concat(offerId.concat(peerId));
+  let entity = DealToJoinedOfferPeer.load(concattedIds);
+
+  if (entity == null) {
+    entity = new DealToJoinedOfferPeer(concattedIds);
+    entity.deal = dealId;
+    entity.peer = peerId;
+    entity.offer = offerId;
+    entity.save();
+  }
+  return entity as DealToJoinedOfferPeer;
 }
 
 export function createOrLoadGraphNetwork(): GraphNetwork {

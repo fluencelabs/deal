@@ -27,7 +27,7 @@ const DEFAULT_CONFIRMATIONS = 1;
 // - time for core epoch
 // - other eps.
 // TODO: get core.epochDuration instead of 15000
-const TESTS_TIMEOUT = 90000 + 15000;
+const TESTS_TIMEOUT = 120000 + 15000;
 
 async function getDefaultOfferFixture(
   owner: string,
@@ -193,6 +193,9 @@ describe("#getMatchedOffersByDealId", () => {
       }
 
       console.log("---- Deal Creation ----");
+      const marketContract = await contractsClient.getMarket();
+      const marketAddress = await marketContract.getAddress();
+
       const coreContract = await contractsClient.getCore();
       const epochMilliseconds = (await coreContract.epochDuration()) * 1000n;
       console.log(
@@ -213,7 +216,6 @@ describe("#getMatchedOffersByDealId", () => {
         BigInt(targetWorkersDeal) *
         pricePerWorkerEpochDeal *
         minDealDepositedEpoches;
-      const marketContract = await contractsClient.getMarket();
 
       console.info(
         "Send approve of payment token for amount = ",
@@ -222,7 +224,6 @@ describe("#getMatchedOffersByDealId", () => {
       expect(await paymentToken.balanceOf(signerAddress)).toBeGreaterThan(
         toApproveFromDeployer,
       );
-      const marketAddress = await marketContract.getAddress();
       expect(marketAddress).not.toBe("0x0000000000000000000000000000");
       await paymentToken.approve(marketAddress, toApproveFromDeployer);
 
@@ -259,6 +260,7 @@ describe("#getMatchedOffersByDealId", () => {
       await new Promise((resolve) =>
         setTimeout(resolve, DEFAULT_SUBGRAPH_TIME_INDEXING),
       );
+      // const dealId = "0xd79df1927718b3212fa6e126ec4ad2b3ee1263d9"
 
       console.log("---- Deal Matching ----");
       console.info(`Find matched offers for dealId: ${dealId}...`);
@@ -266,6 +268,10 @@ describe("#getMatchedOffersByDealId", () => {
       const matchedOffersOut =
         await dealMatcherClient.getMatchedOffersByDealId(dealId);
       expect(matchedOffersOut.offers.length).toBe(1); // At least with one previously created offer it matched.
+
+      const ccId = matchedOffersOut.computeUnitsPerOffers[0][0]
+      console.log(`Additional check for status of matched CC: ${ccId} from chain...`)
+      console.log(await capacityContract.getStatus(ccId))  // e.g. 4 == Failed.
 
       console.info(
         `Match deal with offers structure proposed by indexer: ${JSON.stringify(

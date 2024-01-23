@@ -376,9 +376,19 @@ contract Capacity is CapacityConst, Multicall, Whitelist, UUPSUpgradeable, ICapa
 
         market.setCommitmentId(peerId, commitmentId);
 
+        // To calculate nextCCFailedEpoch and send it in event of activation.
+        (uint256 failedEpoch,,) = _failedEpoch(
+            maxFailedRatio(),
+            unitCount,
+            unitCount,
+            cc.info.nextAdditionalActiveUnitCount,
+            cc.info.totalCUFailCount,
+            currentEpoch_
+        );
+
         emit CollateralDeposited(commitmentId, collateral);
         emit CommitmentActivated(
-            peerId, commitmentId, startEpoch, startEpoch + cc.info.duration, market.getComputeUnitIds(peerId)
+            peerId, commitmentId, startEpoch, startEpoch + cc.info.duration, market.getComputeUnitIds(peerId), failedEpoch
         );
     }
 
@@ -730,6 +740,7 @@ contract Capacity is CapacityConst, Multicall, Whitelist, UUPSUpgradeable, ICapa
         if (nextAdditionalActiveUnitCount > 0) {
             cc.info.activeUnitCount += nextAdditionalActiveUnitCount;
             cc.info.nextAdditionalActiveUnitCount = 0;
+            // TODO: we changed nextActive... but what about _setActiveUnitCount(...);?
         }
 
         if (epoch >= failedEpoch) {
@@ -751,6 +762,8 @@ contract Capacity is CapacityConst, Multicall, Whitelist, UUPSUpgradeable, ICapa
             _setActiveUnitCount(activeUnitCount() - activeUnitCount_);
             cc.info.status = newStatus;
         }
+
+        emit CommitmentSnapshotCommitted(cc.info.peerId, failedEpoch);
 
         return newStatus;
     }

@@ -57,3 +57,7 @@ export function getDealContract(contractAddress: Address): Deal {
 export function getEpochDuration(contractAddress: Address): i32 {
   return Core.bind(contractAddress).epochDuration().toI32();
 }
+
+export function getInitTimestamp(contractAddress: Address): i32 {
+  return Core.bind(contractAddress).initTimestamp().toI32();
+}

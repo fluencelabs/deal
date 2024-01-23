@@ -30,6 +30,7 @@ query DealQuery(
   }
   graphNetworks(first:1) {
     coreEpochDuration
+    initTimestamp
   }
 
 }

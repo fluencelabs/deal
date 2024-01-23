@@ -20,6 +20,7 @@ export function handleCommitmentCreated(event: CommitmentCreated): void {
   commitment.totalCUFailCount = 0
   commitment.failedEpoch = ZERO_BIG_INT
   commitment.exitedUnitCount = 0
+  commitment.nextCCFailedEpoch = ZERO_BIG_INT
   commitment.save()
 
   let peer = Peer.load(event.params.peerId.toHex()) as Peer;
@@ -36,6 +37,7 @@ export function handleCommitmentActivated(event: CommitmentActivated): void {
   commitment.startEpoch = event.params.startEpoch
   commitment.endEpoch = event.params.endEpoch
   commitment.unitCount = event.params.unitIds.length
+  commitment.nextCCFailedEpoch = event.params.nextCCFailedEpoch
   commitment.save()
 
   let peer = Peer.load(event.params.peerId.toHex()) as Peer;
@@ -47,3 +49,5 @@ export function handleCommitmentActivated(event: CommitmentActivated): void {
 export function handleCollateralDeposited(event: CollateralDeposited): void {}
 
 // TODO: commitment expired and other events.
+
+// TODO: catch nextCCFailedEpoch change in CommitmentSnapshotCommitted...
