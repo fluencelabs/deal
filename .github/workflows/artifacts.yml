@@ -10,6 +10,9 @@ on:
       release:
         type: boolean
         default: false
+    secrets:
+      token:
+        description: "fluencebot token to commit local.json"
     outputs:
       deal-ts-clients-version:
         description: "@fluencelabs/deal-ts-clients version"

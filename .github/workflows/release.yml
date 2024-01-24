@@ -86,6 +86,8 @@ jobs:
     with:
       ref: ${{ needs.release-please.outputs.tag-name }}
       release: true
+    secrets:
+      token: ${{ secrets.FLUENCEBOT_RELEASE_PLEASE_PAT }}
 
   slack:
     if: always()
