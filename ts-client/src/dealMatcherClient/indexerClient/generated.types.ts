@@ -210,7 +210,9 @@ export type CapacityCommitment_OrderBy =
   | 'id'
   | 'nextCCFailedEpoch'
   | 'peer'
-  | 'peer__capacityFieldCollateralDepositedAt'
+  | 'peer__currentCCCollateralDepositedAt'
+  | 'peer__currentCCEndEpoch'
+  | 'peer__currentCCNextCCFailedEpoch'
   | 'peer__id'
   | 'peer__isAnyJoinedDeals'
   | 'rewardDelegatorRate'
@@ -341,7 +343,9 @@ export type ComputeUnit_OrderBy =
   | 'deal__withdrawalSum'
   | 'id'
   | 'peer'
-  | 'peer__capacityFieldCollateralDepositedAt'
+  | 'peer__currentCCCollateralDepositedAt'
+  | 'peer__currentCCEndEpoch'
+  | 'peer__currentCCNextCCFailedEpoch'
   | 'peer__id'
   | 'peer__isAnyJoinedDeals'
   | 'provider'
@@ -485,6 +489,7 @@ export type DealToEffector_OrderBy =
   | 'id';
 
 /**
+ * TODO: deprecate.
  * To add possibility to filter already joined peers into a Deal from perspective of an Offer
  * (protocol does not allow more than one CU per peer for the same Deal).
  *
@@ -597,7 +602,9 @@ export type DealToJoinedOfferPeer_OrderBy =
   | 'offer__pricePerEpoch'
   | 'offer__updatedAt'
   | 'peer'
-  | 'peer__capacityFieldCollateralDepositedAt'
+  | 'peer__currentCCCollateralDepositedAt'
+  | 'peer__currentCCEndEpoch'
+  | 'peer__currentCCNextCCFailedEpoch'
   | 'peer__id'
   | 'peer__isAnyJoinedDeals';
 
@@ -680,7 +687,9 @@ export type DealToPeer_OrderBy =
   | 'deal__withdrawalSum'
   | 'id'
   | 'peer'
-  | 'peer__capacityFieldCollateralDepositedAt'
+  | 'peer__currentCCCollateralDepositedAt'
+  | 'peer__currentCCEndEpoch'
+  | 'peer__currentCCNextCCFailedEpoch'
   | 'peer__id'
   | 'peer__isAnyJoinedDeals';
 
@@ -1273,9 +1282,11 @@ export type Peer = {
   __typename?: 'Peer';
   /** To access history of capacity commitments. */
   capacityCommitments?: Maybe<Array<CapacityCommitment>>;
-  /** To understand if collateral for peer have been submitted. This field should be use in conjunction with currentCapacityCommitment. */
-  capacityFieldCollateralDepositedAt?: Maybe<Scalars['BigInt']['output']>;
   computeUnits?: Maybe<Array<ComputeUnit>>;
+  /** To understand if collateral for peer have been submitted. This field should be use in conjunction with currentCapacityCommitment. */
+  currentCCCollateralDepositedAt?: Maybe<Scalars['BigInt']['output']>;
+  currentCCEndEpoch?: Maybe<Scalars['BigInt']['output']>;
+  currentCCNextCCFailedEpoch?: Maybe<Scalars['BigInt']['output']>;
   currentCapacityCommitment?: Maybe<CapacityCommitment>;
   /** ref to peerId in contract. */
   id: Scalars['ID']['output'];
@@ -1317,15 +1328,31 @@ export type Peer_Filter = {
   _change_block?: InputMaybe<BlockChangedFilter>;
   and?: InputMaybe<Array<InputMaybe<Peer_Filter>>>;
   capacityCommitments_?: InputMaybe<CapacityCommitment_Filter>;
-  capacityFieldCollateralDepositedAt?: InputMaybe<Scalars['BigInt']['input']>;
-  capacityFieldCollateralDepositedAt_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  capacityFieldCollateralDepositedAt_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  capacityFieldCollateralDepositedAt_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  capacityFieldCollateralDepositedAt_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  capacityFieldCollateralDepositedAt_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  capacityFieldCollateralDepositedAt_not?: InputMaybe<Scalars['BigInt']['input']>;
-  capacityFieldCollateralDepositedAt_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   computeUnits_?: InputMaybe<ComputeUnit_Filter>;
+  currentCCCollateralDepositedAt?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCCollateralDepositedAt_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCCollateralDepositedAt_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCCollateralDepositedAt_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  currentCCCollateralDepositedAt_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCCollateralDepositedAt_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCCollateralDepositedAt_not?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCCollateralDepositedAt_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  currentCCEndEpoch?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCEndEpoch_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCEndEpoch_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCEndEpoch_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  currentCCEndEpoch_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCEndEpoch_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCEndEpoch_not?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCEndEpoch_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  currentCCNextCCFailedEpoch?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCNextCCFailedEpoch_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCNextCCFailedEpoch_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCNextCCFailedEpoch_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  currentCCNextCCFailedEpoch_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCNextCCFailedEpoch_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCNextCCFailedEpoch_not?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCNextCCFailedEpoch_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   currentCapacityCommitment?: InputMaybe<Scalars['String']['input']>;
   currentCapacityCommitment_?: InputMaybe<CapacityCommitment_Filter>;
   currentCapacityCommitment_contains?: InputMaybe<Scalars['String']['input']>;
@@ -1407,8 +1434,10 @@ export type Peer_Filter = {
 
 export type Peer_OrderBy =
   | 'capacityCommitments'
-  | 'capacityFieldCollateralDepositedAt'
   | 'computeUnits'
+  | 'currentCCCollateralDepositedAt'
+  | 'currentCCEndEpoch'
+  | 'currentCCNextCCFailedEpoch'
   | 'currentCapacityCommitment'
   | 'currentCapacityCommitment__CCStatus'
   | 'currentCapacityCommitment__collateralPerUnit'
