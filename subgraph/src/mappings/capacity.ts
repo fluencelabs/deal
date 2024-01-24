@@ -2,7 +2,7 @@ import {CapacityCommitmentStatus, ZERO_BIG_INT} from "../models";
 import {CapacityCommitment, Peer} from "../../generated/schema";
 import {
   CollateralDeposited, CommitmentActivated,
-  CommitmentCreated
+  CommitmentCreated, CommitmentSnapshotCommitted
 } from "../../generated/Capacity/Capacity";
 
 export function handleCommitmentCreated(event: CommitmentCreated): void {
@@ -49,6 +49,20 @@ export function handleCommitmentActivated(event: CommitmentActivated): void {
 
 // @deprecated. Currently, no use for the event as it is used in handleCommitmentActivated.
 export function handleCollateralDeposited(event: CollateralDeposited): void {}
+
+export function handleCommitmentSnapshotCommitted(event: CommitmentSnapshotCommitted): void {
+  let peer = Peer.load(event.params.peerId.toHex()) as Peer;
+  const nextCCFailedEpoch = event.params.nextCCFailedEpoch;
+  peer.currentCCNextCCFailedEpoch = nextCCFailedEpoch
+  peer.save();
+
+  if (peer.currentCapacityCommitment == null) {
+    throw new Error("Assertion: Peer has no current capacity commitment.");
+  }
+  let cc = CapacityCommitment.load(peer.currentCapacityCommitment!) as CapacityCommitment;
+  cc.nextCCFailedEpoch = nextCCFailedEpoch;
+  cc.save();
+}
 
 // TODO: commitment expired and other events.
 
