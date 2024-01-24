@@ -10,7 +10,7 @@ dataSources:
     source:
       abi: Core
       address: "0xc351628EB244ec633d5f21fBD6621e1a683B1181"
-      startBlock: 18
+      startBlock: 8
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -30,7 +30,7 @@ dataSources:
     source:
       abi: Capacity
       address: "0xB0D4afd8879eD9F52b28595d31B441D079B2Ca07"
-      startBlock: 18
+      startBlock: 8
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -61,7 +61,7 @@ dataSources:
     source:
       abi: Market
       address: "0x1429859428C0aBc9C2C47C8Ee9FBaf82cFA0F20f"
-      startBlock: 18
+      startBlock: 8
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7

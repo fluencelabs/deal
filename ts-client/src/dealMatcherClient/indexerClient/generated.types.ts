@@ -36,6 +36,7 @@ export type Block_Height = {
  */
 export type CapacityCommitment = {
   __typename?: 'CapacityCommitment';
+  activeUnitCount: Scalars['Int']['output'];
   collateralPerUnit: Scalars['BigInt']['output'];
   delegator: Scalars['String']['output'];
   /** If CC deleted before collateral deposited. */
@@ -51,7 +52,6 @@ export type CapacityCommitment = {
   startEpoch: Scalars['BigInt']['output'];
   status?: Maybe<CapacityCommitmentStatus>;
   totalCUFailCount: Scalars['Int']['output'];
-  unitCount: Scalars['Int']['output'];
 };
 
 export type CapacityCommitmentStatus =
@@ -65,6 +65,14 @@ export type CapacityCommitmentStatus =
 export type CapacityCommitment_Filter = {
   /** Filter for the block changed event. */
   _change_block?: InputMaybe<BlockChangedFilter>;
+  activeUnitCount?: InputMaybe<Scalars['Int']['input']>;
+  activeUnitCount_gt?: InputMaybe<Scalars['Int']['input']>;
+  activeUnitCount_gte?: InputMaybe<Scalars['Int']['input']>;
+  activeUnitCount_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  activeUnitCount_lt?: InputMaybe<Scalars['Int']['input']>;
+  activeUnitCount_lte?: InputMaybe<Scalars['Int']['input']>;
+  activeUnitCount_not?: InputMaybe<Scalars['Int']['input']>;
+  activeUnitCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
   and?: InputMaybe<Array<InputMaybe<CapacityCommitment_Filter>>>;
   collateralPerUnit?: InputMaybe<Scalars['BigInt']['input']>;
   collateralPerUnit_gt?: InputMaybe<Scalars['BigInt']['input']>;
@@ -196,17 +204,10 @@ export type CapacityCommitment_Filter = {
   totalCUFailCount_lte?: InputMaybe<Scalars['Int']['input']>;
   totalCUFailCount_not?: InputMaybe<Scalars['Int']['input']>;
   totalCUFailCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
-  unitCount?: InputMaybe<Scalars['Int']['input']>;
-  unitCount_gt?: InputMaybe<Scalars['Int']['input']>;
-  unitCount_gte?: InputMaybe<Scalars['Int']['input']>;
-  unitCount_in?: InputMaybe<Array<Scalars['Int']['input']>>;
-  unitCount_lt?: InputMaybe<Scalars['Int']['input']>;
-  unitCount_lte?: InputMaybe<Scalars['Int']['input']>;
-  unitCount_not?: InputMaybe<Scalars['Int']['input']>;
-  unitCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
 };
 
 export type CapacityCommitment_OrderBy =
+  | 'activeUnitCount'
   | 'collateralPerUnit'
   | 'delegator'
   | 'deleted'
@@ -225,8 +226,7 @@ export type CapacityCommitment_OrderBy =
   | 'rewardDelegatorRate'
   | 'startEpoch'
   | 'status'
-  | 'totalCUFailCount'
-  | 'unitCount';
+  | 'totalCUFailCount';
 
 export type ComputeUnit = {
   __typename?: 'ComputeUnit';
@@ -1447,6 +1447,7 @@ export type Peer_OrderBy =
   | 'currentCCEndEpoch'
   | 'currentCCNextCCFailedEpoch'
   | 'currentCapacityCommitment'
+  | 'currentCapacityCommitment__activeUnitCount'
   | 'currentCapacityCommitment__collateralPerUnit'
   | 'currentCapacityCommitment__delegator'
   | 'currentCapacityCommitment__deleted'
@@ -1460,7 +1461,6 @@ export type Peer_OrderBy =
   | 'currentCapacityCommitment__startEpoch'
   | 'currentCapacityCommitment__status'
   | 'currentCapacityCommitment__totalCUFailCount'
-  | 'currentCapacityCommitment__unitCount'
   | 'id'
   | 'isAnyJoinedDeals'
   | 'joinedDeals'

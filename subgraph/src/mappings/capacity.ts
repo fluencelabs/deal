@@ -18,7 +18,7 @@ export function handleCommitmentCreated(event: CommitmentCreated): void {
   commitment.duration = event.params.duration
   commitment.rewardDelegatorRate = event.params.rewardDelegationRate.toI32()
   commitment.delegator = event.params.delegator.toHex()
-  commitment.unitCount = 0
+  commitment.activeUnitCount = 0
   commitment.startEpoch = ZERO_BIG_INT
   commitment.endEpoch = ZERO_BIG_INT
   commitment.totalCUFailCount = 0
@@ -41,7 +41,7 @@ export function handleCommitmentActivated(event: CommitmentActivated): void {
   commitment.status = CapacityCommitmentStatus.WaitStart
   commitment.startEpoch = event.params.startEpoch
   commitment.endEpoch = event.params.endEpoch
-  commitment.unitCount = event.params.unitIds.length
+  commitment.activeUnitCount = event.params.unitIds.length
   commitment.nextCCFailedEpoch = event.params.nextCCFailedEpoch
   commitment.save()
 
@@ -89,6 +89,10 @@ export function handleCommitmentFinished(event: CommitmentFinished): void {
   peer.save();
 }
 
-// TODO: commitment expired and other events.
+// TODO: UnitDeactivated/ UnitActivated to work with
+// - activeUnitCount
+// - totalCUFailCount
+// - failedEpoch
+// - exitedUnitCount
 
 
