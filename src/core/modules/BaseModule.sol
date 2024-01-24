@@ -2,15 +2,9 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "src/utils/OwnableUpgradableDiamond.sol";
-import "src/core/interfaces/ICore.sol";
-
-interface IBaseModule {
-    function core() external view returns (ICore);
-    function fluenceToken() external view returns (IERC20);
-}
+import "./IBaseModule.sol";
 
 contract BaseModule is Initializable, IBaseModule {
     ICore public immutable core;
