@@ -10,6 +10,9 @@ on:
       release:
         type: boolean
         default: false
+    secrets:
+      token:
+        description: "fluencebot token to commit local.json"
     outputs:
       deal-ts-clients-version:
         description: "@fluencelabs/deal-ts-clients version"
@@ -234,6 +237,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: fluencelabs/deal
+          token: ${{ secrets.token }}
           ref: ${{ inputs.ref }}
           submodules: recursive
 

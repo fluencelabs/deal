@@ -1,5 +1,82 @@
 # Changelog
 
+## [0.3.0](https://github.com/fluencelabs/deal/compare/v0.2.22...v0.3.0) (2024-01-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* Provider metadata ([#213](https://github.com/fluencelabs/deal/issues/213))
+* random X integration  ([#204](https://github.com/fluencelabs/deal/issues/204))
+* add whitelist [fixes CHAIN-273 CHAIN-274 CHAIN-275] ([#190](https://github.com/fluencelabs/deal/issues/190))
+* Deal switching ([#176](https://github.com/fluencelabs/deal/issues/176))
+* Add capacity commitment ([#177](https://github.com/fluencelabs/deal/issues/177))
+* revert for pagination in graphQL ([#170](https://github.com/fluencelabs/deal/issues/170))
+* market offer ([#150](https://github.com/fluencelabs/deal/issues/150))
+
+### Features
+
+* Add capacity commitment ([#177](https://github.com/fluencelabs/deal/issues/177)) ([5051856](https://github.com/fluencelabs/deal/commit/50518565d25a3805972d965ecee16e03dbb5286b))
+* add deploy instruction [CHAIN-213] ([#129](https://github.com/fluencelabs/deal/issues/129)) ([a9d2f8f](https://github.com/fluencelabs/deal/commit/a9d2f8f513e7052f1f252af8aaadd3272d3495a1))
+* add deploy script with basic auth for stage ([#171](https://github.com/fluencelabs/deal/issues/171)) ([6484227](https://github.com/fluencelabs/deal/commit/6484227a57ad0c49887ad2353a051373017e7c7a))
+* add lib for interaction with the deal contract system ([#51](https://github.com/fluencelabs/deal/issues/51)) ([0911822](https://github.com/fluencelabs/deal/commit/0911822d02ea32df0fd0acd94d3421fd9a752e92))
+* add multicall ([#211](https://github.com/fluencelabs/deal/issues/211)) ([432601a](https://github.com/fluencelabs/deal/commit/432601a261104f927c5c315461afa3749868115e))
+* add networks to client (kras, stage, testnet) ([#55](https://github.com/fluencelabs/deal/issues/55)) ([8e899e6](https://github.com/fluencelabs/deal/commit/8e899e6996273d30b79db99b58a71c71c69e9891))
+* add RPC caller [chain 233] ([#165](https://github.com/fluencelabs/deal/issues/165)) ([fc00df4](https://github.com/fluencelabs/deal/commit/fc00df476d6647259f4e882641d95645e62ab383))
+* add whitelist [fixes CHAIN-273 CHAIN-274 CHAIN-275] ([#190](https://github.com/fluencelabs/deal/issues/190)) ([a3c67ee](https://github.com/fluencelabs/deal/commit/a3c67eed02c7ae96900ad10d89c3eee092053c9b))
+* auto deploy ([#76](https://github.com/fluencelabs/deal/issues/76)) ([de45ca3](https://github.com/fluencelabs/deal/commit/de45ca3c32955c62beae983de68d0d9344f1c5a9))
+* Chain 188 use openzeppelin owner in deal ([#119](https://github.com/fluencelabs/deal/issues/119)) ([9ed0589](https://github.com/fluencelabs/deal/commit/9ed058978324e9aeddb297f89ea8755a0094da1d))
+* CHAIN-191 Deploy on IPC subnet ([#122](https://github.com/fluencelabs/deal/issues/122)) ([fca6895](https://github.com/fluencelabs/deal/commit/fca68954f6df170c2dae496068a29e4d79d178e4))
+* change calculation logic ([1127734](https://github.com/fluencelabs/deal/commit/1127734e5c285e049310d3e7b7df3df47d02d50a))
+* convert automatically token values [chain 249] ([#169](https://github.com/fluencelabs/deal/issues/169)) ([3880c4c](https://github.com/fluencelabs/deal/commit/3880c4ce8ae903d6b14223e198d4a3f3957888ad))
+* deal lifecycle [#1](https://github.com/fluencelabs/deal/issues/1) ([2bd70cc](https://github.com/fluencelabs/deal/commit/2bd70ccdd8f94dde37c96ae0a942803b86fa83d8))
+* Deal switching ([#176](https://github.com/fluencelabs/deal/issues/176)) ([4d81ec4](https://github.com/fluencelabs/deal/commit/4d81ec4c47bbeaa490e64b22ed8cf147dade9a87))
+* deploy to filecoin env ([#105](https://github.com/fluencelabs/deal/issues/105)) ([fb55199](https://github.com/fluencelabs/deal/commit/fb55199a98d09705a269bd1a6a975d280d85c034))
+* doc with mumbai example [CHAIN-225] ([#155](https://github.com/fluencelabs/deal/issues/155)) ([8d45f3c](https://github.com/fluencelabs/deal/commit/8d45f3c03e707a0ecea0ed1789fb897f1fc2392a))
+* integrate deal-switching into offchain matcher [CHAIN-269] ([#192](https://github.com/fluencelabs/deal/issues/192)) ([359528a](https://github.com/fluencelabs/deal/commit/359528a5803f78920777dd9b953579807aab5ee6))
+* market offer ([#150](https://github.com/fluencelabs/deal/issues/150)) ([c1bfb46](https://github.com/fluencelabs/deal/commit/c1bfb4615c44805e5d56a3a83623b4e38d433705))
+* paginator in graphql [chain-238] ([#163](https://github.com/fluencelabs/deal/issues/163)) ([12dcce7](https://github.com/fluencelabs/deal/commit/12dcce7c44e224cd3c5e33d53fa0192138b1d589))
+* Provider metadata ([#213](https://github.com/fluencelabs/deal/issues/213)) ([738af3d](https://github.com/fluencelabs/deal/commit/738af3d867083a9f40d40328d06777618fe18433))
+* random X integration  ([#204](https://github.com/fluencelabs/deal/issues/204)) ([18ad79e](https://github.com/fluencelabs/deal/commit/18ad79e4e4b7ad24cd2dcf03ef9ce4c88d5243f0))
+* resolve search fields [chain 237] ([#172](https://github.com/fluencelabs/deal/issues/172)) ([ec4180b](https://github.com/fluencelabs/deal/commit/ec4180bfe2fe1ebf3178960ca3f18337fa67af4f))
+* subnets update ([#83](https://github.com/fluencelabs/deal/issues/83)) ([39b5700](https://github.com/fluencelabs/deal/commit/39b5700e0774d9415656eb56bad4dbb06c6e9509))
+* update deployments ([459175f](https://github.com/fluencelabs/deal/commit/459175f8472375fe33097f9767b7d427dbc5765b))
+* whitelist & blacklist ([#98](https://github.com/fluencelabs/deal/issues/98)) ([c6d9589](https://github.com/fluencelabs/deal/commit/c6d9589e1fda42ce3b73461f1704235a6c4fefa0))
+
+
+### Bug Fixes
+
+* add kras deployment ([11b6741](https://github.com/fluencelabs/deal/commit/11b6741397f370f325425c877f1606f88add7079))
+* add multicall deploy on mumbai ([#173](https://github.com/fluencelabs/deal/issues/173)) ([f3a9d8a](https://github.com/fluencelabs/deal/commit/f3a9d8a88af41ee1f8e8ffb789e2c98ec80d31a8))
+* add verify in deploy ([f266365](https://github.com/fluencelabs/deal/commit/f26636559402f5f2c6c6d277c7ccfe569744b2d5))
+* add volume to docker-compose and notes ([#164](https://github.com/fluencelabs/deal/issues/164)) ([e210b6e](https://github.com/fluencelabs/deal/commit/e210b6efed207ce923ffe0d5b0cb08f17169904e))
+* addresses ([#62](https://github.com/fluencelabs/deal/issues/62)) ([63a97b5](https://github.com/fluencelabs/deal/commit/63a97b5f9dac8d3cad38a2155cb6c776b8679f83))
+* build ([#88](https://github.com/fluencelabs/deal/issues/88)) ([7bab4f7](https://github.com/fluencelabs/deal/commit/7bab4f76b45748d84e523152f477e8f3e9af7f38))
+* ci-uses-capacity-in-cli ([#200](https://github.com/fluencelabs/deal/issues/200)) ([4b53776](https://github.com/fluencelabs/deal/commit/4b53776ccc93ecd61f759586758dd5d2e1de0602))
+* client ([5f9b551](https://github.com/fluencelabs/deal/commit/5f9b551ddbf060cab32e0602b6d19f15258a0069))
+* deal whitelist bug ([#193](https://github.com/fluencelabs/deal/issues/193)) ([b9fc3a3](https://github.com/fluencelabs/deal/commit/b9fc3a383c7be26439de9f8a605328825cdefc5c))
+* deploy ([40aee38](https://github.com/fluencelabs/deal/commit/40aee38e8a231804d807ba6f20e4a0cf598745d7))
+* deploy configs ([332c894](https://github.com/fluencelabs/deal/commit/332c894dfafb684e48c901e990e03925c8625494))
+* **deps:** update dependency @graphprotocol/graph-cli to v0.67.0 ([#201](https://github.com/fluencelabs/deal/issues/201)) ([d42e78c](https://github.com/fluencelabs/deal/commit/d42e78c03baf64fb7a9e380814d102c5a8236d29))
+* **deps:** update dependency @graphprotocol/graph-cli to v0.67.1 ([#205](https://github.com/fluencelabs/deal/issues/205)) ([ff15f28](https://github.com/fluencelabs/deal/commit/ff15f28b948bb8c559d68021877e4e92b91d4f58))
+* fix bugs and update cp peers logic ([#87](https://github.com/fluencelabs/deal/issues/87)) ([56f5141](https://github.com/fluencelabs/deal/commit/56f5141bc95826349e267d3f2d6982aa9394152a))
+* fix phassphrase ([a656a42](https://github.com/fluencelabs/deal/commit/a656a426a9c4b432f41b59041b392f81bc922485))
+* fix tests and deploy ([#90](https://github.com/fluencelabs/deal/issues/90)) ([0c9397b](https://github.com/fluencelabs/deal/commit/0c9397b34e3c5cc21a1394cae18f4898974e2e8d))
+* fix the matching event, migrate cid from string to struct, fix tests ([#60](https://github.com/fluencelabs/deal/issues/60)) ([f2e87a8](https://github.com/fluencelabs/deal/commit/f2e87a8cf711e90266c760985d1e4eac3be3e9ce))
+* ide typings ([#123](https://github.com/fluencelabs/deal/issues/123)) ([c5bd70f](https://github.com/fluencelabs/deal/commit/c5bd70f244d59e27f1c64efff33a2ab0b1a84226))
+* merge ([#92](https://github.com/fluencelabs/deal/issues/92)) ([63aa080](https://github.com/fluencelabs/deal/commit/63aa0809bb03d036fc4e64bfac0b923f84146f1d))
+* minor fixes ([#207](https://github.com/fluencelabs/deal/issues/207)) ([d70a1f5](https://github.com/fluencelabs/deal/commit/d70a1f5e99799c0f5d4a6e0e53383dbb111a295a))
+* redeploy contracts ([3430d8b](https://github.com/fluencelabs/deal/commit/3430d8bb6d8fba4e15abb5b974eb2092e0e4dd4e))
+* remove peer fix ([8cff584](https://github.com/fluencelabs/deal/commit/8cff5843899fa12e597263b36708b1c5bb128a2f))
+* resolve CHAIN-247 ([#154](https://github.com/fluencelabs/deal/issues/154)) ([eb934e6](https://github.com/fluencelabs/deal/commit/eb934e610fc2396216685c88129b4d8a0c1cc322))
+* revert for pagination in graphQL ([#170](https://github.com/fluencelabs/deal/issues/170)) ([f7712fa](https://github.com/fluencelabs/deal/commit/f7712fa04c29d7a92a1b8b421a562fdaf0cb24ad))
+* revert txconfig ([968b3b2](https://github.com/fluencelabs/deal/commit/968b3b2d05232bf6d4cce7650b08216033f12790))
+* update cid ([b368cf0](https://github.com/fluencelabs/deal/commit/b368cf0695001068635c897b153999c2b506023b))
+* update deployment for mumbai ([#84](https://github.com/fluencelabs/deal/issues/84)) ([2a331a5](https://github.com/fluencelabs/deal/commit/2a331a5e863fa521fca705699fb51f92a5056ac0))
+* Update deployment v3 ([#214](https://github.com/fluencelabs/deal/issues/214)) ([9f1a180](https://github.com/fluencelabs/deal/commit/9f1a180dc82939505ead70f7c62b472c1e7fb775))
+* update deployments ([6b50ff6](https://github.com/fluencelabs/deal/commit/6b50ff68c951f16968b5762b151fc2a46803f526))
+* update subgraph configs ([#208](https://github.com/fluencelabs/deal/issues/208)) ([f373529](https://github.com/fluencelabs/deal/commit/f373529a935e8d442e74c5fe5e689fa0cec6b52d))
+* version in pkg ([0bfacc6](https://github.com/fluencelabs/deal/commit/0bfacc686c1eeab6b578ded014ce71c43e93e42e))
+
 ## [0.2.22](https://github.com/fluencelabs/deal/compare/deal-aurora-v0.2.21...deal-aurora-v0.2.22) (2023-11-17)
 
 
