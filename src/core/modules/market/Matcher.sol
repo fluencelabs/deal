@@ -42,6 +42,8 @@ abstract contract Matcher is Offer, IMatcher {
      * @notice - Offer, or Peer not allowed to match (deal.isProviderAllowed, allowed prices, paymentToken, effectors)
      * @notice - Compute Unit (CU): Active CC status, also note, protocol does not allow more than one CU per peer
      * @notice    for the same Deal.
+     * @notice TODO: consolidate workaround: when it comes to check CC status, on wrong status the whole transaction
+     * @notice  will be failed instead of to be silenced.
      * @dev There should be `bytes32[][] calldata peers` as well, but it is not supported by subgraph codegen.
      * @dev  Ref to https://github.com/graphprotocol/graph-tooling/issues/342.
      * @param deal: Deal to match.
