@@ -31,7 +31,7 @@ contract CapacityCommitmentTest is Test {
     );
     event CommitmentRemoved(bytes32 indexed commitmentId);
     event CommitmentActivated(
-        bytes32 indexed peerId, bytes32 indexed commitmentId, uint256 startEpoch, uint256 endEpoch, bytes32[] unitIds
+        bytes32 indexed peerId, bytes32 indexed commitmentId, uint256 startEpoch, uint256 endEpoch, bytes32[] unitIds, uint256 nextCCFailedEpoch
     );
     event CommitmentFinished(bytes32 indexed commitmentId);
 
@@ -149,7 +149,8 @@ contract CapacityCommitmentTest is Test {
 
         vm.expectEmit(true, true, true, true, address(deployment.capacity));
         emit CommitmentActivated(
-            peerId, commitmentId, currentEpoch + 1, currentEpoch + 1 + ccDuration, registerPeers[0].unitIds
+            // TODO: according to deploy script params. Use formula instead...
+            peerId, commitmentId, currentEpoch + 1, currentEpoch + 1 + ccDuration, registerPeers[0].unitIds, 11
         );
 
         deployment.capacity.depositCollateral(commitmentId);
