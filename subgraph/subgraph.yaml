@@ -42,6 +42,8 @@ dataSources:
         - name: Capacity
           file: ../out/Capacity.sol/Capacity.json
       eventHandlers:
+        - event: Initialized(uint8)
+          handler: handleInitialized
         - event: CommitmentCreated(indexed
             bytes32,bytes32,uint256,address,uint256,uint256)
           handler: handleCommitmentCreated
