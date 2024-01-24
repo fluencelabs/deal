@@ -101,10 +101,11 @@ type Peer @entity {
   "To access history of capacity commitments."
   capacityCommitments: [CapacityCommitment!] @derivedFrom(field: "peer")
 
-  # Indexer query helper fields below.
+  # Indexer query helper fields below (named with prefix of already existed field, e.g. currentCapacityCommitment).
   "To understand if collateral for peer have been submitted. This field should be use in conjunction with currentCapacityCommitment."
-  capacityFieldCollateralDepositedAt: BigInt
-
+  currentCCCollateralDepositedAt: BigInt
+  currentCCEndEpoch: BigInt
+  currentCCNextCCFailedEpoch: BigInt
 
   # We need field to query from perspective of Peer on deal field.
   joinedDeals: [DealToPeer!] @derivedFrom(field: "peer")

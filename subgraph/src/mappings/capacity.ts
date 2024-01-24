@@ -41,8 +41,10 @@ export function handleCommitmentActivated(event: CommitmentActivated): void {
   commitment.save()
 
   let peer = Peer.load(event.params.peerId.toHex()) as Peer;
-  peer.capacityFieldCollateralDepositedAt = event.params.startEpoch
-  peer.save()
+  peer.currentCCCollateralDepositedAt = event.params.startEpoch;
+  peer.currentCCEndEpoch = event.params.endEpoch;
+  peer.currentCCNextCCFailedEpoch = event.params.nextCCFailedEpoch;
+  peer.save();
 }
 
 // @deprecated. Currently, no use for the event as it is used in handleCommitmentActivated.
