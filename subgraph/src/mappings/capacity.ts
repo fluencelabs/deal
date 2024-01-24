@@ -65,5 +65,3 @@ export function handleCommitmentSnapshotCommitted(event: CommitmentSnapshotCommi
 }
 
 // TODO: commitment expired and other events.
-
-// TODO: catch nextCCFailedEpoch change in CommitmentSnapshotCommitted...
