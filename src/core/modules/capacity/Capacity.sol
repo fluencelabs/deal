@@ -743,7 +743,6 @@ contract Capacity is CapacityConst, Multicall, Whitelist, UUPSUpgradeable, ICapa
         if (nextAdditionalActiveUnitCount > 0) {
             cc.info.activeUnitCount += nextAdditionalActiveUnitCount;
             cc.info.nextAdditionalActiveUnitCount = 0;
-            // TODO: we changed nextActive... but what about _setActiveUnitCount(...);?
         }
 
         if (epoch >= failedEpoch) {

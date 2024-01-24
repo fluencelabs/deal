@@ -132,6 +132,22 @@ contract CapacityCommitmentTest is Test {
         assertEq(commitment.exitedUnitCount, 0, "ExitedUnitCount mismatch");
     }
 
+    // Mirror function _failedEpoch internal method in this case (after deposit).
+    function _failedEpoch(
+        uint256 maxFailedRatio_,
+        uint256 unitCount_,
+        uint256 activeUnitCount_,
+        uint256 nextAdditionalActiveUnitCount_,
+        uint256 totalCUFailCount_,
+        uint256 lastSnapshotEpoch_
+    ) private view returns (uint256 failedEpoch) {
+        uint256 maxFails = maxFailedRatio_ * unitCount_;
+        uint256 remainingFails = maxFails - totalCUFailCount_;
+        remainingFails = remainingFails - activeUnitCount_;
+        activeUnitCount_ += nextAdditionalActiveUnitCount_;
+        failedEpoch = 1 + lastSnapshotEpoch_ + (remainingFails / activeUnitCount_);
+    }
+
     function test_DepositCollateral() public {
         bytes32 peerId = registerPeers[0].peerId;
         uint256 unitCount = registerPeers[0].unitIds.length;
@@ -147,10 +163,21 @@ contract CapacityCommitmentTest is Test {
         vm.expectEmit(true, true, false, true, address(deployment.capacity));
         emit CollateralDeposited(commitmentId, amount);
 
+        // Calculate next failed epoch to check in event.
+        ICapacity.CommitmentView memory commitmentView = deployment.capacity.getCommitment(commitmentId);
+        uint nextFailedEpoch = _failedEpoch(
+            deployment.capacity.maxFailedRatio(),
+            commitmentView.unitCount,
+            commitmentView.unitCount,
+            0,
+            0,
+            currentEpoch
+        );
+
         vm.expectEmit(true, true, true, true, address(deployment.capacity));
         emit CommitmentActivated(
             // TODO: according to deploy script params. Use formula instead...
-            peerId, commitmentId, currentEpoch + 1, currentEpoch + 1 + ccDuration, registerPeers[0].unitIds, 11
+            peerId, commitmentId, currentEpoch + 1, currentEpoch + 1 + ccDuration, registerPeers[0].unitIds, nextFailedEpoch
         );
 
         deployment.capacity.depositCollateral(commitmentId);
