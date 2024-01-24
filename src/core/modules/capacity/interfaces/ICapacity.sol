@@ -40,7 +40,9 @@ interface ICapacity is ICapacityConst {
     // ------------------ Types ------------------
     enum CCStatus {
         Active,
+        // WaitDelegation - before collateral is deposited.
         WaitDelegation,
+        // Status is WaitStart - means collateral deposited, and epoch should be proceed before Active.
         WaitStart,
         Inactive,
         Failed,
