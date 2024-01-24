@@ -234,6 +234,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: fluencelabs/deal
+          token: ${{ secrets.FLUENCEBOT_RELEASE_PLEASE_PAT }}
           ref: ${{ inputs.ref }}
           submodules: recursive
 
