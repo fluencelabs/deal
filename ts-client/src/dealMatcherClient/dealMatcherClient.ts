@@ -92,6 +92,8 @@ export class DealMatcherClient {
               //  in query we relay on that field to filter Failed CC.
               nextCCFailedEpoch_gt: currentEpochString,
               deleted: false,
+              // Wait delegation is duplicating startEpoch_lte check, though.
+              status_not_in: ["WaitDelegation", "Removed"],
             },
           },
           {

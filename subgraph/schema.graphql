@@ -182,6 +182,7 @@ type Deal @entity {
 enum CapacityCommitmentStatus {
   Active
   WaitDelegation
+  WaitStart
   Inactive
   Failed
   Removed
@@ -193,7 +194,7 @@ type CapacityCommitment @entity {
   peer: Peer!
   # TODO: status on storage does not give right status as it is from getStatus() method.
   # TODO: add required property.
-  CCStatus: CapacityCommitmentStatus
+  status: CapacityCommitmentStatus
   collateralPerUnit: BigInt!
   duration: BigInt!
   rewardDelegatorRate: Int!

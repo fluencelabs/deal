@@ -163,12 +163,16 @@ export function createOrLoadGraphNetwork(): GraphNetwork {
   return graphNetwork as GraphNetwork
 }
 
+// Statuses that could be saved in Subgraph.
+// Some of the statues should be calculated regard to current epoch and should not be stored in the subgraph.
 // We have to mirror enums according to
 //  https://ethereum.stackexchange.com/questions/139078/how-to-use-subgraph-enums-in-the-mapping.
 export class CapacityCommitmentStatus {
-  static Active: string = "Active";
+  static Active: string = "Active"; // Should not be stored!
   static WaitDelegation: string = "WaitDelegation";
-  static Inactive: string = "Inactive";
-  static Failed: string = "Failed";
+  // Status is WaitStart - means collateral deposited.
+  static WaitStart: string = "WaitStart";
+  static Inactive: string = "Inactive";  // Should not be stored!
+  static Failed: string = "Failed";  // Should not be stored!
   static Removed: string = "Removed";
 }

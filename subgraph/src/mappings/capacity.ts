@@ -1,15 +1,19 @@
 import {CapacityCommitmentStatus, ZERO_BIG_INT} from "../models";
 import {CapacityCommitment, Peer} from "../../generated/schema";
 import {
-  CollateralDeposited, CommitmentActivated,
-  CommitmentCreated, CommitmentRemoved, CommitmentSnapshotCommitted
+  CollateralDeposited,
+  CommitmentActivated,
+  CommitmentCreated,
+  CommitmentFinished,
+  CommitmentRemoved,
+  CommitmentSnapshotCommitted
 } from "../../generated/Capacity/Capacity";
 
 export function handleCommitmentCreated(event: CommitmentCreated): void {
   let commitment = new CapacityCommitment(event.params.commitmentId.toHex());
 
   commitment.peer = event.params.peerId.toHex()
-  commitment.CCStatus = CapacityCommitmentStatus.WaitDelegation
+  commitment.status = CapacityCommitmentStatus.WaitDelegation
   commitment.collateralPerUnit = event.params.fltCCCollateralPerUnit
   commitment.duration = event.params.duration
   commitment.rewardDelegatorRate = event.params.rewardDelegationRate.toI32()
@@ -34,7 +38,7 @@ export function handleCommitmentCreated(event: CommitmentCreated): void {
 export function handleCommitmentActivated(event: CommitmentActivated): void {
   let commitment = CapacityCommitment.load(event.params.commitmentId.toHex()) as CapacityCommitment;
   // TODO: resolve when on chain resolved problem of waiting for collateral status.
-  // commitment.CCStatus = CapacityCommitmentStatus.Active
+  commitment.status = CapacityCommitmentStatus.WaitStart
   commitment.startEpoch = event.params.startEpoch
   commitment.endEpoch = event.params.endEpoch
   commitment.unitCount = event.params.unitIds.length
@@ -75,6 +79,16 @@ export function handleCommitmentRemoved(event: CommitmentRemoved): void {
   peer.save();
 }
 
+export function handleCommitmentFinished(event: CommitmentFinished): void {
+  let commitment = CapacityCommitment.load(event.params.commitmentId.toHex()) as CapacityCommitment;
+  commitment.status = CapacityCommitmentStatus.Removed;
+  commitment.save();
+
+  let peer = Peer.load(commitment.peer) as Peer;
+  peer.currentCapacityCommitment = null;
+  peer.save();
+}
+
 // TODO: commitment expired and other events.
 
-// TODO: handle CommitmentFinished event.
+

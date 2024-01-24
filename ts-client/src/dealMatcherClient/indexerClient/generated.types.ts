@@ -36,7 +36,6 @@ export type Block_Height = {
  */
 export type CapacityCommitment = {
   __typename?: 'CapacityCommitment';
-  CCStatus?: Maybe<CapacityCommitmentStatus>;
   collateralPerUnit: Scalars['BigInt']['output'];
   delegator: Scalars['String']['output'];
   /** If CC deleted before collateral deposited. */
@@ -50,6 +49,7 @@ export type CapacityCommitment = {
   peer: Peer;
   rewardDelegatorRate: Scalars['Int']['output'];
   startEpoch: Scalars['BigInt']['output'];
+  status?: Maybe<CapacityCommitmentStatus>;
   totalCUFailCount: Scalars['Int']['output'];
   unitCount: Scalars['Int']['output'];
 };
@@ -59,13 +59,10 @@ export type CapacityCommitmentStatus =
   | 'Failed'
   | 'Inactive'
   | 'Removed'
-  | 'WaitDelegation';
+  | 'WaitDelegation'
+  | 'WaitStart';
 
 export type CapacityCommitment_Filter = {
-  CCStatus?: InputMaybe<CapacityCommitmentStatus>;
-  CCStatus_in?: InputMaybe<Array<CapacityCommitmentStatus>>;
-  CCStatus_not?: InputMaybe<CapacityCommitmentStatus>;
-  CCStatus_not_in?: InputMaybe<Array<CapacityCommitmentStatus>>;
   /** Filter for the block changed event. */
   _change_block?: InputMaybe<BlockChangedFilter>;
   and?: InputMaybe<Array<InputMaybe<CapacityCommitment_Filter>>>;
@@ -187,6 +184,10 @@ export type CapacityCommitment_Filter = {
   startEpoch_lte?: InputMaybe<Scalars['BigInt']['input']>;
   startEpoch_not?: InputMaybe<Scalars['BigInt']['input']>;
   startEpoch_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  status?: InputMaybe<CapacityCommitmentStatus>;
+  status_in?: InputMaybe<Array<CapacityCommitmentStatus>>;
+  status_not?: InputMaybe<CapacityCommitmentStatus>;
+  status_not_in?: InputMaybe<Array<CapacityCommitmentStatus>>;
   totalCUFailCount?: InputMaybe<Scalars['Int']['input']>;
   totalCUFailCount_gt?: InputMaybe<Scalars['Int']['input']>;
   totalCUFailCount_gte?: InputMaybe<Scalars['Int']['input']>;
@@ -206,7 +207,6 @@ export type CapacityCommitment_Filter = {
 };
 
 export type CapacityCommitment_OrderBy =
-  | 'CCStatus'
   | 'collateralPerUnit'
   | 'delegator'
   | 'deleted'
@@ -224,6 +224,7 @@ export type CapacityCommitment_OrderBy =
   | 'peer__isAnyJoinedDeals'
   | 'rewardDelegatorRate'
   | 'startEpoch'
+  | 'status'
   | 'totalCUFailCount'
   | 'unitCount';
 
@@ -1446,7 +1447,6 @@ export type Peer_OrderBy =
   | 'currentCCEndEpoch'
   | 'currentCCNextCCFailedEpoch'
   | 'currentCapacityCommitment'
-  | 'currentCapacityCommitment__CCStatus'
   | 'currentCapacityCommitment__collateralPerUnit'
   | 'currentCapacityCommitment__delegator'
   | 'currentCapacityCommitment__deleted'
@@ -1458,6 +1458,7 @@ export type Peer_OrderBy =
   | 'currentCapacityCommitment__nextCCFailedEpoch'
   | 'currentCapacityCommitment__rewardDelegatorRate'
   | 'currentCapacityCommitment__startEpoch'
+  | 'currentCapacityCommitment__status'
   | 'currentCapacityCommitment__totalCUFailCount'
   | 'currentCapacityCommitment__unitCount'
   | 'id'
