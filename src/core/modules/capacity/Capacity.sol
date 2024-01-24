@@ -289,6 +289,9 @@ contract Capacity is CapacityConst, Multicall, Whitelist, UUPSUpgradeable, ICapa
         return commitmentId;
     }
 
+    /*
+     * @dev Delete! capacity commitment before collateral deposited.
+    */
     function removeCommitment(bytes32 commitmentId) external {
         CommitmentStorage storage s = _getCommitmentStorage();
         Commitment storage cc = s.commitments[commitmentId];

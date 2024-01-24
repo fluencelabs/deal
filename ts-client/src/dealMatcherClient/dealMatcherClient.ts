@@ -91,6 +91,7 @@ export class DealMatcherClient {
               // On each submitProof indexer should save nextCCFailedEpoch, and
               //  in query we relay on that field to filter Failed CC.
               nextCCFailedEpoch_gt: currentEpochString,
+              deleted: false,
             },
           },
           {

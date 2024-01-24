@@ -206,4 +206,6 @@ type CapacityCommitment @entity {
   #  TODO: store CUs.
   unitCount: Int!
   nextCCFailedEpoch: BigInt!
+  "If CC deleted before collateral deposited."
+  deleted: Boolean!
 }

@@ -2,7 +2,7 @@ import {CapacityCommitmentStatus, ZERO_BIG_INT} from "../models";
 import {CapacityCommitment, Peer} from "../../generated/schema";
 import {
   CollateralDeposited, CommitmentActivated,
-  CommitmentCreated, CommitmentSnapshotCommitted
+  CommitmentCreated, CommitmentRemoved, CommitmentSnapshotCommitted
 } from "../../generated/Capacity/Capacity";
 
 export function handleCommitmentCreated(event: CommitmentCreated): void {
@@ -21,6 +21,7 @@ export function handleCommitmentCreated(event: CommitmentCreated): void {
   commitment.failedEpoch = ZERO_BIG_INT
   commitment.exitedUnitCount = 0
   commitment.nextCCFailedEpoch = ZERO_BIG_INT
+  commitment.deleted = false;
   commitment.save()
 
   let peer = Peer.load(event.params.peerId.toHex()) as Peer;
@@ -64,4 +65,16 @@ export function handleCommitmentSnapshotCommitted(event: CommitmentSnapshotCommi
   cc.save();
 }
 
+export function handleCommitmentRemoved(event: CommitmentRemoved): void {
+  let commitment = CapacityCommitment.load(event.params.commitmentId.toHex()) as CapacityCommitment;
+  commitment.deleted = true;
+  commitment.save();
+
+  let peer = Peer.load(commitment.peer) as Peer;
+  peer.currentCapacityCommitment = null;
+  peer.save();
+}
+
 // TODO: commitment expired and other events.
+
+// TODO: handle CommitmentFinished event.

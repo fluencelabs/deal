@@ -39,6 +39,8 @@ export type CapacityCommitment = {
   CCStatus?: Maybe<CapacityCommitmentStatus>;
   collateralPerUnit: Scalars['BigInt']['output'];
   delegator: Scalars['String']['output'];
+  /** If CC deleted before collateral deposited. */
+  deleted: Scalars['Boolean']['output'];
   duration: Scalars['BigInt']['output'];
   endEpoch: Scalars['BigInt']['output'];
   exitedUnitCount: Scalars['Int']['output'];
@@ -95,6 +97,10 @@ export type CapacityCommitment_Filter = {
   delegator_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
   delegator_starts_with?: InputMaybe<Scalars['String']['input']>;
   delegator_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  deleted?: InputMaybe<Scalars['Boolean']['input']>;
+  deleted_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+  deleted_not?: InputMaybe<Scalars['Boolean']['input']>;
+  deleted_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
   duration?: InputMaybe<Scalars['BigInt']['input']>;
   duration_gt?: InputMaybe<Scalars['BigInt']['input']>;
   duration_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -203,6 +209,7 @@ export type CapacityCommitment_OrderBy =
   | 'CCStatus'
   | 'collateralPerUnit'
   | 'delegator'
+  | 'deleted'
   | 'duration'
   | 'endEpoch'
   | 'exitedUnitCount'
@@ -1442,6 +1449,7 @@ export type Peer_OrderBy =
   | 'currentCapacityCommitment__CCStatus'
   | 'currentCapacityCommitment__collateralPerUnit'
   | 'currentCapacityCommitment__delegator'
+  | 'currentCapacityCommitment__deleted'
   | 'currentCapacityCommitment__duration'
   | 'currentCapacityCommitment__endEpoch'
   | 'currentCapacityCommitment__exitedUnitCount'

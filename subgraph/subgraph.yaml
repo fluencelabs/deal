@@ -50,6 +50,8 @@ dataSources:
           handler: handleCommitmentActivated
         - event: CommitmentSnapshotCommitted(bytes32,uint256)
           handler: handleCommitmentSnapshotCommitted
+        - event: CommitmentRemoved(indexed bytes32)
+          handler: handleCommitmentRemoved
       file: ./src/mappings/capacity.ts
   - kind: ethereum/contract
     name: Market
