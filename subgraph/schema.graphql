@@ -103,7 +103,8 @@ type Peer @entity {
 
   # Indexer query helper fields below.
   "To understand if collateral for peer have been submitted. This field should be use in conjunction with currentCapacityCommitment."
-  collateralDepositedAt: BigInt
+  capacityFieldCollateralDepositedAt: BigInt
+
 
   # We need field to query from perspective of Peer on deal field.
   joinedDeals: [DealToPeer!] @derivedFrom(field: "peer")

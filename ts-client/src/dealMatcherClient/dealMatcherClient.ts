@@ -73,7 +73,7 @@ export class DealMatcherClient {
           currentCapacityCommitment_not: null,
           // Since it is not possible to filter by currentCapacityCommitment_.startEpoch_lt
           //  we use this help field.
-          collateralDepositedAt_lt: currentEpochString,
+          capacityFieldCollateralDepositedAt_lt: currentEpochString,
           // TODO: optimise query - mirror endEpoch check
           // TODO: optimise query - mirror nextCCFailedEpoch check
         },

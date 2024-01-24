@@ -41,7 +41,7 @@ export function handleCommitmentActivated(event: CommitmentActivated): void {
   commitment.save()
 
   let peer = Peer.load(event.params.peerId.toHex()) as Peer;
-  peer.collateralDepositedAt = event.params.startEpoch
+  peer.capacityFieldCollateralDepositedAt = event.params.startEpoch
   peer.save()
 }
 
