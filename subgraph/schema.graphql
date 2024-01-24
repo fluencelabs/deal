@@ -201,11 +201,14 @@ type CapacityCommitment @entity {
   delegator: String!
   startEpoch: BigInt!
   endEpoch: BigInt!
+  # TODO: Not updated not used resolve in other feat.
   totalCUFailCount: Int!
+  # TODO: Not updated not used resolve in other feat.
   failedEpoch: BigInt!
+  # TODO: Not updated not used resolve in other feat.
   exitedUnitCount: Int!
   #  TODO: store CUs.
-  unitCount: Int!
+  activeUnitCount: Int!
   nextCCFailedEpoch: BigInt!
   "If CC deleted before collateral deposited."
   deleted: Boolean!
