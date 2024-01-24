@@ -14,6 +14,8 @@ type GraphNetwork @entity {
   # Add constants from Core contract below.
   coreEpochDuration: Int
   initTimestamp: Int
+  # Capacity consts are below.
+  capacityMaxFailedRatio: Int
 }
 
 type Token @entity(immutable: true) {
@@ -209,7 +211,11 @@ type CapacityCommitment @entity {
   exitedUnitCount: Int!
   #  TODO: store CUs.
   activeUnitCount: Int!
-  nextCCFailedEpoch: BigInt!
+  nextAdditionalActiveUnitCount: Int!
+  unitCount: Int!
+  snapshotEpoch: BigInt!
   "If CC deleted before collateral deposited."
   deleted: Boolean!
+  "Calculated in subgraph field: next failed epoch means the next epoch without proofs submitted when CC declared to be Failed."
+  nextCCFailedEpoch: BigInt!
 }

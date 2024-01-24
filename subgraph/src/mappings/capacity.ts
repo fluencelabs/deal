@@ -1,4 +1,8 @@
-import {CapacityCommitmentStatus, ZERO_BIG_INT} from "../models";
+import {
+  CapacityCommitmentStatus,
+  createOrLoadGraphNetwork,
+  ZERO_BIG_INT
+} from "../models";
 import {CapacityCommitment, Peer} from "../../generated/schema";
 import {
   CollateralDeposited,
@@ -8,6 +12,20 @@ import {
   CommitmentRemoved,
   CommitmentSnapshotCommitted
 } from "../../generated/Capacity/Capacity";
+import {
+  calculateEpoch,
+  calculateNextFailedCCEpoch, getCapacityMaxFailedRatio,
+} from "../contracts";
+import {Initialized} from "../../generated/Capacity/Capacity";
+import {BigInt} from "@graphprotocol/graph-ts";
+import { log } from '@graphprotocol/graph-ts'
+
+
+export function handleInitialized(event: Initialized): void {
+  let graphNetwork = createOrLoadGraphNetwork();
+  graphNetwork.capacityMaxFailedRatio = getCapacityMaxFailedRatio(event.address).toI32();
+  graphNetwork.save()
+}
 
 export function handleCommitmentCreated(event: CommitmentCreated): void {
   let commitment = new CapacityCommitment(event.params.commitmentId.toHex());
@@ -25,6 +43,9 @@ export function handleCommitmentCreated(event: CommitmentCreated): void {
   commitment.failedEpoch = ZERO_BIG_INT
   commitment.exitedUnitCount = 0
   commitment.nextCCFailedEpoch = ZERO_BIG_INT
+  commitment.unitCount = 0
+  commitment.nextAdditionalActiveUnitCount = 0
+  commitment.snapshotEpoch = ZERO_BIG_INT
   commitment.deleted = false;
   commitment.save()
 
@@ -37,18 +58,34 @@ export function handleCommitmentCreated(event: CommitmentCreated): void {
 //  (the same tx).
 export function handleCommitmentActivated(event: CommitmentActivated): void {
   let commitment = CapacityCommitment.load(event.params.commitmentId.toHex()) as CapacityCommitment;
-  // TODO: resolve when on chain resolved problem of waiting for collateral status.
   commitment.status = CapacityCommitmentStatus.WaitStart
   commitment.startEpoch = event.params.startEpoch
   commitment.endEpoch = event.params.endEpoch
   commitment.activeUnitCount = event.params.unitIds.length
-  commitment.nextCCFailedEpoch = event.params.nextCCFailedEpoch
+  commitment.unitCount = event.params.unitIds.length
+  commitment.nextAdditionalActiveUnitCount = 0
+  const graphNetwork = createOrLoadGraphNetwork();
+  commitment.snapshotEpoch = calculateEpoch(
+    event.block.timestamp,
+    BigInt.fromI32(graphNetwork.initTimestamp),
+    BigInt.fromI32(graphNetwork.coreEpochDuration),
+  )
+
+  const _calculatedFailedEpoch = calculateNextFailedCCEpoch(
+    BigInt.fromString(graphNetwork.capacityMaxFailedRatio.toString()),
+    BigInt.fromString(commitment.unitCount.toString()),
+    BigInt.fromString(commitment.activeUnitCount.toString()),
+    BigInt.fromString(commitment.nextAdditionalActiveUnitCount.toString()),
+    BigInt.fromString(commitment.totalCUFailCount.toString()),
+    BigInt.fromString(commitment.snapshotEpoch.toString()),
+  )
+  commitment.nextCCFailedEpoch = _calculatedFailedEpoch
   commitment.save()
 
   let peer = Peer.load(event.params.peerId.toHex()) as Peer;
   peer.currentCCCollateralDepositedAt = event.params.startEpoch;
   peer.currentCCEndEpoch = event.params.endEpoch;
-  peer.currentCCNextCCFailedEpoch = event.params.nextCCFailedEpoch;
+  peer.currentCCNextCCFailedEpoch = _calculatedFailedEpoch;
   peer.save();
 }
 
@@ -76,6 +113,8 @@ export function handleCommitmentRemoved(event: CommitmentRemoved): void {
 
   let peer = Peer.load(commitment.peer) as Peer;
   peer.currentCapacityCommitment = null;
+  peer.currentCCCollateralDepositedAt = ZERO_BIG_INT;
+  peer.currentCCEndEpoch = ZERO_BIG_INT;
   peer.save();
 }
 
@@ -86,6 +125,8 @@ export function handleCommitmentFinished(event: CommitmentFinished): void {
 
   let peer = Peer.load(commitment.peer) as Peer;
   peer.currentCapacityCommitment = null;
+  peer.currentCCCollateralDepositedAt = ZERO_BIG_INT;
+  peer.currentCCEndEpoch = ZERO_BIG_INT;
   peer.save();
 }
 
