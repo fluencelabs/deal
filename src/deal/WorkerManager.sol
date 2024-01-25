@@ -104,6 +104,7 @@ contract WorkerManager is Config, IWorkerManager {
         bytes32 id = computeUnit;
         require(workerStorage.computeUnitById[id].provider == address(0x00), "Id already used");
 
+        // Protocol restriction: do not allow to deploy on the same peer same Deal.
         require(workerStorage.isComputePeerExist[peerId] == false, "PeerId already used");
         workerStorage.isComputePeerExist[peerId] = true;
 

@@ -207,6 +207,14 @@ contract Capacity is CapacityConst, Multicall, Whitelist, UUPSUpgradeable, ICapa
 
         _setActiveUnitCount(activeUnitCount() - 1);
 
+        emit CommitmentStatsUpdated(
+            commitmentId,
+            cc.info.totalCUFailCount,
+            cc.info.exitedUnitCount,
+            cc.info.activeUnitCount,
+            cc.info.nextAdditionalActiveUnitCount,
+            epoch
+        );
         emit UnitDeactivated(commitmentId, unitId);
     }
 
@@ -235,6 +243,15 @@ contract Capacity is CapacityConst, Multicall, Whitelist, UUPSUpgradeable, ICapa
         cc.info.nextAdditionalActiveUnitCount += 1;
 
         _setActiveUnitCount(activeUnitCount() + 1);
+
+        emit CommitmentStatsUpdated(
+            commitmentId,
+            cc.info.totalCUFailCount,
+            cc.info.exitedUnitCount,
+            cc.info.activeUnitCount,
+            cc.info.nextAdditionalActiveUnitCount,
+            epoch
+        );
     }
     // #endregion
 
@@ -289,6 +306,9 @@ contract Capacity is CapacityConst, Multicall, Whitelist, UUPSUpgradeable, ICapa
         return commitmentId;
     }
 
+    /*
+     * @dev Delete! capacity commitment before collateral deposited.
+    */
     function removeCommitment(bytes32 commitmentId) external {
         CommitmentStorage storage s = _getCommitmentStorage();
         Commitment storage cc = s.commitments[commitmentId];
@@ -449,6 +469,15 @@ contract Capacity is CapacityConst, Multicall, Whitelist, UUPSUpgradeable, ICapa
         require(randomXTargetHash.toBytes32() == targetHash, "Proof is not valid");
         require(targetHash <= difficulty(), "Proof is bigger than difficulty");
 
+        emit CommitmentStatsUpdated(
+            commitmentId,
+            cc.info.totalCUFailCount,
+            cc.info.exitedUnitCount,
+            cc.info.activeUnitCount,
+            cc.info.nextAdditionalActiveUnitCount,
+            epoch
+        );
+
         emit ProofSubmitted(commitmentId, unitId, globalUnitNonce, localUnitNonce);
     }
 
@@ -462,6 +491,15 @@ contract Capacity is CapacityConst, Multicall, Whitelist, UUPSUpgradeable, ICapa
         uint256 epoch = core.currentEpoch() - 1;
         uint256 expiredEpoch = _expiredEpoch(cc);
         _commitCommitmentSnapshot(cc, peer, epoch, expiredEpoch);
+
+        emit CommitmentStatsUpdated(
+            commitmentId,
+            cc.info.totalCUFailCount,
+            cc.info.exitedUnitCount,
+            cc.info.activeUnitCount,
+            cc.info.nextAdditionalActiveUnitCount,
+            epoch
+        );
     }
 
     function removeCUFromCC(bytes32 commitmentId, bytes32[] calldata unitIds) external {
@@ -496,6 +534,15 @@ contract Capacity is CapacityConst, Multicall, Whitelist, UUPSUpgradeable, ICapa
                 cc.info.exitedUnitCount += 1;
             }
         }
+
+        emit CommitmentStatsUpdated(
+            commitmentId,
+            cc.info.totalCUFailCount,
+            cc.info.exitedUnitCount,
+            cc.info.activeUnitCount,
+            cc.info.nextAdditionalActiveUnitCount,
+            currentEpoch_
+        );
     }
 
     function withdrawReward(bytes32 commitmentId) external {
@@ -536,6 +583,14 @@ contract Capacity is CapacityConst, Multicall, Whitelist, UUPSUpgradeable, ICapa
         IMarket.Offer memory offer = market.getOffer(peer.offerId);
         flt.safeTransfer(offer.provider, providerReward);
 
+        emit CommitmentStatsUpdated(
+            commitmentId,
+            cc.info.totalCUFailCount,
+            cc.info.exitedUnitCount,
+            cc.info.activeUnitCount,
+            cc.info.nextAdditionalActiveUnitCount,
+            epoch
+        );
         emit RewardWithdrawn(commitmentId, amount);
     }
     // #endregion

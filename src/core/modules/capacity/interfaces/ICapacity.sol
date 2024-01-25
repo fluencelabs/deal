@@ -73,6 +73,17 @@ interface ICapacity is ICapacityConst {
     /// @param unitId Compute unit id which activated
     event UnitActivated(bytes32 indexed commitmentId, bytes32 indexed unitId);
 
+    // To fetch updates on changes in CC stats (currently only in stats related to CUs).
+    event CommitmentStatsUpdated(
+        bytes32 commitmentId,
+        uint256 totalCUFailCount,
+        uint256 exitedUnitCount,
+        uint256 activeUnitCount,
+        uint256 nextAdditionalActiveUnitCount,
+        // Aka Snapshot epoch but in order to not mislead with actual snapshotting, it renamed to changedEpoch.
+        uint256 changedEpoch
+    );
+
     // ------------------ Errors ------------------
     /// @dev Throws if peer sent too many proofs for the commitment by unit per epoch
     error TooManyProofs();
@@ -80,7 +91,9 @@ interface ICapacity is ICapacityConst {
     // ------------------ Types ------------------
     enum CCStatus {
         Active,
+        // WaitDelegation - before collateral is deposited.
         WaitDelegation,
+        // Status is WaitStart - means collateral deposited, and epoch should be proceed before Active.
         WaitStart,
         Inactive,
         Failed,

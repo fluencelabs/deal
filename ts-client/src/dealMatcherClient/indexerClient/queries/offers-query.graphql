@@ -24,6 +24,7 @@ query OffersQuery(
       first: $peersLimit
       skip: $peersOffset
     ) {
+      id
       computeUnits(
         where: $computeUnitsFilters
         first: $computeUnitsLimit

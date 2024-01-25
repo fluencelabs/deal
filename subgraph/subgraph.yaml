@@ -9,8 +9,8 @@ dataSources:
     network: local
     source:
       abi: Core
-      address: "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650"
-      startBlock: 1
+      address: "0x7B4f352Cd40114f12e82fC675b5BA8C7582FC513"
+      startBlock: 4326
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -29,8 +29,8 @@ dataSources:
     network: local
     source:
       abi: Capacity
-      address: "0x1429859428C0aBc9C2C47C8Ee9FBaf82cFA0F20f"
-      startBlock: 1
+      address: "0x51C65cd0Cdb1A8A8b79dfc2eE965B1bA0bb8fc89"
+      startBlock: 4326
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -42,20 +42,28 @@ dataSources:
         - name: Capacity
           file: ../out/Capacity.sol/Capacity.json
       eventHandlers:
+        - event: Initialized(uint8)
+          handler: handleInitialized
         - event: CommitmentCreated(indexed
             bytes32,bytes32,uint256,address,uint256,uint256)
           handler: handleCommitmentCreated
         - event: CommitmentActivated(indexed bytes32,indexed
             bytes32,uint256,uint256,bytes32[])
           handler: handleCommitmentActivated
+        - event: CommitmentStatsUpdated(bytes32,uint256,uint256,uint256,uint256,uint256)
+          handler: handleCommitmentStatsUpdated
+        - event: CommitmentRemoved(indexed bytes32)
+          handler: handleCommitmentRemoved
+        - event: CommitmentFinished(indexed bytes32)
+          handler: handleCommitmentFinished
       file: ./src/mappings/capacity.ts
   - kind: ethereum/contract
     name: Market
     network: local
     source:
       abi: Market
-      address: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc"
-      startBlock: 1
+      address: "0x87006e75a5B6bE9D1bbF61AC8Cd84f05D9140589"
+      startBlock: 4326
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
