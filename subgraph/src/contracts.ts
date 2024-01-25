@@ -98,10 +98,11 @@ export function calculateNextFailedCCEpoch(
         return failedEpoch;
     }
 
+// It mirrors core.currentEpoch in EpochController.sol.
 export function calculateEpoch(
-    timestamp: BigInt,
-    epochControllerStorageInitTimestamp: BigInt,
-    epochControllerStorageEpochDuration: BigInt,
-  ): BigInt {
+  timestamp: BigInt,
+  epochControllerStorageInitTimestamp: BigInt,
+  epochControllerStorageEpochDuration: BigInt,
+): BigInt {
   return UNO_BIG_INT + (timestamp - epochControllerStorageInitTimestamp) / epochControllerStorageEpochDuration
-  }
+}
