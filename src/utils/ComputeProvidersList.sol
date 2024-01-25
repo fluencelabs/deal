@@ -47,9 +47,8 @@ library ComputeProvidersList {
             mstore(propLengthPtr, add(length, 1)) // list.length++
 
             switch eq(firstPtr, 0)
-            case true {
-                mstore(firstPtrPtr, elementPtr) // list.firstPtr = elementPtr
-            }
+            case true { mstore(firstPtrPtr, elementPtr) }
+                // list.firstPtr = elementPtr
             case false {
                 let propNextPtrPtr := add(lastPtr, 32) // ptr -> element.nextPtr
                 mstore(propNextPtrPtr, elementPtr) // element.nextPtr = elementPtr
@@ -58,7 +57,11 @@ library ComputeProvidersList {
     }
 
     // ------------------ VIEWS ------------------
-    function toBytes32Array(List memory self) internal pure returns (CPsAndPeersBytes32Array memory cpAndPeersBytes32Array) {
+    function toBytes32Array(List memory self)
+        internal
+        pure
+        returns (CPsAndPeersBytes32Array memory cpAndPeersBytes32Array)
+    {
         uint256 length = self.length;
 
         cpAndPeersBytes32Array.computeProviders = new address[](length);
@@ -116,7 +119,7 @@ library ComputeProvidersList {
     }
 
     function add(ComputePeersList memory self, bytes32 value) internal pure {
-        ComputePeer memory peer = ComputePeer({ value: value, nextPtr: bytes32(0) });
+        ComputePeer memory peer = ComputePeer({value: value, nextPtr: bytes32(0)});
 
         bytes32 peerPtr;
         bytes32 listPt;

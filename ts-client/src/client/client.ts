@@ -11,11 +11,11 @@ import {
 import { getDeployment } from "./config.js";
 
 import type {
-  Capacity,
-  Core,
   Deal,
-  ERC20,
-  Market,
+  ICapacity,
+  ICore,
+  IERC20,
+  IMarket,
   Multicall3,
 } from "../typechain-types/index.js";
 import type { Deployment, ContractsENV } from "./config.js";
@@ -34,35 +34,35 @@ export class DealClient {
     return Deal__factory.connect(address, this.signerOrProvider);
   }
 
-  async getCore(): Promise<Core> {
+  async getCore(): Promise<ICore> {
     return Core__factory.connect(
       (await this.deployment).core,
       this.signerOrProvider,
     );
   }
 
-  async getMarket(): Promise<Market> {
+  async getMarket(): Promise<IMarket> {
     return Market__factory.connect(
       await (await this.getCore()).market(),
       this.signerOrProvider,
     );
   }
 
-  async getCapacity(): Promise<Capacity> {
+  async getCapacity(): Promise<ICapacity> {
     return Capacity__factory.connect(
       await (await this.getCore()).capacity(),
       this.signerOrProvider,
     );
   }
 
-  async getFLT(): Promise<ERC20> {
+  async getFLT(): Promise<IERC20> {
     return ERC20__factory.connect(
       (await this.deployment).flt,
       this.signerOrProvider,
     );
   }
 
-  async getUSDC(): Promise<ERC20> {
+  async getUSDC(): Promise<IERC20> {
     return ERC20__factory.connect(
       (await this.deployment).usdc,
       this.signerOrProvider,
