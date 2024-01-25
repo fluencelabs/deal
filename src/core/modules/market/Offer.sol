@@ -83,10 +83,19 @@ abstract contract Offer is BaseModule, IOffer {
         bytes32[] memory unitIds = _getOfferStorage().computeUnitIdsByPeerId[peerId].values();
         ComputeUnitView[] memory units = new ComputeUnitView[](unitIds.length);
 
+        ComputePeer storage computePeer = offerStorage.peers[peerId];
+        bytes32 commitmentId = computePeer.commitmentId;
+
         for (uint256 i = 0; i < unitIds.length; i++) {
             bytes32 unitId = unitIds[i];
             ComputeUnit storage computeUnit = offerStorage.computeUnits[unitId];
-            units[i] = ComputeUnitView({id: unitId, deal: computeUnit.deal});
+            uint256 startEpoch = computeUnit.startEpoch;
+
+            if (commitmentId != bytes32(0x00) && startEpoch == 0) {
+                startEpoch = core.capacity().getCommitment(commitmentId).startEpoch;
+            }
+
+            units[i] = ComputeUnitView({id: unitId, deal: computeUnit.deal, startEpoch: startEpoch});
         }
 
         return units;
@@ -319,6 +328,13 @@ abstract contract Offer is BaseModule, IOffer {
         computePeer.commitmentId = commitmentId;
     }
 
+    function setStartEpoch(bytes32 unitId, uint256 startEpoch) external onlyCapacity {
+        OfferStorage storage offerStorage = _getOfferStorage();
+        ComputeUnit storage computeUnit = offerStorage.computeUnits[unitId];
+
+        computeUnit.startEpoch = startEpoch;
+    }
+
     // Effector info
     function setEffectorInfo(CIDV1 calldata id, string calldata description, CIDV1 calldata metadata)
         external
@@ -415,7 +431,7 @@ abstract contract Offer is BaseModule, IOffer {
             require(offerStorage.computeUnits[unitId].peerId == bytes32(0x00), "Compute unit already exists");
 
             // create compute unit
-            offerStorage.computeUnits[unitId] = ComputeUnit({deal: address(0x00), peerId: peerId});
+            offerStorage.computeUnits[unitId] = ComputeUnit({deal: address(0x00), peerId: peerId, startEpoch: 0});
             offerStorage.computeUnitIdsByPeerId[peerId].add(unitId);
 
             emit ComputeUnitCreated(peerId, unitId);

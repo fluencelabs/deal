@@ -236,7 +236,7 @@ contract Capacity is CapacityConst, Multicall, Whitelist, UUPSUpgradeable, ICapa
         unitProofsInfo.isInactive = false;
         unitProofsInfo.lastMinProofsEpoch = epoch;
 
-        emit UnitActivated(commitmentId, unitId);
+        emit UnitActivated(commitmentId, unitId, epoch + 1);
 
         if (status == CCStatus.Inactive || status == CCStatus.Failed) {
             return;
@@ -246,6 +246,7 @@ contract Capacity is CapacityConst, Multicall, Whitelist, UUPSUpgradeable, ICapa
 
         _setActiveUnitCount(activeUnitCount() + 1);
 
+        market.setStartEpoch(unitId, epoch + 1);
         emit CommitmentStatsUpdated(
             commitmentId,
             cc.info.totalCUFailCount,

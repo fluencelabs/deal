@@ -71,7 +71,7 @@ interface ICapacity is ICapacityConst {
     /// @dev Emitted when a unit activated. Unit is activated when it returned from deal
     /// @param commitmentId Commitment id
     /// @param unitId Compute unit id which activated
-    event UnitActivated(bytes32 indexed commitmentId, bytes32 indexed unitId);
+    event UnitActivated(bytes32 indexed commitmentId, bytes32 indexed unitId, uint256 startEpoch);
 
     // To fetch updates on changes in CC stats (currently only in stats related to CUs).
     event CommitmentStatsUpdated(

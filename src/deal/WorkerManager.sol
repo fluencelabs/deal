@@ -128,7 +128,7 @@ contract WorkerManager is Config, IWorkerManager {
         // add ComputeUnit to list
         workerStorage.computeUnitsIdsList.push(id);
 
-        emit ComputeUnitJoined(id);
+        emit ComputeUnitJoined(peerId, id);
     }
 
     function _removeComputeUnit(bytes32 computeUnitId) internal returns (uint256 workerCount) {
@@ -150,13 +150,14 @@ contract WorkerManager is Config, IWorkerManager {
             workerStorage.workerCount = workerCount;
         }
 
-        workerStorage.isComputePeerExist[computeUnit.peerId] = false;
+        bytes32 peerId = computeUnit.peerId;
+        workerStorage.isComputePeerExist[peerId] = false;
 
         // remove ComputeUnit
         delete workerStorage.computeUnitById[computeUnitId];
         workerStorage.computeUnitsIdsList.remove(computeUnitId);
 
-        emit ComputeUnitRemoved(computeUnitId);
+        emit ComputeUnitRemoved(peerId, computeUnitId);
 
         return workerCount;
     }

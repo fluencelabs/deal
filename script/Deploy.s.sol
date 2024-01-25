@@ -86,7 +86,7 @@ contract DeployContracts is Depoyments, Script {
         ENV memory env = _loadENV();
 
         _startDeploy();
-        (IERC20 tFLT, IERC20 tUSD) = _deployTestTokens();
+        IERC20 tUSD = _deployTestTokens();
 
         // Deploy Multicall3 as **helper** contract to fetch info only from the chain.
         // Thus, this contract is not belongs to Fluence contract ecosystem.
@@ -96,19 +96,16 @@ contract DeployContracts is Depoyments, Script {
             string memory mnemonic = vm.envOr("ANVIL_MNEMONIC", DEFAULT_ANVIL_MNEMONIC);
             for (uint32 i = 0; i < 10; i++) {
                 address addr = vm.rememberKey(vm.deriveKey(mnemonic, i));
-                tFLT.safeTransfer(addr, LOCAL_tFLT_BALANCE);
                 tUSD.safeTransfer(addr, LOCAL_tUSD_BALANCE);
             }
         } else {
-            (address faucet, bool isNew) = _deployTestFaucet(tFLT, tUSD);
+            (address faucet, bool isNew) = _deployTestFaucet(tUSD);
             if (isNew) {
-                tFLT.safeTransfer(address(faucet), 1_000_000_000_000 ether);
                 tUSD.safeTransfer(address(faucet), 1_000_000_000_000 ether);
             }
         }
 
         _deployCore(
-            tFLT,
             env.epochDuration,
             env.fltPrice,
             env.minDepositedEpoches,
@@ -202,11 +199,8 @@ contract DeployContracts is Depoyments, Script {
         });
     }
 
-    function _deployTestTokens() internal returns (IERC20 tFLT, IERC20 tUSD) {
-        bytes memory args = abi.encode("Fluence Token", "tFLT");
-        tFLT = IERC20(_deployContract("tFLT", "TestERC20", args));
-
-        args = abi.encode("USD Token", "tUSD");
+    function _deployTestTokens() internal returns (IERC20 tUSD) {
+        bytes memory args = abi.encode("USD Token", "tUSD");
         tUSD = IERC20(_deployContract("tUSD", "TestERC20", args));
     }
 
@@ -215,13 +209,12 @@ contract DeployContracts is Depoyments, Script {
         multicall = Multicall3(_deployContract("Multicall3", "Multicall3", args));
     }
 
-    function _deployTestFaucet(IERC20 tFLT, IERC20 tUSD) internal returns (address faucet, bool isNew) {
-        bytes memory args = abi.encode(tFLT, tUSD);
+    function _deployTestFaucet(IERC20 tUSD) internal returns (address faucet, bool isNew) {
+        bytes memory args = abi.encode(tUSD);
         return _tryDeployContract("Faucet", "OwnableFaucet", args);
     }
 
     function _deployCore(
-        IERC20 flt,
         uint256 epochDuration_,
         uint256 fltPrice_,
         uint256 minDepositedEpoches_,
@@ -241,7 +234,7 @@ contract DeployContracts is Depoyments, Script {
         bytes32 difficulty_,
         bytes32 initGlobalNonce_
     ) internal {
-        address coreImpl = _deployContract("CoreImpl", "Core", abi.encode(flt));
+        address coreImpl = _deployContract("CoreImpl", "Core", new bytes(0));
         address dealImpl = _deployContract("DealImpl", "Deal", new bytes(0));
         address randomXProxy = _deployContract("RandomXProxy", "RandomXProxy", new bytes(0));
 
@@ -260,8 +253,8 @@ contract DeployContracts is Depoyments, Script {
             needToRedeployMarket || needToRedeployCapacity
         );
 
-        address marketImpl = _deployContract("MarketImpl", "Market", abi.encode(flt, coreAddr), isNewCore);
-        address capacityImpl = _deployContract("CapacityImpl", "Capacity", abi.encode(flt, coreAddr), isNewCore);
+        address marketImpl = _deployContract("MarketImpl", "Market", abi.encode(coreAddr), isNewCore);
+        address capacityImpl = _deployContract("CapacityImpl", "Capacity", abi.encode(coreAddr), isNewCore);
 
         address marketProxy = _deployContract(
             "Market",

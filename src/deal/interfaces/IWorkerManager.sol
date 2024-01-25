@@ -20,11 +20,11 @@ interface IWorkerManager {
 
     /// @dev Emitted when a new compute unit is added
     /// @param unitId The compute unit ID
-    event ComputeUnitJoined(bytes32 unitId);
+    event ComputeUnitJoined(bytes32 indexed peerId, bytes32 unitId);
 
     /// @dev Emitted when a compute unit is removed
     /// @param unitId The compute unit ID
-    event ComputeUnitRemoved(bytes32 unitId);
+    event ComputeUnitRemoved(bytes32 indexed peerId, bytes32 unitId);
 
     /// @dev Emitted when a worker ID is updated
     /// @param computeUnitId The compute unit
