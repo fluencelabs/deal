@@ -113,13 +113,15 @@ contract CapacityCommitmentTest is Test {
     }
 
     function test_GetCapacityCommitment() public {
+        deployment.market.setProviderInfo("name", CIDV1({prefixes: 0x12345678, hash: bytes32(0)}));
+        bytes32 offerId = deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, registerPeers);
+
         bytes32 peerId = registerPeers[0].peerId;
 
         (bytes32 commitmentId,) = _createCapacityCommitment(peerId);
 
         Capacity.CommitmentView memory commitment = deployment.capacity.getCommitment(commitmentId);
 
-        console.logBytes32(commitment.peerId);
         assertEq(uint256(commitment.status), uint256(ICapacity.CCStatus.WaitDelegation), "Status mismatch");
         assertEq(commitment.peerId, peerId, "PeerId mismatch");
         assertEq(commitment.collateralPerUnit, deployment.capacity.fltCollateralPerUnit(), "CollateralPerUnit mismatch");
@@ -148,45 +150,63 @@ contract CapacityCommitmentTest is Test {
         failedEpoch = 1 + lastSnapshotEpoch_ + (remainingFails / activeUnitCount_);
     }
 
+    // Note, it also tests that it is possible to approve FLT once for total sum, before deposit to several CCs.
     function test_DepositCollateral() public {
-        bytes32 peerId = registerPeers[0].peerId;
-        uint256 unitCount = registerPeers[0].unitIds.length;
-        (bytes32 commitmentId,) = _createCapacityCommitment(peerId);
+        deployment.market.setProviderInfo("name", CIDV1({prefixes: 0x12345678, hash: bytes32(0)}));
+        bytes32 offerId = deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, registerPeers);
 
+        uint amountTotal = 0;
+        bytes32[] memory createdCCIds = new bytes32[](registerPeers.length);
+        uint256[] memory amounts = new uint256[](registerPeers.length);
+        uint unitCountTotal = 0;
         uint256 activeUnitCountBefore = deployment.capacity.activeUnitCount();
-        uint256 amount = unitCount * deployment.capacity.fltCollateralPerUnit();
+        for (uint i = 0; i < registerPeers.length; ++i) {
+            bytes32 peerId = registerPeers[i].peerId;
+            uint256 unitCount = registerPeers[i].unitIds.length;
+            unitCountTotal += unitCount;
+            (bytes32 commitmentId,) = _createCapacityCommitment(peerId);
+            createdCCIds[i] = commitmentId;
+
+            uint256 amount = unitCount * deployment.capacity.fltCollateralPerUnit();
+            amounts[i] = amount;
+            amountTotal += amount;
+        }
 
         vm.startPrank(ccDelegator);
-        deployment.tFLT.approve(address(deployment.capacity), amount);
+        deployment.tFLT.approve(address(deployment.capacity), amountTotal);
         uint256 currentEpoch = deployment.core.currentEpoch();
 
-        vm.expectEmit(true, true, false, true, address(deployment.capacity));
-        emit CollateralDeposited(commitmentId, amount);
+        for (uint i = 0; i < registerPeers.length; ++i) {
+            vm.expectEmit(true, true, false, true, address(deployment.capacity));
+            emit CollateralDeposited(createdCCIds[i], amounts[i]);
 
-        vm.expectEmit(true, true, true, true, address(deployment.capacity));
-        emit CommitmentActivated(
-            peerId, commitmentId, currentEpoch + 1, currentEpoch + 1 + ccDuration, registerPeers[0].unitIds
-        );
+            vm.expectEmit(true, true, true, true, address(deployment.capacity));
+            emit CommitmentActivated(
+                registerPeers[i].peerId, createdCCIds[i], currentEpoch + 1, currentEpoch + 1 + ccDuration, registerPeers[i].unitIds
+            );
 
-        deployment.capacity.depositCollateral(commitmentId);
+            deployment.capacity.depositCollateral(createdCCIds[i]);
+        }
         vm.stopPrank();
 
         StdCheats.skip(uint256(deployment.core.epochDuration()));
 
         uint256 activeUnitCountAfter = deployment.capacity.activeUnitCount();
-        assertEq(activeUnitCountAfter, activeUnitCountBefore + unitCount, "ActiveUnitCount mismatch");
+        assertEq(activeUnitCountAfter, activeUnitCountBefore + unitCountTotal, "ActiveUnitCount mismatch");
 
-        // Verify commitment info
-        Capacity.CommitmentView memory commitment = deployment.capacity.getCommitment(commitmentId);
-        assertEq(uint256(commitment.status), uint256(ICapacity.CCStatus.Active), "Status mismatch");
-        assertEq(commitment.peerId, peerId, "PeerId mismatch");
-        assertEq(commitment.collateralPerUnit, deployment.capacity.fltCollateralPerUnit(), "CollateralPerUnit mismatch");
-        assertEq(commitment.endEpoch, deployment.core.currentEpoch() + ccDuration, "Duration mismatch");
-        assertEq(commitment.rewardDelegatorRate, rewardCCDelegationRate, "RewardDelegatorRate mismatch");
-        assertEq(commitment.delegator, ccDelegator, "Delegator mismatch");
-        assertEq(commitment.startEpoch, deployment.core.currentEpoch(), "StartEpoch mismatch");
-        assertEq(commitment.failedEpoch, 0, "FailedEpoch mismatch");
-        assertEq(commitment.exitedUnitCount, 0, "ExitedUnitCount mismatch");
+        // Verify commitments info.
+        for (uint256 i = 0; i < registerPeers.length; ++i) {
+            Capacity.CommitmentView memory commitment = deployment.capacity.getCommitment(createdCCIds[i]);
+            assertEq(uint256(commitment.status), uint256(ICapacity.CCStatus.Active), "Status mismatch");
+            assertEq(commitment.peerId, registerPeers[i].peerId, "PeerId mismatch");
+            assertEq(commitment.collateralPerUnit, deployment.capacity.fltCollateralPerUnit(), "CollateralPerUnit mismatch");
+            assertEq(commitment.endEpoch, deployment.core.currentEpoch() + ccDuration, "Duration mismatch");
+            assertEq(commitment.rewardDelegatorRate, rewardCCDelegationRate, "RewardDelegatorRate mismatch");
+            assertEq(commitment.delegator, ccDelegator, "Delegator mismatch");
+            assertEq(commitment.startEpoch, deployment.core.currentEpoch(), "StartEpoch mismatch");
+            assertEq(commitment.failedEpoch, 0, "FailedEpoch mismatch");
+            assertEq(commitment.exitedUnitCount, 0, "ExitedUnitCount mismatch");
+        }
     }
 
     function test_SubmitProof() public {
@@ -252,9 +272,6 @@ contract CapacityCommitmentTest is Test {
 
     // ------------------ Internals ------------------
     function _createCapacityCommitment(bytes32 peerId) internal returns (bytes32 commitmentId, bytes32 offerId) {
-        deployment.market.setProviderInfo("name", CIDV1({prefixes: 0x12345678, hash: bytes32(0)}));
-        offerId = deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, registerPeers);
-
         vm.recordLogs();
         deployment.capacity.createCommitment(peerId, ccDuration, ccDelegator, rewardCCDelegationRate);
 
@@ -269,6 +286,9 @@ contract CapacityCommitmentTest is Test {
         internal
         returns (bytes32 commitmentId, bytes32 offerId)
     {
+        deployment.market.setProviderInfo("name", CIDV1({prefixes: 0x12345678, hash: bytes32(0)}));
+        offerId = deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, registerPeers);
+
         (commitmentId, offerId) = _createCapacityCommitment(peerId);
 
         vm.startPrank(ccDelegator);
