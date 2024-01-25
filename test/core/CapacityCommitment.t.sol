@@ -27,7 +27,7 @@ contract CapacityCommitmentTest is Test {
         uint256 duration,
         address delegator,
         uint256 rewardDelegationRate,
-        uint256 fltCCCollateralPerUnit
+        uint256 fltCollateralPerUnit
     );
     event CommitmentRemoved(bytes32 indexed commitmentId);
     event CommitmentActivated(

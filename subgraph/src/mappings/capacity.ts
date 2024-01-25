@@ -10,7 +10,7 @@ export function handleCommitmentCreated(event: CommitmentCreated): void {
 
   commitment.peer = event.params.peerId.toHex()
   commitment.CCStatus = CapacityCommitmentStatus.WaitDelegation
-  commitment.collateralPerUnit = event.params.fltCCCollateralPerUnit
+  commitment.collateralPerUnit = event.params.fltCollateralPerUnit
   commitment.duration = event.params.duration
   commitment.rewardDelegatorRate = event.params.rewardDelegationRate.toI32()
   commitment.delegator = event.params.delegator.toHex()
