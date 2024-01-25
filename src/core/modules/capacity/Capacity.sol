@@ -396,9 +396,6 @@ contract Capacity is CapacityConst, Multicall, Whitelist, UUPSUpgradeable, ICapa
 
         market.setCommitmentId(peerId, commitmentId);
 
-//        TODO: maybe emit stats changed too.
-        // To calculate nextCCFailedEpoch and send it in event of activation.
-
         emit CollateralDeposited(commitmentId, collateral);
         emit CommitmentActivated(
             peerId, commitmentId, startEpoch, startEpoch + cc.info.duration, market.getComputeUnitIds(peerId)
