@@ -52,16 +52,6 @@ jobs:
         with:
           version: nightly
 
-      - name: Restore cached contract artifacts
-        uses: actions/cache/restore@v4
-        with:
-          path: |
-            cache
-            out
-          key: ${{ runner.os }}-amd64-contracts-${{ hashFiles('foundry.toml', 'src/**/*') }}
-          restore-keys: |
-            ${{ runner.os }}-amd64-contracts-
-
       - run: make install-npms
       - run: make build-all
 
@@ -78,16 +68,6 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
-
-      - name: Restore cached contract artifacts
-        uses: actions/cache/restore@v4
-        with:
-          path: |
-            cache
-            out
-          key: ${{ runner.os }}-amd64-contracts-${{ hashFiles('foundry.toml', 'src/**/*') }}
-          restore-keys: |
-            ${{ runner.os }}-amd64-contracts-
 
       - name: Run Forge build
         run: |
