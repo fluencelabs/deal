@@ -8,11 +8,9 @@ import "./IBaseModule.sol";
 
 contract BaseModule is Initializable, IBaseModule {
     ICore public immutable core;
-    IERC20 public immutable fluenceToken;
 
     // ------------------ Initializer ------------------
-    constructor(IERC20 fluenceToken_, ICore core_) {
-        fluenceToken = fluenceToken_;
+    constructor(ICore core_) {
         core = core_;
         _disableInitializers();
     }

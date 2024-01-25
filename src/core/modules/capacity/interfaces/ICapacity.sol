@@ -200,7 +200,7 @@ interface ICapacity is ICapacityConst {
 
     /// @dev Deposits collateral to commitment. It makes commitment active
     /// @param commitmentId Commitment id
-    function depositCollateral(bytes32 commitmentId) external;
+    function depositCollateral(bytes32 commitmentId) external payable;
 
     /// @dev Submits a proof for the commitment
     /// @param unitId Compute unit id which provied the proof

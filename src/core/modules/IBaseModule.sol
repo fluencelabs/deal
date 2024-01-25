@@ -9,7 +9,4 @@ import "src/core/interfaces/ICore.sol";
 interface IBaseModule {
     /// @dev Returns the core contract address
     function core() external view returns (ICore);
-
-    /// @dev Returns the fluence token address
-    function fluenceToken() external view returns (IERC20);
 }

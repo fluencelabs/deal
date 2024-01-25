@@ -58,7 +58,7 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
     // #endregion ------------------ Storage ------------------
 
     // #region ------------------ Initializer ------------------
-    constructor(IERC20 fluenceToken_, ICore core_) BaseModule(fluenceToken_, core_) {}
+    constructor(ICore core_) BaseModule(core_) {}
 
     function __CapacityConst_init(
         uint256 fltPrice_,
