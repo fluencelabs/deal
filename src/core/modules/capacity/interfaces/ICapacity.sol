@@ -89,9 +89,6 @@ interface ICapacity is ICapacityConst {
         uint256 totalCUFailCount;
         uint256 failedEpoch;
         uint256 exitedUnitCount;
-//        uint256 activeUnitCount;
-//        uint256 nextAdditionalActiveUnitCount;
-//        uint256 snapshotEpoch;
     }
 
     // ------------------ Initializer ------------------
