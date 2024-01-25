@@ -194,8 +194,7 @@ enum CapacityCommitmentStatus {
 type CapacityCommitment @entity {
   id: ID!
   peer: Peer!
-  # TODO: status on storage does not give right status as it is from getStatus() method.
-  # TODO: add required property.
+  "This status represents last stored status on chain (status that does not depends on the current epoch some how)."
   status: CapacityCommitmentStatus
   collateralPerUnit: BigInt!
   duration: BigInt!
@@ -203,13 +202,9 @@ type CapacityCommitment @entity {
   delegator: String!
   startEpoch: BigInt!
   endEpoch: BigInt!
-  # TODO: Not updated not used resolve in other feat.
   totalCUFailCount: Int!
-  # TODO: Not updated not used resolve in other feat.
   failedEpoch: BigInt!
-  # TODO: Not updated not used resolve in other feat.
   exitedUnitCount: Int!
-  #  TODO: store CUs.
   activeUnitCount: Int!
   nextAdditionalActiveUnitCount: Int!
   unitCount: Int!

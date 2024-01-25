@@ -10,7 +10,7 @@ import {
   CommitmentCreated,
   CommitmentFinished,
   CommitmentRemoved,
-  CommitmentSnapshotCommitted
+  CommitmentStatsUpdated,
 } from "../../generated/Capacity/Capacity";
 import {
   calculateEpoch,
@@ -92,20 +92,6 @@ export function handleCommitmentActivated(event: CommitmentActivated): void {
 // @deprecated. Currently, no use for the event as it is used in handleCommitmentActivated.
 export function handleCollateralDeposited(event: CollateralDeposited): void {}
 
-export function handleCommitmentSnapshotCommitted(event: CommitmentSnapshotCommitted): void {
-  let peer = Peer.load(event.params.peerId.toHex()) as Peer;
-  const nextCCFailedEpoch = event.params.nextCCFailedEpoch;
-  peer.currentCCNextCCFailedEpoch = nextCCFailedEpoch
-  peer.save();
-
-  if (peer.currentCapacityCommitment == null) {
-    throw new Error("Assertion: Peer has no current capacity commitment.");
-  }
-  let cc = CapacityCommitment.load(peer.currentCapacityCommitment!) as CapacityCommitment;
-  cc.nextCCFailedEpoch = nextCCFailedEpoch;
-  cc.save();
-}
-
 export function handleCommitmentRemoved(event: CommitmentRemoved): void {
   let commitment = CapacityCommitment.load(event.params.commitmentId.toHex()) as CapacityCommitment;
   commitment.deleted = true;
@@ -130,10 +116,43 @@ export function handleCommitmentFinished(event: CommitmentFinished): void {
   peer.save();
 }
 
-// TODO: UnitDeactivated/ UnitActivated to work with
-// - activeUnitCount
-// - totalCUFailCount
-// - failedEpoch
-// - exitedUnitCount
+export function handleCommitmentStatsUpdated(event: CommitmentStatsUpdated): void {
+  let commitment = CapacityCommitment.load(event.params.commitmentId.toHex()) as CapacityCommitment;
+
+  commitment.totalCUFailCount = event.params.totalCUFailCount.toI32()
+  commitment.exitedUnitCount = event.params.exitedUnitCount.toI32()
+  commitment.activeUnitCount = event.params.activeUnitCount.toI32()
+  commitment.nextAdditionalActiveUnitCount = event.params.nextAdditionalActiveUnitCount.toI32()
+
+  const graphNetwork = createOrLoadGraphNetwork();
+  // Calculate next failed epoch.
+  const _calculatedFailedEpoch = calculateNextFailedCCEpoch(
+    BigInt.fromString(graphNetwork.capacityMaxFailedRatio.toString()),
+    BigInt.fromString(commitment.unitCount.toString()),
+    BigInt.fromString(commitment.activeUnitCount.toString()),
+    BigInt.fromString(commitment.nextAdditionalActiveUnitCount.toString()),
+    BigInt.fromString(commitment.totalCUFailCount.toString()),
+    BigInt.fromString(commitment.snapshotEpoch.toString()),
+  )
+  commitment.nextCCFailedEpoch = _calculatedFailedEpoch
+
+  // Additional check if failedEpoch could be committed in CC model.
+  const currentEpoch = calculateEpoch(
+    event.block.timestamp,
+    BigInt.fromI32(graphNetwork.initTimestamp),
+    BigInt.fromI32(graphNetwork.coreEpochDuration),
+  )
+  if (currentEpoch >= _calculatedFailedEpoch) {
+    commitment.failedEpoch = currentEpoch;
+    commitment.status = CapacityCommitmentStatus.Failed;
+  }
+  commitment.save();
+
+  let peer = Peer.load(commitment.peer) as Peer;
+  peer.currentCCNextCCFailedEpoch = _calculatedFailedEpoch;
+  peer.save();
+}
+
+// TODO: UnitDeactivated/ UnitActivated to work with units.
 
 

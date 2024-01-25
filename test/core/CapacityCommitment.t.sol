@@ -31,7 +31,7 @@ contract CapacityCommitmentTest is Test {
     );
     event CommitmentRemoved(bytes32 indexed commitmentId);
     event CommitmentActivated(
-        bytes32 indexed peerId, bytes32 indexed commitmentId, uint256 startEpoch, uint256 endEpoch, bytes32[] unitIds, uint256 nextCCFailedEpoch
+        bytes32 indexed peerId, bytes32 indexed commitmentId, uint256 startEpoch, uint256 endEpoch, bytes32[] unitIds
     );
     event CommitmentFinished(bytes32 indexed commitmentId);
 
@@ -163,21 +163,9 @@ contract CapacityCommitmentTest is Test {
         vm.expectEmit(true, true, false, true, address(deployment.capacity));
         emit CollateralDeposited(commitmentId, amount);
 
-        // Calculate next failed epoch to check in event.
-        ICapacity.CommitmentView memory commitmentView = deployment.capacity.getCommitment(commitmentId);
-        uint nextFailedEpoch = _failedEpoch(
-            deployment.capacity.maxFailedRatio(),
-            commitmentView.unitCount,
-            commitmentView.unitCount,
-            0,
-            0,
-            currentEpoch
-        );
-
         vm.expectEmit(true, true, true, true, address(deployment.capacity));
         emit CommitmentActivated(
-            // TODO: according to deploy script params. Use formula instead...
-            peerId, commitmentId, currentEpoch + 1, currentEpoch + 1 + ccDuration, registerPeers[0].unitIds, nextFailedEpoch
+            peerId, commitmentId, currentEpoch + 1, currentEpoch + 1 + ccDuration, registerPeers[0].unitIds
         );
 
         deployment.capacity.depositCollateral(commitmentId);

@@ -173,6 +173,9 @@ export class CapacityCommitmentStatus {
   // Status is WaitStart - means collateral deposited.
   static WaitStart: string = "WaitStart";
   static Inactive: string = "Inactive";  // Should not be stored!
-  static Failed: string = "Failed";  // Should not be stored!
+  // It is stored when subgraph could be certain that Failed
+  //  (when CommitmentStatsUpdated event emitted), but before this transaction
+  //  if Failed should be checked in another way (not by relaying on this status).
+  static Failed: string = "Failed";
   static Removed: string = "Removed";
 }

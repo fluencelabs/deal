@@ -17,7 +17,7 @@ interface ICapacity is ICapacityConst {
     );
     event CommitmentRemoved(bytes32 indexed commitmentId);
     event CommitmentActivated(
-        bytes32 indexed peerId, bytes32 indexed commitmentId, uint256 startEpoch, uint256 endEpoch, bytes32[] unitIds, uint256 nextCCFailedEpoch
+        bytes32 indexed peerId, bytes32 indexed commitmentId, uint256 startEpoch, uint256 endEpoch, bytes32[] unitIds
     );
     event CommitmentFinished(bytes32 indexed commitmentId);
 
@@ -31,8 +31,16 @@ interface ICapacity is ICapacityConst {
     event UnitDeactivated(bytes32 indexed commitmentId, bytes32 indexed unitId);
     event UnitActivated(bytes32 indexed commitmentId, bytes32 indexed unitId);
 
-    // nextCCFailedEpoch is the epoch when the commitment will be failed if no correct proofs will be submitted.
-    event CommitmentSnapshotCommitted(bytes32 peerId, uint256 nextCCFailedEpoch);
+    // To fetch updates on changes in CC stats (currently only in stats related to CUs).
+    event CommitmentStatsUpdated(
+        bytes32 commitmentId,
+        uint256 totalCUFailCount,
+        uint256 exitedUnitCount,
+        uint256 activeUnitCount,
+        uint256 nextAdditionalActiveUnitCount,
+        // Aka Snapshot epoch but in order to not mislead with actual snapshotting, it renamed to changedEpoch.
+        uint256 changedEpoch
+    );
 
     // ------------------ Errors ------------------
     error TooManyProofs();
@@ -81,6 +89,9 @@ interface ICapacity is ICapacityConst {
         uint256 totalCUFailCount;
         uint256 failedEpoch;
         uint256 exitedUnitCount;
+//        uint256 activeUnitCount;
+//        uint256 nextAdditionalActiveUnitCount;
+//        uint256 snapshotEpoch;
     }
 
     // ------------------ Initializer ------------------

@@ -93,7 +93,7 @@ export class DealMatcherClient {
               nextCCFailedEpoch_gt: currentEpochString,
               deleted: false,
               // Wait delegation is duplicating startEpoch_lte check, though.
-              status_not_in: ["WaitDelegation", "Removed"],
+              status_not_in: ["WaitDelegation", "Removed", "Failed"],
             },
           },
           {
