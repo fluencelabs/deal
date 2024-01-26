@@ -12,7 +12,6 @@ import {
   MinPricePerEpochUpdated,
   PaymentTokenUpdated,
   PeerCreated,
-  UpdateProviderApprove,
   ProviderInfoUpdated,
 } from "../../generated/Market/Market";
 import {
@@ -52,12 +51,6 @@ export function handleProviderInfoUpdated(event: ProviderInfoUpdated): void {
   let graphNetwork = createOrLoadGraphNetwork();
   graphNetwork.providersTotal = graphNetwork.providersTotal.plus(UNO_BIG_INT);
   graphNetwork.save()
-}
-
-export function handleUpdateProviderApprove(event: UpdateProviderApprove): void {
-  let provider = Provider.load(event.params.provider.toHex()) as Provider;
-  provider.approved = event.params.changeApproveTo;
-  provider.save();
 }
 
 export function handleEffectorInfoSet(event: EffectorInfoSet): void {

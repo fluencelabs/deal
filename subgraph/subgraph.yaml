@@ -44,6 +44,10 @@ dataSources:
       eventHandlers:
         - event: Initialized(uint8)
           handler: handleInitialized
+        - event: WhitelistAccessGranted(address)
+          handler: handleWhitelistAccessGranted
+        - event: WhitelistAccessRevoked(address)
+          handler: handleWhitelistAccessRevoked
         - event: CommitmentCreated(indexed
             bytes32,bytes32,uint256,address,uint256,uint256)
           handler: handleCommitmentCreated
@@ -88,8 +92,6 @@ dataSources:
           handler: handleProviderInfoUpdated
         - event: EffectorInfoSet((indexed bytes4,bytes32),string,(bytes4,bytes32))
           handler: handleEffectorInfoSet
-        - event: UpdateProviderApprove(indexed address,bool)
-          handler: handleUpdateProviderApprove
         - event: EffectorInfoRemoved((indexed bytes4,bytes32))
           handler: handleEffectorInfoRemoved
         - event: MarketOfferRegistered(indexed

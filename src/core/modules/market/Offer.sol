@@ -106,15 +106,6 @@ abstract contract Offer is BaseModule, IOffer {
         emit ProviderInfoUpdated(msg.sender, name, metadata);
     }
 
-    function updateProviderApprove(address provider, bool changeApproveTo) onlyCoreOwner external {
-        ProviderInfo storage providerInfo = _getOfferStorage().providers[provider];
-        require(bytes(providerInfo.name).length > 0, "Provider doesn't exist");
-
-        providerInfo.approved = changeApproveTo;
-
-        emit UpdateProviderApprove(provider, changeApproveTo);
-    }
-
     function registerMarketOffer(
         uint256 minPricePerWorkerEpoch,
         address paymentToken,
