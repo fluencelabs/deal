@@ -5,6 +5,7 @@ pragma solidity ^0.8.19;
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Multicall.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
 import "src/deal/base/Types.sol";
 import "src/utils/RandomXProxy.sol";
@@ -16,6 +17,7 @@ import "./CapacityConst.sol";
 contract Capacity is CapacityConst, Multicall, Whitelist, UUPSUpgradeable, ICapacity {
     using SafeERC20 for IERC20;
     using BytesConverter for bytes;
+    using Address for address payable;
 
     // #region ------------------ Types ------------------
     struct UnitProofsInfo {
@@ -65,7 +67,7 @@ contract Capacity is CapacityConst, Multicall, Whitelist, UUPSUpgradeable, ICapa
     // #endregion
 
     // #region ------------------ Initializer & Upgradeable ------------------
-    constructor(IERC20 fluenceToken_, ICore core_) CapacityConst(fluenceToken_, core_) {}
+    constructor(ICore core_) CapacityConst(core_) {}
 
     function initialize(
         uint256 fltPrice_,
@@ -234,7 +236,7 @@ contract Capacity is CapacityConst, Multicall, Whitelist, UUPSUpgradeable, ICapa
         unitProofsInfo.isInactive = false;
         unitProofsInfo.lastMinProofsEpoch = epoch;
 
-        emit UnitActivated(commitmentId, unitId);
+        emit UnitActivated(commitmentId, unitId, epoch + 1);
 
         if (status == CCStatus.Inactive || status == CCStatus.Failed) {
             return;
@@ -244,6 +246,7 @@ contract Capacity is CapacityConst, Multicall, Whitelist, UUPSUpgradeable, ICapa
 
         _setActiveUnitCount(activeUnitCount() + 1);
 
+        market.setStartEpoch(unitId, epoch + 1);
         emit CommitmentStatsUpdated(
             commitmentId,
             cc.info.totalCUFailCount,
@@ -348,21 +351,21 @@ contract Capacity is CapacityConst, Multicall, Whitelist, UUPSUpgradeable, ICapa
 
         cc.info.status = CCStatus.Removed;
 
-        address delegator = cc.info.delegator;
+        address payable delegator = payable(cc.info.delegator);
         uint256 collateralPerUnit_ = cc.info.collateralPerUnit;
 
         uint256 totalCollateral = collateralPerUnit_ * unitCount;
         uint256 slashedCollateral = cc.info.totalCUFailCount * collateralPerUnit_;
-
         totalCollateral -= slashedCollateral;
 
-        IERC20(core.fluenceToken()).safeTransfer(delegator, totalCollateral);
         market.setCommitmentId(peerId, bytes32(0x00));
+
+        delegator.sendValue(totalCollateral);
 
         emit CommitmentFinished(commitmentId);
     }
 
-    function depositCollateral(bytes32 commitmentId) external {
+    function depositCollateral(bytes32 commitmentId) external payable {
         IMarket market = core.market();
 
         CommitmentStorage storage s = _getCommitmentStorage();
@@ -389,10 +392,10 @@ contract Capacity is CapacityConst, Multicall, Whitelist, UUPSUpgradeable, ICapa
         uint256 unitCount = peer.unitCount;
         uint256 collateral = unitCount * cc.info.collateralPerUnit;
 
+        require(msg.value == collateral, "Collateral is not equal to collateral per unit * unit count");
+
         cc.info.activeUnitCount = unitCount;
         _setActiveUnitCount(activeUnitCount() + unitCount);
-
-        IERC20(core.fluenceToken()).safeTransferFrom(msg.sender, address(this), collateral);
 
         cc.info.status = CCStatus.Active;
 
@@ -554,15 +557,11 @@ contract Capacity is CapacityConst, Multicall, Whitelist, UUPSUpgradeable, ICapa
             cc.info.totalWithdrawnReward = totalWithdrawnReward + amount;
         }
 
-        IERC20 flt = IERC20(core.fluenceToken());
-
         uint256 delegatorReward = (amount * cc.info.rewardDelegatorRate) / PRECISION;
         uint256 providerReward = amount - delegatorReward;
 
-        flt.safeTransfer(cc.info.delegator, delegatorReward);
-
-        IMarket.Offer memory offer = market.getOffer(peer.offerId);
-        flt.safeTransfer(offer.provider, providerReward);
+        payable(cc.info.delegator).sendValue(delegatorReward);
+        payable(market.getOffer(peer.offerId).provider).sendValue(providerReward);
 
         emit CommitmentStatsUpdated(
             commitmentId,

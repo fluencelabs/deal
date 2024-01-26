@@ -26,9 +26,6 @@ interface IGlobalConst {
     function precision() external view returns (uint256);
 
     // ------------------ External View Functions ------------------
-    /// @dev Returns fluence token address
-    /// @return fluence token address
-    function fluenceToken() external view returns (IERC20);
 
     /// @dev Returns min deposited epoches constant for new deals
     /// @return min deposited epoches for new deals

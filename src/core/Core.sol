@@ -32,7 +32,7 @@ contract Core is UUPSUpgradeable, GlobalConst, ICore {
 
     // ------------------ Constructor ------------------
     // @custom:oz-upgrades-unsafe-allow constructor
-    constructor(IERC20 fluenceToken_) GlobalConst(fluenceToken_) {
+    constructor() {
         _disableInitializers();
     }
 

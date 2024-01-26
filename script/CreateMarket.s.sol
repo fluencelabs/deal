@@ -52,6 +52,7 @@ contract CreateMarket is Depoyments, Script {
         peerIds = new bytes32[][](offerCount);
         unitIds = new bytes32[][][](offerCount);
 
+        market.setProviderInfo("TestProvider", CIDV1({prefixes: 0x12345678, hash: bytes32(0)}));
         for (uint256 i = 0; i < offerCount; i++) {
             peerIds[i] = new bytes32[](peerCountPerOffer);
             unitIds[i] = new bytes32[][](peerCountPerOffer);

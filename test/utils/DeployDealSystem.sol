@@ -18,7 +18,6 @@ library DeployDealSystem {
     // ------------------ Types ------------------
     struct Deployment {
         bool initialized;
-        IERC20 tFLT;
         IERC20 tUSD;
         Core core;
         Market market;
@@ -48,11 +47,10 @@ library DeployDealSystem {
 
     // ------------------ Variables ------------------
     function deployDealSystem() internal returns (Deployment memory deployment) {
-        deployment.tFLT = IERC20(new TestERC20("Test FLT", "tFLT"));
         deployment.tUSD = IERC20(new TestERC20("Test USD", "tUSD"));
 
         Deal dealImpl = new Deal();
-        Core coreImpl = new Core(deployment.tFLT);
+        Core coreImpl = new Core();
 
         deployment.core = Core(
             address(
@@ -71,8 +69,7 @@ library DeployDealSystem {
         deployment.market = Market(
             address(
                 new ERC1967Proxy(
-                    address(new Market(deployment.tFLT, deployment.core)),
-                    abi.encodeWithSelector(Market.initialize.selector, dealImpl)
+                    address(new Market(deployment.core)), abi.encodeWithSelector(Market.initialize.selector, dealImpl)
                 )
             )
         );
@@ -80,7 +77,7 @@ library DeployDealSystem {
         deployment.capacity = Capacity(
             address(
                 new ERC1967Proxy(
-                    address(new Capacity(deployment.tFLT, deployment.core)),
+                    address(new Capacity(deployment.core)),
                     abi.encodeWithSelector(
                         Capacity.initialize.selector,
                         DEFAULT_FLT_PRICE,

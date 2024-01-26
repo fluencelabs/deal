@@ -40,11 +40,13 @@ interface IOffer {
     struct ComputeUnit {
         address deal;
         bytes32 peerId;
+        uint256 startEpoch;
     }
 
     struct ComputeUnitView {
         bytes32 id;
         address deal;
+        uint256 startEpoch;
     }
 
     struct EffectorInfo {
@@ -213,6 +215,9 @@ interface IOffer {
 
     /// @dev Set the commitment id for a peer. Only one commitment id for the peer
     function setCommitmentId(bytes32 peerId, bytes32 commitmentId) external;
+
+    /// @dev Set the start epoch of a compute unit
+    function setStartEpoch(bytes32 unitId, uint256 startEpoch) external;
 
     // Effector info
     /// @dev Set the effector info. Effector info can be added by the contract owner

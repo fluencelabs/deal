@@ -8,19 +8,13 @@ import "@openzeppelin/contracts/utils/Multicall.sol";
 import "./TestERC20.sol";
 
 contract OwnableFaucet is Ownable, Multicall {
-    IERC20 public immutable fluenceToken;
     IERC20 public immutable usdToken;
 
-    constructor(IERC20 fluenceToken_, IERC20 usdToken_) {
-        fluenceToken = fluenceToken_;
+    constructor(IERC20 usdToken_) {
         usdToken = usdToken_;
     }
 
     function sendUSD(address addr, uint256 value) external onlyOwner {
         usdToken.transfer(addr, value);
-    }
-
-    function sendFLT(address addr, uint256 value) external onlyOwner {
-        fluenceToken.transfer(addr, value);
     }
 }

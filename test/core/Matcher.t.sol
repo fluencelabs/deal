@@ -59,8 +59,7 @@ contract MatcherTest is Test {
 
                 uint256 amount =
                     deployment.capacity.getCommitment(commitmentId).collateralPerUnit * unitIds[i][j].length;
-                deployment.tFLT.safeApprove(address(deployment.capacity), amount);
-                deployment.capacity.depositCollateral(commitmentId);
+                deployment.capacity.depositCollateral{value: amount}(commitmentId);
             }
         }
     }

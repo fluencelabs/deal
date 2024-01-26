@@ -12,7 +12,7 @@ import "./interfaces/IMarket.sol";
 
 contract Market is UUPSUpgradeable, Multicall, DealFactory, Matcher, IMarket {
     // ------------------ Initializer ------------------
-    constructor(IERC20 fluenceToken_, ICore core_) BaseModule(fluenceToken_, core_) {}
+    constructor(ICore core_) BaseModule(core_) {}
 
     function initialize(IDeal dealImpl) public initializer {
         __DealFactory_init(dealImpl);
