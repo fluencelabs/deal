@@ -263,6 +263,8 @@ contract Capacity is CapacityConst, Multicall, Whitelist, UUPSUpgradeable, ICapa
         external
         returns (bytes32)
     {
+        require(isApproved(msg.sender), "Only whitelisted provider can create capacity commitment");
+
         IMarket market = core.market();
 
         CommitmentStorage storage s = _getCommitmentStorage();
@@ -482,27 +484,6 @@ contract Capacity is CapacityConst, Multicall, Whitelist, UUPSUpgradeable, ICapa
         );
 
         emit ProofSubmitted(commitmentId, unitId, globalUnitNonce, localUnitNonce);
-    }
-
-    function commitSnapshot(bytes32 commitmentId) external {
-        IMarket market = core.market();
-
-        CommitmentStorage storage s = _getCommitmentStorage();
-        Commitment storage cc = s.commitments[commitmentId];
-        IMarket.ComputePeer memory peer = market.getComputePeer(cc.info.peerId);
-
-        uint256 epoch = core.currentEpoch() - 1;
-        uint256 expiredEpoch = _expiredEpoch(cc);
-        _commitCommitmentSnapshot(cc, peer, epoch, expiredEpoch);
-
-        emit CommitmentStatsUpdated(
-            commitmentId,
-            cc.info.totalCUFailCount,
-            cc.info.exitedUnitCount,
-            cc.info.activeUnitCount,
-            cc.info.nextAdditionalActiveUnitCount,
-            epoch
-        );
     }
 
     function removeCUFromCC(bytes32 commitmentId, bytes32[] calldata unitIds) external {

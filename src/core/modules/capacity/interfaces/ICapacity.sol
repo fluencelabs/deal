@@ -210,10 +210,6 @@ interface ICapacity is ICapacityConst {
     function submitProof(bytes32 unitId, bytes32 globalUnitNonce, bytes32 localUnitNonce, bytes32 targetHash)
         external;
 
-    /// @dev Commit the snapshot of the commitment. Need to call this function before finish the commitment
-    /// @param commitmentId Commitment id
-    function commitSnapshot(bytes32 commitmentId) external;
-
     /// @dev Remove CU from Ended or Failed CC. Need to call this function before finish the commitment
     /// @param commitmentId Commitment id
     /// @param unitIds Compute unit ids which will be removed from the commitment
