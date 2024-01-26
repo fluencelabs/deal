@@ -24,7 +24,8 @@ contract CreateMarket is Depoyments, Script {
 
     string constant DEPLOYMENTS_PATH = "/deployments/";
     // It is synced with subgraph: networkConstants.ts
-    bytes32[4] effectorSuffixes = [bytes32("Dogu"), "Doge"];
+    bytes32[2] effectorSuffixes = [bytes32("Dogu"), "Doge"];
+    string[2] effectorDescriptions = ["cURL", "IPFS"];
     IMarket market;
     ICore core;
     IERC20 tFLT;
