@@ -132,9 +132,9 @@ templates:
           handler: handleMaxPaidEpochUpdated
         - event: AdminChanged(address,address)
           handler: handleAppCIDChanged
-        - event: ComputeUnitJoined(bytes32)
+        - event: ComputeUnitJoined(indexed bytes32,bytes32)
           handler: handleComputeUnitJoined
-        - event: ComputeUnitRemoved(bytes32)
+        - event: ComputeUnitRemoved(indexed bytes32,bytes32)
           handler: handleComputeUnitRemoved
         - event: WorkerIdUpdated(bytes32,bytes32)
           handler: handleWorkerIdUpdated
