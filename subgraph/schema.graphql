@@ -28,6 +28,7 @@ type Provider @entity {
   id: ID!
   name: String!
   createdAt: BigInt!
+  approved: Boolean!
 
   offers: [Offer!] @derivedFrom(field: "provider")
 

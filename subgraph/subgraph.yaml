@@ -9,8 +9,8 @@ dataSources:
     network: local
     source:
       abi: Core
-      address: "0x0B306BF915C4d645ff596e518fAf3F9669b97016"
-      startBlock: 0
+      address: "0x7aB5cEee0Ff304b053CE1F67d84C33F0ff407a55"
+      startBlock: 5163
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -29,8 +29,8 @@ dataSources:
     network: local
     source:
       abi: Capacity
-      address: "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c"
-      startBlock: 0
+      address: "0xB8d6D6b01bFe81784BE46e5771eF017Fa3c906d8"
+      startBlock: 5163
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -44,6 +44,10 @@ dataSources:
       eventHandlers:
         - event: Initialized(uint8)
           handler: handleInitialized
+        - event: WhitelistAccessGranted(address)
+          handler: handleWhitelistAccessGranted
+        - event: WhitelistAccessRevoked(address)
+          handler: handleWhitelistAccessRevoked
         - event: CommitmentCreated(indexed
             bytes32,bytes32,uint256,address,uint256,uint256)
           handler: handleCommitmentCreated
@@ -62,8 +66,8 @@ dataSources:
     network: local
     source:
       abi: Market
-      address: "0x68B1D87F95878fE05B998F19b66F4baba5De1aed"
-      startBlock: 0
+      address: "0xa138575a030a2F4977D19Cc900781E7BE3fD2bc0"
+      startBlock: 5163
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -84,6 +88,12 @@ dataSources:
         - name: ERC20
           file: ../out/ERC20.sol/ERC20.json
       eventHandlers:
+        - event: ProviderInfoUpdated(indexed address,string,(bytes4,bytes32))
+          handler: handleProviderInfoUpdated
+        - event: EffectorInfoSet((indexed bytes4,bytes32),string,(bytes4,bytes32))
+          handler: handleEffectorInfoSet
+        - event: EffectorInfoRemoved((indexed bytes4,bytes32))
+          handler: handleEffectorInfoRemoved
         - event: MarketOfferRegistered(indexed
             address,bytes32,uint256,address,(bytes4,bytes32)[])
           handler: handleMarketOfferRegistered

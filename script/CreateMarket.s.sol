@@ -17,11 +17,14 @@ import "src/dev/TestERC20.sol";
 import "src/deal/base/Types.sol";
 import "./utils/Depoyments.sol";
 
+// It creates market example on chain.
+// Currently used for sync Network Explorer frontend dev.
 contract CreateMarket is Depoyments, Script {
     using SafeERC20 for IERC20;
 
     string constant DEPLOYMENTS_PATH = "/deployments/";
-    bytes32[4] effectorSuffixes = [bytes32("Dogu"), "Doge", "Dog", "KotenokGav"];
+    // It is synced with subgraph: networkConstants.ts
+    bytes32[4] effectorSuffixes = [bytes32("Dogu"), "Doge"];
     IMarket market;
     ICore core;
     IERC20 tFLT;
