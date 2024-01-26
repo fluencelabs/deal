@@ -78,12 +78,15 @@ describe("#getMatchedOffersByDealId", () => {
       timestamp,
     );
 
-    console.log('Register Provider by setProviderInfo...')
-    const setProviderInfoTx = await marketContract.setProviderInfo('CI_PROVIDER', {
-      prefixes: "0x12345678",
-      hash: ethers.encodeBytes32String(`CI_PROVIDER:${timestamp}`),
-    });
-    await setProviderInfoTx.wait(DEFAULT_CONFIRMATIONS)
+    console.log("Register Provider by setProviderInfo...");
+    const setProviderInfoTx = await marketContract.setProviderInfo(
+      "CI_PROVIDER",
+      {
+        prefixes: "0x12345678",
+        hash: ethers.encodeBytes32String(`CI_PROVIDER:${timestamp}`),
+      },
+    );
+    await setProviderInfoTx.wait(DEFAULT_CONFIRMATIONS);
 
     const tx = await marketContract.registerMarketOffer(
       offerFixture.minPricePerWorkerEpoch,
@@ -154,9 +157,11 @@ describe("#getMatchedOffersByDealId", () => {
       const commitmentIds = capacityCommitmentCreatedEventsLast.map(
         (event) => event.args.commitmentId,
       );
-      let collateralToApproveCommitments = 0n;
+
+      console.info("Deposit collateral for all sent CC...");
       for (let i = 0; i < commitmentIds.length; i++) {
         const commitmentId = commitmentIds[i];
+
         const commitment = await capacityContract.getCommitment(commitmentId);
         const collateralToApproveCommitment =
           commitment.collateralPerUnit * commitment.unitCount;
@@ -167,28 +172,17 @@ describe("#getMatchedOffersByDealId", () => {
           collateralToApproveCommitment,
           "...",
         );
-        collateralToApproveCommitments += collateralToApproveCommitment;
-      }
-      console.info(
-        `Send approve of FLT for all commitments for value: ${collateralToApproveCommitments}...`,
-      );
-      const fltContract = await contractsClient.getFLT();
-      const collateralToApproveCommitmentsTx = await fltContract.approve(
-        capacityContractAddress,
-        collateralToApproveCommitments,
-      );
-      await collateralToApproveCommitmentsTx.wait(DEFAULT_CONFIRMATIONS);
 
-      console.info("Deposit collateral for all sent CC...");
-      for (let i = 0; i < commitmentIds.length; i++) {
-        const commitmentId = commitmentIds[i];
         console.info(
           "Deposit collateral for commitmentId: ",
           commitmentId,
           "...",
         );
-        const depositCollateralTx =
-          await capacityContract.depositCollateral(commitmentId);
+
+        const depositCollateralTx = await capacityContract.depositCollateral(
+          commitmentId,
+          { value: collateralToApproveCommitment },
+        );
         await depositCollateralTx.wait(DEFAULT_CONFIRMATIONS);
       }
 
@@ -269,11 +263,11 @@ describe("#getMatchedOffersByDealId", () => {
         await dealMatcherClient.getMatchedOffersByDealId(dealId);
       expect(matchedOffersOut.offers.length).toBe(1); // At least with one previously created offer it matched.
 
-      const cuId = matchedOffersOut.computeUnitsPerOffers[0][0]
+      const cuId = matchedOffersOut.computeUnitsPerOffers[0][0];
       // Additional check for status of matched CC from chain perspective
       for (const commitmentId of commitmentIds) {
         // e.g. 4 == Failed; 0 - Active.
-        expect(Number(await capacityContract.getStatus(commitmentId))).eq(0)
+        expect(Number(await capacityContract.getStatus(commitmentId))).eq(0);
       }
 
       console.info(

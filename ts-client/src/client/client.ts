@@ -55,13 +55,6 @@ export class DealClient {
     );
   }
 
-  async getFLT(): Promise<IERC20> {
-    return ERC20__factory.connect(
-      (await this.deployment).flt,
-      this.signerOrProvider,
-    );
-  }
-
   async getUSDC(): Promise<IERC20> {
     return ERC20__factory.connect(
       (await this.deployment).usdc,
