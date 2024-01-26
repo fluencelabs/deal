@@ -17,7 +17,7 @@ import type {
   PaymentToken,
   PaymentTokenListView,
   EffectorListView,
-} from "./schemes.js";
+} from "./types/schemes.js";
 import type {
   ByProviderAndStatusFilter,
   DealsFilters,
@@ -28,7 +28,7 @@ import type {
   DealsShortOrderBy,
   EffectorsOrderBy,
   PaymentTokenOrderBy,
-} from "./filters.js";
+} from "./types/filters.js";
 import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type { BasicOfferFragment } from "./indexerClient/queries/offers-query.generated.js";
 import type { ProviderOfProvidersQueryFragment } from "./indexerClient/queries/providers-query.generated.js";
