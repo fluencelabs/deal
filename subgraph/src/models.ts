@@ -3,14 +3,15 @@ import {
   OfferToEffector,
   Token,
   DealToEffector,
-  GraphNetwork, Provider, DealToPeer, DealToJoinedOfferPeer,
+  GraphNetwork, DealToPeer, DealToJoinedOfferPeer,
 } from "../generated/schema";
 import { BigInt, Bytes } from "@graphprotocol/graph-ts";
 import {getTokenDecimals, getTokenSymbol} from "./contracts";
-import {getProviderName} from "./networkConstants";
 
 export const ZERO_BIG_INT = BigInt.fromI32(0);
 export const UNO_BIG_INT = BigInt.fromI32(1);
+
+export const UNKNOWN_EFFECTOR_DESCRIPTION = "Unknown";
 
 export function createOrLoadToken(tokenAddress: string): Token {
   let entity = Token.load(tokenAddress);
@@ -29,32 +30,12 @@ export function createOrLoadToken(tokenAddress: string): Token {
   return entity as Token;
 }
 
-export function createOrLoadProvider(providerAddress: string, timestamp: BigInt): Provider {
-  let entity = Provider.load(providerAddress);
-
-  if (entity == null) {
-    entity = new Provider(providerAddress);
-    entity.name = getProviderName(providerAddress);
-    entity.createdAt = timestamp;
-    entity.computeUnitsAvailable = 0;
-    entity.computeUnitsTotal = 0;
-    entity.peerCount = 0;
-    entity.effectorCount = 0;
-    entity.save();
-
-    let graphNetwork = createOrLoadGraphNetwork();
-    graphNetwork.providersTotal = graphNetwork.providersTotal.plus(UNO_BIG_INT);
-    graphNetwork.save()
-  }
-  return entity as Provider;
-}
-
 export function createOrLoadEffector(cid: string): Effector {
   let entity = Effector.load(cid);
 
   if (entity == null) {
     entity = new Effector(cid);
-    entity.description = getEffectorDescription(cid);
+    entity.description = UNKNOWN_EFFECTOR_DESCRIPTION;
     entity.save();
 
     let graphNetwork = createOrLoadGraphNetwork();
