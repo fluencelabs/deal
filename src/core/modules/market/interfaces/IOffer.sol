@@ -10,9 +10,11 @@ import "src/deal/base/Types.sol";
 /// @dev Offer contract is responsible for managing the offers in the market
 interface IOffer {
     // ------------------ Types ------------------
+    /// @param approved If provider address approved by Fluence (Core Owner).
     struct ProviderInfo {
         string name;
         CIDV1 metadata;
+        bool approved;
     }
 
     struct RegisterComputePeer {
@@ -56,6 +58,8 @@ interface IOffer {
     /// @param name The new name of the provider
     /// @param metadata The new metadata of the provider
     event ProviderInfoUpdated(address indexed provider, string name, CIDV1 metadata);
+
+    event ProviderApproved(address indexed provider, bool approved);
 
     /// @dev Emitted when a new offer is registered
     /// @param provider The provider address
@@ -164,6 +168,12 @@ interface IOffer {
     /// @param name The name of the provider
     /// @param metadata The metadata of the provider
     function setProviderInfo(string calldata name, CIDV1 calldata metadata) external;
+
+    /// @dev Approve provider from Core Owner.
+    /// @dev Call the method after provider is registered only (by setProviderInfo).
+    /// @param provider Provider address.
+    /// @param changeApproveTo state to change an APPROVE field.
+    function approveProvider(address provider, bool changeApproveTo) external;
 
     /// @dev Register a new offer
     /// @param minPricePerWorkerEpoch The min price per worker per epoch which the provider specify for the matching with the deal

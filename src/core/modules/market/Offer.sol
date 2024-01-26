@@ -101,9 +101,18 @@ abstract contract Offer is BaseModule, IOffer {
     function setProviderInfo(string calldata name, CIDV1 calldata metadata) external {
         require(bytes(name).length > 0, "Name should be not empty");
 
-        _getOfferStorage().providers[msg.sender] = ProviderInfo({name: name, metadata: metadata});
+        _getOfferStorage().providers[msg.sender] = ProviderInfo({name: name, metadata: metadata, approved: false});
 
         emit ProviderInfoUpdated(msg.sender, name, metadata);
+    }
+
+    function approveProvider(address provider, bool changeApproveTo) onlyCoreOwner external {
+        ProviderInfo storage providerInfo = _getOfferStorage().providers[provider];
+        require(bytes(providerInfo.name).length > 0, "Provider doesn't exist");
+
+        providerInfo.approved = changeApproveTo;
+
+        emit ProviderApproved(provider, changeApproveTo);
     }
 
     function registerMarketOffer(
