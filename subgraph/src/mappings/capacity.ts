@@ -3,7 +3,7 @@ import {
   createOrLoadGraphNetwork,
   ZERO_BIG_INT
 } from "../models";
-import {CapacityCommitment, Peer} from "../../generated/schema";
+import {CapacityCommitment, Peer, Provider} from "../../generated/schema";
 import {
   CollateralDeposited,
   CommitmentActivated,
@@ -11,6 +11,8 @@ import {
   CommitmentFinished,
   CommitmentRemoved,
   CommitmentStatsUpdated,
+  WhitelistAccessGranted,
+  WhitelistAccessRevoked,
 } from "../../generated/Capacity/Capacity";
 import {
   calculateEpoch,
@@ -18,8 +20,19 @@ import {
 } from "../contracts";
 import {Initialized} from "../../generated/Capacity/Capacity";
 import {BigInt} from "@graphprotocol/graph-ts";
-import { log } from '@graphprotocol/graph-ts'
 
+
+export function handleWhitelistAccessGranted(event: WhitelistAccessGranted): void {
+  let provider = Provider.load(event.params.account.toHex()) as Provider;
+  provider.approved = true;
+  provider.save();
+}
+
+export function handleWhitelistAccessRevoked(event: WhitelistAccessRevoked): void {
+  let provider = Provider.load(event.params.account.toHex()) as Provider;
+  provider.approved = false;
+  provider.save();
+}
 
 export function handleInitialized(event: Initialized): void {
   let graphNetwork = createOrLoadGraphNetwork();

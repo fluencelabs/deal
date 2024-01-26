@@ -10,9 +10,11 @@ import "src/deal/base/Types.sol";
 /// @dev Offer contract is responsible for managing the offers in the market
 interface IOffer {
     // ------------------ Types ------------------
+    /// @param approved If provider address approved by Fluence (Core Owner).
     struct ProviderInfo {
         string name;
         CIDV1 metadata;
+        bool approved;
     }
 
     struct RegisterComputePeer {

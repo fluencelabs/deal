@@ -6,12 +6,13 @@ import {
   ComputeUnitCreated,
   ComputeUnitRemovedFromDeal,
   DealCreated,
-  EffectorAdded,
+  EffectorAdded, EffectorInfoRemoved, EffectorInfoSet,
   EffectorRemoved,
   MarketOfferRegistered,
   MinPricePerEpochUpdated,
   PaymentTokenUpdated,
   PeerCreated,
+  ProviderInfoUpdated,
 } from "../../generated/Market/Market";
 import {
   createOrLoadDealEffector,
@@ -20,8 +21,7 @@ import {
   createOrLoadEffector,
   createOrLoadGraphNetwork,
   createOrLoadOfferEffector,
-  createOrLoadProvider,
-  createOrLoadToken,
+  createOrLoadToken, UNKNOWN_EFFECTOR_DESCRIPTION,
   UNO_BIG_INT,
   ZERO_BIG_INT,
 } from "../models";
@@ -36,7 +36,40 @@ import {
 } from "../../generated/schema";
 import { Deal as DealTemplate } from "../../generated/templates";
 import {AppCID, formatAddress, getEffectorCID, parseEffectors} from "./utils";
-import { getProviderName } from "../networkConstants";
+
+export function handleProviderInfoUpdated(event: ProviderInfoUpdated): void {
+  let provider = new Provider(event.params.provider.toHex());
+  provider.name = event.params.name;
+  provider.approved = false;
+  provider.createdAt = event.block.timestamp;
+  provider.computeUnitsAvailable = 0;
+  provider.computeUnitsTotal = 0;
+  provider.peerCount = 0;
+  provider.effectorCount = 0;
+  provider.save();
+
+  let graphNetwork = createOrLoadGraphNetwork();
+  graphNetwork.providersTotal = graphNetwork.providersTotal.plus(UNO_BIG_INT);
+  graphNetwork.save()
+}
+
+export function handleEffectorInfoSet(event: EffectorInfoSet): void {
+  const appCID = changetype<AppCID>(event.params.id);
+  const cid = getEffectorCID(appCID);
+  let effector = createOrLoadEffector(cid);
+  effector.description = event.params.description;
+  effector.save();
+}
+
+// When it is removed: it does not mean that in other place it is stopped to use the effector.
+//  Effector description and approved info merely deleted.
+export function handleEffectorInfoRemoved(event: EffectorInfoRemoved): void {
+  const appCID = changetype<AppCID>(event.params.id);
+  const cid = getEffectorCID(appCID);
+  let effector = createOrLoadEffector(cid);
+  effector.description = UNKNOWN_EFFECTOR_DESCRIPTION;
+  effector.save();
+}
 
 export function handleMarketOfferRegistered(
   event: MarketOfferRegistered,
@@ -46,8 +79,7 @@ export function handleMarketOfferRegistered(
   // - emit PeerCreated(offerId, peer.peerId);
   // - emit ComputeUnitCreated(offerId, peerId, unitId);
 
-  // Create provider.
-  const provider = createOrLoadProvider(formatAddress(event.params.provider), event.block.timestamp);
+  const provider = Provider.load(event.params.provider.toHex()) as Provider;
 
   // Create Offer.
   const offer = new Offer(event.params.offerId.toHex());
