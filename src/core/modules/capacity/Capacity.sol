@@ -260,6 +260,8 @@ contract Capacity is CapacityConst, Multicall, Whitelist, UUPSUpgradeable, ICapa
         external
         returns (bytes32)
     {
+        require(isApproved(msg.sender), "Only whitelisted provider can create capacity commitment");
+
         IMarket market = core.market();
 
         CommitmentStorage storage s = _getCommitmentStorage();

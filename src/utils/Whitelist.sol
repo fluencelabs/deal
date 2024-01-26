@@ -42,7 +42,7 @@ contract Whitelist is OwnableUpgradableDiamond {
     // #endregion
 
     // #region ----------------- Public View -----------------
-    function isApproved(address account) external view returns (bool) {
+    function isApproved(address account) public view returns (bool) {
         WhitelistStorage storage s = _getWhitelistStorage();
         return !s.isWhitelistEnabled || s.isWhitelisted[account];
     }
