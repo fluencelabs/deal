@@ -9,8 +9,8 @@ dataSources:
     network: local
     source:
       abi: Core
-      address: "0x7B4f352Cd40114f12e82fC675b5BA8C7582FC513"
-      startBlock: 4326
+      address: "0xb6057e08a11da09a998985874FE2119e98dB3D5D"
+      startBlock: 4982
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -29,8 +29,8 @@ dataSources:
     network: local
     source:
       abi: Capacity
-      address: "0x51C65cd0Cdb1A8A8b79dfc2eE965B1bA0bb8fc89"
-      startBlock: 4326
+      address: "0x0D92d35D311E54aB8EEA0394d7E773Fc5144491a"
+      startBlock: 4982
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -62,8 +62,8 @@ dataSources:
     network: local
     source:
       abi: Market
-      address: "0x87006e75a5B6bE9D1bbF61AC8Cd84f05D9140589"
-      startBlock: 4326
+      address: "0x4278C5d322aB92F1D876Dd7Bd9b44d1748b88af2"
+      startBlock: 4982
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7

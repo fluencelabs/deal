@@ -5,6 +5,7 @@ export type ProviderDetailsStatusFilter = "all" | "active" | "inactive";
 /*
  * @dev :param paymentTokens: tokens addresses.
  * @dev :para search: strict search only.
+ * @dev :param onlyApproved: if provider of the offer is Approved.
  */
 export interface OffersFilters {
   search?: string | undefined;
@@ -12,7 +13,6 @@ export interface OffersFilters {
   paymentTokens?: Array<string> | undefined;
   minPricePerWorkerEpoch?: number | undefined;
   maxPricePerWorkerEpoch?: number | undefined;
-  //? eslint-disable-next-line @typescript-eslint/no-unused-vars
   onlyApproved?: boolean;
   createdAtFrom?: number | undefined;
   createdAtTo?: number | undefined;

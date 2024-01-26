@@ -144,10 +144,12 @@ export class DealExplorerClient {
     if (!providersFilters) {
       return {};
     }
-    if (providersFilters.onlyApproved) {
-      console.warn("Currently onlyApproved field does not implemented.");
-    }
     const convertedFilters: Provider_Filter = { and: [] };
+    if (providersFilters.onlyApproved) {
+      convertedFilters.and?.push({
+        approved: true,
+      })
+    }
     if (providersFilters.search) {
       const search = providersFilters.search;
       convertedFilters.and?.push({
@@ -360,10 +362,12 @@ export class DealExplorerClient {
     if (!v) {
       return {};
     }
-    if (v.onlyApproved) {
-      console.warn("Currently onlyApproved field does not implemented.");
-    }
     const convertedFilters: Offer_Filter = { and: [] };
+    if (v.onlyApproved) {
+      convertedFilters.and?.push({
+        provider_: { approved: true },
+      })
+    }
     if (v.search) {
       const search = v.search;
       convertedFilters.and?.push({
