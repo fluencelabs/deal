@@ -59,7 +59,10 @@ interface IOffer {
     /// @param metadata The new metadata of the provider
     event ProviderInfoUpdated(address indexed provider, string name, CIDV1 metadata);
 
-    event ProviderApproved(address indexed provider, bool approved);
+    /// @dev Emitted when a provider approve status changed by Core Owner.
+    /// @param provider The provider address
+    /// @param changeApproveTo The new state of approve
+    event UpdateProviderApprove(address indexed provider, bool changeApproveTo);
 
     /// @dev Emitted when a new offer is registered
     /// @param provider The provider address
@@ -173,7 +176,7 @@ interface IOffer {
     /// @dev Call the method after provider is registered only (by setProviderInfo).
     /// @param provider Provider address.
     /// @param changeApproveTo state to change an APPROVE field.
-    function approveProvider(address provider, bool changeApproveTo) external;
+    function updateProviderApprove(address provider, bool changeApproveTo) external;
 
     /// @dev Register a new offer
     /// @param minPricePerWorkerEpoch The min price per worker per epoch which the provider specify for the matching with the deal

@@ -9,8 +9,8 @@ dataSources:
     network: local
     source:
       abi: Core
-      address: "0xb6057e08a11da09a998985874FE2119e98dB3D5D"
-      startBlock: 4982
+      address: "0x18b7CBdfFA52d1e7BB992fd50f394c5b59E20B72"
+      startBlock: 5132
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -29,8 +29,8 @@ dataSources:
     network: local
     source:
       abi: Capacity
-      address: "0x0D92d35D311E54aB8EEA0394d7E773Fc5144491a"
-      startBlock: 4982
+      address: "0x820638ecd57B55e51CE6EaD7D137962E7A201dD9"
+      startBlock: 5132
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -62,8 +62,8 @@ dataSources:
     network: local
     source:
       abi: Market
-      address: "0x4278C5d322aB92F1D876Dd7Bd9b44d1748b88af2"
-      startBlock: 4982
+      address: "0x3A906C603F080D96dc08f81CF2889dAB6FF299dE"
+      startBlock: 5132
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -88,6 +88,8 @@ dataSources:
           handler: handleProviderInfoUpdated
         - event: EffectorInfoSet((indexed bytes4,bytes32),string,(bytes4,bytes32))
           handler: handleEffectorInfoSet
+        - event: UpdateProviderApprove(indexed address,bool)
+          handler: handleUpdateProviderApprove
         - event: EffectorInfoRemoved((indexed bytes4,bytes32))
           handler: handleEffectorInfoRemoved
         - event: MarketOfferRegistered(indexed
