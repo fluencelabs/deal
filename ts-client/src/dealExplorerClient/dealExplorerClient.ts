@@ -539,7 +539,6 @@ export class DealExplorerClient {
     if (!v) {
       return {};
     }
-    // TODO: onlyActive
     if (v.onlyApproved) {
       console.warn("Currently onlyApproved filter does not implemented.");
     }
