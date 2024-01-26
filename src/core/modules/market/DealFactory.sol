@@ -105,4 +105,8 @@ abstract contract DealFactory is BaseModule, IDealFactory {
 
         return deal;
     }
+
+    function updateDealImpl(IDeal dealImpl_) external onlyCoreOwner {
+        _getDealFactoryStorage().dealImpl = dealImpl_;
+    }
 }
