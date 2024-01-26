@@ -1,4 +1,4 @@
-import type { DealStatus } from "./types.js";
+import type {DealStatus} from "./schemes.js";
 
 export type ProviderDetailsStatusFilter = "all" | "active" | "inactive";
 
@@ -42,3 +42,18 @@ export interface DealsFilters {
   providerId?: string | undefined;
   status?: DealStatus | undefined;
 }
+
+// Order Types.
+export type OfferShortOrderBy =
+  | "createdAt"
+  | "pricePerWorkerEpoch"
+  | "updatedAt";
+
+export type ProviderShortOrderBy = "createdAt" | "computeUnitsTotal";
+
+export type DealsShortOrderBy = "createdAt";
+
+export type EffectorsOrderBy = "id";
+export type PaymentTokenOrderBy = "id" | "symbol";
+
+export type OrderType = "asc" | "desc";

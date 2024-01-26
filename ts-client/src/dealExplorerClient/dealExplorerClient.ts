@@ -2,15 +2,11 @@ import { ethers } from "ethers";
 import type {
   DealShort,
   OfferShort,
-  OfferShortOrderBy,
-  OrderType,
   ProviderShort,
   OfferDetail,
-  ProviderShortOrderBy,
   Effector,
   ProviderDetail,
   ProviderBase,
-  DealsShortOrderBy,
   DealDetail,
   Peer,
   ComputeUnit,
@@ -18,17 +14,20 @@ import type {
   DealShortListView,
   OfferShortListView,
   ProviderShortListView,
-  EffectorsOrderBy,
-  PaymentTokenOrderBy,
   PaymentToken,
   PaymentTokenListView,
   EffectorListView,
-} from "./types.js";
+} from "./schemes.js";
 import type {
   ByProviderAndStatusFilter,
   DealsFilters,
-  OffersFilters,
+  OffersFilters, OfferShortOrderBy,
   ProvidersFilters,
+  OrderType,
+  ProviderShortOrderBy,
+  DealsShortOrderBy,
+  EffectorsOrderBy,
+  PaymentTokenOrderBy,
 } from "./filters.js";
 import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type { BasicOfferFragment } from "./indexerClient/queries/offers-query.generated.js";
@@ -49,6 +48,7 @@ import type { ContractsENV } from "../client/config.js";
 import type { BasicPeerFragment } from "./indexerClient/queries/offers-query.generated.js";
 import { DealRpcClient } from "./rpcClients/index.js";
 import { tokenValueToRounded, valueToTokenValue } from "./utils.js";
+import {serializeProviderName} from "./serializers.js";
 
 export class FiltersError extends Error {}
 export class ValidTogetherFiltersError extends FiltersError {}
@@ -113,7 +113,8 @@ export class DealExplorerClient {
       createdAt: Number(provider.createdAt),
       totalComputeUnits: provider.computeUnitsTotal,
       freeComputeUnits: provider.computeUnitsAvailable,
-      name: provider.name,
+      // TODO: add logic for approved.
+      name: serializeProviderName(provider.name, provider.id, false),
       // TODO: add logic for approved.
       isApproved: true,
     } as ProviderBase;
