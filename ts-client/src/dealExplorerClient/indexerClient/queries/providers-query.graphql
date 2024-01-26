@@ -45,6 +45,7 @@ fragment ProviderABC on Provider {
     createdAt
     computeUnitsAvailable
     computeUnitsTotal
+    approved
 }
 
 fragment ProvidersBasicOffer on Offer {

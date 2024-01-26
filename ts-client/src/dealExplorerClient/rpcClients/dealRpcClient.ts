@@ -4,7 +4,7 @@ import {
   type Multicall3ContractCall,
 } from "./multicall3ContractClient.js";
 import { Deal__factory } from "../../index.js";
-import type { DealStatus } from "../types.js";
+import type { DealStatus } from "../types/schemes.js";
 
 export class DealRpcClient extends Multicall3ContractClient {
   constructor(
