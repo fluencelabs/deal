@@ -113,10 +113,8 @@ export class DealExplorerClient {
       createdAt: Number(provider.createdAt),
       totalComputeUnits: provider.computeUnitsTotal,
       freeComputeUnits: provider.computeUnitsAvailable,
-      // TODO: add logic for approved.
-      name: serializeProviderName(provider.name, provider.id, false),
-      // TODO: add logic for approved.
-      isApproved: true,
+      name: serializeProviderName(provider.name, provider.id, provider.approved),
+      isApproved: provider.approved,
     } as ProviderBase;
   }
 
@@ -536,6 +534,7 @@ export class DealExplorerClient {
     if (!v) {
       return {};
     }
+    // TODO: onlyActive
     if (v.onlyApproved) {
       console.warn("Currently onlyApproved filter does not implemented.");
     }
