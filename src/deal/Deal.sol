@@ -48,6 +48,12 @@ contract Deal is UUPSUpgradeable, Multicall, WorkerManager, IDeal {
         }
     }
 
+    // ------------------ Modifiers ------------------
+    modifier onlyCoreOwner() {
+        require(msg.sender == OwnableUpgradableDiamond(address(_globalCore())).owner(), "Only core owner can call");
+        _;
+    }
+
     // ------------------ Constructor ---------------------
     constructor() {
         _disableInitializers();
@@ -140,7 +146,7 @@ contract Deal is UUPSUpgradeable, Multicall, WorkerManager, IDeal {
         dealStorage.lastCommitedEpoch = currentEpoch;
     }
 
-    function _authorizeUpgrade(address) internal override onlyOwner {}
+    function _authorizeUpgrade(address) internal override onlyCoreOwner {}
 
     // ------------------ Public View Functions ------------------
     function getStatus() public view returns (Status) {
