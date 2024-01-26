@@ -6,6 +6,7 @@ export type ProviderDetailsStatusFilter = "all" | "active" | "inactive";
  * @dev :param paymentTokens: tokens addresses.
  * @dev :para search: strict search only.
  * @dev :param onlyApproved: if provider of the offer is Approved.
+ * @dev :param onlyActive: if any of the CUs in the offer is Active (available for matching).
  */
 export interface OffersFilters {
   search?: string | undefined;
@@ -17,6 +18,7 @@ export interface OffersFilters {
   createdAtFrom?: number | undefined;
   createdAtTo?: number | undefined;
   providerId?: string | undefined;
+  onlyActive?: boolean | undefined;
 }
 
 export interface ProvidersFilters {

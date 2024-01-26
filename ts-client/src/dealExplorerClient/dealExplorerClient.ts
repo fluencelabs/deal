@@ -361,6 +361,11 @@ export class DealExplorerClient {
       return {};
     }
     const convertedFilters: Offer_Filter = { and: [] };
+    if (v.onlyActive) {
+      convertedFilters.and?.push({
+        computeUnitsAvailable_gt: 0,
+      })
+    }
     if (v.onlyApproved) {
       convertedFilters.and?.push({
         provider_: { approved: true },
