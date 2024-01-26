@@ -5,34 +5,41 @@ import {Test, console2} from "forge-std/Test.sol";
 import "forge-std/console.sol";
 import "forge-std/Vm.sol";
 import "forge-std/StdCheats.sol";
+import "filecoin-solidity/v0.8/utils/Actor.sol";
 import "src/core/Core.sol";
 import "src/core/modules/capacity/Capacity.sol";
 import "src/core/modules/capacity/interfaces/ICapacity.sol";
+import "src/utils/BytesConverter.sol";
 import "test/utils/DeployDealSystem.sol";
 import "src/core/modules/market/Market.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
 import "test/utils/Random.sol";
+import "forge-std/StdCheats.sol";
 
 contract CapacityCommitmentTest is Test {
     using SafeERC20 for IERC20;
+    using BytesConverter for bytes32;
 
     // ------------------ Events ------------------
     event CommitmentCreated(
         bytes32 indexed peerId,
         bytes32 commitmentId,
+        uint256 duration,
         address delegator,
         uint256 rewardDelegationRate,
-        uint256 fltCCCollateralPerUnit
+        uint256 fltCollateralPerUnit
     );
     event CommitmentRemoved(bytes32 indexed commitmentId);
     event CommitmentActivated(
-        bytes32 indexed peerId, bytes32 indexed commitmentId, uint256 endEpoch, bytes32[] unitIds
+        bytes32 indexed peerId, bytes32 indexed commitmentId, uint256 startEpoch, uint256 endEpoch, bytes32[] unitIds
     );
     event CommitmentFinished(bytes32 indexed commitmentId);
 
     event CollateralDeposited(bytes32 indexed commitmentId, uint256 totalCollateral);
 
-    event ProofSubmitted(bytes32 indexed commitmentId, bytes32 indexed unitId);
+    event ProofSubmitted(
+        bytes32 indexed commitmentId, bytes32 indexed unitId, bytes32 globalUnitNonce, bytes32 localUnitNonce
+    );
     event RewardWithdrawn(bytes32 indexed commitmentId, uint256 amount);
 
     // ------------------ Variables ------------------
@@ -83,6 +90,7 @@ contract CapacityCommitmentTest is Test {
     }
 
     function test_CreateCapacityCommitment() public {
+        deployment.market.setProviderInfo("name", CIDV1({prefixes: 0x12345678, hash: bytes32(0)}));
         deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, registerPeers);
 
         bytes32 peerId = registerPeers[0].peerId;
@@ -92,7 +100,12 @@ contract CapacityCommitmentTest is Test {
         // expect emit CommitmentCreated
         vm.expectEmit(true, true, false, true, address(deployment.capacity));
         emit CommitmentCreated(
-            peerId, commitmentId, ccDelegator, rewardCCDelegationRate, deployment.capacity.fltCollateralPerUnit()
+            peerId,
+            commitmentId,
+            ccDuration,
+            ccDelegator,
+            rewardCCDelegationRate,
+            deployment.capacity.fltCollateralPerUnit()
         );
 
         // call createCapacityCommitment
@@ -100,13 +113,15 @@ contract CapacityCommitmentTest is Test {
     }
 
     function test_GetCapacityCommitment() public {
+        deployment.market.setProviderInfo("name", CIDV1({prefixes: 0x12345678, hash: bytes32(0)}));
+        bytes32 offerId = deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, registerPeers);
+
         bytes32 peerId = registerPeers[0].peerId;
 
         (bytes32 commitmentId,) = _createCapacityCommitment(peerId);
 
         Capacity.CommitmentView memory commitment = deployment.capacity.getCommitment(commitmentId);
 
-        console.logBytes32(commitment.peerId);
         assertEq(uint256(commitment.status), uint256(ICapacity.CCStatus.WaitDelegation), "Status mismatch");
         assertEq(commitment.peerId, peerId, "PeerId mismatch");
         assertEq(commitment.collateralPerUnit, deployment.capacity.fltCollateralPerUnit(), "CollateralPerUnit mismatch");
@@ -119,41 +134,79 @@ contract CapacityCommitmentTest is Test {
         assertEq(commitment.exitedUnitCount, 0, "ExitedUnitCount mismatch");
     }
 
-    function test_DepositCollateral() public {
-        bytes32 peerId = registerPeers[0].peerId;
-        uint256 unitCount = registerPeers[0].unitIds.length;
-        (bytes32 commitmentId,) = _createCapacityCommitment(peerId);
+    // Mirror function _failedEpoch internal method in this case (after deposit).
+    function _failedEpoch(
+        uint256 maxFailedRatio_,
+        uint256 unitCount_,
+        uint256 activeUnitCount_,
+        uint256 nextAdditionalActiveUnitCount_,
+        uint256 totalCUFailCount_,
+        uint256 lastSnapshotEpoch_
+    ) private view returns (uint256 failedEpoch) {
+        uint256 maxFails = maxFailedRatio_ * unitCount_;
+        uint256 remainingFails = maxFails - totalCUFailCount_;
+        remainingFails = remainingFails - activeUnitCount_;
+        activeUnitCount_ += nextAdditionalActiveUnitCount_;
+        failedEpoch = 1 + lastSnapshotEpoch_ + (remainingFails / activeUnitCount_);
+    }
 
+    // Note, it also tests that it is possible to approve FLT once for total sum, before deposit to several CCs.
+    function test_DepositCollateral() public {
+        deployment.market.setProviderInfo("name", CIDV1({prefixes: 0x12345678, hash: bytes32(0)}));
+        bytes32 offerId = deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, registerPeers);
+
+        uint amountTotal = 0;
+        bytes32[] memory createdCCIds = new bytes32[](registerPeers.length);
+        uint256[] memory amounts = new uint256[](registerPeers.length);
+        uint unitCountTotal = 0;
         uint256 activeUnitCountBefore = deployment.capacity.activeUnitCount();
-        uint256 amount = unitCount * deployment.capacity.fltCollateralPerUnit();
+        for (uint i = 0; i < registerPeers.length; ++i) {
+            bytes32 peerId = registerPeers[i].peerId;
+            uint256 unitCount = registerPeers[i].unitIds.length;
+            unitCountTotal += unitCount;
+            (bytes32 commitmentId,) = _createCapacityCommitment(peerId);
+            createdCCIds[i] = commitmentId;
+
+            uint256 amount = unitCount * deployment.capacity.fltCollateralPerUnit();
+            amounts[i] = amount;
+            amountTotal += amount;
+        }
 
         vm.startPrank(ccDelegator);
-        deployment.tFLT.approve(address(deployment.capacity), amount);
+        deployment.tFLT.approve(address(deployment.capacity), amountTotal);
         uint256 currentEpoch = deployment.core.currentEpoch();
 
-        vm.expectEmit(true, true, false, true, address(deployment.capacity));
-        emit CollateralDeposited(commitmentId, amount);
+        for (uint i = 0; i < registerPeers.length; ++i) {
+            vm.expectEmit(true, true, false, true, address(deployment.capacity));
+            emit CollateralDeposited(createdCCIds[i], amounts[i]);
 
-        vm.expectEmit(true, true, true, true, address(deployment.capacity));
-        emit CommitmentActivated(peerId, commitmentId, currentEpoch + 1 + ccDuration, registerPeers[0].unitIds);
+            vm.expectEmit(true, true, true, true, address(deployment.capacity));
+            emit CommitmentActivated(
+                registerPeers[i].peerId, createdCCIds[i], currentEpoch + 1, currentEpoch + 1 + ccDuration, registerPeers[i].unitIds
+            );
 
-        deployment.capacity.depositCollateral(commitmentId);
+            deployment.capacity.depositCollateral(createdCCIds[i]);
+        }
         vm.stopPrank();
 
-        uint256 activeUnitCountAfter = deployment.capacity.activeUnitCount();
-        assertEq(activeUnitCountAfter, activeUnitCountBefore + unitCount, "ActiveUnitCount mismatch");
+        StdCheats.skip(uint256(deployment.core.epochDuration()));
 
-        // Verify commitment info
-        Capacity.CommitmentView memory commitment = deployment.capacity.getCommitment(commitmentId);
-        assertEq(uint256(commitment.status), uint256(ICapacity.CCStatus.Active), "Status mismatch");
-        assertEq(commitment.peerId, peerId, "PeerId mismatch");
-        assertEq(commitment.collateralPerUnit, deployment.capacity.fltCollateralPerUnit(), "CollateralPerUnit mismatch");
-        assertEq(commitment.endEpoch, deployment.core.currentEpoch() + 1 + ccDuration, "Duration mismatch");
-        assertEq(commitment.rewardDelegatorRate, rewardCCDelegationRate, "RewardDelegatorRate mismatch");
-        assertEq(commitment.delegator, ccDelegator, "Delegator mismatch");
-        assertEq(commitment.startEpoch, deployment.core.currentEpoch() + 1, "StartEpoch mismatch");
-        assertEq(commitment.failedEpoch, 0, "FailedEpoch mismatch");
-        assertEq(commitment.exitedUnitCount, 0, "ExitedUnitCount mismatch");
+        uint256 activeUnitCountAfter = deployment.capacity.activeUnitCount();
+        assertEq(activeUnitCountAfter, activeUnitCountBefore + unitCountTotal, "ActiveUnitCount mismatch");
+
+        // Verify commitments info.
+        for (uint256 i = 0; i < registerPeers.length; ++i) {
+            Capacity.CommitmentView memory commitment = deployment.capacity.getCommitment(createdCCIds[i]);
+            assertEq(uint256(commitment.status), uint256(ICapacity.CCStatus.Active), "Status mismatch");
+            assertEq(commitment.peerId, registerPeers[i].peerId, "PeerId mismatch");
+            assertEq(commitment.collateralPerUnit, deployment.capacity.fltCollateralPerUnit(), "CollateralPerUnit mismatch");
+            assertEq(commitment.endEpoch, deployment.core.currentEpoch() + ccDuration, "Duration mismatch");
+            assertEq(commitment.rewardDelegatorRate, rewardCCDelegationRate, "RewardDelegatorRate mismatch");
+            assertEq(commitment.delegator, ccDelegator, "Delegator mismatch");
+            assertEq(commitment.startEpoch, deployment.core.currentEpoch(), "StartEpoch mismatch");
+            assertEq(commitment.failedEpoch, 0, "FailedEpoch mismatch");
+            assertEq(commitment.exitedUnitCount, 0, "ExitedUnitCount mismatch");
+        }
     }
 
     function test_SubmitProof() public {
@@ -164,17 +217,21 @@ contract CapacityCommitmentTest is Test {
 
         (bytes32 commitmentId,) = _createAndDepositCapacityCommitment(peerId, unitCount);
 
-        bytes32 localK = keccak256(abi.encodePacked("proof"));
-        bytes32 h = keccak256(abi.encodePacked("h"));
-
         StdCheats.skip(uint256(deployment.core.epochDuration()));
 
         vm.startPrank(peerOwner);
 
-        vm.expectEmit(true, true, true, false, address(deployment.capacity));
-        emit ProofSubmitted(commitmentId, unitId);
+        bytes32 globalUnitNonce = keccak256(abi.encodePacked(deployment.capacity.getGlobalNonce(), unitId));
+        bytes32 localUnitNonce = keccak256(abi.encodePacked("localUnitNonce"));
+        bytes32 targetHash = bytes32(uint256(deployment.capacity.difficulty()) - 1);
 
-        deployment.capacity.submitProof(unitId, localK, h);
+        vm.expectEmit(true, true, true, false, address(deployment.capacity));
+        emit ProofSubmitted(commitmentId, unitId, globalUnitNonce, localUnitNonce);
+
+        //TODO: vm mock not working here :(
+        vm.etch(address(Actor.CALL_ACTOR_ID), address(new MockActorCallActorPrecompile(targetHash)).code);
+
+        deployment.capacity.submitProof(unitId, globalUnitNonce, localUnitNonce, targetHash);
 
         vm.stopPrank();
     }
@@ -187,19 +244,23 @@ contract CapacityCommitmentTest is Test {
 
         (bytes32 commitmentId,) = _createAndDepositCapacityCommitment(peerId, unitCount);
 
-        bytes32 localK = keccak256(abi.encodePacked("proof"));
-        bytes32 h = keccak256(abi.encodePacked("h"));
-
         // warp to next epoch
         StdCheats.skip(deployment.core.epochDuration());
+
+        bytes32 targetHash = bytes32(uint256(deployment.capacity.difficulty()) - 1);
+        //TODO: vm mock not working here :(
+        vm.etch(address(Actor.CALL_ACTOR_ID), address(new MockActorCallActorPrecompile(targetHash)).code);
 
         vm.startPrank(peerOwner);
         uint256 minRequiredProofsPerEpoch = deployment.capacity.minRequierdProofsPerEpoch();
         for (uint256 i = 0; i < minRequiredProofsPerEpoch; i++) {
-            vm.expectEmit(true, true, true, false, address(deployment.capacity));
-            emit ProofSubmitted(commitmentId, unitId);
+            bytes32 globalUnitNonce = keccak256(abi.encodePacked(deployment.capacity.getGlobalNonce(), i, unitId));
+            bytes32 localUnitNonce = keccak256(abi.encodePacked("localUnitNonce", i));
 
-            deployment.capacity.submitProof(unitId, localK, h);
+            vm.expectEmit(true, true, true, false, address(deployment.capacity));
+            emit ProofSubmitted(commitmentId, unitId, globalUnitNonce, localUnitNonce);
+
+            deployment.capacity.submitProof(unitId, globalUnitNonce, localUnitNonce, targetHash);
         }
 
         StdCheats.skip(deployment.core.epochDuration());
@@ -211,8 +272,6 @@ contract CapacityCommitmentTest is Test {
 
     // ------------------ Internals ------------------
     function _createCapacityCommitment(bytes32 peerId) internal returns (bytes32 commitmentId, bytes32 offerId) {
-        offerId = deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, registerPeers);
-
         vm.recordLogs();
         deployment.capacity.createCommitment(peerId, ccDuration, ccDelegator, rewardCCDelegationRate);
 
@@ -227,11 +286,33 @@ contract CapacityCommitmentTest is Test {
         internal
         returns (bytes32 commitmentId, bytes32 offerId)
     {
+        deployment.market.setProviderInfo("name", CIDV1({prefixes: 0x12345678, hash: bytes32(0)}));
+        offerId = deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, registerPeers);
+
         (commitmentId, offerId) = _createCapacityCommitment(peerId);
 
         vm.startPrank(ccDelegator);
         deployment.tFLT.approve(address(deployment.capacity), unitCount * deployment.capacity.fltCollateralPerUnit());
         deployment.capacity.depositCollateral(commitmentId);
         vm.stopPrank();
+    }
+}
+
+contract MockActorCallActorPrecompile {
+    bytes32 immutable targetHash;
+
+    fallback() external {
+        bytes memory cborEncoded = abi.encodePacked(bytes1(0x81), bytes1(0xC2), bytes1(0x58), bytes1(0x20), targetHash);
+
+        bytes memory ret = abi.encode(int256(0), uint64(Misc.CBOR_CODEC), cborEncoded);
+        uint256 length = ret.length;
+
+        assembly {
+            return(add(ret, 0x20), length)
+        }
+    }
+
+    constructor(bytes32 targetHash_) {
+        targetHash = targetHash_;
     }
 }

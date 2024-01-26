@@ -17,9 +17,6 @@ abstract contract Matcher is Offer, IMatcher {
     using SafeERC20 for IERC20;
     using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
 
-    // ----------------- Events -----------------
-    event ComputeUnitMatched(bytes32 indexed peerId, bytes32 unitId, uint256 dealCreationBlock, CIDV1 appCID);
-
     // ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.market.storage.v1.matcher")) - 1);
 
@@ -38,12 +35,20 @@ abstract contract Matcher is Offer, IMatcher {
 
     // ----------------- External Mutable -----------------
     /**
+     * @dev Match Deal with Compute Units provided.
      * @notice Match deal with offers and compute units (peers checks through compute units).
+     * @notice It validates provided CUs and silently ignore unvalidated ones on checking:
+     * @notice - deal.maxWorkersPerProvider and silently ignore other CUs out of this limit.
+     * @notice - Offer, or Peer not allowed to match (deal.isProviderAllowed, allowed prices, paymentToken, effectors)
+     * @notice - Compute Unit (CU): Active CC status, also note, protocol does not allow more than one CU per peer
+     * @notice    for the same Deal.
+     * @notice TODO: consolidate workaround: when it comes to check CC status, on wrong status the whole transaction
+     * @notice  will be failed instead of to be silenced.
      * @dev There should be `bytes32[][] calldata peers` as well, but it is not supported by subgraph codegen.
      * @dev  Ref to https://github.com/graphprotocol/graph-tooling/issues/342.
-     * @param deal Deal to match.
-     * @param offers Offers to match with.
-     * @param computeUnits Compute units to match with.
+     * @param deal: Deal to match.
+     * @param offers: Offers array that represents offers  in computeUnits 2D array.
+     * @param computeUnits: Compute Units per offer id (2D array) to match with.
      */
     function matchDeal(IDeal deal, bytes32[] calldata offers, bytes32[][] calldata computeUnits) external {
         ICapacity capacity = core.capacity();
@@ -82,6 +87,7 @@ abstract contract Matcher is Offer, IMatcher {
                 continue;
             }
 
+            // To validate that match will be not more than with maxWorkersPerProvider CUs.
             uint256 computeUnitCountInDealByProvider = deal.getComputeUnitCount(offer.provider);
 
             // Go through compute units.
@@ -108,16 +114,21 @@ abstract contract Matcher is Offer, IMatcher {
                     providersAccessType == IConfig.AccessType.WHITELIST
                         && (
                             computeUnit.deal != address(0) || peer.commitmentId == bytes32(0x000000000)
-                                || currentEpoch < capacity.getCommitment(peer.commitmentId).startEpoch
+                                || capacity.getStatus(peer.commitmentId) == ICapacity.CCStatus.Active
                         )
                 ) {
+                    continue;
+                }
+
+                // Currently, protocol does not allow more than one CU per peer for the same Deal.
+                if (deal.isComputePeerExist(peerId)) {
                     continue;
                 }
 
                 _mvComputeUnitToDeal(computeUnitId, deal);
 
                 // TODO: only for NOX -- remove in future
-                emit ComputeUnitMatched(peerId, computeUnitId, creationBlock, appCID);
+                emit ComputeUnitMatched(peerId, deal, computeUnitId, creationBlock, appCID);
 
                 computeUnitCountInDealByProvider++;
                 freeWorkerSlotsCurrent--;

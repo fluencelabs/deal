@@ -20,6 +20,7 @@ async function createRandomIndexerOffersData(
         });
       }
       createdPeers.push({
+        id: ethers.hexlify(ethers.randomBytes(32)),
         computeUnits: createdComputeUnits,
       });
     }
@@ -56,6 +57,10 @@ interface CallImplProps {
 
 describe("#getMatchedOffers", () => {
   async function _callImpl(callImplProps: CallImplProps) {
+    // First of all check protocol restirction.
+    expect(callImplProps.CUsMockedPage1).lessThanOrEqual(1)
+    expect(callImplProps.CUsMockedPage2).lessThanOrEqual(1)
+
     const _getMatchedOffersPageSpy = vi.spyOn(
       DealMatcherClient.prototype,
       "_getMatchedOffersPage",
@@ -83,12 +88,15 @@ describe("#getMatchedOffers", () => {
     const maxWorkersPerProvider = 1;
 
     const matchedOffers = await client.getMatchedOffers({
+      dealId: "foo",
       pricePerWorkerEpoch: pricePerWorkerEpoch,
       effectors: effectors,
       paymentToken: paymentToken,
       targetWorkerSlotToMatch: callImplProps.targetWorkerSlotToMatch,
       minWorkersToMatch: callImplProps.minWorkersToMatch,
       maxWorkersPerProvider: maxWorkersPerProvider,
+      // Currently, this epoch does not matter.
+      currentEpoch: 999,
     });
 
     expect(_getMatchedOffersPageSpy.mock.calls.length).toEqual(
@@ -125,34 +133,16 @@ describe("#getMatchedOffers", () => {
     await _callImpl({
       targetWorkerSlotToMatch: client.MAX_PER_PAGE,
       minWorkersToMatch: 1,
-      offersMockedPage1: 1,
+      offersMockedPage1: client.MAX_PER_PAGE,
       peersMockedPage1: 1,
       offersMockedPage2: 0,
       peersMockedPage2: 0,
       CUsMockedPage2: 0,
-      CUsMockedPage1: client.MAX_PER_PAGE,
+      CUsMockedPage1: 1,
       expectedCU: client.MAX_PER_PAGE,
       exceptedIndexerCalls: 1,
       expectedFulfilled: true,
-      expectedOffers: 1,
-    });
-  });
-
-  test(`It calls indexer several times to find target CUs paginating through CUs.`, async () => {
-    const client = new DealMatcherClient(TEST_NETWORK);
-    await _callImpl({
-      targetWorkerSlotToMatch: client.MAX_PER_PAGE + 1,
-      minWorkersToMatch: 1,
-      offersMockedPage1: 1,
-      peersMockedPage1: 1,
-      CUsMockedPage1: client.MAX_PER_PAGE,
-      offersMockedPage2: 1,
-      peersMockedPage2: 1,
-      CUsMockedPage2: 1,
-      expectedCU: client.MAX_PER_PAGE + 1,
-      exceptedIndexerCalls: 2,
-      expectedFulfilled: true,
-      expectedOffers: 2,
+      expectedOffers: client.MAX_PER_PAGE,
     });
   });
 
@@ -197,16 +187,16 @@ describe("#getMatchedOffers", () => {
     await _callImpl({
       targetWorkerSlotToMatch: client.MAX_PER_PAGE + 1,
       minWorkersToMatch: 1,
-      offersMockedPage1: 1,
+      offersMockedPage1: client.MAX_PER_PAGE - 1,
       peersMockedPage1: 1,
-      CUsMockedPage1: client.MAX_PER_PAGE - 1,
+      CUsMockedPage1: 1,
       offersMockedPage2: 0,
       peersMockedPage2: 0,
       CUsMockedPage2: 0,
       expectedCU: client.MAX_PER_PAGE - 1,
       exceptedIndexerCalls: 1,
       expectedFulfilled: false,
-      expectedOffers: 1,
+      expectedOffers: client.MAX_PER_PAGE - 1,
     });
   });
 

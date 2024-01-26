@@ -30,12 +30,210 @@ export type Block_Height = {
   number_gte?: InputMaybe<Scalars['Int']['input']>;
 };
 
+/**
+ * To represent that Peer has capacity commitment for some time.
+ *
+ */
+export type CapacityCommitment = {
+  __typename?: 'CapacityCommitment';
+  activeUnitCount: Scalars['Int']['output'];
+  collateralPerUnit: Scalars['BigInt']['output'];
+  delegator: Scalars['String']['output'];
+  /** If CC deleted before collateral deposited. */
+  deleted: Scalars['Boolean']['output'];
+  duration: Scalars['BigInt']['output'];
+  endEpoch: Scalars['BigInt']['output'];
+  exitedUnitCount: Scalars['Int']['output'];
+  failedEpoch: Scalars['BigInt']['output'];
+  id: Scalars['ID']['output'];
+  nextCCFailedEpoch: Scalars['BigInt']['output'];
+  peer: Peer;
+  rewardDelegatorRate: Scalars['Int']['output'];
+  startEpoch: Scalars['BigInt']['output'];
+  status?: Maybe<CapacityCommitmentStatus>;
+  totalCUFailCount: Scalars['Int']['output'];
+};
+
+export type CapacityCommitmentStatus =
+  | 'Active'
+  | 'Failed'
+  | 'Inactive'
+  | 'Removed'
+  | 'WaitDelegation'
+  | 'WaitStart';
+
+export type CapacityCommitment_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>;
+  activeUnitCount?: InputMaybe<Scalars['Int']['input']>;
+  activeUnitCount_gt?: InputMaybe<Scalars['Int']['input']>;
+  activeUnitCount_gte?: InputMaybe<Scalars['Int']['input']>;
+  activeUnitCount_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  activeUnitCount_lt?: InputMaybe<Scalars['Int']['input']>;
+  activeUnitCount_lte?: InputMaybe<Scalars['Int']['input']>;
+  activeUnitCount_not?: InputMaybe<Scalars['Int']['input']>;
+  activeUnitCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  and?: InputMaybe<Array<InputMaybe<CapacityCommitment_Filter>>>;
+  collateralPerUnit?: InputMaybe<Scalars['BigInt']['input']>;
+  collateralPerUnit_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  collateralPerUnit_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  collateralPerUnit_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  collateralPerUnit_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  collateralPerUnit_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  collateralPerUnit_not?: InputMaybe<Scalars['BigInt']['input']>;
+  collateralPerUnit_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  delegator?: InputMaybe<Scalars['String']['input']>;
+  delegator_contains?: InputMaybe<Scalars['String']['input']>;
+  delegator_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  delegator_ends_with?: InputMaybe<Scalars['String']['input']>;
+  delegator_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  delegator_gt?: InputMaybe<Scalars['String']['input']>;
+  delegator_gte?: InputMaybe<Scalars['String']['input']>;
+  delegator_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  delegator_lt?: InputMaybe<Scalars['String']['input']>;
+  delegator_lte?: InputMaybe<Scalars['String']['input']>;
+  delegator_not?: InputMaybe<Scalars['String']['input']>;
+  delegator_not_contains?: InputMaybe<Scalars['String']['input']>;
+  delegator_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  delegator_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  delegator_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  delegator_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  delegator_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  delegator_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  delegator_starts_with?: InputMaybe<Scalars['String']['input']>;
+  delegator_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  deleted?: InputMaybe<Scalars['Boolean']['input']>;
+  deleted_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+  deleted_not?: InputMaybe<Scalars['Boolean']['input']>;
+  deleted_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+  duration?: InputMaybe<Scalars['BigInt']['input']>;
+  duration_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  duration_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  duration_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  duration_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  duration_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  duration_not?: InputMaybe<Scalars['BigInt']['input']>;
+  duration_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  endEpoch?: InputMaybe<Scalars['BigInt']['input']>;
+  endEpoch_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  endEpoch_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  endEpoch_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  endEpoch_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  endEpoch_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  endEpoch_not?: InputMaybe<Scalars['BigInt']['input']>;
+  endEpoch_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  exitedUnitCount?: InputMaybe<Scalars['Int']['input']>;
+  exitedUnitCount_gt?: InputMaybe<Scalars['Int']['input']>;
+  exitedUnitCount_gte?: InputMaybe<Scalars['Int']['input']>;
+  exitedUnitCount_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  exitedUnitCount_lt?: InputMaybe<Scalars['Int']['input']>;
+  exitedUnitCount_lte?: InputMaybe<Scalars['Int']['input']>;
+  exitedUnitCount_not?: InputMaybe<Scalars['Int']['input']>;
+  exitedUnitCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  failedEpoch?: InputMaybe<Scalars['BigInt']['input']>;
+  failedEpoch_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  failedEpoch_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  failedEpoch_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  failedEpoch_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  failedEpoch_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  failedEpoch_not?: InputMaybe<Scalars['BigInt']['input']>;
+  failedEpoch_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  id_gt?: InputMaybe<Scalars['ID']['input']>;
+  id_gte?: InputMaybe<Scalars['ID']['input']>;
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  id_lt?: InputMaybe<Scalars['ID']['input']>;
+  id_lte?: InputMaybe<Scalars['ID']['input']>;
+  id_not?: InputMaybe<Scalars['ID']['input']>;
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  nextCCFailedEpoch?: InputMaybe<Scalars['BigInt']['input']>;
+  nextCCFailedEpoch_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  nextCCFailedEpoch_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  nextCCFailedEpoch_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  nextCCFailedEpoch_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  nextCCFailedEpoch_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  nextCCFailedEpoch_not?: InputMaybe<Scalars['BigInt']['input']>;
+  nextCCFailedEpoch_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  or?: InputMaybe<Array<InputMaybe<CapacityCommitment_Filter>>>;
+  peer?: InputMaybe<Scalars['String']['input']>;
+  peer_?: InputMaybe<Peer_Filter>;
+  peer_contains?: InputMaybe<Scalars['String']['input']>;
+  peer_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  peer_ends_with?: InputMaybe<Scalars['String']['input']>;
+  peer_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  peer_gt?: InputMaybe<Scalars['String']['input']>;
+  peer_gte?: InputMaybe<Scalars['String']['input']>;
+  peer_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  peer_lt?: InputMaybe<Scalars['String']['input']>;
+  peer_lte?: InputMaybe<Scalars['String']['input']>;
+  peer_not?: InputMaybe<Scalars['String']['input']>;
+  peer_not_contains?: InputMaybe<Scalars['String']['input']>;
+  peer_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  peer_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  peer_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  peer_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  peer_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  peer_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  peer_starts_with?: InputMaybe<Scalars['String']['input']>;
+  peer_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  rewardDelegatorRate?: InputMaybe<Scalars['Int']['input']>;
+  rewardDelegatorRate_gt?: InputMaybe<Scalars['Int']['input']>;
+  rewardDelegatorRate_gte?: InputMaybe<Scalars['Int']['input']>;
+  rewardDelegatorRate_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  rewardDelegatorRate_lt?: InputMaybe<Scalars['Int']['input']>;
+  rewardDelegatorRate_lte?: InputMaybe<Scalars['Int']['input']>;
+  rewardDelegatorRate_not?: InputMaybe<Scalars['Int']['input']>;
+  rewardDelegatorRate_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  startEpoch?: InputMaybe<Scalars['BigInt']['input']>;
+  startEpoch_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  startEpoch_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  startEpoch_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  startEpoch_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  startEpoch_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  startEpoch_not?: InputMaybe<Scalars['BigInt']['input']>;
+  startEpoch_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  status?: InputMaybe<CapacityCommitmentStatus>;
+  status_in?: InputMaybe<Array<CapacityCommitmentStatus>>;
+  status_not?: InputMaybe<CapacityCommitmentStatus>;
+  status_not_in?: InputMaybe<Array<CapacityCommitmentStatus>>;
+  totalCUFailCount?: InputMaybe<Scalars['Int']['input']>;
+  totalCUFailCount_gt?: InputMaybe<Scalars['Int']['input']>;
+  totalCUFailCount_gte?: InputMaybe<Scalars['Int']['input']>;
+  totalCUFailCount_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  totalCUFailCount_lt?: InputMaybe<Scalars['Int']['input']>;
+  totalCUFailCount_lte?: InputMaybe<Scalars['Int']['input']>;
+  totalCUFailCount_not?: InputMaybe<Scalars['Int']['input']>;
+  totalCUFailCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+};
+
+export type CapacityCommitment_OrderBy =
+  | 'activeUnitCount'
+  | 'collateralPerUnit'
+  | 'delegator'
+  | 'deleted'
+  | 'duration'
+  | 'endEpoch'
+  | 'exitedUnitCount'
+  | 'failedEpoch'
+  | 'id'
+  | 'nextCCFailedEpoch'
+  | 'peer'
+  | 'peer__currentCCCollateralDepositedAt'
+  | 'peer__currentCCEndEpoch'
+  | 'peer__currentCCNextCCFailedEpoch'
+  | 'peer__id'
+  | 'peer__isAnyJoinedDeals'
+  | 'rewardDelegatorRate'
+  | 'startEpoch'
+  | 'status'
+  | 'totalCUFailCount';
+
 export type ComputeUnit = {
   __typename?: 'ComputeUnit';
   deal?: Maybe<Deal>;
   id: Scalars['ID']['output'];
   peer: Peer;
-  /** In order to simplify relation. */
+  /** In order to simplify relation for query. */
   provider: Provider;
   workerId?: Maybe<Scalars['String']['output']>;
 };
@@ -153,7 +351,11 @@ export type ComputeUnit_OrderBy =
   | 'deal__withdrawalSum'
   | 'id'
   | 'peer'
+  | 'peer__currentCCCollateralDepositedAt'
+  | 'peer__currentCCEndEpoch'
+  | 'peer__currentCCNextCCFailedEpoch'
   | 'peer__id'
+  | 'peer__isAnyJoinedDeals'
   | 'provider'
   | 'provider__computeUnitsAvailable'
   | 'provider__computeUnitsTotal'
@@ -173,6 +375,8 @@ export type Deal = {
   depositedSum: Scalars['BigInt']['output'];
   effectors?: Maybe<Array<DealToEffector>>;
   id: Scalars['ID']['output'];
+  /** Many to many to access joined peers to maintain protocol restrictions */
+  joinedPeers?: Maybe<Array<DealToPeer>>;
   maxPaidEpoch?: Maybe<Scalars['BigInt']['output']>;
   maxWorkersPerProvider: Scalars['Int']['output'];
   minWorkers: Scalars['Int']['output'];
@@ -199,6 +403,15 @@ export type DealEffectorsArgs = {
   orderDirection?: InputMaybe<OrderDirection>;
   skip?: InputMaybe<Scalars['Int']['input']>;
   where?: InputMaybe<DealToEffector_Filter>;
+};
+
+
+export type DealJoinedPeersArgs = {
+  first?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<DealToPeer_OrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<DealToPeer_Filter>;
 };
 
 export type DealToEffector = {
@@ -283,6 +496,211 @@ export type DealToEffector_OrderBy =
   | 'effector__id'
   | 'id';
 
+/**
+ * TODO: deprecate.
+ * To add possibility to filter already joined peers into a Deal from perspective of an Offer
+ * (protocol does not allow more than one CU per peer for the same Deal).
+ *
+ */
+export type DealToJoinedOfferPeer = {
+  __typename?: 'DealToJoinedOfferPeer';
+  deal: Deal;
+  id: Scalars['ID']['output'];
+  offer: Offer;
+  peer: Peer;
+};
+
+export type DealToJoinedOfferPeer_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>;
+  and?: InputMaybe<Array<InputMaybe<DealToJoinedOfferPeer_Filter>>>;
+  deal?: InputMaybe<Scalars['String']['input']>;
+  deal_?: InputMaybe<Deal_Filter>;
+  deal_contains?: InputMaybe<Scalars['String']['input']>;
+  deal_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  deal_ends_with?: InputMaybe<Scalars['String']['input']>;
+  deal_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  deal_gt?: InputMaybe<Scalars['String']['input']>;
+  deal_gte?: InputMaybe<Scalars['String']['input']>;
+  deal_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  deal_lt?: InputMaybe<Scalars['String']['input']>;
+  deal_lte?: InputMaybe<Scalars['String']['input']>;
+  deal_not?: InputMaybe<Scalars['String']['input']>;
+  deal_not_contains?: InputMaybe<Scalars['String']['input']>;
+  deal_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  deal_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  deal_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  deal_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  deal_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  deal_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  deal_starts_with?: InputMaybe<Scalars['String']['input']>;
+  deal_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  id_gt?: InputMaybe<Scalars['ID']['input']>;
+  id_gte?: InputMaybe<Scalars['ID']['input']>;
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  id_lt?: InputMaybe<Scalars['ID']['input']>;
+  id_lte?: InputMaybe<Scalars['ID']['input']>;
+  id_not?: InputMaybe<Scalars['ID']['input']>;
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  offer?: InputMaybe<Scalars['String']['input']>;
+  offer_?: InputMaybe<Offer_Filter>;
+  offer_contains?: InputMaybe<Scalars['String']['input']>;
+  offer_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  offer_ends_with?: InputMaybe<Scalars['String']['input']>;
+  offer_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  offer_gt?: InputMaybe<Scalars['String']['input']>;
+  offer_gte?: InputMaybe<Scalars['String']['input']>;
+  offer_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  offer_lt?: InputMaybe<Scalars['String']['input']>;
+  offer_lte?: InputMaybe<Scalars['String']['input']>;
+  offer_not?: InputMaybe<Scalars['String']['input']>;
+  offer_not_contains?: InputMaybe<Scalars['String']['input']>;
+  offer_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  offer_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  offer_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  offer_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  offer_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  offer_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  offer_starts_with?: InputMaybe<Scalars['String']['input']>;
+  offer_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  or?: InputMaybe<Array<InputMaybe<DealToJoinedOfferPeer_Filter>>>;
+  peer?: InputMaybe<Scalars['String']['input']>;
+  peer_?: InputMaybe<Peer_Filter>;
+  peer_contains?: InputMaybe<Scalars['String']['input']>;
+  peer_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  peer_ends_with?: InputMaybe<Scalars['String']['input']>;
+  peer_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  peer_gt?: InputMaybe<Scalars['String']['input']>;
+  peer_gte?: InputMaybe<Scalars['String']['input']>;
+  peer_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  peer_lt?: InputMaybe<Scalars['String']['input']>;
+  peer_lte?: InputMaybe<Scalars['String']['input']>;
+  peer_not?: InputMaybe<Scalars['String']['input']>;
+  peer_not_contains?: InputMaybe<Scalars['String']['input']>;
+  peer_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  peer_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  peer_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  peer_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  peer_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  peer_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  peer_starts_with?: InputMaybe<Scalars['String']['input']>;
+  peer_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type DealToJoinedOfferPeer_OrderBy =
+  | 'deal'
+  | 'deal__appCID'
+  | 'deal__createdAt'
+  | 'deal__depositedSum'
+  | 'deal__id'
+  | 'deal__maxPaidEpoch'
+  | 'deal__maxWorkersPerProvider'
+  | 'deal__minWorkers'
+  | 'deal__owner'
+  | 'deal__pricePerWorkerEpoch'
+  | 'deal__targetWorkers'
+  | 'deal__withdrawalSum'
+  | 'id'
+  | 'offer'
+  | 'offer__computeUnitsAvailable'
+  | 'offer__computeUnitsTotal'
+  | 'offer__createdAt'
+  | 'offer__id'
+  | 'offer__pricePerEpoch'
+  | 'offer__updatedAt'
+  | 'peer'
+  | 'peer__currentCCCollateralDepositedAt'
+  | 'peer__currentCCEndEpoch'
+  | 'peer__currentCCNextCCFailedEpoch'
+  | 'peer__id'
+  | 'peer__isAnyJoinedDeals';
+
+export type DealToPeer = {
+  __typename?: 'DealToPeer';
+  deal: Deal;
+  id: Scalars['ID']['output'];
+  peer: Peer;
+};
+
+export type DealToPeer_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>;
+  and?: InputMaybe<Array<InputMaybe<DealToPeer_Filter>>>;
+  deal?: InputMaybe<Scalars['String']['input']>;
+  deal_?: InputMaybe<Deal_Filter>;
+  deal_contains?: InputMaybe<Scalars['String']['input']>;
+  deal_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  deal_ends_with?: InputMaybe<Scalars['String']['input']>;
+  deal_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  deal_gt?: InputMaybe<Scalars['String']['input']>;
+  deal_gte?: InputMaybe<Scalars['String']['input']>;
+  deal_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  deal_lt?: InputMaybe<Scalars['String']['input']>;
+  deal_lte?: InputMaybe<Scalars['String']['input']>;
+  deal_not?: InputMaybe<Scalars['String']['input']>;
+  deal_not_contains?: InputMaybe<Scalars['String']['input']>;
+  deal_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  deal_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  deal_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  deal_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  deal_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  deal_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  deal_starts_with?: InputMaybe<Scalars['String']['input']>;
+  deal_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  id_gt?: InputMaybe<Scalars['ID']['input']>;
+  id_gte?: InputMaybe<Scalars['ID']['input']>;
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  id_lt?: InputMaybe<Scalars['ID']['input']>;
+  id_lte?: InputMaybe<Scalars['ID']['input']>;
+  id_not?: InputMaybe<Scalars['ID']['input']>;
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  or?: InputMaybe<Array<InputMaybe<DealToPeer_Filter>>>;
+  peer?: InputMaybe<Scalars['String']['input']>;
+  peer_?: InputMaybe<Peer_Filter>;
+  peer_contains?: InputMaybe<Scalars['String']['input']>;
+  peer_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  peer_ends_with?: InputMaybe<Scalars['String']['input']>;
+  peer_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  peer_gt?: InputMaybe<Scalars['String']['input']>;
+  peer_gte?: InputMaybe<Scalars['String']['input']>;
+  peer_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  peer_lt?: InputMaybe<Scalars['String']['input']>;
+  peer_lte?: InputMaybe<Scalars['String']['input']>;
+  peer_not?: InputMaybe<Scalars['String']['input']>;
+  peer_not_contains?: InputMaybe<Scalars['String']['input']>;
+  peer_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  peer_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  peer_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  peer_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  peer_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  peer_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  peer_starts_with?: InputMaybe<Scalars['String']['input']>;
+  peer_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type DealToPeer_OrderBy =
+  | 'deal'
+  | 'deal__appCID'
+  | 'deal__createdAt'
+  | 'deal__depositedSum'
+  | 'deal__id'
+  | 'deal__maxPaidEpoch'
+  | 'deal__maxWorkersPerProvider'
+  | 'deal__minWorkers'
+  | 'deal__owner'
+  | 'deal__pricePerWorkerEpoch'
+  | 'deal__targetWorkers'
+  | 'deal__withdrawalSum'
+  | 'id'
+  | 'peer'
+  | 'peer__currentCCCollateralDepositedAt'
+  | 'peer__currentCCEndEpoch'
+  | 'peer__currentCCNextCCFailedEpoch'
+  | 'peer__id'
+  | 'peer__isAnyJoinedDeals';
+
 export type Deal_Filter = {
   /** Filter for the block changed event. */
   _change_block?: InputMaybe<BlockChangedFilter>;
@@ -333,6 +751,7 @@ export type Deal_Filter = {
   id_lte?: InputMaybe<Scalars['ID']['input']>;
   id_not?: InputMaybe<Scalars['ID']['input']>;
   id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  joinedPeers_?: InputMaybe<DealToPeer_Filter>;
   maxPaidEpoch?: InputMaybe<Scalars['BigInt']['input']>;
   maxPaidEpoch_gt?: InputMaybe<Scalars['BigInt']['input']>;
   maxPaidEpoch_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -432,6 +851,7 @@ export type Deal_OrderBy =
   | 'depositedSum'
   | 'effectors'
   | 'id'
+  | 'joinedPeers'
   | 'maxPaidEpoch'
   | 'maxWorkersPerProvider'
   | 'minWorkers'
@@ -506,10 +926,12 @@ export type Effector_OrderBy =
 
 export type GraphNetwork = {
   __typename?: 'GraphNetwork';
+  coreEpochDuration?: Maybe<Scalars['Int']['output']>;
   dealsTotal: Scalars['BigInt']['output'];
   effectorsTotal: Scalars['BigInt']['output'];
   /** ID is set to 1 */
   id: Scalars['ID']['output'];
+  initTimestamp?: Maybe<Scalars['Int']['output']>;
   offersTotal: Scalars['BigInt']['output'];
   providersTotal: Scalars['BigInt']['output'];
   tokensTotal: Scalars['BigInt']['output'];
@@ -519,6 +941,14 @@ export type GraphNetwork_Filter = {
   /** Filter for the block changed event. */
   _change_block?: InputMaybe<BlockChangedFilter>;
   and?: InputMaybe<Array<InputMaybe<GraphNetwork_Filter>>>;
+  coreEpochDuration?: InputMaybe<Scalars['Int']['input']>;
+  coreEpochDuration_gt?: InputMaybe<Scalars['Int']['input']>;
+  coreEpochDuration_gte?: InputMaybe<Scalars['Int']['input']>;
+  coreEpochDuration_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  coreEpochDuration_lt?: InputMaybe<Scalars['Int']['input']>;
+  coreEpochDuration_lte?: InputMaybe<Scalars['Int']['input']>;
+  coreEpochDuration_not?: InputMaybe<Scalars['Int']['input']>;
+  coreEpochDuration_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
   dealsTotal?: InputMaybe<Scalars['BigInt']['input']>;
   dealsTotal_gt?: InputMaybe<Scalars['BigInt']['input']>;
   dealsTotal_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -543,6 +973,14 @@ export type GraphNetwork_Filter = {
   id_lte?: InputMaybe<Scalars['ID']['input']>;
   id_not?: InputMaybe<Scalars['ID']['input']>;
   id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  initTimestamp?: InputMaybe<Scalars['Int']['input']>;
+  initTimestamp_gt?: InputMaybe<Scalars['Int']['input']>;
+  initTimestamp_gte?: InputMaybe<Scalars['Int']['input']>;
+  initTimestamp_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  initTimestamp_lt?: InputMaybe<Scalars['Int']['input']>;
+  initTimestamp_lte?: InputMaybe<Scalars['Int']['input']>;
+  initTimestamp_not?: InputMaybe<Scalars['Int']['input']>;
+  initTimestamp_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
   offersTotal?: InputMaybe<Scalars['BigInt']['input']>;
   offersTotal_gt?: InputMaybe<Scalars['BigInt']['input']>;
   offersTotal_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -571,9 +1009,11 @@ export type GraphNetwork_Filter = {
 };
 
 export type GraphNetwork_OrderBy =
+  | 'coreEpochDuration'
   | 'dealsTotal'
   | 'effectorsTotal'
   | 'id'
+  | 'initTimestamp'
   | 'offersTotal'
   | 'providersTotal'
   | 'tokensTotal';
@@ -591,6 +1031,8 @@ export type Offer = {
    *
    */
   id: Scalars['ID']['output'];
+  /** To support check that a peer already in a deal. */
+  joinedOfferPeers?: Maybe<Array<DealToJoinedOfferPeer>>;
   paymentToken: Token;
   peers?: Maybe<Array<Peer>>;
   pricePerEpoch: Scalars['BigInt']['output'];
@@ -605,6 +1047,15 @@ export type OfferEffectorsArgs = {
   orderDirection?: InputMaybe<OrderDirection>;
   skip?: InputMaybe<Scalars['Int']['input']>;
   where?: InputMaybe<OfferToEffector_Filter>;
+};
+
+
+export type OfferJoinedOfferPeersArgs = {
+  first?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<DealToJoinedOfferPeer_OrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<DealToJoinedOfferPeer_Filter>;
 };
 
 
@@ -744,6 +1195,7 @@ export type Offer_Filter = {
   id_lte?: InputMaybe<Scalars['ID']['input']>;
   id_not?: InputMaybe<Scalars['ID']['input']>;
   id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  joinedOfferPeers_?: InputMaybe<DealToJoinedOfferPeer_Filter>;
   or?: InputMaybe<Array<InputMaybe<Offer_Filter>>>;
   paymentToken?: InputMaybe<Scalars['String']['input']>;
   paymentToken_?: InputMaybe<Token_Filter>;
@@ -812,6 +1264,7 @@ export type Offer_OrderBy =
   | 'createdAt'
   | 'effectors'
   | 'id'
+  | 'joinedOfferPeers'
   | 'paymentToken'
   | 'paymentToken__decimals'
   | 'paymentToken__id'
@@ -835,11 +1288,29 @@ export type OrderDirection =
 
 export type Peer = {
   __typename?: 'Peer';
+  /** To access history of capacity commitments. */
+  capacityCommitments?: Maybe<Array<CapacityCommitment>>;
   computeUnits?: Maybe<Array<ComputeUnit>>;
+  /** To understand if collateral for peer have been submitted. This field should be use in conjunction with currentCapacityCommitment. */
+  currentCCCollateralDepositedAt?: Maybe<Scalars['BigInt']['output']>;
+  currentCCEndEpoch?: Maybe<Scalars['BigInt']['output']>;
+  currentCCNextCCFailedEpoch?: Maybe<Scalars['BigInt']['output']>;
+  currentCapacityCommitment?: Maybe<CapacityCommitment>;
   /** ref to peerId in contract. */
   id: Scalars['ID']['output'];
+  isAnyJoinedDeals: Scalars['Boolean']['output'];
+  joinedDeals?: Maybe<Array<DealToPeer>>;
   offer: Offer;
   provider: Provider;
+};
+
+
+export type PeerCapacityCommitmentsArgs = {
+  first?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<CapacityCommitment_OrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<CapacityCommitment_Filter>;
 };
 
 
@@ -851,11 +1322,66 @@ export type PeerComputeUnitsArgs = {
   where?: InputMaybe<ComputeUnit_Filter>;
 };
 
+
+export type PeerJoinedDealsArgs = {
+  first?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<DealToPeer_OrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<DealToPeer_Filter>;
+};
+
 export type Peer_Filter = {
   /** Filter for the block changed event. */
   _change_block?: InputMaybe<BlockChangedFilter>;
   and?: InputMaybe<Array<InputMaybe<Peer_Filter>>>;
+  capacityCommitments_?: InputMaybe<CapacityCommitment_Filter>;
   computeUnits_?: InputMaybe<ComputeUnit_Filter>;
+  currentCCCollateralDepositedAt?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCCollateralDepositedAt_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCCollateralDepositedAt_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCCollateralDepositedAt_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  currentCCCollateralDepositedAt_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCCollateralDepositedAt_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCCollateralDepositedAt_not?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCCollateralDepositedAt_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  currentCCEndEpoch?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCEndEpoch_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCEndEpoch_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCEndEpoch_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  currentCCEndEpoch_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCEndEpoch_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCEndEpoch_not?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCEndEpoch_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  currentCCNextCCFailedEpoch?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCNextCCFailedEpoch_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCNextCCFailedEpoch_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCNextCCFailedEpoch_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  currentCCNextCCFailedEpoch_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCNextCCFailedEpoch_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCNextCCFailedEpoch_not?: InputMaybe<Scalars['BigInt']['input']>;
+  currentCCNextCCFailedEpoch_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  currentCapacityCommitment?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_?: InputMaybe<CapacityCommitment_Filter>;
+  currentCapacityCommitment_contains?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_ends_with?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_gt?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_gte?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  currentCapacityCommitment_lt?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_lte?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_not?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_not_contains?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  currentCapacityCommitment_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_starts_with?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
   id_gt?: InputMaybe<Scalars['ID']['input']>;
   id_gte?: InputMaybe<Scalars['ID']['input']>;
@@ -864,6 +1390,11 @@ export type Peer_Filter = {
   id_lte?: InputMaybe<Scalars['ID']['input']>;
   id_not?: InputMaybe<Scalars['ID']['input']>;
   id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  isAnyJoinedDeals?: InputMaybe<Scalars['Boolean']['input']>;
+  isAnyJoinedDeals_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+  isAnyJoinedDeals_not?: InputMaybe<Scalars['Boolean']['input']>;
+  isAnyJoinedDeals_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+  joinedDeals_?: InputMaybe<DealToPeer_Filter>;
   offer?: InputMaybe<Scalars['String']['input']>;
   offer_?: InputMaybe<Offer_Filter>;
   offer_contains?: InputMaybe<Scalars['String']['input']>;
@@ -910,8 +1441,29 @@ export type Peer_Filter = {
 };
 
 export type Peer_OrderBy =
+  | 'capacityCommitments'
   | 'computeUnits'
+  | 'currentCCCollateralDepositedAt'
+  | 'currentCCEndEpoch'
+  | 'currentCCNextCCFailedEpoch'
+  | 'currentCapacityCommitment'
+  | 'currentCapacityCommitment__activeUnitCount'
+  | 'currentCapacityCommitment__collateralPerUnit'
+  | 'currentCapacityCommitment__delegator'
+  | 'currentCapacityCommitment__deleted'
+  | 'currentCapacityCommitment__duration'
+  | 'currentCapacityCommitment__endEpoch'
+  | 'currentCapacityCommitment__exitedUnitCount'
+  | 'currentCapacityCommitment__failedEpoch'
+  | 'currentCapacityCommitment__id'
+  | 'currentCapacityCommitment__nextCCFailedEpoch'
+  | 'currentCapacityCommitment__rewardDelegatorRate'
+  | 'currentCapacityCommitment__startEpoch'
+  | 'currentCapacityCommitment__status'
+  | 'currentCapacityCommitment__totalCUFailCount'
   | 'id'
+  | 'isAnyJoinedDeals'
+  | 'joinedDeals'
   | 'offer'
   | 'offer__computeUnitsAvailable'
   | 'offer__computeUnitsTotal'
@@ -1039,11 +1591,17 @@ export type Query = {
   __typename?: 'Query';
   /** Access to subgraph metadata */
   _meta?: Maybe<_Meta_>;
+  capacityCommitment?: Maybe<CapacityCommitment>;
+  capacityCommitments: Array<CapacityCommitment>;
   computeUnit?: Maybe<ComputeUnit>;
   computeUnits: Array<ComputeUnit>;
   deal?: Maybe<Deal>;
   dealToEffector?: Maybe<DealToEffector>;
   dealToEffectors: Array<DealToEffector>;
+  dealToJoinedOfferPeer?: Maybe<DealToJoinedOfferPeer>;
+  dealToJoinedOfferPeers: Array<DealToJoinedOfferPeer>;
+  dealToPeer?: Maybe<DealToPeer>;
+  dealToPeers: Array<DealToPeer>;
   deals: Array<Deal>;
   effector?: Maybe<Effector>;
   effectors: Array<Effector>;
@@ -1064,6 +1622,24 @@ export type Query = {
 
 export type Query_MetaArgs = {
   block?: InputMaybe<Block_Height>;
+};
+
+
+export type QueryCapacityCommitmentArgs = {
+  block?: InputMaybe<Block_Height>;
+  id: Scalars['ID']['input'];
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type QueryCapacityCommitmentsArgs = {
+  block?: InputMaybe<Block_Height>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<CapacityCommitment_OrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  subgraphError?: _SubgraphErrorPolicy_;
+  where?: InputMaybe<CapacityCommitment_Filter>;
 };
 
 
@@ -1107,6 +1683,42 @@ export type QueryDealToEffectorsArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>;
   subgraphError?: _SubgraphErrorPolicy_;
   where?: InputMaybe<DealToEffector_Filter>;
+};
+
+
+export type QueryDealToJoinedOfferPeerArgs = {
+  block?: InputMaybe<Block_Height>;
+  id: Scalars['ID']['input'];
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type QueryDealToJoinedOfferPeersArgs = {
+  block?: InputMaybe<Block_Height>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<DealToJoinedOfferPeer_OrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  subgraphError?: _SubgraphErrorPolicy_;
+  where?: InputMaybe<DealToJoinedOfferPeer_Filter>;
+};
+
+
+export type QueryDealToPeerArgs = {
+  block?: InputMaybe<Block_Height>;
+  id: Scalars['ID']['input'];
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type QueryDealToPeersArgs = {
+  block?: InputMaybe<Block_Height>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<DealToPeer_OrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  subgraphError?: _SubgraphErrorPolicy_;
+  where?: InputMaybe<DealToPeer_Filter>;
 };
 
 
@@ -1250,11 +1862,17 @@ export type Subscription = {
   __typename?: 'Subscription';
   /** Access to subgraph metadata */
   _meta?: Maybe<_Meta_>;
+  capacityCommitment?: Maybe<CapacityCommitment>;
+  capacityCommitments: Array<CapacityCommitment>;
   computeUnit?: Maybe<ComputeUnit>;
   computeUnits: Array<ComputeUnit>;
   deal?: Maybe<Deal>;
   dealToEffector?: Maybe<DealToEffector>;
   dealToEffectors: Array<DealToEffector>;
+  dealToJoinedOfferPeer?: Maybe<DealToJoinedOfferPeer>;
+  dealToJoinedOfferPeers: Array<DealToJoinedOfferPeer>;
+  dealToPeer?: Maybe<DealToPeer>;
+  dealToPeers: Array<DealToPeer>;
   deals: Array<Deal>;
   effector?: Maybe<Effector>;
   effectors: Array<Effector>;
@@ -1275,6 +1893,24 @@ export type Subscription = {
 
 export type Subscription_MetaArgs = {
   block?: InputMaybe<Block_Height>;
+};
+
+
+export type SubscriptionCapacityCommitmentArgs = {
+  block?: InputMaybe<Block_Height>;
+  id: Scalars['ID']['input'];
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type SubscriptionCapacityCommitmentsArgs = {
+  block?: InputMaybe<Block_Height>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<CapacityCommitment_OrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  subgraphError?: _SubgraphErrorPolicy_;
+  where?: InputMaybe<CapacityCommitment_Filter>;
 };
 
 
@@ -1318,6 +1954,42 @@ export type SubscriptionDealToEffectorsArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>;
   subgraphError?: _SubgraphErrorPolicy_;
   where?: InputMaybe<DealToEffector_Filter>;
+};
+
+
+export type SubscriptionDealToJoinedOfferPeerArgs = {
+  block?: InputMaybe<Block_Height>;
+  id: Scalars['ID']['input'];
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type SubscriptionDealToJoinedOfferPeersArgs = {
+  block?: InputMaybe<Block_Height>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<DealToJoinedOfferPeer_OrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  subgraphError?: _SubgraphErrorPolicy_;
+  where?: InputMaybe<DealToJoinedOfferPeer_Filter>;
+};
+
+
+export type SubscriptionDealToPeerArgs = {
+  block?: InputMaybe<Block_Height>;
+  id: Scalars['ID']['input'];
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type SubscriptionDealToPeersArgs = {
+  block?: InputMaybe<Block_Height>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<DealToPeer_OrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  subgraphError?: _SubgraphErrorPolicy_;
+  where?: InputMaybe<DealToPeer_Filter>;
 };
 
 

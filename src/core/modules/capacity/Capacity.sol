@@ -2,21 +2,20 @@
 
 pragma solidity ^0.8.19;
 
-import "forge-std/console.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/utils/Multicall.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
 import "src/deal/base/Types.sol";
-import "src/deal/interfaces/IDeal.sol";
-import "src/utils/OwnableUpgradableDiamond.sol";
-import "src/utils/LinkedListWithUniqueKeys.sol";
+import "src/utils/RandomXProxy.sol";
 import "src/utils/Whitelist.sol";
+import "src/utils/BytesConverter.sol";
 import "./interfaces/ICapacity.sol";
 import "./CapacityConst.sol";
 
-contract Capacity is CapacityConst, Whitelist, UUPSUpgradeable, ICapacity {
+contract Capacity is CapacityConst, Multicall, Whitelist, UUPSUpgradeable, ICapacity {
     using SafeERC20 for IERC20;
-    using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
+    using BytesConverter for bytes;
 
     // #region ------------------ Types ------------------
     struct UnitProofsInfo {
@@ -49,6 +48,10 @@ contract Capacity is CapacityConst, Whitelist, UUPSUpgradeable, ICapacity {
     struct CommitmentStorage {
         mapping(bytes32 => Commitment) commitments;
         mapping(uint256 => RewardInfo) rewardInfoByEpoch;
+        bytes32 globalNonce;
+        bytes32 nextGlobalNonce;
+        uint256 nonceEpochSnapshot;
+        mapping(bytes32 => mapping(bytes32 => bool)) isProofSubmittedByUnit;
     }
 
     CommitmentStorage private _storage;
@@ -77,7 +80,10 @@ contract Capacity is CapacityConst, Whitelist, UUPSUpgradeable, ICapacity {
         uint256 maxProofsPerEpoch_,
         uint256 withdrawEpochesAfterFailed_,
         uint256 maxFailedRatio_,
-        bool isWhitelistEnabled_
+        bool isWhitelistEnabled_,
+        bytes32 initGlobalNonce_,
+        bytes32 difficulty_,
+        address randomXProxy_
     ) external initializer {
         __Ownable_init(msg.sender);
         __Whitelist_init(isWhitelistEnabled_);
@@ -93,8 +99,14 @@ contract Capacity is CapacityConst, Whitelist, UUPSUpgradeable, ICapacity {
             minRequierdProofsPerEpoch_,
             maxProofsPerEpoch_,
             withdrawEpochesAfterFailed_,
-            maxFailedRatio_
+            maxFailedRatio_,
+            difficulty_,
+            randomXProxy_
         );
+
+        CommitmentStorage storage s = _getCommitmentStorage();
+        s.globalNonce = initGlobalNonce_;
+        s.nonceEpochSnapshot = core.currentEpoch();
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyCoreOwner {}
@@ -111,6 +123,8 @@ contract Capacity is CapacityConst, Whitelist, UUPSUpgradeable, ICapacity {
             return CCStatus.Removed;
         } else if (cc.info.startEpoch == 0) {
             return CCStatus.WaitDelegation;
+        } else if (cc.info.startEpoch > currentEpoch_) {
+            return CCStatus.WaitStart;
         } else if (_isFailed(cc, currentEpoch_)) {
             return CCStatus.Failed;
         } else if (currentEpoch_ >= _expiredEpoch(cc)) {
@@ -161,8 +175,13 @@ contract Capacity is CapacityConst, Whitelist, UUPSUpgradeable, ICapacity {
         return cc.vestings[uint256(index)].cumulativeAmount - cc.info.totalWithdrawnReward;
     }
 
-    function getK() external pure returns (bytes32) {
-        return bytes32(0x00);
+    function getGlobalNonce() external view returns (bytes32) {
+        CommitmentStorage storage s = _getCommitmentStorage();
+        if (core.currentEpoch() != s.nonceEpochSnapshot) {
+            return s.nextGlobalNonce;
+        }
+
+        return s.globalNonce;
     }
     // #endregion
 
@@ -188,6 +207,14 @@ contract Capacity is CapacityConst, Whitelist, UUPSUpgradeable, ICapacity {
 
         _setActiveUnitCount(activeUnitCount() - 1);
 
+        emit CommitmentStatsUpdated(
+            commitmentId,
+            cc.info.totalCUFailCount,
+            cc.info.exitedUnitCount,
+            cc.info.activeUnitCount,
+            cc.info.nextAdditionalActiveUnitCount,
+            epoch
+        );
         emit UnitDeactivated(commitmentId, unitId);
     }
 
@@ -216,6 +243,15 @@ contract Capacity is CapacityConst, Whitelist, UUPSUpgradeable, ICapacity {
         cc.info.nextAdditionalActiveUnitCount += 1;
 
         _setActiveUnitCount(activeUnitCount() + 1);
+
+        emit CommitmentStatsUpdated(
+            commitmentId,
+            cc.info.totalCUFailCount,
+            cc.info.exitedUnitCount,
+            cc.info.activeUnitCount,
+            cc.info.nextAdditionalActiveUnitCount,
+            epoch
+        );
     }
     // #endregion
 
@@ -265,11 +301,14 @@ contract Capacity is CapacityConst, Whitelist, UUPSUpgradeable, ICapacity {
         });
         peer.commitmentId = commitmentId;
 
-        emit CommitmentCreated(peerId, commitmentId, delegator, rewardDelegationRate, collateralPerUnit);
+        emit CommitmentCreated(peerId, commitmentId, duration, delegator, rewardDelegationRate, collateralPerUnit);
 
         return commitmentId;
     }
 
+    /*
+     * @dev Delete! capacity commitment before collateral deposited.
+    */
     function removeCommitment(bytes32 commitmentId) external {
         CommitmentStorage storage s = _getCommitmentStorage();
         Commitment storage cc = s.commitments[commitmentId];
@@ -358,41 +397,53 @@ contract Capacity is CapacityConst, Whitelist, UUPSUpgradeable, ICapacity {
         market.setCommitmentId(peerId, commitmentId);
 
         emit CollateralDeposited(commitmentId, collateral);
-        emit CommitmentActivated(peerId, commitmentId, startEpoch + cc.info.duration, market.getComputeUnitIds(peerId));
+        emit CommitmentActivated(
+            peerId, commitmentId, startEpoch, startEpoch + cc.info.duration, market.getComputeUnitIds(peerId)
+        );
     }
 
-    function submitProof(bytes32 unitId, bytes32 localK, bytes32 h) external {
+    function submitProof(bytes32 unitId, bytes32 globalUnitNonce, bytes32 localUnitNonce, bytes32 targetHash)
+        external
+    {
         IMarket market = core.market();
 
         CommitmentStorage storage s = _getCommitmentStorage();
         IMarket.ComputeUnit memory unit = market.getComputeUnit(unitId);
         IMarket.ComputePeer memory peer = market.getComputePeer(unit.peerId);
-
         require(peer.owner == msg.sender, "Only compute peer owner can submit proof");
 
         bytes32 commitmentId = peer.commitmentId;
-
         Commitment storage cc = s.commitments[commitmentId];
-
         require(commitmentId != bytes32(0x00), "Compute unit doesn't have commitment");
 
         uint256 epoch = core.currentEpoch();
         uint256 expiredEpoch = _expiredEpoch(cc);
-
         require(epoch >= cc.info.startEpoch, "Capacity commitment is not started");
 
         CCStatus status = _commitCommitmentSnapshot(cc, peer, epoch - 1, expiredEpoch);
-
         require(status == CCStatus.Active, "Capacity commitment is not active");
 
-        uint256 minRequierdCCProofs_ = minRequierdProofsPerEpoch();
+        // update global nonce
+        if (s.nonceEpochSnapshot != epoch) {
+            s.nonceEpochSnapshot = epoch;
+            s.globalNonce = s.nextGlobalNonce;
+        }
+        s.nextGlobalNonce = keccak256(abi.encodePacked(s.globalNonce, blockhash(block.number - 1)));
 
+        // save localUnitNonce
+        bytes32 globalUnitNonce_ = keccak256(abi.encodePacked(s.globalNonce, unitId));
+        require(!s.isProofSubmittedByUnit[globalUnitNonce_][localUnitNonce], "Proof is already submitted for this unit");
+        s.isProofSubmittedByUnit[globalUnitNonce_][localUnitNonce] = true;
+
+        // save info about proof
         UnitProofsInfo storage unitProofsInfo = cc.unitProofsInfoByUnit[unitId];
         uint256 unitProofsCount = unitProofsInfo.proofsCountByEpoch[epoch];
-
         unitProofsCount += 1;
-        require(unitProofsCount <= maxProofsPerEpoch(), "Too many proofs");
+        if (unitProofsCount > maxProofsPerEpoch()) {
+            revert TooManyProofs();
+        }
 
+        uint256 minRequierdCCProofs_ = minRequierdProofsPerEpoch();
         if (unitProofsCount == minRequierdCCProofs_) {
             cc.info.currentCUSuccessCount += 1;
             _commitUnitSnapshot(cc, unitProofsInfo, epoch, expiredEpoch, cc.info.failedEpoch);
@@ -409,7 +460,25 @@ contract Capacity is CapacityConst, Whitelist, UUPSUpgradeable, ICapacity {
 
         unitProofsInfo.proofsCountByEpoch[epoch] = unitProofsCount;
 
-        emit ProofSubmitted(commitmentId, unitId);
+        // check proof
+        (bool success, bytes memory randomXTargetHash) = randomXProxy().delegatecall(
+            abi.encodeWithSelector(RandomXProxy.run.selector, globalUnitNonce_, localUnitNonce)
+        );
+
+        require(success, "RandomXProxy.run failed");
+        require(randomXTargetHash.toBytes32() == targetHash, "Proof is not valid");
+        require(targetHash <= difficulty(), "Proof is bigger than difficulty");
+
+        emit CommitmentStatsUpdated(
+            commitmentId,
+            cc.info.totalCUFailCount,
+            cc.info.exitedUnitCount,
+            cc.info.activeUnitCount,
+            cc.info.nextAdditionalActiveUnitCount,
+            epoch
+        );
+
+        emit ProofSubmitted(commitmentId, unitId, globalUnitNonce, localUnitNonce);
     }
 
     function commitSnapshot(bytes32 commitmentId) external {
@@ -422,6 +491,15 @@ contract Capacity is CapacityConst, Whitelist, UUPSUpgradeable, ICapacity {
         uint256 epoch = core.currentEpoch() - 1;
         uint256 expiredEpoch = _expiredEpoch(cc);
         _commitCommitmentSnapshot(cc, peer, epoch, expiredEpoch);
+
+        emit CommitmentStatsUpdated(
+            commitmentId,
+            cc.info.totalCUFailCount,
+            cc.info.exitedUnitCount,
+            cc.info.activeUnitCount,
+            cc.info.nextAdditionalActiveUnitCount,
+            epoch
+        );
     }
 
     function removeCUFromCC(bytes32 commitmentId, bytes32[] calldata unitIds) external {
@@ -456,6 +534,15 @@ contract Capacity is CapacityConst, Whitelist, UUPSUpgradeable, ICapacity {
                 cc.info.exitedUnitCount += 1;
             }
         }
+
+        emit CommitmentStatsUpdated(
+            commitmentId,
+            cc.info.totalCUFailCount,
+            cc.info.exitedUnitCount,
+            cc.info.activeUnitCount,
+            cc.info.nextAdditionalActiveUnitCount,
+            currentEpoch_
+        );
     }
 
     function withdrawReward(bytes32 commitmentId) external {
@@ -496,6 +583,14 @@ contract Capacity is CapacityConst, Whitelist, UUPSUpgradeable, ICapacity {
         IMarket.Offer memory offer = market.getOffer(peer.offerId);
         flt.safeTransfer(offer.provider, providerReward);
 
+        emit CommitmentStatsUpdated(
+            commitmentId,
+            cc.info.totalCUFailCount,
+            cc.info.exitedUnitCount,
+            cc.info.activeUnitCount,
+            cc.info.nextAdditionalActiveUnitCount,
+            epoch
+        );
         emit RewardWithdrawn(commitmentId, amount);
     }
     // #endregion

@@ -15,9 +15,12 @@ import {
 } from "../../generated/Market/Market";
 import {
   createOrLoadDealEffector,
+  createOrLoadDealToJoinedOfferPeer,
+  createOrLoadDealToPeer,
   createOrLoadEffector,
   createOrLoadGraphNetwork,
-  createOrLoadOfferEffector, createOrLoadProvider,
+  createOrLoadOfferEffector,
+  createOrLoadProvider,
   createOrLoadToken,
   UNO_BIG_INT,
   ZERO_BIG_INT,
@@ -115,6 +118,7 @@ export function handlePeerCreated(event: PeerCreated): void {
   // log.info('offer.provider {}', offer.provider.toString())
   peer.provider = offer.provider;
   peer.offer = offer.id;
+  peer.isAnyJoinedDeals = false;
   peer.save();
 }
 
@@ -183,9 +187,14 @@ export function handleComputeUnitAddedToDeal(
   event: ComputeUnitAddedToDeal,
 ): void {
   // Call the contract to extract peerId of the computeUnit.
-  const peer = Peer.load(event.params.peerId.toHex()) as Peer;
+  let peer = Peer.load(event.params.peerId.toHex()) as Peer;
   const offer = Offer.load(peer.offer) as Offer;
   const provider = Provider.load(offer.provider) as Provider;
+
+  createOrLoadDealToPeer(event.address.toHex(), peer.id);
+  createOrLoadDealToJoinedOfferPeer(event.address.toHex(), offer.id, peer.id);
+  peer.isAnyJoinedDeals = true;
+  peer.save()
 
   provider.computeUnitsAvailable = provider.computeUnitsAvailable - 1;
   provider.save();
@@ -199,9 +208,18 @@ export function handleComputeUnitRemovedFromDeal(
   event: ComputeUnitRemovedFromDeal,
 ): void {
   // Call the contract to extract peerId of the computeUnit.
-  const peer = Peer.load(event.params.peerId.toHex()) as Peer;
+  let peer = Peer.load(event.params.peerId.toHex()) as Peer;
   const offer = Offer.load(peer.offer) as Offer;
   const provider = Provider.load(offer.provider) as Provider;
+
+  const dealToPeer = createOrLoadDealToPeer(event.address.toHex(), peer.id);
+  const dealToJoinedOfferPeer = createOrLoadDealToJoinedOfferPeer(event.address.toHex(), offer.id, peer.id);
+  store.remove("DealToPeer", dealToPeer.id);
+  store.remove("DealToJoinedOfferPeer", dealToJoinedOfferPeer.id);
+  if (peer.joinedDeals.load().length == 0) {
+    peer.isAnyJoinedDeals = false;
+    peer.save()
+  }
 
   provider.computeUnitsAvailable = provider.computeUnitsAvailable + 1;
   provider.computeUnitsTotal = provider.computeUnitsTotal + 1;

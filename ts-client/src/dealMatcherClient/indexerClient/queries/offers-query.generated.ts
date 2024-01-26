@@ -21,7 +21,7 @@ export type OffersQueryQueryVariables = Types.Exact<{
 }>;
 
 
-export type OffersQueryQuery = { __typename?: 'Query', offers: Array<{ __typename?: 'Offer', id: string, peers?: Array<{ __typename?: 'Peer', computeUnits?: Array<{ __typename?: 'ComputeUnit', id: string }> | null }> | null }> };
+export type OffersQueryQuery = { __typename?: 'Query', offers: Array<{ __typename?: 'Offer', id: string, peers?: Array<{ __typename?: 'Peer', id: string, computeUnits?: Array<{ __typename?: 'ComputeUnit', id: string }> | null }> | null }> };
 
 
 export const OffersQueryDocument = gql`
@@ -35,6 +35,7 @@ export const OffersQueryDocument = gql`
   ) {
     id
     peers(where: $peersFilters, first: $peersLimit, skip: $peersOffset) {
+      id
       computeUnits(
         where: $computeUnitsFilters
         first: $computeUnitsLimit
@@ -47,15 +48,15 @@ export const OffersQueryDocument = gql`
 }
     `;
 
-export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string, operationType?: string) => Promise<T>;
+export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string, operationType?: string, variables?: any) => Promise<T>;
 
 
-const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationType) => action();
+const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationType, variables) => action();
 
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
   return {
     OffersQuery(variables?: OffersQueryQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<OffersQueryQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<OffersQueryQuery>(OffersQueryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'OffersQuery', 'query');
+      return withWrapper((wrappedRequestHeaders) => client.request<OffersQueryQuery>(OffersQueryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'OffersQuery', 'query', variables);
     }
   };
 }

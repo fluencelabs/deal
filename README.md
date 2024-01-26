@@ -106,16 +106,17 @@ $ PRIVATE_KEY=${} make deploy-{network_name}
 ## Test
 
 - Contracts
+
 ```shell
 $ forge test
 ```
 
 - TS Clients
+
 ```shell
 cd ts-client && npm test unittests
 cd ts-client && npm test integrational-tests
 ```
-
 
 ## Format
 
@@ -161,12 +162,12 @@ infrastructure of the repo locally.
 
 1. Clone this repo. Clone with submodules, e.g.: `git submodule update --init --recursive`
 
-```bash
+````bash
 2. Start local chain node containers (chain, explorer, deploy script):
 
 ```bash
 docker compose -f docker/docker-compose.yml up -d
-```
+````
 
 `chain-deploy-script` will produce `deployment/local.json` file that is used in
 the next steps.

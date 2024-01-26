@@ -36,11 +36,14 @@ jobs:
     uses: ./.github/workflows/artifacts.yml
     with:
       ref: ${{ github.ref }}
+    secrets:
+      token: ${{ secrets.FLUENCEBOT_RELEASE_PLEASE_PAT }}
 
   cli:
     needs:
       - deal
-    uses: fluencelabs/cli/.github/workflows/tests.yml@main
+    # TODO: change on main below when https://github.com/fluencelabs/cli/pull/654 is merged.
+    uses: fluencelabs/cli/.github/workflows/tests.yml@capacity
     with:
       ref: main
       chain-rpc-image: "${{ needs.deal.outputs.chain-rpc-image }}"

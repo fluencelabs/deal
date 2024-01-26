@@ -3,11 +3,11 @@ import {
   OfferToEffector,
   Token,
   DealToEffector,
-  GraphNetwork, Provider,
+  GraphNetwork, Provider, DealToPeer, DealToJoinedOfferPeer,
 } from "../generated/schema";
 import { BigInt, Bytes } from "@graphprotocol/graph-ts";
-import { getTokenDecimals, getTokenSymbol } from "./contracts";
-import {getEffectorDescription, getProviderName} from "./networkConstants";
+import {getTokenDecimals, getTokenSymbol} from "./contracts";
+import {getProviderName} from "./networkConstants";
 
 export const ZERO_BIG_INT = BigInt.fromI32(0);
 export const UNO_BIG_INT = BigInt.fromI32(1);
@@ -111,6 +111,41 @@ export function createOrLoadDealEffector(
   return entity as DealToEffector;
 }
 
+export function createOrLoadDealToPeer(
+  dealId: string,
+  peerId: string,
+): DealToPeer {
+  const concattedIds = dealId.concat(peerId);
+  let entity = DealToPeer.load(concattedIds);
+
+  if (entity == null) {
+    entity = new DealToPeer(concattedIds);
+    entity.deal = dealId;
+    entity.peer = peerId;
+    entity.save();
+  }
+  return entity as DealToPeer;
+}
+
+export function createOrLoadDealToJoinedOfferPeer(
+  dealId: string,
+  offerId: string,
+  peerId: string,
+): DealToJoinedOfferPeer {
+  // // deal.id.concat(offer.id.concat(peer.id)).
+  const concattedIds = dealId.concat(offerId.concat(peerId));
+  let entity = DealToJoinedOfferPeer.load(concattedIds);
+
+  if (entity == null) {
+    entity = new DealToJoinedOfferPeer(concattedIds);
+    entity.deal = dealId;
+    entity.peer = peerId;
+    entity.offer = offerId;
+    entity.save();
+  }
+  return entity as DealToJoinedOfferPeer;
+}
+
 export function createOrLoadGraphNetwork(): GraphNetwork {
   let graphNetwork = GraphNetwork.load('1')
   if (graphNetwork == null) {
@@ -123,4 +158,21 @@ export function createOrLoadGraphNetwork(): GraphNetwork {
     graphNetwork.save()
   }
   return graphNetwork as GraphNetwork
+}
+
+// Statuses that could be saved in Subgraph.
+// Some of the statues should be calculated regard to current epoch and should not be stored in the subgraph.
+// We have to mirror enums according to
+//  https://ethereum.stackexchange.com/questions/139078/how-to-use-subgraph-enums-in-the-mapping.
+export class CapacityCommitmentStatus {
+  static Active: string = "Active"; // Should not be stored!
+  static WaitDelegation: string = "WaitDelegation";
+  // Status is WaitStart - means collateral deposited.
+  static WaitStart: string = "WaitStart";
+  static Inactive: string = "Inactive";  // Should not be stored!
+  // It is stored when subgraph could be certain that Failed
+  //  (when CommitmentStatsUpdated event emitted), but before this transaction
+  //  if Failed should be checked in another way (not by relaying on this status).
+  static Failed: string = "Failed";
+  static Removed: string = "Removed";
 }

@@ -11,6 +11,11 @@ type GraphNetwork @entity {
   offersTotal: BigInt!
   tokensTotal: BigInt!
   effectorsTotal: BigInt!
+  # Add constants from Core contract below.
+  coreEpochDuration: Int
+  initTimestamp: Int
+  # Capacity consts are below.
+  capacityMaxFailedRatio: Int
 }
 
 type Token @entity(immutable: true) {
@@ -53,6 +58,10 @@ type Offer @entity {
   # Add Statistics below.
   computeUnitsAvailable: Int  # Sum of all available compute units in the offer (not in the deals).
   computeUnitsTotal: Int  # Sum of all compute units registered in the offer. TODO: when CU deleted?
+
+  # Add helpers fields to support some queries below.
+  "To support check that a peer already in a deal."
+  joinedOfferPeers: [DealToJoinedOfferPeer!] @derivedFrom(field: "offer")
 }
 
 
@@ -89,12 +98,28 @@ type Peer @entity {
   offer: Offer!
   provider: Provider!
   computeUnits: [ComputeUnit!] @derivedFrom(field: "peer")
+
+  currentCapacityCommitment: CapacityCommitment
+  "To access history of capacity commitments."
+  capacityCommitments: [CapacityCommitment!] @derivedFrom(field: "peer")
+
+  # Indexer query helper fields below (named with prefix of already existed field, e.g. currentCapacityCommitment).
+  "To understand if collateral for peer have been submitted. This field should be use in conjunction with currentCapacityCommitment."
+  currentCCCollateralDepositedAt: BigInt
+  currentCCEndEpoch: BigInt
+  currentCCNextCCFailedEpoch: BigInt
+
+  # We need field to query from perspective of Peer on deal field.
+  joinedDeals: [DealToPeer!] @derivedFrom(field: "peer")
+  # To make query with OR to retrieve even entities with joinedDeals == [].
+  # TODO: create issue on Subgraph for the feature and past here.
+  isAnyJoinedDeals: Boolean!
 }
 
 type ComputeUnit @entity {
   id: ID!
   peer: Peer!
-  "In order to simplify relation."
+  "In order to simplify relation for query."
   provider: Provider!
 
   deal: Deal
@@ -103,10 +128,28 @@ type ComputeUnit @entity {
 }
 
 # ---- Deal Contract ----
-type DealToEffector @entity {
+type DealToEffector @entity(immutable: true) {
     id: ID! # Set to `deal.id.concat(effector.id)`
     deal: Deal!
     effector: Effector!
+}
+
+type DealToPeer @entity(immutable: true) {
+    id: ID! # Set to `deal.id.concat(peer.id)`
+    deal: Deal!
+    peer: Peer!
+}
+
+"""
+TODO: deprecate.
+To add possibility to filter already joined peers into a Deal from perspective of an Offer
+(protocol does not allow more than one CU per peer for the same Deal).
+"""
+type DealToJoinedOfferPeer @entity(immutable: true) {
+    id: ID! # Set to `deal.id.concat(offer.id.concat(peer.id))`
+    deal: Deal!
+    offer: Offer!  # search offers initially using this fk relation.
+    peer: Peer!
 }
 
 type Deal @entity {
@@ -121,6 +164,8 @@ type Deal @entity {
   paymentToken: Token!
   pricePerWorkerEpoch: BigInt!
   effectors: [DealToEffector!] @derivedFrom(field: "deal")
+  "Many to many to access joined peers to maintain protocol restrictions"
+  joinedPeers: [DealToPeer!] @derivedFrom(field: "deal")
   # TODO: add whitelists...
   # TODO: add blacklists...
   #  balance: BigInt!  # on-request via frontend
@@ -134,4 +179,38 @@ type Deal @entity {
   "I.e. Matching Result (Figma)."
   addedComputeUnits: [ComputeUnit!] @derivedFrom(field: "deal")
   #   TODO: add matched workers.
+}
+
+enum CapacityCommitmentStatus {
+  Active
+  WaitDelegation
+  WaitStart
+  Inactive
+  Failed
+  Removed
+}
+
+"""To represent that Peer has capacity commitment for some time."""
+type CapacityCommitment @entity {
+  id: ID!
+  peer: Peer!
+  "This status represents last stored status on chain (status that does not depends on the current epoch some how)."
+  status: CapacityCommitmentStatus
+  collateralPerUnit: BigInt!
+  duration: BigInt!
+  rewardDelegatorRate: Int!
+  delegator: String!
+  startEpoch: BigInt!
+  endEpoch: BigInt!
+  totalCUFailCount: Int!
+  failedEpoch: BigInt!
+  exitedUnitCount: Int!
+  activeUnitCount: Int!
+  nextAdditionalActiveUnitCount: Int!
+  unitCount: Int!
+  snapshotEpoch: BigInt!
+  "If CC deleted before collateral deposited."
+  deleted: Boolean!
+  "Calculated in subgraph field: next failed epoch means the next epoch without proofs submitted when CC declared to be Failed."
+  nextCCFailedEpoch: BigInt!
 }

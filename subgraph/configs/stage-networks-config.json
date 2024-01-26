@@ -1,8 +1,16 @@
 {
   "stage": {
     "Market": {
-      "address": "0x5f1B280b7C4A92D5B50C097f95585C4CEe3aF18a",
-      "startBlock": 44378788
+      "address": "0x6a54816c67EEcA432e22Be5f8D9bC7b56153FA96",
+      "startBlock": 45147375
+    },
+    "Capacity": {
+      "address": "0xb8a1cFfd0408e985a2d0250e821d134d3431ecbA",
+      "startBlock": 45147375
+    },
+    "Core": {
+      "address": "0x3941808e279cF863Fc08C84864c804452f0e5D18",
+      "startBlock": 45147375
     }
   }
 }

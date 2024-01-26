@@ -32,7 +32,7 @@ library DeployDealSystem {
     uint256 public constant DEFAULT_MIN_REMATCHING_EPOCHES = 2;
     uint256 public constant DEFAULT_USD_COLLATERAL_PER_UNIT = 100 * PRECISION; // 100 USD
     uint256 public constant DEFAULT_USD_TARGET_REVENUE_PER_EPOCH = 10 * PRECISION; // 10 USD
-    uint256 public constant DEFAULT_MIN_DURATION = 100; // 100 epochs
+    uint256 public constant DEFAULT_MIN_DURATION = 1 days;
     uint256 public constant DEFAULT_MIN_REWARD_PER_EPOCH = 10000;
     uint256 public constant DEFAULT_MAX_REWARD_PER_EPOCH = 1;
     uint256 public constant DEFAULT_VESTING_DURATION = 2 days;
@@ -40,8 +40,11 @@ library DeployDealSystem {
     uint256 public constant DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH = 3;
     uint256 public constant DEFAULT_MAX_PROOFS_PER_EPOCH = 5;
     uint256 public constant DEFAULT_WITHDRAW_EPOCHES_AFTER_FAILED = 2;
-    uint256 public constant DEFAULT_MAX_FAILED_RATIO = 1;
-    bool public constant IS_WHITELIST_ENABLED = false;
+    uint256 public constant DEFAULT_MAX_FAILED_RATIO = 10;
+    bool public constant DEFAULT_IS_WHITELIST_ENABLED = false;
+    bytes32 public constant DEFAULT_DIFFICULTY_TARGET =
+        0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+    bytes32 public constant DEFAULT_INIT_GLOBAL_NONCE = keccak256("init_global_nonce");
 
     // ------------------ Variables ------------------
     function deployDealSystem() internal returns (Deployment memory deployment) {
@@ -92,7 +95,10 @@ library DeployDealSystem {
                         DEFAULT_MAX_PROOFS_PER_EPOCH,
                         DEFAULT_WITHDRAW_EPOCHES_AFTER_FAILED,
                         DEFAULT_MAX_FAILED_RATIO,
-                        IS_WHITELIST_ENABLED
+                        DEFAULT_IS_WHITELIST_ENABLED,
+                        DEFAULT_INIT_GLOBAL_NONCE,
+                        DEFAULT_DIFFICULTY_TARGET,
+                        new RandomXProxy()
                     )
                 )
             )

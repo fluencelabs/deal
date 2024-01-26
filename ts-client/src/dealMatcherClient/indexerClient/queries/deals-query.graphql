@@ -22,4 +22,15 @@ query DealQuery(
       }
     }
   }
+
+  _meta {
+    block {
+      timestamp
+    }
+  }
+  graphNetworks(first:1) {
+    coreEpochDuration
+    initTimestamp
+  }
+
 }

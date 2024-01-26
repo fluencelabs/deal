@@ -26,6 +26,7 @@ contract WorkerManager is Config, IWorkerManager {
         mapping(address => ComputeProviderInfo) computeProviderInfo;
         // compute units area
         mapping(bytes32 => ComputeUnit) computeUnitById;
+        mapping(bytes32 => bool) isComputePeerExist;
         LinkedListWithUniqueKeys.Bytes32List computeUnitsIdsList;
     }
 
@@ -103,6 +104,10 @@ contract WorkerManager is Config, IWorkerManager {
         bytes32 id = computeUnit;
         require(workerStorage.computeUnitById[id].provider == address(0x00), "Id already used");
 
+        // Protocol restriction: do not allow to deploy on the same peer same Deal.
+        require(workerStorage.isComputePeerExist[peerId] == false, "PeerId already used");
+        workerStorage.isComputePeerExist[peerId] = true;
+
         // check max units per compute provider
         uint256 computeUnitCountByCP = workerStorage.computeProviderInfo[computeProvider].computeUnitCount;
         require(computeUnitCountByCP < maxWorkersPerProvider(), "Max units per compute provider reached");
@@ -130,7 +135,8 @@ contract WorkerManager is Config, IWorkerManager {
         WorkerManagerStorage storage workerStorage = _getWorkerManagerStorage();
 
         // check owner
-        address computeProvider = workerStorage.computeUnitById[computeUnitId].provider;
+        ComputeUnit memory computeUnit = workerStorage.computeUnitById[computeUnitId];
+        address computeProvider = computeUnit.provider;
         require(computeProvider != address(0x00), "ComputeUnit not found");
 
         // change computeUnit count
@@ -143,6 +149,8 @@ contract WorkerManager is Config, IWorkerManager {
             workerCount--;
             workerStorage.workerCount = workerCount;
         }
+
+        workerStorage.isComputePeerExist[computeUnit.peerId] = false;
 
         // remove ComputeUnit
         delete workerStorage.computeUnitById[computeUnitId];
@@ -185,5 +193,9 @@ contract WorkerManager is Config, IWorkerManager {
 
     function getWorkerCount() public view returns (uint256) {
         return _getWorkerManagerStorage().workerCount;
+    }
+
+    function isComputePeerExist(bytes32 peerId) external view returns (bool) {
+        return _getWorkerManagerStorage().isComputePeerExist[peerId];
     }
 }
