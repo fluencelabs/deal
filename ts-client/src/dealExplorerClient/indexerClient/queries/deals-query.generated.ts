@@ -2,9 +2,9 @@
 //@ts-nocheck
 import * as Types from "../generated.types.js";
 
-import { GraphQLClient } from "graphql-request";
-import type { RequestOptions } from "graphql-request";
-import { GraphQLClientRequestHeaders } from "graphql-request/build/esm/types.js";
+import { GraphQLClient } from 'graphql-request';
+import type { RequestOptions } from 'graphql-request';
+type GraphQLClientRequestHeaders = RequestOptions['requestHeaders'];
 import gql from "graphql-tag";
 export type DealsQueryQueryVariables = Types.Exact<{
   filters?: Types.InputMaybe<Types.Deal_Filter>;

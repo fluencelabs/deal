@@ -63,6 +63,9 @@ fragment ProvidersBasicOffer on Offer {
         ...EffectorBasic
       }
     }
+    provider {
+      id
+    }
 }
 
 fragment EffectorBasic on Effector {
