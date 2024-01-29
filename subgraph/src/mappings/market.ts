@@ -58,7 +58,7 @@ export function handleProviderInfoUpdated(event: ProviderInfoUpdated): void {
 // It fails on EffectorInfoSet but does not fail on
 // EffectorInfoSetButNotTuple(indexed uint256,(bytes4,bytes32),string,(bytes4,bytes32)).
 // TODO: enable this handler when https://github.com/graphprotocol/graph-node/issues/5171 resolved.
-export function handleEffectorInfoSet(event: EffectorInfoSet): void {
+export function handleEffectorInfoSet(event: EffectorInfoSetButNotTuple): void {
   // TODO: WHY nOT?
   log.info("TODO: in handleEffectorInfoSet", []);
   const appCID = changetype<AppCID>(event.params.id);

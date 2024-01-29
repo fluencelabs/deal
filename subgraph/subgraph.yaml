@@ -90,7 +90,7 @@ dataSources:
       eventHandlers:
         - event: ProviderInfoUpdated(indexed address,string,(bytes4,bytes32))
           handler: handleProviderInfoUpdated
-        - event: EffectorInfoSet((indexed bytes4,bytes32),string,(bytes4,bytes32))
+        - event: EffectorInfoSetButNotTuple((indexed bytes4,bytes32),string,(bytes4,bytes32))
           handler: handleEffectorInfoSet
         - event: EffectorInfoRemoved((indexed bytes4,bytes32))
           handler: handleEffectorInfoRemoved

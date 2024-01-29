@@ -351,7 +351,8 @@ abstract contract Offer is BaseModule, IOffer {
         effectorInfo.description = description;
         effectorInfo.metadata = metadata;
 
-//        emit EffectorInfoSetButNotTuple(1, id, description, metadata);
+        // Changed here for purpose of https://github.com/graphprotocol/graph-node/issues/5171.
+        emit EffectorInfoSetButNotTuple(1, id, description, metadata);
         emit EffectorInfoSet(id, description, metadata);
     }
 
