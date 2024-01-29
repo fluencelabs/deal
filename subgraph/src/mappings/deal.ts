@@ -1,4 +1,4 @@
-import { AppCID, getEffectorCID } from "./utils";
+import {AppCID, formatAddress, getEffectorCID} from "./utils";
 import {
   AppCIDChanged,
   ComputeUnitJoined,
@@ -6,9 +6,14 @@ import {
   MaxPaidEpochUpdated,
   Withdrawn,
   WorkerIdUpdated,
-  ComputeUnitRemoved,
+  ComputeUnitRemoved, ProviderAddedToAccessList, ProviderRemovedFromAccessList,
 } from "../../generated/Market/Deal";
 import { ComputeUnit, Deal } from "../../generated/schema";
+import {
+  createOrLoadDealToProvidersAccess,
+  createOrLoadUnregisteredProvider
+} from "../models";
+import {store} from "@graphprotocol/graph-ts";
 
 export function handleDeposited(event: Deposited): void {
   let deal = Deal.load(event.address.toHex()) as Deal;
@@ -64,4 +69,17 @@ export function handleWorkerIdUpdated(event: WorkerIdUpdated): void {
   ) as ComputeUnit;
   computeUnit.workerId = event.params.workerId.toHex();
   computeUnit.save();
+}
+
+export function handleProviderAddedToAccessList(event: ProviderAddedToAccessList): void {
+  const deal = Deal.load(formatAddress(event.address)) as Deal;
+  const provider = createOrLoadUnregisteredProvider(formatAddress(event.params.provider));
+  createOrLoadDealToProvidersAccess(deal.id, provider.id);
+}
+
+export function handleProviderRemovedFromAccessList(event: ProviderRemovedFromAccessList): void {
+  const deal = Deal.load(formatAddress(event.address)) as Deal;
+  const provider = createOrLoadUnregisteredProvider(formatAddress(event.params.provider));
+  const entity = createOrLoadDealToProvidersAccess(deal.id, provider.id);
+  store.remove("OfferToEffector", entity.id);
 }
