@@ -21,6 +21,10 @@ query DealQuery(
         id
       }
     }
+    providersAccessType
+    providersAccessList {
+      id
+    }
   }
 
   _meta {

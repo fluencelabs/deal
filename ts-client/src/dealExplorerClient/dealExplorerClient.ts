@@ -50,10 +50,10 @@ import type { BasicPeerFragment } from "./indexerClient/queries/offers-query.gen
 import { DealRpcClient } from "./rpcClients/index.js";
 import { tokenValueToRounded, valueToTokenValue } from "./utils.js";
 import {
-  serializeDealProviderAccessLists,
   serializeEffectorDescription,
   serializeProviderName,
 } from "./serializers.js";
+import {serializeDealProviderAccessLists} from "../utils/serializers.js";
 
 export class FiltersError extends Error {}
 export class ValidTogetherFiltersError extends FiltersError {}
