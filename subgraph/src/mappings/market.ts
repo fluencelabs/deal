@@ -18,11 +18,13 @@ import {
 import {
   createOrLoadDealEffector,
   createOrLoadDealToJoinedOfferPeer,
-  createOrLoadDealToPeer,
+  createOrLoadDealToPeer, createOrLoadDealToProvidersAccess,
   createOrLoadEffector,
   createOrLoadGraphNetwork,
   createOrLoadOfferEffector,
-  createOrLoadToken, UNKNOWN_EFFECTOR_DESCRIPTION,
+  createOrLoadToken,
+  createOrLoadUnregisteredProvider,
+  UNKNOWN_EFFECTOR_DESCRIPTION,
   UNO_BIG_INT,
   ZERO_BIG_INT,
 } from "../models";
@@ -288,8 +290,14 @@ export function handleDealCreated(event: DealCreated): void {
   deal.appCID = getEffectorCID(appCID);
   deal.withdrawalSum = ZERO_BIG_INT;
   deal.depositedSum = ZERO_BIG_INT;
-  graphNetwork.dealsTotal = graphNetwork.dealsTotal.plus(UNO_BIG_INT);
-  graphNetwork.save();
+
+  // Perform provider access lists (whitelist, blacklist or non).
+  deal.providersAccessType = event.params.providersAccessType_;
+  for (let i=0; i < event.params.providersAccessList_.length; i++) {
+    const providerAddress = formatAddress(event.params.providersAccessList_[i]);
+    const provider = createOrLoadUnregisteredProvider(providerAddress);
+    createOrLoadDealToProvidersAccess(deal.id, provider.id);
+  }
   deal.save();
 
   // Get effectors.
@@ -301,6 +309,10 @@ export function handleDealCreated(event: DealCreated): void {
     // Automatically create link or ensure that exists.
     createOrLoadDealEffector(deal.id, effectorId);
   }
+
+  // Upd stats.
+  graphNetwork.dealsTotal = graphNetwork.dealsTotal.plus(UNO_BIG_INT);
+  graphNetwork.save();
 
   // Start indexing this deployed contract too
   DealTemplate.create(event.params.deal);

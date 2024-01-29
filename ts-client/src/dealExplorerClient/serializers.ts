@@ -18,7 +18,7 @@ export function serializeProviderName(
 // It is used for dev purpose as scripts/CreateMarket.s.sol itself as well.
 export function serializeEffectorDescription(
   cid: string,
-  descriptionFromIndexer: string
+  descriptionFromIndexer: string,
 ): string {
   if (cid == "\u00124VxDoge") {
     return "IPFS";
@@ -27,4 +27,35 @@ export function serializeEffectorDescription(
     return "cURL";
   }
   return descriptionFromIndexer;
+}
+
+export function serializeDealProviderAccessLists(
+  providersAccessType: number,
+  providersAccessList:
+    | Array<{
+        __typename?: "DealToProvidersAccess";
+        id: string;
+      }>
+    | null
+    | undefined,
+): { whitelist: Array<string>; blacklist: Array<string> } {
+  const res: { whitelist: Array<string>; blacklist: Array<string> } = {
+    whitelist: [],
+    blacklist: [],
+  };
+  if (!providersAccessType || !providersAccessList) {
+    // None
+    return res;
+  }
+  const providersAccessListStrings = providersAccessList.map((providerObj) => {
+    return providerObj.id;
+  });
+  if (providersAccessType == 1) {
+    // whitelist
+    res.whitelist = providersAccessListStrings;
+  } else if (providersAccessType == 2) {
+    // whitelist
+    res.blacklist = providersAccessListStrings;
+  }
+  return res;
 }

@@ -1,4 +1,4 @@
-import type {DealStatus} from "./schemes.js";
+import type { DealStatus } from "./schemes.js";
 
 export type ProviderDetailsStatusFilter = "all" | "active" | "inactive";
 

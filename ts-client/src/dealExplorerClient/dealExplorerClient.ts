@@ -21,7 +21,8 @@ import type {
 import type {
   ByProviderAndStatusFilter,
   DealsFilters,
-  OffersFilters, OfferShortOrderBy,
+  OffersFilters,
+  OfferShortOrderBy,
   ProvidersFilters,
   OrderType,
   ProviderShortOrderBy,
@@ -49,8 +50,9 @@ import type { BasicPeerFragment } from "./indexerClient/queries/offers-query.gen
 import { DealRpcClient } from "./rpcClients/index.js";
 import { tokenValueToRounded, valueToTokenValue } from "./utils.js";
 import {
+  serializeDealProviderAccessLists,
   serializeEffectorDescription,
-  serializeProviderName
+  serializeProviderName,
 } from "./serializers.js";
 
 export class FiltersError extends Error {}
@@ -116,7 +118,11 @@ export class DealExplorerClient {
       createdAt: Number(provider.createdAt),
       totalComputeUnits: provider.computeUnitsTotal,
       freeComputeUnits: provider.computeUnitsAvailable,
-      name: serializeProviderName(provider.name, provider.id, provider.approved),
+      name: serializeProviderName(
+        provider.name,
+        provider.id,
+        provider.approved,
+      ),
       isApproved: provider.approved,
     } as ProviderBase;
   }
@@ -149,7 +155,7 @@ export class DealExplorerClient {
     if (providersFilters.onlyApproved) {
       convertedFilters.and?.push({
         approved: true,
-      })
+      });
     }
     if (providersFilters.search) {
       const search = providersFilters.search;
@@ -284,7 +290,10 @@ export class DealExplorerClient {
     for (const effector of manyToManyEffectors) {
       composedEffectors.push({
         cid: effector.effector.id,
-        description: serializeEffectorDescription(effector.effector.id, effector.effector.description),
+        description: serializeEffectorDescription(
+          effector.effector.id,
+          effector.effector.description,
+        ),
       });
     }
 
@@ -367,12 +376,12 @@ export class DealExplorerClient {
     if (v.onlyActive) {
       convertedFilters.and?.push({
         computeUnitsAvailable_gt: 0,
-      })
+      });
     }
     if (v.onlyApproved) {
       convertedFilters.and?.push({
         provider_: { approved: true },
-      })
+      });
     }
     if (v.search) {
       const search = v.search;
@@ -751,6 +760,10 @@ export class DealExplorerClient {
         await this._dealRpcClient!.getFreeBalanceDealBatch([dealId])
       )[0];
       const effectors = this._composeEffectors(deal.effectors);
+      const { whitelist, blacklist } = serializeDealProviderAccessLists(
+        deal.providersAccessType,
+        deal.providersAccessList,
+      );
       res = {
         ...this._composeDealsShort(deal, { dealStatus, freeBalance }),
         pricePerWorkerEpoch: tokenValueToRounded(
@@ -762,9 +775,9 @@ export class DealExplorerClient {
         computeUnits: this._composeComputeUnits(
           deal.addedComputeUnits as Array<ComputeUnitBasicFragment>,
         ),
-        // TODO: resolve whitelists and blacklists.
-        whitelist: [],
-        blacklist: [],
+        // Serialize data from indexer into lists.
+        whitelist,
+        blacklist,
         effectors: effectors,
       };
     }
@@ -787,7 +800,13 @@ export class DealExplorerClient {
     if (data) {
       // data.deals.map(deal => { return deal.id })
       res = data.effectors.map((effector) => {
-        return { cid: effector.id, description: serializeEffectorDescription(effector.id, effector.description) };
+        return {
+          cid: effector.id,
+          description: serializeEffectorDescription(
+            effector.id,
+            effector.description,
+          ),
+        };
       });
     }
     let total = null;
