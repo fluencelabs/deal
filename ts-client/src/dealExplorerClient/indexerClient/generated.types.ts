@@ -397,6 +397,7 @@ export type ComputeUnit_OrderBy =
   | 'provider__id'
   | 'provider__name'
   | 'provider__peerCount'
+  | 'provider__registered'
   | 'workerId';
 
 export type Deal = {
@@ -836,7 +837,8 @@ export type DealToProvidersAccess_OrderBy =
   | 'provider__createdAt'
   | 'provider__id'
   | 'provider__name'
-  | 'provider__peerCount';
+  | 'provider__peerCount'
+  | 'provider__registered';
 
 export type Deal_Filter = {
   /** Filter for the block changed event. */
@@ -1437,6 +1439,7 @@ export type Offer_OrderBy =
   | 'provider__id'
   | 'provider__name'
   | 'provider__peerCount'
+  | 'provider__registered'
   | 'updatedAt';
 
 /** Defines the order direction, either ascending or descending */
@@ -1639,7 +1642,8 @@ export type Peer_OrderBy =
   | 'provider__createdAt'
   | 'provider__id'
   | 'provider__name'
-  | 'provider__peerCount';
+  | 'provider__peerCount'
+  | 'provider__registered';
 
 export type Provider = {
   __typename?: 'Provider';
@@ -1651,6 +1655,8 @@ export type Provider = {
   name: Scalars['String']['output'];
   offers?: Maybe<Array<Offer>>;
   peerCount: Scalars['Int']['output'];
+  /** Is provider registered in the network (if false - possible just mentioned). */
+  registered: Scalars['Boolean']['output'];
 };
 
 
@@ -1732,6 +1738,10 @@ export type Provider_Filter = {
   peerCount_lte?: InputMaybe<Scalars['Int']['input']>;
   peerCount_not?: InputMaybe<Scalars['Int']['input']>;
   peerCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  registered?: InputMaybe<Scalars['Boolean']['input']>;
+  registered_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+  registered_not?: InputMaybe<Scalars['Boolean']['input']>;
+  registered_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
 };
 
 export type Provider_OrderBy =
@@ -1742,7 +1752,8 @@ export type Provider_OrderBy =
   | 'id'
   | 'name'
   | 'offers'
-  | 'peerCount';
+  | 'peerCount'
+  | 'registered';
 
 export type Query = {
   __typename?: 'Query';

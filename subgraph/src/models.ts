@@ -26,7 +26,7 @@ export function createOrLoadUnregisteredProvider(providerAddress: string): Provi
 
   if (entity == null) {
     entity = new Provider(providerAddress);
-
+    entity.registered = false;
     entity.name = UNREGISTERED_PROVIDER_NAME;
     entity.approved = false;
     entity.createdAt = ZERO_BIG_INT;

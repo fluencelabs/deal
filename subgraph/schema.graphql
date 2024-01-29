@@ -29,6 +29,8 @@ type Provider @entity {
   name: String!
   createdAt: BigInt!
   approved: Boolean!
+  "Is provider registered in the network (if false - possible just mentioned)."
+  registered: Boolean!
 
   offers: [Offer!] @derivedFrom(field: "provider")
 

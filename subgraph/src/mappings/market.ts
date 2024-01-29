@@ -41,8 +41,14 @@ import { Deal as DealTemplate } from "../../generated/templates";
 import {AppCID, formatAddress, getEffectorCID, parseEffectors} from "./utils";
 
 export function handleProviderInfoUpdated(event: ProviderInfoUpdated): void {
-  let provider = new Provider(event.params.provider.toHex());
+  const addr = formatAddress(event.params.provider);
+  let provider = Provider.load(addr);
+  if (provider == null) {
+    provider = new Provider(addr);
+  }
+  // Loaded or created provider - does not meter for this function logic.
   provider.name = event.params.name;
+  provider.registered = true;
   provider.approved = false;
   provider.createdAt = event.block.timestamp;
   provider.computeUnitsAvailable = 0;

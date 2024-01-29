@@ -148,10 +148,12 @@ export class DealExplorerClient {
   async _convertProviderFiltersToIndexer(
     providersFilters?: ProvidersFilters,
   ): Promise<Provider_Filter> {
-    if (!providersFilters) {
-      return {};
-    }
-    const convertedFilters: Provider_Filter = { and: [] };
+    // Only for registered providers.
+    const convertedFilters: Provider_Filter = { and: [
+        {
+          registered: true,
+        }
+      ] };
     if (providersFilters.onlyApproved) {
       convertedFilters.and?.push({
         approved: true,
