@@ -57,6 +57,10 @@ export function createOrLoadToken(tokenAddress: string): Token {
 }
 
 export function createOrLoadEffector(cid: string): Effector {
+  // Do not create empty cid effector.
+  if (cid == "") {
+    return
+  }
   let entity = Effector.load(cid);
 
   if (entity == null) {
