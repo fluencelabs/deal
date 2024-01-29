@@ -460,7 +460,6 @@ export class DealExplorerClient {
       orderBy: orderByConverted,
       orderType,
     });
-    console.log("data...", JSON.stringify(data))
     const res = [];
     if (data) {
       for (const offer of data.offers) {
