@@ -19,15 +19,18 @@ import "./utils/Depoyments.sol";
 
 // It creates market example on chain.
 // Currently used for sync Network Explorer frontend dev.
+// To run this script you also should use the Core Owner (it uses some restricted admin methods).
+// It creates differently configurated Deals in terms of access lists.
 contract CreateMarket is Depoyments, Script {
     using SafeERC20 for IERC20;
 
     string constant DEPLOYMENTS_PATH = "/deployments/";
     // It is synced with subgraph: networkConstants.ts
-    bytes32[4] effectorSuffixes = [bytes32("Dogu"), "Doge"];
+    bytes32[2] effectorSuffixes = [bytes32("Dogu"), "Doge"];
+    string[2] effectorDescriptions = ["cURL", "IPFS"];
     IMarket market;
     ICore core;
-    IERC20 tFLT;
+    IERC20 tUSD;
 
     function setUp() external {
         string memory envName = vm.envString("CONTRACTS_ENV_NAME");
@@ -37,7 +40,7 @@ contract CreateMarket is Depoyments, Script {
 
         market = IMarket(deployments.contracts["Market"].addr);
         core = ICore(deployments.contracts["Core"].addr);
-        tFLT = IERC20(deployments.contracts["tFLT"].addr);
+        tUSD = IERC20(deployments.contracts["tUSD"].addr);
     }
 
     function _registerOffers(
@@ -89,7 +92,7 @@ contract CreateMarket is Depoyments, Script {
         // (arifmetic progression for target workers) * pricePerWorkerEpoch * core.minDealDepositedEpoches() * dealCount
         uint256 totalApprove = (startTargetWorkers + (startTargetWorkers + dealCount)) / 2 * dealCount
             * pricePerWorkerEpoch * core.minDealDepositedEpoches() * dealCount;
-        tFLT.approve(address(market), totalApprove);
+        tUSD.approve(address(market), totalApprove);
 
         address[] memory createdDeals = new address[](dealCount);
         for (uint32 i = 0; i < dealCount; i++) {
@@ -97,28 +100,79 @@ contract CreateMarket is Depoyments, Script {
             uint256 newTargetWorkers = startTargetWorkers + i;
             uint256 newMaxWorkerPerProvider = startMaxWorkerPerProvider + i;
 
+            // Generate providersAccessList: 1 pseudo and 1 existed.
             CIDV1 memory appCID = CIDV1({prefixes: 0x12345678, hash: pseudoRandom(abi.encode("dealAppCID", i))});
-            IDeal dealCreatedContract = market.deployDeal(
-                appCID,
-                tFLT,
-                newMinWorkers,
-                newTargetWorkers,
-                newMaxWorkerPerProvider,
-                pricePerWorkerEpoch,
-                effectors,
-                IConfig.AccessType.NONE,
-                new address[](0)
-            );
-            createdDeals[i] = address(dealCreatedContract);
+            address[] memory providersAccessList = new address[](2);  // TODO: to const.
+            for (uint j = 0; j < 2; j++) {
+                if (j % 2 == 0) {
+                    providersAccessList[j] = address(this);
+                } else {
+                    providersAccessList[j] = address(0x0);
+                }
+            }
+            // Add zoo into Deals configuration of whitelists.
+            if (i % 3 == 0) {
+                IDeal dealCreatedContract = market.deployDeal(
+                    appCID,
+                    tUSD,
+                    newMinWorkers,
+                    newTargetWorkers,
+                    newMaxWorkerPerProvider,
+                    pricePerWorkerEpoch,
+                    effectors,
+                    IConfig.AccessType.NONE,
+                    new address[](0)
+                );
+                createdDeals[i] = address(dealCreatedContract);
+            } else if (i % 2 == 0) {
+                IDeal dealCreatedContract = market.deployDeal(
+                    appCID,
+                    tUSD,
+                    newMinWorkers,
+                    newTargetWorkers,
+                    newMaxWorkerPerProvider,
+                    pricePerWorkerEpoch,
+                    effectors,
+                    IConfig.AccessType.WHITELIST,
+                    providersAccessList
+                );
+                createdDeals[i] = address(dealCreatedContract);
+            } else {
+                IDeal dealCreatedContract = market.deployDeal(
+                    appCID,
+                    tUSD,
+                    newMinWorkers,
+                    newTargetWorkers,
+                    newMaxWorkerPerProvider,
+                    pricePerWorkerEpoch,
+                    effectors,
+                    IConfig.AccessType.BLACKLIST,
+                    providersAccessList
+                );
+                createdDeals[i] = address(dealCreatedContract);
+            }
+
         }
 
         return createdDeals;
     }
 
     function run() external {
+        // Setup foundry run.
+        vm.startBroadcast();
+        console.log("Broadcast from address: %s", address(this));
+
         CIDV1[] memory effectors = new CIDV1[](10);
         for (uint256 i = 0; i < effectorSuffixes.length; i++) {
             effectors[i] = CIDV1({prefixes: 0x12345678, hash: effectorSuffixes[i]});
+            console.log("setEffectorInfo (descriptions): %s", effectorDescriptions[i]);
+            // This transaction will broke system coz of https://github.com/graphprotocol/graph-node/issues/5171
+            // TODO: uncomment subgraph handlers and return support for events from this transaction.
+            market.setEffectorInfo(
+                effectors[i],
+                effectorDescriptions[i],
+                CIDV1({prefixes: 0x12345678, hash: bytes32(0)})
+            );
         }
 
         uint256 offerCount = 10;
@@ -126,16 +180,12 @@ contract CreateMarket is Depoyments, Script {
         uint256 unitCountPerPeer = 2;
         uint256 minPricePerWorkerEpoch = 0.01 ether;
 
-        // Setup foundry run.
-        vm.startBroadcast();
-        console.log("Broadcast from address: %s", address(this));
-
-        uint256 tokenBalance = tFLT.balanceOf(address(this));
+        uint256 tokenBalance = tUSD.balanceOf(address(this));
         console.log("Token balance of broadcast runner is: %s", tokenBalance);
 
         console.log("Register several market offers..");
         _registerOffers(
-            offerCount, peerCountPerOffer, unitCountPerPeer, effectors, address(tFLT), minPricePerWorkerEpoch
+            offerCount, peerCountPerOffer, unitCountPerPeer, effectors, address(tUSD), minPricePerWorkerEpoch
         );
 
         console.log("Create Deals...");

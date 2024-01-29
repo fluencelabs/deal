@@ -20,6 +20,10 @@ export function parseEffectors(effectors: Array<AppCID>): Array<string> {
   let effectorEntities: Array<string> = [];
   for (let i = 0; i < effectors.length; i++) {
     const cid = getEffectorCID(effectors[i]);
+    // Do not create empty cid effector.
+    if (cid == "") {
+      continue;
+    }
     const effector = createOrLoadEffector(cid);
     effectorEntities.push(effector.id);
   }

@@ -37,7 +37,6 @@ export interface ProviderShort extends ProviderBase {
 
 export interface ProviderDetail extends ProviderBase {
   peerCount: number;
-  effectorCount: number;
   // deprecated.
   // revenue: Array<Revenue>;
 }

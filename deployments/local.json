@@ -38,8 +38,8 @@
   "MarketImpl": {
     "addr": "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1",
     "blockNumber": 0,
-    "codeHash": "0x13dc1460d2426507e7b45a0a27fc9d6dd5aae0985e8ec169286f94686d804434",
-    "creationCodeHash": "0x33dcbe033397657907eb046e2bdae2b6ffc27d4571b8eb00a206b1a16e37d08b"
+    "codeHash": "0x7893ef031b5d77ffa6bdce9be2a6ec55f07b26c2025d80c3880060bb5165e4e0",
+    "creationCodeHash": "0x85deb8372986a2efa674d4ada1b4b03f6dbaba67999310eab6c0c55526790682"
   },
   "Multicall3": {
     "addr": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
@@ -56,7 +56,7 @@
   "tUSD": {
     "addr": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
     "blockNumber": 0,
-    "codeHash": "0xb64da3bb2b474e01c5adf699237223d5ae1c60906135f0fcc878fc38e2e01e85",
-    "creationCodeHash": "0x150ab6af317d4bba5bc911e86a8084692b95172bbd7c22c131c6b4aba3e207c9"
+    "codeHash": "0xc94476853731c94839358f885f010d3a719594f354f196afc5a5bfd2a38a2677",
+    "creationCodeHash": "0x5ca53bbb88dd96dccfe398a5163002b303c600a8052bdbe93bad9c084462d63e"
   }
 }

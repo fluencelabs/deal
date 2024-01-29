@@ -29,6 +29,8 @@ type Provider @entity {
   name: String!
   createdAt: BigInt!
   approved: Boolean!
+  "Is provider registered in the network (if false - possible just mentioned)."
+  registered: Boolean!
 
   offers: [Offer!] @derivedFrom(field: "provider")
 
@@ -36,7 +38,6 @@ type Provider @entity {
   computeUnitsAvailable: Int!  # Sum of all available compute units in the offer (not in the deals).
   computeUnitsTotal: Int!  # Sum of all compute units registered in the offer. TODO: when CU deleted?
   peerCount: Int!
-  effectorCount: Int!
 }
 
 # ---- Core Contract ----
@@ -153,6 +154,13 @@ type DealToJoinedOfferPeer @entity(immutable: true) {
     peer: Peer!
 }
 
+"It represents m2m b/w deal and provider in context of access list."
+type DealToProvidersAccess @entity(immutable: true) {
+  id: ID! # Set to `deal.id.concat(provider.id)`
+  deal: Deal!
+  provider: Provider!
+}
+
 type Deal @entity {
   id: ID!  # Ref to offerId in contract.
   appCID: String!
@@ -167,8 +175,9 @@ type Deal @entity {
   effectors: [DealToEffector!] @derivedFrom(field: "deal")
   "Many to many to access joined peers to maintain protocol restrictions"
   joinedPeers: [DealToPeer!] @derivedFrom(field: "deal")
-  # TODO: add whitelists...
-  # TODO: add blacklists...
+  "It represents AccessType of Deal contract."
+  providersAccessType: Int!
+  providersAccessList: [DealToProvidersAccess!] @derivedFrom(field: "deal")
   #  balance: BigInt!  # on-request via frontend
   #  status: DealStatus!  # on-request via frontend
 

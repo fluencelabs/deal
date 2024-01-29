@@ -3,7 +3,11 @@ import {
   OfferToEffector,
   Token,
   DealToEffector,
-  GraphNetwork, DealToPeer, DealToJoinedOfferPeer,
+  GraphNetwork,
+  DealToPeer,
+  DealToJoinedOfferPeer,
+  Provider,
+  DealToProvidersAccess,
 } from "../generated/schema";
 import { BigInt, Bytes } from "@graphprotocol/graph-ts";
 import {getTokenDecimals, getTokenSymbol} from "./contracts";
@@ -12,6 +16,27 @@ export const ZERO_BIG_INT = BigInt.fromI32(0);
 export const UNO_BIG_INT = BigInt.fromI32(1);
 
 export const UNKNOWN_EFFECTOR_DESCRIPTION = "Unknown";
+export const UNREGISTERED_PROVIDER_NAME = "Unregistered";
+
+// In contracts flow to register provider exists, but on e.g. deal
+//  creation some unregistered providers could be used.
+// @notice Those unregistered providers does not count in total providers.
+export function createOrLoadUnregisteredProvider(providerAddress: string): Provider {
+  let entity = Provider.load(providerAddress);
+
+  if (entity == null) {
+    entity = new Provider(providerAddress);
+    entity.registered = false;
+    entity.name = UNREGISTERED_PROVIDER_NAME;
+    entity.approved = false;
+    entity.createdAt = ZERO_BIG_INT;
+    entity.computeUnitsAvailable = 0;
+    entity.computeUnitsTotal = 0;
+    entity.peerCount = 0;
+    entity.save();
+  }
+  return entity as Provider;
+}
 
 export function createOrLoadToken(tokenAddress: string): Token {
   let entity = Token.load(tokenAddress);
@@ -141,8 +166,24 @@ export function createOrLoadGraphNetwork(): GraphNetwork {
   return graphNetwork as GraphNetwork
 }
 
+export function createOrLoadDealToProvidersAccess(
+  dealId: string,
+  providerId: string,
+): DealToProvidersAccess {
+  const concattedIds = dealId.concat(providerId);
+  let entity = DealToProvidersAccess.load(concattedIds);
+
+  if (entity == null) {
+    entity = new DealToProvidersAccess(concattedIds)
+    entity.deal = dealId
+    entity.provider = providerId
+    entity.save()
+  }
+  return entity as DealToProvidersAccess
+}
+
 // Statuses that could be saved in Subgraph.
-// Some of the statues should be calculated regard to current epoch and should not be stored in the subgraph.
+// Some of the statues should be calculated regard to current epoch and can not be stored in the subgraph.
 // We have to mirror enums according to
 //  https://ethereum.stackexchange.com/questions/139078/how-to-use-subgraph-enums-in-the-mapping.
 export class CapacityCommitmentStatus {

@@ -1,6 +1,7 @@
 import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type { ContractsENV } from "../client/config.js";
 import type { OffersQueryQueryVariables } from "./indexerClient/queries/offers-query.generated.js";
+import {serializeDealProviderAccessLists} from "../utils/serializers.js";
 
 // Structure match matchDeal() arguments.
 // Currently: bytes32[] calldata offers, bytes32[][] calldata computeUnits.
@@ -19,6 +20,8 @@ export interface GetMatchedOffersIn {
   minWorkersToMatch: number;
   maxWorkersPerProvider: number;
   currentEpoch: number;
+  providersWhiteList: Array<string>;
+  providersBlackList: Array<string>;
 }
 
 export class DealNotFoundError extends Error {
@@ -122,6 +125,16 @@ export class DealMatcherClient {
     if (getMatchedOffersIn.effectors.length > 0) {
       indexerGetOffersParams.filters!["effectors_"] = {
         effector_in: getMatchedOffersIn.effectors,
+      };
+    }
+    if (getMatchedOffersIn.providersWhiteList.length > 0) {
+      indexerGetOffersParams.filters!["provider_"] = {
+        id_in: getMatchedOffersIn.providersWhiteList,
+      };
+    }
+    if (getMatchedOffersIn.providersBlackList.length > 0) {
+      indexerGetOffersParams.filters!["provider_"] = {
+        id_in: getMatchedOffersIn.providersBlackList,
       };
     }
     console.info(
@@ -380,6 +393,7 @@ export class DealMatcherClient {
     if (deal.effectors == null) {
       throw new Error(`Effectors of a deal: ${dealId} are null - assert.`);
     }
+    const {whitelist, blacklist} = serializeDealProviderAccessLists(deal.providersAccessType, deal.providersAccessList)
     return await this.getMatchedOffers({
       dealId: dealId,
       // TODO: after migrate to another indexer, rm as string.
@@ -396,6 +410,8 @@ export class DealMatcherClient {
         Number(graphNetworks[0].initTimestamp),
         graphNetworks[0].coreEpochDuration,
       ),
+      providersWhiteList: whitelist,
+      providersBlackList: blacklist,
     });
   }
 }

@@ -49,6 +49,10 @@ fragment BasicDeal on Deal {
     addedComputeUnits {
         ...ComputeUnitBasic
     }
+    providersAccessType
+    providersAccessList {
+      id
+    }
     maxPaidEpoch
     depositedSum
     withdrawalSum
