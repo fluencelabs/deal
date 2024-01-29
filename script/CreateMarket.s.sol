@@ -19,6 +19,7 @@ import "./utils/Depoyments.sol";
 
 // It creates market example on chain.
 // Currently used for sync Network Explorer frontend dev.
+// To run this script you also should use the Core Owner (it uses some restricted admin methods).
 contract CreateMarket is Depoyments, Script {
     using SafeERC20 for IERC20;
 
@@ -28,7 +29,7 @@ contract CreateMarket is Depoyments, Script {
     string[2] effectorDescriptions = ["cURL", "IPFS"];
     IMarket market;
     ICore core;
-    IERC20 tFLT;
+    IERC20 tUSD;
 
     function setUp() external {
         string memory envName = vm.envString("CONTRACTS_ENV_NAME");
@@ -38,7 +39,7 @@ contract CreateMarket is Depoyments, Script {
 
         market = IMarket(deployments.contracts["Market"].addr);
         core = ICore(deployments.contracts["Core"].addr);
-        tFLT = IERC20(deployments.contracts["tFLT"].addr);
+        tUSD = IERC20(deployments.contracts["tUSD"].addr);
     }
 
     function _registerOffers(
@@ -90,7 +91,7 @@ contract CreateMarket is Depoyments, Script {
         // (arifmetic progression for target workers) * pricePerWorkerEpoch * core.minDealDepositedEpoches() * dealCount
         uint256 totalApprove = (startTargetWorkers + (startTargetWorkers + dealCount)) / 2 * dealCount
             * pricePerWorkerEpoch * core.minDealDepositedEpoches() * dealCount;
-        tFLT.approve(address(market), totalApprove);
+        tUSD.approve(address(market), totalApprove);
 
         address[] memory createdDeals = new address[](dealCount);
         for (uint32 i = 0; i < dealCount; i++) {
@@ -101,7 +102,7 @@ contract CreateMarket is Depoyments, Script {
             CIDV1 memory appCID = CIDV1({prefixes: 0x12345678, hash: pseudoRandom(abi.encode("dealAppCID", i))});
             IDeal dealCreatedContract = market.deployDeal(
                 appCID,
-                tFLT,
+                tUSD,
                 newMinWorkers,
                 newTargetWorkers,
                 newMaxWorkerPerProvider,
@@ -117,9 +118,21 @@ contract CreateMarket is Depoyments, Script {
     }
 
     function run() external {
+        // Setup foundry run.
+        vm.startBroadcast();
+        console.log("Broadcast from address: %s", address(this));
+
         CIDV1[] memory effectors = new CIDV1[](10);
         for (uint256 i = 0; i < effectorSuffixes.length; i++) {
             effectors[i] = CIDV1({prefixes: 0x12345678, hash: effectorSuffixes[i]});
+            console.log("setEffectorInfo (descriptions): %s", effectorDescriptions[i]);
+            // This transaction will broke system coz of https://github.com/graphprotocol/graph-node/issues/5171
+            // TODO: uncomment when above is resolved.
+            market.setEffectorInfo(
+                effectors[i],
+                effectorDescriptions[i],
+                CIDV1({prefixes: 0x12345678, hash: bytes32(0)})
+            );
         }
 
         uint256 offerCount = 10;
@@ -127,16 +140,12 @@ contract CreateMarket is Depoyments, Script {
         uint256 unitCountPerPeer = 2;
         uint256 minPricePerWorkerEpoch = 0.01 ether;
 
-        // Setup foundry run.
-        vm.startBroadcast();
-        console.log("Broadcast from address: %s", address(this));
-
-        uint256 tokenBalance = tFLT.balanceOf(address(this));
+        uint256 tokenBalance = tUSD.balanceOf(address(this));
         console.log("Token balance of broadcast runner is: %s", tokenBalance);
 
         console.log("Register several market offers..");
         _registerOffers(
-            offerCount, peerCountPerOffer, unitCountPerPeer, effectors, address(tFLT), minPricePerWorkerEpoch
+            offerCount, peerCountPerOffer, unitCountPerPeer, effectors, address(tUSD), minPricePerWorkerEpoch
         );
 
         console.log("Create Deals...");

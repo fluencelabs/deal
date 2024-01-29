@@ -47,7 +47,7 @@ library DeployDealSystem {
 
     // ------------------ Variables ------------------
     function deployDealSystem() internal returns (Deployment memory deployment) {
-        deployment.tUSD = IERC20(new TestERC20("Test USD", "tUSD"));
+        deployment.tUSD = IERC20(new TestERC20("Test USD", "tUSD", 8));
 
         Deal dealImpl = new Deal();
         Core coreImpl = new Core();

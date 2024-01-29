@@ -6,7 +6,9 @@ import {
   ComputeUnitCreated,
   ComputeUnitRemovedFromDeal,
   DealCreated,
-  EffectorAdded, EffectorInfoRemoved, EffectorInfoSet,
+  EffectorAdded,
+  EffectorInfoRemoved, EffectorInfoSet,
+  EffectorInfoSetButNotTuple,
   EffectorRemoved,
   MarketOfferRegistered,
   MinPricePerEpochUpdated,
@@ -53,10 +55,17 @@ export function handleProviderInfoUpdated(event: ProviderInfoUpdated): void {
   graphNetwork.save()
 }
 
+// It fails on EffectorInfoSet but does not fail on
+// EffectorInfoSetButNotTuple(indexed uint256,(bytes4,bytes32),string,(bytes4,bytes32)).
+// TODO: enable this handler when https://github.com/graphprotocol/graph-node/issues/5171 resolved.
 export function handleEffectorInfoSet(event: EffectorInfoSet): void {
+  // TODO: WHY nOT?
+  log.info("TODO: in handleEffectorInfoSet", []);
   const appCID = changetype<AppCID>(event.params.id);
   const cid = getEffectorCID(appCID);
+  log.info("TODO: in CID {}", [cid]);
   let effector = createOrLoadEffector(cid);
+  log.info("TODO: event.params.description {}", [event.params.description]);
   effector.description = event.params.description;
   effector.save();
 }

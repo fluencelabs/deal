@@ -335,6 +335,8 @@ abstract contract Offer is BaseModule, IOffer {
         computeUnit.startEpoch = startEpoch;
     }
 
+    event EffectorInfoSetButNotTuple(uint indexed foo, CIDV1 id, string description, CIDV1 metadata);
+
     // Effector info
     function setEffectorInfo(CIDV1 calldata id, string calldata description, CIDV1 calldata metadata)
         external
@@ -349,6 +351,7 @@ abstract contract Offer is BaseModule, IOffer {
         effectorInfo.description = description;
         effectorInfo.metadata = metadata;
 
+//        emit EffectorInfoSetButNotTuple(1, id, description, metadata);
         emit EffectorInfoSet(id, description, metadata);
     }
 
