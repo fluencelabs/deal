@@ -9,8 +9,8 @@ dataSources:
     network: local
     source:
       abi: Core
-      address: "0x38a024C0b412B9d1db8BC398140D00F5Af3093D4"
-      startBlock: 629
+      address: "0x36C02dA8a0983159322a80FFE9F24b1acfF8B570"
+      startBlock: 1
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -29,8 +29,8 @@ dataSources:
     network: local
     source:
       abi: Capacity
-      address: "0xb9bEECD1A582768711dE1EE7B0A1d582D9d72a6C"
-      startBlock: 629
+      address: "0x5f3f1dBD7B74C6B46e8c44f98792A1dAf8d69154"
+      startBlock: 1
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -66,8 +66,8 @@ dataSources:
     network: local
     source:
       abi: Market
-      address: "0x2a810409872AfC346F9B5b26571Fd6eC42EA4849"
-      startBlock: 629
+      address: "0x1291Be112d480055DaFd8a610b7d1e203891C274"
+      startBlock: 1
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -149,8 +149,8 @@ templates:
           handler: handleComputeUnitRemoved
         - event: WorkerIdUpdated(bytes32,bytes32)
           handler: handleWorkerIdUpdated
-        - event: ProviderAddedToAccessList(bytes32,bytes32)
+        - event: ProviderAddedToAccessList(address)
           handler: handleProviderAddedToAccessList
-        - event: ProviderRemovedFromAccessList(bytes32,bytes32)
+        - event: ProviderRemovedFromAccessList(address)
           handler: handleProviderRemovedFromAccessList
       file: ./src/mappings/deal.ts

@@ -33,8 +33,7 @@ export function createOrLoadUnregisteredProvider(providerAddress: string): Provi
     entity.computeUnitsAvailable = 0;
     entity.computeUnitsTotal = 0;
     entity.peerCount = 0;
-    entity.effectorCount = 0;
-    entity.save()
+    entity.save();
   }
   return entity as Provider;
 }

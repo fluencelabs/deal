@@ -35,7 +35,6 @@ query ProviderQuery(
   provider(id: $id) {
     ...ProviderABC
     peerCount
-    effectorCount
   }
 }
 

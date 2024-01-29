@@ -229,7 +229,6 @@ export class DealExplorerClient {
       res = {
         ...providerBase,
         peerCount: providerFetched.peerCount,
-        effectorCount: providerFetched.effectorCount,
       };
     }
     return res;

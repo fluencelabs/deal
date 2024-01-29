@@ -48,7 +48,6 @@ export function handleProviderInfoUpdated(event: ProviderInfoUpdated): void {
   provider.computeUnitsAvailable = 0;
   provider.computeUnitsTotal = 0;
   provider.peerCount = 0;
-  provider.effectorCount = 0;
   provider.save();
 
   let graphNetwork = createOrLoadGraphNetwork();
@@ -103,21 +102,15 @@ export function handleMarketOfferRegistered(
   const appCIDS = changetype<Array<AppCID>>(event.params.effectors);
   const effectorEntities = parseEffectors(appCIDS);
   // Link effectors and offer:
-  let createdOfferToEffector = 0;
   for (let i = 0; i < effectorEntities.length; i++) {
     const effectorId = effectorEntities[i];
     // Automatically create link or ensure that exists.
-    const createOrLoadOfferEffectorRes = createOrLoadOfferEffector(
+    createOrLoadOfferEffector(
       offer.id,
       effectorId,
     );
-
-    if (createOrLoadOfferEffectorRes.created) {
-      createdOfferToEffector = createdOfferToEffector + 1;
-    }
   }
 
-  provider.effectorCount = provider.effectorCount + createdOfferToEffector;
   provider.save();
 }
 
@@ -178,7 +171,6 @@ export function handlePaymentTokenUpdated(event: PaymentTokenUpdated): void {
 
 export function handleEffectorAdded(event: EffectorAdded): void {
   const offer = Offer.load(event.params.offerId.toHex()) as Offer;
-  const provider = Provider.load(offer.provider) as Provider;
   const appCID = changetype<AppCID>(event.params.effector);
   const cid = getEffectorCID(appCID);
   const effector = createOrLoadEffector(cid);
@@ -190,15 +182,10 @@ export function handleEffectorAdded(event: EffectorAdded): void {
 
   offer.updatedAt = event.block.timestamp;
   offer.save();
-  if (createOrLoadOfferEffectorRes.created) {
-    provider.effectorCount = provider.effectorCount + 1;
-    provider.save();
-  }
 }
 
 export function handleEffectorRemoved(event: EffectorRemoved): void {
   const offer = Offer.load(event.params.offerId.toHex()) as Offer;
-  const provider = Provider.load(offer.provider) as Provider;
   const appCID = changetype<AppCID>(event.params.effector);
   const cidToRemove = getEffectorCID(appCID);
   const effector = createOrLoadEffector(cidToRemove);
@@ -208,15 +195,6 @@ export function handleEffectorRemoved(event: EffectorRemoved): void {
     effector.id,
   );
   store.remove("OfferToEffector", createOrLoadOfferEffectorRes.entity.id);
-  if (createOrLoadOfferEffectorRes.created) {
-    // We created and deleted the effector: means nothing should be changed in counter.
-    provider.effectorCount = provider.effectorCount + 1;
-    provider.save();
-  } else {
-    provider.effectorCount = provider.effectorCount - 1;
-    provider.save();
-  }
-
   offer.updatedAt = event.block.timestamp;
   offer.save();
 }
