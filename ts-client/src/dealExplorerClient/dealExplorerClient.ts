@@ -154,6 +154,9 @@ export class DealExplorerClient {
           registered: true,
         }
       ] };
+    if (!providersFilters) {
+      return convertedFilters;
+    }
     if (providersFilters.onlyApproved) {
       convertedFilters.and?.push({
         approved: true,

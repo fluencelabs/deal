@@ -82,6 +82,13 @@ create-pure-market-local: ## Create market on a local blockchain
 
 	@echo "\033[0;32mSuccess! Pure market created on local chain - check it out.\033[0m"
 
+create-pure-market-%: ## Create market on for a stand...
+	@make verify-command program=forge
+	@CONTRACTS_ENV_NAME=$* forge script script/CreateMarket.s.sol --rpc-url $*  \
+	--private-key $(PRIVATE_KEY) --broadcast
+
+	@echo "\033[0;32mSuccess! Pure market created on $* chain - check it out.\033[0m"
+
 help: ## List makefile targets
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 	| awk 'BEGIN {FS = ":.*?## "}; {printf "%-30s %s\n", $$1, $$2}'
