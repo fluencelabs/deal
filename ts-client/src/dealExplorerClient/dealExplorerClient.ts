@@ -48,7 +48,10 @@ import type { ContractsENV } from "../client/config.js";
 import type { BasicPeerFragment } from "./indexerClient/queries/offers-query.generated.js";
 import { DealRpcClient } from "./rpcClients/index.js";
 import { tokenValueToRounded, valueToTokenValue } from "./utils.js";
-import {serializeProviderName} from "./serializers.js";
+import {
+  serializeEffectorDescription,
+  serializeProviderName
+} from "./serializers.js";
 
 export class FiltersError extends Error {}
 export class ValidTogetherFiltersError extends FiltersError {}
@@ -281,7 +284,7 @@ export class DealExplorerClient {
     for (const effector of manyToManyEffectors) {
       composedEffectors.push({
         cid: effector.effector.id,
-        description: effector.effector.description,
+        description: serializeEffectorDescription(effector.effector.id, effector.effector.description),
       });
     }
 
@@ -784,7 +787,7 @@ export class DealExplorerClient {
     if (data) {
       // data.deals.map(deal => { return deal.id })
       res = data.effectors.map((effector) => {
-        return { cid: effector.id, description: effector.description };
+        return { cid: effector.id, description: serializeEffectorDescription(effector.id, effector.description) };
       });
     }
     let total = null;
