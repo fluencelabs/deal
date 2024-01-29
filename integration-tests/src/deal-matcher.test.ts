@@ -3,6 +3,7 @@
 // - deployed contracts
 // - subgraph indexes contracts
 // # Test itself consists of:
+// - it creates provider info: market.setProviderInfo
 // - it creates Offers
 // - it creates CC (and approve, and deposited collateral)
 // - it waits 1 core epoch (before we could start to match)
@@ -29,8 +30,8 @@ const DEFAULT_CONFIRMATIONS = 1;
 // - time for subgraph indexing
 // - time for core epoch
 // - other eps.
-// TODO: get core.epochDuration instead of 15000
-const TESTS_TIMEOUT = 90000 + 15000;
+// TODO: get core.epochDuration instead of 30000
+const TESTS_TIMEOUT = 120000 + 30000;
 
 function getDefaultOfferFixture(
   owner: string,
@@ -80,6 +81,16 @@ describe("#getMatchedOffersByDealId", () => {
       paymentTokenAddress,
       timestamp,
     );
+
+    console.log("Register Provider by setProviderInfo...");
+    const setProviderInfoTx = await marketContract.setProviderInfo(
+      "CI_PROVIDER",
+      {
+        prefixes: "0x12345678",
+        hash: ethers.encodeBytes32String(`CI_PROVIDER:${timestamp}`),
+      },
+    );
+    await setProviderInfoTx.wait(DEFAULT_CONFIRMATIONS);
 
     const tx = await marketContract.registerMarketOffer(
       offerFixture.minPricePerWorkerEpoch,
@@ -187,6 +198,9 @@ describe("#getMatchedOffersByDealId", () => {
       }
 
       console.log("---- Deal Creation ----");
+      const marketContract = await contractsClient.getMarket();
+      const marketAddress = await marketContract.getAddress();
+
       const coreContract = await contractsClient.getCore();
       const epochMilliseconds = (await coreContract.epochDuration()) * 1000n;
       console.log(
@@ -207,7 +221,6 @@ describe("#getMatchedOffersByDealId", () => {
         BigInt(targetWorkersDeal) *
         pricePerWorkerEpochDeal *
         minDealDepositedEpoches;
-      const marketContract = await contractsClient.getMarket();
 
       console.info(
         "Send approve of payment token for amount = ",
@@ -216,7 +229,6 @@ describe("#getMatchedOffersByDealId", () => {
       expect(await paymentToken.balanceOf(signerAddress)).toBeGreaterThan(
         toApproveFromDeployer,
       );
-      const marketAddress = await marketContract.getAddress();
       expect(marketAddress).not.toBe("0x0000000000000000000000000000");
       await paymentToken.approve(marketAddress, toApproveFromDeployer);
 
@@ -236,8 +248,6 @@ describe("#getMatchedOffersByDealId", () => {
         registeredOffer.effectors,
         0,
         [],
-        // providersAccessType: BigNumberish,
-        // providersAccessList: AddressLike[]
       );
       await deployDealTx.wait(DEFAULT_CONFIRMATIONS);
 
@@ -262,6 +272,15 @@ describe("#getMatchedOffersByDealId", () => {
       const matchedOffersOut =
         await dealMatcherClient.getMatchedOffersByDealId(dealId);
       expect(matchedOffersOut.offers.length).toBe(1); // At least with one previously created offer it matched.
+
+      console.log(matchedOffersOut.computeUnitsPerOffers);
+      // const cuId = matchedOffersOut.computeUnitsPerOffers[0]?.[0];
+
+      // Additional check for status of matched CC from chain perspective
+      for (const commitmentId of commitmentIds) {
+        // e.g. 4 == Failed; 0 - Active.
+        expect(Number(await capacityContract.getStatus(commitmentId))).eq(0);
+      }
 
       console.info(
         `Match deal with offers structure proposed by indexer: ${JSON.stringify(matchedOffersOut)}...`,
