@@ -20,6 +20,7 @@ import "./utils/Depoyments.sol";
 // It creates market example on chain.
 // Currently used for sync Network Explorer frontend dev.
 // To run this script you also should use the Core Owner (it uses some restricted admin methods).
+// It creates differently configurated Deals in terms of access lists.
 contract CreateMarket is Depoyments, Script {
     using SafeERC20 for IERC20;
 
@@ -99,19 +100,58 @@ contract CreateMarket is Depoyments, Script {
             uint256 newTargetWorkers = startTargetWorkers + i;
             uint256 newMaxWorkerPerProvider = startMaxWorkerPerProvider + i;
 
+            // Generate providersAccessList: 1 pseudo and 1 existed.
             CIDV1 memory appCID = CIDV1({prefixes: 0x12345678, hash: pseudoRandom(abi.encode("dealAppCID", i))});
-            IDeal dealCreatedContract = market.deployDeal(
-                appCID,
-                tUSD,
-                newMinWorkers,
-                newTargetWorkers,
-                newMaxWorkerPerProvider,
-                pricePerWorkerEpoch,
-                effectors,
-                IConfig.AccessType.NONE,
-                new address[](0)
-            );
-            createdDeals[i] = address(dealCreatedContract);
+            address[] memory providersAccessList = new address[](2);  // TODO: to const.
+            for (uint j = 0; j < 2; j++) {
+                if (j % 2 == 0) {
+                    providersAccessList[j] = address(this);
+                } else {
+                    providersAccessList[j] = address(0x0);
+                }
+            }
+            // Add zoo into Deals configuration of whitelists.
+            if (i % 3 == 0) {
+                IDeal dealCreatedContract = market.deployDeal(
+                    appCID,
+                    tUSD,
+                    newMinWorkers,
+                    newTargetWorkers,
+                    newMaxWorkerPerProvider,
+                    pricePerWorkerEpoch,
+                    effectors,
+                    IConfig.AccessType.NONE,
+                    new address[](0)
+                );
+                createdDeals[i] = address(dealCreatedContract);
+            } else if (i % 2 == 0) {
+                IDeal dealCreatedContract = market.deployDeal(
+                    appCID,
+                    tUSD,
+                    newMinWorkers,
+                    newTargetWorkers,
+                    newMaxWorkerPerProvider,
+                    pricePerWorkerEpoch,
+                    effectors,
+                    IConfig.AccessType.WHITELIST,
+                    providersAccessList
+                );
+                createdDeals[i] = address(dealCreatedContract);
+            } else {
+                IDeal dealCreatedContract = market.deployDeal(
+                    appCID,
+                    tUSD,
+                    newMinWorkers,
+                    newTargetWorkers,
+                    newMaxWorkerPerProvider,
+                    pricePerWorkerEpoch,
+                    effectors,
+                    IConfig.AccessType.BLACKLIST,
+                    providersAccessList
+                );
+                createdDeals[i] = address(dealCreatedContract);
+            }
+
         }
 
         return createdDeals;
@@ -127,7 +167,7 @@ contract CreateMarket is Depoyments, Script {
             effectors[i] = CIDV1({prefixes: 0x12345678, hash: effectorSuffixes[i]});
             console.log("setEffectorInfo (descriptions): %s", effectorDescriptions[i]);
             // This transaction will broke system coz of https://github.com/graphprotocol/graph-node/issues/5171
-            // TODO: uncomment when above is resolved.
+            // TODO: uncomment subgraph handlers and return support for events from this transaction.
             market.setEffectorInfo(
                 effectors[i],
                 effectorDescriptions[i],
