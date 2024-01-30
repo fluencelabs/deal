@@ -29,16 +29,19 @@ contract CreateMarket is Depoyments, Script {
     bytes32[2] effectorSuffixes = [bytes32("Dogu"), "Doge"];
     string[2] effectorDescriptions = ["cURL", "IPFS"];
     IMarket market;
+    ICapacity capacity;
     ICore core;
     IERC20 tUSD;
+    string envName;
 
     function setUp() external {
-        string memory envName = vm.envString("CONTRACTS_ENV_NAME");
+        envName = vm.envString("CONTRACTS_ENV_NAME");
         string memory fileNames = string.concat(envName, ".json");
         string memory fullDeploymentsPath = string.concat(vm.projectRoot(), DEPLOYMENTS_PATH, fileNames);
         _loadDepoyments(fullDeploymentsPath);
 
         market = IMarket(deployments.contracts["Market"].addr);
+        capacity = ICapacity(deployments.contracts["Capacity"].addr);
         core = ICore(deployments.contracts["Core"].addr);
         tUSD = IERC20(deployments.contracts["tUSD"].addr);
     }
@@ -157,8 +160,42 @@ contract CreateMarket is Depoyments, Script {
         return createdDeals;
     }
 
+    function _createCCs(bytes32[] memory peers) internal returns (bytes32[] memory) {
+        uint capacityMinDuration = capacity.minDuration();
+        bytes32[] memory commitments = new bytes32[](peers.length);
+        // TODO: use another signer (deligator)...
+        for (uint i=0; i < peers.length; ++i) {
+            commitments[i] = capacity.createCommitment(
+                peers[i],
+                capacityMinDuration,
+                // Delegator will be assigned on deposit.
+                address(0),
+                1
+            );
+        }
+        return commitments;
+    }
+
+    // Before deposit it also calculates collateral.
+    function _depositCollateralToCCs(bytes32[] memory capacityCommitments) internal {
+        for (uint i=0; i < capacityCommitments.length; ++i) {
+            bytes32 capacityCommitmentId = capacityCommitments[i];
+            console.log("[_depositCollateralToCCs] for CC:");
+            console.logBytes32(capacityCommitmentId);
+            ICapacity.CommitmentView memory commitment = capacity.getCommitment(capacityCommitmentId);
+            uint valueToSend = (commitment.collateralPerUnit * commitment.unitCount);
+
+            capacity.depositCollateral{ value: valueToSend }(capacityCommitmentId);
+        }
+    }
+
     function run() external {
         // Setup foundry run.
+        // add tokens for local network, if it is local anvil node.
+        if (keccak256(bytes(envName)) == keccak256(bytes("local"))) {
+            console.log('envName is local, feed with Eth...');
+            vm.deal(address(this), 100 ether);
+        }
         vm.startBroadcast();
         console.log("Broadcast from address: %s", address(this));
 
@@ -181,12 +218,22 @@ contract CreateMarket is Depoyments, Script {
         uint256 minPricePerWorkerEpoch = 0.01 ether;
 
         uint256 tokenBalance = tUSD.balanceOf(address(this));
-        console.log("Token balance of broadcast runner is: %s", tokenBalance);
+        console.log("tUSD token balance of broadcast runner is: %s", tokenBalance);
+        console.log("Eth balance of broadcast runner is: %s", address(this).balance);
 
         console.log("Register several market offers..");
-        _registerOffers(
+        (bytes32[] memory offerIds, bytes32[][] memory peerIds, bytes32[][][] memory unitIds) = _registerOffers(
             offerCount, peerCountPerOffer, unitCountPerPeer, effectors, address(tUSD), minPricePerWorkerEpoch
         );
+
+        console.log("Create CC for all peers, deposit CC for each Peer of  Offer with even index...");
+        for (uint i=0; i < offerIds.length; ++i) {
+            bytes32[] memory commitments = _createCCs(peerIds[i]);
+
+            if (i % 2 == 0) {
+                _depositCollateralToCCs(commitments);
+            }
+        }
 
         console.log("Create Deals...");
         uint256 dealCount = 10;
