@@ -176,19 +176,6 @@ contract CreateMarket is Depoyments, Script {
         return commitments;
     }
 
-    // Before deposit it also calculates collateral.
-    function _depositCollateralToCCs(bytes32[] memory capacityCommitments) internal {
-        for (uint i=0; i < capacityCommitments.length; ++i) {
-            bytes32 capacityCommitmentId = capacityCommitments[i];
-            console.log("[_depositCollateralToCCs] for CC:");
-            console.logBytes32(capacityCommitmentId);
-            ICapacity.CommitmentView memory commitment = capacity.getCommitment(capacityCommitmentId);
-            uint valueToSend = (commitment.collateralPerUnit * commitment.unitCount);
-
-            capacity.depositCollateral{ value: valueToSend }(capacityCommitmentId);
-        }
-    }
-
     function run() external {
         // Setup foundry run.
         // add tokens for local network, if it is local anvil node.
@@ -226,13 +213,9 @@ contract CreateMarket is Depoyments, Script {
             offerCount, peerCountPerOffer, unitCountPerPeer, effectors, address(tUSD), minPricePerWorkerEpoch
         );
 
-        console.log("Create CC for all peers, deposit CC for each Peer of  Offer with even index...");
+        console.log("Create CC for all peers...");
         for (uint i=0; i < offerIds.length; ++i) {
             bytes32[] memory commitments = _createCCs(peerIds[i]);
-
-            if (i % 2 == 0) {
-                _depositCollateralToCCs(commitments);
-            }
         }
 
         console.log("Create Deals...");
