@@ -6,11 +6,11 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: Core
-    network: mumbai
+    network: local
     source:
       abi: Core
-      address: "0x067F07E3c85028f60a3F5FdbA5b7164FDA298271"
-      startBlock: 45147390
+      address: "0x49fd2BE640DB2910c2fAb69bB8531Ab6E76127ff"
+      startBlock: 5455
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -26,11 +26,11 @@ dataSources:
       file: ./src/mappings/core.ts
   - kind: ethereum/contract
     name: Capacity
-    network: mumbai
+    network: local
     source:
       abi: Capacity
-      address: "0xd86BB4a224e56039b1799bd984497f78992A2674"
-      startBlock: 45147390
+      address: "0xf953b3A269d80e3eB0F2947630Da976B896A8C5b"
+      startBlock: 5455
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -63,11 +63,11 @@ dataSources:
       file: ./src/mappings/capacity.ts
   - kind: ethereum/contract
     name: Market
-    network: mumbai
+    network: local
     source:
       abi: Market
-      address: "0x58f30341Ee3d324ed0c9eBe5107Ad77F567c7dc3"
-      startBlock: 45147390
+      address: "0xA4899D35897033b927acFCf422bc745916139776"
+      startBlock: 5455
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -121,7 +121,7 @@ dataSources:
 templates:
   - name: Deal
     kind: ethereum/contract
-    network: mumbai
+    network: local
     source:
       abi: Deal
     mapping:

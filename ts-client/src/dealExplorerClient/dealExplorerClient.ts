@@ -14,6 +14,8 @@ import type {
   PaymentToken,
   PaymentTokenListView,
   EffectorListView,
+  CapacityCommitmentListView,
+  CapacityCommitment,
 } from "./types/schemes.js";
 import type {
   ByProviderAndStatusFilter,
@@ -25,13 +27,9 @@ import type {
   ProviderShortOrderBy,
   DealsShortOrderBy,
   EffectorsOrderBy,
-  PaymentTokenOrderBy
+  PaymentTokenOrderBy, CapacityCommitmentsFilters, CapacityCommitmentsOrderBy
 } from "./types/filters.js";
 import { IndexerClient } from "./indexerClient/indexerClient.js";
-import type {
-  Deal_OrderBy,
-  Offer_OrderBy,
-} from "./indexerClient/generated.types.js";
 import type {
   BasicDealFragment,
   ComputeUnitBasicFragment,
@@ -41,6 +39,7 @@ import type { ContractsENV } from "../client/config.js";
 import type { BasicPeerFragment } from "./indexerClient/queries/offers-query.generated.js";
 import { DealRpcClient } from "./rpcClients/index.js";
 import {
+  calculateTimestamp,
   DEFAULT_ORDER_TYPE,
   DEFAULT_TOKEN_VALUE_ROUNDING, FILTER_MULTISELECT_MAX,
   tokenValueToRounded,
@@ -53,7 +52,7 @@ import {
   convertDealsFiltersToIndexerType,
   convertOffersFiltersToIndexerType,
   FiltersError,
-  // serializeCapacityCommitmentsFiltersToIndexer,
+  serializeCapacityCommitmentsFiltersToIndexer,
   serializeProviderFiltersToIndexer, ValidTogetherFiltersError
 } from "./serializers/filters.js";
 import {
@@ -62,6 +61,11 @@ import {
   composeProviderBase,
   composeProviderShort
 } from "./serializers/schemes.js";
+import {
+  convertDealShortOrderByToIndexerType,
+  convertOfferShortOrderByToIndexerType,
+  serializeCapacityCommitmentsOrderByToIndexerType
+} from "./serializers/orderby.js";
 
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
@@ -245,13 +249,6 @@ export class DealExplorerClient {
     );
   }
 
-  _convertOfferShortOrderByToIndexerType(v: OfferShortOrderBy): Offer_OrderBy {
-    if (v == "pricePerWorkerEpoch") {
-      return "pricePerEpoch" as Offer_OrderBy;
-    }
-    return v as Offer_OrderBy;
-  }
-
   async _calculateTokenDecimalsForFilters(
     paymentTokens: Array<string> | undefined,
     otherConditions: boolean | undefined,
@@ -280,8 +277,7 @@ export class DealExplorerClient {
     orderBy: OfferShortOrderBy = "createdAt",
     orderType: OrderType = DEFAULT_ORDER_TYPE,
   ): Promise<OfferShortListView> {
-    const orderByConverted =
-      this._convertOfferShortOrderByToIndexerType(orderBy);
+    const orderByConverted = convertOfferShortOrderByToIndexerType(orderBy);
 
     const _cond = (offerFilters?.minPricePerWorkerEpoch || offerFilters?.maxPricePerWorkerEpoch) !== undefined
     const commonTokenDecimals = await this._calculateTokenDecimalsForFilters(
@@ -382,11 +378,6 @@ export class DealExplorerClient {
     return res;
   }
 
-  _convertDealShortOrderByToIndexerType(v: DealsShortOrderBy): Deal_OrderBy {
-    // Currently no needs in convert because only createdAt.
-    return v as Deal_OrderBy;
-  }
-
   async _getDealsImpl(
     dealsFilters?: DealsFilters,
     offset: number = 0,
@@ -396,8 +387,7 @@ export class DealExplorerClient {
   ): Promise<DealShortListView> {
     await this._init();
 
-    const orderByConverted =
-      this._convertDealShortOrderByToIndexerType(orderBy);
+    const orderByConverted = convertDealShortOrderByToIndexerType(orderBy);
 
     const _cond = (dealsFilters?.minPricePerWorkerEpoch || dealsFilters?.maxPricePerWorkerEpoch) !== undefined
     const commonTokenDecimals = await this._calculateTokenDecimalsForFilters(
@@ -642,43 +632,64 @@ export class DealExplorerClient {
     };
   }
 
-  // async getCapacityCommitments(
-  //   filters?: CapacityCommitmentsFilters,
-  //   offset: number = 0,
-  //   limit: number = this.DEFAULT_PAGE_LIMIT,
-  //   orderBy: CapacityCommitmentsOrderBy = "createdAt",
-  //   orderType: OrderType = DEFAULT_ORDER_TYPE,
-  // ): Promise<CapacityCommitmentListView> {
-  //   await this._init();
-  //   const serializedFilters =
-  //     await serializeCapacityCommitmentsFiltersToIndexer(filters);
-  //   const data = await this._indexerClient.getCapacityCommitments({
-  //     filters: serializedFilters,
-  //     offset,
-  //     limit,
-  //     orderBy,
-  //     orderType,
-  //   });
-  //   const res = [];
-  //   if (data) {
-  //     for (const capacityCommitment of data.capacityCommitments) {
-  //       res.push(composeProviderShort(provider));
-  //     }
-  //   }
-  //   let total = null;
-  //   if (
-  //     !serializedFilters &&
-  //     data.graphNetworks.length == 1 &&
-  //     data.graphNetworks[0] &&
-  //     data.graphNetworks[0].capacityCommitmentsTotal
-  //   ) {
-  //     total = data.graphNetworks[0].capacityCommitmentsTotal as string;
-  //   }
-  //   return {
-  //     data: res,
-  //     total,
-  //   };
-  // }
+  async getCapacityCommitments(
+    filters?: CapacityCommitmentsFilters,
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: CapacityCommitmentsOrderBy = "createdAt",
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
+  ): Promise<CapacityCommitmentListView> {
+    await this._init();
+    const orderBySerialized = serializeCapacityCommitmentsOrderByToIndexerType(orderBy);
+    const filtersSerialized =
+      await serializeCapacityCommitmentsFiltersToIndexer(filters);
+    const data = await this._indexerClient.getCapacityCommitments({
+      filters: filtersSerialized,
+      offset,
+      limit,
+      orderBy: orderBySerialized,
+      orderType,
+    });
+    const res: Array<CapacityCommitment> = [];
+
+    if (data) {
+      if (data.graphNetworks.length != 1 || data.graphNetworks[0] == undefined) {
+        throw new Error("Assertion: data.graphNetworks.length != 1 || data.graphNetworks[0] == undefined.")
+      }
+      for (const capacityCommitment of data.capacityCommitments) {
+
+        let expiredAt = null
+        if (capacityCommitment.endEpoch != 0) {
+          expiredAt = calculateTimestamp(
+            Number(capacityCommitment.endEpoch),
+            Number(data.graphNetworks[0].initTimestamp),
+            Number(data.graphNetworks[0].coreEpochDuration)
+          )
+        }
+
+        res.push({
+          id: capacityCommitment.id,
+          createdAt: Number(capacityCommitment.createdAt),
+          expiredAt,
+          providerId: capacityCommitment.peer.provider.id,
+          peerId: capacityCommitment.peer.id,
+          computeUnitsCount: Number(capacityCommitment.computeUnitsCount),
+        });
+      }
+    }
+    let total = null;
+    if (
+      data.graphNetworks.length == 1 &&
+      data.graphNetworks[0] &&
+      data.graphNetworks[0].capacityCommitmentsTotal
+    ) {
+      total = data.graphNetworks[0].capacityCommitmentsTotal as string;
+    }
+    return {
+      data: res,
+      total,
+    };
+  }
 }
 
 /*

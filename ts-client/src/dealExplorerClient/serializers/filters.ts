@@ -1,3 +1,4 @@
+// Module is for filter serializers.
 import type {
   CapacityCommitmentsFilters, DealsFilters, OffersFilters,
   ProvidersFilters
@@ -179,12 +180,12 @@ export async function convertDealsFiltersToIndexerType(
 }
 
 
+// TODO
 export async function serializeCapacityCommitmentsFiltersToIndexer(
   filters?: CapacityCommitmentsFilters
 ): Promise<CapacityCommitment_Filter> {
   if (!filters) {
     return {};
   }
-  // TODO
   return {}
 }

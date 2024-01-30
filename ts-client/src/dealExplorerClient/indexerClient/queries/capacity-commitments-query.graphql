@@ -16,6 +16,8 @@ query CapacityCommitmentsQuery(
   }
   graphNetworks(first: 1) {
     capacityCommitmentsTotal
+    coreEpochDuration
+    initTimestamp
   }
 }
 
@@ -31,6 +33,7 @@ query CapacityCommitmentsQuery(
 #}
 
 fragment CapacityCommitmentBasic on CapacityCommitment {
+  id
   peer {
     id
     provider {
@@ -38,6 +41,7 @@ fragment CapacityCommitmentBasic on CapacityCommitment {
     }
   }
   status
+  createdAt
   startEpoch
   endEpoch
   computeUnitsCount

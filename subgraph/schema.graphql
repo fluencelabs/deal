@@ -217,6 +217,8 @@ type CapacityCommitment @entity {
   duration: BigInt!
   rewardDelegatorRate: Int!
   delegator: String!
+  "timestamp of creation of CC. It does not mean that CC is started."
+  createdAt: BigInt!
   startEpoch: BigInt!
   endEpoch: BigInt!
   totalCUFailCount: Int!

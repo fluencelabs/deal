@@ -40,6 +40,8 @@ export type CapacityCommitment = {
   collateralPerUnit: Scalars['BigInt']['output'];
   computeUnits?: Maybe<Array<CapacityCommitmentToComputeUnit>>;
   computeUnitsCount: Scalars['Int']['output'];
+  /** timestamp of creation of CC. It does not mean that CC is started. */
+  createdAt: Scalars['BigInt']['output'];
   delegator: Scalars['String']['output'];
   /** If CC deleted before collateral deposited. */
   deleted: Scalars['Boolean']['output'];
@@ -150,6 +152,7 @@ export type CapacityCommitmentToComputeUnit_OrderBy =
   | 'capacityCommitment__activeUnitCount'
   | 'capacityCommitment__collateralPerUnit'
   | 'capacityCommitment__computeUnitsCount'
+  | 'capacityCommitment__createdAt'
   | 'capacityCommitment__delegator'
   | 'capacityCommitment__deleted'
   | 'capacityCommitment__duration'
@@ -198,6 +201,14 @@ export type CapacityCommitment_Filter = {
   computeUnitsCount_not?: InputMaybe<Scalars['Int']['input']>;
   computeUnitsCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
   computeUnits_?: InputMaybe<CapacityCommitmentToComputeUnit_Filter>;
+  createdAt?: InputMaybe<Scalars['BigInt']['input']>;
+  createdAt_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  createdAt_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  createdAt_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  createdAt_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  createdAt_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  createdAt_not?: InputMaybe<Scalars['BigInt']['input']>;
+  createdAt_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   delegator?: InputMaybe<Scalars['String']['input']>;
   delegator_contains?: InputMaybe<Scalars['String']['input']>;
   delegator_contains_nocase?: InputMaybe<Scalars['String']['input']>;
@@ -343,6 +354,7 @@ export type CapacityCommitment_OrderBy =
   | 'collateralPerUnit'
   | 'computeUnits'
   | 'computeUnitsCount'
+  | 'createdAt'
   | 'delegator'
   | 'deleted'
   | 'duration'
@@ -1725,6 +1737,7 @@ export type Peer_OrderBy =
   | 'currentCapacityCommitment__activeUnitCount'
   | 'currentCapacityCommitment__collateralPerUnit'
   | 'currentCapacityCommitment__computeUnitsCount'
+  | 'currentCapacityCommitment__createdAt'
   | 'currentCapacityCommitment__delegator'
   | 'currentCapacityCommitment__deleted'
   | 'currentCapacityCommitment__duration'

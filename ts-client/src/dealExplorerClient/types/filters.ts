@@ -47,6 +47,19 @@ export interface DealsFilters {
   status?: DealStatus | undefined;
 }
 
+export interface CapacityCommitmentsFilters {
+  // provider id, commitment id, peer id
+  // search?: string | undefined;
+  computeUnitsCountFrom?: number | undefined;
+  computeUnitsCountTo?: number | undefined;
+  createdAtFrom?: number | undefined;
+  createdAtTo?: number | undefined;
+  // TODO: implement.
+  // onlyActive?: boolean;
+  rewardDelegatorRateFrom?: number | undefined;
+  rewardDelegatorRateTo?: number | undefined;
+}
+
 // Order Types.
 export type OfferShortOrderBy =
   | "createdAt"

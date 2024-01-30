@@ -27,10 +27,11 @@ export interface CapacityCommitmentListView extends ListViewABC {
   data: Array<CapacityCommitment>;
 }
 
+// @param expiredAt: null if not CC have not been activated yet.
 export type CapacityCommitment = {
   id: string;
   createdAt: number;
-  expiredAt: number;
+  expiredAt: number | null;
   providerId: string;
   peerId: string;
   computeUnitsCount: number;

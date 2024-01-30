@@ -21,3 +21,20 @@ export function valueToTokenValue(
 ) {
   return ethers.parseUnits(value.toString(), decimals).toString();
 }
+
+// It mirrors core.currentEpoch in EpochController.sol.
+export function calculateEpoch(
+  timestamp: number,
+  epochControllerStorageInitTimestamp: number,
+  epochControllerStorageEpochDuration: number,
+): number {
+  return 1 + (timestamp - epochControllerStorageInitTimestamp) / epochControllerStorageEpochDuration
+}
+
+export function calculateTimestamp(
+  epoch: number,
+  epochControllerStorageInitTimestamp: number,
+  epochControllerStorageEpochDuration: number,
+): number {
+  return (epoch - 1) * epochControllerStorageEpochDuration + epochControllerStorageInitTimestamp
+}
