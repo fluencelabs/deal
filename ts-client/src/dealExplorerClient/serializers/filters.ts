@@ -180,12 +180,47 @@ export async function convertDealsFiltersToIndexerType(
 }
 
 
-// TODO
-export async function serializeCapacityCommitmentsFiltersToIndexer(
-  filters?: CapacityCommitmentsFilters
-): Promise<CapacityCommitment_Filter> {
-  if (!filters) {
+export function serializeCapacityCommitmentsFiltersToIndexer(
+  v?: CapacityCommitmentsFilters,
+  currentEpoch?: string,
+): CapacityCommitment_Filter {
+  if (!v) {
     return {};
+  }
+  const convertedFilters: CapacityCommitment_Filter = { and: [] };
+  if (v.createdAtFrom) {
+    convertedFilters.and?.push({ createdAt_gte: v.createdAtFrom.toString() });
+  }
+  if (v.createdAtTo) {
+    convertedFilters.and?.push({ createdAt_lte: v.createdAtTo.toString() });
+  }
+  if (v.computeUnitsCountFrom) {
+    convertedFilters.and?.push({ computeUnitsCount_gte: v.computeUnitsCountFrom });
+  }
+  if (v.computeUnitsCountTo) {
+    convertedFilters.and?.push({ computeUnitsCount_lte: v.computeUnitsCountTo });
+  }
+  if (v.rewardDelegatorRateFrom) {
+    convertedFilters.and?.push({ rewardDelegatorRate_gte: v.rewardDelegatorRateFrom });
+  }
+  if (v.rewardDelegatorRateTo) {
+    convertedFilters.and?.push({ rewardDelegatorRate_lte: v.rewardDelegatorRateTo });
+  }
+  if (v.onlyActive) {
+    if (currentEpoch == undefined) {
+      throw new Error("Assertion: currentEpoch is undefined but v.onlyActive filter is used.");
+    }
+    convertedFilters.and?.push({
+      // Duplication as it is in DealExplorerClient: serializeCapacityCommitmentsFiltersToIndexer.
+      startEpoch_lte: currentEpoch,
+      endEpoch_gt: currentEpoch,
+      // On each submitProof indexer should save nextCCFailedEpoch, and
+      //  in query we relay on that field to filter Failed CC.
+      nextCCFailedEpoch_gt: currentEpoch,
+      deleted: false,
+      // Wait delegation is duplicating startEpoch_lte check, though.
+      status_not_in: ["WaitDelegation", "Removed", "Failed"],
+    });
   }
   return {}
 }

@@ -39,6 +39,7 @@ import type { ContractsENV } from "../client/config.js";
 import type { BasicPeerFragment } from "./indexerClient/queries/offers-query.generated.js";
 import { DealRpcClient } from "./rpcClients/index.js";
 import {
+  calculateEpoch,
   calculateTimestamp,
   DEFAULT_ORDER_TYPE,
   DEFAULT_TOKEN_VALUE_ROUNDING, FILTER_MULTISELECT_MAX,
@@ -81,6 +82,8 @@ export class DealExplorerClient {
   private _indexerClient: IndexerClient;
   private _dealContractsClient: DealClient;
   private _dealRpcClient: DealRpcClient | null;
+  private _coreEpochDuration: number | null;
+  private _coreInitTimestamp: number | null;
 
   constructor(
     network: ContractsENV,
@@ -97,12 +100,17 @@ export class DealExplorerClient {
     }
     this._indexerClient = new IndexerClient(network);
     this._dealContractsClient = new DealClient(this._caller, network);
+    // Fields to init declare below.
     this._dealRpcClient = null;
+    this._coreEpochDuration = null;
+    this._coreInitTimestamp = null;
   }
 
   // Add init other async attributes here.
   // Call before code in every external methods.
-  // Currently, it inits only DealRpcClient.
+  // Currently, it inits:
+  // - DealRpcClient multicall3Contract
+  // - fetches core constants from indexer.
   async _init() {
     if (this._dealRpcClient) {
       return;
@@ -113,6 +121,17 @@ export class DealExplorerClient {
       this._caller,
       multicall3ContractAddress,
     );
+    // Init constants from indexer.
+    // TODO: add cache.
+    if ((this._coreEpochDuration == null) || (this._coreInitTimestamp == null)) {
+      console.info('Fetch contract constants from indexer.')
+      const data = await this._indexerClient.getContractConstants()
+      if (data.graphNetworks.length != 1 || data.graphNetworks[0] == undefined) {
+        throw new Error("Assertion: data.graphNetworks.length != 1 || data.graphNetworks[0] == undefined.")
+      }
+      this._coreInitTimestamp = Number(data.graphNetworks[0].initTimestamp)
+      this._coreEpochDuration = Number(data.graphNetworks[0].coreEpochDuration)
+    }
   }
 
   /*
@@ -641,8 +660,21 @@ export class DealExplorerClient {
   ): Promise<CapacityCommitmentListView> {
     await this._init();
     const orderBySerialized = serializeCapacityCommitmentsOrderByToIndexerType(orderBy);
+
+    let currentEpoch = undefined
+    if (filters?.onlyActive) {
+      if (this._coreInitTimestamp == null || this._coreEpochDuration == null) {
+        throw new Error("Assertion: Class object was not inited correctly.")
+      }
+      currentEpoch = calculateEpoch(
+        Date.now() / 1000,
+        this._coreInitTimestamp,
+        this._coreEpochDuration,
+      ).toString()
+    }
+
     const filtersSerialized =
-      await serializeCapacityCommitmentsFiltersToIndexer(filters);
+      serializeCapacityCommitmentsFiltersToIndexer(filters, currentEpoch);
     const data = await this._indexerClient.getCapacityCommitments({
       filters: filtersSerialized,
       offset,

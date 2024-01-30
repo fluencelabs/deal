@@ -54,8 +54,7 @@ export interface CapacityCommitmentsFilters {
   computeUnitsCountTo?: number | undefined;
   createdAtFrom?: number | undefined;
   createdAtTo?: number | undefined;
-  // TODO: implement.
-  // onlyActive?: boolean;
+  onlyActive?: boolean;
   rewardDelegatorRateFrom?: number | undefined;
   rewardDelegatorRateTo?: number | undefined;
 }

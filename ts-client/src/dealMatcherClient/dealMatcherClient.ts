@@ -89,6 +89,7 @@ export class DealMatcherClient {
             //  cc.info.startEpoch <= currentEpoch_.
             currentCapacityCommitment_not: null,
             currentCapacityCommitment_: {
+              // Duplication as it is in DealExplorerClient: serializeCapacityCommitmentsFiltersToIndexer.
               startEpoch_lte: currentEpochString,
               endEpoch_gt: currentEpochString,
               // On each submitProof indexer should save nextCCFailedEpoch, and
