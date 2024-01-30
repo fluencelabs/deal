@@ -18,17 +18,26 @@ import type {
   Sdk as ProvidersSdk,
 } from "./queries/providers-query.generated.js";
 import { getSdk as getProvidersSdk } from "./queries/providers-query.generated.js";
+import type {
+  Sdk as CapacityCommitmentsSdk
+} from "./queries/capacity-commitments-query.generated.js";
+import { getSdk as getCapacityCommitmentsSdk } from "./queries/capacity-commitments-query.generated.js";
 import { IndexerClientABC } from "../../indexerClient/indexerClientABC.js";
 import type { ContractsENV } from "../../client/config.js";
+import type {
+  CapacityCommitmentsQueryQueryVariables
+} from "./queries/capacity-commitments-query.generated.js";
 
 export class IndexerClient extends IndexerClientABC {
   private dealsClient: DealsSdk;
   private offersClient: OffersSdk;
   private providersClient: ProvidersSdk;
+  private capacityCommitmentsClient: CapacityCommitmentsSdk;
   constructor(network: ContractsENV) {
     super(network);
     this.dealsClient = getDealsSdk(this._graphqlClient);
     this.offersClient = getOffersSdk(this._graphqlClient);
+    this.capacityCommitmentsClient = getCapacityCommitmentsSdk(this._graphqlClient);
     this.providersClient = getProvidersSdk(this._graphqlClient);
   }
 
@@ -62,5 +71,9 @@ export class IndexerClient extends IndexerClientABC {
 
   async getTokens(variables: TokenQueryQueryVariables) {
     return await this.offersClient.TokenQuery(variables);
+  }
+
+  async getCapacityCommitments(variables: CapacityCommitmentsQueryQueryVariables) {
+    return await this.capacityCommitmentsClient.CapacityCommitmentsQuery(variables);
   }
 }

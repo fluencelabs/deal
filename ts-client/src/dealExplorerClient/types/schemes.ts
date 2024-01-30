@@ -1,3 +1,4 @@
+// Schemes that dealExplorerClient should compose and return (aka API of dealExplorerClient).
 interface ListViewABC {
   total: string | null;
 }
@@ -21,6 +22,21 @@ export interface EffectorListView extends ListViewABC {
 export interface PaymentTokenListView extends ListViewABC {
   data: Array<PaymentToken>;
 }
+
+export interface CapacityCommitmentListView extends ListViewABC {
+  data: Array<CapacityCommitment>;
+}
+
+export type CapacityCommitment = {
+  id: string;
+  createdAt: number;
+  expiredAt: number;
+  providerId: string;
+  peerId: string;
+  computeUnitsCount: number;
+  // TODO: implement.
+  // status: CapacityCommitmentStatus;
+};
 
 export type ProviderBase = {
   id: string;
@@ -123,3 +139,5 @@ export interface DealDetail extends DealShort {
 
 // Status undefined == problem with networks, etc.
 export type DealStatus = "inactive" | "active" | "ended" | "undefined";
+
+// export type CapacityCommitmentStatus = "active" | "ended";

@@ -1,5 +1,7 @@
 import { ethers } from "ethers";
 
+export const DEFAULT_TOKEN_VALUE_ROUNDING = 3
+
 export function tokenValueToRounded(
   value: string | bigint,
   toFixed: number = 3,

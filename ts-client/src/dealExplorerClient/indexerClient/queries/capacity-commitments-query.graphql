@@ -1,0 +1,57 @@
+query CapacityCommitmentsQuery(
+  $filters: CapacityCommitment_filter,
+  $offset: Int,
+  $limit: Int,
+  $orderBy: CapacityCommitment_orderBy,
+  $orderType: OrderDirection,
+) {
+  capacityCommitments(
+      where: $filters
+      first: $limit
+      skip: $offset
+      orderBy: $orderBy
+      orderDirection: $orderType
+  ) {
+    ...CapacityCommitmentBasic
+  }
+  graphNetworks(first: 1) {
+    capacityCommitmentsTotal
+  }
+}
+
+#query DealQuery(
+#  $id: ID!
+#) {
+#  deal(id: $id) {
+#    ...BasicDeal
+#      maxWorkersPerProvider
+#      appCID
+#      pricePerWorkerEpoch
+#  }
+#}
+
+fragment CapacityCommitmentBasic on CapacityCommitment {
+  peer {
+    id
+    provider {
+      id
+    }
+  }
+  status
+  startEpoch
+  endEpoch
+  computeUnitsCount
+}
+
+fragment ComputeUnitBasic on ComputeUnit {
+    id
+    workerId
+    provider {
+        id
+    }
+}
+
+fragment EffectorBasic on Effector {
+    id
+    description
+}

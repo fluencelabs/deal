@@ -7,7 +7,7 @@ import {
   DealToPeer,
   DealToJoinedOfferPeer,
   Provider,
-  DealToProvidersAccess,
+  DealToProvidersAccess, CapacityCommitmentToComputeUnit,
 } from "../generated/schema";
 import { BigInt, Bytes } from "@graphprotocol/graph-ts";
 import {getTokenDecimals, getTokenSymbol} from "./contracts";
@@ -197,4 +197,20 @@ export class CapacityCommitmentStatus {
   //  if Failed should be checked in another way (not by relaying on this status).
   static Failed: string = "Failed";
   static Removed: string = "Removed";
+}
+
+export function createOrLoadCapacityCommitmentToComputeUnit(
+  capacityCommitmentId: string,
+  computeUnitId: string,
+): CapacityCommitmentToComputeUnit {
+  const concattedIds = capacityCommitmentId.concat(computeUnitId);
+  let entity = CapacityCommitmentToComputeUnit.load(concattedIds);
+
+  if (entity == null) {
+    entity = new CapacityCommitmentToComputeUnit(concattedIds)
+    entity.capacityCommitment = capacityCommitmentId
+    entity.computeUnit = computeUnitId
+    entity.save()
+  }
+  return entity as CapacityCommitmentToComputeUnit
 }

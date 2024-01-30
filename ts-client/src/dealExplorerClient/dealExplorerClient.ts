@@ -1,12 +1,9 @@
 import { ethers } from "ethers";
 import type {
   DealShort,
-  OfferShort,
-  ProviderShort,
   OfferDetail,
   Effector,
   ProviderDetail,
-  ProviderBase,
   DealDetail,
   Peer,
   ComputeUnit,
@@ -28,17 +25,14 @@ import type {
   ProviderShortOrderBy,
   DealsShortOrderBy,
   EffectorsOrderBy,
-  PaymentTokenOrderBy,
+  PaymentTokenOrderBy
 } from "./types/filters.js";
 import { IndexerClient } from "./indexerClient/indexerClient.js";
-import type { BasicOfferFragment } from "./indexerClient/queries/offers-query.generated.js";
-import type { ProviderOfProvidersQueryFragment } from "./indexerClient/queries/providers-query.generated.js";
 import type {
   Deal_Filter,
   Deal_OrderBy,
   Offer_Filter,
   Offer_OrderBy,
-  Provider_Filter,
 } from "./indexerClient/generated.types.js";
 import type {
   BasicDealFragment,
@@ -48,12 +42,25 @@ import { DealClient } from "../client/client.js";
 import type { ContractsENV } from "../client/config.js";
 import type { BasicPeerFragment } from "./indexerClient/queries/offers-query.generated.js";
 import { DealRpcClient } from "./rpcClients/index.js";
-import { tokenValueToRounded, valueToTokenValue } from "./utils.js";
+import {
+  DEFAULT_TOKEN_VALUE_ROUNDING,
+  tokenValueToRounded,
+  valueToTokenValue
+} from "./utils.js";
 import {
   serializeEffectorDescription,
-  serializeProviderName,
-} from "./serializers.js";
+} from "./serializers/logics.js";
 import {serializeDealProviderAccessLists} from "../utils/serializers.js";
+import {
+  // serializeCapacityCommitmentsFiltersToIndexer,
+  serializeProviderFiltersToIndexer
+} from "./serializers/filters.js";
+import {
+  composeEffectors,
+  composeOfferShort,
+  composeProviderBase,
+  composeProviderShort
+} from "./serializers/schemes.js";
 
 export class FiltersError extends Error {}
 export class ValidTogetherFiltersError extends FiltersError {}
@@ -65,7 +72,6 @@ export class ValidTogetherFiltersError extends FiltersError {}
 export class DealExplorerClient {
   DEFAULT_PAGE_LIMIT = 100;
   DEFAULT_ORDER_TYPE: OrderType = "desc";
-  DEFAULT_TOKEN_VALUE_ROUNDING = 3;
   // For MVM we suppose that everything is in USDC.
   //  Used only with filters - if no token selected.
   DEFAULT_FILTER_TOKEN_DECIMALS = 6;
@@ -110,75 +116,6 @@ export class DealExplorerClient {
     );
   }
 
-  _composeProviderBase(
-    provider: ProviderOfProvidersQueryFragment,
-  ): ProviderBase {
-    return {
-      id: provider.id,
-      createdAt: Number(provider.createdAt),
-      totalComputeUnits: provider.computeUnitsTotal,
-      freeComputeUnits: provider.computeUnitsAvailable,
-      name: serializeProviderName(
-        provider.name,
-        provider.id,
-        provider.approved,
-      ),
-      isApproved: provider.approved,
-    } as ProviderBase;
-  }
-
-  _composeProviderShort(
-    provider: ProviderOfProvidersQueryFragment,
-  ): ProviderShort {
-    const providerBase = this._composeProviderBase(provider);
-    const composedOffers = [];
-    if (provider.offers) {
-      for (const offer of provider.offers) {
-        composedOffers.push(
-          this._composeOfferShort(offer as BasicOfferFragment),
-        );
-      }
-    }
-    return {
-      ...providerBase,
-      offers: composedOffers,
-    } as ProviderShort;
-  }
-
-  async _convertProviderFiltersToIndexer(
-    providersFilters?: ProvidersFilters,
-  ): Promise<Provider_Filter> {
-    // Only for registered providers.
-    const convertedFilters: Provider_Filter = { and: [
-        {
-          registered: true,
-        }
-      ] };
-    if (!providersFilters) {
-      return convertedFilters;
-    }
-    if (providersFilters.onlyApproved) {
-      convertedFilters.and?.push({
-        approved: true,
-      });
-    }
-    if (providersFilters.search) {
-      const search = providersFilters.search;
-      convertedFilters.and?.push({
-        or: [{ id: search.toLowerCase() }, { name: search }],
-      });
-    }
-    // https://github.com/graphprotocol/graph-node/issues/2539
-    // https://github.com/graphprotocol/graph-node/issues/4775
-    // https://github.com/graphprotocol/graph-node/blob/ad31fd9699b0957abda459340dff093b2a279074/NEWS.md?plain=1#L30
-    // Thus, kinda join should be presented on client side =(.
-    if (providersFilters.effectorIds) {
-      // composedFilters = { offers_: { effectors_: { effector_in: providersFilters.effectorIds } } };
-      console.warn("Currently effectorIds filter does not implemented.");
-    }
-    return convertedFilters;
-  }
-
   /*
    * @dev search: you could perform strict search by `provider address` or `provider name`
    * @dev Note, deprecation:
@@ -192,7 +129,7 @@ export class DealExplorerClient {
   ): Promise<ProviderShortListView> {
     await this._init();
     const composedFilters =
-      await this._convertProviderFiltersToIndexer(providersFilters);
+      await serializeProviderFiltersToIndexer(providersFilters);
     const data = await this._indexerClient.getProviders({
       filters: composedFilters,
       offset,
@@ -203,7 +140,7 @@ export class DealExplorerClient {
     const res = [];
     if (data) {
       for (const provider of data.providers) {
-        res.push(this._composeProviderShort(provider));
+        res.push(composeProviderShort(provider));
       }
     }
     let total = null;
@@ -230,7 +167,7 @@ export class DealExplorerClient {
     let res = null;
     if (data && data.provider) {
       const providerFetched = data.provider;
-      const providerBase = this._composeProviderBase(providerFetched);
+      const providerBase = composeProviderBase(providerFetched);
       res = {
         ...providerBase,
         peerCount: providerFetched.peerCount,
@@ -279,50 +216,6 @@ export class DealExplorerClient {
       orderBy,
       orderType,
     );
-  }
-
-  _composeEffectors(
-    manyToManyEffectors:
-      | Array<{ effector: { id: string; description: string } }>
-      | null
-      | undefined,
-  ): Array<Effector> {
-    const composedEffectors: Array<Effector> = [];
-    if (!manyToManyEffectors) {
-      return composedEffectors;
-    }
-    for (const effector of manyToManyEffectors) {
-      composedEffectors.push({
-        cid: effector.effector.id,
-        description: serializeEffectorDescription(
-          effector.effector.id,
-          effector.effector.description,
-        ),
-      });
-    }
-
-    return composedEffectors;
-  }
-
-  _composeOfferShort(offer: BasicOfferFragment): OfferShort {
-    return {
-      id: offer.id,
-      createdAt: Number(offer.createdAt),
-      totalComputeUnits: Number(offer.computeUnitsTotal ?? 0),
-      freeComputeUnits: Number(offer.computeUnitsAvailable ?? 0),
-      paymentToken: {
-        address: offer.paymentToken.id,
-        symbol: offer.paymentToken.symbol,
-        decimals: offer.paymentToken.decimals.toString(),
-      },
-      pricePerEpoch: tokenValueToRounded(
-        offer.pricePerEpoch,
-        this.DEFAULT_TOKEN_VALUE_ROUNDING,
-        offer.paymentToken.decimals,
-      ),
-      effectors: this._composeEffectors(offer.effectors),
-      providerId: offer.provider.id,
-    };
   }
 
   _convertOfferShortOrderByToIndexerType(v: OfferShortOrderBy): Offer_OrderBy {
@@ -463,7 +356,7 @@ export class DealExplorerClient {
     const res = [];
     if (data) {
       for (const offer of data.offers) {
-        res.push(this._composeOfferShort(offer));
+        res.push(composeOfferShort(offer));
       }
     }
     let total = null;
@@ -536,7 +429,7 @@ export class DealExplorerClient {
     let res: OfferDetail | null = null;
     if (data && data.offer) {
       res = {
-        ...this._composeOfferShort(data.offer),
+        ...composeOfferShort(data.offer),
         peers: this._composePeers(data.offer.peers as Array<BasicPeerFragment>),
         updatedAt: Number(data.offer.updatedAt),
       };
@@ -673,6 +566,7 @@ export class DealExplorerClient {
     };
   }
 
+  // TODO: relocate.
   _composeDealsShort(
     deal: BasicDealFragment,
     fromRpcForDealShort: {
@@ -699,7 +593,7 @@ export class DealExplorerClient {
       },
       balance: tokenValueToRounded(
         freeBalance,
-        this.DEFAULT_TOKEN_VALUE_ROUNDING,
+        DEFAULT_TOKEN_VALUE_ROUNDING,
         deal.paymentToken.decimals,
       ),
       status: fromRpcForDealShort.dealStatus
@@ -707,7 +601,7 @@ export class DealExplorerClient {
         : "active",
       totalEarnings: tokenValueToRounded(
         totalEarnings,
-        this.DEFAULT_TOKEN_VALUE_ROUNDING,
+        DEFAULT_TOKEN_VALUE_ROUNDING,
         deal.paymentToken.decimals,
       ),
       // TODO: add missed implementations.
@@ -763,7 +657,7 @@ export class DealExplorerClient {
       const freeBalance = (
         await this._dealRpcClient!.getFreeBalanceDealBatch([dealId])
       )[0];
-      const effectors = this._composeEffectors(deal.effectors);
+      const effectors = composeEffectors(deal.effectors);
       const { whitelist, blacklist } = serializeDealProviderAccessLists(
         deal.providersAccessType,
         deal.providersAccessList,
@@ -772,7 +666,7 @@ export class DealExplorerClient {
         ...this._composeDealsShort(deal, { dealStatus, freeBalance }),
         pricePerWorkerEpoch: tokenValueToRounded(
           deal.pricePerWorkerEpoch,
-          this.DEFAULT_TOKEN_VALUE_ROUNDING,
+          DEFAULT_TOKEN_VALUE_ROUNDING,
           deal.paymentToken.decimals,
         ),
         maxWorkersPerProvider: deal.maxWorkersPerProvider,
@@ -863,6 +757,44 @@ export class DealExplorerClient {
       total,
     };
   }
+
+  // async getCapacityCommitments(
+  //   filters?: CapacityCommitmentsFilters,
+  //   offset: number = 0,
+  //   limit: number = this.DEFAULT_PAGE_LIMIT,
+  //   orderBy: CapacityCommitmentsOrderBy = "createdAt",
+  //   orderType: OrderType = this.DEFAULT_ORDER_TYPE,
+  // ): Promise<CapacityCommitmentListView> {
+  //   await this._init();
+  //   const serializedFilters =
+  //     await serializeCapacityCommitmentsFiltersToIndexer(filters);
+  //   const data = await this._indexerClient.getCapacityCommitments({
+  //     filters: serializedFilters,
+  //     offset,
+  //     limit,
+  //     orderBy,
+  //     orderType,
+  //   });
+  //   const res = [];
+  //   if (data) {
+  //     for (const capacityCommitment of data.capacityCommitments) {
+  //       res.push(composeProviderShort(provider));
+  //     }
+  //   }
+  //   let total = null;
+  //   if (
+  //     !serializedFilters &&
+  //     data.graphNetworks.length == 1 &&
+  //     data.graphNetworks[0] &&
+  //     data.graphNetworks[0].capacityCommitmentsTotal
+  //   ) {
+  //     total = data.graphNetworks[0].capacityCommitmentsTotal as string;
+  //   }
+  //   return {
+  //     data: res,
+  //     total,
+  //   };
+  // }
 }
 
 /*
