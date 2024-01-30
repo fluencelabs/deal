@@ -29,9 +29,7 @@ import type {
 } from "./types/filters.js";
 import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type {
-  Deal_Filter,
   Deal_OrderBy,
-  Offer_Filter,
   Offer_OrderBy,
 } from "./indexerClient/generated.types.js";
 import type {
@@ -43,17 +41,20 @@ import type { ContractsENV } from "../client/config.js";
 import type { BasicPeerFragment } from "./indexerClient/queries/offers-query.generated.js";
 import { DealRpcClient } from "./rpcClients/index.js";
 import {
-  DEFAULT_TOKEN_VALUE_ROUNDING,
+  DEFAULT_ORDER_TYPE,
+  DEFAULT_TOKEN_VALUE_ROUNDING, FILTER_MULTISELECT_MAX,
   tokenValueToRounded,
-  valueToTokenValue
 } from "./utils.js";
 import {
   serializeEffectorDescription,
 } from "./serializers/logics.js";
 import {serializeDealProviderAccessLists} from "../utils/serializers.js";
 import {
+  convertDealsFiltersToIndexerType,
+  convertOffersFiltersToIndexerType,
+  FiltersError,
   // serializeCapacityCommitmentsFiltersToIndexer,
-  serializeProviderFiltersToIndexer
+  serializeProviderFiltersToIndexer, ValidTogetherFiltersError
 } from "./serializers/filters.js";
 import {
   composeEffectors,
@@ -62,21 +63,15 @@ import {
   composeProviderShort
 } from "./serializers/schemes.js";
 
-export class FiltersError extends Error {}
-export class ValidTogetherFiltersError extends FiltersError {}
-
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
  * @dev It supports mainnet, testnet by selecting related contractsEnv.
  */
 export class DealExplorerClient {
   DEFAULT_PAGE_LIMIT = 100;
-  DEFAULT_ORDER_TYPE: OrderType = "desc";
   // For MVM we suppose that everything is in USDC.
   //  Used only with filters - if no token selected.
   DEFAULT_FILTER_TOKEN_DECIMALS = 6;
-  // Max to select per 1 multiselect filter.
-  FILTER_MULTISELECT_MAX = 100;
 
   private _caller: ethers.Provider | ethers.Signer;
   private _indexerClient: IndexerClient;
@@ -117,6 +112,37 @@ export class DealExplorerClient {
   }
 
   /*
+ * @dev Request indexer for common decimals across tokens, thus,
+ * @dev  it checks if symbols across are equal, or throw ValidTogetherFiltersError.
+ */
+  async _getCommonTokenDecimals(
+    tokenAddresses: Array<string>,
+  ): Promise<number> {
+    if (tokenAddresses.length > FILTER_MULTISELECT_MAX) {
+      throw new FiltersError("Too many tokens selected per 1 multiselect.");
+    }
+    const fetched = await this._indexerClient.getTokens({
+      filters: { id_in: tokenAddresses },
+      limit: FILTER_MULTISELECT_MAX,
+      orderBy: "id",
+      orderType: DEFAULT_ORDER_TYPE,
+    });
+    const tokenModels = fetched.tokens;
+    if (tokenModels.length === 0 || tokenModels[0] === undefined) {
+      return this.DEFAULT_FILTER_TOKEN_DECIMALS;
+    }
+    const commonDecimals = tokenModels[0].decimals;
+    if (
+      tokenModels.some((tokenModel) => tokenModel.decimals !== commonDecimals)
+    ) {
+      throw new ValidTogetherFiltersError(
+        "Tokens have different decimals field. It is impossible to filter them together.",
+      );
+    }
+    return commonDecimals;
+  }
+
+  /*
    * @dev search: you could perform strict search by `provider address` or `provider name`
    * @dev Note, deprecation:
    */
@@ -125,7 +151,7 @@ export class DealExplorerClient {
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: ProviderShortOrderBy = "createdAt",
-    orderType: OrderType = this.DEFAULT_ORDER_TYPE,
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
   ): Promise<ProviderShortListView> {
     await this._init();
     const composedFilters =
@@ -177,11 +203,12 @@ export class DealExplorerClient {
   }
 
   async getOffersByProvider(
+    // TODO: what this status is about?
     byProviderAndStatusFilter: ByProviderAndStatusFilter,
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: OfferShortOrderBy = "createdAt",
-    orderType: OrderType = this.DEFAULT_ORDER_TYPE,
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
   ): Promise<OfferShortListView> {
     await this._init();
     if (byProviderAndStatusFilter.status) {
@@ -202,7 +229,7 @@ export class DealExplorerClient {
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: DealsShortOrderBy = "createdAt",
-    orderType: OrderType = this.DEFAULT_ORDER_TYPE,
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
   ): Promise<DealShortListView> {
     await this._init();
     if (byProviderAndStatusFilter.status) {
@@ -225,114 +252,25 @@ export class DealExplorerClient {
     return v as Offer_OrderBy;
   }
 
-  /*
-   * @dev Request indexer for common decimals across tokens, thus,
-   * @dev  it checks if symbols across are equal, or throw ValidTogetherFiltersError.
-   */
-  async _getCommonTokenDecimals(
-    tokenAddresses: Array<string>,
-  ): Promise<number> {
-    if (tokenAddresses.length > this.FILTER_MULTISELECT_MAX) {
-      throw new FiltersError("Too many tokens selected per 1 multiselect.");
-    }
-    const fetched = await this._indexerClient.getTokens({
-      filters: { id_in: tokenAddresses },
-      limit: this.FILTER_MULTISELECT_MAX,
-      orderBy: "id",
-      orderType: this.DEFAULT_ORDER_TYPE,
-    });
-    const tokenModels = fetched.tokens;
-    if (tokenModels.length === 0 || tokenModels[0] === undefined) {
-      return this.DEFAULT_FILTER_TOKEN_DECIMALS;
-    }
-    const commonDecimals = tokenModels[0].decimals;
-    if (
-      tokenModels.some((tokenModel) => tokenModel.decimals !== commonDecimals)
-    ) {
-      throw new ValidTogetherFiltersError(
-        "Tokens have different decimals field. It is impossible to filter them together.",
-      );
-    }
-    return commonDecimals;
-  }
-
-  /*
-   * @dev We allow to select paymentTokens and range of values for those tokens.
-   * @dev If for selected tokens decimals are not at the same: exception will be raised.
-   * @dev Thus, on frontend side this "missmatch" should be avoided by checking selected
-   * @dev  tokens on equal "decimals" field.
-   * @dev [MVM] If no token is selected DEFAULT_FILTER_TOKEN_DECIMALS is applied.
-   */
-  async _convertOffersFiltersToIndexerType(
-    v?: OffersFilters,
-  ): Promise<Offer_Filter> {
-    if (!v) {
-      return {};
-    }
-    const convertedFilters: Offer_Filter = { and: [] };
-    if (v.onlyActive) {
-      convertedFilters.and?.push({
-        computeUnitsAvailable_gt: 0,
-      });
-    }
-    if (v.onlyApproved) {
-      convertedFilters.and?.push({
-        provider_: { approved: true },
-      });
-    }
-    if (v.search) {
-      const search = v.search;
-      convertedFilters.and?.push({
-        or: [{ id: search }, { provider: search.toLowerCase() }],
-      });
-    }
-    if (v.effectorIds) {
-      convertedFilters.and?.push({
-        effectors_: { effector_in: v.effectorIds },
-      });
-    }
-    if (v.createdAtFrom) {
-      convertedFilters.and?.push({ createdAt_gte: v.createdAtFrom.toString() });
-    }
-    if (v.createdAtTo) {
-      convertedFilters.and?.push({ createdAt_lte: v.createdAtTo.toString() });
-    }
-    if (v.providerId) {
-      convertedFilters.and?.push({ provider: v.providerId });
-    }
-    // Filters with relation check below.
+  async _calculateTokenDecimalsForFilters(
+    paymentTokens: Array<string> | undefined,
+    otherConditions: boolean | undefined,
+  ) {
     let tokenDecimals = this.DEFAULT_FILTER_TOKEN_DECIMALS;
-    const paymentTokensLowerCase = v.paymentTokens?.map((tokenAddress) => {
-      return tokenAddress.toLowerCase();
-    });
-    if (paymentTokensLowerCase) {
-      convertedFilters.and?.push({ paymentToken_in: paymentTokensLowerCase });
-    }
-    if (
-      (v.minPricePerWorkerEpoch || v.maxPricePerWorkerEpoch) &&
-      paymentTokensLowerCase
-    ) {
-      tokenDecimals = await this._getCommonTokenDecimals(
-        paymentTokensLowerCase,
-      );
-    }
-    if (v.minPricePerWorkerEpoch) {
-      convertedFilters.and?.push({
-        pricePerEpoch_gte: valueToTokenValue(
-          v.minPricePerWorkerEpoch,
-          tokenDecimals,
-        ),
+    if (paymentTokens) {
+      const paymentTokensLowerCase = paymentTokens.map((tokenAddress) => {
+        return tokenAddress.toLowerCase();
       });
+      if (
+        otherConditions &&
+        paymentTokensLowerCase.length > 1
+      ) {
+        tokenDecimals = await this._getCommonTokenDecimals(
+          paymentTokensLowerCase,
+        );
+      }
     }
-    if (v.maxPricePerWorkerEpoch) {
-      convertedFilters.and?.push({
-        pricePerEpoch_lte: valueToTokenValue(
-          v.maxPricePerWorkerEpoch,
-          tokenDecimals,
-        ),
-      });
-    }
-    return convertedFilters;
+    return tokenDecimals
   }
 
   async _getOffersImpl(
@@ -340,12 +278,19 @@ export class DealExplorerClient {
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: OfferShortOrderBy = "createdAt",
-    orderType: OrderType = this.DEFAULT_ORDER_TYPE,
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
   ): Promise<OfferShortListView> {
     const orderByConverted =
       this._convertOfferShortOrderByToIndexerType(orderBy);
+
+    const _cond = (offerFilters?.minPricePerWorkerEpoch || offerFilters?.maxPricePerWorkerEpoch) !== undefined
+    const commonTokenDecimals = await this._calculateTokenDecimalsForFilters(
+      offerFilters?.paymentTokens,
+      _cond,
+    )
+
     const filtersConverted =
-      await this._convertOffersFiltersToIndexerType(offerFilters);
+      await convertOffersFiltersToIndexerType(offerFilters, commonTokenDecimals);
     const data = await this._indexerClient.getOffers({
       filters: filtersConverted,
       offset,
@@ -390,7 +335,7 @@ export class DealExplorerClient {
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: OfferShortOrderBy = "createdAt",
-    orderType: OrderType = this.DEFAULT_ORDER_TYPE,
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
   ): Promise<OfferShortListView> {
     await this._init();
     return await this._getOffersImpl(
@@ -442,87 +387,26 @@ export class DealExplorerClient {
     return v as Deal_OrderBy;
   }
 
-  async _convertDealsFiltersToIndexerType(
-    v?: DealsFilters,
-  ): Promise<Deal_Filter> {
-    if (!v) {
-      return {};
-    }
-    if (v.onlyApproved) {
-      console.warn("Currently onlyApproved filter does not implemented.");
-    }
-    if (v.status) {
-      console.warn("Currently status filter does not implemented.");
-    }
-    const convertedFilters: Deal_Filter = { and: [] };
-    if (v.search) {
-      const search = v.search.toLowerCase();
-      convertedFilters.and?.push({ or: [{ id: search }, { owner: search }] });
-    }
-    if (v.effectorIds) {
-      convertedFilters.and?.push({
-        effectors_: { effector_in: v.effectorIds },
-      });
-    }
-    if (v.createdAtFrom) {
-      convertedFilters.and?.push({ createdAt_gte: v.createdAtFrom.toString() });
-    }
-    if (v.createdAtTo) {
-      convertedFilters.and?.push({ createdAt_lte: v.createdAtTo.toString() });
-    }
-    if (v.providerId) {
-      convertedFilters.and?.push({
-        addedComputeUnits_: { provider: v.providerId.toLowerCase() },
-      });
-    }
-    // Filters with relation check below.
-    let tokenDecimals = this.DEFAULT_FILTER_TOKEN_DECIMALS;
-    const paymentTokensLowerCase = v.paymentTokens?.map((tokenAddress) => {
-      return tokenAddress.toLowerCase();
-    });
-    if (paymentTokensLowerCase) {
-      convertedFilters.and?.push({ paymentToken_in: paymentTokensLowerCase });
-    }
-    if (
-      (v.minPricePerWorkerEpoch || v.maxPricePerWorkerEpoch) &&
-      paymentTokensLowerCase
-    ) {
-      tokenDecimals = await this._getCommonTokenDecimals(
-        paymentTokensLowerCase,
-      );
-    }
-    if (v.minPricePerWorkerEpoch) {
-      convertedFilters.and?.push({
-        pricePerWorkerEpoch_gte: valueToTokenValue(
-          v.minPricePerWorkerEpoch,
-          tokenDecimals,
-        ),
-      });
-    }
-    if (v.maxPricePerWorkerEpoch) {
-      convertedFilters.and?.push({
-        pricePerWorkerEpoch_lte: valueToTokenValue(
-          v.maxPricePerWorkerEpoch,
-          tokenDecimals,
-        ),
-      });
-    }
-    return convertedFilters;
-  }
-
   async _getDealsImpl(
     dealsFilters?: DealsFilters,
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: DealsShortOrderBy = "createdAt",
-    orderType: OrderType = this.DEFAULT_ORDER_TYPE,
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
   ): Promise<DealShortListView> {
     await this._init();
 
     const orderByConverted =
       this._convertDealShortOrderByToIndexerType(orderBy);
+
+    const _cond = (dealsFilters?.minPricePerWorkerEpoch || dealsFilters?.maxPricePerWorkerEpoch) !== undefined
+    const commonTokenDecimals = await this._calculateTokenDecimalsForFilters(
+      dealsFilters?.paymentTokens,
+      _cond,
+    )
+
     const filtersConverted =
-      await this._convertDealsFiltersToIndexerType(dealsFilters);
+      await convertDealsFiltersToIndexerType(dealsFilters, commonTokenDecimals);
     const data = await this._indexerClient.getDeals({
       filters: filtersConverted,
       offset,
@@ -615,7 +499,7 @@ export class DealExplorerClient {
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: DealsShortOrderBy = "createdAt",
-    orderType: OrderType = this.DEFAULT_ORDER_TYPE,
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
   ): Promise<DealShortListView> {
     return await this._getDealsImpl(
       dealFilters,
@@ -686,7 +570,7 @@ export class DealExplorerClient {
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: EffectorsOrderBy = "id",
-    orderType: OrderType = this.DEFAULT_ORDER_TYPE,
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
   ): Promise<EffectorListView> {
     const data = await this._indexerClient.getEffectors({
       offset,
@@ -725,7 +609,7 @@ export class DealExplorerClient {
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: PaymentTokenOrderBy = "symbol",
-    orderType: OrderType = this.DEFAULT_ORDER_TYPE,
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
   ): Promise<PaymentTokenListView> {
     const data = await this._indexerClient.getTokens({
       offset,
@@ -763,7 +647,7 @@ export class DealExplorerClient {
   //   offset: number = 0,
   //   limit: number = this.DEFAULT_PAGE_LIMIT,
   //   orderBy: CapacityCommitmentsOrderBy = "createdAt",
-  //   orderType: OrderType = this.DEFAULT_ORDER_TYPE,
+  //   orderType: OrderType = DEFAULT_ORDER_TYPE,
   // ): Promise<CapacityCommitmentListView> {
   //   await this._init();
   //   const serializedFilters =

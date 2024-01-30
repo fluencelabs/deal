@@ -3,9 +3,11 @@ export * from "./client/config.js";
 export * from "./typechain-types/index.js";
 export {
   DealExplorerClient,
+} from "./dealExplorerClient/dealExplorerClient.js";
+export {
   ValidTogetherFiltersError,
   FiltersError,
-} from "./dealExplorerClient/dealExplorerClient.js";
+} from "./dealExplorerClient/serializers/filters.js";
 export {
   DealMatcherClient,
   type GetMatchedOffersOut,
