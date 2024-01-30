@@ -65,6 +65,4 @@ interface IDealFactory {
         IConfig.AccessType providersAccessType_,
         address[] calldata providersAccessList_
     ) external returns (IDeal);
-
-    function updateDealImpl(IDeal dealImpl_) external;
 }

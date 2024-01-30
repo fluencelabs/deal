@@ -9,5 +9,5 @@ import "./IMatcher.sol";
 /// @title Market contract interface
 /// @dev Market contract is responsible for managing the deals and offers
 interface IMarket is IDealFactory, IOffer, IMatcher {
-    function initialize(IDeal dealImpl) external;
+    function initialize() external;
 }

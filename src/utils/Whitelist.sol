@@ -3,7 +3,7 @@
 pragma solidity ^0.8.19;
 
 import "forge-std/console.sol";
-import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "src/utils/OwnableUpgradableDiamond.sol";
 
 contract Whitelist is OwnableUpgradableDiamond {

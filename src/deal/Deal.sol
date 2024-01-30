@@ -2,10 +2,9 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/MulticallUpgradeable.sol";
 import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
-import "@openzeppelin/contracts/utils/Multicall.sol";
 import "src/core/interfaces/ICore.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
 import "src/utils/OwnableUpgradableDiamond.sol";
@@ -14,7 +13,7 @@ import "./WorkerManager.sol";
 import "./interfaces/IDeal.sol";
 import "./interfaces/IConfig.sol";
 
-contract Deal is UUPSUpgradeable, Multicall, WorkerManager, IDeal {
+contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
     using BitMaps for BitMaps.BitMap;
     using SafeERC20 for IERC20;
     using DealStorageUtils for DealStorageUtils.Balance;
@@ -85,6 +84,7 @@ contract Deal is UUPSUpgradeable, Multicall, WorkerManager, IDeal {
             providersAccessType_,
             providersAccessList_
         );
+        __Multicall_init();
     }
 
     // ------------------ Privat Functions ------------------
@@ -145,8 +145,6 @@ contract Deal is UUPSUpgradeable, Multicall, WorkerManager, IDeal {
         balance.commitToStorage(dealStorage);
         dealStorage.lastCommitedEpoch = currentEpoch;
     }
-
-    function _authorizeUpgrade(address) internal override onlyCoreOwner {}
 
     // ------------------ Public View Functions ------------------
     function getStatus() public view returns (Status) {

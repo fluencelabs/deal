@@ -1,4 +1,11 @@
+@ensdomains/buffer/=lib/filecoin-solidity/lib/buffer/
+@openzeppelin/contracts-upgradeable/=lib/filecoin-solidity/lib/openzeppelin-contracts-upgradeable/contracts/
+@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts
+buffer/=lib/filecoin-solidity/lib/buffer/contracts/
 ds-test/=lib/forge-std/lib/ds-test/src/
-erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/
+erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/
+filecoin-solidity/=lib/filecoin-solidity/contracts/
 forge-std/=lib/forge-std/src/
-@openzeppelin/=lib/openzeppelin-contracts/
+solidity-BigNumber/=lib/filecoin-solidity/contracts/vendor/solidity-BigNumber/src/
+solidity-cborutils/=lib/solidity-cborutils/contracts/
+solidity-cborutils/contracts/=lib/filecoin-solidity/lib/solidity-cborutils/contracts/
