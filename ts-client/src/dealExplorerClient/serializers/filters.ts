@@ -188,6 +188,15 @@ export function serializeCapacityCommitmentsFiltersToIndexer(
     return {};
   }
   const convertedFilters: CapacityCommitment_Filter = { and: [] };
+  if (v.search) {
+    convertedFilters.and?.push({
+      or: [
+        {id: v.search},
+        {peer_: {id: v.search}},
+        {provider_: {id: v.search}},
+      ],
+    });
+  }
   if (v.createdAtFrom) {
     convertedFilters.and?.push({ createdAt_gte: v.createdAtFrom.toString() });
   }

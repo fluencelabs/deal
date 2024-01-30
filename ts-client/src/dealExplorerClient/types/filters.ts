@@ -47,9 +47,10 @@ export interface DealsFilters {
   status?: DealStatus | undefined;
 }
 
+// @param search: search by provider id, commitment id, peer id
+//  (strict search only).
 export interface CapacityCommitmentsFilters {
-  // provider id, commitment id, peer id
-  // search?: string | undefined;
+  search?: string | undefined;
   computeUnitsCountFrom?: number | undefined;
   computeUnitsCountTo?: number | undefined;
   createdAtFrom?: number | undefined;

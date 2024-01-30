@@ -54,6 +54,7 @@ export type CapacityCommitment = {
   /** Calculated in subgraph field: next failed epoch means the next epoch without proofs submitted when CC declared to be Failed. */
   nextCCFailedEpoch: Scalars['BigInt']['output'];
   peer: Peer;
+  provider: Provider;
   rewardDelegatorRate: Scalars['Int']['output'];
   snapshotEpoch: Scalars['BigInt']['output'];
   startEpoch: Scalars['BigInt']['output'];
@@ -311,6 +312,27 @@ export type CapacityCommitment_Filter = {
   peer_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
   peer_starts_with?: InputMaybe<Scalars['String']['input']>;
   peer_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  provider?: InputMaybe<Scalars['String']['input']>;
+  provider_?: InputMaybe<Provider_Filter>;
+  provider_contains?: InputMaybe<Scalars['String']['input']>;
+  provider_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  provider_ends_with?: InputMaybe<Scalars['String']['input']>;
+  provider_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  provider_gt?: InputMaybe<Scalars['String']['input']>;
+  provider_gte?: InputMaybe<Scalars['String']['input']>;
+  provider_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  provider_lt?: InputMaybe<Scalars['String']['input']>;
+  provider_lte?: InputMaybe<Scalars['String']['input']>;
+  provider_not?: InputMaybe<Scalars['String']['input']>;
+  provider_not_contains?: InputMaybe<Scalars['String']['input']>;
+  provider_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  provider_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  provider_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  provider_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  provider_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  provider_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  provider_starts_with?: InputMaybe<Scalars['String']['input']>;
+  provider_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
   rewardDelegatorRate?: InputMaybe<Scalars['Int']['input']>;
   rewardDelegatorRate_gt?: InputMaybe<Scalars['Int']['input']>;
   rewardDelegatorRate_gte?: InputMaybe<Scalars['Int']['input']>;
@@ -370,6 +392,15 @@ export type CapacityCommitment_OrderBy =
   | 'peer__currentCCNextCCFailedEpoch'
   | 'peer__id'
   | 'peer__isAnyJoinedDeals'
+  | 'provider'
+  | 'provider__approved'
+  | 'provider__computeUnitsAvailable'
+  | 'provider__computeUnitsTotal'
+  | 'provider__createdAt'
+  | 'provider__id'
+  | 'provider__name'
+  | 'provider__peerCount'
+  | 'provider__registered'
   | 'rewardDelegatorRate'
   | 'snapshotEpoch'
   | 'startEpoch'

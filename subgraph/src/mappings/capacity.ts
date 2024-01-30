@@ -53,6 +53,7 @@ export function handleCommitmentCreated(event: CommitmentCreated): void {
   log.info('loaded peer', []);
 
   commitment.peer = peer.id
+  commitment.provider = peer.provider
   commitment.status = CapacityCommitmentStatus.WaitDelegation
   commitment.collateralPerUnit = event.params.fltCollateralPerUnit
   commitment.createdAt = event.block.timestamp;

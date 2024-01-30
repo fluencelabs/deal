@@ -235,4 +235,7 @@ type CapacityCommitment @entity {
   deleted: Boolean!
   "Calculated in subgraph field: next failed epoch means the next epoch without proofs submitted when CC declared to be Failed."
   nextCCFailedEpoch: BigInt!
+
+  # Add additional fields to filter by below.
+  provider: Provider!
 }
