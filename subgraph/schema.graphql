@@ -11,6 +11,7 @@ type GraphNetwork @entity {
   offersTotal: BigInt!
   tokensTotal: BigInt!
   effectorsTotal: BigInt!
+  capacityCommitmentsTotal: BigInt!
   # Add constants from Core contract below.
   coreEpochDuration: Int
   initTimestamp: Int
@@ -200,6 +201,12 @@ enum CapacityCommitmentStatus {
   Removed
 }
 
+type CapacityCommitmentToComputeUnit @entity(immutable: true) {
+  id: ID! # Set to `capacityCommitment.id.concat(computeUnit.id)`
+  capacityCommitment: CapacityCommitment!
+  computeUnit: ComputeUnit!
+}
+
 """To represent that Peer has capacity commitment for some time."""
 type CapacityCommitment @entity {
   id: ID!
@@ -217,7 +224,10 @@ type CapacityCommitment @entity {
   exitedUnitCount: Int!
   activeUnitCount: Int!
   nextAdditionalActiveUnitCount: Int!
-  unitCount: Int!
+
+  computeUnits: [CapacityCommitmentToComputeUnit!] @derivedFrom(field: "capacityCommitment")
+  computeUnitsCount: Int!
+
   snapshotEpoch: BigInt!
   "If CC deleted before collateral deposited."
   deleted: Boolean!
