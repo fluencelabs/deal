@@ -247,7 +247,7 @@ contract DeployContracts is Depoyments, Script {
             abi.encode(
                 coreImpl,
                 abi.encodeWithSelector(
-                    Core.initialize.selector, epochDuration_, minDepositedEpoches_, minRematchingEpoches_
+                    Core.initialize.selector, epochDuration_, minDepositedEpoches_, minRematchingEpoches_, dealImpl
                 )
             ),
             needToRedeployMarket || needToRedeployCapacity
@@ -257,9 +257,7 @@ contract DeployContracts is Depoyments, Script {
         address capacityImpl = _deployContract("CapacityImpl", "Capacity", abi.encode(coreAddr), isNewCore);
 
         address marketProxy = _deployContract(
-            "Market",
-            "ERC1967Proxy",
-            abi.encode(marketImpl, abi.encodeWithSelector(Market.initialize.selector, dealImpl))
+            "Market", "ERC1967Proxy", abi.encode(marketImpl, abi.encodeWithSelector(Market.initialize.selector))
         );
 
         address capacityProxy = _deployContract(

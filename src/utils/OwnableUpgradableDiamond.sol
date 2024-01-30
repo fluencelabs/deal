@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /*
  * @dev Similar (not fully) to the OZ OwnableUpgradable(Initializable, ContextUpgradeable).

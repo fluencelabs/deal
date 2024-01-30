@@ -60,7 +60,8 @@ library DeployDealSystem {
                         Core.initialize.selector,
                         DEFAULT_EPOCH_DURATION,
                         DEFAULT_MIN_DEPOSITED_EPOCHES,
-                        DEFAULT_MIN_REMATCHING_EPOCHES
+                        DEFAULT_MIN_REMATCHING_EPOCHES,
+                        dealImpl
                     )
                 )
             )
