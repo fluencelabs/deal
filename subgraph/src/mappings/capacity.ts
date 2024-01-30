@@ -26,7 +26,6 @@ import {
 import {Initialized} from "../../generated/Capacity/Capacity";
 import {BigInt} from "@graphprotocol/graph-ts";
 import {formatAddress} from "./utils";
-import {log} from "@graphprotocol/graph-ts/index";
 
 
 export function handleWhitelistAccessGranted(event: WhitelistAccessGranted): void {
@@ -50,7 +49,6 @@ export function handleInitialized(event: Initialized): void {
 export function handleCommitmentCreated(event: CommitmentCreated): void {
   let commitment = new CapacityCommitment(event.params.commitmentId.toHex());
   let peer = Peer.load(event.params.peerId.toHex()) as Peer;
-  log.info('loaded peer', []);
 
   commitment.peer = peer.id
   commitment.provider = peer.provider
@@ -73,13 +71,8 @@ export function handleCommitmentCreated(event: CommitmentCreated): void {
   commitment.deleted = false;
   commitment.save()
 
-  log.info("commitment.saved", []);
-  log.info("commitment id {}", [commitment.id]);
-
   peer.currentCapacityCommitment = commitment.id;
   peer.save()
-
-  log.info("peer saved", []);
 
   let graphNetwork = createOrLoadGraphNetwork();
   graphNetwork.capacityCommitmentsTotal = graphNetwork.capacityCommitmentsTotal.plus(UNO_BIG_INT);
