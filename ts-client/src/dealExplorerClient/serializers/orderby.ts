@@ -1,5 +1,4 @@
 // Seralizers for order by fields: b/w scheme and indexer.
-// TODO: rename.
 import type {
   CapacityCommitmentsOrderBy,
   DealsShortOrderBy,
@@ -24,7 +23,14 @@ export function serializeDealShortOrderByToIndexer(v: DealsShortOrderBy): Deal_O
 }
 
 export function serializeCapacityCommitmentsOrderByToIndexer(v: CapacityCommitmentsOrderBy): CapacityCommitment_OrderBy {
-  console.log(v)
-  // TODO: implement
-  return "startEpoch";
+  if (v == "createdAt") {
+    return "startEpoch"
+  }
+  if (v == "expirationAt") {
+    return "endEpoch"
+  }
+  if (v == "computeUnitsCount") {
+    return "computeUnitsCount"
+  }
+  throw new Error(`Assertion: unknown CapacityCommitmentsOrderBy value: ${v}`);
 }
