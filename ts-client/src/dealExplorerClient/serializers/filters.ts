@@ -55,7 +55,7 @@ export async function serializeProviderFiltersToIndexer(
  * @dev [MVM] If no token is selected DEFAULT_FILTER_TOKEN_DECIMALS is applied.
  * @param tokenDecimals: token decimals to use for token value conversion.
  */
-export async function convertOffersFiltersToIndexerType(
+export async function serializeOffersFiltersToIndexerType(
   v?: OffersFilters,
   tokenDecimals?: number,
 ): Promise<Offer_Filter> {
@@ -119,7 +119,7 @@ export async function convertOffersFiltersToIndexerType(
   return convertedFilters;
 }
 
-export async function convertDealsFiltersToIndexerType(
+export async function serializeDealsFiltersToIndexer(
   v?: DealsFilters,
   tokenDecimals?: number,
 ): Promise<Deal_Filter> {

@@ -48,23 +48,23 @@ import {
 } from "./serializers/logics.js";
 import {serializeDealProviderAccessLists} from "../utils/serializers.js";
 import {
-  convertDealsFiltersToIndexerType,
-  convertOffersFiltersToIndexerType,
+  serializeDealsFiltersToIndexer,
+  serializeOffersFiltersToIndexerType,
   FiltersError,
   serializeCapacityCommitmentsFiltersToIndexer,
   serializeProviderFiltersToIndexer, ValidTogetherFiltersError
 } from "./serializers/filters.js";
 import {
-  composeComputeUnits, composeDealsShort,
-  composeEffectors,
-  composeOfferShort, composePeers,
-  composeProviderBase,
-  composeProviderShort
+  serializeComputeUnits, serializeDealsShort,
+  serializeEffectors,
+  serializeOfferShort, serializePeers,
+  serializeProviderBase,
+  serializeProviderShort
 } from "./serializers/schemes.js";
 import {
-  convertDealShortOrderByToIndexerType,
-  convertOfferShortOrderByToIndexerType,
-  serializeCapacityCommitmentsOrderByToIndexerType
+  serializeDealShortOrderByToIndexer,
+  serializeOfferShortOrderByToIndexer,
+  serializeCapacityCommitmentsOrderByToIndexer
 } from "./serializers/orderby.js";
 import type {ICapacity} from "../typechain-types/index.js";
 
@@ -198,7 +198,7 @@ export class DealExplorerClient {
     const res = [];
     if (data) {
       for (const provider of data.providers) {
-        res.push(composeProviderShort(provider));
+        res.push(serializeProviderShort(provider));
       }
     }
     let total = null;
@@ -225,7 +225,7 @@ export class DealExplorerClient {
     let res = null;
     if (data && data.provider) {
       const providerFetched = data.provider;
-      const providerBase = composeProviderBase(providerFetched);
+      const providerBase = serializeProviderBase(providerFetched);
       res = {
         ...providerBase,
         peerCount: providerFetched.peerCount,
@@ -305,7 +305,7 @@ export class DealExplorerClient {
     orderBy: OfferShortOrderBy = "createdAt",
     orderType: OrderType = DEFAULT_ORDER_TYPE,
   ): Promise<OfferShortListView> {
-    const orderByConverted = convertOfferShortOrderByToIndexerType(orderBy);
+    const orderByConverted = serializeOfferShortOrderByToIndexer(orderBy);
 
     const _cond = (offerFilters?.minPricePerWorkerEpoch || offerFilters?.maxPricePerWorkerEpoch) !== undefined
     const commonTokenDecimals = await this._calculateTokenDecimalsForFilters(
@@ -314,7 +314,7 @@ export class DealExplorerClient {
     )
 
     const filtersConverted =
-      await convertOffersFiltersToIndexerType(offerFilters, commonTokenDecimals);
+      await serializeOffersFiltersToIndexerType(offerFilters, commonTokenDecimals);
     const data = await this._indexerClient.getOffers({
       filters: filtersConverted,
       offset,
@@ -325,7 +325,7 @@ export class DealExplorerClient {
     const res = [];
     if (data) {
       for (const offer of data.offers) {
-        res.push(composeOfferShort(offer));
+        res.push(serializeOfferShort(offer));
       }
     }
     let total = null;
@@ -380,8 +380,8 @@ export class DealExplorerClient {
     let res: OfferDetail | null = null;
     if (data && data.offer) {
       res = {
-        ...composeOfferShort(data.offer),
-        peers: composePeers(data.offer.peers as Array<BasicPeerFragment>),
+        ...serializeOfferShort(data.offer),
+        peers: serializePeers(data.offer.peers as Array<BasicPeerFragment>),
         updatedAt: Number(data.offer.updatedAt),
       };
     }
@@ -397,7 +397,7 @@ export class DealExplorerClient {
   ): Promise<DealShortListView> {
     await this._init();
 
-    const orderByConverted = convertDealShortOrderByToIndexerType(orderBy);
+    const orderByConverted = serializeDealShortOrderByToIndexer(orderBy);
 
     const _cond = (dealsFilters?.minPricePerWorkerEpoch || dealsFilters?.maxPricePerWorkerEpoch) !== undefined
     const commonTokenDecimals = await this._calculateTokenDecimalsForFilters(
@@ -406,7 +406,7 @@ export class DealExplorerClient {
     )
 
     const filtersConverted =
-      await convertDealsFiltersToIndexerType(dealsFilters, commonTokenDecimals);
+      await serializeDealsFiltersToIndexer(dealsFilters, commonTokenDecimals);
     const data = await this._indexerClient.getDeals({
       filters: filtersConverted,
       offset,
@@ -428,7 +428,7 @@ export class DealExplorerClient {
       for (let i = 0; i < data.deals.length; i++) {
         const deal = data.deals[i] as BasicDealFragment;
         res.push(
-          composeDealsShort(deal, {
+          serializeDealsShort(deal, {
             dealStatus: dealStatuses[i],
             freeBalance: freeBalances[i],
           }),
@@ -481,20 +481,20 @@ export class DealExplorerClient {
       const freeBalance = (
         await this._dealRpcClient!.getFreeBalanceDealBatch([dealId])
       )[0];
-      const effectors = composeEffectors(deal.effectors);
+      const effectors = serializeEffectors(deal.effectors);
       const { whitelist, blacklist } = serializeDealProviderAccessLists(
         deal.providersAccessType,
         deal.providersAccessList,
       );
       res = {
-        ...composeDealsShort(deal, { dealStatus, freeBalance }),
+        ...serializeDealsShort(deal, { dealStatus, freeBalance }),
         pricePerWorkerEpoch: tokenValueToRounded(
           deal.pricePerWorkerEpoch,
           DEFAULT_TOKEN_VALUE_ROUNDING,
           deal.paymentToken.decimals,
         ),
         maxWorkersPerProvider: deal.maxWorkersPerProvider,
-        computeUnits: composeComputeUnits(
+        computeUnits: serializeComputeUnits(
           deal.addedComputeUnits as Array<ComputeUnitBasicFragment>,
         ),
         // Serialize data from indexer into lists.
@@ -590,7 +590,7 @@ export class DealExplorerClient {
     orderType: OrderType = DEFAULT_ORDER_TYPE,
   ): Promise<CapacityCommitmentListView> {
     await this._init();
-    const orderBySerialized = serializeCapacityCommitmentsOrderByToIndexerType(orderBy);
+    const orderBySerialized = serializeCapacityCommitmentsOrderByToIndexer(orderBy);
 
     let currentEpoch = undefined
     if (filters?.onlyActive) {

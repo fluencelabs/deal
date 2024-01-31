@@ -1,4 +1,4 @@
-// To store serializers, e.g. from indexer fields to dealExplorerClient schemes.
+// To store serializers, e.g. from indexer fields/fragments to DealExplorerClient schemes.
 import type {
   ProviderOfProvidersQueryFragment
 } from "../indexerClient/queries/providers-query.generated.js";
@@ -19,7 +19,7 @@ import type {
   ComputeUnitBasicFragment
 } from "../indexerClient/queries/deals-query.generated.js";
 
-export function composeEffectors(
+export function serializeEffectors(
     manyToManyEffectors:
       | Array<{ effector: { id: string; description: string } }>
       | null
@@ -42,7 +42,7 @@ export function composeEffectors(
     return composedEffectors;
   }
 
-export function composeOfferShort(offer: BasicOfferFragment): OfferShort {
+export function serializeOfferShort(offer: BasicOfferFragment): OfferShort {
     return {
       id: offer.id,
       createdAt: Number(offer.createdAt),
@@ -58,12 +58,12 @@ export function composeOfferShort(offer: BasicOfferFragment): OfferShort {
         DEFAULT_TOKEN_VALUE_ROUNDING,
         offer.paymentToken.decimals,
       ),
-      effectors: composeEffectors(offer.effectors),
+      effectors: serializeEffectors(offer.effectors),
       providerId: offer.provider.id,
     };
   }
 
-export function composeProviderBase(
+export function serializeProviderBase(
     provider: ProviderOfProvidersQueryFragment,
   ): ProviderBase {
     return {
@@ -80,15 +80,15 @@ export function composeProviderBase(
     } as ProviderBase;
   }
 
-export function composeProviderShort(
+export function serializeProviderShort(
     provider: ProviderOfProvidersQueryFragment,
   ): ProviderShort {
-  const providerBase = composeProviderBase(provider);
+  const providerBase = serializeProviderBase(provider);
   const composedOffers = [];
   if (provider.offers) {
     for (const offer of provider.offers) {
       composedOffers.push(
-        composeOfferShort(offer as BasicOfferFragment),
+        serializeOfferShort(offer as BasicOfferFragment),
       );
     }
   }
@@ -99,7 +99,7 @@ export function composeProviderShort(
 }
 
 // It composes only compute units with linked workerIds.
-export function composeComputeUnits(
+export function serializeComputeUnits(
   fetchedComputeUnits: Array<ComputeUnitBasicFragment>,
 ): Array<ComputeUnit> {
   const res: Array<ComputeUnit> = [];
@@ -114,7 +114,7 @@ export function composeComputeUnits(
   return res;
 }
 
-export function composePeers(peers: Array<BasicPeerFragment>): Array<Peer> {
+export function serializePeers(peers: Array<BasicPeerFragment>): Array<Peer> {
   const peersComposed: Array<Peer> = [];
   if (peers) {
     for (const peer of peers) {
@@ -122,7 +122,7 @@ export function composePeers(peers: Array<BasicPeerFragment>): Array<Peer> {
         id: peer.id,
         offerId: peer.offer.id,
         computeUnits: peer.computeUnits
-          ? composeComputeUnits(
+          ? serializeComputeUnits(
               peer.computeUnits as Array<ComputeUnitBasicFragment>,
             )
           : [],
@@ -132,7 +132,7 @@ export function composePeers(peers: Array<BasicPeerFragment>): Array<Peer> {
   return peersComposed;
 }
 
-export function composeDealsShort(
+export function serializeDealsShort(
   deal: BasicDealFragment,
   fromRpcForDealShort: {
     dealStatus: DealStatus | undefined;
