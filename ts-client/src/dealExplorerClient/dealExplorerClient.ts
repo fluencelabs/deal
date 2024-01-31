@@ -1,12 +1,9 @@
 import { ethers } from "ethers";
 import type {
-  DealShort,
   OfferDetail,
   Effector,
   ProviderDetail,
   DealDetail,
-  Peer,
-  ComputeUnit,
   DealStatus,
   DealShortListView,
   OfferShortListView,
