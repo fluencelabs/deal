@@ -15,7 +15,7 @@ export type CapacityCommitmentsQueryQueryVariables = Types.Exact<{
 }>;
 
 
-export type CapacityCommitmentsQueryQuery = { __typename?: 'Query', capacityCommitments: Array<{ __typename?: 'CapacityCommitment', id: string, status?: Types.CapacityCommitmentStatus | null, createdAt: any, startEpoch: any, endEpoch: any, computeUnitsCount: number, peer: { __typename?: 'Peer', id: string, provider: { __typename?: 'Provider', id: string } } }>, graphNetworks: Array<{ __typename?: 'GraphNetwork', capacityCommitmentsTotal: any, coreEpochDuration?: number | null, initTimestamp?: number | null }> };
+export type CapacityCommitmentsQueryQuery = { __typename?: 'Query', capacityCommitments: Array<{ __typename?: 'CapacityCommitment', id: string, status?: Types.CapacityCommitmentStatus | null, createdAt: any, startEpoch: any, endEpoch: any, computeUnitsCount: number, peer: { __typename?: 'Peer', id: string, provider: { __typename?: 'Provider', id: string } } }>, graphNetworks: Array<{ __typename?: 'GraphNetwork', capacityCommitmentsTotal: any }> };
 
 export type CapacityCommitmentBasicFragment = { __typename?: 'CapacityCommitment', id: string, status?: Types.CapacityCommitmentStatus | null, createdAt: any, startEpoch: any, endEpoch: any, computeUnitsCount: number, peer: { __typename?: 'Peer', id: string, provider: { __typename?: 'Provider', id: string } } };
 
@@ -67,8 +67,6 @@ export const CapacityCommitmentsQueryDocument = gql`
   }
   graphNetworks(first: 1) {
     capacityCommitmentsTotal
-    coreEpochDuration
-    initTimestamp
   }
 }
     ${CapacityCommitmentBasicFragmentDoc}`;

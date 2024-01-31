@@ -694,8 +694,8 @@ export class DealExplorerClient {
         if (capacityCommitment.endEpoch != 0) {
           expiredAt = calculateTimestamp(
             Number(capacityCommitment.endEpoch),
-            Number(data.graphNetworks[0].initTimestamp),
-            Number(data.graphNetworks[0].coreEpochDuration)
+            this._coreInitTimestamp!,
+            this._coreEpochDuration!,
           )
         }
 

@@ -16,8 +16,6 @@ query CapacityCommitmentsQuery(
   }
   graphNetworks(first: 1) {
     capacityCommitmentsTotal
-    coreEpochDuration
-    initTimestamp
   }
 }
 
