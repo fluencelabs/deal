@@ -141,7 +141,7 @@ templates:
           handler: handleWithdrawn
         - event: MaxPaidEpochUpdated(uint256)
           handler: handleMaxPaidEpochUpdated
-        - event: AdminChanged(address,address)
+        - event: AppCIDChanged((bytes4,bytes32))
           handler: handleAppCIDChanged
         - event: ComputeUnitJoined(indexed bytes32,bytes32)
           handler: handleComputeUnitJoined
