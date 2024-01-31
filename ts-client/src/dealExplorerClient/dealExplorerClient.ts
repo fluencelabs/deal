@@ -58,8 +58,9 @@ import {
   serializeProviderFiltersToIndexer, ValidTogetherFiltersError
 } from "./serializers/filters.js";
 import {
+  composeComputeUnits, composeDealsShort,
   composeEffectors,
-  composeOfferShort,
+  composeOfferShort, composePeers,
   composeProviderBase,
   composeProviderShort
 } from "./serializers/schemes.js";
@@ -373,24 +374,6 @@ export class DealExplorerClient {
     );
   }
 
-  _composePeers(peers: Array<BasicPeerFragment>): Array<Peer> {
-    const peersComposed: Array<Peer> = [];
-    if (peers) {
-      for (const peer of peers) {
-        peersComposed.push({
-          id: peer.id,
-          offerId: peer.offer.id,
-          computeUnits: peer.computeUnits
-            ? this._composeComputeUnits(
-                peer.computeUnits as Array<ComputeUnitBasicFragment>,
-              )
-            : [],
-        });
-      }
-    }
-    return peersComposed;
-  }
-
   // Return OfferDetail View.
   async getOffer(offerId: string): Promise<OfferDetail | null> {
     const options = {
@@ -401,7 +384,7 @@ export class DealExplorerClient {
     if (data && data.offer) {
       res = {
         ...composeOfferShort(data.offer),
-        peers: this._composePeers(data.offer.peers as Array<BasicPeerFragment>),
+        peers: composePeers(data.offer.peers as Array<BasicPeerFragment>),
         updatedAt: Number(data.offer.updatedAt),
       };
     }
@@ -448,7 +431,7 @@ export class DealExplorerClient {
       for (let i = 0; i < data.deals.length; i++) {
         const deal = data.deals[i] as BasicDealFragment;
         res.push(
-          this._composeDealsShort(deal, {
+          composeDealsShort(deal, {
             dealStatus: dealStatuses[i],
             freeBalance: freeBalances[i],
           }),
@@ -470,50 +453,6 @@ export class DealExplorerClient {
     };
   }
 
-  // TODO: relocate.
-  _composeDealsShort(
-    deal: BasicDealFragment,
-    fromRpcForDealShort: {
-      dealStatus: DealStatus | undefined;
-      freeBalance: bigint | null | undefined;
-    },
-  ): DealShort {
-    const freeBalance = fromRpcForDealShort.freeBalance
-      ? fromRpcForDealShort.freeBalance
-      : BigInt(0);
-    const totalEarnings =
-      BigInt(deal.depositedSum) - BigInt(deal.withdrawalSum) - freeBalance;
-
-    return {
-      id: deal.id,
-      createdAt: Number(deal.createdAt),
-      client: deal.owner,
-      minWorkers: deal.minWorkers,
-      targetWorkers: deal.targetWorkers,
-      paymentToken: {
-        address: deal.paymentToken.id,
-        symbol: deal.paymentToken.symbol,
-        decimals: deal.paymentToken.decimals.toString(),
-      },
-      balance: tokenValueToRounded(
-        freeBalance,
-        DEFAULT_TOKEN_VALUE_ROUNDING,
-        deal.paymentToken.decimals,
-      ),
-      status: fromRpcForDealShort.dealStatus
-        ? fromRpcForDealShort.dealStatus
-        : "active",
-      totalEarnings: tokenValueToRounded(
-        totalEarnings,
-        DEFAULT_TOKEN_VALUE_ROUNDING,
-        deal.paymentToken.decimals,
-      ),
-      // TODO: add missed implementations.
-      registeredWorkers: 0,
-      matchedWorkers: 0,
-    };
-  }
-
   async getDeals(
     dealFilters?: DealsFilters,
     offset: number = 0,
@@ -528,22 +467,6 @@ export class DealExplorerClient {
       orderBy,
       orderType,
     );
-  }
-
-  // It composes only compute units with linked workerIds.
-  _composeComputeUnits(
-    fetchedComputeUnits: Array<ComputeUnitBasicFragment>,
-  ): Array<ComputeUnit> {
-    const res: Array<ComputeUnit> = [];
-    for (const fetched of fetchedComputeUnits) {
-      if (fetched.workerId) {
-        res.push({
-          id: fetched.id,
-          workerId: fetched.workerId,
-        });
-      }
-    }
-    return res;
   }
 
   async getDeal(dealId: string): Promise<DealDetail | null> {
@@ -567,14 +490,14 @@ export class DealExplorerClient {
         deal.providersAccessList,
       );
       res = {
-        ...this._composeDealsShort(deal, { dealStatus, freeBalance }),
+        ...composeDealsShort(deal, { dealStatus, freeBalance }),
         pricePerWorkerEpoch: tokenValueToRounded(
           deal.pricePerWorkerEpoch,
           DEFAULT_TOKEN_VALUE_ROUNDING,
           deal.paymentToken.decimals,
         ),
         maxWorkersPerProvider: deal.maxWorkersPerProvider,
-        computeUnits: this._composeComputeUnits(
+        computeUnits: composeComputeUnits(
           deal.addedComputeUnits as Array<ComputeUnitBasicFragment>,
         ),
         // Serialize data from indexer into lists.

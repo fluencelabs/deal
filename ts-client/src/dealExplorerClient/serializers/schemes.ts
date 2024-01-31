@@ -3,16 +3,21 @@ import type {
   ProviderOfProvidersQueryFragment
 } from "../indexerClient/queries/providers-query.generated.js";
 import type {
+  ComputeUnit, DealShort, DealStatus,
   Effector,
-  OfferShort,
+  OfferShort, Peer,
   ProviderBase,
   ProviderShort
 } from "../types/schemes.js";
 import type {
-  BasicOfferFragment
+  BasicOfferFragment, BasicPeerFragment
 } from "../indexerClient/queries/offers-query.generated.js";
 import {serializeEffectorDescription, serializeProviderName} from "./logics.js";
 import {DEFAULT_TOKEN_VALUE_ROUNDING, tokenValueToRounded} from "../utils.js";
+import type {
+  BasicDealFragment,
+  ComputeUnitBasicFragment
+} from "../indexerClient/queries/deals-query.generated.js";
 
 export function composeEffectors(
     manyToManyEffectors:
@@ -78,17 +83,94 @@ export function composeProviderBase(
 export function composeProviderShort(
     provider: ProviderOfProvidersQueryFragment,
   ): ProviderShort {
-    const providerBase = composeProviderBase(provider);
-    const composedOffers = [];
-    if (provider.offers) {
-      for (const offer of provider.offers) {
-        composedOffers.push(
-          composeOfferShort(offer as BasicOfferFragment),
-        );
-      }
+  const providerBase = composeProviderBase(provider);
+  const composedOffers = [];
+  if (provider.offers) {
+    for (const offer of provider.offers) {
+      composedOffers.push(
+        composeOfferShort(offer as BasicOfferFragment),
+      );
     }
-    return {
-      ...providerBase,
-      offers: composedOffers,
-    } as ProviderShort;
   }
+  return {
+    ...providerBase,
+    offers: composedOffers,
+  } as ProviderShort;
+}
+
+// It composes only compute units with linked workerIds.
+export function composeComputeUnits(
+  fetchedComputeUnits: Array<ComputeUnitBasicFragment>,
+): Array<ComputeUnit> {
+  const res: Array<ComputeUnit> = [];
+  for (const fetched of fetchedComputeUnits) {
+    if (fetched.workerId) {
+      res.push({
+        id: fetched.id,
+        workerId: fetched.workerId,
+      });
+    }
+  }
+  return res;
+}
+
+export function composePeers(peers: Array<BasicPeerFragment>): Array<Peer> {
+  const peersComposed: Array<Peer> = [];
+  if (peers) {
+    for (const peer of peers) {
+      peersComposed.push({
+        id: peer.id,
+        offerId: peer.offer.id,
+        computeUnits: peer.computeUnits
+          ? composeComputeUnits(
+              peer.computeUnits as Array<ComputeUnitBasicFragment>,
+            )
+          : [],
+      });
+    }
+  }
+  return peersComposed;
+}
+
+export function composeDealsShort(
+  deal: BasicDealFragment,
+  fromRpcForDealShort: {
+    dealStatus: DealStatus | undefined;
+    freeBalance: bigint | null | undefined;
+  },
+): DealShort {
+  const freeBalance = fromRpcForDealShort.freeBalance
+    ? fromRpcForDealShort.freeBalance
+    : BigInt(0);
+  const totalEarnings =
+    BigInt(deal.depositedSum) - BigInt(deal.withdrawalSum) - freeBalance;
+
+  return {
+    id: deal.id,
+    createdAt: Number(deal.createdAt),
+    client: deal.owner,
+    minWorkers: deal.minWorkers,
+    targetWorkers: deal.targetWorkers,
+    paymentToken: {
+      address: deal.paymentToken.id,
+      symbol: deal.paymentToken.symbol,
+      decimals: deal.paymentToken.decimals.toString(),
+    },
+    balance: tokenValueToRounded(
+      freeBalance,
+      DEFAULT_TOKEN_VALUE_ROUNDING,
+      deal.paymentToken.decimals,
+    ),
+    status: fromRpcForDealShort.dealStatus
+      ? fromRpcForDealShort.dealStatus
+      : "active",
+    totalEarnings: tokenValueToRounded(
+      totalEarnings,
+      DEFAULT_TOKEN_VALUE_ROUNDING,
+      deal.paymentToken.decimals,
+    ),
+    // TODO: add missed implementations.
+    registeredWorkers: 0,
+    matchedWorkers: 0,
+  };
+}
