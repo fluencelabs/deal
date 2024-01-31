@@ -16,6 +16,7 @@ import type {
   EffectorListView,
   CapacityCommitmentListView,
   CapacityCommitment,
+  CapacityCommitmentStatus,
 } from "./types/schemes.js";
 import type {
   ByProviderAndStatusFilter,
@@ -67,6 +68,7 @@ import {
   convertOfferShortOrderByToIndexerType,
   serializeCapacityCommitmentsOrderByToIndexerType
 } from "./serializers/orderby.js";
+import type {ICapacity} from "../typechain-types/index.js";
 
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
@@ -84,6 +86,8 @@ export class DealExplorerClient {
   private _dealRpcClient: DealRpcClient | null;
   private _coreEpochDuration: number | null;
   private _coreInitTimestamp: number | null;
+  private _capacityContract: ICapacity | null;
+  private _capacityContractAddress: string | null;
 
   constructor(
     network: ContractsENV,
@@ -100,10 +104,12 @@ export class DealExplorerClient {
     }
     this._indexerClient = new IndexerClient(network);
     this._dealContractsClient = new DealClient(this._caller, network);
-    // Fields to init declare below.
+    // Fields to init() are declared below.
     this._dealRpcClient = null;
     this._coreEpochDuration = null;
     this._coreInitTimestamp = null;
+    this._capacityContract = null;
+    this._capacityContractAddress = null;
   }
 
   // Add init other async attributes here.
@@ -112,15 +118,20 @@ export class DealExplorerClient {
   // - DealRpcClient multicall3Contract
   // - fetches core constants from indexer.
   async _init() {
-    if (this._dealRpcClient) {
+    // Check if already inited - early return.
+    if (this._dealRpcClient && this._capacityContract) {
       return;
     }
+    console.info(`[DealExplorerClient] Init client...`);
     const multicall3Contract = await this._dealContractsClient.getMulticall3();
     const multicall3ContractAddress = await multicall3Contract.getAddress();
     this._dealRpcClient = new DealRpcClient(
       this._caller,
       multicall3ContractAddress,
     );
+    this._capacityContract = await this._dealContractsClient.getCapacity();
+    this._capacityContractAddress = await this._capacityContract.getAddress();
+
     // Init constants from indexer.
     // TODO: add cache.
     if ((this._coreEpochDuration == null) || (this._coreInitTimestamp == null)) {
@@ -688,24 +699,31 @@ export class DealExplorerClient {
       if (data.graphNetworks.length != 1 || data.graphNetworks[0] == undefined) {
         throw new Error("Assertion: data.graphNetworks.length != 1 || data.graphNetworks[0] == undefined.")
       }
-      for (const capacityCommitment of data.capacityCommitments) {
+
+      const capacityComitmentIds: Array<string> = data.capacityCommitments.map((capacityCommitment) => {return capacityCommitment.id})
+      const capacityCommitmentsStatuses: Array<CapacityCommitmentStatus> =
+        await this._dealRpcClient!.getStatusCapacityCommitmentsBatch(this._capacityContractAddress!, capacityComitmentIds);
+
+      for (let i = 0; i < data.capacityCommitments.length; i++) {
+        const capacityCommitment = data.capacityCommitments[i]
 
         let expiredAt = null
-        if (capacityCommitment.endEpoch != 0) {
+        if (capacityCommitment?.endEpoch != 0) {
           expiredAt = calculateTimestamp(
-            Number(capacityCommitment.endEpoch),
+            Number(capacityCommitment?.endEpoch),
             this._coreInitTimestamp!,
             this._coreEpochDuration!,
           )
         }
 
         res.push({
-          id: capacityCommitment.id,
-          createdAt: Number(capacityCommitment.createdAt),
+          id: capacityCommitment!.id,
+          createdAt: Number(capacityCommitment!.createdAt),
           expiredAt,
-          providerId: capacityCommitment.peer.provider.id,
-          peerId: capacityCommitment.peer.id,
-          computeUnitsCount: Number(capacityCommitment.computeUnitsCount),
+          providerId: capacityCommitment!.peer.provider.id,
+          peerId: capacityCommitment!.peer.id,
+          computeUnitsCount: Number(capacityCommitment!.computeUnitsCount),
+          status: capacityCommitmentsStatuses[i] ?? "undefined",
         });
       }
     }

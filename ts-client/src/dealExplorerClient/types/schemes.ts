@@ -35,8 +35,7 @@ export type CapacityCommitment = {
   providerId: string;
   peerId: string;
   computeUnitsCount: number;
-  // TODO: implement.
-  // status: CapacityCommitmentStatus;
+  status: CapacityCommitmentStatus;
 };
 
 export type ProviderBase = {
@@ -140,5 +139,4 @@ export interface DealDetail extends DealShort {
 
 // Status undefined == problem with networks, etc.
 export type DealStatus = "inactive" | "active" | "ended" | "undefined";
-
-// export type CapacityCommitmentStatus = "active" | "ended";
+export type CapacityCommitmentStatus = "active" | "waitDelegation" | "waitStart" | "inactive" | "failed" | "removed" | "undefined";

@@ -3,8 +3,11 @@ import {
   Multicall3ContractClient,
   type Multicall3ContractCall,
 } from "./multicall3ContractClient.js";
-import { Deal__factory } from "../../index.js";
-import type { DealStatus } from "../types/schemes.js";
+import {Capacity__factory, Deal__factory} from "../../index.js";
+import {
+  serializeTxCapacityCommitmentStatus,
+  serializeTxDealStatus
+} from "./serializers.js";
 
 export class DealRpcClient extends Multicall3ContractClient {
   constructor(
@@ -12,37 +15,6 @@ export class DealRpcClient extends Multicall3ContractClient {
     multicall3ContractAddress: string,
   ) {
     super(caller, multicall3ContractAddress);
-  }
-
-  _txDealStatusToString(result: Result | null): DealStatus {
-    // Values are:
-    // ENDED
-    // INACTIVE
-    // ACTIVE and undefined
-    if (!result) {
-      return "undefined";
-    }
-    let status: DealStatus;
-    const converted = Number(result);
-    switch (converted) {
-      case 0: {
-        status = "inactive";
-        break;
-      }
-      case 1: {
-        status = "active";
-        break;
-      }
-      case 2: {
-        status = "ended";
-        break;
-      }
-      default: {
-        status = "undefined";
-        break;
-      }
-    }
-    return status;
   }
 
   // Get statuses for batch of Deals by 1 call.
@@ -71,7 +43,7 @@ export class DealRpcClient extends Multicall3ContractClient {
       callsEncoded,
       dealContractForInterface.interface,
       contractMethod,
-      this._txDealStatusToString,
+      serializeTxDealStatus,
     );
   }
 
@@ -107,6 +79,34 @@ export class DealRpcClient extends Multicall3ContractClient {
       dealContractForInterface.interface,
       contractMethod,
       this._txToBigInt,
+    );
+  }
+
+  // Get statuses for batch of Capacity Commitments by 1 call.
+  async getStatusCapacityCommitmentsBatch(capacityContractAddress: string, capacityCommitmentIds: Array<string>) {
+    // We need any of the deal contract coz we will use interface of the Deal only.
+    const contractInstance = Capacity__factory.connect(
+      capacityContractAddress,
+      this._caller,
+    );
+    const contractMethod = "getStatus";
+    const callsEncoded: Multicall3ContractCall[] = [];
+    for (let i = 0; i < capacityCommitmentIds.length; i++) {
+      callsEncoded.push(
+        {
+          target: capacityContractAddress,
+          allowFailure: true, // We allow failure for all calls.
+          // @ts-ignore
+          callData: contractInstance.interface.encodeFunctionData(contractMethod, [capacityCommitmentIds[i]]),
+        }
+      )
+    }
+
+    return await this._callBatch(
+      callsEncoded,
+      contractInstance.interface,
+      contractMethod,
+      serializeTxCapacityCommitmentStatus,
     );
   }
 }
