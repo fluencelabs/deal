@@ -1,6 +1,6 @@
 import type {
   DealQueryQueryVariables,
-  DealsQueryQueryVariables,
+  DealsQueryQueryVariables, DealsByPeerQueryQueryVariables,
   Sdk as DealsSdk,
 } from "./queries/deals-query.generated.js";
 import { getSdk as getDealsSdk } from "./queries/deals-query.generated.js";
@@ -105,5 +105,10 @@ export class IndexerClient extends IndexerClientABC {
 
   async getPeer(variables: PeerQueryQueryVariables) {
     return await this.peersClient.PeerQuery(variables);
+  }
+
+  // Get all deals per provided id of a Peer.
+  async getPeerDeals(variables: DealsByPeerQueryQueryVariables) {
+    return await this.dealsClient.DealsByPeerQuery(variables);
   }
 }

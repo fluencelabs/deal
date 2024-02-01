@@ -120,15 +120,12 @@ export type Effector = {
   description: string;
 };
 
-// TODO: transactionHash deprecated.
-// TODO: workerSlots deprecated.
 export type Peer = {
   id: string;
   offerId: string;
   computeUnits: Array<ComputeUnit>;
 };
 
-// TODO: deprecated: collateral.
 export type ComputeUnit = {
   id: string;
   workerId: string | undefined;
@@ -149,7 +146,6 @@ export type DealShort = {
   totalEarnings: string;
 };
 
-// Collateral deprecated.
 export interface DealDetail extends DealShort {
   pricePerWorkerEpoch: string;
   maxWorkersPerProvider: number;
@@ -159,6 +155,7 @@ export interface DealDetail extends DealShort {
   effectors: Array<Effector>;
 }
 
+// [Figma: Peer ID]
 export interface PeerDetail {
   id: string;
   providerId: string;
@@ -166,6 +163,18 @@ export interface PeerDetail {
   computeUnitsInDeal: number;
   computeUnitsInCapacityCommitment: number;
   computeUnitsTotal: number;
+}
+
+// [Figma: Peer ID]
+export interface DealsByPeerListView extends ListViewABC {
+  data: Array<DealByPeer>
+}
+
+// [Figma: Peer ID] Scheme represents entity of Array<Deal> for complex PeerDetail View.
+export interface DealByPeer {
+  dealId: string;
+  computeUnitId: string;
+  workerId: string;
 }
 
 // Status undefined == problem with networks, etc.

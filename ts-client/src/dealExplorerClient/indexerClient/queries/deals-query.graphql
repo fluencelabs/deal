@@ -70,3 +70,29 @@ fragment EffectorBasic on Effector {
     id
     description
 }
+
+query DealsByPeerQuery(
+  $peerId: ID!,
+  $dealsOffset: Int,
+  $dealsLimit: Int,
+  $dealsOrderBy: DealToPeer_orderBy,
+  $dealsOrderType: OrderDirection,
+) {
+  peer(id: $peerId) {
+    id
+    joinedDeals(
+      skip: $dealsOffset
+      first: $dealsLimit
+      orderBy: $dealsOrderBy
+      orderDirection: $dealsOrderType
+    ) {
+      deal {
+        id
+        addedComputeUnits {
+          id
+          workerId
+        }
+      }
+    }
+  }
+}
