@@ -159,6 +159,15 @@ export interface DealDetail extends DealShort {
   effectors: Array<Effector>;
 }
 
+export interface PeerDetail {
+  id: string;
+  providerId: string;
+  offerId: string;
+  computeUnitsInDeal: number;
+  computeUnitsInCapacityCommitment: number;
+  computeUnitsTotal: number;
+}
+
 // Status undefined == problem with networks, etc.
 export type DealStatus = "inactive" | "active" | "ended" | "undefined";
 export type CapacityCommitmentStatus =

@@ -120,8 +120,8 @@ export class DealRpcClient extends Multicall3ContractClient {
       callsEncoded.push({
         target: capacityContractAddress,
         allowFailure: true, // We allow failure for all calls.
-        // @ts-ignore
         callData: contractInstance.interface.encodeFunctionData(
+          // @ts-ignore
           contractMethod,
           [capacityCommitmentIds[i]],
         ),

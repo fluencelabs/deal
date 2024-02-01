@@ -15,7 +15,7 @@ import {
   CommitmentCreated,
   CommitmentFinished,
   CommitmentRemoved,
-  CommitmentStatsUpdated,
+  CommitmentStatsUpdated, UnitActivated, UnitDeactivated,
   WhitelistAccessGranted,
   WhitelistAccessRevoked,
 } from "../../generated/Capacity/Capacity";
@@ -51,10 +51,10 @@ export function handleCommitmentCreated(event: CommitmentCreated): void {
   // TODO: rm those logs if phantom error does not occur.
   log.info("[handleCommitmentCreated] Start...", []);
   let commitment = new CapacityCommitment(event.params.commitmentId.toHex());
-  log.info("event.params.commitmentId.toHex():", [event.params.commitmentId.toHex()]);
-  log.info("event.params.peerId.toHex():", [event.params.peerId.toHex()]);
+  log.info("event.params.commitmentId.toHex(): {}", [event.params.commitmentId.toHex()]);
+  log.info("event.params.peerId.toHex(): {}", [event.params.peerId.toHex()]);
   let peer = Peer.load(event.params.peerId.toHex()) as Peer;
-  log.info("peer loaded successfully:", [peer.id]);
+  log.info("peer loaded successfully: {}", [peer.id]);
 
   commitment.peer = peer.id
   commitment.provider = peer.provider
@@ -196,6 +196,22 @@ export function handleCommitmentStatsUpdated(event: CommitmentStatsUpdated): voi
   peer.save();
 }
 
-// TODO: UnitDeactivated/ UnitActivated to work with units.
+// Use this event to only check activation/deactivation for the exact unit.
+// Do not update commitment.activeUnitCount as it is updated in handleCommitmentStatsUpdated.
+export function handleUnitActivated(event: UnitActivated): void {
+  let computeUnit = ComputeUnit.load(event.params.unitId.toHex()) as ComputeUnit;
+  let peer = Peer.load(computeUnit.peer) as Peer;
 
+  peer.computeUnitsInCapacityCommitment = peer.computeUnitsInCapacityCommitment + 1;
+  peer.save();
+}
 
+// Use this event to only check activation/deactivation for the exact unit.
+// Do not update commitment.activeUnitCount as it is updated in handleCommitmentStatsUpdated.
+export function handleUnitDeactivated(event: UnitDeactivated): void {
+  let computeUnit = ComputeUnit.load(event.params.unitId.toHex()) as ComputeUnit;
+  let peer = Peer.load(computeUnit.peer) as Peer;
+
+  peer.computeUnitsInCapacityCommitment = peer.computeUnitsInCapacityCommitment - 1;
+  peer.save();
+}

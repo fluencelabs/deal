@@ -13,6 +13,7 @@ import type {
   OfferShortListView,
   PaymentToken,
   PaymentTokenListView,
+  PeerDetail,
   ProviderDetail,
   ProviderShortListView,
 } from "./types/schemes.js";
@@ -714,6 +715,24 @@ export class DealExplorerClient {
       totalRewards: capacityCommitmentRpcDetails.totalRewards
         ? tokenValueToRounded(capacityCommitmentRpcDetails.totalRewards)
         : "0",
+    };
+  }
+
+  async getPeer(peerId: string): Promise<PeerDetail | null> {
+    await this._init();
+    const data = await this._indexerClient.getPeer({ id: peerId });
+    if (!data || !data.peer) {
+      return null;
+    }
+    const peer = data.peer;
+
+    return {
+      id: peer.id,
+      providerId: peer.provider.id,
+      offerId: peer.offer.id,
+      computeUnitsInDeal: peer.computeUnitsInDeal,
+      computeUnitsInCapacityCommitment: peer.computeUnitsInCapacityCommitment,
+      computeUnitsTotal: peer.computeUnitsTotal,
     };
   }
 }

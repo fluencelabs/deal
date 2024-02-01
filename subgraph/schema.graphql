@@ -117,6 +117,13 @@ type Peer @entity {
   # To make query with OR to retrieve even entities with joinedDeals == [].
   # TODO: create issue on Subgraph for the feature and past here.
   isAnyJoinedDeals: Boolean!
+
+  # Add Peer stats below.
+  computeUnitsTotal: Int!
+  "Compute units in any deals: update only when moved to deal or out."
+  computeUnitsInDeal: Int!
+  "Compute units in any cc: update only when moved to CC or out: {UnitActivated, UnitDeactivated}."
+  computeUnitsInCapacityCommitment: Int!
 }
 
 type ComputeUnit @entity {
