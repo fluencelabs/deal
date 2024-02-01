@@ -167,7 +167,7 @@ export interface PeerDetail {
 
 // [Figma: Peer ID]
 export interface DealsByPeerListView extends ListViewABC {
-  data: Array<DealByPeer>
+  data: Array<DealByPeer>;
 }
 
 // [Figma: Peer ID] Scheme represents entity of Array<Deal> for complex PeerDetail View.

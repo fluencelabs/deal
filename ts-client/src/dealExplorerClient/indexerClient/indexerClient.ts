@@ -1,6 +1,7 @@
 import type {
   DealQueryQueryVariables,
-  DealsQueryQueryVariables, DealsByPeerQueryQueryVariables,
+  DealsQueryQueryVariables,
+  DealsByPeerQueryQueryVariables,
   Sdk as DealsSdk,
 } from "./queries/deals-query.generated.js";
 import { getSdk as getDealsSdk } from "./queries/deals-query.generated.js";

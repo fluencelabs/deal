@@ -13,7 +13,9 @@ import type {
   OfferShortListView,
   PaymentToken,
   PaymentTokenListView,
-  PeerDetail, DealByPeer, DealsByPeerListView,
+  PeerDetail,
+  DealByPeer,
+  DealsByPeerListView,
   ProviderDetail,
   ProviderShortListView,
 } from "./types/schemes.js";
@@ -746,21 +748,26 @@ export class DealExplorerClient {
   ): Promise<DealsByPeerListView> {
     await this._init();
     // TODO: ClientError: Failed to get entities from store: SortKey::ChildKey cannot be used for parent ordering (yet).
-    console.warn(`orderBy & orderType params are not supported yet. Thus, ${orderBy} & ${orderType} are ignored.`);
-    const data = await this._indexerClient.getPeerDeals(
-      {
-        peerId: peerId,
-        dealsOffset: offset,
-        dealsLimit: limit,
-        dealsOrderBy: null,
-        dealsOrderType: null,
-      });
+    console.warn(
+      `orderBy & orderType params are not supported yet. Thus, ${orderBy} & ${orderType} are ignored.`,
+    );
+    const data = await this._indexerClient.getPeerDeals({
+      peerId: peerId,
+      dealsOffset: offset,
+      dealsLimit: limit,
+      dealsOrderBy: null,
+      dealsOrderType: null,
+    });
 
-    if (data.peer == undefined || data.peer.joinedDeals == undefined || data.peer.joinedDeals?.length == 0) {
+    if (
+      data.peer == undefined ||
+      data.peer.joinedDeals == undefined ||
+      data.peer.joinedDeals?.length == 0
+    ) {
       return {
         data: [],
         total: null,
-      }
+      };
     }
 
     let res: Array<DealByPeer> = [];
@@ -770,25 +777,26 @@ export class DealExplorerClient {
         throw new Error("Assertion: peerDeal == undefined.");
       }
       if (
-        !peerDeal.deal.addedComputeUnits || peerDeal.deal.addedComputeUnits.length != 1 || peerDeal.deal.addedComputeUnits[0] == undefined) {
+        !peerDeal.deal.addedComputeUnits ||
+        peerDeal.deal.addedComputeUnits.length != 1 ||
+        peerDeal.deal.addedComputeUnits[0] == undefined
+      ) {
         // Logically fetched deals of the peer could not have more than 1 CU (protocol restriction).
         throw new Error(
           `Assertion: peerDeal.deal.addedComputeUnits.length != 1 || peerDeal.deal.addedComputeUnits[0] == undefined. peerDeal.deal.addedComputeUnits: ${peerDeal.deal.addedComputeUnits}`,
         );
       }
-      const firstCU = peerDeal.deal.addedComputeUnits[0]
-      res.push(
-        {
-          dealId: peerDeal.deal.id,
-          computeUnitId: firstCU.id!,
-          workerId: firstCU.workerId!,
-        }
-      )
+      const firstCU = peerDeal.deal.addedComputeUnits[0];
+      res.push({
+        dealId: peerDeal.deal.id,
+        computeUnitId: firstCU.id!,
+        workerId: firstCU.workerId!,
+      });
     }
     return {
       total: null,
       data: res,
-    }
+    };
   }
 }
 
