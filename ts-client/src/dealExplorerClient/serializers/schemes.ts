@@ -1,104 +1,102 @@
 // To store serializers, e.g. from indexer fields/fragments to DealExplorerClient schemes.
+import type { ProviderOfProvidersQueryFragment } from "../indexerClient/queries/providers-query.generated.js";
 import type {
-  ProviderOfProvidersQueryFragment
-} from "../indexerClient/queries/providers-query.generated.js";
-import type {
-  CapacityCommitmentShort, CapacityCommitmentStatus,
-  ComputeUnit, DealShort, DealStatus,
+  CapacityCommitmentShort,
+  CapacityCommitmentStatus,
+  ComputeUnit,
+  DealShort,
+  DealStatus,
   Effector,
-  OfferShort, Peer,
+  OfferShort,
+  Peer,
   ProviderBase,
-  ProviderShort
+  ProviderShort,
 } from "../types/schemes.js";
 import type {
-  BasicOfferFragment, BasicPeerFragment
+  BasicOfferFragment,
+  BasicPeerFragment,
 } from "../indexerClient/queries/offers-query.generated.js";
-import {serializeEffectorDescription, serializeProviderName} from "./logics.js";
+import {
+  serializeEffectorDescription,
+  serializeProviderName,
+} from "./logics.js";
 import {
   calculateTimestamp,
   DEFAULT_TOKEN_VALUE_ROUNDING,
-  tokenValueToRounded
+  tokenValueToRounded,
 } from "../utils.js";
 import type {
   BasicDealFragment,
-  ComputeUnitBasicFragment
+  ComputeUnitBasicFragment,
 } from "../indexerClient/queries/deals-query.generated.js";
-import type {
-  CapacityCommitmentBasicFragment
-} from "../indexerClient/queries/capacity-commitments-query.generated.js";
+import type { CapacityCommitmentBasicFragment } from "../indexerClient/queries/capacity-commitments-query.generated.js";
 
 // TODO: rename to scheme suffixes not there is a Zoo in naming a little.
 export function serializeEffectors(
-    manyToManyEffectors:
-      | Array<{ effector: { id: string; description: string } }>
-      | null
-      | undefined,
-  ): Array<Effector> {
-    const composedEffectors: Array<Effector> = [];
-    if (!manyToManyEffectors) {
-      return composedEffectors;
-    }
-    for (const effector of manyToManyEffectors) {
-      composedEffectors.push({
-        cid: effector.effector.id,
-        description: serializeEffectorDescription(
-          effector.effector.id,
-          effector.effector.description,
-        ),
-      });
-    }
-
+  manyToManyEffectors:
+    | Array<{ effector: { id: string; description: string } }>
+    | null
+    | undefined,
+): Array<Effector> {
+  const composedEffectors: Array<Effector> = [];
+  if (!manyToManyEffectors) {
     return composedEffectors;
   }
+  for (const effector of manyToManyEffectors) {
+    composedEffectors.push({
+      cid: effector.effector.id,
+      description: serializeEffectorDescription(
+        effector.effector.id,
+        effector.effector.description,
+      ),
+    });
+  }
+
+  return composedEffectors;
+}
 
 export function serializeOfferShort(offer: BasicOfferFragment): OfferShort {
-    return {
-      id: offer.id,
-      createdAt: Number(offer.createdAt),
-      totalComputeUnits: Number(offer.computeUnitsTotal ?? 0),
-      freeComputeUnits: Number(offer.computeUnitsAvailable ?? 0),
-      paymentToken: {
-        address: offer.paymentToken.id,
-        symbol: offer.paymentToken.symbol,
-        decimals: offer.paymentToken.decimals.toString(),
-      },
-      pricePerEpoch: tokenValueToRounded(
-        offer.pricePerEpoch,
-        DEFAULT_TOKEN_VALUE_ROUNDING,
-        offer.paymentToken.decimals,
-      ),
-      effectors: serializeEffectors(offer.effectors),
-      providerId: offer.provider.id,
-    };
-  }
+  return {
+    id: offer.id,
+    createdAt: Number(offer.createdAt),
+    totalComputeUnits: Number(offer.computeUnitsTotal ?? 0),
+    freeComputeUnits: Number(offer.computeUnitsAvailable ?? 0),
+    paymentToken: {
+      address: offer.paymentToken.id,
+      symbol: offer.paymentToken.symbol,
+      decimals: offer.paymentToken.decimals.toString(),
+    },
+    pricePerEpoch: tokenValueToRounded(
+      offer.pricePerEpoch,
+      DEFAULT_TOKEN_VALUE_ROUNDING,
+      offer.paymentToken.decimals,
+    ),
+    effectors: serializeEffectors(offer.effectors),
+    providerId: offer.provider.id,
+  };
+}
 
 export function serializeProviderBase(
-    provider: ProviderOfProvidersQueryFragment,
-  ): ProviderBase {
-    return {
-      id: provider.id,
-      createdAt: Number(provider.createdAt),
-      totalComputeUnits: provider.computeUnitsTotal,
-      freeComputeUnits: provider.computeUnitsAvailable,
-      name: serializeProviderName(
-        provider.name,
-        provider.id,
-        provider.approved,
-      ),
-      isApproved: provider.approved,
-    } as ProviderBase;
-  }
+  provider: ProviderOfProvidersQueryFragment,
+): ProviderBase {
+  return {
+    id: provider.id,
+    createdAt: Number(provider.createdAt),
+    totalComputeUnits: provider.computeUnitsTotal,
+    freeComputeUnits: provider.computeUnitsAvailable,
+    name: serializeProviderName(provider.name, provider.id, provider.approved),
+    isApproved: provider.approved,
+  } as ProviderBase;
+}
 
 export function serializeProviderShort(
-    provider: ProviderOfProvidersQueryFragment,
-  ): ProviderShort {
+  provider: ProviderOfProvidersQueryFragment,
+): ProviderShort {
   const providerBase = serializeProviderBase(provider);
   const composedOffers = [];
   if (provider.offers) {
     for (const offer of provider.offers) {
-      composedOffers.push(
-        serializeOfferShort(offer as BasicOfferFragment),
-      );
+      composedOffers.push(serializeOfferShort(offer as BasicOfferFragment));
     }
   }
   return {
@@ -190,19 +188,22 @@ export function serializeCapacityCommitmentShort(
   coreInitTimestamp: number,
   coreEpochDuration: number,
 ): CapacityCommitmentShort {
-  let expiredAt = null
-  let startedAt = null
-  if (capacityCommitmentFromIndexer.endEpoch != 0 && capacityCommitmentFromIndexer.startEpoch != 0) {
+  let expiredAt = null;
+  let startedAt = null;
+  if (
+    capacityCommitmentFromIndexer.endEpoch != 0 &&
+    capacityCommitmentFromIndexer.startEpoch != 0
+  ) {
     expiredAt = calculateTimestamp(
       Number(capacityCommitmentFromIndexer.endEpoch),
       coreInitTimestamp,
       coreEpochDuration,
-    )
+    );
     startedAt = calculateTimestamp(
       Number(capacityCommitmentFromIndexer.startEpoch),
       coreInitTimestamp,
       coreEpochDuration,
-    )
+    );
   }
 
   return {
@@ -214,5 +215,5 @@ export function serializeCapacityCommitmentShort(
     peerId: capacityCommitmentFromIndexer.peer.id,
     computeUnitsCount: Number(capacityCommitmentFromIndexer.computeUnitsCount),
     status: statusFromRpc,
-  }
+  };
 }

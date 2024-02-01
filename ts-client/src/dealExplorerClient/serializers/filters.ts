@@ -1,27 +1,32 @@
 // Module is for filter serializers.
 import type {
-  CapacityCommitmentsFilters, DealsFilters, OffersFilters,
-  ProvidersFilters
+  CapacityCommitmentsFilters,
+  DealsFilters,
+  OffersFilters,
+  ProvidersFilters,
 } from "../types/filters.js";
 import type {
-  CapacityCommitment_Filter, Deal_Filter, Offer_Filter,
-  Provider_Filter
+  CapacityCommitment_Filter,
+  Deal_Filter,
+  Offer_Filter,
+  Provider_Filter,
 } from "../indexerClient/generated.types.js";
-import {valueToTokenValue} from "../utils.js";
+import { valueToTokenValue } from "../utils.js";
 
 export class FiltersError extends Error {}
 export class ValidTogetherFiltersError extends FiltersError {}
-
 
 export async function serializeProviderFiltersToIndexer(
   providersFilters?: ProvidersFilters,
 ): Promise<Provider_Filter> {
   // Only for registered providers.
-  const convertedFilters: Provider_Filter = { and: [
+  const convertedFilters: Provider_Filter = {
+    and: [
       {
         registered: true,
-      }
-    ] };
+      },
+    ],
+  };
   if (!providersFilters) {
     return convertedFilters;
   }
@@ -179,7 +184,6 @@ export async function serializeDealsFiltersToIndexer(
   return convertedFilters;
 }
 
-
 export function serializeCapacityCommitmentsFiltersToIndexer(
   v?: CapacityCommitmentsFilters,
   currentEpoch?: string,
@@ -191,9 +195,9 @@ export function serializeCapacityCommitmentsFiltersToIndexer(
   if (v.search) {
     convertedFilters.and?.push({
       or: [
-        {id: v.search},
-        {peer_: {id: v.search}},
-        {provider_: {id: v.search}},
+        { id: v.search },
+        { peer_: { id: v.search } },
+        { provider_: { id: v.search } },
       ],
     });
   }
@@ -204,20 +208,30 @@ export function serializeCapacityCommitmentsFiltersToIndexer(
     convertedFilters.and?.push({ createdAt_lte: v.createdAtTo.toString() });
   }
   if (v.computeUnitsCountFrom) {
-    convertedFilters.and?.push({ computeUnitsCount_gte: v.computeUnitsCountFrom });
+    convertedFilters.and?.push({
+      computeUnitsCount_gte: v.computeUnitsCountFrom,
+    });
   }
   if (v.computeUnitsCountTo) {
-    convertedFilters.and?.push({ computeUnitsCount_lte: v.computeUnitsCountTo });
+    convertedFilters.and?.push({
+      computeUnitsCount_lte: v.computeUnitsCountTo,
+    });
   }
   if (v.rewardDelegatorRateFrom) {
-    convertedFilters.and?.push({ rewardDelegatorRate_gte: v.rewardDelegatorRateFrom });
+    convertedFilters.and?.push({
+      rewardDelegatorRate_gte: v.rewardDelegatorRateFrom,
+    });
   }
   if (v.rewardDelegatorRateTo) {
-    convertedFilters.and?.push({ rewardDelegatorRate_lte: v.rewardDelegatorRateTo });
+    convertedFilters.and?.push({
+      rewardDelegatorRate_lte: v.rewardDelegatorRateTo,
+    });
   }
   if (v.onlyActive) {
     if (currentEpoch == undefined) {
-      throw new Error("Assertion: currentEpoch is undefined but v.onlyActive filter is used.");
+      throw new Error(
+        "Assertion: currentEpoch is undefined but v.onlyActive filter is used.",
+      );
     }
     convertedFilters.and?.push({
       // Duplication as it is in DealExplorerClient: serializeCapacityCommitmentsFiltersToIndexer.
@@ -231,5 +245,5 @@ export function serializeCapacityCommitmentsFiltersToIndexer(
       status_not_in: ["WaitDelegation", "Removed", "Failed"],
     });
   }
-  return {}
+  return {};
 }

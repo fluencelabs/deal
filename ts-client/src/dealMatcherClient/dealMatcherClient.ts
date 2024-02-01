@@ -1,7 +1,7 @@
 import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type { ContractsENV } from "../client/config.js";
 import type { OffersQueryQueryVariables } from "./indexerClient/queries/offers-query.generated.js";
-import {serializeDealProviderAccessLists} from "../utils/serializers.js";
+import { serializeDealProviderAccessLists } from "../utils/serializers.js";
 
 // Structure match matchDeal() arguments.
 // Currently: bytes32[] calldata offers, bytes32[][] calldata computeUnits.
@@ -394,7 +394,10 @@ export class DealMatcherClient {
     if (deal.effectors == null) {
       throw new Error(`Effectors of a deal: ${dealId} are null - assert.`);
     }
-    const {whitelist, blacklist} = serializeDealProviderAccessLists(deal.providersAccessType, deal.providersAccessList)
+    const { whitelist, blacklist } = serializeDealProviderAccessLists(
+      deal.providersAccessType,
+      deal.providersAccessList,
+    );
     return await this.getMatchedOffers({
       dealId: dealId,
       // TODO: after migrate to another indexer, rm as string.

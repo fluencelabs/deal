@@ -32,7 +32,7 @@ export interface CapacityCommitmentListView extends ListViewABC {
 export interface CapacityCommitmentShort {
   id: string;
   createdAt: number;
-  startedAt: number | null
+  startedAt: number | null;
   expiredAt: number | null;
   providerId: string;
   peerId: string;
@@ -161,4 +161,11 @@ export interface DealDetail extends DealShort {
 
 // Status undefined == problem with networks, etc.
 export type DealStatus = "inactive" | "active" | "ended" | "undefined";
-export type CapacityCommitmentStatus = "active" | "waitDelegation" | "waitStart" | "inactive" | "failed" | "removed" | "undefined";
+export type CapacityCommitmentStatus =
+  | "active"
+  | "waitDelegation"
+  | "waitStart"
+  | "inactive"
+  | "failed"
+  | "removed"
+  | "undefined";

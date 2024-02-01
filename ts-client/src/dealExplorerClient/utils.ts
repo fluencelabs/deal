@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
-import type {OrderType} from "./types/filters.js";
+import type { OrderType } from "./types/filters.js";
 
-export const DEFAULT_TOKEN_VALUE_ROUNDING = 3
+export const DEFAULT_TOKEN_VALUE_ROUNDING = 3;
 // Max to select per 1 multiselect filter.
 export const FILTER_MULTISELECT_MAX = 100;
 export const DEFAULT_ORDER_TYPE: OrderType = "desc";
@@ -28,7 +28,11 @@ export function calculateEpoch(
   epochControllerStorageInitTimestamp: number,
   epochControllerStorageEpochDuration: number,
 ): number {
-  return 1 + (timestamp - epochControllerStorageInitTimestamp) / epochControllerStorageEpochDuration
+  return (
+    1 +
+    (timestamp - epochControllerStorageInitTimestamp) /
+      epochControllerStorageEpochDuration
+  );
 }
 
 export function calculateTimestamp(
@@ -36,5 +40,8 @@ export function calculateTimestamp(
   epochControllerStorageInitTimestamp: number,
   epochControllerStorageEpochDuration: number,
 ): number {
-  return (epoch - 1) * epochControllerStorageEpochDuration + epochControllerStorageInitTimestamp
+  return (
+    (epoch - 1) * epochControllerStorageEpochDuration +
+    epochControllerStorageInitTimestamp
+  );
 }

@@ -70,6 +70,9 @@ export type ProviderShortOrderBy = "createdAt" | "computeUnitsTotal";
 export type DealsShortOrderBy = "createdAt";
 export type EffectorsOrderBy = "id";
 export type PaymentTokenOrderBy = "id" | "symbol";
-export type CapacityCommitmentsOrderBy = "createdAt" | "computeUnitsCount" | "expirationAt";
+export type CapacityCommitmentsOrderBy =
+  | "createdAt"
+  | "computeUnitsCount"
+  | "expirationAt";
 
 export type OrderType = "asc" | "desc";

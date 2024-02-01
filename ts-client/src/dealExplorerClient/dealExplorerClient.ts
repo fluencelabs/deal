@@ -1,4 +1,4 @@
-import {ethers} from "ethers";
+import { ethers } from "ethers";
 import type {
   CapacityCommitmentDetail,
   CapacityCommitmentListView,
@@ -28,19 +28,17 @@ import type {
   OrderType,
   PaymentTokenOrderBy,
   ProvidersFilters,
-  ProviderShortOrderBy
+  ProviderShortOrderBy,
 } from "./types/filters.js";
-import {IndexerClient} from "./indexerClient/indexerClient.js";
+import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type {
   BasicDealFragment,
   ComputeUnitBasicFragment,
 } from "./indexerClient/queries/deals-query.generated.js";
-import {DealClient} from "../client/client.js";
-import type {ContractsENV} from "../client/config.js";
-import type {
-  BasicPeerFragment
-} from "./indexerClient/queries/offers-query.generated.js";
-import {DealRpcClient} from "./rpcClients/index.js";
+import { DealClient } from "../client/client.js";
+import type { ContractsENV } from "../client/config.js";
+import type { BasicPeerFragment } from "./indexerClient/queries/offers-query.generated.js";
+import { DealRpcClient } from "./rpcClients/index.js";
 import {
   calculateEpoch,
   DEFAULT_ORDER_TYPE,
@@ -48,15 +46,15 @@ import {
   FILTER_MULTISELECT_MAX,
   tokenValueToRounded,
 } from "./utils.js";
-import {serializeEffectorDescription,} from "./serializers/logics.js";
-import {serializeDealProviderAccessLists} from "../utils/serializers.js";
+import { serializeEffectorDescription } from "./serializers/logics.js";
+import { serializeDealProviderAccessLists } from "../utils/serializers.js";
 import {
   FiltersError,
   serializeCapacityCommitmentsFiltersToIndexer,
   serializeDealsFiltersToIndexer,
   serializeOffersFiltersToIndexerType,
   serializeProviderFiltersToIndexer,
-  ValidTogetherFiltersError
+  ValidTogetherFiltersError,
 } from "./serializers/filters.js";
 import {
   serializeCapacityCommitmentShort,
@@ -66,18 +64,16 @@ import {
   serializeOfferShort,
   serializePeers,
   serializeProviderBase,
-  serializeProviderShort
+  serializeProviderShort,
 } from "./serializers/schemes.js";
 import {
   serializeCapacityCommitmentsOrderByToIndexer,
   serializeDealShortOrderByToIndexer,
-  serializeOfferShortOrderByToIndexer
+  serializeOfferShortOrderByToIndexer,
 } from "./serializers/orderby.js";
-import type {ICapacity} from "../typechain-types/index.js";
-import type {
-  CapacityCommitmentBasicFragment
-} from "./indexerClient/queries/capacity-commitments-query.generated.js";
-import {FLTToken} from "./constants.js";
+import type { ICapacity } from "../typechain-types/index.js";
+import type { CapacityCommitmentBasicFragment } from "./indexerClient/queries/capacity-commitments-query.generated.js";
+import { FLTToken } from "./constants.js";
 
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
@@ -143,21 +139,26 @@ export class DealExplorerClient {
 
     // Init constants from indexer.
     // TODO: add cache.
-    if ((this._coreEpochDuration == null) || (this._coreInitTimestamp == null)) {
-      console.info('Fetch contract constants from indexer.')
-      const data = await this._indexerClient.getContractConstants()
-      if (data.graphNetworks.length != 1 || data.graphNetworks[0] == undefined) {
-        throw new Error("Assertion: data.graphNetworks.length != 1 || data.graphNetworks[0] == undefined.")
+    if (this._coreEpochDuration == null || this._coreInitTimestamp == null) {
+      console.info("Fetch contract constants from indexer.");
+      const data = await this._indexerClient.getContractConstants();
+      if (
+        data.graphNetworks.length != 1 ||
+        data.graphNetworks[0] == undefined
+      ) {
+        throw new Error(
+          "Assertion: data.graphNetworks.length != 1 || data.graphNetworks[0] == undefined.",
+        );
       }
-      this._coreInitTimestamp = Number(data.graphNetworks[0].initTimestamp)
-      this._coreEpochDuration = Number(data.graphNetworks[0].coreEpochDuration)
+      this._coreInitTimestamp = Number(data.graphNetworks[0].initTimestamp);
+      this._coreEpochDuration = Number(data.graphNetworks[0].coreEpochDuration);
     }
   }
 
   /*
- * @dev Request indexer for common decimals across tokens, thus,
- * @dev  it checks if symbols across are equal, or throw ValidTogetherFiltersError.
- */
+   * @dev Request indexer for common decimals across tokens, thus,
+   * @dev  it checks if symbols across are equal, or throw ValidTogetherFiltersError.
+   */
   async _getCommonTokenDecimals(
     tokenAddresses: Array<string>,
   ): Promise<number> {
@@ -297,16 +298,13 @@ export class DealExplorerClient {
       const paymentTokensLowerCase = paymentTokens.map((tokenAddress) => {
         return tokenAddress.toLowerCase();
       });
-      if (
-        otherConditions &&
-        paymentTokensLowerCase.length > 1
-      ) {
+      if (otherConditions && paymentTokensLowerCase.length > 1) {
         tokenDecimals = await this._getCommonTokenDecimals(
           paymentTokensLowerCase,
         );
       }
     }
-    return tokenDecimals
+    return tokenDecimals;
   }
 
   async _getOffersImpl(
@@ -318,14 +316,18 @@ export class DealExplorerClient {
   ): Promise<OfferShortListView> {
     const orderByConverted = serializeOfferShortOrderByToIndexer(orderBy);
 
-    const _cond = (offerFilters?.minPricePerWorkerEpoch || offerFilters?.maxPricePerWorkerEpoch) !== undefined
+    const _cond =
+      (offerFilters?.minPricePerWorkerEpoch ||
+        offerFilters?.maxPricePerWorkerEpoch) !== undefined;
     const commonTokenDecimals = await this._calculateTokenDecimalsForFilters(
       offerFilters?.paymentTokens,
       _cond,
-    )
+    );
 
-    const filtersConverted =
-      await serializeOffersFiltersToIndexerType(offerFilters, commonTokenDecimals);
+    const filtersConverted = await serializeOffersFiltersToIndexerType(
+      offerFilters,
+      commonTokenDecimals,
+    );
     const data = await this._indexerClient.getOffers({
       filters: filtersConverted,
       offset,
@@ -402,14 +404,18 @@ export class DealExplorerClient {
 
     const orderByConverted = serializeDealShortOrderByToIndexer(orderBy);
 
-    const _cond = (dealsFilters?.minPricePerWorkerEpoch || dealsFilters?.maxPricePerWorkerEpoch) !== undefined
+    const _cond =
+      (dealsFilters?.minPricePerWorkerEpoch ||
+        dealsFilters?.maxPricePerWorkerEpoch) !== undefined;
     const commonTokenDecimals = await this._calculateTokenDecimalsForFilters(
       dealsFilters?.paymentTokens,
       _cond,
-    )
+    );
 
-    const filtersConverted =
-      await serializeDealsFiltersToIndexer(dealsFilters, commonTokenDecimals);
+    const filtersConverted = await serializeDealsFiltersToIndexer(
+      dealsFilters,
+      commonTokenDecimals,
+    );
     const data = await this._indexerClient.getDeals({
       filters: filtersConverted,
       offset,
@@ -594,22 +600,25 @@ export class DealExplorerClient {
   ): Promise<CapacityCommitmentListView> {
     await this._init();
 
-    const orderBySerialized = serializeCapacityCommitmentsOrderByToIndexer(orderBy);
+    const orderBySerialized =
+      serializeCapacityCommitmentsOrderByToIndexer(orderBy);
 
-    let currentEpoch = undefined
+    let currentEpoch = undefined;
     if (filters?.onlyActive) {
       if (this._coreInitTimestamp == null || this._coreEpochDuration == null) {
-        throw new Error("Assertion: Class object was not inited correctly.")
+        throw new Error("Assertion: Class object was not inited correctly.");
       }
       currentEpoch = calculateEpoch(
         Date.now() / 1000,
         this._coreInitTimestamp,
         this._coreEpochDuration,
-      ).toString()
+      ).toString();
     }
 
-    const filtersSerialized =
-      serializeCapacityCommitmentsFiltersToIndexer(filters, currentEpoch);
+    const filtersSerialized = serializeCapacityCommitmentsFiltersToIndexer(
+      filters,
+      currentEpoch,
+    );
     const data = await this._indexerClient.getCapacityCommitments({
       filters: filtersSerialized,
       offset,
@@ -620,16 +629,30 @@ export class DealExplorerClient {
     const res: Array<CapacityCommitmentShort> = [];
 
     if (data) {
-      if (data.graphNetworks.length != 1 || data.graphNetworks[0] == undefined) {
-        throw new Error("Assertion: data.graphNetworks.length != 1 || data.graphNetworks[0] == undefined.")
+      if (
+        data.graphNetworks.length != 1 ||
+        data.graphNetworks[0] == undefined
+      ) {
+        throw new Error(
+          "Assertion: data.graphNetworks.length != 1 || data.graphNetworks[0] == undefined.",
+        );
       }
 
-      const capacityComitmentIds: Array<string> = data.capacityCommitments.map((capacityCommitment) => {return capacityCommitment.id})
+      const capacityComitmentIds: Array<string> = data.capacityCommitments.map(
+        (capacityCommitment) => {
+          return capacityCommitment.id;
+        },
+      );
       const capacityCommitmentsStatuses: Array<CapacityCommitmentStatus> =
-        await this._dealRpcClient!.getStatusCapacityCommitmentsBatch(this._capacityContractAddress!, capacityComitmentIds);
+        await this._dealRpcClient!.getStatusCapacityCommitmentsBatch(
+          this._capacityContractAddress!,
+          capacityComitmentIds,
+        );
 
       for (let i = 0; i < data.capacityCommitments.length; i++) {
-        const capacityCommitment = data.capacityCommitments[i] as CapacityCommitmentBasicFragment
+        const capacityCommitment = data.capacityCommitments[
+          i
+        ] as CapacityCommitmentBasicFragment;
 
         res.push(
           serializeCapacityCommitmentShort(
@@ -637,8 +660,8 @@ export class DealExplorerClient {
             capacityCommitmentsStatuses[i] ?? "undefined",
             this._coreInitTimestamp!,
             this._coreEpochDuration!,
-          )
-        )
+          ),
+        );
       }
     }
     // TODO: generalize code below.
@@ -656,30 +679,41 @@ export class DealExplorerClient {
     };
   }
 
-  async getCapacityCommitment(capacityCommitmentId: string): Promise<CapacityCommitmentDetail | null> {
+  async getCapacityCommitment(
+    capacityCommitmentId: string,
+  ): Promise<CapacityCommitmentDetail | null> {
     await this._init();
     const options = {
       id: capacityCommitmentId,
     };
     const data = await this._indexerClient.getCapacityCommitment(options);
     if (!data || !data.capacityCommitment) {
-      return null
+      return null;
     }
 
     const capacityCommitment = data.capacityCommitment;
-    const capacityCommitmentRpcDetails = (
-      await this._dealRpcClient!.getCapacityCommitmentDetails(this._capacityContractAddress!, capacityCommitment.id)
-    );
+    const capacityCommitmentRpcDetails =
+      await this._dealRpcClient!.getCapacityCommitmentDetails(
+        this._capacityContractAddress!,
+        capacityCommitment.id,
+      );
 
     return {
       ...serializeCapacityCommitmentShort(
-        capacityCommitment, capacityCommitmentRpcDetails.status,
-        this._coreInitTimestamp!, this._coreEpochDuration!),
+        capacityCommitment,
+        capacityCommitmentRpcDetails.status,
+        this._coreInitTimestamp!,
+        this._coreEpochDuration!,
+      ),
       totalCollateral: tokenValueToRounded(capacityCommitment.totalCollateral),
       collateralToken: FLTToken,
       rewardDelegatorRate: capacityCommitment.rewardDelegatorRate,
-      unlockedRewards: capacityCommitmentRpcDetails.unlockedRewards ? tokenValueToRounded(capacityCommitmentRpcDetails.unlockedRewards) : "0",
-      totalRewards: capacityCommitmentRpcDetails.totalRewards ? tokenValueToRounded(capacityCommitmentRpcDetails.totalRewards) : "0",
+      unlockedRewards: capacityCommitmentRpcDetails.unlockedRewards
+        ? tokenValueToRounded(capacityCommitmentRpcDetails.unlockedRewards)
+        : "0",
+      totalRewards: capacityCommitmentRpcDetails.totalRewards
+        ? tokenValueToRounded(capacityCommitmentRpcDetails.totalRewards)
+        : "0",
     };
   }
 }

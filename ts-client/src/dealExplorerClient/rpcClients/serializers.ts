@@ -1,5 +1,5 @@
-import type {Result} from "ethers";
-import type {CapacityCommitmentStatus, DealStatus} from "../types/schemes.js";
+import type { Result } from "ethers";
+import type { CapacityCommitmentStatus, DealStatus } from "../types/schemes.js";
 
 export function serializeTxDealStatus(result: Result | null): DealStatus {
   // Values are:
@@ -32,7 +32,9 @@ export function serializeTxDealStatus(result: Result | null): DealStatus {
   return status;
 }
 
-export function serializeTxCapacityCommitmentStatus(result: Result | null): CapacityCommitmentStatus {
+export function serializeTxCapacityCommitmentStatus(
+  result: Result | null,
+): CapacityCommitmentStatus {
   // Values are:
   // active
   // waitDelegation

@@ -29,9 +29,9 @@ export abstract class Multicall3ContractClient {
 
   /*
    * @dev Put arrays of encoded calls and other data to decode and convert responses:
-    *dev - callResultsInterfaces
-    *dev - contractMethods
-    *dev - txResultsConverters
+   * @dev - callResultsInterfaces
+   * @dev - contractMethods
+   * @dev - txResultsConverters
    * @dev Note, If one of the transaction is reverted it sends null to txResultsConverter.
    * @dev  Thus, null should be caught appropriate in a supplied txResultsConverter.
    */
@@ -41,8 +41,17 @@ export abstract class Multicall3ContractClient {
     contractMethods: Array<string>,
     txResultsConverters: Array<TxResultsConverter>,
   ): Promise<Array<any>> {
-    if ((callsEncoded.length + callResultsInterfaces.length + contractMethods.length + txResultsConverters.length) % 4 != 0) {
-      throw new Error("Assertion: callsEncoded, callResultsInterfaces, contractMethods, txResultsConverters should have the same length.")
+    if (
+      (callsEncoded.length +
+        callResultsInterfaces.length +
+        contractMethods.length +
+        txResultsConverters.length) %
+        4 !=
+      0
+    ) {
+      throw new Error(
+        "Assertion: callsEncoded, callResultsInterfaces, contractMethods, txResultsConverters should have the same length.",
+      );
     }
     console.group("[_callBatch]");
     console.info(
@@ -55,11 +64,17 @@ export abstract class Multicall3ContractClient {
 
     let decodedResults: Array<any> = [];
     for (let i = 0; i < multicallContractCallResults.length; i++) {
-      const txResultsConverter = txResultsConverters[i]
-      const contractMethod = contractMethods[i]
-      const callResultsInterface = callResultsInterfaces[i]
-      if (txResultsConverter == undefined || contractMethod == undefined || callResultsInterface == undefined) {
-        throw new Error("Assertion: txResultsConverter or contractMethod or callResultsInterface is undefined.")
+      const txResultsConverter = txResultsConverters[i];
+      const contractMethod = contractMethods[i];
+      const callResultsInterface = callResultsInterfaces[i];
+      if (
+        txResultsConverter == undefined ||
+        contractMethod == undefined ||
+        callResultsInterface == undefined
+      ) {
+        throw new Error(
+          "Assertion: txResultsConverter or contractMethod or callResultsInterface is undefined.",
+        );
       }
 
       const rawResult = multicallContractCallResults[i];
