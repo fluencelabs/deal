@@ -22,8 +22,8 @@ import { ethers } from "ethers";
 
 // TODO: from env.
 const TEST_NETWORK: ContractsENV = "local";
-const TEST_RPC_URL = "http://localhost:8545";
-const DEFAULT_SUBGRAPH_TIME_INDEXING = 10000;
+const TEST_RPC_URL = "http://akim-dev.dev.fluence.dev:8545";
+const DEFAULT_SUBGRAPH_TIME_INDEXING = 240000;
 const DEFAULT_CONFIRMATIONS = 1;
 // Test timeout should include:
 // - time for confirmations waits (1 confirmation is setup on anvil chain start)
@@ -31,7 +31,7 @@ const DEFAULT_CONFIRMATIONS = 1;
 // - time for core epoch
 // - other eps.
 // TODO: get core.epochDuration instead of 30000
-const TESTS_TIMEOUT = 120000 + 30000;
+const TESTS_TIMEOUT = 120000 + 30000 + DEFAULT_SUBGRAPH_TIME_INDEXING;
 
 function getDefaultOfferFixture(
   owner: string,
@@ -161,7 +161,8 @@ describe("#getMatchedOffersByDealId", () => {
       const commitmentIds = capacityCommitmentCreatedEventsLast.map(
         (event) => event.args.commitmentId,
       );
-      let collateralToApproveCommitments = 0n;
+
+      console.info("Deposit collateral for all sent CC...");
       for (const commitmentId of commitmentIds) {
         const commitment = await capacityContract.getCommitment(commitmentId);
         const collateralToApproveCommitment =
@@ -173,27 +174,16 @@ describe("#getMatchedOffersByDealId", () => {
           collateralToApproveCommitment,
           "...",
         );
-        collateralToApproveCommitments += collateralToApproveCommitment;
-      }
-      console.info(
-        `Send approve of FLT for all commitments for value: ${collateralToApproveCommitments}...`,
-      );
-      const fltContract = await contractsClient.getFLT();
-      const collateralToApproveCommitmentsTx = await fltContract.approve(
-        capacityContractAddress,
-        collateralToApproveCommitments,
-      );
-      await collateralToApproveCommitmentsTx.wait(DEFAULT_CONFIRMATIONS);
 
-      console.info("Deposit collateral for all sent CC...");
-      for (const commitmentId of commitmentIds) {
         console.info(
           "Deposit collateral for commitmentId: ",
           commitmentId,
           "...",
         );
-        const depositCollateralTx =
-          await capacityContract.depositCollateral(commitmentId);
+        const depositCollateralTx = await capacityContract.depositCollateral(
+          commitmentId,
+          { value: collateralToApproveCommitment },
+        );
         await depositCollateralTx.wait(DEFAULT_CONFIRMATIONS);
       }
 
@@ -268,7 +258,10 @@ describe("#getMatchedOffersByDealId", () => {
 
       console.log("---- Deal Matching ----");
       console.info(`Find matched offers for dealId: ${dealId}...`);
-      const dealMatcherClient = new DealMatcherClient(TEST_NETWORK);
+      const dealMatcherClient = new DealMatcherClient(
+        TEST_NETWORK,
+        "http://akim-dev.dev.fluence.dev:8000/subgraphs/name/fluence-deal-contracts",
+      );
       const matchedOffersOut =
         await dealMatcherClient.getMatchedOffersByDealId(dealId);
       expect(matchedOffersOut.offers.length).toBe(1); // At least with one previously created offer it matched.
