@@ -26,6 +26,7 @@ import {
 import {Initialized} from "../../generated/Capacity/Capacity";
 import {BigInt} from "@graphprotocol/graph-ts";
 import {formatAddress} from "./utils";
+import {log} from "@graphprotocol/graph-ts/index";
 
 
 export function handleWhitelistAccessGranted(event: WhitelistAccessGranted): void {
@@ -47,8 +48,13 @@ export function handleInitialized(event: Initialized): void {
 }
 
 export function handleCommitmentCreated(event: CommitmentCreated): void {
+  // TODO: rm those logs if phantom error does not occur.
+  log.info("[handleCommitmentCreated] Start...", []);
   let commitment = new CapacityCommitment(event.params.commitmentId.toHex());
+  log.info("event.params.commitmentId.toHex():", [event.params.commitmentId.toHex()]);
+  log.info("event.params.peerId.toHex():", [event.params.peerId.toHex()]);
   let peer = Peer.load(event.params.peerId.toHex()) as Peer;
+  log.info("peer loaded successfully:", [peer.id]);
 
   commitment.peer = peer.id
   commitment.provider = peer.provider

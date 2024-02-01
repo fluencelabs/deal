@@ -78,3 +78,10 @@ export function serializeTxCapacityCommitmentStatus(result: Result | null): Capa
   }
   return status;
 }
+
+export function serializeTxToBigInt(result: Result | null): bigint | null {
+  if (!result) {
+    return null;
+  }
+  return BigInt(result.toString());
+}

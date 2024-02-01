@@ -1,4 +1,4 @@
-import type { Result, ethers } from "ethers";
+import type { ethers } from "ethers";
 import {
   Multicall3ContractClient,
   type Multicall3ContractCall,
@@ -6,7 +6,7 @@ import {
 import {Capacity__factory, Deal__factory} from "../../index.js";
 import {
   serializeTxCapacityCommitmentStatus,
-  serializeTxDealStatus
+  serializeTxDealStatus, serializeTxToBigInt
 } from "./serializers.js";
 import type {CapacityCommitmentStatus} from "../types/schemes.js";
 
@@ -61,13 +61,6 @@ export class DealRpcClient extends Multicall3ContractClient {
     );
   }
 
-  _txToBigInt(result: Result | null): bigint | null {
-    if (!result) {
-      return null;
-    }
-    return BigInt(result.toString());
-  }
-
   async getFreeBalanceDealBatch(dealAddresses: Array<string>) {
     if (dealAddresses[0] == undefined) {
       return [];
@@ -99,7 +92,7 @@ export class DealRpcClient extends Multicall3ContractClient {
       )
       callResultsInterfaces.push(contractInstance.interface)
       contractMethods.push(contractMethod)
-      txResultsConverters.push(this._txToBigInt)
+      txResultsConverters.push(serializeTxToBigInt)
     }
 
     // TODO: add exact validation instead of "as".
@@ -144,5 +137,53 @@ export class DealRpcClient extends Multicall3ContractClient {
       contractMethods,
       txResultsConverters,
     )) as Array<CapacityCommitmentStatus>;
+  }
+
+  // Fetch on-chain data through several view methods of Capacity contract for the exact CC.
+  // It gets:
+  // - status
+  // - unlockedRewards
+  // - totalRewards
+  async getCapacityCommitmentDetails(capacityContractAddress: string, capacityCommitmentId: string) {
+    const contractInstance = Capacity__factory.connect(
+      capacityContractAddress,
+      this._caller,
+    );
+
+    const contractMethods = ["getStatus", "unlockedRewards", "totalRewards"]
+    const txResultsConverters = [serializeTxCapacityCommitmentStatus, serializeTxToBigInt, serializeTxToBigInt]
+    const callsEncoded: Multicall3ContractCall[] = [
+      {
+        target: capacityContractAddress,
+        allowFailure: true, // We allow failure for all calls.
+        callData: contractInstance.interface.encodeFunctionData("getStatus", [capacityCommitmentId]),
+      },
+      {
+        target: capacityContractAddress,
+        allowFailure: true, // We allow failure for all calls.
+        callData: contractInstance.interface.encodeFunctionData("unlockedRewards", [capacityCommitmentId]),
+      },
+      {
+        target: capacityContractAddress,
+        allowFailure: true, // We allow failure for all calls.
+        callData: contractInstance.interface.encodeFunctionData("totalRewards", [capacityCommitmentId]),
+      }
+    ];
+    const callResultsInterfaces = [contractInstance.interface, contractInstance.interface, contractInstance.interface]
+
+    const results = await this._callBatch(
+      callsEncoded,
+      callResultsInterfaces,
+      contractMethods,
+      txResultsConverters,
+    )
+    if (results.length != 3) {
+      throw new Error("[getCapacityCommitmentDetails] Assertion: results.length != 3")
+    }
+    return {
+      status: results[0] as CapacityCommitmentStatus,
+      unlockedRewards: results[1] as bigint | null,
+      totalRewards: results[2] as bigint | null,
+    }
   }
 }

@@ -41,6 +41,9 @@ export abstract class Multicall3ContractClient {
     contractMethods: Array<string>,
     txResultsConverters: Array<TxResultsConverter>,
   ): Promise<Array<any>> {
+    if ((callsEncoded.length + callResultsInterfaces.length + contractMethods.length + txResultsConverters.length) % 4 != 0) {
+      throw new Error("Assertion: callsEncoded, callResultsInterfaces, contractMethods, txResultsConverters should have the same length.")
+    }
     console.group("[_callBatch]");
     console.info(
       "Send batch request with callsEncoded = %s...",

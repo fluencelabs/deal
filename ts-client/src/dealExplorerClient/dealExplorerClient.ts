@@ -1,75 +1,83 @@
-import { ethers } from "ethers";
+import {ethers} from "ethers";
 import type {
-  OfferDetail,
-  Effector,
-  ProviderDetail,
-  DealDetail,
-  DealStatus,
-  DealShortListView,
-  OfferShortListView,
-  ProviderShortListView,
-  PaymentToken,
-  PaymentTokenListView,
-  EffectorListView,
+  CapacityCommitmentDetail,
   CapacityCommitmentListView,
   CapacityCommitmentShort,
   CapacityCommitmentStatus,
+  DealDetail,
+  DealShortListView,
+  DealStatus,
+  Effector,
+  EffectorListView,
+  OfferDetail,
+  OfferShortListView,
+  PaymentToken,
+  PaymentTokenListView,
+  ProviderDetail,
+  ProviderShortListView,
 } from "./types/schemes.js";
 import type {
   ByProviderAndStatusFilter,
+  CapacityCommitmentsFilters,
+  CapacityCommitmentsOrderBy,
   DealsFilters,
-  OffersFilters,
-  OfferShortOrderBy,
-  ProvidersFilters,
-  OrderType,
-  ProviderShortOrderBy,
   DealsShortOrderBy,
   EffectorsOrderBy,
-  PaymentTokenOrderBy, CapacityCommitmentsFilters, CapacityCommitmentsOrderBy
+  OffersFilters,
+  OfferShortOrderBy,
+  OrderType,
+  PaymentTokenOrderBy,
+  ProvidersFilters,
+  ProviderShortOrderBy
 } from "./types/filters.js";
-import { IndexerClient } from "./indexerClient/indexerClient.js";
+import {IndexerClient} from "./indexerClient/indexerClient.js";
 import type {
   BasicDealFragment,
   ComputeUnitBasicFragment,
 } from "./indexerClient/queries/deals-query.generated.js";
-import { DealClient } from "../client/client.js";
-import type { ContractsENV } from "../client/config.js";
-import type { BasicPeerFragment } from "./indexerClient/queries/offers-query.generated.js";
-import { DealRpcClient } from "./rpcClients/index.js";
+import {DealClient} from "../client/client.js";
+import type {ContractsENV} from "../client/config.js";
+import type {
+  BasicPeerFragment
+} from "./indexerClient/queries/offers-query.generated.js";
+import {DealRpcClient} from "./rpcClients/index.js";
 import {
   calculateEpoch,
   DEFAULT_ORDER_TYPE,
-  DEFAULT_TOKEN_VALUE_ROUNDING, FILTER_MULTISELECT_MAX,
+  DEFAULT_TOKEN_VALUE_ROUNDING,
+  FILTER_MULTISELECT_MAX,
   tokenValueToRounded,
 } from "./utils.js";
-import {
-  serializeEffectorDescription,
-} from "./serializers/logics.js";
+import {serializeEffectorDescription,} from "./serializers/logics.js";
 import {serializeDealProviderAccessLists} from "../utils/serializers.js";
 import {
-  serializeDealsFiltersToIndexer,
-  serializeOffersFiltersToIndexerType,
   FiltersError,
   serializeCapacityCommitmentsFiltersToIndexer,
-  serializeProviderFiltersToIndexer, ValidTogetherFiltersError
+  serializeDealsFiltersToIndexer,
+  serializeOffersFiltersToIndexerType,
+  serializeProviderFiltersToIndexer,
+  ValidTogetherFiltersError
 } from "./serializers/filters.js";
 import {
   serializeCapacityCommitmentShort,
-  serializeComputeUnits, serializeDealsShort,
+  serializeComputeUnits,
+  serializeDealsShort,
   serializeEffectors,
-  serializeOfferShort, serializePeers,
+  serializeOfferShort,
+  serializePeers,
   serializeProviderBase,
   serializeProviderShort
 } from "./serializers/schemes.js";
 import {
+  serializeCapacityCommitmentsOrderByToIndexer,
   serializeDealShortOrderByToIndexer,
-  serializeOfferShortOrderByToIndexer,
-  serializeCapacityCommitmentsOrderByToIndexer
+  serializeOfferShortOrderByToIndexer
 } from "./serializers/orderby.js";
 import type {ICapacity} from "../typechain-types/index.js";
 import type {
   CapacityCommitmentBasicFragment
 } from "./indexerClient/queries/capacity-commitments-query.generated.js";
+import {FLTToken} from "./constants.js";
 
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
@@ -348,14 +356,6 @@ export class DealExplorerClient {
 
   /*
    * @dev Get offers list for 1 page and specified filters.
-   * @dev # Deprecated Notice:
-   * @dev - minCollateralPerWorker
-   * @dev - maxCollateralPerWorker
-   * @dev - skip: renamed to offset
-   * @dev - take: renamed to limit
-   * @dev - order: renamed to orderBy
-   * @dev - paymentToken: array of paymentTokens
-   * TODO: remove unused vars.
    */
   async getOffers(
     offerFilters?: OffersFilters,
@@ -653,6 +653,33 @@ export class DealExplorerClient {
     return {
       data: res,
       total,
+    };
+  }
+
+  async getCapacityCommitment(capacityCommitmentId: string): Promise<CapacityCommitmentDetail | null> {
+    await this._init();
+    const options = {
+      id: capacityCommitmentId,
+    };
+    const data = await this._indexerClient.getCapacityCommitment(options);
+    if (!data || !data.capacityCommitment) {
+      return null
+    }
+
+    const capacityCommitment = data.capacityCommitment;
+    const capacityCommitmentRpcDetails = (
+      await this._dealRpcClient!.getCapacityCommitmentDetails(this._capacityContractAddress!, capacityCommitment.id)
+    );
+
+    return {
+      ...serializeCapacityCommitmentShort(
+        capacityCommitment, capacityCommitmentRpcDetails.status,
+        this._coreInitTimestamp!, this._coreEpochDuration!),
+      totalCollateral: tokenValueToRounded(capacityCommitment.totalCollateral),
+      collateralToken: FLTToken,
+      rewardDelegatorRate: capacityCommitment.rewardDelegatorRate,
+      unlockedRewards: capacityCommitmentRpcDetails.unlockedRewards ? tokenValueToRounded(capacityCommitmentRpcDetails.unlockedRewards) : "0",
+      totalRewards: capacityCommitmentRpcDetails.totalRewards ? tokenValueToRounded(capacityCommitmentRpcDetails.totalRewards) : "0",
     };
   }
 }
