@@ -7,9 +7,6 @@ tmp
 typechain-types
 deployments
 
-# dependencies
-node_modules
-
 # IDEs and editors
 /.idea
 .project
@@ -40,5 +37,4 @@ testem.log
 .DS_Store
 Thumbs.db
 
-node_modules
 .env

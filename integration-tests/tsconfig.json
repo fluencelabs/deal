@@ -1,0 +1,14 @@
+{
+  "extends": ["@tsconfig/node18", "@tsconfig/strictest"],
+  "compilerOptions": {
+    "importHelpers": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "moduleResolution": "NodeNext",
+    "module": "ESNext",
+    "resolveJsonModule": true,
+    "verbatimModuleSyntax": true,
+    "lib": ["es2023"]
+  },
+  "include": ["src"],
+}
