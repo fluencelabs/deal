@@ -8,6 +8,7 @@ import {
   serializeTxCapacityCommitmentStatus,
   serializeTxDealStatus
 } from "./serializers.js";
+import type {CapacityCommitmentStatus} from "../types/schemes.js";
 
 export class DealRpcClient extends Multicall3ContractClient {
   constructor(
@@ -24,26 +25,39 @@ export class DealRpcClient extends Multicall3ContractClient {
     }
 
     // We need any of the deal contract coz we will use interface of the Deal only.
-    const dealContractForInterface = Deal__factory.connect(
+    const contractInstance = Deal__factory.connect(
       dealAddresses[0],
       this._caller,
     );
     const contractMethod = "getStatus";
     const callEncoded =
-      dealContractForInterface.interface.encodeFunctionData(contractMethod);
-    const callsEncoded: Multicall3ContractCall[] = dealAddresses.map(
-      (dealAddress) => ({
-        target: dealAddress,
-        allowFailure: true, // We allow failure for all calls.
-        callData: callEncoded,
-      }),
-    );
+      contractInstance.interface.encodeFunctionData(contractMethod);
+    const callsEncoded: Multicall3ContractCall[] = [];
+    const callResultsInterfaces = []
+    const contractMethods = []
+    const txResultsConverters = []
+    for (let i = 0; i < dealAddresses.length; i++) {
+      const dealAddress = dealAddresses[i]
+      if (!dealAddress) {
+        throw new Error("Assertion: dealAddress is undefined.")
+      }
+      callsEncoded.push(
+        {
+          target: dealAddress,
+          allowFailure: true, // We allow failure for all calls.
+          callData: callEncoded,
+        }
+      )
+      callResultsInterfaces.push(contractInstance.interface)
+      contractMethods.push(contractMethod)
+      txResultsConverters.push(serializeTxDealStatus)
+    }
 
     return await this._callBatch(
       callsEncoded,
-      dealContractForInterface.interface,
-      contractMethod,
-      serializeTxDealStatus,
+      callResultsInterfaces,
+      contractMethods,
+      txResultsConverters,
     );
   }
 
@@ -59,27 +73,42 @@ export class DealRpcClient extends Multicall3ContractClient {
       return [];
     }
 
-    const dealContractForInterface = Deal__factory.connect(
+    const contractInstance = Deal__factory.connect(
       dealAddresses[0],
       this._caller,
     );
     const contractMethod = "getFreeBalance";
     const callEncoded =
-      dealContractForInterface.interface.encodeFunctionData(contractMethod);
-    const callsEncoded: Multicall3ContractCall[] = dealAddresses.map(
-      (dealAddress) => ({
-        target: dealAddress,
-        allowFailure: true, // We allow failure for all calls.
-        callData: callEncoded,
-      }),
-    );
+      contractInstance.interface.encodeFunctionData(contractMethod);
 
-    return await this._callBatch(
+    const callsEncoded: Multicall3ContractCall[] = [];
+    const callResultsInterfaces = []
+    const contractMethods = []
+    const txResultsConverters = []
+    for (let i = 0; i < dealAddresses.length; i++) {
+      const dealAddress = dealAddresses[i]
+      if (!dealAddress) {
+        throw new Error("Assertion: dealAddress is undefined.")
+      }
+      callsEncoded.push(
+        {
+          target: dealAddress,
+          allowFailure: true, // We allow failure for all calls.
+          callData: callEncoded,
+        }
+      )
+      callResultsInterfaces.push(contractInstance.interface)
+      contractMethods.push(contractMethod)
+      txResultsConverters.push(this._txToBigInt)
+    }
+
+    // TODO: add exact validation instead of "as".
+    return (await this._callBatch(
       callsEncoded,
-      dealContractForInterface.interface,
-      contractMethod,
-      this._txToBigInt,
-    );
+      callResultsInterfaces,
+      contractMethods,
+      txResultsConverters,
+    )) as Array<bigint | null>;
   }
 
   // Get statuses for batch of Capacity Commitments by 1 call.
@@ -91,6 +120,9 @@ export class DealRpcClient extends Multicall3ContractClient {
     );
     const contractMethod = "getStatus";
     const callsEncoded: Multicall3ContractCall[] = [];
+    const callResultsInterfaces = []
+    const contractMethods = []
+    const txResultsConverters = []
     for (let i = 0; i < capacityCommitmentIds.length; i++) {
       callsEncoded.push(
         {
@@ -100,13 +132,17 @@ export class DealRpcClient extends Multicall3ContractClient {
           callData: contractInstance.interface.encodeFunctionData(contractMethod, [capacityCommitmentIds[i]]),
         }
       )
+      callResultsInterfaces.push(contractInstance.interface)
+      contractMethods.push(contractMethod)
+      txResultsConverters.push(serializeTxCapacityCommitmentStatus)
     }
 
-    return await this._callBatch(
+    // TODO: add exact validation instead of "as".
+    return (await this._callBatch(
       callsEncoded,
-      contractInstance.interface,
-      contractMethod,
-      serializeTxCapacityCommitmentStatus,
-    );
+      callResultsInterfaces,
+      contractMethods,
+      txResultsConverters,
+    )) as Array<CapacityCommitmentStatus>;
   }
 }

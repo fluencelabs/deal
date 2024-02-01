@@ -7,7 +7,7 @@ export type Multicall3ContractCall = {
   callData: string;
 };
 export type Aggregate3Response = { success: boolean; returnData: string };
-export type TxResultsConverter<T> = (result: Result | null, ...opt: any[]) => T;
+export type TxResultsConverter = (result: Result | null, ...opt: any[]) => any;
 
 /*
  * @description Client to be inherited from to work with Multicall3 contract to perform batch calls.
@@ -28,15 +28,19 @@ export abstract class Multicall3ContractClient {
   }
 
   /*
-   * @dev Note, If one of the transcation is unsuccessfull it sends null to txResultsConverter.
-   * @dev  Thus, null should be catched approptitery in txResultsConverter.
+   * @dev Put arrays of encoded calls and other data to decode and convert responses:
+    *dev - callResultsInterfaces
+    *dev - contractMethods
+    *dev - txResultsConverters
+   * @dev Note, If one of the transaction is reverted it sends null to txResultsConverter.
+   * @dev  Thus, null should be caught appropriate in a supplied txResultsConverter.
    */
-  async _callBatch<ConvertTo>(
+  async _callBatch(
     callsEncoded: Multicall3ContractCall[],
-    callResultsInterface: Interface,
-    contractMethod: string,
-    txResultsConverter: TxResultsConverter<ConvertTo>,
-  ): Promise<Array<ConvertTo>> {
+    callResultsInterfaces: Array<Interface>,
+    contractMethods: Array<string>,
+    txResultsConverters: Array<TxResultsConverter>,
+  ): Promise<Array<any>> {
     console.group("[_callBatch]");
     console.info(
       "Send batch request with callsEncoded = %s...",
@@ -44,27 +48,33 @@ export abstract class Multicall3ContractClient {
     );
     const multicallContractCallResults: Aggregate3Response[] =
       await this._multicall3Contract.aggregate3.staticCall(callsEncoded);
-    let decodedResults: Array<ConvertTo> = [];
-    console.info(
-      "Decode and convert all results with converter %s",
-      txResultsConverter.name,
-    );
-    for (const rawResult of multicallContractCallResults) {
-      const status = rawResult.success;
+    console.debug("Got: %s", JSON.stringify(multicallContractCallResults));
+
+    let decodedResults: Array<any> = [];
+    for (let i = 0; i < multicallContractCallResults.length; i++) {
+      const txResultsConverter = txResultsConverters[i]
+      const contractMethod = contractMethods[i]
+      const callResultsInterface = callResultsInterfaces[i]
+      if (txResultsConverter == undefined || contractMethod == undefined || callResultsInterface == undefined) {
+        throw new Error("Assertion: txResultsConverter or contractMethod or callResultsInterface is undefined.")
+      }
+
+      const rawResult = multicallContractCallResults[i];
+      if (rawResult == undefined || !rawResult.success) {
+        decodedResults.push(txResultsConverter(null));
+        continue;
+      }
+
       const rawReturnData = rawResult.returnData;
-      console.info("Success status: %s", status);
       console.debug("Raw data: %s", rawReturnData);
 
-      if (!status) {
-        decodedResults.push(txResultsConverter(null));
-      } else {
-        const decoded = callResultsInterface.decodeFunctionResult(
-          contractMethod,
-          rawReturnData,
-        );
-        console.debug("Got after decoding: %s", decoded);
-        decodedResults.push(txResultsConverter(decoded));
-      }
+      const decoded = callResultsInterface.decodeFunctionResult(
+        contractMethod,
+        rawReturnData,
+      );
+      console.debug("Got after decoding: %s", decoded);
+      console.info("Apply converter: %s", txResultsConverter.name);
+      decodedResults.push(txResultsConverter(decoded));
     }
     console.groupEnd();
     return decodedResults;
