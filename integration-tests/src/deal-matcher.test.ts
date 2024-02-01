@@ -22,7 +22,7 @@ import { ethers } from "ethers";
 
 // TODO: from env.
 const TEST_NETWORK: ContractsENV = "local";
-const TEST_RPC_URL = "http://akim-dev.dev.fluence.dev:8545";
+const TEST_RPC_URL = "http://localhost:8545";
 const DEFAULT_SUBGRAPH_TIME_INDEXING = 240000;
 const DEFAULT_CONFIRMATIONS = 1;
 // Test timeout should include:
@@ -262,7 +262,7 @@ describe("#getMatchedOffersByDealId", () => {
       console.info(`Find matched offers for dealId: ${dealId}...`);
       const dealMatcherClient = new DealMatcherClient(
         TEST_NETWORK,
-        "http://akim-dev.dev.fluence.dev:8000/subgraphs/name/fluence-deal-contracts",
+        "http://localhost:8000/subgraphs/name/fluence-deal-contracts",
       );
       const matchedOffersOut =
         await dealMatcherClient.getMatchedOffersByDealId(dealId);
