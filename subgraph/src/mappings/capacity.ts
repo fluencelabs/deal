@@ -69,6 +69,7 @@ export function handleCommitmentCreated(event: CommitmentCreated): void {
   commitment.nextAdditionalActiveUnitCount = 0
   commitment.snapshotEpoch = ZERO_BIG_INT
   commitment.deleted = false;
+  commitment.totalCollateral = ZERO_BIG_INT;
   commitment.save()
 
   peer.currentCapacityCommitment = commitment.id;
@@ -122,8 +123,11 @@ export function handleCommitmentActivated(event: CommitmentActivated): void {
   peer.save();
 }
 
-// @deprecated. Currently, no use for the event as it is used in handleCommitmentActivated.
-export function handleCollateralDeposited(event: CollateralDeposited): void {}
+export function handleCollateralDeposited(event: CollateralDeposited): void {
+  let commitment = CapacityCommitment.load(event.params.commitmentId.toHex()) as CapacityCommitment;
+  commitment.totalCollateral = event.params.totalCollateral;
+  commitment.save()
+}
 
 export function handleCommitmentRemoved(event: CommitmentRemoved): void {
   let commitment = CapacityCommitment.load(event.params.commitmentId.toHex()) as CapacityCommitment;

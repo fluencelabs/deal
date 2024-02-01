@@ -24,19 +24,35 @@ export interface PaymentTokenListView extends ListViewABC {
 }
 
 export interface CapacityCommitmentListView extends ListViewABC {
-  data: Array<CapacityCommitment>;
+  data: Array<CapacityCommitmentShort>;
 }
 
 // @param expiredAt: null if not CC have not been activated yet.
-export type CapacityCommitment = {
+// @param startedAt: is not null when delegator deposited collateral and CC could be activated.
+export interface CapacityCommitmentShort {
   id: string;
   createdAt: number;
+  startedAt: number | null
   expiredAt: number | null;
   providerId: string;
   peerId: string;
   computeUnitsCount: number;
   status: CapacityCommitmentStatus;
-};
+}
+
+// Other related fields to CC should be fetched separately, e.g.
+// - list of CUs
+// - proofs
+// @param totalCollateral: collateral that deposited.
+// @param unlockedRewards: reward for CC that unlocked to withdraw.
+// @param totalRewards: total rewards collected - already withdrawn.
+export interface CapacityCommitmentDetail extends CapacityCommitmentShort {
+  totalCollateral: string;
+  collateralToken: NativeToken;
+  rewardDelegatorRate: number;
+  unlockedRewards: string;
+  totalRewards: string;
+}
 
 export type ProviderBase = {
   id: string;
@@ -76,11 +92,17 @@ export interface OfferDetail extends OfferShort {
   updatedAt: number;
 }
 
-export type PaymentToken = {
-  address: string;
+// Token that is used for the blockchain.
+// This is a constant per chain type.
+export interface NativeToken {
   symbol: string;
   decimals: string;
-};
+}
+
+// Other tokens
+export interface PaymentToken extends NativeToken {
+  address: string;
+}
 
 export type Revenue = {
   total: number;

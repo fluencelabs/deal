@@ -3,6 +3,7 @@ import type {
   ProviderOfProvidersQueryFragment
 } from "../indexerClient/queries/providers-query.generated.js";
 import type {
+  CapacityCommitmentShort, CapacityCommitmentStatus,
   ComputeUnit, DealShort, DealStatus,
   Effector,
   OfferShort, Peer,
@@ -13,12 +14,20 @@ import type {
   BasicOfferFragment, BasicPeerFragment
 } from "../indexerClient/queries/offers-query.generated.js";
 import {serializeEffectorDescription, serializeProviderName} from "./logics.js";
-import {DEFAULT_TOKEN_VALUE_ROUNDING, tokenValueToRounded} from "../utils.js";
+import {
+  calculateTimestamp,
+  DEFAULT_TOKEN_VALUE_ROUNDING,
+  tokenValueToRounded
+} from "../utils.js";
 import type {
   BasicDealFragment,
   ComputeUnitBasicFragment
 } from "../indexerClient/queries/deals-query.generated.js";
+import type {
+  CapacityCommitmentBasicFragment
+} from "../indexerClient/queries/capacity-commitments-query.generated.js";
 
+// TODO: rename to scheme suffixes not there is a Zoo in naming a little.
 export function serializeEffectors(
     manyToManyEffectors:
       | Array<{ effector: { id: string; description: string } }>
@@ -173,4 +182,37 @@ export function serializeDealsShort(
     registeredWorkers: 0,
     matchedWorkers: 0,
   };
+}
+
+export function serializeCapacityCommitmentShort(
+  capacityCommitmentFromIndexer: CapacityCommitmentBasicFragment,
+  statusFromRpc: CapacityCommitmentStatus,
+  coreInitTimestamp: number,
+  coreEpochDuration: number,
+): CapacityCommitmentShort {
+  let expiredAt = null
+  let startedAt = null
+  if (capacityCommitmentFromIndexer.endEpoch != 0 && capacityCommitmentFromIndexer.startEpoch != 0) {
+    expiredAt = calculateTimestamp(
+      Number(capacityCommitmentFromIndexer.endEpoch),
+      coreInitTimestamp,
+      coreEpochDuration,
+    )
+    startedAt = calculateTimestamp(
+      Number(capacityCommitmentFromIndexer.startEpoch),
+      coreInitTimestamp,
+      coreEpochDuration,
+    )
+  }
+
+  return {
+    id: capacityCommitmentFromIndexer.id,
+    createdAt: Number(capacityCommitmentFromIndexer.createdAt),
+    startedAt,
+    expiredAt,
+    providerId: capacityCommitmentFromIndexer.peer.provider.id,
+    peerId: capacityCommitmentFromIndexer.peer.id,
+    computeUnitsCount: Number(capacityCommitmentFromIndexer.computeUnitsCount),
+    status: statusFromRpc,
+  }
 }

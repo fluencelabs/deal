@@ -61,6 +61,8 @@ export type CapacityCommitment = {
   /** This status represents last stored status on chain (status that does not depends on the current epoch some how). */
   status?: Maybe<CapacityCommitmentStatus>;
   totalCUFailCount: Scalars['Int']['output'];
+  /** Collateral of native token (FLT) that has been deposited. */
+  totalCollateral: Scalars['BigInt']['output'];
 };
 
 
@@ -168,6 +170,7 @@ export type CapacityCommitmentToComputeUnit_OrderBy =
   | 'capacityCommitment__startEpoch'
   | 'capacityCommitment__status'
   | 'capacityCommitment__totalCUFailCount'
+  | 'capacityCommitment__totalCollateral'
   | 'computeUnit'
   | 'computeUnit__id'
   | 'computeUnit__workerId'
@@ -369,6 +372,14 @@ export type CapacityCommitment_Filter = {
   totalCUFailCount_lte?: InputMaybe<Scalars['Int']['input']>;
   totalCUFailCount_not?: InputMaybe<Scalars['Int']['input']>;
   totalCUFailCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  totalCollateral?: InputMaybe<Scalars['BigInt']['input']>;
+  totalCollateral_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  totalCollateral_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  totalCollateral_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  totalCollateral_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  totalCollateral_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  totalCollateral_not?: InputMaybe<Scalars['BigInt']['input']>;
+  totalCollateral_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
 };
 
 export type CapacityCommitment_OrderBy =
@@ -405,7 +416,8 @@ export type CapacityCommitment_OrderBy =
   | 'snapshotEpoch'
   | 'startEpoch'
   | 'status'
-  | 'totalCUFailCount';
+  | 'totalCUFailCount'
+  | 'totalCollateral';
 
 export type ComputeUnit = {
   __typename?: 'ComputeUnit';
@@ -1783,6 +1795,7 @@ export type Peer_OrderBy =
   | 'currentCapacityCommitment__startEpoch'
   | 'currentCapacityCommitment__status'
   | 'currentCapacityCommitment__totalCUFailCount'
+  | 'currentCapacityCommitment__totalCollateral'
   | 'id'
   | 'isAnyJoinedDeals'
   | 'joinedDeals'

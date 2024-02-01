@@ -17,6 +17,13 @@ export type CapacityCommitmentsQueryQueryVariables = Types.Exact<{
 
 export type CapacityCommitmentsQueryQuery = { __typename?: 'Query', capacityCommitments: Array<{ __typename?: 'CapacityCommitment', id: string, status?: Types.CapacityCommitmentStatus | null, createdAt: any, startEpoch: any, endEpoch: any, computeUnitsCount: number, peer: { __typename?: 'Peer', id: string, provider: { __typename?: 'Provider', id: string } } }>, graphNetworks: Array<{ __typename?: 'GraphNetwork', capacityCommitmentsTotal: any }> };
 
+export type CapacityCommitmentQueryQueryVariables = Types.Exact<{
+  id: Types.Scalars['ID']['input'];
+}>;
+
+
+export type CapacityCommitmentQueryQuery = { __typename?: 'Query', capacityCommitment?: { __typename?: 'CapacityCommitment', totalCollateral: any, rewardDelegatorRate: number, id: string, status?: Types.CapacityCommitmentStatus | null, createdAt: any, startEpoch: any, endEpoch: any, computeUnitsCount: number, peer: { __typename?: 'Peer', id: string, provider: { __typename?: 'Provider', id: string } } } | null };
+
 export type CapacityCommitmentBasicFragment = { __typename?: 'CapacityCommitment', id: string, status?: Types.CapacityCommitmentStatus | null, createdAt: any, startEpoch: any, endEpoch: any, computeUnitsCount: number, peer: { __typename?: 'Peer', id: string, provider: { __typename?: 'Provider', id: string } } };
 
 export type ComputeUnitBasicFragment = { __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string } };
@@ -70,6 +77,15 @@ export const CapacityCommitmentsQueryDocument = gql`
   }
 }
     ${CapacityCommitmentBasicFragmentDoc}`;
+export const CapacityCommitmentQueryDocument = gql`
+    query CapacityCommitmentQuery($id: ID!) {
+  capacityCommitment(id: $id) {
+    ...CapacityCommitmentBasic
+    totalCollateral
+    rewardDelegatorRate
+  }
+}
+    ${CapacityCommitmentBasicFragmentDoc}`;
 
 export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string, operationType?: string, variables?: any) => Promise<T>;
 
@@ -80,6 +96,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
   return {
     CapacityCommitmentsQuery(variables?: CapacityCommitmentsQueryQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<CapacityCommitmentsQueryQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<CapacityCommitmentsQueryQuery>(CapacityCommitmentsQueryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'CapacityCommitmentsQuery', 'query', variables);
+    },
+    CapacityCommitmentQuery(variables: CapacityCommitmentQueryQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<CapacityCommitmentQueryQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<CapacityCommitmentQueryQuery>(CapacityCommitmentQueryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'CapacityCommitmentQuery', 'query', variables);
     }
   };
 }

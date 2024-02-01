@@ -19,16 +19,15 @@ query CapacityCommitmentsQuery(
   }
 }
 
-#query DealQuery(
-#  $id: ID!
-#) {
-#  deal(id: $id) {
-#    ...BasicDeal
-#      maxWorkersPerProvider
-#      appCID
-#      pricePerWorkerEpoch
-#  }
-#}
+query CapacityCommitmentQuery(
+  $id: ID!
+) {
+  capacityCommitment(id: $id) {
+    ...CapacityCommitmentBasic
+      totalCollateral
+      rewardDelegatorRate
+  }
+}
 
 fragment CapacityCommitmentBasic on CapacityCommitment {
   id

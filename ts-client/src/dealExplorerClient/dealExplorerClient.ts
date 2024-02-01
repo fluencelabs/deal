@@ -12,7 +12,7 @@ import type {
   PaymentTokenListView,
   EffectorListView,
   CapacityCommitmentListView,
-  CapacityCommitment,
+  CapacityCommitmentShort,
   CapacityCommitmentStatus,
 } from "./types/schemes.js";
 import type {
@@ -38,7 +38,6 @@ import type { BasicPeerFragment } from "./indexerClient/queries/offers-query.gen
 import { DealRpcClient } from "./rpcClients/index.js";
 import {
   calculateEpoch,
-  calculateTimestamp,
   DEFAULT_ORDER_TYPE,
   DEFAULT_TOKEN_VALUE_ROUNDING, FILTER_MULTISELECT_MAX,
   tokenValueToRounded,
@@ -55,6 +54,7 @@ import {
   serializeProviderFiltersToIndexer, ValidTogetherFiltersError
 } from "./serializers/filters.js";
 import {
+  serializeCapacityCommitmentShort,
   serializeComputeUnits, serializeDealsShort,
   serializeEffectors,
   serializeOfferShort, serializePeers,
@@ -67,6 +67,9 @@ import {
   serializeCapacityCommitmentsOrderByToIndexer
 } from "./serializers/orderby.js";
 import type {ICapacity} from "../typechain-types/index.js";
+import type {
+  CapacityCommitmentBasicFragment
+} from "./indexerClient/queries/capacity-commitments-query.generated.js";
 
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
@@ -590,6 +593,7 @@ export class DealExplorerClient {
     orderType: OrderType = DEFAULT_ORDER_TYPE,
   ): Promise<CapacityCommitmentListView> {
     await this._init();
+
     const orderBySerialized = serializeCapacityCommitmentsOrderByToIndexer(orderBy);
 
     let currentEpoch = undefined
@@ -613,7 +617,7 @@ export class DealExplorerClient {
       orderBy: orderBySerialized,
       orderType,
     });
-    const res: Array<CapacityCommitment> = [];
+    const res: Array<CapacityCommitmentShort> = [];
 
     if (data) {
       if (data.graphNetworks.length != 1 || data.graphNetworks[0] == undefined) {
@@ -625,28 +629,19 @@ export class DealExplorerClient {
         await this._dealRpcClient!.getStatusCapacityCommitmentsBatch(this._capacityContractAddress!, capacityComitmentIds);
 
       for (let i = 0; i < data.capacityCommitments.length; i++) {
-        const capacityCommitment = data.capacityCommitments[i]
+        const capacityCommitment = data.capacityCommitments[i] as CapacityCommitmentBasicFragment
 
-        let expiredAt = null
-        if (capacityCommitment?.endEpoch != 0) {
-          expiredAt = calculateTimestamp(
-            Number(capacityCommitment?.endEpoch),
+        res.push(
+          serializeCapacityCommitmentShort(
+            capacityCommitment,
+            capacityCommitmentsStatuses[i] ?? "undefined",
             this._coreInitTimestamp!,
             this._coreEpochDuration!,
           )
-        }
-
-        res.push({
-          id: capacityCommitment!.id,
-          createdAt: Number(capacityCommitment!.createdAt),
-          expiredAt,
-          providerId: capacityCommitment!.peer.provider.id,
-          peerId: capacityCommitment!.peer.id,
-          computeUnitsCount: Number(capacityCommitment!.computeUnitsCount),
-          status: capacityCommitmentsStatuses[i] ?? "undefined",
-        });
+        )
       }
     }
+    // TODO: generalize code below.
     let total = null;
     if (
       data.graphNetworks.length == 1 &&

@@ -226,6 +226,8 @@ type CapacityCommitment @entity {
   exitedUnitCount: Int!
   activeUnitCount: Int!
   nextAdditionalActiveUnitCount: Int!
+  "Collateral of native token (FLT) that has been deposited."
+  totalCollateral: BigInt!
 
   computeUnits: [CapacityCommitmentToComputeUnit!] @derivedFrom(field: "capacityCommitment")
   computeUnitsCount: Int!
