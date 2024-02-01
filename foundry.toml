@@ -5,16 +5,15 @@ src = "src"
 out = "out"
 libs = ["lib"]
 via_ir = true
-solc_version = "0.8.19"
+solc = "0.8.19"
 fs_permissions = [
     { access = "read-write", path = "./deployments" },
-    { access = "read-write", path = "./ts-client/abi" },
-    { access = "read-write", path = "./subgraph/abis" },
     { access = "read", path = "./out" },
 ]
 gas_reports = ["*"]
 optimizer = true
 optimizer_runs = 0 # TODO: add 
+extra_output = ["devdoc"]
 
 [rpc_endpoints]
 local = "http://0.0.0.0:8545"

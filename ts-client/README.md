@@ -134,7 +134,7 @@ tsconfig.js for reactApp example:
 
 ready to use main.js (to run with e.g. via `node --loader ts-node/esm main.ts`)
 ```typescript
-import { DealExplorerClient } from "@fluencelabs/deal-aurora";
+import { DealExplorerClient } from "@fluencelabs/deal-ts-clients";
 
 type asyncRuntimeDecoratorType = (func: Function) => void;
 

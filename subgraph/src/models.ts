@@ -3,14 +3,40 @@ import {
   OfferToEffector,
   Token,
   DealToEffector,
-  GraphNetwork, Provider,
+  GraphNetwork,
+  DealToPeer,
+  DealToJoinedOfferPeer,
+  Provider,
+  DealToProvidersAccess,
 } from "../generated/schema";
 import { BigInt, Bytes } from "@graphprotocol/graph-ts";
 import {getTokenDecimals, getTokenSymbol} from "./contracts";
-import {getProviderName} from "./networkConstants";
 
 export const ZERO_BIG_INT = BigInt.fromI32(0);
 export const UNO_BIG_INT = BigInt.fromI32(1);
+
+export const UNKNOWN_EFFECTOR_DESCRIPTION = "Unknown";
+export const UNREGISTERED_PROVIDER_NAME = "Unregistered";
+
+// In contracts flow to register provider exists, but on e.g. deal
+//  creation some unregistered providers could be used.
+// @notice Those unregistered providers does not count in total providers.
+export function createOrLoadUnregisteredProvider(providerAddress: string): Provider {
+  let entity = Provider.load(providerAddress);
+
+  if (entity == null) {
+    entity = new Provider(providerAddress);
+    entity.registered = false;
+    entity.name = UNREGISTERED_PROVIDER_NAME;
+    entity.approved = false;
+    entity.createdAt = ZERO_BIG_INT;
+    entity.computeUnitsAvailable = 0;
+    entity.computeUnitsTotal = 0;
+    entity.peerCount = 0;
+    entity.save();
+  }
+  return entity as Provider;
+}
 
 export function createOrLoadToken(tokenAddress: string): Token {
   let entity = Token.load(tokenAddress);
@@ -29,35 +55,12 @@ export function createOrLoadToken(tokenAddress: string): Token {
   return entity as Token;
 }
 
-// TODO: add description mapper.
-const DEFAULT_EFFECTOR_DESCRIPTION = "DEFAULT";
-
-export function createOrLoadProvider(providerAddress: string, timestamp: BigInt): Provider {
-  let entity = Provider.load(providerAddress);
-
-  if (entity == null) {
-    entity = new Provider(providerAddress);
-    entity.name = getProviderName(providerAddress);
-    entity.createdAt = timestamp;
-    entity.computeUnitsAvailable = 0;
-    entity.computeUnitsTotal = 0;
-    entity.peerCount = 0;
-    entity.effectorCount = 0;
-    entity.save();
-
-    let graphNetwork = createOrLoadGraphNetwork();
-    graphNetwork.providersTotal = graphNetwork.providersTotal.plus(UNO_BIG_INT);
-    graphNetwork.save()
-  }
-  return entity as Provider;
-}
-
 export function createOrLoadEffector(cid: string): Effector {
   let entity = Effector.load(cid);
 
   if (entity == null) {
     entity = new Effector(cid);
-    entity.description = DEFAULT_EFFECTOR_DESCRIPTION;
+    entity.description = UNKNOWN_EFFECTOR_DESCRIPTION;
     entity.save();
 
     let graphNetwork = createOrLoadGraphNetwork();
@@ -114,6 +117,41 @@ export function createOrLoadDealEffector(
   return entity as DealToEffector;
 }
 
+export function createOrLoadDealToPeer(
+  dealId: string,
+  peerId: string,
+): DealToPeer {
+  const concattedIds = dealId.concat(peerId);
+  let entity = DealToPeer.load(concattedIds);
+
+  if (entity == null) {
+    entity = new DealToPeer(concattedIds);
+    entity.deal = dealId;
+    entity.peer = peerId;
+    entity.save();
+  }
+  return entity as DealToPeer;
+}
+
+export function createOrLoadDealToJoinedOfferPeer(
+  dealId: string,
+  offerId: string,
+  peerId: string,
+): DealToJoinedOfferPeer {
+  // // deal.id.concat(offer.id.concat(peer.id)).
+  const concattedIds = dealId.concat(offerId.concat(peerId));
+  let entity = DealToJoinedOfferPeer.load(concattedIds);
+
+  if (entity == null) {
+    entity = new DealToJoinedOfferPeer(concattedIds);
+    entity.deal = dealId;
+    entity.peer = peerId;
+    entity.offer = offerId;
+    entity.save();
+  }
+  return entity as DealToJoinedOfferPeer;
+}
+
 export function createOrLoadGraphNetwork(): GraphNetwork {
   let graphNetwork = GraphNetwork.load('1')
   if (graphNetwork == null) {
@@ -128,12 +166,35 @@ export function createOrLoadGraphNetwork(): GraphNetwork {
   return graphNetwork as GraphNetwork
 }
 
+export function createOrLoadDealToProvidersAccess(
+  dealId: string,
+  providerId: string,
+): DealToProvidersAccess {
+  const concattedIds = dealId.concat(providerId);
+  let entity = DealToProvidersAccess.load(concattedIds);
+
+  if (entity == null) {
+    entity = new DealToProvidersAccess(concattedIds)
+    entity.deal = dealId
+    entity.provider = providerId
+    entity.save()
+  }
+  return entity as DealToProvidersAccess
+}
+
+// Statuses that could be saved in Subgraph.
+// Some of the statues should be calculated regard to current epoch and can not be stored in the subgraph.
 // We have to mirror enums according to
 //  https://ethereum.stackexchange.com/questions/139078/how-to-use-subgraph-enums-in-the-mapping.
 export class CapacityCommitmentStatus {
-  static Active: string = "Active";
+  static Active: string = "Active"; // Should not be stored!
   static WaitDelegation: string = "WaitDelegation";
-  static Inactive: string = "Inactive";
+  // Status is WaitStart - means collateral deposited.
+  static WaitStart: string = "WaitStart";
+  static Inactive: string = "Inactive";  // Should not be stored!
+  // It is stored when subgraph could be certain that Failed
+  //  (when CommitmentStatsUpdated event emitted), but before this transaction
+  //  if Failed should be checked in another way (not by relaying on this status).
   static Failed: string = "Failed";
   static Removed: string = "Removed";
 }

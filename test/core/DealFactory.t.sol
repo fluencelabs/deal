@@ -56,6 +56,8 @@ contract DealFactoryTest is Test {
             new address[](0)
         );
 
+        console.log("Deal deployed");
+
         return (
             deal,
             DealParams({

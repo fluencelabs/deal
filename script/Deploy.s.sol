@@ -44,8 +44,10 @@ contract DeployContracts is Depoyments, Script {
     uint256 constant DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH = 2;
     uint256 constant DEFAULT_MAX_PROOFS_PER_EPOCH = 5;
     uint256 constant DEFAULT_WITHDRAW_EPOCHES_AFTER_FAILED = 2;
-    uint256 constant DEFAULT_MAX_FAILED_RATIO = 10;
-    bool constant IS_WHITELIST_ENABLED = false;
+    uint256 constant DEFAULT_MAX_FAILED_RATIO = 40;
+    bool constant DEFAULT_IS_WHITELIST_ENABLED = false;
+    bytes32 public constant DEFAULT_DIFFICULTY = 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+    bytes32 public constant DEFAULT_INIT_GLOBAL_NONCE = keccak256("init_global_nonce");
 
     // ------------------ Deploy result ------------------
     string constant DEPLOYMENTS_PATH = "/deployments/";
@@ -70,6 +72,8 @@ contract DeployContracts is Depoyments, Script {
         uint256 withdrawEpochesAfterFailed;
         uint256 maxFailedRatio;
         bool isWhitelistEnabled;
+        bytes32 difficulty;
+        bytes32 initGlobalNonce;
     }
 
     function setUp() external {
@@ -82,7 +86,7 @@ contract DeployContracts is Depoyments, Script {
         ENV memory env = _loadENV();
 
         _startDeploy();
-        (IERC20 tFLT, IERC20 tUSD) = _deployTestTokens();
+        IERC20 tUSD = _deployTestTokens();
 
         // Deploy Multicall3 as **helper** contract to fetch info only from the chain.
         // Thus, this contract is not belongs to Fluence contract ecosystem.
@@ -92,19 +96,16 @@ contract DeployContracts is Depoyments, Script {
             string memory mnemonic = vm.envOr("ANVIL_MNEMONIC", DEFAULT_ANVIL_MNEMONIC);
             for (uint32 i = 0; i < 10; i++) {
                 address addr = vm.rememberKey(vm.deriveKey(mnemonic, i));
-                tFLT.safeTransfer(addr, LOCAL_tFLT_BALANCE);
                 tUSD.safeTransfer(addr, LOCAL_tUSD_BALANCE);
             }
         } else {
-            (address faucet, bool isNew) = _deployTestFaucet(tFLT, tUSD);
+            (address faucet, bool isNew) = _deployTestFaucet(tUSD);
             if (isNew) {
-                tFLT.safeTransfer(address(faucet), 1_000_000_000_000 ether);
                 tUSD.safeTransfer(address(faucet), 1_000_000_000_000 ether);
             }
         }
 
         _deployCore(
-            tFLT,
             env.epochDuration,
             env.fltPrice,
             env.minDepositedEpoches,
@@ -120,14 +121,15 @@ contract DeployContracts is Depoyments, Script {
             env.maxProofsPerEpoch,
             env.withdrawEpochesAfterFailed,
             env.maxFailedRatio,
-            env.isWhitelistEnabled
+            env.isWhitelistEnabled,
+            env.difficulty,
+            env.initGlobalNonce
         );
         _stopDeploy();
     }
 
     // ------------------ Internal functions ------------------
-
-    function _loadENV() internal returns (ENV memory) {
+    function _loadENV() internal view returns (ENV memory) {
         uint256 chainId = block.chainid;
         uint256 epochDuration = vm.envOr("EPOCH_DURATION", DEFAULT_EPOCH_DURATION);
         uint256 fltPice = vm.envOr("FLT_PRICE", DEFAULT_FLT_PRICE);
@@ -147,7 +149,9 @@ contract DeployContracts is Depoyments, Script {
         uint256 withdrawEpochesAfterFailed =
             vm.envOr("WITHDRAW_EPOCHES_AFTER_FAILED", DEFAULT_WITHDRAW_EPOCHES_AFTER_FAILED);
         uint256 maxFailedRatio = vm.envOr("MAX_FAILED_RATIO", DEFAULT_MAX_FAILED_RATIO);
-        bool isWhitelistEnabled = vm.envOr("IS_WHITELIST_ENABLED", IS_WHITELIST_ENABLED);
+        bool isWhitelistEnabled = vm.envOr("IS_WHITELIST_ENABLED", DEFAULT_IS_WHITELIST_ENABLED);
+        bytes32 difficulty = vm.envOr("DIFFICULTY", DEFAULT_DIFFICULTY);
+        bytes32 initGlobalNonce = vm.envOr("INIT_GLOBAL_NONCE", DEFAULT_INIT_GLOBAL_NONCE);
 
         console.log("----------------- ENV -----------------");
         console.log(StdStyle.blue("CHAIN_ID:"), block.chainid);
@@ -166,6 +170,10 @@ contract DeployContracts is Depoyments, Script {
         console.log(StdStyle.blue("WITHDRAW_EPOCHES_AFTER_FAILED:"), withdrawEpochesAfterFailed);
         console.log(StdStyle.blue("MAX_FAILED_RATIO:"), maxFailedRatio);
         console.log(StdStyle.blue("IS_WHITELIST_ENABLED:"), isWhitelistEnabled);
+        console.log(StdStyle.blue("DIFFICULTY:"));
+        console.logBytes32(difficulty);
+        console.log(StdStyle.blue("INIT_GLOBAL_NONCE:"));
+        console.logBytes32(initGlobalNonce);
         console.log("---------------------------------------");
 
         return ENV({
@@ -185,15 +193,14 @@ contract DeployContracts is Depoyments, Script {
             maxProofsPerEpoch: maxProofsPerEpoch,
             withdrawEpochesAfterFailed: withdrawEpochesAfterFailed,
             maxFailedRatio: maxFailedRatio,
-            isWhitelistEnabled: isWhitelistEnabled
+            isWhitelistEnabled: isWhitelistEnabled,
+            difficulty: difficulty,
+            initGlobalNonce: initGlobalNonce
         });
     }
 
-    function _deployTestTokens() internal returns (IERC20 tFLT, IERC20 tUSD) {
-        bytes memory args = abi.encode("Fluence Token", "tFLT");
-        tFLT = IERC20(_deployContract("tFLT", "TestERC20", args));
-
-        args = abi.encode("USD Token", "tUSD");
+    function _deployTestTokens() internal returns (IERC20 tUSD) {
+        bytes memory args = abi.encode("USD Token", "tUSD", 6);
         tUSD = IERC20(_deployContract("tUSD", "TestERC20", args));
     }
 
@@ -202,13 +209,12 @@ contract DeployContracts is Depoyments, Script {
         multicall = Multicall3(_deployContract("Multicall3", "Multicall3", args));
     }
 
-    function _deployTestFaucet(IERC20 tFLT, IERC20 tUSD) internal returns (address faucet, bool isNew) {
-        bytes memory args = abi.encode(tFLT, tUSD);
+    function _deployTestFaucet(IERC20 tUSD) internal returns (address faucet, bool isNew) {
+        bytes memory args = abi.encode(tUSD);
         return _tryDeployContract("Faucet", "OwnableFaucet", args);
     }
 
     function _deployCore(
-        IERC20 flt,
         uint256 epochDuration_,
         uint256 fltPrice_,
         uint256 minDepositedEpoches_,
@@ -224,10 +230,13 @@ contract DeployContracts is Depoyments, Script {
         uint256 maxProofsPerEpoch_,
         uint256 withdrawEpochesAfterFailed_,
         uint256 maxFailedRatio_,
-        bool isWhitelistEnabled_
+        bool isWhitelistEnabled_,
+        bytes32 difficulty_,
+        bytes32 initGlobalNonce_
     ) internal {
-        address coreImpl = _deployContract("CoreImpl", "Core", abi.encode(flt));
+        address coreImpl = _deployContract("CoreImpl", "Core", new bytes(0));
         address dealImpl = _deployContract("DealImpl", "Deal", new bytes(0));
+        address randomXProxy = _deployContract("RandomXProxy", "RandomXProxy", new bytes(0));
 
         bool needToRedeployMarket = _doNeedToRedeploy("MarketImpl", "Market");
         bool needToRedeployCapacity = _doNeedToRedeploy("CapacityImpl", "Capacity");
@@ -238,19 +247,17 @@ contract DeployContracts is Depoyments, Script {
             abi.encode(
                 coreImpl,
                 abi.encodeWithSelector(
-                    Core.initialize.selector, epochDuration_, minDepositedEpoches_, minRematchingEpoches_
+                    Core.initialize.selector, epochDuration_, minDepositedEpoches_, minRematchingEpoches_, dealImpl
                 )
             ),
             needToRedeployMarket || needToRedeployCapacity
         );
 
-        address marketImpl = _deployContract("MarketImpl", "Market", abi.encode(flt, coreAddr), isNewCore);
-        address capacityImpl = _deployContract("CapacityImpl", "Capacity", abi.encode(flt, coreAddr), isNewCore);
+        address marketImpl = _deployContract("MarketImpl", "Market", abi.encode(coreAddr), isNewCore);
+        address capacityImpl = _deployContract("CapacityImpl", "Capacity", abi.encode(coreAddr), isNewCore);
 
         address marketProxy = _deployContract(
-            "Market",
-            "ERC1967Proxy",
-            abi.encode(marketImpl, abi.encodeWithSelector(Market.initialize.selector, dealImpl))
+            "Market", "ERC1967Proxy", abi.encode(marketImpl, abi.encodeWithSelector(Market.initialize.selector))
         );
 
         address capacityProxy = _deployContract(
@@ -272,7 +279,10 @@ contract DeployContracts is Depoyments, Script {
                     maxProofsPerEpoch_,
                     withdrawEpochesAfterFailed_,
                     maxFailedRatio_,
-                    isWhitelistEnabled_
+                    isWhitelistEnabled_,
+                    difficulty_,
+                    initGlobalNonce_,
+                    randomXProxy
                 )
             )
         );
@@ -288,7 +298,7 @@ contract DeployContracts is Depoyments, Script {
         }
     }
 
-    function _startDeploy() internal {
+    function _startDeploy() internal virtual {
         bool isTestnet = vm.envOr("TEST", false);
         if (!isTestnet) {
             _loadDepoyments(fullDeploymentsPath);
@@ -298,7 +308,7 @@ contract DeployContracts is Depoyments, Script {
         console.log("\nStart deploying...");
     }
 
-    function _stopDeploy() internal {
+    function _stopDeploy() internal virtual {
         bool isTestnet = vm.envOr("TEST", false);
 
         if (!isTestnet) {

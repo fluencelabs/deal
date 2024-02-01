@@ -2,8 +2,7 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
-
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "src/utils/OwnableUpgradableDiamond.sol";
 import "src/deal/Deal.sol";
 import "src/core/modules/capacity/interfaces/ICapacity.sol";
@@ -19,6 +18,7 @@ contract Core is UUPSUpgradeable, GlobalConst, ICore {
     struct CoreStorage {
         ICapacity capacity;
         IMarket market;
+        IDeal dealImpl;
     }
 
     GlobalConstStorage private _storage;
@@ -32,18 +32,24 @@ contract Core is UUPSUpgradeable, GlobalConst, ICore {
 
     // ------------------ Constructor ------------------
     // @custom:oz-upgrades-unsafe-allow constructor
-    constructor(IERC20 fluenceToken_) GlobalConst(fluenceToken_) {
+    constructor() {
         _disableInitializers();
     }
 
     // ------------------ Initializer ------------------
-    function initialize(uint256 epochDuration_, uint256 minDepositedEpoches_, uint256 minRematchingEpoches_)
-        public
-        initializer
-    {
+    function initialize(
+        uint256 epochDuration_,
+        uint256 minDepositedEpoches_,
+        uint256 minRematchingEpoches_,
+        IDeal dealImpl_
+    ) public initializer {
         __Ownable_init(msg.sender);
         __EpochController_init(epochDuration_);
         __GlobalConst_init(minDepositedEpoches_, minRematchingEpoches_);
+        __UUPSUpgradeable_init();
+
+        _getCoreStorage().dealImpl = dealImpl_;
+        emit DealImplSet(dealImpl_);
     }
 
     function initializeModules(ICapacity capacity_, IMarket market_) external onlyOwner {
@@ -59,14 +65,27 @@ contract Core is UUPSUpgradeable, GlobalConst, ICore {
     }
 
     // ------------------ External View Functions ------------------
-    function capacity() external view override returns (ICapacity) {
+    function capacity() external view returns (ICapacity) {
         return _getCoreStorage().capacity;
     }
 
-    function market() external view override returns (IMarket) {
+    function market() external view returns (IMarket) {
         return _getCoreStorage().market;
     }
 
+    function dealImpl() external view returns (IDeal) {
+        return _getCoreStorage().dealImpl;
+    }
+
     // ------------------ Internal Mutable Functions ------------------
+
+    function setDealImpl(IDeal dealImpl_) external onlyOwner {
+        require(Address.isContract(address(dealImpl_)), "New deal implementation is not a contract");
+
+        _getCoreStorage().dealImpl = dealImpl_;
+
+        emit DealImplSet(dealImpl_);
+    }
+
     function _authorizeUpgrade(address) internal override onlyOwner {}
 }

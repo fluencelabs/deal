@@ -1,10 +1,12 @@
-import type { DealStatus } from "./types.js";
+import type { DealStatus } from "./schemes.js";
 
 export type ProviderDetailsStatusFilter = "all" | "active" | "inactive";
 
 /*
  * @dev :param paymentTokens: tokens addresses.
  * @dev :para search: strict search only.
+ * @dev :param onlyApproved: if provider of the offer is Approved.
+ * @dev :param onlyActive: if any of the CUs in the offer is Active (available for matching).
  */
 export interface OffersFilters {
   search?: string | undefined;
@@ -12,11 +14,11 @@ export interface OffersFilters {
   paymentTokens?: Array<string> | undefined;
   minPricePerWorkerEpoch?: number | undefined;
   maxPricePerWorkerEpoch?: number | undefined;
-  //? eslint-disable-next-line @typescript-eslint/no-unused-vars
   onlyApproved?: boolean;
   createdAtFrom?: number | undefined;
   createdAtTo?: number | undefined;
   providerId?: string | undefined;
+  onlyActive?: boolean | undefined;
 }
 
 export interface ProvidersFilters {
@@ -30,6 +32,8 @@ export interface ByProviderAndStatusFilter {
   status?: ProviderDetailsStatusFilter | undefined;
 }
 
+// @dev Where is "OnlyActive" filter? - currently, it should be filtered by
+// @dev  frontend itself by Deal field: status.
 export interface DealsFilters {
   search?: string | undefined;
   effectorIds?: Array<string> | undefined;
@@ -42,3 +46,18 @@ export interface DealsFilters {
   providerId?: string | undefined;
   status?: DealStatus | undefined;
 }
+
+// Order Types.
+export type OfferShortOrderBy =
+  | "createdAt"
+  | "pricePerWorkerEpoch"
+  | "updatedAt";
+
+export type ProviderShortOrderBy = "createdAt" | "computeUnitsTotal";
+
+export type DealsShortOrderBy = "createdAt";
+
+export type EffectorsOrderBy = "id";
+export type PaymentTokenOrderBy = "id" | "symbol";
+
+export type OrderType = "asc" | "desc";

@@ -3,7 +3,7 @@
 pragma solidity ^0.8.19;
 
 import "forge-std/console.sol";
-import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "src/utils/OwnableUpgradableDiamond.sol";
 
 contract Whitelist is OwnableUpgradableDiamond {
@@ -42,7 +42,7 @@ contract Whitelist is OwnableUpgradableDiamond {
     // #endregion
 
     // #region ----------------- Public View -----------------
-    function isApproved(address account) external view returns (bool) {
+    function isApproved(address account) public view returns (bool) {
         WhitelistStorage storage s = _getWhitelistStorage();
         return !s.isWhitelistEnabled || s.isWhitelisted[account];
     }

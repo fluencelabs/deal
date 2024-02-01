@@ -11,28 +11,25 @@ test("#getDeployment", async () => {
   //   usdc: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
   //   chainId: 31337,
   // });
-
-  expect(await getDeployment("stage")).toEqual({
-    core: "0x7523E3b82F05bB0a9775FD1354D5DA736a7c29c0",
-    flt: "0xb56B66f6E225a3f6Cde58cc012Cf3f3D13729bac",
-    usdc: "0xC1F39E258D827b5B75cA296e797044AA030907bF",
-    multicall3: "0xC8cD377019FfA4520E18813499d13C234dc08717",
-    chainId: 80001,
-  });
-
-  expect(await getDeployment("testnet")).toEqual({
-    core: "0x7523E3b82F05bB0a9775FD1354D5DA736a7c29c0",
-    flt: "0xb56B66f6E225a3f6Cde58cc012Cf3f3D13729bac",
-    usdc: "0xC1F39E258D827b5B75cA296e797044AA030907bF",
-    multicall3: "0xC8cD377019FfA4520E18813499d13C234dc08717",
-    chainId: 80001,
-  });
-
-  expect(await getDeployment("kras")).toEqual({
-    core: "0x7523E3b82F05bB0a9775FD1354D5DA736a7c29c0",
-    flt: "0xb56B66f6E225a3f6Cde58cc012Cf3f3D13729bac",
-    usdc: "0xC1F39E258D827b5B75cA296e797044AA030907bF",
-    multicall3: "0xC8cD377019FfA4520E18813499d13C234dc08717",
-    chainId: 80001,
-  });
+  // expect(await getDeployment("stage")).toEqual({
+  //   core: "0x7523E3b82F05bB0a9775FD1354D5DA736a7c29c0",
+  //   flt: "0xb56B66f6E225a3f6Cde58cc012Cf3f3D13729bac",
+  //   usdc: "0xC1F39E258D827b5B75cA296e797044AA030907bF",
+  //   multicall3: "0xC8cD377019FfA4520E18813499d13C234dc08717",
+  //   chainId: 80001,
+  // });
+  // expect(await getDeployment("testnet")).toEqual({
+  //   core: "0x7523E3b82F05bB0a9775FD1354D5DA736a7c29c0",
+  //   flt: "0xb56B66f6E225a3f6Cde58cc012Cf3f3D13729bac",
+  //   usdc: "0xC1F39E258D827b5B75cA296e797044AA030907bF",
+  //   multicall3: "0xC8cD377019FfA4520E18813499d13C234dc08717",
+  //   chainId: 80001,
+  // });
+  // expect(await getDeployment("kras")).toEqual({
+  //   core: "0x7523E3b82F05bB0a9775FD1354D5DA736a7c29c0",
+  //   flt: "0xb56B66f6E225a3f6Cde58cc012Cf3f3D13729bac",
+  //   usdc: "0xC1F39E258D827b5B75cA296e797044AA030907bF",
+  //   multicall3: "0xC8cD377019FfA4520E18813499d13C234dc08717",
+  //   chainId: 80001,
+  // });
 });

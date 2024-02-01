@@ -6,11 +6,11 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: Core
-    network: local
+    network: mumbai
     source:
       abi: Core
-      address: "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650"
-      startBlock: 1
+      address: "0x067F07E3c85028f60a3F5FdbA5b7164FDA298271"
+      startBlock: 45147390
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -26,11 +26,11 @@ dataSources:
       file: ./src/mappings/core.ts
   - kind: ethereum/contract
     name: Capacity
-    network: local
+    network: mumbai
     source:
       abi: Capacity
-      address: "0x1429859428C0aBc9C2C47C8Ee9FBaf82cFA0F20f"
-      startBlock: 1
+      address: "0xd86BB4a224e56039b1799bd984497f78992A2674"
+      startBlock: 45147390
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -42,20 +42,32 @@ dataSources:
         - name: Capacity
           file: ../out/Capacity.sol/Capacity.json
       eventHandlers:
+        - event: Initialized(uint8)
+          handler: handleInitialized
+        - event: WhitelistAccessGranted(address)
+          handler: handleWhitelistAccessGranted
+        - event: WhitelistAccessRevoked(address)
+          handler: handleWhitelistAccessRevoked
         - event: CommitmentCreated(indexed
             bytes32,bytes32,uint256,address,uint256,uint256)
           handler: handleCommitmentCreated
         - event: CommitmentActivated(indexed bytes32,indexed
             bytes32,uint256,uint256,bytes32[])
           handler: handleCommitmentActivated
+        - event: CommitmentStatsUpdated(bytes32,uint256,uint256,uint256,uint256,uint256)
+          handler: handleCommitmentStatsUpdated
+        - event: CommitmentRemoved(indexed bytes32)
+          handler: handleCommitmentRemoved
+        - event: CommitmentFinished(indexed bytes32)
+          handler: handleCommitmentFinished
       file: ./src/mappings/capacity.ts
   - kind: ethereum/contract
     name: Market
-    network: local
+    network: mumbai
     source:
       abi: Market
-      address: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc"
-      startBlock: 1
+      address: "0x58f30341Ee3d324ed0c9eBe5107Ad77F567c7dc3"
+      startBlock: 45147390
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -76,6 +88,13 @@ dataSources:
         - name: ERC20
           file: ../out/ERC20.sol/ERC20.json
       eventHandlers:
+        - event: ProviderInfoUpdated(indexed address,string,(bytes4,bytes32))
+          handler: handleProviderInfoUpdated
+#          TODO: uncomment when resolved: https://github.com/graphprotocol/graph-node/issues/5171
+#        - event: EffectorInfoSet((indexed bytes4,bytes32),string,(bytes4,bytes32))
+#          handler: handleEffectorInfoSet
+#        - event: EffectorInfoRemoved((indexed bytes4,bytes32))
+#          handler: handleEffectorInfoRemoved
         - event: MarketOfferRegistered(indexed
             address,bytes32,uint256,address,(bytes4,bytes32)[])
           handler: handleMarketOfferRegistered
@@ -102,7 +121,7 @@ dataSources:
 templates:
   - name: Deal
     kind: ethereum/contract
-    network: local
+    network: mumbai
     source:
       abi: Deal
     mapping:
@@ -122,12 +141,16 @@ templates:
           handler: handleWithdrawn
         - event: MaxPaidEpochUpdated(uint256)
           handler: handleMaxPaidEpochUpdated
-        - event: AdminChanged(address,address)
+        - event: AppCIDChanged((bytes4,bytes32))
           handler: handleAppCIDChanged
-        - event: ComputeUnitJoined(bytes32)
+        - event: ComputeUnitJoined(indexed bytes32,bytes32)
           handler: handleComputeUnitJoined
-        - event: ComputeUnitRemoved(bytes32)
+        - event: ComputeUnitRemoved(indexed bytes32,bytes32)
           handler: handleComputeUnitRemoved
         - event: WorkerIdUpdated(bytes32,bytes32)
           handler: handleWorkerIdUpdated
+        - event: ProviderAddedToAccessList(address)
+          handler: handleProviderAddedToAccessList
+        - event: ProviderRemovedFromAccessList(address)
+          handler: handleProviderRemovedFromAccessList
       file: ./src/mappings/deal.ts

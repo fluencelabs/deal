@@ -37,7 +37,6 @@ export interface ProviderShort extends ProviderBase {
 
 export interface ProviderDetail extends ProviderBase {
   peerCount: number;
-  effectorCount: number;
   // deprecated.
   // revenue: Array<Revenue>;
 }
@@ -124,16 +123,3 @@ export interface DealDetail extends DealShort {
 
 // Status undefined == problem with networks, etc.
 export type DealStatus = "inactive" | "active" | "ended" | "undefined";
-
-export type ProviderShortOrderBy = "createdAt" | "computeUnitsTotal";
-export type OfferShortOrderBy =
-  | "createdAt"
-  | "pricePerWorkerEpoch"
-  | "updatedAt";
-
-export type DealsShortOrderBy = "createdAt";
-
-export type EffectorsOrderBy = "id";
-export type PaymentTokenOrderBy = "id" | "symbol";
-
-export type OrderType = "asc" | "desc";

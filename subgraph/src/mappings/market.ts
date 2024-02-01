@@ -7,18 +7,24 @@ import {
   ComputeUnitRemovedFromDeal,
   DealCreated,
   EffectorAdded,
+  EffectorInfoRemoved, EffectorInfoSet,
   EffectorRemoved,
   MarketOfferRegistered,
   MinPricePerEpochUpdated,
   PaymentTokenUpdated,
   PeerCreated,
+  ProviderInfoUpdated,
 } from "../../generated/Market/Market";
 import {
   createOrLoadDealEffector,
+  createOrLoadDealToJoinedOfferPeer,
+  createOrLoadDealToPeer, createOrLoadDealToProvidersAccess,
   createOrLoadEffector,
   createOrLoadGraphNetwork,
-  createOrLoadOfferEffector, createOrLoadProvider,
+  createOrLoadOfferEffector,
   createOrLoadToken,
+  createOrLoadUnregisteredProvider,
+  UNKNOWN_EFFECTOR_DESCRIPTION,
   UNO_BIG_INT,
   ZERO_BIG_INT,
 } from "../models";
@@ -33,7 +39,48 @@ import {
 } from "../../generated/schema";
 import { Deal as DealTemplate } from "../../generated/templates";
 import {AppCID, formatAddress, getEffectorCID, parseEffectors} from "./utils";
-import { getProviderName } from "../networkConstants";
+
+export function handleProviderInfoUpdated(event: ProviderInfoUpdated): void {
+  const addr = formatAddress(event.params.provider);
+  let provider = Provider.load(addr);
+  if (provider == null) {
+    provider = new Provider(addr);
+  }
+  // Loaded or created provider - does not meter for this function logic.
+  provider.name = event.params.name;
+  provider.registered = true;
+  provider.approved = false;
+  provider.createdAt = event.block.timestamp;
+  provider.computeUnitsAvailable = 0;
+  provider.computeUnitsTotal = 0;
+  provider.peerCount = 0;
+  provider.save();
+
+  let graphNetwork = createOrLoadGraphNetwork();
+  graphNetwork.providersTotal = graphNetwork.providersTotal.plus(UNO_BIG_INT);
+  graphNetwork.save()
+}
+
+// It fails on EffectorInfoSet but does not fail on
+// EffectorInfoSetButNotTuple(indexed uint256,(bytes4,bytes32),string,(bytes4,bytes32)).
+// TODO: enable this handler when https://github.com/graphprotocol/graph-node/issues/5171 resolved.
+export function handleEffectorInfoSet(event: EffectorInfoSet): void {
+  const appCID = changetype<AppCID>(event.params.id);
+  const cid = getEffectorCID(appCID);
+  let effector = createOrLoadEffector(cid);
+  effector.description = event.params.description;
+  effector.save();
+}
+
+// When it is removed: it does not mean that in other place it is stopped to use the effector.
+//  Effector description and approved info merely deleted.
+export function handleEffectorInfoRemoved(event: EffectorInfoRemoved): void {
+  const appCID = changetype<AppCID>(event.params.id);
+  const cid = getEffectorCID(appCID);
+  let effector = createOrLoadEffector(cid);
+  effector.description = UNKNOWN_EFFECTOR_DESCRIPTION;
+  effector.save();
+}
 
 export function handleMarketOfferRegistered(
   event: MarketOfferRegistered,
@@ -43,8 +90,7 @@ export function handleMarketOfferRegistered(
   // - emit PeerCreated(offerId, peer.peerId);
   // - emit ComputeUnitCreated(offerId, peerId, unitId);
 
-  // Create provider.
-  const provider = createOrLoadProvider(formatAddress(event.params.provider), event.block.timestamp);
+  const provider = Provider.load(event.params.provider.toHex()) as Provider;
 
   // Create Offer.
   const offer = new Offer(event.params.offerId.toHex());
@@ -62,21 +108,15 @@ export function handleMarketOfferRegistered(
   const appCIDS = changetype<Array<AppCID>>(event.params.effectors);
   const effectorEntities = parseEffectors(appCIDS);
   // Link effectors and offer:
-  let createdOfferToEffector = 0;
   for (let i = 0; i < effectorEntities.length; i++) {
     const effectorId = effectorEntities[i];
     // Automatically create link or ensure that exists.
-    const createOrLoadOfferEffectorRes = createOrLoadOfferEffector(
+    createOrLoadOfferEffector(
       offer.id,
       effectorId,
     );
-
-    if (createOrLoadOfferEffectorRes.created) {
-      createdOfferToEffector = createdOfferToEffector + 1;
-    }
   }
 
-  provider.effectorCount = provider.effectorCount + createdOfferToEffector;
   provider.save();
 }
 
@@ -116,6 +156,7 @@ export function handlePeerCreated(event: PeerCreated): void {
   // log.info('offer.provider {}', offer.provider.toString())
   peer.provider = offer.provider;
   peer.offer = offer.id;
+  peer.isAnyJoinedDeals = false;
   peer.save();
 }
 
@@ -136,7 +177,6 @@ export function handlePaymentTokenUpdated(event: PaymentTokenUpdated): void {
 
 export function handleEffectorAdded(event: EffectorAdded): void {
   const offer = Offer.load(event.params.offerId.toHex()) as Offer;
-  const provider = Provider.load(offer.provider) as Provider;
   const appCID = changetype<AppCID>(event.params.effector);
   const cid = getEffectorCID(appCID);
   const effector = createOrLoadEffector(cid);
@@ -148,15 +188,10 @@ export function handleEffectorAdded(event: EffectorAdded): void {
 
   offer.updatedAt = event.block.timestamp;
   offer.save();
-  if (createOrLoadOfferEffectorRes.created) {
-    provider.effectorCount = provider.effectorCount + 1;
-    provider.save();
-  }
 }
 
 export function handleEffectorRemoved(event: EffectorRemoved): void {
   const offer = Offer.load(event.params.offerId.toHex()) as Offer;
-  const provider = Provider.load(offer.provider) as Provider;
   const appCID = changetype<AppCID>(event.params.effector);
   const cidToRemove = getEffectorCID(appCID);
   const effector = createOrLoadEffector(cidToRemove);
@@ -166,15 +201,6 @@ export function handleEffectorRemoved(event: EffectorRemoved): void {
     effector.id,
   );
   store.remove("OfferToEffector", createOrLoadOfferEffectorRes.entity.id);
-  if (createOrLoadOfferEffectorRes.created) {
-    // We created and deleted the effector: means nothing should be changed in counter.
-    provider.effectorCount = provider.effectorCount + 1;
-    provider.save();
-  } else {
-    provider.effectorCount = provider.effectorCount - 1;
-    provider.save();
-  }
-
   offer.updatedAt = event.block.timestamp;
   offer.save();
 }
@@ -184,9 +210,14 @@ export function handleComputeUnitAddedToDeal(
   event: ComputeUnitAddedToDeal,
 ): void {
   // Call the contract to extract peerId of the computeUnit.
-  const peer = Peer.load(event.params.peerId.toHex()) as Peer;
+  let peer = Peer.load(event.params.peerId.toHex()) as Peer;
   const offer = Offer.load(peer.offer) as Offer;
   const provider = Provider.load(offer.provider) as Provider;
+
+  createOrLoadDealToPeer(event.address.toHex(), peer.id);
+  createOrLoadDealToJoinedOfferPeer(event.address.toHex(), offer.id, peer.id);
+  peer.isAnyJoinedDeals = true;
+  peer.save()
 
   provider.computeUnitsAvailable = provider.computeUnitsAvailable - 1;
   provider.save();
@@ -200,9 +231,18 @@ export function handleComputeUnitRemovedFromDeal(
   event: ComputeUnitRemovedFromDeal,
 ): void {
   // Call the contract to extract peerId of the computeUnit.
-  const peer = Peer.load(event.params.peerId.toHex()) as Peer;
+  let peer = Peer.load(event.params.peerId.toHex()) as Peer;
   const offer = Offer.load(peer.offer) as Offer;
   const provider = Provider.load(offer.provider) as Provider;
+
+  const dealToPeer = createOrLoadDealToPeer(event.address.toHex(), peer.id);
+  const dealToJoinedOfferPeer = createOrLoadDealToJoinedOfferPeer(event.address.toHex(), offer.id, peer.id);
+  store.remove("DealToPeer", dealToPeer.id);
+  store.remove("DealToJoinedOfferPeer", dealToJoinedOfferPeer.id);
+  if (peer.joinedDeals.load().length == 0) {
+    peer.isAnyJoinedDeals = false;
+    peer.save()
+  }
 
   provider.computeUnitsAvailable = provider.computeUnitsAvailable + 1;
   provider.computeUnitsTotal = provider.computeUnitsTotal + 1;
@@ -234,8 +274,14 @@ export function handleDealCreated(event: DealCreated): void {
   deal.appCID = getEffectorCID(appCID);
   deal.withdrawalSum = ZERO_BIG_INT;
   deal.depositedSum = ZERO_BIG_INT;
-  graphNetwork.dealsTotal = graphNetwork.dealsTotal.plus(UNO_BIG_INT);
-  graphNetwork.save();
+
+  // Perform provider access lists (whitelist, blacklist or non).
+  deal.providersAccessType = event.params.providersAccessType_;
+  for (let i=0; i < event.params.providersAccessList_.length; i++) {
+    const providerAddress = formatAddress(event.params.providersAccessList_[i]);
+    const provider = createOrLoadUnregisteredProvider(providerAddress);
+    createOrLoadDealToProvidersAccess(deal.id, provider.id);
+  }
   deal.save();
 
   // Get effectors.
@@ -247,6 +293,10 @@ export function handleDealCreated(event: DealCreated): void {
     // Automatically create link or ensure that exists.
     createOrLoadDealEffector(deal.id, effectorId);
   }
+
+  // Upd stats.
+  graphNetwork.dealsTotal = graphNetwork.dealsTotal.plus(UNO_BIG_INT);
+  graphNetwork.save();
 
   // Start indexing this deployed contract too
   DealTemplate.create(event.params.deal);

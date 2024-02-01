@@ -49,6 +49,8 @@ fragment BasicOffer on Offer {
     }
     provider {
       id
+      approved
+      name
     }
 }
 
@@ -78,6 +80,7 @@ fragment EffectorBasic on Effector {
   description
 }
 
+# Query to retrieve all Effectors to filter by them after.
 query EffectorQuery(
   $offset: Int,
   $limit: Int,
@@ -97,6 +100,7 @@ query EffectorQuery(
   }
 }
 
+# Query to retrieve all Tokens to filter by them after.
 query TokenQuery(
   $filters: Token_filter,
   $offset: Int,

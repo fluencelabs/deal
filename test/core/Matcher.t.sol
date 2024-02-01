@@ -49,6 +49,7 @@ contract MatcherTest is Test {
                 peers[j] = IOffer.RegisterComputePeer({peerId: peerId, unitIds: unitIds[i][j], owner: address(this)});
             }
 
+            deployment.market.setProviderInfo("test", CIDV1({prefixes: 0x12345678, hash: bytes32(0x00)}));
             offerIds[i] = deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, peers);
 
             for (uint256 j = 0; j < peerCountPerOffer; j++) {
@@ -58,8 +59,7 @@ contract MatcherTest is Test {
 
                 uint256 amount =
                     deployment.capacity.getCommitment(commitmentId).collateralPerUnit * unitIds[i][j].length;
-                deployment.tFLT.safeApprove(address(deployment.capacity), amount);
-                deployment.capacity.depositCollateral(commitmentId);
+                deployment.capacity.depositCollateral{value: amount}(commitmentId);
             }
         }
     }
@@ -80,7 +80,7 @@ contract MatcherTest is Test {
         uint256 creationBlock = block.number;
         uint256 pricePerWorkerEpoch = 1 ether;
         uint256 offerCount = 3;
-        uint256 unitCountPerPeer = 2;
+        uint256 unitCountPerPeer = 1;
         uint256 peerCountPerOffer = 3;
         uint256 minWorkers = 1;
         uint256 maxWorkersPerProvider = unitCountPerPeer * peerCountPerOffer * offerCount;
@@ -183,6 +183,7 @@ contract DealMock {
     mapping(bytes32 => address) public computeProviderByUnitId;
     mapping(bytes32 => bytes32) public peerIdByUnitId;
     mapping(address => uint256) public computeUnitCountByProvider;
+    mapping(bytes32 => bool) public isComputePeerExist;
 
     constructor(
         uint256 _pricePerWorkerEpoch,
@@ -214,6 +215,7 @@ contract DealMock {
         unitExists[unitId] = true;
         computeProviderByUnitId[unitId] = computeProvider;
         peerIdByUnitId[unitId] = peerId;
+        isComputePeerExist[peerId] = true;
 
         computeUnitCountByProvider[computeProvider]++;
         computeUnitCount++;

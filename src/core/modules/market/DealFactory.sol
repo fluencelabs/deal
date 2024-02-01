@@ -4,8 +4,9 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "src/deal/interfaces/IDeal.sol";
 import "src/utils/OwnableUpgradableDiamond.sol";
+import "src/deal/interfaces/IDeal.sol";
+import "src/deal/DealProxy.sol";
 import "src/core/modules/BaseModule.sol";
 import "./interfaces/IDealFactory.sol";
 
@@ -19,7 +20,6 @@ abstract contract DealFactory is BaseModule, IDealFactory {
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.market.storage.v1.dealFactory")) - 1);
 
     struct DealFactoryStorage {
-        IDeal dealImpl;
         mapping(IDeal => bool) hasDeal;
     }
 
@@ -30,13 +30,6 @@ abstract contract DealFactory is BaseModule, IDealFactory {
         assembly {
             s.slot := storageSlot
         }
-    }
-
-    // ------------------ Initializer ------------------
-    function __DealFactory_init(IDeal dealImpl_) internal onlyInitializing {
-        DealFactoryStorage storage dealFactoryStorage = _getDealFactoryStorage();
-
-        dealFactoryStorage.dealImpl = dealImpl_;
     }
 
     // ----------------- View -----------------
@@ -60,8 +53,8 @@ abstract contract DealFactory is BaseModule, IDealFactory {
 
         IDeal deal = IDeal(
             address(
-                new ERC1967Proxy(
-                    address(dealFactoryStorage.dealImpl),
+                new DealProxy(
+                    core,
                     abi.encodeWithSelector(
                         IDeal.initialize.selector,
                         core,

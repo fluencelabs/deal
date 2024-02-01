@@ -180,6 +180,7 @@ describe("#getMatchedOffersByDealId", () => {
           commitmentId,
           "...",
         );
+
         const depositCollateralTx = await capacityContract.depositCollateral(
           commitmentId,
           { value: collateralToApproveCommitment },
@@ -255,6 +256,7 @@ describe("#getMatchedOffersByDealId", () => {
       await new Promise((resolve) =>
         setTimeout(resolve, DEFAULT_SUBGRAPH_TIME_INDEXING),
       );
+      // const dealId = "0xd79df1927718b3212fa6e126ec4ad2b3ee1263d9"
 
       console.log("---- Deal Matching ----");
       console.info(`Find matched offers for dealId: ${dealId}...`);

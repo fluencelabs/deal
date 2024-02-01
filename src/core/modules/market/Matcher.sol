@@ -4,7 +4,6 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
 import "./interfaces/IMatcher.sol";
 import "./interfaces/IMatcher.sol";
 import "src/deal/interfaces/IDeal.sol";
@@ -16,9 +15,6 @@ import "./Offer.sol";
 abstract contract Matcher is Offer, IMatcher {
     using SafeERC20 for IERC20;
     using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
-
-    // ----------------- Events -----------------
-    event ComputeUnitMatched(bytes32 indexed peerId, bytes32 unitId, uint256 dealCreationBlock, CIDV1 appCID);
 
     // ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.market.storage.v1.matcher")) - 1);
@@ -40,8 +36,13 @@ abstract contract Matcher is Offer, IMatcher {
     /**
      * @dev Match Deal with Compute Units provided.
      * @notice Match deal with offers and compute units (peers checks through compute units).
-     * @notice It validates maxWorkersPerProvider and fails silently if more CUs provided for an offer.
-     * @dev If Offer, or Peer, or CU are not allowed to match - them are silently ignored.
+     * @notice It validates provided CUs and silently ignore unvalidated ones on checking:
+     * @notice - deal.maxWorkersPerProvider and silently ignore other CUs out of this limit.
+     * @notice - Offer, or Peer not allowed to match (deal.isProviderAllowed, allowed prices, paymentToken, effectors)
+     * @notice - Compute Unit (CU): Active CC status, also note, protocol does not allow more than one CU per peer
+     * @notice    for the same Deal.
+     * @notice TODO: consolidate workaround: when it comes to check CC status, on wrong status the whole transaction
+     * @notice  will be failed instead of to be silenced.
      * @dev There should be `bytes32[][] calldata peers` as well, but it is not supported by subgraph codegen.
      * @dev  Ref to https://github.com/graphprotocol/graph-tooling/issues/342.
      * @param deal: Deal to match.
@@ -65,7 +66,6 @@ abstract contract Matcher is Offer, IMatcher {
         uint256 freeWorkerSlots = deal.targetWorkers() - dealComputeUnitCount;
         uint256 freeWorkerSlotsCurrent = freeWorkerSlots;
         uint256 maxWorkersPerProvider = deal.maxWorkersPerProvider();
-
         CIDV1[] memory effectors = deal.effectors();
 
         CIDV1 memory appCID = deal.appCID();
@@ -113,21 +113,21 @@ abstract contract Matcher is Offer, IMatcher {
                     providersAccessType == IConfig.AccessType.WHITELIST
                         && (
                             computeUnit.deal != address(0) || peer.commitmentId == bytes32(0x000000000)
-                                || currentEpoch < capacity.getCommitment(peer.commitmentId).startEpoch
+                                || capacity.getStatus(peer.commitmentId) == ICapacity.CCStatus.Active
                         )
                 ) {
                     continue;
                 }
 
-                // Check if deposit collateral send (and CCStatus.Active? TODO: use status Active).
-                if (currentEpoch < capacity.getCommitment(peer.commitmentId).startEpoch) {
+                // Currently, protocol does not allow more than one CU per peer for the same Deal.
+                if (deal.isComputePeerExist(peerId)) {
                     continue;
                 }
 
                 _mvComputeUnitToDeal(computeUnitId, deal);
 
                 // TODO: only for NOX -- remove in future
-                emit ComputeUnitMatched(peerId, computeUnitId, creationBlock, appCID);
+                emit ComputeUnitMatched(peerId, deal, computeUnitId, creationBlock, appCID);
 
                 computeUnitCountInDealByProvider++;
                 freeWorkerSlotsCurrent--;
