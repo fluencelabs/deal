@@ -542,7 +542,6 @@ export class DealExplorerClient {
         computeUnits: serializeComputeUnits(
           deal.addedComputeUnits as Array<ComputeUnitBasicFragment>,
         ),
-        // Serialize data from indexer into lists.
         whitelist,
         blacklist,
         effectors: effectors,
