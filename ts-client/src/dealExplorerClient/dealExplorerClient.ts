@@ -77,7 +77,6 @@ import {
 import type { ICapacity } from "../typechain-types/index.js";
 import type { CapacityCommitmentBasicFragment } from "./indexerClient/queries/capacity-commitments-query.generated.js";
 import { FLTToken } from "./constants.js";
-import type {Offer_Filter} from "./indexerClient/generated.types.js";
 
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
@@ -300,7 +299,26 @@ export class DealExplorerClient {
   // @notice [Figma] Provider Capacity.
   async getCapacityCommitmentsByProvider(
     capacityCommitmentsByProviderFilter: ChildEntitiesByProviderFilter,
-  ) {}
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: CapacityCommitmentsOrderBy = "createdAt",
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
+  ) {
+    await this._init();
+    const convertedFilters: CapacityCommitmentsFilters = {
+      search: capacityCommitmentsByProviderFilter.providerId.toLowerCase(),
+    };
+    if (capacityCommitmentsByProviderFilter.status && capacityCommitmentsByProviderFilter.status != "all") {
+      convertedFilters.status = capacityCommitmentsByProviderFilter.status;
+    }
+    return await this._getCapacityCommitmentsImpl(
+      convertedFilters,
+      offset,
+      limit,
+      orderBy,
+      orderType,
+    );
+  }
 
   async _calculateTokenDecimalsForFilters(
     paymentTokens: Array<string> | undefined,
@@ -611,16 +629,13 @@ export class DealExplorerClient {
     };
   }
 
-  // @notice [Figma] List of capacity.
-  async getCapacityCommitments(
+  async _getCapacityCommitmentsImpl(
     filters?: CapacityCommitmentsFilters,
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: CapacityCommitmentsOrderBy = "createdAt",
     orderType: OrderType = DEFAULT_ORDER_TYPE,
   ): Promise<CapacityCommitmentListView> {
-    await this._init();
-
     const orderBySerialized =
       serializeCapacityCommitmentsOrderByToIndexer(orderBy);
 
@@ -698,6 +713,25 @@ export class DealExplorerClient {
       data: res,
       total,
     };
+  }
+
+  // @notice [Figma] List of capacity.
+  async getCapacityCommitments(
+    filters?: CapacityCommitmentsFilters,
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: CapacityCommitmentsOrderBy = "createdAt",
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
+  ): Promise<CapacityCommitmentListView> {
+    await this._init();
+
+    return await this._getCapacityCommitmentsImpl(
+      filters,
+      offset,
+      limit,
+      orderBy,
+      orderType,
+    )
   }
 
   // @notice [Figma] Capacity.
