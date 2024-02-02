@@ -1,6 +1,6 @@
 {
   "name": "@fluencelabs/deal-ts-clients",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "main": "dist/index.js",
   "type": "module",
   "types": "dist/index.d.ts",
@@ -16,7 +16,9 @@
     "test": "vitest run",
     "test:watch": "vitest"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "@graphql-typed-document-node/core": "^3.2.0",
     "dotenv": "^16.3.1",
