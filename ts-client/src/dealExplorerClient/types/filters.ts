@@ -1,6 +1,6 @@
 import type { DealStatus } from "./schemes.js";
 
-export type ProviderDetailsStatusFilter = "all" | "active" | "inactive";
+export type ProviderChildEntityStatusFilter = "all" | "active" | "inactive";
 
 /*
  * @dev :param paymentTokens: tokens addresses.
@@ -30,9 +30,9 @@ export interface ProvidersFilters {
   onlyApproved?: boolean;
 }
 
-export interface ByProviderAndStatusFilter {
-  providerId?: string | undefined;
-  status?: ProviderDetailsStatusFilter | undefined;
+export interface ChildEntitiesByProviderFilter {
+  providerId: string;
+  status?: ProviderChildEntityStatusFilter | undefined;
 }
 
 // @dev Where is "OnlyActive" filter? - currently, it should be filtered by

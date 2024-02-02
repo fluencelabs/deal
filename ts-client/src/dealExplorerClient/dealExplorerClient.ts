@@ -20,7 +20,7 @@ import type {
   ProviderShortListView,
 } from "./types/schemes.js";
 import type {
-  ByProviderAndStatusFilter,
+  ChildEntitiesByProviderFilter,
   CapacityCommitmentsFilters,
   CapacityCommitmentsOrderBy,
   DealsFilters,
@@ -77,6 +77,7 @@ import {
 import type { ICapacity } from "../typechain-types/index.js";
 import type { CapacityCommitmentBasicFragment } from "./indexerClient/queries/capacity-commitments-query.generated.js";
 import { FLTToken } from "./constants.js";
+import type {Offer_Filter} from "./indexerClient/generated.types.js";
 
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
@@ -253,20 +254,20 @@ export class DealExplorerClient {
 
   // @notice [Figma] Provider Offers List.
   async getOffersByProvider(
-    // TODO: what this status is about?
-    byProviderAndStatusFilter: ByProviderAndStatusFilter,
+    offersByProviderFilter: ChildEntitiesByProviderFilter,
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: OfferShortOrderBy = "createdAt",
     orderType: OrderType = DEFAULT_ORDER_TYPE,
   ): Promise<OfferShortListView> {
     await this._init();
-    if (byProviderAndStatusFilter.status) {
-      // TODO.
-      console.warn("Status filter is not implemented.");
+
+    const convertedFilters: OffersFilters = { providerId: offersByProviderFilter.providerId.toLowerCase() };
+    if (offersByProviderFilter.status && offersByProviderFilter.status != "all") {
+      convertedFilters.status = offersByProviderFilter.status;
     }
     return await this._getOffersImpl(
-      { providerId: byProviderAndStatusFilter.providerId?.toLowerCase() },
+      convertedFilters,
       offset,
       limit,
       orderBy,
@@ -276,19 +277,19 @@ export class DealExplorerClient {
 
   // @notice [Figma] Provider Deals.
   async getDealsByProvider(
-    byProviderAndStatusFilter: ByProviderAndStatusFilter,
+    dealsByProviderFilter: ChildEntitiesByProviderFilter,
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: DealsShortOrderBy = "createdAt",
     orderType: OrderType = DEFAULT_ORDER_TYPE,
   ): Promise<DealShortListView> {
     await this._init();
-    if (byProviderAndStatusFilter.status) {
-      // TODO.
-      console.warn("Status filter is not implemented.");
+
+    if (dealsByProviderFilter.status &&  dealsByProviderFilter.status != "all") {
+      console.warn("Filter deals by status if not implemented.");
     }
     return await this._getDealsImpl(
-      { providerId: byProviderAndStatusFilter.providerId?.toLowerCase() },
+      { providerId: dealsByProviderFilter.providerId?.toLowerCase() },
       offset,
       limit,
       orderBy,
@@ -297,8 +298,9 @@ export class DealExplorerClient {
   }
 
   // @notice [Figma] Provider Capacity.
-  // TODO
-  async getCapacityCommitmentsByProvider() {}
+  async getCapacityCommitmentsByProvider(
+    capacityCommitmentsByProviderFilter: ChildEntitiesByProviderFilter,
+  ) {}
 
   async _calculateTokenDecimalsForFilters(
     paymentTokens: Array<string> | undefined,

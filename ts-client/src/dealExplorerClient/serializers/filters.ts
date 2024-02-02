@@ -1,6 +1,6 @@
 // Module is for filter serializers.
 import type {
-  CapacityCommitmentsFilters,
+  CapacityCommitmentsFilters, ChildEntitiesByProviderFilter,
   DealsFilters,
   OffersFilters,
   ProvidersFilters,
