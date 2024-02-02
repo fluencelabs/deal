@@ -190,6 +190,7 @@ export class DealExplorerClient {
   }
 
   /*
+   * @notice [Figma] Compute Provider List.
    * @dev search: you could perform strict search by `provider address` or `provider name`
    * @dev Note, deprecation:
    */
@@ -231,6 +232,7 @@ export class DealExplorerClient {
     };
   }
 
+  // @notice [Figma] Provider Info
   async getProvider(providerId: string): Promise<ProviderDetail | null> {
     await this._init();
     const options = {
@@ -249,6 +251,7 @@ export class DealExplorerClient {
     return res;
   }
 
+  // @notice [Figma] Provider Offers List.
   async getOffersByProvider(
     // TODO: what this status is about?
     byProviderAndStatusFilter: ByProviderAndStatusFilter,
@@ -271,6 +274,7 @@ export class DealExplorerClient {
     );
   }
 
+  // @notice [Figma] Provider Deals.
   async getDealsByProvider(
     byProviderAndStatusFilter: ByProviderAndStatusFilter,
     offset: number = 0,
@@ -291,6 +295,10 @@ export class DealExplorerClient {
       orderType,
     );
   }
+
+  // @notice [Figma] Provider Capacity.
+  // TODO
+  async getCapacityCommitmentsByProvider() {}
 
   async _calculateTokenDecimalsForFilters(
     paymentTokens: Array<string> | undefined,
@@ -360,6 +368,7 @@ export class DealExplorerClient {
   }
 
   /*
+   * @notice [Figma] List of Offers.
    * @dev Get offers list for 1 page and specified filters.
    */
   async getOffers(
@@ -379,7 +388,9 @@ export class DealExplorerClient {
     );
   }
 
-  // Return OfferDetail View.
+  /*
+   * @notice [Figma] Offer.
+  */
   async getOffer(offerId: string): Promise<OfferDetail | null> {
     const options = {
       id: offerId,
@@ -462,6 +473,7 @@ export class DealExplorerClient {
     };
   }
 
+  // @notice [Figma] List of Deals.
   async getDeals(
     dealFilters?: DealsFilters,
     offset: number = 0,
@@ -478,6 +490,7 @@ export class DealExplorerClient {
     );
   }
 
+  // @notice [Figma] Deal.
   async getDeal(dealId: string): Promise<DealDetail | null> {
     await this._init();
     const options = {
@@ -518,6 +531,7 @@ export class DealExplorerClient {
     return res;
   }
 
+  // @dev To fetch all effectors for multiselect filter.
   async getEffectors(
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
@@ -557,6 +571,7 @@ export class DealExplorerClient {
     };
   }
 
+  // @dev To fetch all payment tokens for multiselect filter.
   async getPaymentTokens(
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
@@ -594,7 +609,7 @@ export class DealExplorerClient {
     };
   }
 
-  // TODO: add filter by status instead of only active...
+  // @notice [Figma] List of capacity.
   async getCapacityCommitments(
     filters?: CapacityCommitmentsFilters,
     offset: number = 0,
@@ -683,6 +698,7 @@ export class DealExplorerClient {
     };
   }
 
+  // @notice [Figma] Capacity.
   async getCapacityCommitment(
     capacityCommitmentId: string,
   ): Promise<CapacityCommitmentDetail | null> {
@@ -721,6 +737,7 @@ export class DealExplorerClient {
     };
   }
 
+  // @notice [Figma] Peer ID.
   async getPeer(peerId: string): Promise<PeerDetail | null> {
     await this._init();
     const data = await this._indexerClient.getPeer({ id: peerId });
@@ -739,6 +756,7 @@ export class DealExplorerClient {
     };
   }
 
+  // @notice [Figma] Peer ID: Deals.
   async getDealsByPeer(
     peerId: string,
     offset: number = 0,
