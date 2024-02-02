@@ -15,3 +15,24 @@ query PeerQuery(
     computeUnitsInCapacityCommitment
   }
 }
+
+query ComputeUnitQuery(
+  $id: ID!
+) {
+  computeUnit(id: $id) {
+    id
+    peer {
+      id
+      currentCapacityCommitment {
+        id
+        collateralPerUnit
+        submittedProofsCount
+        startEpoch
+      }
+    }
+    provider {
+      id
+      name
+    }
+  }
+}

@@ -5,7 +5,10 @@ import type {
   Sdk as DealsSdk,
 } from "./queries/deals-query.generated.js";
 import { getSdk as getDealsSdk } from "./queries/deals-query.generated.js";
-import type { Sdk as PeersSdk } from "./queries/peers-query.generated.js";
+import type {
+  ComputeUnitQueryQueryVariables,
+  Sdk as PeersSdk
+} from "./queries/peers-query.generated.js";
 import { getSdk as getPeersSdk } from "./queries/peers-query.generated.js";
 import type {
   EffectorQueryQueryVariables,
@@ -111,5 +114,9 @@ export class IndexerClient extends IndexerClientABC {
   // Get all deals per provided id of a Peer.
   async getPeerDeals(variables: DealsByPeerQueryQueryVariables) {
     return await this.dealsClient.DealsByPeerQuery(variables);
+  }
+
+  async getComputeUnit(variables: ComputeUnitQueryQueryVariables) {
+    return await this.peersClient.ComputeUnitQuery(variables)
   }
 }

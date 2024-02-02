@@ -7,7 +7,7 @@ import {
   CapacityCommitment,
   ComputeUnit,
   Peer,
-  Provider
+  Provider, SubmittedProof
 } from "../../generated/schema";
 import {
   CollateralDeposited,
@@ -15,7 +15,7 @@ import {
   CommitmentCreated,
   CommitmentFinished,
   CommitmentRemoved,
-  CommitmentStatsUpdated, UnitActivated, UnitDeactivated,
+  CommitmentStatsUpdated, ProofSubmitted, UnitActivated, UnitDeactivated,
   WhitelistAccessGranted,
   WhitelistAccessRevoked,
 } from "../../generated/Capacity/Capacity";
@@ -53,6 +53,7 @@ export function handleCommitmentCreated(event: CommitmentCreated): void {
   let commitment = new CapacityCommitment(event.params.commitmentId.toHex());
   log.info("event.params.commitmentId.toHex(): {}", [event.params.commitmentId.toHex()]);
   log.info("event.params.peerId.toHex(): {}", [event.params.peerId.toHex()]);
+  // Load or create peer.
   let peer = Peer.load(event.params.peerId.toHex()) as Peer;
   log.info("peer loaded successfully: {}", [peer.id]);
 
@@ -214,4 +215,24 @@ export function handleUnitDeactivated(event: UnitDeactivated): void {
 
   peer.computeUnitsInCapacityCommitment = peer.computeUnitsInCapacityCommitment - 1;
   peer.save();
+}
+
+export function handleProofSubmitted(event: ProofSubmitted): void {
+  let proofSubmitted = new SubmittedProof(event.transaction.hash.toHex());
+  let capacityCommitment = CapacityCommitment.load(event.params.commitmentId.toHex()) as CapacityCommitment;
+  let computeUnit = ComputeUnit.load(event.params.unitId.toHex()) as ComputeUnit;
+
+  proofSubmitted.capacityCommitment = capacityCommitment.id;
+  proofSubmitted.computeUnit = computeUnit.id;
+  proofSubmitted.globalUnitNonce = event.params.globalUnitNonce;
+  proofSubmitted.localUnitNonce = event.params.localUnitNonce;
+  proofSubmitted.createdAt = event.block.timestamp;
+  proofSubmitted.save()
+
+  // Update stats below.
+  capacityCommitment.submittedProofsCount = capacityCommitment.submittedProofsCount + 1;
+  capacityCommitment.save()
+
+  computeUnit.submittedProofsCount = capacityCommitment.submittedProofsCount + 1;
+  computeUnit.save()
 }

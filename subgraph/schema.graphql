@@ -135,6 +135,9 @@ type ComputeUnit @entity {
   deal: Deal
   workerId: String
   # TODO: worker status "Expired" how to calculate.
+
+  submittedProofs: [SubmittedProof!] @derivedFrom(field: "computeUnit")
+  submittedProofsCount: Int!
 }
 
 # ---- Deal Contract ----
@@ -236,6 +239,9 @@ type CapacityCommitment @entity {
   "Collateral of native token (FLT) that has been deposited."
   totalCollateral: BigInt!
 
+  submittedProofs: [SubmittedProof!] @derivedFrom(field: "capacityCommitment")
+  submittedProofsCount: Int!
+
   computeUnits: [CapacityCommitmentToComputeUnit!] @derivedFrom(field: "capacityCommitment")
   computeUnitsCount: Int!
 
@@ -247,4 +253,14 @@ type CapacityCommitment @entity {
 
   # Add additional fields to filter by below.
   provider: Provider!
+}
+
+type SubmittedProof @entity(immutable: true) {
+  "Id here is a transaction hash."
+  id: ID!
+  capacityCommitment: CapacityCommitment!
+  computeUnit: ComputeUnit!
+  globalUnitNonce: Bytes!
+  localUnitNonce: Bytes!
+  createdAt: BigInt!
 }

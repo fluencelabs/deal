@@ -17,7 +17,7 @@ import type {
   DealByPeer,
   DealsByPeerListView,
   ProviderDetail,
-  ProviderShortListView,
+  ProviderShortListView, ComputeUnitDetail
 } from "./types/schemes.js";
 import type {
   ChildEntitiesByProviderFilter,
@@ -849,6 +849,34 @@ export class DealExplorerClient {
     return {
       total: null,
       data: res,
+    };
+  }
+
+  // @notice [Figma] Compute Unit.
+  async getComputeUnit(computeUnitId: string): Promise<ComputeUnitDetail | null> {
+    await this._init();
+    const data = await this._indexerClient.getComputeUnit({ id: computeUnitId });
+    if (!data || !data.computeUnit) {
+      return null;
+    }
+    const computeUnit = data.computeUnit;
+
+    const currentCapacityCommitment = computeUnit.peer.currentCapacityCommitment;
+    let expectedProofsDueNow = 0
+    const startEpoch = currentCapacityCommitment?.startEpoch
+    if (startEpoch != 0) {
+      expectedProofsDueNow = calculateEpoch(Date.now() / 1000, this._coreInitTimestamp, this._coreEpochDuration) - startEpoch
+    }
+
+    return {
+      providerId: computeUnit.provider.id,
+      currentCommitmentId: currentCapacityCommitment?.id,
+      peerId: computeUnit.peer.id,
+      // TODO: if no value...
+      collateral: currentCapacityCommitment ? tokenValueToRounded(currentCapacityCommitment.collateralPerUnit) : "0",
+      expectedProofsDueNow,
+      successProofs: currentCapacityCommitment ? currentCapacityCommitment.submittedProofsCount: 0,
+      collateralToken: FLTToken,
     };
   }
 }
