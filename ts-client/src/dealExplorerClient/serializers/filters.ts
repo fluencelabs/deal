@@ -68,9 +68,15 @@ export async function serializeOffersFiltersToIndexerType(
     return {};
   }
   const convertedFilters: Offer_Filter = { and: [] };
-  if (v.onlyActive) {
+  // TODO: deprecate only active.
+  if (v.onlyActive || v.status == "active") {
     convertedFilters.and?.push({
       computeUnitsAvailable_gt: 0,
+    });
+  }
+  if (v.status && v.status == "inactive") {
+    convertedFilters.and?.push({
+      computeUnitsAvailable: 0,
     });
   }
   if (v.onlyApproved) {

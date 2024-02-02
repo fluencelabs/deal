@@ -6,7 +6,8 @@ export type ProviderDetailsStatusFilter = "all" | "active" | "inactive";
  * @dev :param paymentTokens: tokens addresses.
  * @dev :para search: strict search only.
  * @dev :param onlyApproved: if provider of the offer is Approved.
- * @dev :param onlyActive: if any of the CUs in the offer is Active (available for matching).
+ * @dev :param onlyActive: deprecated - use status filter instead
+ * @dev :param status: active - if any of the CUs in the offer is Active (available for matching). inactive - otherwise.
  */
 export interface OffersFilters {
   search?: string | undefined;
@@ -18,7 +19,9 @@ export interface OffersFilters {
   createdAtFrom?: number | undefined;
   createdAtTo?: number | undefined;
   providerId?: string | undefined;
+  // @deprecated: use status instead.
   onlyActive?: boolean | undefined;
+  status?: "active" | "inactive";
 }
 
 export interface ProvidersFilters {
@@ -56,6 +59,7 @@ export interface CapacityCommitmentsFilters {
   computeUnitsCountTo?: number | undefined;
   createdAtFrom?: number | undefined;
   createdAtTo?: number | undefined;
+  // @deprecated
   onlyActive?: boolean;
   status?: "active" | "inactive";
   rewardDelegatorRateFrom?: number | undefined;
