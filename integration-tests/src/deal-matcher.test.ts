@@ -11,25 +11,29 @@
 // - it finds match via subgraph client
 // - it send mathcDeal tx finally.
 // TODO: more variates not only 1to1 match.
-import { describe, test, expect } from "vitest";
+import { describe, test, expect, assert } from "vitest";
 
-import { ContractsENV, DealClient, DealMatcherClient } from "../../src";
+import {
+  type ContractsENV,
+  DealClient,
+  DealMatcherClient,
+} from "@fluencelabs/deal-ts-clients";
 import { ethers } from "ethers";
 
 // TODO: from env.
 const TEST_NETWORK: ContractsENV = "local";
 const TEST_RPC_URL = "http://localhost:8545";
-const DEFAULT_SUBGRAPH_TIME_INDEXING = 10000;
+const DEFAULT_SUBGRAPH_TIME_INDEXING = 240000;
 const DEFAULT_CONFIRMATIONS = 1;
 // Test timeout should include:
 // - time for confirmations waits (1 confirmation is setup on anvil chain start)
 // - time for subgraph indexing
 // - time for core epoch
 // - other eps.
-// TODO: get core.epochDuration instead of 15000
-const TESTS_TIMEOUT = 120000 + 15000;
+// TODO: get core.epochDuration instead of 30000
+const TESTS_TIMEOUT = 120000 + 30000 + DEFAULT_SUBGRAPH_TIME_INDEXING;
 
-async function getDefaultOfferFixture(
+function getDefaultOfferFixture(
   owner: string,
   paymentToken: string,
   timestamp: number,
@@ -72,7 +76,7 @@ describe("#getMatchedOffersByDealId", () => {
     const marketContract = await contractsClient.getMarket();
     const signerAddress = await signer.getAddress();
 
-    const { offerFixture } = await getDefaultOfferFixture(
+    const { offerFixture } = getDefaultOfferFixture(
       signerAddress,
       paymentTokenAddress,
       timestamp,
@@ -111,6 +115,7 @@ describe("#getMatchedOffersByDealId", () => {
 
       const blockNumber = await provider.getBlockNumber();
       const timestamp = (await provider.getBlock(blockNumber))?.timestamp;
+      assert(timestamp, "timestamp is undefined");
 
       console.info("---- Offer Creation ----");
       const registeredOffer = await createOffer(
@@ -123,8 +128,7 @@ describe("#getMatchedOffersByDealId", () => {
       const capacityContract = await contractsClient.getCapacity();
       const capacityContractAddress = await capacityContract.getAddress();
       const capacityMinDuration = await capacityContract.minDuration();
-      for (let i = 0; i < registeredOffer.peers.length; i++) {
-        const peer = registeredOffer.peers[i];
+      for (const peer of registeredOffer.peers) {
         // bytes32 peerId, uint256 duration, address delegator, uint256 rewardDelegationRate
         console.log(
           "Create commitment for peer: ",
@@ -159,9 +163,7 @@ describe("#getMatchedOffersByDealId", () => {
       );
 
       console.info("Deposit collateral for all sent CC...");
-      for (let i = 0; i < commitmentIds.length; i++) {
-        const commitmentId = commitmentIds[i];
-
+      for (const commitmentId of commitmentIds) {
         const commitment = await capacityContract.getCommitment(commitmentId);
         const collateralToApproveCommitment =
           commitment.collateralPerUnit * commitment.unitCount;
@@ -224,7 +226,6 @@ describe("#getMatchedOffersByDealId", () => {
       console.info("Create deal that match default offer...");
       const filter = marketContract.filters.DealCreated;
       const lastDealsCreatedBefore = await marketContract.queryFilter(filter);
-
       const deployDealTx = await marketContract.deployDeal(
         {
           prefixes: "0x12345678",
@@ -246,7 +247,8 @@ describe("#getMatchedOffersByDealId", () => {
         1,
       );
       const dealId =
-        lastDealsCreatedAfter[lastDealsCreatedAfter.length - 1].args.deal;
+        lastDealsCreatedAfter[lastDealsCreatedAfter.length - 1]?.args.deal;
+      assert(dealId, "Deal ID is not defined");
 
       console.info(
         `Wait indexer ${DEFAULT_SUBGRAPH_TIME_INDEXING} to process transactions with Deal...`,
@@ -258,12 +260,17 @@ describe("#getMatchedOffersByDealId", () => {
 
       console.log("---- Deal Matching ----");
       console.info(`Find matched offers for dealId: ${dealId}...`);
-      const dealMatcherClient = new DealMatcherClient(TEST_NETWORK);
+      const dealMatcherClient = new DealMatcherClient(
+        TEST_NETWORK,
+        "http://localhost:8000/subgraphs/name/fluence-deal-contracts",
+      );
       const matchedOffersOut =
         await dealMatcherClient.getMatchedOffersByDealId(dealId);
       expect(matchedOffersOut.offers.length).toBe(1); // At least with one previously created offer it matched.
 
-      const cuId = matchedOffersOut.computeUnitsPerOffers[0][0];
+      console.log(matchedOffersOut.computeUnitsPerOffers);
+      // const cuId = matchedOffersOut.computeUnitsPerOffers[0]?.[0];
+
       // Additional check for status of matched CC from chain perspective
       for (const commitmentId of commitmentIds) {
         // e.g. 4 == Failed; 0 - Active.
@@ -271,9 +278,7 @@ describe("#getMatchedOffersByDealId", () => {
       }
 
       console.info(
-        `Match deal with offers structure proposed by indexer: ${JSON.stringify(
-          matchedOffersOut,
-        )}...`,
+        `Match deal with offers structure proposed by indexer: ${JSON.stringify(matchedOffersOut)}...`,
       );
       const matchDealTx = await marketContract.matchDeal(
         dealId,
