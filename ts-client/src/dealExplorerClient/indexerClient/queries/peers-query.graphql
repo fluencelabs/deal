@@ -21,6 +21,9 @@ query ComputeUnitQuery(
 ) {
   computeUnit(id: $id) {
     id
+    deal {
+      id
+    }
     peer {
       id
       currentCapacityCommitment {

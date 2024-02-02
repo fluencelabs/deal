@@ -126,10 +126,22 @@ export type Peer = {
   computeUnits: Array<ComputeUnit>;
 };
 
-export type ComputeUnit = {
+export interface ComputeUnit {
   id: string;
   workerId: string | undefined;
-};
+}
+
+// @param status: might be undefined when CU not in deal and peer of the CU is not in CC.
+export interface ComputeUnitDetail extends ComputeUnit {
+  providerId: string;
+  currentCommitmentId: string | undefined;
+  peerId: string;
+  collateral: string;
+  status: "capacity" | "deal" | "undefined"
+  expectedProofsDueNow: number;
+  successProofs: number;
+  collateralToken: NativeToken;
+}
 
 export type DealShort = {
   id: string;

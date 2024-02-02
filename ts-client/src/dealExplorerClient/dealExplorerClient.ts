@@ -861,22 +861,32 @@ export class DealExplorerClient {
     }
     const computeUnit = data.computeUnit;
 
-    const currentCapacityCommitment = computeUnit.peer.currentCapacityCommitment;
+    const currentPeerCapacityCommitment = computeUnit.peer.currentCapacityCommitment;
     let expectedProofsDueNow = 0
-    const startEpoch = currentCapacityCommitment?.startEpoch
+    const startEpoch = currentPeerCapacityCommitment?.startEpoch
     if (startEpoch != 0) {
       expectedProofsDueNow = calculateEpoch(Date.now() / 1000, this._coreInitTimestamp, this._coreEpochDuration) - startEpoch
     }
 
+    let status = undefined
+    if (computeUnit.deal) {
+      status = "deal"
+    } else if (currentPeerCapacityCommitment) {
+      status = "capacity"
+    } else {
+      status = "undefined"
+    }
+
     return {
       providerId: computeUnit.provider.id,
-      currentCommitmentId: currentCapacityCommitment?.id,
+      currentCommitmentId: currentPeerCapacityCommitment?.id,
       peerId: computeUnit.peer.id,
       // TODO: if no value...
-      collateral: currentCapacityCommitment ? tokenValueToRounded(currentCapacityCommitment.collateralPerUnit) : "0",
+      collateral: currentPeerCapacityCommitment ? tokenValueToRounded(currentPeerCapacityCommitment.collateralPerUnit) : "0",
       expectedProofsDueNow,
-      successProofs: currentCapacityCommitment ? currentCapacityCommitment.submittedProofsCount: 0,
+      successProofs: currentPeerCapacityCommitment ? currentPeerCapacityCommitment.submittedProofsCount: 0,
       collateralToken: FLTToken,
+      status,
     };
   }
 }
