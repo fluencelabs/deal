@@ -11,6 +11,7 @@ type GraphNetwork @entity {
   offersTotal: BigInt!
   tokensTotal: BigInt!
   effectorsTotal: BigInt!
+  capacityCommitmentsTotal: BigInt!
   # Add constants from Core contract below.
   coreEpochDuration: Int
   initTimestamp: Int
@@ -116,6 +117,13 @@ type Peer @entity {
   # To make query with OR to retrieve even entities with joinedDeals == [].
   # TODO: create issue on Subgraph for the feature and past here.
   isAnyJoinedDeals: Boolean!
+
+  # Add Peer stats below.
+  computeUnitsTotal: Int!
+  "Compute units in any deals: update only when moved to deal or out."
+  computeUnitsInDeal: Int!
+  "Compute units in any cc: update only when moved to CC or out: {UnitActivated, UnitDeactivated}."
+  computeUnitsInCapacityCommitment: Int!
 }
 
 type ComputeUnit @entity {
@@ -200,6 +208,12 @@ enum CapacityCommitmentStatus {
   Removed
 }
 
+type CapacityCommitmentToComputeUnit @entity(immutable: true) {
+  id: ID! # Set to `capacityCommitment.id.concat(computeUnit.id)`
+  capacityCommitment: CapacityCommitment!
+  computeUnit: ComputeUnit!
+}
+
 """To represent that Peer has capacity commitment for some time."""
 type CapacityCommitment @entity {
   id: ID!
@@ -210,6 +224,8 @@ type CapacityCommitment @entity {
   duration: BigInt!
   rewardDelegatorRate: Int!
   delegator: String!
+  "timestamp of creation of CC. It does not mean that CC is started."
+  createdAt: BigInt!
   startEpoch: BigInt!
   endEpoch: BigInt!
   totalCUFailCount: Int!
@@ -217,10 +233,18 @@ type CapacityCommitment @entity {
   exitedUnitCount: Int!
   activeUnitCount: Int!
   nextAdditionalActiveUnitCount: Int!
-  unitCount: Int!
+  "Collateral of native token (FLT) that has been deposited."
+  totalCollateral: BigInt!
+
+  computeUnits: [CapacityCommitmentToComputeUnit!] @derivedFrom(field: "capacityCommitment")
+  computeUnitsCount: Int!
+
   snapshotEpoch: BigInt!
   "If CC deleted before collateral deposited."
   deleted: Boolean!
   "Calculated in subgraph field: next failed epoch means the next epoch without proofs submitted when CC declared to be Failed."
   nextCCFailedEpoch: BigInt!
+
+  # Add additional fields to filter by below.
+  provider: Provider!
 }

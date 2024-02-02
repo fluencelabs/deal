@@ -1,0 +1,17 @@
+query PeerQuery(
+  $id: ID!
+) {
+  peer(id: $id) {
+    id
+    offer {
+      id
+    }
+    provider {
+      id
+      name
+    }
+    computeUnitsTotal
+    computeUnitsInDeal
+    computeUnitsInCapacityCommitment
+  }
+}
