@@ -49,6 +49,7 @@ export interface DealsFilters {
 
 // @param search: search by provider id, commitment id, peer id
 //  (strict search only).
+// @param onlyActive: deprecated - use status filter instead.
 export interface CapacityCommitmentsFilters {
   search?: string | undefined;
   computeUnitsCountFrom?: number | undefined;
@@ -56,6 +57,7 @@ export interface CapacityCommitmentsFilters {
   createdAtFrom?: number | undefined;
   createdAtTo?: number | undefined;
   onlyActive?: boolean;
+  status?: "active" | "inactive";
   rewardDelegatorRateFrom?: number | undefined;
   rewardDelegatorRateTo?: number | undefined;
 }

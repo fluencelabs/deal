@@ -227,7 +227,8 @@ export function serializeCapacityCommitmentsFiltersToIndexer(
       rewardDelegatorRate_lte: v.rewardDelegatorRateTo,
     });
   }
-  if (v.onlyActive) {
+  // TODO: deprecate onlyActive.
+  if (v.onlyActive || (v.status && v.status == "active")) {
     if (currentEpoch == undefined) {
       throw new Error(
         "Assertion: currentEpoch is undefined but v.onlyActive filter is used.",
@@ -245,5 +246,15 @@ export function serializeCapacityCommitmentsFiltersToIndexer(
       status_not_in: ["WaitDelegation", "Removed", "Failed"],
     });
   }
-  return {};
+  if (v.status && v.status == "inactive") {
+    if (currentEpoch == undefined) {
+      throw new Error(
+        "Assertion: currentEpoch is undefined but v.onlyActive filter is used.",
+      );
+    }
+    convertedFilters.and?.push({
+      endEpoch_lte: currentEpoch,
+    })
+  }
+  return convertedFilters;
 }

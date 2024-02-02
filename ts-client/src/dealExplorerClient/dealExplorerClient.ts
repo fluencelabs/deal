@@ -608,7 +608,7 @@ export class DealExplorerClient {
       serializeCapacityCommitmentsOrderByToIndexer(orderBy);
 
     let currentEpoch = undefined;
-    if (filters?.onlyActive) {
+    if (filters?.onlyActive || filters?.status == "active" || filters?.status == "inactive") {
       if (this._coreInitTimestamp == null || this._coreEpochDuration == null) {
         throw new Error("Assertion: Class object was not inited correctly.");
       }
