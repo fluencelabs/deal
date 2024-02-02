@@ -263,4 +263,5 @@ type SubmittedProof @entity(immutable: true) {
   globalUnitNonce: Bytes!
   localUnitNonce: Bytes!
   createdAt: BigInt!
+  createdEpoch: BigInt!
 }

@@ -37,5 +37,6 @@ query ComputeUnitQuery(
       id
       name
     }
+    workerId
   }
 }

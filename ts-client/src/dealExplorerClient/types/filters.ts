@@ -66,6 +66,10 @@ export interface CapacityCommitmentsFilters {
   rewardDelegatorRateTo?: number | undefined;
 }
 
+export interface ProofsFilters {
+  search?: string | undefined;
+}
+
 // Order Types.
 export type OfferShortOrderBy =
   | "createdAt"
@@ -80,5 +84,6 @@ export type CapacityCommitmentsOrderBy =
   | "createdAt"
   | "computeUnitsCount"
   | "expirationAt";
+export type ProofsOrderBy = "createdBy" | "epoch"
 
 export type OrderType = "asc" | "desc";

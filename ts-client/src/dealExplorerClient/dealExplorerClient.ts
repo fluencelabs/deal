@@ -17,7 +17,10 @@ import type {
   DealByPeer,
   DealsByPeerListView,
   ProviderDetail,
-  ProviderShortListView, ComputeUnitDetail
+  ProviderShortListView,
+  ComputeUnitDetail,
+  ProofBasicListView,
+  ComputeUnitStatus
 } from "./types/schemes.js";
 import type {
   ChildEntitiesByProviderFilter,
@@ -855,6 +858,7 @@ export class DealExplorerClient {
   // @notice [Figma] Compute Unit.
   async getComputeUnit(computeUnitId: string): Promise<ComputeUnitDetail | null> {
     await this._init();
+
     const data = await this._indexerClient.getComputeUnit({ id: computeUnitId });
     if (!data || !data.computeUnit) {
       return null;
@@ -864,11 +868,11 @@ export class DealExplorerClient {
     const currentPeerCapacityCommitment = computeUnit.peer.currentCapacityCommitment;
     let expectedProofsDueNow = 0
     const startEpoch = currentPeerCapacityCommitment?.startEpoch
-    if (startEpoch != 0) {
-      expectedProofsDueNow = calculateEpoch(Date.now() / 1000, this._coreInitTimestamp, this._coreEpochDuration) - startEpoch
+    if (startEpoch && startEpoch != 0) {
+      expectedProofsDueNow = calculateEpoch(Date.now() / 1000, this._coreInitTimestamp!, this._coreEpochDuration!) - startEpoch
     }
 
-    let status = undefined
+    let status: ComputeUnitStatus = "undefined"
     if (computeUnit.deal) {
       status = "deal"
     } else if (currentPeerCapacityCommitment) {
@@ -878,10 +882,11 @@ export class DealExplorerClient {
     }
 
     return {
+      id: computeUnit.id,
+      workerId: computeUnit.workerId ?? undefined,
       providerId: computeUnit.provider.id,
       currentCommitmentId: currentPeerCapacityCommitment?.id,
       peerId: computeUnit.peer.id,
-      // TODO: if no value...
       collateral: currentPeerCapacityCommitment ? tokenValueToRounded(currentPeerCapacityCommitment.collateralPerUnit) : "0",
       expectedProofsDueNow,
       successProofs: currentPeerCapacityCommitment ? currentPeerCapacityCommitment.submittedProofsCount: 0,

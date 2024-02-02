@@ -137,7 +137,7 @@ export interface ComputeUnitDetail extends ComputeUnit {
   currentCommitmentId: string | undefined;
   peerId: string;
   collateral: string;
-  status: "capacity" | "deal" | "undefined"
+  status: ComputeUnitStatus;
   expectedProofsDueNow: number;
   successProofs: number;
   collateralToken: NativeToken;
@@ -189,6 +189,18 @@ export interface DealByPeer {
   workerId: string;
 }
 
+export interface ProofBasic {
+  transactionId: string;
+  capacityCommitmentId: string;
+  computeUnitId: string;
+  peerId: string;
+  createdAt: number;
+}
+
+export interface ProofBasicListView extends ListViewABC {
+  data: Array<ProofBasic>
+}
+
 // Status undefined == problem with networks, etc.
 export type DealStatus = "inactive" | "active" | "ended" | "undefined";
 export type CapacityCommitmentStatus =
@@ -199,3 +211,5 @@ export type CapacityCommitmentStatus =
   | "failed"
   | "removed"
   | "undefined";
+
+export type ComputeUnitStatus = "deal" | "capacity" | "undefined";
