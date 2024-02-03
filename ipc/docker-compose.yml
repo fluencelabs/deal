@@ -1,0 +1,53 @@
+volumes:
+  fendermint:
+  cometbft:
+  fendermint-eth:
+
+services:
+  fendermint:
+    image: "fendermint"
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      target: fendermint
+    ports:
+      - "26658:26658"
+    volumes:
+      - fendermint:/fendermint/data
+
+  cometbft:
+    image: "cometbft"
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      target: cometbft
+    environment:
+      CMT_PROXY_APP: "tcp://fendermint:26658"
+    ports:
+      - "26657:26657"
+    volumes:
+      - cometbft:/cometbft/data
+    healthcheck:
+      test: curl --fail http://localhost:26657 || exit 1
+      interval: 8s
+      timeout: 10s
+      retries: 20
+    depends_on:
+      - fendermint
+
+  fendermint-eth:
+    image: "fendermint-eth"
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      target: fendermint-eth
+    environment:
+      TENDERMINT_RPC_URL: "http://cometbft:26657"
+      TENDERMINT_WS_URL: "ws://cometbft:26657/websocket"
+    ports:
+      - "8545:8545"
+    volumes:
+      - fendermint-eth:/fendermint/data
+    depends_on:
+      cometbft:
+        condition: service_healthy
