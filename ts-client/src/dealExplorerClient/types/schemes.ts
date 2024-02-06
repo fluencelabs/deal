@@ -1,3 +1,4 @@
+// Schemes that dealExplorerClient should compose and return (aka API of dealExplorerClient).
 interface ListViewABC {
   total: string | null;
 }
@@ -20,6 +21,37 @@ export interface EffectorListView extends ListViewABC {
 
 export interface PaymentTokenListView extends ListViewABC {
   data: Array<PaymentToken>;
+}
+
+export interface CapacityCommitmentListView extends ListViewABC {
+  data: Array<CapacityCommitmentShort>;
+}
+
+// @param expiredAt: null if not CC have not been activated yet.
+// @param startedAt: is not null when delegator deposited collateral and CC could be activated.
+export interface CapacityCommitmentShort {
+  id: string;
+  createdAt: number;
+  startedAt: number | null;
+  expiredAt: number | null;
+  providerId: string;
+  peerId: string;
+  computeUnitsCount: number;
+  status: CapacityCommitmentStatus;
+}
+
+// Other related fields to CC should be fetched separately, e.g.
+// - list of CUs
+// - proofs
+// @param totalCollateral: collateral that deposited.
+// @param unlockedRewards: reward for CC that unlocked to withdraw.
+// @param totalRewards: total rewards collected - already withdrawn.
+export interface CapacityCommitmentDetail extends CapacityCommitmentShort {
+  totalCollateral: string;
+  collateralToken: NativeToken;
+  rewardDelegatorRate: number;
+  unlockedRewards: string;
+  totalRewards: string;
 }
 
 export type ProviderBase = {
@@ -60,11 +92,17 @@ export interface OfferDetail extends OfferShort {
   updatedAt: number;
 }
 
-export type PaymentToken = {
-  address: string;
+// Token that is used for the blockchain.
+// This is a constant per chain type.
+export interface NativeToken {
   symbol: string;
   decimals: string;
-};
+}
+
+// Other tokens
+export interface PaymentToken extends NativeToken {
+  address: string;
+}
 
 export type Revenue = {
   total: number;
@@ -82,15 +120,12 @@ export type Effector = {
   description: string;
 };
 
-// TODO: transactionHash deprecated.
-// TODO: workerSlots deprecated.
 export type Peer = {
   id: string;
   offerId: string;
   computeUnits: Array<ComputeUnit>;
 };
 
-// TODO: deprecated: collateral.
 export type ComputeUnit = {
   id: string;
   workerId: string | undefined;
@@ -111,7 +146,6 @@ export type DealShort = {
   totalEarnings: string;
 };
 
-// Collateral deprecated.
 export interface DealDetail extends DealShort {
   pricePerWorkerEpoch: string;
   maxWorkersPerProvider: number;
@@ -121,5 +155,35 @@ export interface DealDetail extends DealShort {
   effectors: Array<Effector>;
 }
 
+// [Figma: Peer ID]
+export interface PeerDetail {
+  id: string;
+  providerId: string;
+  offerId: string;
+  computeUnitsInDeal: number;
+  computeUnitsInCapacityCommitment: number;
+  computeUnitsTotal: number;
+}
+
+// [Figma: Peer ID]
+export interface DealsByPeerListView extends ListViewABC {
+  data: Array<DealByPeer>;
+}
+
+// [Figma: Peer ID] Scheme represents entity of Array<Deal> for complex PeerDetail View.
+export interface DealByPeer {
+  dealId: string;
+  computeUnitId: string;
+  workerId: string;
+}
+
 // Status undefined == problem with networks, etc.
 export type DealStatus = "inactive" | "active" | "ended" | "undefined";
+export type CapacityCommitmentStatus =
+  | "active"
+  | "waitDelegation"
+  | "waitStart"
+  | "inactive"
+  | "failed"
+  | "removed"
+  | "undefined";

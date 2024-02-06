@@ -1,45 +1,39 @@
 import { ethers } from "ethers";
 import type {
-  DealShort,
-  OfferShort,
-  ProviderShort,
-  OfferDetail,
-  Effector,
-  ProviderDetail,
-  ProviderBase,
+  CapacityCommitmentDetail,
+  CapacityCommitmentListView,
+  CapacityCommitmentShort,
+  CapacityCommitmentStatus,
   DealDetail,
-  Peer,
-  ComputeUnit,
-  DealStatus,
   DealShortListView,
+  DealStatus,
+  Effector,
+  EffectorListView,
+  OfferDetail,
   OfferShortListView,
-  ProviderShortListView,
   PaymentToken,
   PaymentTokenListView,
-  EffectorListView,
+  PeerDetail,
+  DealByPeer,
+  DealsByPeerListView,
+  ProviderDetail,
+  ProviderShortListView,
 } from "./types/schemes.js";
 import type {
-  ByProviderAndStatusFilter,
+  ChildEntitiesByProviderFilter,
+  CapacityCommitmentsFilters,
+  CapacityCommitmentsOrderBy,
   DealsFilters,
-  OffersFilters,
-  OfferShortOrderBy,
-  ProvidersFilters,
-  OrderType,
-  ProviderShortOrderBy,
   DealsShortOrderBy,
   EffectorsOrderBy,
+  OffersFilters,
+  OfferShortOrderBy,
+  OrderType,
   PaymentTokenOrderBy,
+  ProvidersFilters,
+  ProviderShortOrderBy,
 } from "./types/filters.js";
 import { IndexerClient } from "./indexerClient/indexerClient.js";
-import type { BasicOfferFragment } from "./indexerClient/queries/offers-query.generated.js";
-import type { ProviderOfProvidersQueryFragment } from "./indexerClient/queries/providers-query.generated.js";
-import type {
-  Deal_Filter,
-  Deal_OrderBy,
-  Offer_Filter,
-  Offer_OrderBy,
-  Provider_Filter,
-} from "./indexerClient/generated.types.js";
 import type {
   BasicDealFragment,
   ComputeUnitBasicFragment,
@@ -48,15 +42,41 @@ import { DealClient } from "../client/client.js";
 import type { ContractsENV } from "../client/config.js";
 import type { BasicPeerFragment } from "./indexerClient/queries/offers-query.generated.js";
 import { DealRpcClient } from "./rpcClients/index.js";
-import { tokenValueToRounded, valueToTokenValue } from "./utils.js";
 import {
-  serializeEffectorDescription,
-  serializeProviderName,
-} from "./serializers.js";
-import {serializeDealProviderAccessLists} from "../utils/serializers.js";
-
-export class FiltersError extends Error {}
-export class ValidTogetherFiltersError extends FiltersError {}
+  calculateEpoch,
+  DEFAULT_ORDER_TYPE,
+  DEFAULT_TOKEN_VALUE_ROUNDING,
+  FILTER_MULTISELECT_MAX,
+  tokenValueToRounded,
+} from "./utils.js";
+import { serializeEffectorDescription } from "./serializers/logics.js";
+import { serializeDealProviderAccessLists } from "../utils/serializers.js";
+import {
+  FiltersError,
+  serializeCapacityCommitmentsFiltersToIndexer,
+  serializeDealsFiltersToIndexer,
+  serializeOffersFiltersToIndexerType,
+  serializeProviderFiltersToIndexer,
+  ValidTogetherFiltersError,
+} from "./serializers/filters.js";
+import {
+  serializeCapacityCommitmentShort,
+  serializeComputeUnits,
+  serializeDealsShort,
+  serializeEffectors,
+  serializeOfferShort,
+  serializePeers,
+  serializeProviderBase,
+  serializeProviderShort,
+} from "./serializers/schemes.js";
+import {
+  serializeCapacityCommitmentsOrderByToIndexer,
+  serializeDealShortOrderByToIndexer,
+  serializeOfferShortOrderByToIndexer,
+} from "./serializers/orderby.js";
+import type { ICapacity } from "../typechain-types/index.js";
+import type { CapacityCommitmentBasicFragment } from "./indexerClient/queries/capacity-commitments-query.generated.js";
+import { FLTToken } from "./constants.js";
 
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
@@ -64,18 +84,18 @@ export class ValidTogetherFiltersError extends FiltersError {}
  */
 export class DealExplorerClient {
   DEFAULT_PAGE_LIMIT = 100;
-  DEFAULT_ORDER_TYPE: OrderType = "desc";
-  DEFAULT_TOKEN_VALUE_ROUNDING = 3;
   // For MVM we suppose that everything is in USDC.
   //  Used only with filters - if no token selected.
   DEFAULT_FILTER_TOKEN_DECIMALS = 6;
-  // Max to select per 1 multiselect filter.
-  FILTER_MULTISELECT_MAX = 100;
 
   private _caller: ethers.Provider | ethers.Signer;
   private _indexerClient: IndexerClient;
   private _dealContractsClient: DealClient;
   private _dealRpcClient: DealRpcClient | null;
+  private _coreEpochDuration: number | null;
+  private _coreInitTimestamp: number | null;
+  private _capacityContract: ICapacity | null;
+  private _capacityContractAddress: string | null;
 
   constructor(
     network: ContractsENV,
@@ -92,244 +112,50 @@ export class DealExplorerClient {
     }
     this._indexerClient = new IndexerClient(network);
     this._dealContractsClient = new DealClient(this._caller, network);
+    // Fields to init() are declared below.
     this._dealRpcClient = null;
+    this._coreEpochDuration = null;
+    this._coreInitTimestamp = null;
+    this._capacityContract = null;
+    this._capacityContractAddress = null;
   }
 
   // Add init other async attributes here.
   // Call before code in every external methods.
-  // Currently, it inits only DealRpcClient.
+  // Currently, it inits:
+  // - DealRpcClient multicall3Contract
+  // - fetches core constants from indexer.
   async _init() {
-    if (this._dealRpcClient) {
+    // Check if already inited - early return.
+    if (this._dealRpcClient && this._capacityContract) {
       return;
     }
+    console.info(`[DealExplorerClient] Init client...`);
     const multicall3Contract = await this._dealContractsClient.getMulticall3();
     const multicall3ContractAddress = await multicall3Contract.getAddress();
     this._dealRpcClient = new DealRpcClient(
       this._caller,
       multicall3ContractAddress,
     );
-  }
+    this._capacityContract = await this._dealContractsClient.getCapacity();
+    this._capacityContractAddress = await this._capacityContract.getAddress();
 
-  _composeProviderBase(
-    provider: ProviderOfProvidersQueryFragment,
-  ): ProviderBase {
-    return {
-      id: provider.id,
-      createdAt: Number(provider.createdAt),
-      totalComputeUnits: provider.computeUnitsTotal,
-      freeComputeUnits: provider.computeUnitsAvailable,
-      name: serializeProviderName(
-        provider.name,
-        provider.id,
-        provider.approved,
-      ),
-      isApproved: provider.approved,
-    } as ProviderBase;
-  }
-
-  _composeProviderShort(
-    provider: ProviderOfProvidersQueryFragment,
-  ): ProviderShort {
-    const providerBase = this._composeProviderBase(provider);
-    const composedOffers = [];
-    if (provider.offers) {
-      for (const offer of provider.offers) {
-        composedOffers.push(
-          this._composeOfferShort(offer as BasicOfferFragment),
+    // Init constants from indexer.
+    // TODO: add cache.
+    if (this._coreEpochDuration == null || this._coreInitTimestamp == null) {
+      console.info("Fetch contract constants from indexer.");
+      const data = await this._indexerClient.getContractConstants();
+      if (
+        data.graphNetworks.length != 1 ||
+        data.graphNetworks[0] == undefined
+      ) {
+        throw new Error(
+          "Assertion: data.graphNetworks.length != 1 || data.graphNetworks[0] == undefined.",
         );
       }
+      this._coreInitTimestamp = Number(data.graphNetworks[0].initTimestamp);
+      this._coreEpochDuration = Number(data.graphNetworks[0].coreEpochDuration);
     }
-    return {
-      ...providerBase,
-      offers: composedOffers,
-    } as ProviderShort;
-  }
-
-  async _convertProviderFiltersToIndexer(
-    providersFilters?: ProvidersFilters,
-  ): Promise<Provider_Filter> {
-    // Only for registered providers.
-    const convertedFilters: Provider_Filter = { and: [
-        {
-          registered: true,
-        }
-      ] };
-    if (!providersFilters) {
-      return convertedFilters;
-    }
-    if (providersFilters.onlyApproved) {
-      convertedFilters.and?.push({
-        approved: true,
-      });
-    }
-    if (providersFilters.search) {
-      const search = providersFilters.search;
-      convertedFilters.and?.push({
-        or: [{ id: search.toLowerCase() }, { name: search }],
-      });
-    }
-    // https://github.com/graphprotocol/graph-node/issues/2539
-    // https://github.com/graphprotocol/graph-node/issues/4775
-    // https://github.com/graphprotocol/graph-node/blob/ad31fd9699b0957abda459340dff093b2a279074/NEWS.md?plain=1#L30
-    // Thus, kinda join should be presented on client side =(.
-    if (providersFilters.effectorIds) {
-      // composedFilters = { offers_: { effectors_: { effector_in: providersFilters.effectorIds } } };
-      console.warn("Currently effectorIds filter does not implemented.");
-    }
-    return convertedFilters;
-  }
-
-  /*
-   * @dev search: you could perform strict search by `provider address` or `provider name`
-   * @dev Note, deprecation:
-   */
-  async getProviders(
-    providersFilters?: ProvidersFilters,
-    offset: number = 0,
-    limit: number = this.DEFAULT_PAGE_LIMIT,
-    orderBy: ProviderShortOrderBy = "createdAt",
-    orderType: OrderType = this.DEFAULT_ORDER_TYPE,
-  ): Promise<ProviderShortListView> {
-    await this._init();
-    const composedFilters =
-      await this._convertProviderFiltersToIndexer(providersFilters);
-    const data = await this._indexerClient.getProviders({
-      filters: composedFilters,
-      offset,
-      limit,
-      orderBy,
-      orderType,
-    });
-    const res = [];
-    if (data) {
-      for (const provider of data.providers) {
-        res.push(this._composeProviderShort(provider));
-      }
-    }
-    let total = null;
-    if (
-      !providersFilters &&
-      data.graphNetworks.length == 1 &&
-      data.graphNetworks[0] &&
-      data.graphNetworks[0].providersTotal
-    ) {
-      total = data.graphNetworks[0].providersTotal as string;
-    }
-    return {
-      data: res,
-      total,
-    };
-  }
-
-  async getProvider(providerId: string): Promise<ProviderDetail | null> {
-    await this._init();
-    const options = {
-      id: providerId,
-    };
-    const data = await this._indexerClient.getProvider(options);
-    let res = null;
-    if (data && data.provider) {
-      const providerFetched = data.provider;
-      const providerBase = this._composeProviderBase(providerFetched);
-      res = {
-        ...providerBase,
-        peerCount: providerFetched.peerCount,
-      };
-    }
-    return res;
-  }
-
-  async getOffersByProvider(
-    byProviderAndStatusFilter: ByProviderAndStatusFilter,
-    offset: number = 0,
-    limit: number = this.DEFAULT_PAGE_LIMIT,
-    orderBy: OfferShortOrderBy = "createdAt",
-    orderType: OrderType = this.DEFAULT_ORDER_TYPE,
-  ): Promise<OfferShortListView> {
-    await this._init();
-    if (byProviderAndStatusFilter.status) {
-      // TODO.
-      console.warn("Status filter is not implemented.");
-    }
-    return await this._getOffersImpl(
-      { providerId: byProviderAndStatusFilter.providerId?.toLowerCase() },
-      offset,
-      limit,
-      orderBy,
-      orderType,
-    );
-  }
-
-  async getDealsByProvider(
-    byProviderAndStatusFilter: ByProviderAndStatusFilter,
-    offset: number = 0,
-    limit: number = this.DEFAULT_PAGE_LIMIT,
-    orderBy: DealsShortOrderBy = "createdAt",
-    orderType: OrderType = this.DEFAULT_ORDER_TYPE,
-  ): Promise<DealShortListView> {
-    await this._init();
-    if (byProviderAndStatusFilter.status) {
-      // TODO.
-      console.warn("Status filter is not implemented.");
-    }
-    return await this._getDealsImpl(
-      { providerId: byProviderAndStatusFilter.providerId?.toLowerCase() },
-      offset,
-      limit,
-      orderBy,
-      orderType,
-    );
-  }
-
-  _composeEffectors(
-    manyToManyEffectors:
-      | Array<{ effector: { id: string; description: string } }>
-      | null
-      | undefined,
-  ): Array<Effector> {
-    const composedEffectors: Array<Effector> = [];
-    if (!manyToManyEffectors) {
-      return composedEffectors;
-    }
-    for (const effector of manyToManyEffectors) {
-      composedEffectors.push({
-        cid: effector.effector.id,
-        description: serializeEffectorDescription(
-          effector.effector.id,
-          effector.effector.description,
-        ),
-      });
-    }
-
-    return composedEffectors;
-  }
-
-  _composeOfferShort(offer: BasicOfferFragment): OfferShort {
-    return {
-      id: offer.id,
-      createdAt: Number(offer.createdAt),
-      totalComputeUnits: Number(offer.computeUnitsTotal ?? 0),
-      freeComputeUnits: Number(offer.computeUnitsAvailable ?? 0),
-      paymentToken: {
-        address: offer.paymentToken.id,
-        symbol: offer.paymentToken.symbol,
-        decimals: offer.paymentToken.decimals.toString(),
-      },
-      pricePerEpoch: tokenValueToRounded(
-        offer.pricePerEpoch,
-        this.DEFAULT_TOKEN_VALUE_ROUNDING,
-        offer.paymentToken.decimals,
-      ),
-      effectors: this._composeEffectors(offer.effectors),
-      providerId: offer.provider.id,
-    };
-  }
-
-  _convertOfferShortOrderByToIndexerType(v: OfferShortOrderBy): Offer_OrderBy {
-    if (v == "pricePerWorkerEpoch") {
-      return "pricePerEpoch" as Offer_OrderBy;
-    }
-    return v as Offer_OrderBy;
   }
 
   /*
@@ -339,14 +165,14 @@ export class DealExplorerClient {
   async _getCommonTokenDecimals(
     tokenAddresses: Array<string>,
   ): Promise<number> {
-    if (tokenAddresses.length > this.FILTER_MULTISELECT_MAX) {
+    if (tokenAddresses.length > FILTER_MULTISELECT_MAX) {
       throw new FiltersError("Too many tokens selected per 1 multiselect.");
     }
     const fetched = await this._indexerClient.getTokens({
       filters: { id_in: tokenAddresses },
-      limit: this.FILTER_MULTISELECT_MAX,
+      limit: FILTER_MULTISELECT_MAX,
       orderBy: "id",
-      orderType: this.DEFAULT_ORDER_TYPE,
+      orderType: DEFAULT_ORDER_TYPE,
     });
     const tokenModels = fetched.tokens;
     if (tokenModels.length === 0 || tokenModels[0] === undefined) {
@@ -364,82 +190,152 @@ export class DealExplorerClient {
   }
 
   /*
-   * @dev We allow to select paymentTokens and range of values for those tokens.
-   * @dev If for selected tokens decimals are not at the same: exception will be raised.
-   * @dev Thus, on frontend side this "missmatch" should be avoided by checking selected
-   * @dev  tokens on equal "decimals" field.
-   * @dev [MVM] If no token is selected DEFAULT_FILTER_TOKEN_DECIMALS is applied.
+   * @notice [Figma] Compute Provider List.
+   * @dev search: you could perform strict search by `provider address` or `provider name`
+   * @dev Note, deprecation:
    */
-  async _convertOffersFiltersToIndexerType(
-    v?: OffersFilters,
-  ): Promise<Offer_Filter> {
-    if (!v) {
-      return {};
-    }
-    const convertedFilters: Offer_Filter = { and: [] };
-    if (v.onlyActive) {
-      convertedFilters.and?.push({
-        computeUnitsAvailable_gt: 0,
-      });
-    }
-    if (v.onlyApproved) {
-      convertedFilters.and?.push({
-        provider_: { approved: true },
-      });
-    }
-    if (v.search) {
-      const search = v.search;
-      convertedFilters.and?.push({
-        or: [{ id: search }, { provider: search.toLowerCase() }],
-      });
-    }
-    if (v.effectorIds) {
-      convertedFilters.and?.push({
-        effectors_: { effector_in: v.effectorIds },
-      });
-    }
-    if (v.createdAtFrom) {
-      convertedFilters.and?.push({ createdAt_gte: v.createdAtFrom.toString() });
-    }
-    if (v.createdAtTo) {
-      convertedFilters.and?.push({ createdAt_lte: v.createdAtTo.toString() });
-    }
-    if (v.providerId) {
-      convertedFilters.and?.push({ provider: v.providerId });
-    }
-    // Filters with relation check below.
-    let tokenDecimals = this.DEFAULT_FILTER_TOKEN_DECIMALS;
-    const paymentTokensLowerCase = v.paymentTokens?.map((tokenAddress) => {
-      return tokenAddress.toLowerCase();
+  async getProviders(
+    providersFilters?: ProvidersFilters,
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: ProviderShortOrderBy = "createdAt",
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
+  ): Promise<ProviderShortListView> {
+    await this._init();
+    const composedFilters =
+      await serializeProviderFiltersToIndexer(providersFilters);
+    const data = await this._indexerClient.getProviders({
+      filters: composedFilters,
+      offset,
+      limit,
+      orderBy,
+      orderType,
     });
-    if (paymentTokensLowerCase) {
-      convertedFilters.and?.push({ paymentToken_in: paymentTokensLowerCase });
+    const res = [];
+    if (data) {
+      for (const provider of data.providers) {
+        res.push(serializeProviderShort(provider));
+      }
     }
+    let total = null;
     if (
-      (v.minPricePerWorkerEpoch || v.maxPricePerWorkerEpoch) &&
-      paymentTokensLowerCase
+      !providersFilters &&
+      data.graphNetworks.length == 1 &&
+      data.graphNetworks[0] &&
+      data.graphNetworks[0].providersTotal
     ) {
-      tokenDecimals = await this._getCommonTokenDecimals(
-        paymentTokensLowerCase,
-      );
+      total = data.graphNetworks[0].providersTotal as string;
     }
-    if (v.minPricePerWorkerEpoch) {
-      convertedFilters.and?.push({
-        pricePerEpoch_gte: valueToTokenValue(
-          v.minPricePerWorkerEpoch,
-          tokenDecimals,
-        ),
+    return {
+      data: res,
+      total,
+    };
+  }
+
+  // @notice [Figma] Provider Info
+  async getProvider(providerId: string): Promise<ProviderDetail | null> {
+    await this._init();
+    const options = {
+      id: providerId,
+    };
+    const data = await this._indexerClient.getProvider(options);
+    let res = null;
+    if (data && data.provider) {
+      const providerFetched = data.provider;
+      const providerBase = serializeProviderBase(providerFetched);
+      res = {
+        ...providerBase,
+        peerCount: providerFetched.peerCount,
+      };
+    }
+    return res;
+  }
+
+  // @notice [Figma] Provider Offers List.
+  async getOffersByProvider(
+    offersByProviderFilter: ChildEntitiesByProviderFilter,
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: OfferShortOrderBy = "createdAt",
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
+  ): Promise<OfferShortListView> {
+    await this._init();
+
+    const convertedFilters: OffersFilters = { providerId: offersByProviderFilter.providerId.toLowerCase() };
+    if (offersByProviderFilter.status && offersByProviderFilter.status != "all") {
+      convertedFilters.status = offersByProviderFilter.status;
+    }
+    return await this._getOffersImpl(
+      convertedFilters,
+      offset,
+      limit,
+      orderBy,
+      orderType,
+    );
+  }
+
+  // @notice [Figma] Provider Deals.
+  async getDealsByProvider(
+    dealsByProviderFilter: ChildEntitiesByProviderFilter,
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: DealsShortOrderBy = "createdAt",
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
+  ): Promise<DealShortListView> {
+    await this._init();
+
+    if (dealsByProviderFilter.status &&  dealsByProviderFilter.status != "all") {
+      console.warn("Filter deals by status if not implemented.");
+    }
+    return await this._getDealsImpl(
+      { providerId: dealsByProviderFilter.providerId?.toLowerCase() },
+      offset,
+      limit,
+      orderBy,
+      orderType,
+    );
+  }
+
+  // @notice [Figma] Provider Capacity.
+  async getCapacityCommitmentsByProvider(
+    capacityCommitmentsByProviderFilter: ChildEntitiesByProviderFilter,
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: CapacityCommitmentsOrderBy = "createdAt",
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
+  ) {
+    await this._init();
+    const convertedFilters: CapacityCommitmentsFilters = {
+      search: capacityCommitmentsByProviderFilter.providerId.toLowerCase(),
+    };
+    if (capacityCommitmentsByProviderFilter.status && capacityCommitmentsByProviderFilter.status != "all") {
+      convertedFilters.status = capacityCommitmentsByProviderFilter.status;
+    }
+    return await this._getCapacityCommitmentsImpl(
+      convertedFilters,
+      offset,
+      limit,
+      orderBy,
+      orderType,
+    );
+  }
+
+  async _calculateTokenDecimalsForFilters(
+    paymentTokens: Array<string> | undefined,
+    otherConditions: boolean | undefined,
+  ) {
+    let tokenDecimals = this.DEFAULT_FILTER_TOKEN_DECIMALS;
+    if (paymentTokens) {
+      const paymentTokensLowerCase = paymentTokens.map((tokenAddress) => {
+        return tokenAddress.toLowerCase();
       });
+      if (otherConditions && paymentTokensLowerCase.length > 1) {
+        tokenDecimals = await this._getCommonTokenDecimals(
+          paymentTokensLowerCase,
+        );
+      }
     }
-    if (v.maxPricePerWorkerEpoch) {
-      convertedFilters.and?.push({
-        pricePerEpoch_lte: valueToTokenValue(
-          v.maxPricePerWorkerEpoch,
-          tokenDecimals,
-        ),
-      });
-    }
-    return convertedFilters;
+    return tokenDecimals;
   }
 
   async _getOffersImpl(
@@ -447,12 +343,22 @@ export class DealExplorerClient {
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: OfferShortOrderBy = "createdAt",
-    orderType: OrderType = this.DEFAULT_ORDER_TYPE,
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
   ): Promise<OfferShortListView> {
-    const orderByConverted =
-      this._convertOfferShortOrderByToIndexerType(orderBy);
-    const filtersConverted =
-      await this._convertOffersFiltersToIndexerType(offerFilters);
+    const orderByConverted = serializeOfferShortOrderByToIndexer(orderBy);
+
+    const _cond =
+      (offerFilters?.minPricePerWorkerEpoch ||
+        offerFilters?.maxPricePerWorkerEpoch) !== undefined;
+    const commonTokenDecimals = await this._calculateTokenDecimalsForFilters(
+      offerFilters?.paymentTokens,
+      _cond,
+    );
+
+    const filtersConverted = await serializeOffersFiltersToIndexerType(
+      offerFilters,
+      commonTokenDecimals,
+    );
     const data = await this._indexerClient.getOffers({
       filters: filtersConverted,
       offset,
@@ -463,7 +369,7 @@ export class DealExplorerClient {
     const res = [];
     if (data) {
       for (const offer of data.offers) {
-        res.push(this._composeOfferShort(offer));
+        res.push(serializeOfferShort(offer));
       }
     }
     let total = null;
@@ -482,22 +388,15 @@ export class DealExplorerClient {
   }
 
   /*
+   * @notice [Figma] List of Offers.
    * @dev Get offers list for 1 page and specified filters.
-   * @dev # Deprecated Notice:
-   * @dev - minCollateralPerWorker
-   * @dev - maxCollateralPerWorker
-   * @dev - skip: renamed to offset
-   * @dev - take: renamed to limit
-   * @dev - order: renamed to orderBy
-   * @dev - paymentToken: array of paymentTokens
-   * TODO: remove unused vars.
    */
   async getOffers(
     offerFilters?: OffersFilters,
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: OfferShortOrderBy = "createdAt",
-    orderType: OrderType = this.DEFAULT_ORDER_TYPE,
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
   ): Promise<OfferShortListView> {
     await this._init();
     return await this._getOffersImpl(
@@ -509,25 +408,9 @@ export class DealExplorerClient {
     );
   }
 
-  _composePeers(peers: Array<BasicPeerFragment>): Array<Peer> {
-    const peersComposed: Array<Peer> = [];
-    if (peers) {
-      for (const peer of peers) {
-        peersComposed.push({
-          id: peer.id,
-          offerId: peer.offer.id,
-          computeUnits: peer.computeUnits
-            ? this._composeComputeUnits(
-                peer.computeUnits as Array<ComputeUnitBasicFragment>,
-              )
-            : [],
-        });
-      }
-    }
-    return peersComposed;
-  }
-
-  // Return OfferDetail View.
+  /*
+   * @notice [Figma] Offer.
+  */
   async getOffer(offerId: string): Promise<OfferDetail | null> {
     const options = {
       id: offerId,
@@ -536,85 +419,12 @@ export class DealExplorerClient {
     let res: OfferDetail | null = null;
     if (data && data.offer) {
       res = {
-        ...this._composeOfferShort(data.offer),
-        peers: this._composePeers(data.offer.peers as Array<BasicPeerFragment>),
+        ...serializeOfferShort(data.offer),
+        peers: serializePeers(data.offer.peers as Array<BasicPeerFragment>),
         updatedAt: Number(data.offer.updatedAt),
       };
     }
     return res;
-  }
-
-  _convertDealShortOrderByToIndexerType(v: DealsShortOrderBy): Deal_OrderBy {
-    // Currently no needs in convert because only createdAt.
-    return v as Deal_OrderBy;
-  }
-
-  async _convertDealsFiltersToIndexerType(
-    v?: DealsFilters,
-  ): Promise<Deal_Filter> {
-    if (!v) {
-      return {};
-    }
-    if (v.onlyApproved) {
-      console.warn("Currently onlyApproved filter does not implemented.");
-    }
-    if (v.status) {
-      console.warn("Currently status filter does not implemented.");
-    }
-    const convertedFilters: Deal_Filter = { and: [] };
-    if (v.search) {
-      const search = v.search.toLowerCase();
-      convertedFilters.and?.push({ or: [{ id: search }, { owner: search }] });
-    }
-    if (v.effectorIds) {
-      convertedFilters.and?.push({
-        effectors_: { effector_in: v.effectorIds },
-      });
-    }
-    if (v.createdAtFrom) {
-      convertedFilters.and?.push({ createdAt_gte: v.createdAtFrom.toString() });
-    }
-    if (v.createdAtTo) {
-      convertedFilters.and?.push({ createdAt_lte: v.createdAtTo.toString() });
-    }
-    if (v.providerId) {
-      convertedFilters.and?.push({
-        addedComputeUnits_: { provider: v.providerId.toLowerCase() },
-      });
-    }
-    // Filters with relation check below.
-    let tokenDecimals = this.DEFAULT_FILTER_TOKEN_DECIMALS;
-    const paymentTokensLowerCase = v.paymentTokens?.map((tokenAddress) => {
-      return tokenAddress.toLowerCase();
-    });
-    if (paymentTokensLowerCase) {
-      convertedFilters.and?.push({ paymentToken_in: paymentTokensLowerCase });
-    }
-    if (
-      (v.minPricePerWorkerEpoch || v.maxPricePerWorkerEpoch) &&
-      paymentTokensLowerCase
-    ) {
-      tokenDecimals = await this._getCommonTokenDecimals(
-        paymentTokensLowerCase,
-      );
-    }
-    if (v.minPricePerWorkerEpoch) {
-      convertedFilters.and?.push({
-        pricePerWorkerEpoch_gte: valueToTokenValue(
-          v.minPricePerWorkerEpoch,
-          tokenDecimals,
-        ),
-      });
-    }
-    if (v.maxPricePerWorkerEpoch) {
-      convertedFilters.and?.push({
-        pricePerWorkerEpoch_lte: valueToTokenValue(
-          v.maxPricePerWorkerEpoch,
-          tokenDecimals,
-        ),
-      });
-    }
-    return convertedFilters;
   }
 
   async _getDealsImpl(
@@ -622,14 +432,24 @@ export class DealExplorerClient {
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: DealsShortOrderBy = "createdAt",
-    orderType: OrderType = this.DEFAULT_ORDER_TYPE,
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
   ): Promise<DealShortListView> {
     await this._init();
 
-    const orderByConverted =
-      this._convertDealShortOrderByToIndexerType(orderBy);
-    const filtersConverted =
-      await this._convertDealsFiltersToIndexerType(dealsFilters);
+    const orderByConverted = serializeDealShortOrderByToIndexer(orderBy);
+
+    const _cond =
+      (dealsFilters?.minPricePerWorkerEpoch ||
+        dealsFilters?.maxPricePerWorkerEpoch) !== undefined;
+    const commonTokenDecimals = await this._calculateTokenDecimalsForFilters(
+      dealsFilters?.paymentTokens,
+      _cond,
+    );
+
+    const filtersConverted = await serializeDealsFiltersToIndexer(
+      dealsFilters,
+      commonTokenDecimals,
+    );
     const data = await this._indexerClient.getDeals({
       filters: filtersConverted,
       offset,
@@ -651,7 +471,7 @@ export class DealExplorerClient {
       for (let i = 0; i < data.deals.length; i++) {
         const deal = data.deals[i] as BasicDealFragment;
         res.push(
-          this._composeDealsShort(deal, {
+          serializeDealsShort(deal, {
             dealStatus: dealStatuses[i],
             freeBalance: freeBalances[i],
           }),
@@ -673,55 +493,13 @@ export class DealExplorerClient {
     };
   }
 
-  _composeDealsShort(
-    deal: BasicDealFragment,
-    fromRpcForDealShort: {
-      dealStatus: DealStatus | undefined;
-      freeBalance: bigint | null | undefined;
-    },
-  ): DealShort {
-    const freeBalance = fromRpcForDealShort.freeBalance
-      ? fromRpcForDealShort.freeBalance
-      : BigInt(0);
-    const totalEarnings =
-      BigInt(deal.depositedSum) - BigInt(deal.withdrawalSum) - freeBalance;
-
-    return {
-      id: deal.id,
-      createdAt: Number(deal.createdAt),
-      client: deal.owner,
-      minWorkers: deal.minWorkers,
-      targetWorkers: deal.targetWorkers,
-      paymentToken: {
-        address: deal.paymentToken.id,
-        symbol: deal.paymentToken.symbol,
-        decimals: deal.paymentToken.decimals.toString(),
-      },
-      balance: tokenValueToRounded(
-        freeBalance,
-        this.DEFAULT_TOKEN_VALUE_ROUNDING,
-        deal.paymentToken.decimals,
-      ),
-      status: fromRpcForDealShort.dealStatus
-        ? fromRpcForDealShort.dealStatus
-        : "active",
-      totalEarnings: tokenValueToRounded(
-        totalEarnings,
-        this.DEFAULT_TOKEN_VALUE_ROUNDING,
-        deal.paymentToken.decimals,
-      ),
-      // TODO: add missed implementations.
-      registeredWorkers: 0,
-      matchedWorkers: 0,
-    };
-  }
-
+  // @notice [Figma] List of Deals.
   async getDeals(
     dealFilters?: DealsFilters,
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: DealsShortOrderBy = "createdAt",
-    orderType: OrderType = this.DEFAULT_ORDER_TYPE,
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
   ): Promise<DealShortListView> {
     return await this._getDealsImpl(
       dealFilters,
@@ -732,22 +510,7 @@ export class DealExplorerClient {
     );
   }
 
-  // It composes only compute units with linked workerIds.
-  _composeComputeUnits(
-    fetchedComputeUnits: Array<ComputeUnitBasicFragment>,
-  ): Array<ComputeUnit> {
-    const res: Array<ComputeUnit> = [];
-    for (const fetched of fetchedComputeUnits) {
-      if (fetched.workerId) {
-        res.push({
-          id: fetched.id,
-          workerId: fetched.workerId,
-        });
-      }
-    }
-    return res;
-  }
-
+  // @notice [Figma] Deal.
   async getDeal(dealId: string): Promise<DealDetail | null> {
     await this._init();
     const options = {
@@ -763,23 +526,22 @@ export class DealExplorerClient {
       const freeBalance = (
         await this._dealRpcClient!.getFreeBalanceDealBatch([dealId])
       )[0];
-      const effectors = this._composeEffectors(deal.effectors);
+      const effectors = serializeEffectors(deal.effectors);
       const { whitelist, blacklist } = serializeDealProviderAccessLists(
         deal.providersAccessType,
         deal.providersAccessList,
       );
       res = {
-        ...this._composeDealsShort(deal, { dealStatus, freeBalance }),
+        ...serializeDealsShort(deal, { dealStatus, freeBalance }),
         pricePerWorkerEpoch: tokenValueToRounded(
           deal.pricePerWorkerEpoch,
-          this.DEFAULT_TOKEN_VALUE_ROUNDING,
+          DEFAULT_TOKEN_VALUE_ROUNDING,
           deal.paymentToken.decimals,
         ),
         maxWorkersPerProvider: deal.maxWorkersPerProvider,
-        computeUnits: this._composeComputeUnits(
+        computeUnits: serializeComputeUnits(
           deal.addedComputeUnits as Array<ComputeUnitBasicFragment>,
         ),
-        // Serialize data from indexer into lists.
         whitelist,
         blacklist,
         effectors: effectors,
@@ -788,11 +550,12 @@ export class DealExplorerClient {
     return res;
   }
 
+  // @dev To fetch all effectors for multiselect filter.
   async getEffectors(
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: EffectorsOrderBy = "id",
-    orderType: OrderType = this.DEFAULT_ORDER_TYPE,
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
   ): Promise<EffectorListView> {
     const data = await this._indexerClient.getEffectors({
       offset,
@@ -827,11 +590,12 @@ export class DealExplorerClient {
     };
   }
 
+  // @dev To fetch all payment tokens for multiselect filter.
   async getPaymentTokens(
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: PaymentTokenOrderBy = "symbol",
-    orderType: OrderType = this.DEFAULT_ORDER_TYPE,
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
   ): Promise<PaymentTokenListView> {
     const data = await this._indexerClient.getTokens({
       offset,
@@ -861,6 +625,230 @@ export class DealExplorerClient {
     return {
       data: res,
       total,
+    };
+  }
+
+  async _getCapacityCommitmentsImpl(
+    filters?: CapacityCommitmentsFilters,
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: CapacityCommitmentsOrderBy = "createdAt",
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
+  ): Promise<CapacityCommitmentListView> {
+    const orderBySerialized =
+      serializeCapacityCommitmentsOrderByToIndexer(orderBy);
+
+    let currentEpoch = undefined;
+    if (filters?.onlyActive || filters?.status == "active" || filters?.status == "inactive") {
+      if (this._coreInitTimestamp == null || this._coreEpochDuration == null) {
+        throw new Error("Assertion: Class object was not inited correctly.");
+      }
+      currentEpoch = calculateEpoch(
+        Date.now() / 1000,
+        this._coreInitTimestamp,
+        this._coreEpochDuration,
+      ).toString();
+    }
+
+    const filtersSerialized = serializeCapacityCommitmentsFiltersToIndexer(
+      filters,
+      currentEpoch,
+    );
+    const data = await this._indexerClient.getCapacityCommitments({
+      filters: filtersSerialized,
+      offset,
+      limit,
+      orderBy: orderBySerialized,
+      orderType,
+    });
+    const res: Array<CapacityCommitmentShort> = [];
+
+    if (data) {
+      if (
+        data.graphNetworks.length != 1 ||
+        data.graphNetworks[0] == undefined
+      ) {
+        throw new Error(
+          "Assertion: data.graphNetworks.length != 1 || data.graphNetworks[0] == undefined.",
+        );
+      }
+
+      const capacityComitmentIds: Array<string> = data.capacityCommitments.map(
+        (capacityCommitment) => {
+          return capacityCommitment.id;
+        },
+      );
+      const capacityCommitmentsStatuses: Array<CapacityCommitmentStatus> =
+        await this._dealRpcClient!.getStatusCapacityCommitmentsBatch(
+          this._capacityContractAddress!,
+          capacityComitmentIds,
+        );
+
+      for (let i = 0; i < data.capacityCommitments.length; i++) {
+        const capacityCommitment = data.capacityCommitments[
+          i
+        ] as CapacityCommitmentBasicFragment;
+
+        res.push(
+          serializeCapacityCommitmentShort(
+            capacityCommitment,
+            capacityCommitmentsStatuses[i] ?? "undefined",
+            this._coreInitTimestamp!,
+            this._coreEpochDuration!,
+          ),
+        );
+      }
+    }
+    // TODO: generalize code below.
+    let total = null;
+    if (
+      data.graphNetworks.length == 1 &&
+      data.graphNetworks[0] &&
+      data.graphNetworks[0].capacityCommitmentsTotal
+    ) {
+      total = data.graphNetworks[0].capacityCommitmentsTotal as string;
+    }
+    return {
+      data: res,
+      total,
+    };
+  }
+
+  // @notice [Figma] List of capacity.
+  async getCapacityCommitments(
+    filters?: CapacityCommitmentsFilters,
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: CapacityCommitmentsOrderBy = "createdAt",
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
+  ): Promise<CapacityCommitmentListView> {
+    await this._init();
+
+    return await this._getCapacityCommitmentsImpl(
+      filters,
+      offset,
+      limit,
+      orderBy,
+      orderType,
+    )
+  }
+
+  // @notice [Figma] Capacity.
+  async getCapacityCommitment(
+    capacityCommitmentId: string,
+  ): Promise<CapacityCommitmentDetail | null> {
+    await this._init();
+    const options = {
+      id: capacityCommitmentId,
+    };
+    const data = await this._indexerClient.getCapacityCommitment(options);
+    if (!data || !data.capacityCommitment) {
+      return null;
+    }
+
+    const capacityCommitment = data.capacityCommitment;
+    const capacityCommitmentRpcDetails =
+      await this._dealRpcClient!.getCapacityCommitmentDetails(
+        this._capacityContractAddress!,
+        capacityCommitment.id,
+      );
+
+    return {
+      ...serializeCapacityCommitmentShort(
+        capacityCommitment,
+        capacityCommitmentRpcDetails.status,
+        this._coreInitTimestamp!,
+        this._coreEpochDuration!,
+      ),
+      totalCollateral: tokenValueToRounded(capacityCommitment.totalCollateral),
+      collateralToken: FLTToken,
+      rewardDelegatorRate: capacityCommitment.rewardDelegatorRate,
+      unlockedRewards: capacityCommitmentRpcDetails.unlockedRewards
+        ? tokenValueToRounded(capacityCommitmentRpcDetails.unlockedRewards)
+        : "0",
+      totalRewards: capacityCommitmentRpcDetails.totalRewards
+        ? tokenValueToRounded(capacityCommitmentRpcDetails.totalRewards)
+        : "0",
+    };
+  }
+
+  // @notice [Figma] Peer ID.
+  async getPeer(peerId: string): Promise<PeerDetail | null> {
+    await this._init();
+    const data = await this._indexerClient.getPeer({ id: peerId });
+    if (!data || !data.peer) {
+      return null;
+    }
+    const peer = data.peer;
+
+    return {
+      id: peer.id,
+      providerId: peer.provider.id,
+      offerId: peer.offer.id,
+      computeUnitsInDeal: peer.computeUnitsInDeal,
+      computeUnitsInCapacityCommitment: peer.computeUnitsInCapacityCommitment,
+      computeUnitsTotal: peer.computeUnitsTotal,
+    };
+  }
+
+  // @notice [Figma] Peer ID: Deals.
+  async getDealsByPeer(
+    peerId: string,
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: "id",
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
+  ): Promise<DealsByPeerListView> {
+    await this._init();
+    // TODO: ClientError: Failed to get entities from store: SortKey::ChildKey cannot be used for parent ordering (yet).
+    console.warn(
+      `orderBy & orderType params are not supported yet. Thus, ${orderBy} & ${orderType} are ignored.`,
+    );
+    const data = await this._indexerClient.getPeerDeals({
+      peerId: peerId,
+      dealsOffset: offset,
+      dealsLimit: limit,
+      dealsOrderBy: null,
+      dealsOrderType: null,
+    });
+
+    if (
+      data.peer == undefined ||
+      data.peer.joinedDeals == undefined ||
+      data.peer.joinedDeals?.length == 0
+    ) {
+      return {
+        data: [],
+        total: null,
+      };
+    }
+
+    let res: Array<DealByPeer> = [];
+    for (let i = 0; i < data.peer.joinedDeals.length; i++) {
+      const peerDeal = data.peer.joinedDeals[i];
+      if (peerDeal == undefined) {
+        throw new Error("Assertion: peerDeal == undefined.");
+      }
+      if (
+        !peerDeal.deal.addedComputeUnits ||
+        peerDeal.deal.addedComputeUnits.length != 1 ||
+        peerDeal.deal.addedComputeUnits[0] == undefined
+      ) {
+        // Logically fetched deals of the peer could not have more than 1 CU (protocol restriction).
+        throw new Error(
+          `Assertion: peerDeal.deal.addedComputeUnits.length != 1 || peerDeal.deal.addedComputeUnits[0] == undefined. peerDeal.deal.addedComputeUnits: ${peerDeal.deal.addedComputeUnits}`,
+        );
+      }
+      const firstCU = peerDeal.deal.addedComputeUnits[0];
+      res.push({
+        dealId: peerDeal.deal.id,
+        computeUnitId: firstCU.id!,
+        workerId: firstCU.workerId!,
+      });
+    }
+    return {
+      total: null,
+      data: res,
     };
   }
 }
