@@ -2,8 +2,6 @@
 pragma solidity ^0.8.19;
 
 import {Test, console2} from "forge-std/Test.sol";
-// import "forge-std/console.sol";
-// import "forge-std/Vm.sol";
 import "src/core/Core.sol";
 import "test/utils/DeployDealSystem.sol";
 
@@ -29,7 +27,7 @@ contract CoreTest is Test {
     }
 
     function test_CoreHasInitializedValues() external {
-        assertFalse(address(deployment.core.dealImpl()) == address(0), "Deal impl not initialized in Core");
+        assertNotEq(address(deployment.core.dealImpl()), address(0), "Deal impl not initialized in Core");
         assertEq(
             deployment.core.epochDuration(),
             DeployDealSystem.DEFAULT_EPOCH_DURATION,
@@ -63,8 +61,8 @@ contract CoreTest is Test {
 
     function test_InitializeModules() external {
         // initialized in DeployDealSystem, lets's check it
-        assertFalse(address(deployment.core.capacity()) == address(0), "Capacity not initialized in Core");
-        assertFalse(address(deployment.core.market()) == address(0), "Market not initialized in Core");
+        assertNotEq(address(deployment.core.capacity()), address(0), "Capacity not initialized in Core");
+        assertNotEq(address(deployment.core.market()), address(0), "Market not initialized in Core");
 
         // and try again - shall fail
         vm.expectRevert("Core: capacity and market already initialized");
