@@ -4,6 +4,7 @@ WORKDIR ipc/fendermint
 RUN make actor-bundle
 
 FROM ghcr.io/consensus-shipyard/fendermint:latest as fendermint
+COPY ./keys /testnet/keys
 RUN --mount=type=bind,source=/scripts/fendermint-bootstrap.sh,target=/bootstrap.sh /bootstrap.sh
 COPY --from=actors /ipc/fendermint/builtin-actors/output/bundle.car /fendermint/bundle.car
 COPY --from=actors /ipc/fendermint/actors/output/custom_actors_bundle.car /fendermint/custom_actors_bundle.car

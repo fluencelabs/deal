@@ -9,11 +9,11 @@ fendermint genesis --genesis-file /testnet/genesis.json \
     --timestamp 1680101412 \
     --power-scale 0
 
-# Create /testnet/keys
-mkdir /testnet/keys
-for NAME in alice bob charlie dave; do
-  fendermint key gen --out-dir /testnet/keys --name $NAME;
-done
+# # Create /testnet/keys
+# mkdir /testnet/keys
+# for NAME in alice bob charlie dave; do
+#   fendermint key gen --out-dir /testnet/keys --name $NAME;
+# done
 
 # Add alice key as a stand-alone account
 fendermint genesis --genesis-file /testnet/genesis.json \
