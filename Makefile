@@ -65,7 +65,15 @@ deploy-contracts-in-docker: ## Deploy contracts in docker
 	--mnemonics "test test test test test test test test test test test junk" \
 	--sender 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --broadcast
 
-	@echo "\033[0;32mSuccess! Contracts deployed to local chain.\033[0m"
+	@echo "\033[0;32mSuccess! Contracts deployed to docker chain.\033[0m"
+
+deploy-to-ipc:
+	@make verify-command program=forge
+	CONTRACTS_ENV_NAME=local forge script script/Deploy.s.sol --rpc-url arbitrum \
+	--private-key 73f59f92d583b4ca0da78db591c92ea72363345618caf56d58864295c86e8fda \
+	--broadcast --skip-simulation --slow
+
+	@echo "\033[0;32mSuccess! Contracts deployed to ipc chain.\033[0m"
 
 deploy-%: ## Deploy to ...
 	@make verify-command program=forge
