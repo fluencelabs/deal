@@ -6,7 +6,7 @@ import "src/utils/OwnableUpgradableDiamond.sol";
 import "src/core/EpochController.sol";
 import "./interfaces/IGlobalConst.sol";
 
-uint256 constant PRECISION = 10_000_000; // min: 0.0000001
+uint256 constant PRECISION = 10000000; // min: 0.0000001
 
 contract GlobalConst is OwnableUpgradableDiamond, EpochController, IGlobalConst {
     // ------------------ Storage ------------------
