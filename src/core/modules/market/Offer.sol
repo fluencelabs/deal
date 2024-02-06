@@ -38,8 +38,6 @@ abstract contract Offer is BaseModule, IOffer {
         mapping(bytes32 => EffectorInfo) effectorInfoById;
     }
 
-    OfferStorage private _storage;
-
     function _getOfferStorage() private pure returns (OfferStorage storage s) {
         bytes32 storageSlot = _STORAGE_SLOT;
         assembly {

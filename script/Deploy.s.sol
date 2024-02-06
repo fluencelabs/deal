@@ -280,8 +280,8 @@ contract DeployContracts is Depoyments, Script {
                     withdrawEpochesAfterFailed_,
                     maxFailedRatio_,
                     isWhitelistEnabled_,
-                    difficulty_,
                     initGlobalNonce_,
+                    difficulty_,
                     randomXProxy
                 )
             )

@@ -6,7 +6,7 @@ import "forge-std/console.sol";
 import "forge-std/Vm.sol";
 import "src/core/Core.sol";
 import "test/utils/DeployDealSystem.sol";
-import "test/utils/Random.sol";
+import "test/utils/TestHelper.sol";
 import "src/core/modules/market/Market.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
 
@@ -49,22 +49,22 @@ contract MarketTest is Test {
         minPricePerWorkerEpoch = 1000;
 
         for (uint256 i = 0; i < 10; i++) {
-            effectors.push(CIDV1({prefixes: 0x12345678, hash: Random.pseudoRandom(abi.encode("effector", i))}));
+            effectors.push(CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("effector", i))}));
         }
 
         for (uint256 i = 0; i < 10; i++) {
-            bytes32 peerId = Random.pseudoRandom(abi.encode("peerId", i));
+            bytes32 peerId = TestHelper.pseudoRandom(abi.encode("peerId", i));
 
             bytes32[] memory unitIds = new bytes32[](5);
             for (uint256 j = 0; j < unitIds.length; j++) {
-                unitIds[j] = keccak256(abi.encodePacked(Random.pseudoRandom(abi.encode(peerId, "unitId", i, j))));
+                unitIds[j] = keccak256(abi.encodePacked(TestHelper.pseudoRandom(abi.encode(peerId, "unitId", i, j))));
             }
 
             registerPeers.push(
                 IOffer.RegisterComputePeer({
                     peerId: peerId,
                     unitIds: unitIds,
-                    owner: address(bytes20(Random.pseudoRandom(abi.encode("peerId-address", i))))
+                    owner: address(bytes20(TestHelper.pseudoRandom(abi.encode("peerId-address", i))))
                 })
             );
         }

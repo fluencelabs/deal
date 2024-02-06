@@ -21,8 +21,6 @@ contract Core is UUPSUpgradeable, GlobalConst, ICore {
         IDeal dealImpl;
     }
 
-    GlobalConstStorage private _storage;
-
     function _getCoreStorage() private pure returns (CoreStorage storage s) {
         bytes32 storageSlot = _STORAGE_SLOT;
         assembly {

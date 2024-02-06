@@ -47,8 +47,6 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
         address randomXProxy;
     }
 
-    ConstStorage private _storage;
-
     function _getConstStorage() private pure returns (ConstStorage storage s) {
         bytes32 storageSlot = _STORAGE_SLOT;
         assembly {

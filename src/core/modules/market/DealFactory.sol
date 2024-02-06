@@ -23,8 +23,6 @@ abstract contract DealFactory is BaseModule, IDealFactory {
         mapping(IDeal => bool) hasDeal;
     }
 
-    DealFactoryStorage private _storage;
-
     function _getDealFactoryStorage() private pure returns (DealFactoryStorage storage s) {
         bytes32 storageSlot = _STORAGE_SLOT;
         assembly {
