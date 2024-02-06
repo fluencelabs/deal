@@ -50,8 +50,8 @@
   "RandomXProxy": {
     "addr": "0x9A676e781A523b5d0C0e43731313A708CB607508",
     "blockNumber": 0,
-    "codeHash": "0xd8626be03b275ad9f2ce90fce2b51b38be77230fb56c81aa9a7951e484ace28a",
-    "creationCodeHash": "0xdb8902bc0282e90bad72c2b156c5949776bad8bcbdb1f175512cd2ffeb1e871b"
+    "codeHash": "0x69edb723abdf7fc3b1df12a3d98fb0aad90d2c5eaf5dc3e23658fe734cf7d3e1",
+    "creationCodeHash": "0x4a9ccc9e3680087531fe141b58754dd14c3cd8ecb3d95d6d9de9567f37b54981"
   },
   "tUSD": {
     "addr": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
