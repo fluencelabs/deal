@@ -14,7 +14,6 @@ import "./interfaces/IOffer.sol";
 
 abstract contract Offer is BaseModule, IOffer {
     using SafeERC20 for IERC20;
-    using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     // ------------------ Constants ------------------
@@ -37,8 +36,6 @@ abstract contract Offer is BaseModule, IOffer {
         mapping(bytes32 => EnumerableSet.Bytes32Set) computeUnitIdsByPeerId;
         mapping(bytes32 => EffectorInfo) effectorInfoById;
     }
-
-    OfferStorage private _storage;
 
     function _getOfferStorage() private pure returns (OfferStorage storage s) {
         bytes32 storageSlot = _STORAGE_SLOT;
