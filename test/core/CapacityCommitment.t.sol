@@ -188,9 +188,9 @@ contract CapacityCommitmentTest is Test {
                 currentEpoch + 1 + ccDuration,
                 registerPeers[i].unitIds
             );
-
-            deployment.capacity.depositCollateral{value: amounts[i]}(createdCCIds[i]);
         }
+
+        deployment.capacity.depositCollateral{value: amountTotal}(createdCCIds);
         vm.stopPrank();
 
         StdCheats.skip(uint256(deployment.core.epochDuration()));
@@ -296,8 +296,12 @@ contract CapacityCommitmentTest is Test {
         (commitmentId, offerId) = _createCapacityCommitment(peerId);
 
         vm.startPrank(ccDelegator);
+
+        bytes32[] memory commitmentIds = new bytes32[](1);
+        commitmentIds[0] = commitmentId;
+
         deployment.capacity.depositCollateral{value: unitCount * deployment.capacity.fltCollateralPerUnit()}(
-            commitmentId
+            commitmentIds
         );
         vm.stopPrank();
     }

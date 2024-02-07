@@ -52,15 +52,19 @@ contract MatcherTest is Test {
             deployment.market.setProviderInfo("test", CIDV1({prefixes: 0x12345678, hash: bytes32(0x00)}));
             offerIds[i] = deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, peers);
 
+            uint256 amount;
+            bytes32[] memory commitmentIds = new bytes32[](peerCountPerOffer);
+
             for (uint256 j = 0; j < peerCountPerOffer; j++) {
                 bytes32 commitmentId = deployment.capacity.createCommitment(
                     peerIds[i][j], deployment.capacity.minDuration(), address(this), 1
                 );
+                commitmentIds[j] = commitmentId;
 
-                uint256 amount =
-                    deployment.capacity.getCommitment(commitmentId).collateralPerUnit * unitIds[i][j].length;
-                deployment.capacity.depositCollateral{value: amount}(commitmentId);
+                amount += deployment.capacity.getCommitment(commitmentId).collateralPerUnit * unitIds[i][j].length;
             }
+
+            deployment.capacity.depositCollateral{value: amount}(commitmentIds);
         }
     }
 
