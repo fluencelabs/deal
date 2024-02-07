@@ -58,4 +58,35 @@ contract OfferTest is Test {
         assertEq(providerInfo.metadata.hash, metadata.hash, "Provider metadata hash should be equal to metadata.hash");
         assertFalse(providerInfo.approved, "Provider should not be approved");
     }
+
+    function test_EffectorInfo() external {
+        CIDV1 memory id = CIDV1({prefixes: 0x12345678, hash: bytes32(0x00)});
+
+        vm.expectRevert("Effector info doesn't exist");
+        deployment.market.removeEffectorInfo(id);
+
+        CIDV1 memory metadata = CIDV1({prefixes: 0x12345678, hash: bytes32(0x00)});
+        vm.expectRevert("Description should be not empty");
+        deployment.market.setEffectorInfo(id, "", metadata);
+
+        string memory effectorId = "Effector";
+
+        vm.expectEmit(true, false, false, true);
+        emit IOffer.EffectorInfoSet(id, effectorId, metadata);
+        deployment.market.setEffectorInfo(id, effectorId, metadata);
+
+        IOffer.EffectorInfo memory effectorInfo = deployment.market.getEffectorInfo(metadata);
+        assertEq(effectorInfo.description, effectorId, "Effector description should be equal");
+        assertEq(effectorInfo.metadata.prefixes, metadata.prefixes, "Effector metadata prefixes should be equal to metadata.prefixes");
+        assertEq(effectorInfo.metadata.hash, metadata.hash, "Effector metadata hash should be equal to metadata.hash");
+
+        vm.expectEmit(true, false, false, false);
+        emit IOffer.EffectorInfoRemoved(id);
+        deployment.market.removeEffectorInfo(id);
+
+        effectorInfo = deployment.market.getEffectorInfo(metadata);
+        assertEq(effectorInfo.description, "", "Effector description should be empty");
+        assertEq(effectorInfo.metadata.prefixes, bytes4(0), "Effector metadata should be empty");
+        assertEq(effectorInfo.metadata.hash, bytes32(0), "Effector metadata should be empty");
+    }
 }
