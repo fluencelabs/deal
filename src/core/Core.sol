@@ -53,8 +53,7 @@ contract Core is UUPSUpgradeable, GlobalConst, ICore {
     function initializeModules(ICapacity capacity_, IMarket market_) external onlyOwner {
         CoreStorage storage coreStorage = _getCoreStorage();
 
-        require(address(coreStorage.capacity) == address(0), "Core: capacity already initialized");
-        require(address(coreStorage.market) == address(0), "Core: market already initialized");
+        require(address(coreStorage.capacity) == address(0), "Core: capacity and market already initialized");
         require(address(capacity_) != address(0), "Core: capacity is zero address");
         require(address(market_) != address(0), "Core: market is zero address");
 
@@ -75,8 +74,6 @@ contract Core is UUPSUpgradeable, GlobalConst, ICore {
         return _getCoreStorage().dealImpl;
     }
 
-    // ------------------ Internal Mutable Functions ------------------
-
     function setDealImpl(IDeal dealImpl_) external onlyOwner {
         require(Address.isContract(address(dealImpl_)), "New deal implementation is not a contract");
 
@@ -84,6 +81,8 @@ contract Core is UUPSUpgradeable, GlobalConst, ICore {
 
         emit DealImplSet(dealImpl_);
     }
+
+    // ------------------ Internal Mutable Functions ------------------
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
 }

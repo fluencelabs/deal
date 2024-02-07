@@ -125,7 +125,7 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
   // Parent events:
   // - emit PeerCreated(offerId, peer.peerId);
   // - emit MarketOfferRegistered
-  const peer = Peer.load(event.params.peerId.toHex()) as Peer;
+  let peer = Peer.load(event.params.peerId.toHex()) as Peer;
   const offer = Offer.load(peer.offer) as Offer;
   const provider = Provider.load(offer.provider) as Provider;
 
@@ -135,9 +135,14 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
   computeUnit.peer = peer.id;
   computeUnit.save();
 
+  // Upd stats.
+  peer.computeUnitsTotal = peer.computeUnitsTotal + 1;
+  peer.save()
+
   provider.computeUnitsAvailable = provider.computeUnitsAvailable + 1;
   provider.computeUnitsTotal = provider.computeUnitsTotal + 1;
   provider.save();
+
   offer.computeUnitsAvailable = offer.computeUnitsAvailable + 1;
   offer.computeUnitsTotal = offer.computeUnitsTotal + 1;
   offer.updatedAt = event.block.timestamp;
@@ -157,6 +162,10 @@ export function handlePeerCreated(event: PeerCreated): void {
   peer.provider = offer.provider;
   peer.offer = offer.id;
   peer.isAnyJoinedDeals = false;
+  // Init stats below.
+  peer.computeUnitsTotal = 0;
+  peer.computeUnitsInDeal = 0;
+  peer.computeUnitsInCapacityCommitment = 0;
   peer.save();
 }
 
@@ -217,6 +226,9 @@ export function handleComputeUnitAddedToDeal(
   createOrLoadDealToPeer(event.address.toHex(), peer.id);
   createOrLoadDealToJoinedOfferPeer(event.address.toHex(), offer.id, peer.id);
   peer.isAnyJoinedDeals = true;
+
+  // Upd stats.
+  peer.computeUnitsInDeal = peer.computeUnitsInDeal + 1;
   peer.save()
 
   provider.computeUnitsAvailable = provider.computeUnitsAvailable - 1;
@@ -241,12 +253,15 @@ export function handleComputeUnitRemovedFromDeal(
   store.remove("DealToJoinedOfferPeer", dealToJoinedOfferPeer.id);
   if (peer.joinedDeals.load().length == 0) {
     peer.isAnyJoinedDeals = false;
-    peer.save()
   }
 
+  // Upd stats.
+  peer.computeUnitsInDeal = peer.computeUnitsInDeal - 1;
+  peer.save()
+
   provider.computeUnitsAvailable = provider.computeUnitsAvailable + 1;
-  provider.computeUnitsTotal = provider.computeUnitsTotal + 1;
   provider.save();
+
   offer.computeUnitsAvailable = offer.computeUnitsAvailable + 1;
   offer.updatedAt = event.block.timestamp;
   offer.save();

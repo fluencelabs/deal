@@ -1,9 +1,12 @@
 import type {
   DealQueryQueryVariables,
   DealsQueryQueryVariables,
+  DealsByPeerQueryQueryVariables,
   Sdk as DealsSdk,
 } from "./queries/deals-query.generated.js";
 import { getSdk as getDealsSdk } from "./queries/deals-query.generated.js";
+import type { Sdk as PeersSdk } from "./queries/peers-query.generated.js";
+import { getSdk as getPeersSdk } from "./queries/peers-query.generated.js";
 import type {
   EffectorQueryQueryVariables,
   OfferQueryQueryVariables,
@@ -18,18 +21,35 @@ import type {
   Sdk as ProvidersSdk,
 } from "./queries/providers-query.generated.js";
 import { getSdk as getProvidersSdk } from "./queries/providers-query.generated.js";
+import type {
+  CapacityCommitmentQueryQueryVariables,
+  Sdk as CapacityCommitmentsSdk,
+} from "./queries/capacity-commitments-query.generated.js";
+import type { Sdk as ContractConstantsSdk } from "./queries/constants-query.generated.js";
+import { getSdk as getContractConstantsSdk } from "./queries/constants-query.generated.js";
+import { getSdk as getCapacityCommitmentsSdk } from "./queries/capacity-commitments-query.generated.js";
 import { IndexerClientABC } from "../../indexerClient/indexerClientABC.js";
 import type { ContractsENV } from "../../client/config.js";
+import type { CapacityCommitmentsQueryQueryVariables } from "./queries/capacity-commitments-query.generated.js";
+import type { PeerQueryQueryVariables } from "./queries/peers-query.generated.js";
 
 export class IndexerClient extends IndexerClientABC {
   private dealsClient: DealsSdk;
   private offersClient: OffersSdk;
   private providersClient: ProvidersSdk;
+  private capacityCommitmentsClient: CapacityCommitmentsSdk;
+  private contractConstantsClient: ContractConstantsSdk;
+  private peersClient: PeersSdk;
   constructor(network: ContractsENV) {
     super(network);
     this.dealsClient = getDealsSdk(this._graphqlClient);
     this.offersClient = getOffersSdk(this._graphqlClient);
+    this.capacityCommitmentsClient = getCapacityCommitmentsSdk(
+      this._graphqlClient,
+    );
+    this.peersClient = getPeersSdk(this._graphqlClient);
     this.providersClient = getProvidersSdk(this._graphqlClient);
+    this.contractConstantsClient = getContractConstantsSdk(this._graphqlClient);
   }
 
   async getProviders(variables: ProvidersQueryQueryVariables) {
@@ -62,5 +82,34 @@ export class IndexerClient extends IndexerClientABC {
 
   async getTokens(variables: TokenQueryQueryVariables) {
     return await this.offersClient.TokenQuery(variables);
+  }
+
+  async getCapacityCommitments(
+    variables: CapacityCommitmentsQueryQueryVariables,
+  ) {
+    return await this.capacityCommitmentsClient.CapacityCommitmentsQuery(
+      variables,
+    );
+  }
+
+  async getCapacityCommitment(
+    variables: CapacityCommitmentQueryQueryVariables,
+  ) {
+    return await this.capacityCommitmentsClient.CapacityCommitmentQuery(
+      variables,
+    );
+  }
+
+  async getContractConstants() {
+    return await this.contractConstantsClient.ConstantsQuery();
+  }
+
+  async getPeer(variables: PeerQueryQueryVariables) {
+    return await this.peersClient.PeerQuery(variables);
+  }
+
+  // Get all deals per provided id of a Peer.
+  async getPeerDeals(variables: DealsByPeerQueryQueryVariables) {
+    return await this.dealsClient.DealsByPeerQuery(variables);
   }
 }

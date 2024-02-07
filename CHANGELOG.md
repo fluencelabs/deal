@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.4.0](https://github.com/fluencelabs/deal/compare/v0.3.0...v0.4.0) (2024-02-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* Mv from erc20 to native ([#224](https://github.com/fluencelabs/deal/issues/224))
+* integrate CC into matcher [chain-298] ([#217](https://github.com/fluencelabs/deal/issues/217))
+
+### Features
+
+* add description for contracts ([#220](https://github.com/fluencelabs/deal/issues/220)) ([ff7ff3d](https://github.com/fluencelabs/deal/commit/ff7ff3d5f7591b9a2a049f2da2372712be4fcb4b))
+* integrate CC into matcher [chain-298] ([#217](https://github.com/fluencelabs/deal/issues/217)) ([6bf3b49](https://github.com/fluencelabs/deal/commit/6bf3b49ba9c6da9569b6cb6d3333f89e5ef6ab3a))
+* **tests:** Introduce integration tests package ([#203](https://github.com/fluencelabs/deal/issues/203)) ([16fc4ae](https://github.com/fluencelabs/deal/commit/16fc4aef9450878fd673f57ab1649c59ab330239))
+
+
+### Bug Fixes
+
+* add beacon proxy ([#228](https://github.com/fluencelabs/deal/issues/228)) ([6efb771](https://github.com/fluencelabs/deal/commit/6efb77149b296549ba891021cc4604357d589578))
+* chain 279 cosmetic and more ([#194](https://github.com/fluencelabs/deal/issues/194)) ([7410ee3](https://github.com/fluencelabs/deal/commit/7410ee384e720aa8999e037d666734971f118a2a))
+* check approve in createCommitment ([#226](https://github.com/fluencelabs/deal/issues/226)) ([f34f920](https://github.com/fluencelabs/deal/commit/f34f920988cd9bd75e5a51bd1ac1414be5f23c97))
+* Mv from erc20 to native ([#224](https://github.com/fluencelabs/deal/issues/224)) ([2503342](https://github.com/fluencelabs/deal/commit/2503342115bdcd636f03cf44c6be21bebbee0656))
+* related to chain 279 ([#227](https://github.com/fluencelabs/deal/issues/227)) ([27a7ea7](https://github.com/fluencelabs/deal/commit/27a7ea7744783de6889d0b3fbcb2f5d3b34be60f))
+
 ## [0.3.0](https://github.com/fluencelabs/deal/compare/v0.2.22...v0.3.0) (2024-01-23)
 
 
