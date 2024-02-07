@@ -30,8 +30,6 @@ contract WorkerManager is Config, IWorkerManager {
         LinkedListWithUniqueKeys.Bytes32List computeUnitsIdsList;
     }
 
-    WorkerManagerStorage private _storage;
-
     function _getWorkerManagerStorage() private pure returns (WorkerManagerStorage storage s) {
         bytes32 storageSlot = _STORAGE_SLOT;
 

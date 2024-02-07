@@ -30,8 +30,6 @@ contract Config is OwnableUpgradableDiamond, IConfig {
         mapping(address => bool) providersAccessMap;
     }
 
-    ConfigStorage private _storage;
-
     function _getConfigStorage() private pure returns (ConfigStorage storage s) {
         bytes32 storageSlot = _STORAGE_SLOT;
         assembly {

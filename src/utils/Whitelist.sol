@@ -20,8 +20,6 @@ contract Whitelist is OwnableUpgradableDiamond {
         mapping(address => bool) isWhitelisted;
     }
 
-    WhitelistStorage private _storage;
-
     function _getWhitelistStorage() private pure returns (WhitelistStorage storage s) {
         bytes32 storageSlot = _STORAGE_SLOT;
         assembly {
