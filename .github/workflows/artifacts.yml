@@ -20,12 +20,15 @@ on:
       subgraph-deploy-script-image:
         description: "subgraph-deploy-script image"
         value: ${{ jobs.subgraph.outputs.subgraph-deploy-script-image }}
-      chain-deploy-script-image:
-        description: "chain-deploy-script container image"
-        value: ${{ jobs.chain-rpc.outputs.chain-deploy-script-image }}
-      chain-rpc-image:
-        description: "chain-rpc container image"
-        value: ${{ jobs.chain-rpc.outputs.chain-rpc-image }}
+      ipc-deploy-script-image:
+        description: "ipc-deploy-script container image"
+        value: ${{ jobs.ipc.outputs.ipc-deploy-script-image }}
+      ipc-image:
+        description: "ipc container image"
+        value: ${{ jobs.ipc.outputs.ipc-image }}
+      cometbft-image:
+        description: "cometbft container image"
+        value: ${{ jobs.ipc.outputs.cometbft-image }}
 
 env:
   FOUNDRY_PROFILE: "ci"
@@ -93,8 +96,8 @@ jobs:
             cache/**
             out/**
 
-  chain-rpc:
-    name: "Publish chain-rpc (${{ matrix.arch }})"
+  ipc:
+    name: "Publish ipc (${{ matrix.arch }})"
 
     needs:
       - contracts
@@ -110,8 +113,9 @@ jobs:
     runs-on: ${{ matrix.runner }}
 
     outputs:
-      chain-rpc-image: "${{ steps.artifacts.outputs.chain-rpc-image }}"
-      chain-deploy-script-image: "${{ steps.artifacts.outputs.chain-deploy-script-image }}"
+      ipc-image: "${{ steps.artifacts.outputs.ipc-image }}"
+      ipc-deploy-script-image: "${{ steps.artifacts.outputs.ipc-deploy-script-image }}"
+      cometbft-deploy-script-image: "${{ steps.artifacts.outputs.cometbft-image }}"
 
     permissions:
       contents: read
@@ -151,12 +155,14 @@ jobs:
           release: ${{ inputs.release }}
         run: |
           if [[ ${release} ]]; then
-            echo "chain-rpc-image=docker.fluence.dev/chain-rpc:${{ steps.version.outputs.id }}" >> "$GITHUB_OUTPUT"
-            echo "chain-deploy-script-image=docker.fluence.dev/chain-deploy-script:${{ steps.version.outputs.id }}" >> "$GITHUB_OUTPUT"
+            echo "ipc-image=docker.fluence.dev/ipc:${{ steps.version.outputs.id }}" >> "$GITHUB_OUTPUT"
+            echo "ipc-deploy-script-image=docker.fluence.dev/ipc-deploy-script:${{ steps.version.outputs.id }}" >> "$GITHUB_OUTPUT"
+            echo "cometbft-image=docker.fluence.dev/cometbft:${{ steps.version.outputs.id }}" >> "$GITHUB_OUTPUT"
           else
             version="$(jq -r .[] .github/release-please/manifest.json)"
-            echo "chain-rpc-image=fluencelabs/chain-rpc:${version}" >> "$GITHUB_OUTPUT"
-            echo "chain-deploy-script-image=fluencelabs/chain-deploy-script:${version}" >> "$GITHUB_OUTPUT"
+            echo "ipc-rpc-image=fluencelabs/ipc:${version}" >> "$GITHUB_OUTPUT"
+            echo "ipc-deploy-script-image=fluencelabs/ipc-deploy-script:${version}" >> "$GITHUB_OUTPUT"
+            echo "cometbft-image=fluencelabs/cometbft:${version}" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Set up Docker Buildx
@@ -191,40 +197,55 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and push chain-rpc image
-        id: chain-rpc
+      - name: Build and push ipc image
+        id: ipc
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           provenance: false
           file: docker/Dockerfile
-          target: chain-rpc
+          target: ipc
           platforms: linux/${{ matrix.arch }}
           tags: |
-            ${{ steps.artifacts.outputs.chain-rpc-image }}-${{ matrix.arch }}
+            ${{ steps.artifacts.outputs.ipc-image }}-${{ matrix.arch }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and push chain-deploy-script image
-        id: chain-deploy-script
+      - name: Build and push ipc-deploy-script image
+        id: ipc-deploy-script
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           provenance: false
           file: docker/Dockerfile
-          target: chain-deploy-script
+          target: ipc-deploy-script
           platforms: linux/${{ matrix.arch }}
           tags: |
-            ${{ steps.artifacts.outputs.chain-deploy-script-image }}-${{ matrix.arch }}
+            ${{ steps.artifacts.outputs.ipc-deploy-script-image }}-${{ matrix.arch }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push cometbft image
+        id: cometbft
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          provenance: false
+          file: docker/Dockerfile
+          target: cometbft
+          platforms: linux/${{ matrix.arch }}
+          tags: |
+            ${{ steps.artifacts.outputs.cometbft-image }}-${{ matrix.arch }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
   deploy:
     name: "Generate local.json"
     needs:
-      - chain-rpc
+      - ipc
 
     runs-on: linux-amd64-m-xlarge
 
@@ -280,10 +301,11 @@ jobs:
 
       - name: Run deployment script
         env:
-          CHAIN_RPC_IMAGE: "${{ needs.chain-rpc.outputs.chain-rpc-image }}-amd64"
-          CHAIN_DEPLOY_SCRIPT_IMAGE: "${{ needs.chain-rpc.outputs.chain-deploy-script-image }}-amd64"
+          IPC_IMAGE: "${{ needs.ipc.outputs.ipc-image }}-amd64"
+          COMETBFT_IMAGE: "${{ needs.ipc.outputs.cometbft-image }}-amd64"
+          IPC_DEPLOY_SCRIPT_IMAGE: "${{ needs.ipc.outputs.ipc-deploy-script-image }}-amd64"
         working-directory: docker
-        run: docker compose --ansi always run --quiet-pull chain-deploy-script
+        run: docker compose --ansi always run --quiet-pull ipc-deploy-script
 
       - name: Upload deployments/local.json
         uses: actions/upload-artifact@v4
@@ -520,7 +542,7 @@ jobs:
   manifest:
     name: "Merge container arch images"
     needs:
-      - chain-rpc
+      - ipc
       - subgraph
 
     runs-on: ubuntu-latest
@@ -559,19 +581,27 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
 
-      - name: Merge chain-rpc images
+      - name: Merge ipc images
         uses: Noelware/docker-manifest-action@0.4.0
         with:
-          inputs: ${{ needs.chain-rpc.outputs.chain-rpc-image }}
-          images: ${{ needs.chain-rpc.outputs.chain-rpc-image }}-amd64,${{ needs.chain-rpc.outputs.chain-rpc-image }}-arm64
+          inputs: ${{ needs.ipc.outputs.ipc-image }}
+          images: ${{ needs.ipc.outputs.ipc-image }}-amd64,${{ needs.ipc.outputs.ipc-image }}-arm64
           push: true
           amend: true
 
-      - name: Merge chain-deploy-script images
+      - name: Merge ipc-deploy-script images
         uses: Noelware/docker-manifest-action@0.4.0
         with:
-          inputs: ${{ needs.chain-rpc.outputs.chain-deploy-script-image }}
-          images: ${{ needs.chain-rpc.outputs.chain-deploy-script-image }}-amd64,${{ needs.chain-rpc.outputs.chain-deploy-script-image }}-arm64
+          inputs: ${{ needs.ipc.outputs.ipc-deploy-script-image }}
+          images: ${{ needs.ipc.outputs.ipc-deploy-script-image }}-amd64,${{ needs.ipc.outputs.ipc-deploy-script-image }}-arm64
+          push: true
+          amend: true
+
+      - name: Merge cometbft images
+        uses: Noelware/docker-manifest-action@0.4.0
+        with:
+          inputs: ${{ needs.ipc.outputs.cometbft-image }}
+          images: ${{ needs.ipc.outputs.cometbft-image }}-amd64,${{ needs.ipc.outputs.cometbft-image }}-arm64
           push: true
           amend: true
 
@@ -587,14 +617,19 @@ jobs:
         if: always()
         run: |
           cat <<'SNAPSHOT' >> $GITHUB_STEP_SUMMARY
-          ## chain-rpc
+          ## ipc
           ```
-          ${{ needs.chain-rpc.outputs.chain-rpc-image }}
+          ${{ needs.ipc.outputs.ipc-image }}
           ```
 
-          ## chain-deploy-script
+          ## ipc-deploy-script
           ```
-          ${{ needs.chain-rpc.outputs.chain-deploy-script-image }}
+          ${{ needs.ipc.outputs.ipc-deploy-script-image }}
+          ```
+
+          ## cometbft
+          ```
+          ${{ needs.ipc.outputs.cometbft-image }}
           ```
 
           ## subgraph-seploy-script
