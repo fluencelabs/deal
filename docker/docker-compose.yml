@@ -103,9 +103,9 @@ services:
     depends_on:
       - ipc-eth
     volumes:
-      - ./deployments/:/app/deployments/
-      - ./out/:/app/out/
-      - ./cache/:/app/cache/
+      - ../deployments/:/app/deployments/
+      - ../out/:/app/out/
+      - ../cache/:/app/cache/
 
   # Blockscout services
   blockscout:
