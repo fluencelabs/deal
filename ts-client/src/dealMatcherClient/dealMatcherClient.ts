@@ -128,12 +128,18 @@ export class DealMatcherClient {
         effector_in: getMatchedOffersIn.effectors,
       };
     }
-    if (getMatchedOffersIn.providersWhiteList.length > 0) {
+    if (
+      getMatchedOffersIn.providersWhiteList &&
+      getMatchedOffersIn.providersWhiteList.length > 0
+    ) {
       indexerGetOffersParams.filters!["provider_"] = {
         id_in: getMatchedOffersIn.providersWhiteList,
       };
     }
-    if (getMatchedOffersIn.providersBlackList.length > 0) {
+    if (
+      getMatchedOffersIn.providersBlackList &&
+      getMatchedOffersIn.providersBlackList.length > 0
+    ) {
       indexerGetOffersParams.filters!["provider_"] = {
         id_in: getMatchedOffersIn.providersBlackList,
       };
