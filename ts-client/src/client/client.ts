@@ -23,6 +23,10 @@ import type { Deployment, ContractsENV } from "./config.js";
 export class DealClient {
   private deployment: Promise<Deployment>;
 
+  static async getDeployment(env: ContractsENV): Promise<Deployment> {
+    return this.getDeployment(env);
+  }
+
   constructor(
     private signerOrProvider: ethers.Signer | ethers.Provider,
     env: ContractsENV,
@@ -43,14 +47,14 @@ export class DealClient {
 
   async getMarket(): Promise<IMarket> {
     return Market__factory.connect(
-      await (await this.getCore()).market(),
+      (await this.deployment).market,
       this.signerOrProvider,
     );
   }
 
   async getCapacity(): Promise<ICapacity> {
     return Capacity__factory.connect(
-      await (await this.getCore()).capacity(),
+      (await this.deployment).capacity,
       this.signerOrProvider,
     );
   }
