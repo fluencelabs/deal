@@ -8,6 +8,8 @@ import "test/utils/DeployDealSystem.sol";
 contract OfferTest is Test {
     using SafeERC20 for IERC20;
 
+    bytes32 private constant _OFFER_ID_PREFIX = bytes32(uint256(keccak256("fluence.market.offer")) - 1);
+
     DeployDealSystem.Deployment deployment;
     address paymentToken;
 
@@ -129,6 +131,21 @@ contract OfferTest is Test {
             new CIDV1[](0),
             new IOffer.RegisterComputePeer[](0)
         );
+        bytes32 offerId = keccak256(
+            abi.encodePacked(
+                _OFFER_ID_PREFIX,
+                address(this),
+                block.number,
+                abi.encodeWithSelector(
+                    IOffer.registerMarketOffer.selector, 1, paymentToken, new CIDV1[](0), new IOffer.RegisterComputePeer[](0)
+                )
+            )
+        );
+        IOffer.Offer memory offer = deployment.market.getOffer(retOfferId);
+        assertEq(offer.provider, address(this), "Provider should be equal to address(this)");
+        assertEq(offer.minPricePerWorkerEpoch, 1, "Min price per worker epoch should be equal to 1");
+        assertEq(offer.paymentToken, paymentToken, "Payment token should be equal to paymentToken");
+        assertEq(retOfferId, offerId, "OfferId mismatch");
 
         vm.expectRevert("Offer already exists");
         deployment.market.registerMarketOffer(
