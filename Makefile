@@ -4,7 +4,7 @@ export
 .DEFAULT_GOAL := help
 .PHONY: help
 
-CHAIN_RPC_URL ?= http://chain-rpc:8545
+IPC_URL ?= http://ipc-eth:8545
 
 verify-command: ## Verify command
 	@command -v $(program) > /dev/null || (echo "\033[0;31m$(program) is not installed. Please install $(program) and try again.\033[0m" && exit 1)
@@ -69,7 +69,7 @@ deploy-contracts-in-docker: ## Deploy contracts in docker
 
 deploy-to-ipc:
 	@make verify-command program=forge
-	CONTRACTS_ENV_NAME=local forge script script/Deploy.s.sol --rpc-url arbitrum \
+	CONTRACTS_ENV_NAME=local forge script script/Deploy.s.sol --rpc-url $(IPC_URL) \
 	--private-key 73f59f92d583b4ca0da78db591c92ea72363345618caf56d58864295c86e8fda \
 	--broadcast --skip-simulation --slow
 
