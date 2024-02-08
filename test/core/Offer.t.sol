@@ -9,9 +9,11 @@ contract OfferTest is Test {
     using SafeERC20 for IERC20;
 
     DeployDealSystem.Deployment deployment;
+    address paymentToken;
 
     function setUp() external {
         deployment = DeployDealSystem.deployDealSystem();
+        paymentToken = address(deployment.tUSD);
     }
 
     function test_OfferDoesNotExist() external {
@@ -88,5 +90,52 @@ contract OfferTest is Test {
         assertEq(effectorInfo.description, "", "Effector description should be empty");
         assertEq(effectorInfo.metadata.prefixes, bytes4(0), "Effector metadata should be empty");
         assertEq(effectorInfo.metadata.hash, bytes32(0), "Effector metadata should be empty");
+    }
+
+    function test_CreateOffer() external {
+        vm.expectRevert("Offer doesn't exist");
+        deployment.market.getOffer(bytes32(uint256(123)));
+
+        // create offer without provider
+        vm.expectRevert("Provider doesn't exist");
+        deployment.market.registerMarketOffer(
+            1,
+            paymentToken,
+            new CIDV1[](0),
+            new IOffer.RegisterComputePeer[](0)
+        );
+
+        deployment.market.setProviderInfo("test", CIDV1({prefixes: 0x12345678, hash: bytes32(0x00)}));
+
+        vm.expectRevert("Min price per epoch should be greater than 0");
+        deployment.market.registerMarketOffer(
+            0,
+            paymentToken,
+            new CIDV1[](0),
+            new IOffer.RegisterComputePeer[](0)
+        );
+
+        vm.expectRevert("Payment token should be not zero address");
+        deployment.market.registerMarketOffer(
+            1,
+            address(0),
+            new CIDV1[](0),
+            new IOffer.RegisterComputePeer[](0)
+        );
+
+        bytes32 retOfferId = deployment.market.registerMarketOffer(
+            1,
+            paymentToken,
+            new CIDV1[](0),
+            new IOffer.RegisterComputePeer[](0)
+        );
+
+        vm.expectRevert("Offer already exists");
+        deployment.market.registerMarketOffer(
+            1,
+            paymentToken,
+            new CIDV1[](0),
+            new IOffer.RegisterComputePeer[](0)
+        );
     }
 }

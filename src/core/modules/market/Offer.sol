@@ -156,6 +156,7 @@ abstract contract Offer is BaseModule, IOffer {
         OfferStorage storage offerStorage = _getOfferStorage();
         Offer storage offer = offerStorage.offers[offerId];
 
+        require(offer.provider == msg.sender, "Only owner can change offer");
         require(offer.peerCount == 0, "Offer has compute peers");
 
         delete offerStorage.offers[offerId];
