@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "forge-std/console.sol";
 import "src/deal/interfaces/IConfig.sol";
 import "test/utils/DeployDealSystem.sol";
-import "test/utils/Random.sol";
+import "test/utils/TestHelper.sol";
 
 contract ConfigContract is Test {
     using SafeERC20 for IERC20;
@@ -44,12 +44,12 @@ contract ConfigContract is Test {
 
         CIDV1[] memory effectors = new CIDV1[](10);
         for (uint256 i = 0; i < 10; i++) {
-            effectors[i] = CIDV1({prefixes: 0x12345678, hash: Random.pseudoRandom(abi.encode("effector", i))});
+            effectors[i] = CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("effector", i))});
         }
 
         configParams = ConfigContractParams({
             globalCore: deployment.core,
-            appCID: CIDV1({prefixes: 0x12345678, hash: Random.pseudoRandom(abi.encode("appCID", 0))}),
+            appCID: CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("appCID", 0))}),
             paymentToken: IERC20(address(deployment.tUSD)),
             minWorkers: 1,
             targetWorkers: 2,
@@ -104,7 +104,8 @@ contract ConfigContract is Test {
     }
 
     function test_SetAppCID() public {
-        CIDV1 memory newAppCID = CIDV1({prefixes: 0x12345678, hash: Random.pseudoRandom(abi.encode("newAppCID", 0))});
+        CIDV1 memory newAppCID =
+            CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("newAppCID", 0))});
         config.setAppCID(newAppCID);
 
         CIDV1 memory appCID = config.appCID();

@@ -9,7 +9,7 @@ import "src/core/Core.sol";
 import "src/deal/Deal.sol";
 import "src/deal/interfaces/IConfig.sol";
 import "test/utils/DeployDealSystem.sol";
-import "test/utils/Random.sol";
+import "test/utils/TestHelper.sol";
 
 contract DealFactoryTest is Test {
     using SafeERC20 for IERC20;
@@ -35,10 +35,10 @@ contract DealFactoryTest is Test {
     {
         CIDV1[] memory effectors = new CIDV1[](10);
         for (uint256 i = 0; i < 10; i++) {
-            effectors[i] = CIDV1({prefixes: 0x12345678, hash: Random.pseudoRandom(abi.encode("effector", i))});
+            effectors[i] = CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("effector", i))});
         }
 
-        CIDV1 memory appCID = CIDV1({prefixes: 0x12345678, hash: Random.pseudoRandom(abi.encode("appCID", 0))});
+        CIDV1 memory appCID = CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("appCID", 0))});
 
         uint256 minWorkers = 1;
         uint256 maxWorkersPerProvider = 1;

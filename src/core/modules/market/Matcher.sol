@@ -23,8 +23,6 @@ abstract contract Matcher is Offer, IMatcher {
         mapping(address => uint256) lastMatchedEpoch;
     }
 
-    OfferStorage private _storage;
-
     function _getMatcherStorage() private pure returns (MatcherStorage storage s) {
         bytes32 storageSlot = _STORAGE_SLOT;
         assembly {

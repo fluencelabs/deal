@@ -130,7 +130,7 @@ jobs:
           submodules: recursive
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.7.3
+        uses: hashicorp/vault-action@v2.8.0
         with:
           url: https://vault.fluence.dev
           path: jwt/github
@@ -263,7 +263,7 @@ jobs:
           submodules: recursive
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.7.3
+        uses: hashicorp/vault-action@v2.8.0
         with:
           url: https://vault.fluence.dev
           path: jwt/github
@@ -345,7 +345,7 @@ jobs:
           submodules: recursive
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.7.3
+        uses: hashicorp/vault-action@v2.8.0
         with:
           url: https://vault.fluence.dev
           path: jwt/github
@@ -456,7 +456,7 @@ jobs:
           submodules: recursive
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.7.3
+        uses: hashicorp/vault-action@v2.8.0
         with:
           url: https://vault.fluence.dev
           path: jwt/github
@@ -553,7 +553,7 @@ jobs:
 
     steps:
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.7.3
+        uses: hashicorp/vault-action@v2.8.0
         with:
           url: https://vault.fluence.dev
           path: jwt/github

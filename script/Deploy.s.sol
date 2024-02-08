@@ -48,6 +48,7 @@ contract DeployContracts is Depoyments, Script {
     bool constant DEFAULT_IS_WHITELIST_ENABLED = false;
     bytes32 public constant DEFAULT_DIFFICULTY = 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
     bytes32 public constant DEFAULT_INIT_GLOBAL_NONCE = keccak256("init_global_nonce");
+    bool constant IS_MOCKED_RANDOMX = true;
 
     // ------------------ Deploy result ------------------
     string constant DEPLOYMENTS_PATH = "/deployments/";
@@ -74,6 +75,7 @@ contract DeployContracts is Depoyments, Script {
         bool isWhitelistEnabled;
         bytes32 difficulty;
         bytes32 initGlobalNonce;
+        bool isMockedRandomX;
     }
 
     function setUp() external {
@@ -123,7 +125,8 @@ contract DeployContracts is Depoyments, Script {
             env.maxFailedRatio,
             env.isWhitelistEnabled,
             env.difficulty,
-            env.initGlobalNonce
+            env.initGlobalNonce,
+            env.isMockedRandomX
         );
         _stopDeploy();
     }
@@ -152,6 +155,7 @@ contract DeployContracts is Depoyments, Script {
         bool isWhitelistEnabled = vm.envOr("IS_WHITELIST_ENABLED", DEFAULT_IS_WHITELIST_ENABLED);
         bytes32 difficulty = vm.envOr("DIFFICULTY", DEFAULT_DIFFICULTY);
         bytes32 initGlobalNonce = vm.envOr("INIT_GLOBAL_NONCE", DEFAULT_INIT_GLOBAL_NONCE);
+        bool isMockedRandomX = vm.envOr("IS_MOCKED_RANDOMX", IS_MOCKED_RANDOMX);
 
         console.log("----------------- ENV -----------------");
         console.log(StdStyle.blue("CHAIN_ID:"), block.chainid);
@@ -174,6 +178,7 @@ contract DeployContracts is Depoyments, Script {
         console.logBytes32(difficulty);
         console.log(StdStyle.blue("INIT_GLOBAL_NONCE:"));
         console.logBytes32(initGlobalNonce);
+        console.log(StdStyle.blue("IS_MOCKED_RANDOMX:"), isMockedRandomX);
         console.log("---------------------------------------");
 
         return ENV({
@@ -195,7 +200,8 @@ contract DeployContracts is Depoyments, Script {
             maxFailedRatio: maxFailedRatio,
             isWhitelistEnabled: isWhitelistEnabled,
             difficulty: difficulty,
-            initGlobalNonce: initGlobalNonce
+            initGlobalNonce: initGlobalNonce,
+            isMockedRandomX: isMockedRandomX
         });
     }
 
@@ -232,11 +238,18 @@ contract DeployContracts is Depoyments, Script {
         uint256 maxFailedRatio_,
         bool isWhitelistEnabled_,
         bytes32 difficulty_,
-        bytes32 initGlobalNonce_
+        bytes32 initGlobalNonce_,
+        bool isMockedRandomX_
     ) internal {
         address coreImpl = _deployContract("CoreImpl", "Core", new bytes(0));
         address dealImpl = _deployContract("DealImpl", "Deal", new bytes(0));
-        address randomXProxy = _deployContract("RandomXProxy", "RandomXProxy", new bytes(0));
+
+        address randomXProxy;
+        if (isMockedRandomX_) {
+            randomXProxy = _deployContract("RandomXProxy", "RandomXProxyMock", abi.encode(difficulty_));
+        } else {
+            randomXProxy = _deployContract("RandomXProxy", "RandomXProxy", new bytes(0));
+        }
 
         bool needToRedeployMarket = _doNeedToRedeploy("MarketImpl", "Market");
         bool needToRedeployCapacity = _doNeedToRedeploy("CapacityImpl", "Capacity");
@@ -280,8 +293,8 @@ contract DeployContracts is Depoyments, Script {
                     withdrawEpochesAfterFailed_,
                     maxFailedRatio_,
                     isWhitelistEnabled_,
-                    difficulty_,
                     initGlobalNonce_,
+                    difficulty_,
                     randomXProxy
                 )
             )

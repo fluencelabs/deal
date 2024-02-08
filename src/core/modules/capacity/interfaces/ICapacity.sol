@@ -52,11 +52,8 @@ interface ICapacity is ICapacityConst {
     /// @dev Emitted when a proof is submitted
     /// @param commitmentId Commitment id
     /// @param unitId Compute unit id which linked to the proof
-    /// @param globalUnitNonce The global nonce of the unit for calculating the target hash
     /// @param localUnitNonce The local nonce of the unit for calculating the target hash
-    event ProofSubmitted(
-        bytes32 indexed commitmentId, bytes32 indexed unitId, bytes32 globalUnitNonce, bytes32 localUnitNonce
-    );
+    event ProofSubmitted(bytes32 indexed commitmentId, bytes32 indexed unitId, bytes32 localUnitNonce);
 
     /// @dev Emitted when a reward is withdrawn
     /// @param commitmentId Commitment id
@@ -198,17 +195,15 @@ interface ICapacity is ICapacityConst {
     /// @param commitmentId Commitment id
     function finishCommitment(bytes32 commitmentId) external;
 
-    /// @dev Deposits collateral to commitment. It makes commitment active
-    /// @param commitmentId Commitment id
-    function depositCollateral(bytes32 commitmentId) external payable;
+    /// @dev Deposits collateral for commitments. It makes commitments active
+    /// @param commitmentIds Commitment ids
+    function depositCollateral(bytes32[] calldata commitmentIds) external payable;
 
     /// @dev Submits a proof for the commitment
     /// @param unitId Compute unit id which provied the proof
-    /// @param globalUnitNonce The global nonce of the unit for calculating the target hash
     /// @param localUnitNonce The local nonce of the unit for calculating the target hash. It's the proof
     /// @param targetHash The target hash of this proof
-    function submitProof(bytes32 unitId, bytes32 globalUnitNonce, bytes32 localUnitNonce, bytes32 targetHash)
-        external;
+    function submitProof(bytes32 unitId, bytes32 localUnitNonce, bytes32 targetHash) external;
 
     /// @dev Remove CU from Ended or Failed CC. Need to call this function before finish the commitment
     /// @param commitmentId Commitment id
