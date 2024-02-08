@@ -58,7 +58,7 @@ services:
 
   # Blockchain backend
   cometbft:
-    image: "cometbft"
+    image: ${COMETBFT_IMAGE:-cometbft}
     build:
       context: ../
       dockerfile: ./docker/Dockerfile
