@@ -115,7 +115,7 @@ jobs:
     outputs:
       ipc-image: "${{ steps.artifacts.outputs.ipc-image }}"
       ipc-deploy-script-image: "${{ steps.artifacts.outputs.ipc-deploy-script-image }}"
-      cometbft-deploy-script-image: "${{ steps.artifacts.outputs.cometbft-image }}"
+      cometbft-image: "${{ steps.artifacts.outputs.cometbft-image }}"
 
     permissions:
       contents: read
