@@ -15,7 +15,8 @@
 volumes:
   postgres:
   ipfs:
-  chain-rpc:
+  cometbft:
+  ipc:
 
 services:
   ipfs:
@@ -43,36 +44,73 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
 
-  # Anvil node with deployed contracts
-  chain-rpc:
-    image: ${CHAIN_RPC_IMAGE:-chain-rpc}
+  # IPC with deployed contracts
+  ipc:
+    image: ${IPC_IMAGE:-ipc}
     build:
       context: ../
       dockerfile: ./docker/Dockerfile
-      target: chain-rpc
+      target: ipc
+    ports:
+      - "26658:26658"
     volumes:
-      - chain-rpc:/data
+      - ipc:/fendermint/data
+
+  # Blockchain backend
+  cometbft:
+    image: "cometbft"
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile
+      target: cometbft
+    environment:
+      CMT_PROXY_APP: "tcp://ipc:26658"
+    ports:
+      - "26657:26657"
+    volumes:
+      - cometbft:/cometbft/data
+    healthcheck:
+      test: curl --fail http://localhost:26657 || exit 1
+      interval: 8s
+      timeout: 10s
+      retries: 20
+    depends_on:
+      - ipc
+
+  ipc-eth:
+    image: ${IPC_IMAGE:-ipc}
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile
+      target: ipc
+    environment:
+      TENDERMINT_RPC_URL: "http://cometbft:26657"
+      TENDERMINT_WS_URL: "ws://cometbft:26657/websocket"
+    command: "eth run"
     ports:
       - "8545:8545"
+    depends_on:
+      cometbft:
+        condition: service_healthy
 
-  chain-deploy-script:
-    image: ${CHAIN_DEPLOY_SCRIPT_IMAGE:-chain-deploy-script}
+  ipc-deploy-script:
+    image: ${IPC_DEPLOY_SCRIPT_IMAGE:-ipc-deploy-script}
     build:
       context: ../
       dockerfile: ./docker/Dockerfile
-      target: chain-deploy-script
-    command: ["deploy-contracts-in-docker"]
+      target: ipc-deploy-script
+    command: ["deploy-to-ipc"]
     depends_on:
-      - chain-rpc
+      - ipc-eth
     volumes:
-      - ../deployments/:/app/deployments/
-      - ../out/:/app/out/
-      - ../cache/:/app/cache/
+      - deployments/:/app/deployments/
+      - out/:/app/out/
+      - cache/:/app/cache/
 
   # Blockscout services
   blockscout:
     depends_on:
-      - chain-rpc
+      - ipc-eth
       - postgres
     image: offchainlabs/blockscout:v1.0.0-c8db5b1
     restart: always
@@ -87,8 +125,8 @@ services:
         bin/blockscout start
     environment:
       ETHEREUM_JSONRPC_VARIANT: "geth"
-      ETHEREUM_JSONRPC_HTTP_URL: http://chain-rpc:8545/
-      ETHEREUM_JSONRPC_TRACE_URL: http://chain-rpc:8545/
+      ETHEREUM_JSONRPC_HTTP_URL: http://ipc-eth:8545/
+      ETHEREUM_JSONRPC_TRACE_URL: http://ipc-eth:8545/
       INDEXER_DISABLE_PENDING_TRANSACTIONS_FETCHER: "true"
       DATABASE_URL: postgresql://postgres:@postgres:5432/blockscout
       ECTO_USE_SSL: "false"
@@ -110,14 +148,14 @@ services:
     depends_on:
       - ipfs
       - postgres
-      - chain-rpc
+      - ipc-eth
     environment:
       postgres_host: postgres
       postgres_user: postgres
       postgres_pass: ""
       postgres_db: postgres
       ipfs: 'ipfs:5001'
-      ethereum: 'local:http://chain-rpc:8545'
+      ethereum: 'local:http://ipc-eth:8545'
       GRAPH_LOG: info
       # https://github.com/graphprotocol/graph-node/issues/3159#issuecomment-1062827725
       ETHEREUM_REORG_THRESHOLD: 1

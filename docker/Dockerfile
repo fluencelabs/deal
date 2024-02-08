@@ -20,7 +20,13 @@ RUN \
 ENV FOUNDRY_DIR /opt/foundry
 RUN curl -sS https://raw.githubusercontent.com/foundry-rs/foundry/master/foundryup/install | bash && /opt/foundry/bin/foundryup
 
-# Base image with compiled contracts that is used by anvil and by deploy scripts
+# Image with compiled actors
+FROM rust:buster as actors
+RUN git clone --branch fluence https://github.com/fluencelabs/ipc.git
+WORKDIR ipc/fendermint
+RUN make actor-bundle
+
+# Base image with compiled contracts
 FROM ubuntu:22.04 as contracts
 
 # install packages that are required for building contracts
@@ -45,17 +51,27 @@ WORKDIR /app
 
 RUN make build-contracts
 
-# image with local chain - anvil
-FROM contracts as chain-rpc
-ENTRYPOINT ["make"]
-CMD ["start-local-chain"]
+# IPC
+FROM ghcr.io/consensus-shipyard/fendermint:latest as ipc
+COPY docker/keys /testnet/keys
+RUN --mount=type=bind,source=docker/scripts/fendermint-bootstrap.sh,target=/bootstrap.sh /bootstrap.sh
+COPY --from=actors /ipc/fendermint/builtin-actors/output/bundle.car /fendermint/bundle.car
+COPY --from=actors /ipc/fendermint/actors/output/custom_actors_bundle.car /fendermint/custom_actors_bundle.car
 
-# image that deploys contracts to chain-rpc
-FROM contracts as chain-deploy-script
-ENTRYPOINT ["make"]
-CMD ["deploy-contracts-in-docker"]
+# Blockchain
+FROM cometbft/cometbft:v0.37.x as cometbft
+USER root
+COPY --from=ipc /cometbft /cometbft-config
+COPY docker/scripts/cometbft-entrypoint.sh /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["start"]
 
-# image that deploys subgraph
+# Image that deploys contracts to IPC
+FROM contracts as ipc-deploy-script
+ENTRYPOINT ["make"]
+CMD ["deploy-to-ipc"]
+
+# Image that deploys subgraph
 FROM contracts as subgraph-deploy-script
 
 # install packages that are required for nodejs installation
