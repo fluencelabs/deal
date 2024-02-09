@@ -270,6 +270,7 @@ contract CapacityCommitmentTest is Test {
         StdCheats.skip(deployment.core.epochDuration());
 
         assertGe(deployment.capacity.totalRewards(commitmentId), 0, "TotalRewards mismatch");
+        assertEq(deployment.capacity.unlockedRewards(commitmentId), 0, "UnlockedRewards mismatch");
 
         vm.stopPrank();
     }
