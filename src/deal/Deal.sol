@@ -38,8 +38,6 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         uint256 endedEpoch;
     }
 
-    DealStorage private _storage;
-
     function _getDealStorage() private pure returns (DealStorage storage s) {
         bytes32 storageSlot = _STORAGE_SLOT;
         assembly {
@@ -94,6 +92,10 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         uint256 pricePerWorkerEpoch_,
         uint256 workerCount
     ) private pure returns (uint256) {
+        if (workerCount == 0) {
+            return 0;
+        }
+
         return currentEpoch + totalBalance / (pricePerWorkerEpoch_ * workerCount);
     }
 
@@ -337,7 +339,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
     }
 
     function setWorker(bytes32 computeUnitId, bytes32 workerId) public {
-        require(getStatus() == Status.ACTIVE, "Deal is not active");
+        require(getStatus() != Status.ENDED, "Deal is ended");
 
         DealStorage storage dealStorage = _getDealStorage();
 

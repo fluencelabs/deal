@@ -17,8 +17,6 @@ contract OwnableUpgradableDiamond is Initializable {
         address owner;
     }
 
-    OwnableStorage private _storage;
-
     function _getOwnableStorage() private pure returns (OwnableStorage storage s) {
         bytes32 storageSlot = _STORAGE_SLOT;
         assembly {

@@ -6,6 +6,7 @@ import "forge-std/console.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import "src/deal/interfaces/IDeal.sol";
 import "src/dev/TestERC20.sol";
 import "src/core/Core.sol";
 import "src/deal/Deal.sol";
@@ -19,6 +20,7 @@ library DeployDealSystem {
     struct Deployment {
         bool initialized;
         IERC20 tUSD;
+        IDeal dealImpl;
         Core core;
         Market market;
         Capacity capacity;
@@ -51,6 +53,8 @@ library DeployDealSystem {
 
         Deal dealImpl = new Deal();
         Core coreImpl = new Core();
+
+        deployment.dealImpl = dealImpl;
 
         deployment.core = Core(
             address(

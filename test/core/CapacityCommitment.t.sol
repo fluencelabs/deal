@@ -13,7 +13,7 @@ import "src/utils/BytesConverter.sol";
 import "test/utils/DeployDealSystem.sol";
 import "src/core/modules/market/Market.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
-import "test/utils/Random.sol";
+import "test/utils/TestHelper.sol";
 import "forge-std/StdCheats.sol";
 
 contract CapacityCommitmentTest is Test {
@@ -37,9 +37,7 @@ contract CapacityCommitmentTest is Test {
 
     event CollateralDeposited(bytes32 indexed commitmentId, uint256 totalCollateral);
 
-    event ProofSubmitted(
-        bytes32 indexed commitmentId, bytes32 indexed unitId, bytes32 globalUnitNonce, bytes32 localUnitNonce
-    );
+    event ProofSubmitted(bytes32 indexed commitmentId, bytes32 indexed unitId, bytes32 localUnitNonce);
     event RewardWithdrawn(bytes32 indexed commitmentId, uint256 amount);
 
     // ------------------ Variables ------------------
@@ -62,28 +60,28 @@ contract CapacityCommitmentTest is Test {
         minPricePerWorkerEpoch = 1000;
 
         for (uint256 i = 0; i < 10; i++) {
-            effectors.push(CIDV1({prefixes: 0x12345678, hash: Random.pseudoRandom(abi.encode("effector", i))}));
+            effectors.push(CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("effector", i))}));
         }
 
         for (uint256 i = 0; i < 10; i++) {
-            bytes32 peerId = Random.pseudoRandom(abi.encode("peerId", i));
+            bytes32 peerId = TestHelper.pseudoRandom(abi.encode("peerId", i));
 
             bytes32[] memory unitIds = new bytes32[](5);
             for (uint256 j = 0; j < unitIds.length; j++) {
-                unitIds[j] = keccak256(abi.encodePacked(Random.pseudoRandom(abi.encode(peerId, "unitId", i, j))));
+                unitIds[j] = keccak256(abi.encodePacked(TestHelper.pseudoRandom(abi.encode(peerId, "unitId", i, j))));
             }
 
             registerPeers.push(
                 IOffer.RegisterComputePeer({
                     peerId: peerId,
                     unitIds: unitIds,
-                    owner: address(bytes20(Random.pseudoRandom(abi.encode("peerId-address", i))))
+                    owner: address(bytes20(TestHelper.pseudoRandom(abi.encode("peerId-address", i))))
                 })
             );
         }
 
         ccDuration = deployment.capacity.minDuration();
-        ccDelegator = address(bytes20(Random.pseudoRandom(abi.encode("delegator"))));
+        ccDelegator = address(bytes20(TestHelper.pseudoRandom(abi.encode("delegator"))));
 
         vm.deal(ccDelegator, type(uint256).max);
 
@@ -190,9 +188,9 @@ contract CapacityCommitmentTest is Test {
                 currentEpoch + 1 + ccDuration,
                 registerPeers[i].unitIds
             );
-
-            deployment.capacity.depositCollateral{value: amounts[i]}(createdCCIds[i]);
         }
+
+        deployment.capacity.depositCollateral{value: amountTotal}(createdCCIds);
         vm.stopPrank();
 
         StdCheats.skip(uint256(deployment.core.epochDuration()));
@@ -229,17 +227,16 @@ contract CapacityCommitmentTest is Test {
 
         vm.startPrank(peerOwner);
 
-        bytes32 globalUnitNonce = keccak256(abi.encodePacked(deployment.capacity.getGlobalNonce(), unitId));
         bytes32 localUnitNonce = keccak256(abi.encodePacked("localUnitNonce"));
         bytes32 targetHash = bytes32(uint256(deployment.capacity.difficulty()) - 1);
 
         vm.expectEmit(true, true, true, false, address(deployment.capacity));
-        emit ProofSubmitted(commitmentId, unitId, globalUnitNonce, localUnitNonce);
+        emit ProofSubmitted(commitmentId, unitId, localUnitNonce);
 
         //TODO: vm mock not working here :(
         vm.etch(address(Actor.CALL_ACTOR_ID), address(new MockActorCallActorPrecompile(targetHash)).code);
 
-        deployment.capacity.submitProof(unitId, globalUnitNonce, localUnitNonce, targetHash);
+        deployment.capacity.submitProof(unitId, localUnitNonce, targetHash);
 
         vm.stopPrank();
     }
@@ -262,18 +259,18 @@ contract CapacityCommitmentTest is Test {
         vm.startPrank(peerOwner);
         uint256 minRequiredProofsPerEpoch = deployment.capacity.minRequierdProofsPerEpoch();
         for (uint256 i = 0; i < minRequiredProofsPerEpoch; i++) {
-            bytes32 globalUnitNonce = keccak256(abi.encodePacked(deployment.capacity.getGlobalNonce(), i, unitId));
             bytes32 localUnitNonce = keccak256(abi.encodePacked("localUnitNonce", i));
 
             vm.expectEmit(true, true, true, false, address(deployment.capacity));
-            emit ProofSubmitted(commitmentId, unitId, globalUnitNonce, localUnitNonce);
+            emit ProofSubmitted(commitmentId, unitId, localUnitNonce);
 
-            deployment.capacity.submitProof(unitId, globalUnitNonce, localUnitNonce, targetHash);
+            deployment.capacity.submitProof(unitId, localUnitNonce, targetHash);
         }
 
         StdCheats.skip(deployment.core.epochDuration());
 
         assertGe(deployment.capacity.totalRewards(commitmentId), 0, "TotalRewards mismatch");
+        assertEq(deployment.capacity.unlockedRewards(commitmentId), 0, "UnlockedRewards mismatch");
 
         vm.stopPrank();
     }
@@ -300,8 +297,12 @@ contract CapacityCommitmentTest is Test {
         (commitmentId, offerId) = _createCapacityCommitment(peerId);
 
         vm.startPrank(ccDelegator);
+
+        bytes32[] memory commitmentIds = new bytes32[](1);
+        commitmentIds[0] = commitmentId;
+
         deployment.capacity.depositCollateral{value: unitCount * deployment.capacity.fltCollateralPerUnit()}(
-            commitmentId
+            commitmentIds
         );
         vm.stopPrank();
     }
