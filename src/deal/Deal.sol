@@ -14,7 +14,6 @@ import "./interfaces/IDeal.sol";
 import "./interfaces/IConfig.sol";
 
 contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
-    using BitMaps for BitMaps.BitMap;
     using SafeERC20 for IERC20;
     using DealStorageUtils for DealStorageUtils.Balance;
 
@@ -36,6 +35,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         mapping(bytes32 => ComputeUnitPaymentInfo) cUnitPaymentInfo;
         bool isEnded;
         uint256 endedEpoch;
+        uint256 protocolVersion;
     }
 
     function _getDealStorage() private pure returns (DealStorage storage s) {
@@ -67,7 +67,8 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         uint256 pricePerWorkerEpoch_,
         CIDV1[] calldata effectors_,
         AccessType providersAccessType_,
-        address[] calldata providersAccessList_
+        address[] calldata providersAccessList_,
+        uint256 protocolVersion_
     ) public initializer {
         __WorkerManager_init(
             globalCore_,
@@ -82,10 +83,11 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
             providersAccessType_,
             providersAccessList_
         );
+        _getDealStorage().protocolVersion = protocolVersion_;
         __Multicall_init();
     }
 
-    // ------------------ Privat Functions ------------------
+    // ------------------ Private Functions ------------------
     function _calculateMaxPaidEpoch(
         uint256 currentEpoch,
         uint256 totalBalance,

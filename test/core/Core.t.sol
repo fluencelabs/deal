@@ -55,6 +55,8 @@ contract CoreTest is Test {
             DeployDealSystem.DEFAULT_EPOCH_DURATION,
             DeployDealSystem.DEFAULT_MIN_DEPOSITED_EPOCHES,
             DeployDealSystem.DEFAULT_MIN_REMATCHING_EPOCHES,
+            DeployDealSystem.DEFAULT_MIN_PROTOCOL_VERSION,
+            DeployDealSystem.DEFAULT_MAX_PROTOCOL_VERSION,
             dealImpl
         );
     }

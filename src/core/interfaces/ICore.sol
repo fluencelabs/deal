@@ -24,6 +24,8 @@ interface ICore is IEpochController, IGlobalConst {
         uint256 epochDuration_,
         uint256 minDepositedEpoches_,
         uint256 minRematchingEpoches_,
+        uint256 minProtocolVersion_,
+        uint256 maxProtocolVersion_,
         IDeal dealImpl_
     ) external;
 

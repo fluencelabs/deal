@@ -22,6 +22,7 @@ interface IDealFactory {
     /// @param appCID The app cid of the deal
     /// @param providersAccessType_ The providers access type of the deal (None, Whitelist, Blacklist)
     /// @param providersAccessList_ The providers access list of the deal
+    /// @param protocolVersion_ Protocol version
     event DealCreated(
         address indexed owner,
         IDeal deal,
@@ -34,7 +35,8 @@ interface IDealFactory {
         CIDV1[] effectors,
         CIDV1 appCID,
         IConfig.AccessType providersAccessType_,
-        address[] providersAccessList_
+        address[] providersAccessList_,
+        uint256 protocolVersion_
     );
 
     // ----------------- View -----------------
@@ -53,6 +55,7 @@ interface IDealFactory {
     /// @param effectors_ The effectors of the deal
     /// @param providersAccessType_ The providers access type of the deal (None, Whitelist, Blacklist)
     /// @param providersAccessList_ The providers access list of the deal
+    /// @param protocolVersion_ Protocol version
     /// @return The deal address
     function deployDeal(
         CIDV1 calldata appCID_,
@@ -63,6 +66,7 @@ interface IDealFactory {
         uint256 pricePerWorkerEpoch_,
         CIDV1[] calldata effectors_,
         IConfig.AccessType providersAccessType_,
-        address[] calldata providersAccessList_
+        address[] calldata providersAccessList_,
+        uint256 protocolVersion_
     ) external returns (IDeal);
 }

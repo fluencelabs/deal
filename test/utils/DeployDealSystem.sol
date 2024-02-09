@@ -31,6 +31,8 @@ library DeployDealSystem {
     uint256 public constant DEFAULT_FLT_PRICE = 10 * PRECISION; // 10 USD
     uint256 public constant DEFAULT_MIN_DEPOSITED_EPOCHES = 2;
     uint256 public constant DEFAULT_MIN_REMATCHING_EPOCHES = 2;
+    uint256 public constant DEFAULT_MIN_PROTOCOL_VERSION = 1;
+    uint256 public constant DEFAULT_MAX_PROTOCOL_VERSION = 1;
     uint256 public constant DEFAULT_USD_COLLATERAL_PER_UNIT = 100 * PRECISION; // 100 USD
     uint256 public constant DEFAULT_USD_TARGET_REVENUE_PER_EPOCH = 10 * PRECISION; // 10 USD
     uint256 public constant DEFAULT_MIN_DURATION = 1 days;
@@ -65,6 +67,8 @@ library DeployDealSystem {
                         DEFAULT_EPOCH_DURATION,
                         DEFAULT_MIN_DEPOSITED_EPOCHES,
                         DEFAULT_MIN_REMATCHING_EPOCHES,
+                        DEFAULT_MIN_PROTOCOL_VERSION,
+                        DEFAULT_MAX_PROTOCOL_VERSION,
                         dealImpl
                     )
                 )

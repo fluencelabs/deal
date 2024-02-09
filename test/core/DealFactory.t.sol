@@ -29,7 +29,7 @@ contract DealFactoryTest is Test {
     DeployDealSystem.Deployment deployment;
 
     // ------------------ Internal ------------------
-    function _deployDeal(uint256 pricePerWorkerEpoch, uint256 targetWorkers)
+    function _deployDeal(uint256 pricePerWorkerEpoch, uint256 targetWorkers, uint256 protocolVersion)
         internal
         returns (IDeal, DealParams memory)
     {
@@ -53,7 +53,8 @@ contract DealFactoryTest is Test {
             pricePerWorkerEpoch,
             effectors,
             IConfig.AccessType.NONE,
-            new address[](0)
+            new address[](0),
+            protocolVersion
         );
 
         console.log("Deal deployed");
@@ -85,7 +86,8 @@ contract DealFactoryTest is Test {
         uint256 balanceBefore = deployment.tUSD.balanceOf(address(this));
 
         deployment.tUSD.safeApprove(address(deployment.market), minAmount);
-        (IDeal d, DealParams memory dealParams) = _deployDeal(pricePerWorkerEpoch, targetWorkers);
+        uint256 protocolVersion = deployment.core.minProtocolVersion();
+        (IDeal d, DealParams memory dealParams) = _deployDeal(pricePerWorkerEpoch, targetWorkers, protocolVersion);
 
         uint256 balanceDiff = balanceBefore - deployment.tUSD.balanceOf(address(this));
 
@@ -113,9 +115,10 @@ contract DealFactoryTest is Test {
     function test_RevertIf_NoTokenAllowance() public {
         uint256 pricePerWorkerEpoch = 1 ether;
         uint256 targetWorkers = 3;
+        uint256 protocolVersion = deployment.core.minProtocolVersion();
 
         vm.expectRevert("ERC20: insufficient allowance");
-        _deployDeal(pricePerWorkerEpoch, targetWorkers);
+        _deployDeal(pricePerWorkerEpoch, targetWorkers, protocolVersion);
     }
 
     function test_RevertIf_NoEnoughBalance() public {
@@ -126,9 +129,10 @@ contract DealFactoryTest is Test {
         vm.startPrank(address(0x01));
 
         deployment.tUSD.safeApprove(address(deployment.market), minAmount * 100);
+        uint256 protocolVersion = deployment.core.minProtocolVersion();
 
         vm.expectRevert("ERC20: transfer amount exceeds balance");
-        _deployDeal(pricePerWorkerEpoch, targetWorkers);
+        _deployDeal(pricePerWorkerEpoch, targetWorkers, protocolVersion);
 
         vm.stopPrank();
     }

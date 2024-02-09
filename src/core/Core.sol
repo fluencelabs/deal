@@ -3,7 +3,6 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "src/utils/OwnableUpgradableDiamond.sol";
 import "src/deal/Deal.sol";
 import "src/core/modules/capacity/interfaces/ICapacity.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
@@ -39,11 +38,13 @@ contract Core is UUPSUpgradeable, GlobalConst, ICore {
         uint256 epochDuration_,
         uint256 minDepositedEpoches_,
         uint256 minRematchingEpoches_,
+        uint256 minProtocolVersion_,
+        uint256 maxProtocolVersion_,
         IDeal dealImpl_
     ) public initializer {
         __Ownable_init(msg.sender);
         __EpochController_init(epochDuration_);
-        __GlobalConst_init(minDepositedEpoches_, minRematchingEpoches_);
+        __GlobalConst_init(minDepositedEpoches_, minRematchingEpoches_, minProtocolVersion_, maxProtocolVersion_);
         __UUPSUpgradeable_init();
 
         _getCoreStorage().dealImpl = dealImpl_;

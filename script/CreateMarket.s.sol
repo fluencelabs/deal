@@ -124,7 +124,8 @@ contract CreateMarket is Depoyments, Script {
                     pricePerWorkerEpoch,
                     effectors,
                     IConfig.AccessType.NONE,
-                    new address[](0)
+                    new address[](0),
+                    core.minProtocolVersion()
                 );
                 createdDeals[i] = address(dealCreatedContract);
             } else if (i % 2 == 0) {
@@ -137,7 +138,8 @@ contract CreateMarket is Depoyments, Script {
                     pricePerWorkerEpoch,
                     effectors,
                     IConfig.AccessType.WHITELIST,
-                    providersAccessList
+                    providersAccessList,
+                    core.minProtocolVersion()
                 );
                 createdDeals[i] = address(dealCreatedContract);
             } else {
@@ -150,7 +152,8 @@ contract CreateMarket is Depoyments, Script {
                     pricePerWorkerEpoch,
                     effectors,
                     IConfig.AccessType.BLACKLIST,
-                    providersAccessList
+                    providersAccessList,
+                    core.minProtocolVersion()
                 );
                 createdDeals[i] = address(dealCreatedContract);
             }
