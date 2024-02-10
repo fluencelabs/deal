@@ -52,7 +52,7 @@ WORKDIR /app
 RUN make build-contracts
 
 # IPC
-FROM ghcr.io/consensus-shipyard/fendermint:latest as ipc
+FROM fluencelabs/fendermint:latest as ipc
 COPY docker/keys /testnet/keys
 RUN --mount=type=bind,source=docker/scripts/fendermint-bootstrap.sh,target=/bootstrap.sh /bootstrap.sh
 COPY --from=actors /ipc/fendermint/builtin-actors/output/bundle.car /fendermint/bundle.car
