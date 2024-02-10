@@ -44,13 +44,15 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
 
-  # IPC with deployed contracts
+  # IPC
   ipc:
     image: ${IPC_IMAGE:-ipc}
     build:
       context: ../
       dockerfile: ./docker/Dockerfile
       target: ipc
+    environment:
+      TENDERMINT_RPC_URL: http://cometbft:26657
     ports:
       - "26658:26658"
     volumes:
