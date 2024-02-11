@@ -108,10 +108,10 @@ abstract contract Matcher is Offer, IMatcher {
 
                 // Check if CU available.
                 if (
-                    providersAccessType == IConfig.AccessType.WHITELIST
+                    providersAccessType != IConfig.AccessType.WHITELIST
                         && (
                             computeUnit.deal != address(0) || peer.commitmentId == bytes32(0x000000000)
-                                || capacity.getStatus(peer.commitmentId) == ICapacity.CCStatus.Active
+                                || capacity.getStatus(peer.commitmentId) != ICapacity.CCStatus.Active
                         )
                 ) {
                     continue;
