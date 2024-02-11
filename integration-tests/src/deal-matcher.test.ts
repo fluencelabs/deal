@@ -17,13 +17,17 @@ import {
   type ContractsENV,
   DealClient,
   DealMatcherClient,
+  type GetMatchedOffersOut,
 } from "@fluencelabs/deal-ts-clients";
 import { ethers } from "ethers";
+import dns from "node:dns/promises";
 
 // TODO: from env.
+
+const ip = await dns.lookup("akim-dev.dev.fluence.dev");
 const TEST_NETWORK: ContractsENV = "local";
-const TEST_RPC_URL = "http://localhost:8545";
-const DEFAULT_SUBGRAPH_TIME_INDEXING = 240000;
+const TEST_RPC_URL = `http://${ip.address}:8545`;
+const DEFAULT_SUBGRAPH_TIME_INDEXING = 300000;
 const DEFAULT_CONFIRMATIONS = 1;
 // Test timeout should include:
 // - time for confirmations waits (1 confirmation is setup on anvil chain start)
@@ -250,25 +254,40 @@ describe("#getMatchedOffersByDealId", () => {
         lastDealsCreatedAfter[lastDealsCreatedAfter.length - 1]?.args.deal;
       assert(dealId, "Deal ID is not defined");
 
-      console.info(
-        `Wait indexer ${DEFAULT_SUBGRAPH_TIME_INDEXING} to process transactions with Deal...`,
-      );
-      await new Promise((resolve) =>
-        setTimeout(resolve, DEFAULT_SUBGRAPH_TIME_INDEXING),
-      );
-      // const dealId = "0xd79df1927718b3212fa6e126ec4ad2b3ee1263d9"
+      console.info(`Wait till indexer ingesting blockchain state...`);
 
-      console.log("---- Deal Matching ----");
-      console.info(`Find matched offers for dealId: ${dealId}...`);
       const dealMatcherClient = new DealMatcherClient(
         TEST_NETWORK,
-        "http://localhost:8000/subgraphs/name/fluence-deal-contracts",
+        `http://${ip.address}:8000/subgraphs/name/fluence-deal-contracts`,
       );
-      const matchedOffersOut =
-        await dealMatcherClient.getMatchedOffersByDealId(dealId);
+
+      let matchedOffersOut: GetMatchedOffersOut;
+
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition,no-constant-condition
+      while (true) {
+        try {
+          console.info(`Find matched offers for dealId: ${dealId}...`);
+          matchedOffersOut =
+            await dealMatcherClient.getMatchedOffersByDealId(dealId);
+          break;
+        } catch (e) {
+          console.log(e);
+          console.log("Waiting 5s for the next attempt");
+          await new Promise((resolve) => setTimeout(resolve, 5000));
+        }
+      }
+
+      // const dealId = "0xd79df1927718b3212fa6e126ec4ad2b3ee1263d9"
+      console.log("---- Deal Matching ----");
+
       expect(matchedOffersOut.offers.length).toBe(1); // At least with one previously created offer it matched.
 
-      console.log(matchedOffersOut.computeUnitsPerOffers);
+      // throw new Error("Test error");
+
+      console.log(
+        "computeUnitsPerOffers",
+        matchedOffersOut.computeUnitsPerOffers,
+      );
       // const cuId = matchedOffersOut.computeUnitsPerOffers[0]?.[0];
 
       // Additional check for status of matched CC from chain perspective
