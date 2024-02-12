@@ -77,6 +77,7 @@ export function handleCommitmentCreated(event: CommitmentCreated): void {
   commitment.snapshotEpoch = ZERO_BIG_INT
   commitment.deleted = false;
   commitment.totalCollateral = ZERO_BIG_INT;
+  commitment.submittedProofsCount = 0;
   commitment.save()
 
   peer.currentCapacityCommitment = commitment.id;
