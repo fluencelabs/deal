@@ -22,29 +22,6 @@ contract CommitPeriod is Test {
     Deal.DealStorage dealStorage;
 
     // ------------------ Test ------------------
-    /*
-        
-
-
-        if (maxPaidEpoch == 0 || (currentEpoch > maxPaidEpoch && lastCommitedEpoch >= maxPaidEpoch)) 
-        мы должны засетапить гепы так как если
-
-      if (maxPaidEpoch != 0 && currentEpoch > maxPaidEpoch && maxPaidEpoch > lastCommitedEpoch) {
-            uint256 amount = (maxPaidEpoch - lastCommitedEpoch) * pricePerWorkerEpoch_ * currentWorkerCount;
-
-            balance.setTotalBalance(balance.getTotalBalance() - amount);
-            balance.setLockedBalance(balance.getLockedBalance() + amount);
-            balance.setGapsEpochCount(balance.getGapsEpochCount() + (currentEpoch - maxPaidEpoch));
-        } else if (maxPaidEpoch == 0 || (currentEpoch > maxPaidEpoch && lastCommitedEpoch >= maxPaidEpoch)) {
-            balance.setGapsEpochCount(balance.getGapsEpochCount() + (currentEpoch - lastCommitedEpoch));
-        } else if (maxPaidEpoch != 0 && currentEpoch <= maxPaidEpoch) {
-            uint256 amount = (currentEpoch - lastCommitedEpoch) * pricePerWorkerEpoch_ * currentWorkerCount;
-
-            balance.setTotalBalance(balance.getTotalBalance() - amount);
-            balance.setLockedBalance(balance.getLockedBalance() + amount);
-        }
-    */
-
     function setUp() public {
         deployment = DeployDealSystem.deployDealSystem();
         dealContract = new TestDealContract();
@@ -53,52 +30,78 @@ contract CommitPeriod is Test {
         dealStorage.gapsEpochCount = 0;
     }
 
-    function test_RecordGapsWhenMaxPaidEpochIsZero() public {
+    function test_RecordGaps() public {
         dealStorage.totalBalance = 100 ether;
         dealStorage.lockedBalance = 0 ether;
-        dealStorage.gapsEpochCount = 0;
+        dealStorage.gapsEpochCount = 50;
 
-        uint256 currentEpoch = 100;
-        uint256 maxPaidEpoch = 0;
-        uint256 lastCommitedEpoch = 0;
+        uint256 prevEpoch = 100;
+        uint256 maxPaidEpoch = 50;
+        uint256 lastCommitedEpoch = 50;
         uint256 pricePerWorkerEpoch = 1 ether;
         uint256 currentWorkerCount = 1;
 
         DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
-        dealContract.preCommitPeriod(
-            balance, currentEpoch, maxPaidEpoch, lastCommitedEpoch, currentWorkerCount, pricePerWorkerEpoch
+        balance = dealContract.preCommitPeriod(
+            balance, prevEpoch, maxPaidEpoch, lastCommitedEpoch, currentWorkerCount, pricePerWorkerEpoch
         );
 
         assertEq(balance.getTotalBalance(), 100 ether, "totalBalance mismatch");
         assertEq(balance.getLockedBalance(), 0, "lockedBalance mismatch");
-        assertEq(balance.getGapsEpochCount(), 100, "gapsEpochCount mismatch");
+        assertEq(
+            balance.getGapsEpochCount(),
+            dealStorage.gapsEpochCount + prevEpoch - lastCommitedEpoch,
+            "gapsEpochCount mismatch"
+        );
     }
 
-    function test_RecordGapsWhenDealIsInactive() public {}
+    function test_WrtieOffBalanceAndRecordGaps() public {
+        dealStorage.lockedBalance = 0 ether;
+        dealStorage.gapsEpochCount = 100;
+
+        uint256 lastCommitedEpoch = dealStorage.gapsEpochCount;
+        uint256 prevEpoch = 200;
+        uint256 maxPaidEpoch = 150;
+        uint256 pricePerWorkerEpoch = 200 ether;
+        uint256 currentWorkerCount = 5;
+
+        dealStorage.totalBalance = (maxPaidEpoch - lastCommitedEpoch) * pricePerWorkerEpoch * currentWorkerCount;
+
+        DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
+        balance = dealContract.preCommitPeriod(
+            balance, prevEpoch, maxPaidEpoch, lastCommitedEpoch, currentWorkerCount, pricePerWorkerEpoch
+        );
+
+        assertEq(balance.getTotalBalance(), 0, "totalBalance mismatch");
+        assertEq(balance.getLockedBalance(), dealStorage.totalBalance, "lockedBalance mismatch");
+        assertEq(
+            balance.getGapsEpochCount(),
+            dealStorage.gapsEpochCount + prevEpoch - maxPaidEpoch,
+            "gapsEpochCount mismatch"
+        );
+    }
 
     function test_WrtieOffBalanceWithoutGaps() public {
         dealStorage.lockedBalance = 0 ether;
         dealStorage.gapsEpochCount = 100;
 
         uint256 lastCommitedEpoch = dealStorage.gapsEpochCount;
-        uint256 currentEpoch = 200;
-        uint256 maxPaidEpoch = currentEpoch;
+        uint256 prevEpoch = 200;
+        uint256 maxPaidEpoch = prevEpoch;
         uint256 pricePerWorkerEpoch = 200 ether;
         uint256 currentWorkerCount = 5;
 
-        dealStorage.totalBalance = (currentEpoch - lastCommitedEpoch) * pricePerWorkerEpoch * currentWorkerCount;
+        dealStorage.totalBalance = (prevEpoch - lastCommitedEpoch) * pricePerWorkerEpoch * currentWorkerCount;
 
         DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
-        dealContract.preCommitPeriod(
-            balance, currentEpoch, maxPaidEpoch, lastCommitedEpoch, currentWorkerCount, pricePerWorkerEpoch
+        balance = dealContract.preCommitPeriod(
+            balance, prevEpoch, maxPaidEpoch, lastCommitedEpoch, currentWorkerCount, pricePerWorkerEpoch
         );
 
         assertEq(balance.getTotalBalance(), 0, "totalBalance mismatch");
         assertEq(balance.getLockedBalance(), dealStorage.totalBalance, "lockedBalance mismatch");
         assertEq(balance.getGapsEpochCount(), dealStorage.gapsEpochCount, "gapsEpochCount mismatch");
     }
-
-    function test_WrtieOffBalanceAndRecordGaps() public {}
 }
 
 contract TestDealContract is Deal {
@@ -109,10 +112,12 @@ contract TestDealContract is Deal {
         uint256 lastCommitedEpoch,
         uint256 currentWorkerCount,
         uint256 pricePerWorkerEpoch_
-    ) public pure {
+    ) public pure returns (DealStorageUtils.Balance memory) {
         _preCommitPeriod(
             balance, currentEpoch, maxPaidEpoch, lastCommitedEpoch, currentWorkerCount, pricePerWorkerEpoch_
         );
+
+        return balance;
     }
 
     function postCommitPeriod(
