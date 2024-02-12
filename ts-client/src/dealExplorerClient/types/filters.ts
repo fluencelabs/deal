@@ -66,6 +66,7 @@ export interface CapacityCommitmentsFilters {
   rewardDelegatorRateTo?: number | undefined;
 }
 
+// @param search: search by provider id, peer id, transaction hash.
 export interface ProofsFilters {
   search?: string | undefined;
 }
@@ -84,6 +85,6 @@ export type CapacityCommitmentsOrderBy =
   | "createdAt"
   | "computeUnitsCount"
   | "expirationAt";
-export type ProofsOrderBy = "createdBy" | "epoch"
+export type ProofsOrderBy = "createdAt" | "epoch"
 
 export type OrderType = "asc" | "desc";

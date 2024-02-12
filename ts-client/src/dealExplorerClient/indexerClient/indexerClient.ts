@@ -26,7 +26,7 @@ import type {
 import { getSdk as getProvidersSdk } from "./queries/providers-query.generated.js";
 import type {
   CapacityCommitmentQueryQueryVariables,
-  Sdk as CapacityCommitmentsSdk,
+  Sdk as CapacityCommitmentsSdk, SubmittedProofsQueryQueryVariables
 } from "./queries/capacity-commitments-query.generated.js";
 import type { Sdk as ContractConstantsSdk } from "./queries/constants-query.generated.js";
 import { getSdk as getContractConstantsSdk } from "./queries/constants-query.generated.js";
@@ -118,5 +118,10 @@ export class IndexerClient extends IndexerClientABC {
 
   async getComputeUnit(variables: ComputeUnitQueryQueryVariables) {
     return await this.peersClient.ComputeUnitQuery(variables)
+  }
+
+  async getSubmittedProofs(variables: SubmittedProofsQueryQueryVariables) {
+    console.log('variables', variables)
+    return await this.capacityCommitmentsClient.SubmittedProofsQuery()
   }
 }

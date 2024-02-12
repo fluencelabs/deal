@@ -221,12 +221,21 @@ export function handleProofSubmitted(event: ProofSubmitted): void {
   let proofSubmitted = new SubmittedProof(event.transaction.hash.toHex());
   let capacityCommitment = CapacityCommitment.load(event.params.commitmentId.toHex()) as CapacityCommitment;
   let computeUnit = ComputeUnit.load(event.params.unitId.toHex()) as ComputeUnit;
+  const provider = Provider.load(computeUnit.provider) as Provider;
+  let graphNetwork = createOrLoadGraphNetwork();
 
   proofSubmitted.capacityCommitment = capacityCommitment.id;
   proofSubmitted.computeUnit = computeUnit.id;
+  proofSubmitted.provider = provider.id;
+  proofSubmitted.peer = computeUnit.peer;
   proofSubmitted.globalUnitNonce = event.params.globalUnitNonce;
   proofSubmitted.localUnitNonce = event.params.localUnitNonce;
   proofSubmitted.createdAt = event.block.timestamp;
+  proofSubmitted.createdEpoch = calculateEpoch(
+    event.block.timestamp,
+    BigInt.fromI32(graphNetwork.initTimestamp),
+    BigInt.fromI32(graphNetwork.coreEpochDuration),
+  )
   proofSubmitted.save()
 
   // Update stats below.
@@ -235,4 +244,7 @@ export function handleProofSubmitted(event: ProofSubmitted): void {
 
   computeUnit.submittedProofsCount = capacityCommitment.submittedProofsCount + 1;
   computeUnit.save()
+
+  graphNetwork.proofsTotal = graphNetwork.proofsTotal.plus(UNO_BIG_INT);
+  graphNetwork.save();
 }

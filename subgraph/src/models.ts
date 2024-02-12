@@ -162,6 +162,7 @@ export function createOrLoadGraphNetwork(): GraphNetwork {
     graphNetwork.tokensTotal = ZERO_BIG_INT;
     graphNetwork.effectorsTotal = ZERO_BIG_INT;
     graphNetwork.capacityCommitmentsTotal = ZERO_BIG_INT;
+    graphNetwork.proofsTotal = ZERO_BIG_INT;
     graphNetwork.save()
   }
   return graphNetwork as GraphNetwork

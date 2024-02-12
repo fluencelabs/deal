@@ -1,5 +1,7 @@
 # ts-clients
 
+Module consists of several TS clients to access Deal contract logic for different purposes: deal matching, contract address resolving, Network Explorer API, etc.  
+
 * [Requirements](#requirements)
 * [client](#client)
 * [deal-mather-client](#deal-mather-client)

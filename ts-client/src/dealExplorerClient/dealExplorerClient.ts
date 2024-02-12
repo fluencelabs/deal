@@ -20,7 +20,7 @@ import type {
   ProviderShortListView,
   ComputeUnitDetail,
   ProofBasicListView,
-  ComputeUnitStatus
+  ComputeUnitStatus, ProofBasic
 } from "./types/schemes.js";
 import type {
   ChildEntitiesByProviderFilter,
@@ -34,7 +34,7 @@ import type {
   OrderType,
   PaymentTokenOrderBy,
   ProvidersFilters,
-  ProviderShortOrderBy,
+  ProviderShortOrderBy, ProofsFilters, ProofsOrderBy,
 } from "./types/filters.js";
 import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type {
@@ -75,7 +75,7 @@ import {
 import {
   serializeCapacityCommitmentsOrderByToIndexer,
   serializeDealShortOrderByToIndexer,
-  serializeOfferShortOrderByToIndexer,
+  serializeOfferShortOrderByToIndexer, serializeProofsOrderByToIndexer,
 } from "./serializers/orderby.js";
 import type { ICapacity } from "../typechain-types/index.js";
 import type { CapacityCommitmentBasicFragment } from "./indexerClient/queries/capacity-commitments-query.generated.js";
@@ -892,6 +892,49 @@ export class DealExplorerClient {
       successProofs: currentPeerCapacityCommitment ? currentPeerCapacityCommitment.submittedProofsCount: 0,
       collateralToken: FLTToken,
       status,
+    };
+  }
+
+  // @notice [Figma] List of Proofs.
+  async getProofs(
+    filters?: ProofsFilters,
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: ProofsOrderBy = "createdAt",
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
+  ): Promise<ProofBasicListView> {
+    await this._init();
+
+    const filtersSerialized = serializeCapacityCommitmentsFiltersToIndexer(
+      filters,
+    );
+    const data = await this._indexerClient.getSubmittedProofs({
+      filters: filtersSerialized,
+      offset,
+      limit,
+      orderType,
+      orderBy: serializeProofsOrderByToIndexer(orderBy),
+    });
+    const res: Array<ProofBasic> = data.submittedProofs.map((proof) => {return {
+      transactionId: proof.id,
+      capacityCommitmentId: proof.capacityCommitment.id,
+      computeUnitId: proof.computeUnit.id,
+      peerId: proof.peer.id,
+      createdAt: Number(proof.createdAt),
+    }});
+
+    // TODO: generalize code below.
+    let total = null;
+    if (
+      data.graphNetworks.length == 1 &&
+      data.graphNetworks[0] &&
+      data.graphNetworks[0].proofsTotal
+    ) {
+      total = data.graphNetworks[0].proofsTotal as string;
+    }
+    return {
+      data: res,
+      total,
     };
   }
 }

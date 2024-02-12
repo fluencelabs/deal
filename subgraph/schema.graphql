@@ -12,6 +12,7 @@ type GraphNetwork @entity {
   tokensTotal: BigInt!
   effectorsTotal: BigInt!
   capacityCommitmentsTotal: BigInt!
+  proofsTotal: BigInt!
   # Add constants from Core contract below.
   coreEpochDuration: Int
   initTimestamp: Int
@@ -264,4 +265,8 @@ type SubmittedProof @entity(immutable: true) {
   localUnitNonce: Bytes!
   createdAt: BigInt!
   createdEpoch: BigInt!
+
+  # Add fields for filter purpose below.
+  provider: Provider!
+  peer: Peer!
 }
