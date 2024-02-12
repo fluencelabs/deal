@@ -23,8 +23,8 @@ import type { Deployment, ContractsENV } from "./config.js";
 export class DealClient {
   private deployment: Promise<Deployment>;
 
-  static async getDeployment(env: ContractsENV): Promise<Deployment> {
-    return this.getDeployment(env);
+  static async getContractAddresses(env: ContractsENV): Promise<Deployment> {
+    return getDeployment(env);
   }
 
   constructor(
