@@ -191,14 +191,14 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         DealStorage storage dealStorage = _getDealStorage();
         ComputeUnitPaymentInfo storage computeUnitPaymentInfo = dealStorage.cUnitPaymentInfo[computeUnitId];
 
-        uint256 currentEpoch = _globalCore().currentEpoch();
+        uint256 prevEpoch = _globalCore().currentEpoch() - 1;
         uint256 workerCount = getWorkerCount();
         uint256 pricePerWorkerEpoch_ = pricePerWorkerEpoch();
 
         DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
         _preCommitPeriod(
             balance,
-            currentEpoch - 1,
+            prevEpoch,
             dealStorage.maxPaidEpoch,
             dealStorage.lastCommitedEpoch,
             workerCount,
@@ -206,7 +206,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         );
 
         uint256 reward = (
-            (currentEpoch - computeUnitPaymentInfo.startedEpoch)
+            (prevEpoch - computeUnitPaymentInfo.startedEpoch)
                 - (balance.getGapsEpochCount() - computeUnitPaymentInfo.gapsDelta)
         ) * pricePerWorkerEpoch_;
 
