@@ -25,9 +25,6 @@ contract CommitPeriod is Test {
     function setUp() public {
         deployment = DeployDealSystem.deployDealSystem();
         dealContract = new TestDealContract();
-        dealStorage.totalBalance = 0;
-        dealStorage.lockedBalance = 0;
-        dealStorage.gapsEpochCount = 0;
     }
 
     function test_RecordGaps() public {

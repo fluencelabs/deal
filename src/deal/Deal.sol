@@ -162,9 +162,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
             return Status.ENDED;
         }
 
-        if (getWorkerCount() < minWorkers()) {
-            return Status.INACTIVE;
-        } else if (_globalCore().currentEpoch() > dealStorage.maxPaidEpoch) {
+        if (getWorkerCount() < minWorkers() || _globalCore().currentEpoch() > dealStorage.maxPaidEpoch) {
             return Status.INACTIVE;
         } else {
             return Status.ACTIVE;
