@@ -17,8 +17,6 @@ contract GlobalConst is OwnableUpgradableDiamond, EpochController, IGlobalConst 
         uint256 minDealRematchingEpoches;
     }
 
-    GlobalConstStorage private _storage;
-
     function _getGlobalConstStorage() private pure returns (GlobalConstStorage storage s) {
         bytes32 storageSlot = _STORAGE_SLOT;
         assembly {

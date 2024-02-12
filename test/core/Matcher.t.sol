@@ -9,11 +9,16 @@ import "src/deal/interfaces/IDeal.sol";
 import "test/utils/DeployDealSystem.sol";
 import "src/core/modules/market/Market.sol";
 import "src/core/modules/market/interfaces/IOffer.sol";
-import "test/utils/Random.sol";
+import "test/utils/TestHelper.sol";
 import "forge-std/StdCheats.sol";
 
 contract MatcherTest is Test {
     using SafeERC20 for IERC20;
+
+    // ------------------ Events ------------------
+    event ComputeUnitMatched(
+        bytes32 indexed peerId, IDeal deal, bytes32 unitId, uint256 dealCreationBlock, CIDV1 appCID
+    );
 
     // ------------------ Variables ------------------
     DeployDealSystem.Deployment deployment;
@@ -38,12 +43,12 @@ contract MatcherTest is Test {
 
             IOffer.RegisterComputePeer[] memory peers = new IOffer.RegisterComputePeer[](peerCountPerOffer);
             for (uint256 j = 0; j < peerCountPerOffer; j++) {
-                bytes32 peerId = Random.pseudoRandom(abi.encode(i, "peerId", j));
+                bytes32 peerId = TestHelper.pseudoRandom(abi.encode(i, "peerId", j));
                 peerIds[i][j] = peerId;
 
                 unitIds[i][j] = new bytes32[](unitCountPerPeer);
                 for (uint256 k = 0; k < unitIds[i][j].length; k++) {
-                    unitIds[i][j][k] = Random.pseudoRandom(abi.encode(peerId, "unitId", k));
+                    unitIds[i][j][k] = TestHelper.pseudoRandom(abi.encode(peerId, "unitId", k));
                 }
 
                 peers[j] = IOffer.RegisterComputePeer({peerId: peerId, unitIds: unitIds[i][j], owner: address(this)});
@@ -52,15 +57,19 @@ contract MatcherTest is Test {
             deployment.market.setProviderInfo("test", CIDV1({prefixes: 0x12345678, hash: bytes32(0x00)}));
             offerIds[i] = deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, peers);
 
+            uint256 amount;
+            bytes32[] memory commitmentIds = new bytes32[](peerCountPerOffer);
+
             for (uint256 j = 0; j < peerCountPerOffer; j++) {
                 bytes32 commitmentId = deployment.capacity.createCommitment(
                     peerIds[i][j], deployment.capacity.minDuration(), address(this), 1
                 );
+                commitmentIds[j] = commitmentId;
 
-                uint256 amount =
-                    deployment.capacity.getCommitment(commitmentId).collateralPerUnit * unitIds[i][j].length;
-                deployment.capacity.depositCollateral{value: amount}(commitmentId);
+                amount += deployment.capacity.getCommitment(commitmentId).collateralPerUnit * unitIds[i][j].length;
             }
+
+            deployment.capacity.depositCollateral{value: amount}(commitmentIds);
         }
     }
 
@@ -73,7 +82,7 @@ contract MatcherTest is Test {
     function test_Match() public {
         CIDV1[] memory effectors = new CIDV1[](10);
         for (uint256 i = 0; i < effectors.length; i++) {
-            effectors[i] = CIDV1({prefixes: 0x12345678, hash: Random.pseudoRandom(abi.encode("effector", i))});
+            effectors[i] = CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("effector", i))});
         }
 
         address paymentToken = address(deployment.tUSD);
@@ -87,7 +96,7 @@ contract MatcherTest is Test {
 
         // Total workers: offerCount * unitCountPerPeer * peerCountPerOffer. Thus, we have CU in excess.
         uint256 targetWorkers = offerCount * peerCountPerOffer * 1;
-        CIDV1 memory appCID = CIDV1({prefixes: 0x12345678, hash: Random.pseudoRandom(abi.encode("appCID"))});
+        CIDV1 memory appCID = CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("appCID"))});
 
         DealMock dealMock = new DealMock(
             pricePerWorkerEpoch,
@@ -130,6 +139,11 @@ contract MatcherTest is Test {
                     unitIds2D[i][currentUnitIdx] = unitIds[i][j][k];
                     currentUnitIdx += 1;
                     chosenComputeUnits += 1;
+
+                    vm.expectEmit(true, true, true, true, address(deployment.market));
+                    emit ComputeUnitMatched(
+                        peerIds[i][j], IDeal(address(dealMock)), unitIds[i][j][k], creationBlock, appCID
+                    );
                 }
             }
         }
@@ -162,8 +176,6 @@ contract MatcherTest is Test {
                 }
             }
         }
-
-        //TODO: event test
     }
 }
 

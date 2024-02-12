@@ -14,8 +14,6 @@ contract EpochController is Initializable, IEpochController {
         uint256 epochDuration;
     }
 
-    EpochControllerStorage private _storage;
-
     function _getEpochControllerStorage() private pure returns (EpochControllerStorage storage s) {
         bytes32 storageSlot = _STORAGE_SLOT;
         assembly {

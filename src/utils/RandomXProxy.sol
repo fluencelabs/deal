@@ -13,7 +13,7 @@ contract RandomXProxy {
     using BytesConverter for bytes32;
     using BytesConverter for bytes;
 
-    CommonTypes.FilActorId internal constant ActorID = CommonTypes.FilActorId.wrap(17);
+    CommonTypes.FilActorId internal constant ActorID = CommonTypes.FilActorId.wrap(0x70768565);
     uint256 internal constant RunRandomX = 2044353154;
 
     /// @notice runs the Fluence actor which runs RandomX with provided K and H and returns it's result.

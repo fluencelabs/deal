@@ -5,6 +5,8 @@ export type ContractsENV = (typeof CONTRACTS_ENV)[number];
 export type Deployment = {
   core: string;
   usdc: string;
+  market: string;
+  capacity: string;
   multicall3: string;
   chainId: number;
 };
@@ -41,18 +43,18 @@ export const getDeployment = async (env: ContractsENV) => {
 
   //TODO: add verification of deployment object (JSON schema)
 
-  if (deployment === undefined) {
-    throw new Error(`Could not find deployment for env: ${env}`);
-  } else if (deployment?.Core?.addr === undefined) {
-    throw new Error(`Could not find core address for env: ${env}`);
-  } else if (deployment?.tUSD?.addr === undefined) {
-    throw new Error(`Could not find usdc token address for env: ${env}`);
-  } else if (deployment?.Multicall3?.addr === undefined) {
-    throw new Error(`Could not find multicall3 address for network: ${env}`);
+  const contracts = ["Core", "Market", "Capacity", "tUSD", "Multicall3"];
+
+  for (const contract of contracts) {
+    if (deployment[contract] === undefined) {
+      throw new Error(`Could not find contract: ${contract} for env: ${env}`);
+    }
   }
 
   return {
     core: deployment.Core.addr,
+    market: deployment.Market.addr,
+    capacity: deployment.Capacity.addr,
     usdc: deployment.tUSD.addr,
     multicall3: deployment.Multicall3.addr,
     chainId: chainId,
