@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import {Test, console2} from "forge-std/Test.sol";
 import "src/core/Core.sol";
 import "test/utils/DeployDealSystem.sol";
+import "test/utils/TestHelper.sol";
 
 contract OfferTest is Test {
     using SafeERC20 for IERC20;
@@ -125,12 +126,6 @@ contract OfferTest is Test {
             new IOffer.RegisterComputePeer[](0)
         );
 
-        bytes32 retOfferId = deployment.market.registerMarketOffer(
-            1,
-            paymentToken,
-            new CIDV1[](0),
-            new IOffer.RegisterComputePeer[](0)
-        );
         bytes32 offerId = keccak256(
             abi.encodePacked(
                 _OFFER_ID_PREFIX,
@@ -141,10 +136,20 @@ contract OfferTest is Test {
                 )
             )
         );
+
+        vm.expectEmit(true, false, false, true);
+        emit IOffer.MarketOfferRegistered(address(this), offerId, 1, paymentToken, new CIDV1[](0));
+        bytes32 retOfferId = deployment.market.registerMarketOffer(
+            1,
+            paymentToken,
+            new CIDV1[](0),
+            new IOffer.RegisterComputePeer[](0)
+        );
         IOffer.Offer memory offer = deployment.market.getOffer(retOfferId);
         assertEq(offer.provider, address(this), "Provider should be equal to address(this)");
         assertEq(offer.minPricePerWorkerEpoch, 1, "Min price per worker epoch should be equal to 1");
         assertEq(offer.paymentToken, paymentToken, "Payment token should be equal to paymentToken");
+        assertEq(offer.peerCount, 0, "Peer count should be equal to 0");
         assertEq(retOfferId, offerId, "OfferId mismatch");
 
         vm.expectRevert("Offer already exists");
@@ -154,5 +159,24 @@ contract OfferTest is Test {
             new CIDV1[](0),
             new IOffer.RegisterComputePeer[](0)
         );
+
+        // testing creating offer with compute peers
+        IOffer.RegisterComputePeer[] memory peers = new IOffer.RegisterComputePeer[](2);
+        bytes32[] memory unitIds = new bytes32[](5);
+        for (uint256 j = 0; j < unitIds.length; j++) {
+            unitIds[j] = keccak256(abi.encodePacked(TestHelper.pseudoRandom(abi.encode("unitId", j))));
+        }
+        peers[0] = IOffer.RegisterComputePeer({
+            peerId: bytes32(uint256(1)),
+            unitIds: unitIds,
+            owner: address(bytes20(TestHelper.pseudoRandom(abi.encode("peerId-address", 0))))
+        });
+        peers[1] = IOffer.RegisterComputePeer({
+            peerId: bytes32(uint256(2)),
+            unitIds: unitIds,
+            owner: address(bytes20(TestHelper.pseudoRandom(abi.encode("peerId-address", 1))))
+        });
     }
+
+
 }
