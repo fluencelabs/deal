@@ -15,6 +15,11 @@ import "forge-std/StdCheats.sol";
 contract MatcherTest is Test {
     using SafeERC20 for IERC20;
 
+    // ------------------ Events ------------------
+    event ComputeUnitMatched(
+        bytes32 indexed peerId, IDeal deal, bytes32 unitId, uint256 dealCreationBlock, CIDV1 appCID
+    );
+
     // ------------------ Variables ------------------
     DeployDealSystem.Deployment deployment;
 
@@ -134,6 +139,11 @@ contract MatcherTest is Test {
                     unitIds2D[i][currentUnitIdx] = unitIds[i][j][k];
                     currentUnitIdx += 1;
                     chosenComputeUnits += 1;
+
+                    vm.expectEmit(true, true, true, true, address(deployment.market));
+                    emit ComputeUnitMatched(
+                        peerIds[i][j], IDeal(address(dealMock)), unitIds[i][j][k], creationBlock, appCID
+                    );
                 }
             }
         }
@@ -166,8 +176,6 @@ contract MatcherTest is Test {
                 }
             }
         }
-
-        //TODO: event test
     }
 }
 

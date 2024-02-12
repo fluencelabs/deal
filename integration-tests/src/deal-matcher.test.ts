@@ -285,8 +285,10 @@ describe("#getMatchedOffersByDealId", () => {
         matchedOffersOut.offers,
         matchedOffersOut.computeUnitsPerOffers,
       );
+
+      const matchDealTxReceipt = await matchDealTx.wait(DEFAULT_CONFIRMATIONS);
       // await matchDealTx.wait(DEFAULT_CONFIRMATIONS)
-      console.log(matchDealTx);
+      console.log(matchDealTxReceipt);
       //   TODO: check further.
     },
     TESTS_TIMEOUT,

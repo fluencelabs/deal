@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.5.0](https://github.com/fluencelabs/deal/compare/v0.4.0...v0.5.0) (2024-02-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* add static getting contract addresses and fix bug with matching when a deal have a whitelist ([#243](https://github.com/fluencelabs/deal/issues/243))
+
+### Features
+
+* CC list view [chain 316] ([#229](https://github.com/fluencelabs/deal/issues/229)) ([f16fce8](https://github.com/fluencelabs/deal/commit/f16fce85f8d917eb212de7f3355832af6ce218a1))
+
+
+### Bug Fixes
+
+* _findClosestMinVesting ([#242](https://github.com/fluencelabs/deal/issues/242)) ([9f04221](https://github.com/fluencelabs/deal/commit/9f042213fda53c8fe52451159e469b64e20ccc5f))
+* add mock for randomX ([#235](https://github.com/fluencelabs/deal/issues/235)) ([c2e0955](https://github.com/fluencelabs/deal/commit/c2e09554e9da08138b4fe813eed65002eb2675b9))
+* add static getting contract addresses and fix bug with matching when a deal have a whitelist ([#243](https://github.com/fluencelabs/deal/issues/243)) ([1ada170](https://github.com/fluencelabs/deal/commit/1ada1703876215e402b27df05cac313109d1f9ad))
+* **deps:** update dependency @graphprotocol/graph-cli to v0.67.3 ([#216](https://github.com/fluencelabs/deal/issues/216)) ([409a50b](https://github.com/fluencelabs/deal/commit/409a50b6dc23ec2326f04692899289fa8c82ff07))
+* **deps:** update dependency @graphprotocol/graph-cli to v0.67.4 ([#239](https://github.com/fluencelabs/deal/issues/239)) ([2f7fde5](https://github.com/fluencelabs/deal/commit/2f7fde5eeda28485b078d5a38b0518285350333a))
+* **deps:** update dependency dotenv to v16.4.1 ([#212](https://github.com/fluencelabs/deal/issues/212)) ([4e57e7b](https://github.com/fluencelabs/deal/commit/4e57e7bd5aa87b0f737117e3cc91a5d671716d06))
+* fix bugs ([#238](https://github.com/fluencelabs/deal/issues/238)) ([94b621f](https://github.com/fluencelabs/deal/commit/94b621f8a4272f7386d27b748e2ae3f45b3acb72))
+* getDeployment -&gt; getContractAddresses ([#248](https://github.com/fluencelabs/deal/issues/248)) ([83ba646](https://github.com/fluencelabs/deal/commit/83ba646a352a92e7e113e5cca81dee7e99687441))
+
 ## [0.4.0](https://github.com/fluencelabs/deal/compare/v0.3.0...v0.4.0) (2024-02-01)
 
 

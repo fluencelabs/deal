@@ -173,7 +173,9 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         Commitment storage cc = s.commitments[commitmentId];
 
         (int256 index,) = _findClosestMinVesting(cc.vestings, core.currentEpoch());
-        require(index >= 0, "No vesting found");
+        if (index < 0) {
+            return 0;
+        }
 
         return cc.vestings[uint256(index)].cumulativeAmount - cc.info.totalWithdrawnReward;
     }
@@ -631,6 +633,10 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         length = vestings.length;
         index = -1;
 
+        if (length == 0) {
+            return (index, length);
+        }
+
         uint256 low = 0;
         uint256 high = length - 1;
 
@@ -644,7 +650,11 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
                 index = int256(mid);
                 low = mid + 1;
             } else if (epoch < vestingEpoch) {
-                high = mid - 1;
+                if (mid == 0) {
+                    return (-1, length);
+                } else {
+                    high = mid - 1;
+                }
             } else {
                 return (int256(mid), length);
             }
