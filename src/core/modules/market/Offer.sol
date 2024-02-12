@@ -134,7 +134,9 @@ abstract contract Offer is BaseModule, IOffer {
             provider: provider,
             minPricePerWorkerEpoch: minPricePerWorkerEpoch,
             paymentToken: paymentToken,
-            peerCount: 0
+            peerCount: 0,
+            minProtocolVersion: core.minProtocolVersion(),
+            maxProtocolVersion: core.maxProtocolVersion()
         });
 
         // add effectors to offer

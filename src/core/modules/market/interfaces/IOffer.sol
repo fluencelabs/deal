@@ -28,6 +28,8 @@ interface IOffer {
         uint256 minPricePerWorkerEpoch;
         address paymentToken;
         uint256 peerCount;
+        uint256 minProtocolVersion;
+        uint256 maxProtocolVersion;
     }
 
     struct ComputePeer {

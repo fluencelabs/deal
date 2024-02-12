@@ -213,6 +213,10 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         return _getDealStorage().maxPaidEpoch;
     }
 
+    function getProtocolVersion() public view returns (uint256) {
+        return _getDealStorage().protocolVersion;
+    }
+
     // ------------------ Public Mutable Functions ------------------
     function deposit(uint256 amount) external onlyOwner {
         DealStorage storage dealStorage = _getDealStorage();

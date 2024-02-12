@@ -66,6 +66,9 @@ interface IDeal is IConfig, IWorkerManager {
     /// @dev Returns the max paid epoch
     function getMaxPaidEpoch() external view returns (uint256);
 
+    /// @dev Returns the protocol version
+    function getProtocolVersion() external view returns (uint256);
+
     // ------------------ Public Mutable Functions ------------------
     /// @dev Adds a compute unit to the deal
     /// @param computeProvider The compute provider address

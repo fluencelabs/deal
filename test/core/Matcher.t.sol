@@ -93,6 +93,7 @@ contract MatcherTest is Test {
         uint256 peerCountPerOffer = 3;
         uint256 minWorkers = 1;
         uint256 maxWorkersPerProvider = unitCountPerPeer * peerCountPerOffer * offerCount;
+        uint256 protocolVersion = 1;
 
         // Total workers: offerCount * unitCountPerPeer * peerCountPerOffer. Thus, we have CU in excess.
         uint256 targetWorkers = offerCount * peerCountPerOffer * 1;
@@ -106,7 +107,8 @@ contract MatcherTest is Test {
             minWorkers,
             effectors,
             appCID,
-            creationBlock
+            creationBlock,
+            protocolVersion
         );
 
         (bytes32[] memory offerIds, bytes32[][] memory peerIds, bytes32[][][] memory unitIds) = _registerOffersAndCC(
@@ -188,6 +190,7 @@ contract DealMock {
     uint256 public targetWorkers;
     uint256 public maxWorkersPerProvider;
     uint256 public minWorkers;
+    uint256 public getProtocolVersion;
 
     CIDV1[] internal _effectors;
 
@@ -205,7 +208,8 @@ contract DealMock {
         uint256 _minWorkers,
         CIDV1[] memory effectors_,
         CIDV1 memory _appCID,
-        uint256 _creationBlock
+        uint256 _creationBlock,
+        uint256 protocolVersion_
     ) {
         pricePerWorkerEpoch = _pricePerWorkerEpoch;
         paymentToken = _paymentToken;
@@ -215,6 +219,7 @@ contract DealMock {
         _effectors = effectors_;
         appCID = _appCID;
         creationBlock = _creationBlock;
+        getProtocolVersion = protocolVersion_;
     }
 
     function effectors() external view returns (CIDV1[] memory) {
