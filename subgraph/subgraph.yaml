@@ -67,7 +67,7 @@ dataSources:
           handler: handleUnitActivated
         - event: UnitDeactivated(indexed bytes32,indexed bytes32)
           handler: handleUnitDeactivated
-        - event: ProofSubmitted(indexed bytes32,indexed bytes32,bytes32,bytes32)
+        - event: ProofSubmitted(indexed bytes32,indexed bytes32,bytes32)
           handler: handleProofSubmitted
       file: ./src/mappings/capacity.ts
   - kind: ethereum/contract

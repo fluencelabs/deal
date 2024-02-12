@@ -261,7 +261,6 @@ type SubmittedProof @entity(immutable: true) {
   id: ID!
   capacityCommitment: CapacityCommitment!
   computeUnit: ComputeUnit!
-  globalUnitNonce: Bytes!
   localUnitNonce: Bytes!
   createdAt: BigInt!
   createdEpoch: BigInt!

@@ -228,7 +228,6 @@ export function handleProofSubmitted(event: ProofSubmitted): void {
   proofSubmitted.computeUnit = computeUnit.id;
   proofSubmitted.provider = provider.id;
   proofSubmitted.peer = computeUnit.peer;
-  proofSubmitted.globalUnitNonce = event.params.globalUnitNonce;
   proofSubmitted.localUnitNonce = event.params.localUnitNonce;
   proofSubmitted.createdAt = event.block.timestamp;
   proofSubmitted.createdEpoch = calculateEpoch(
