@@ -221,6 +221,10 @@ contract DealMock {
         return _effectors;
     }
 
+    function getStatus() external pure returns (IDeal.Status) {
+        return IDeal.Status.ACTIVE;
+    }
+
     function addComputeUnit(address computeProvider, bytes32 unitId, bytes32 peerId) external {
         require(!unitExists[unitId], "Unit already exists");
 
