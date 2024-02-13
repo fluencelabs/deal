@@ -57,7 +57,7 @@ jobs:
 
   foundry:
     name: "Foundry unit tests"
-    runs-on: linux-amd64-m-2xlarge
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -69,14 +69,14 @@ jobs:
         with:
           version: nightly
 
-      - name: Run Forge build
-        run: |
-          forge --version
-          forge build --sizes
+      # - name: Run Forge build
+      #   run: |
+      #     forge --version
+      #     forge build --sizes
 
-      - name: Setup tmate session
-        if: failure()
-        uses: mxschmitt/action-tmate@v3
+      # - name: Setup tmate session
+      #   if: failure()
+      #   uses: mxschmitt/action-tmate@v3
 
       - name: Run Forge tests
         run: forge test -vvv
