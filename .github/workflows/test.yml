@@ -69,14 +69,10 @@ jobs:
         with:
           version: nightly
 
-      # - name: Run Forge build
-      #   run: |
-      #     forge --version
-      #     forge build --sizes
-
-      # - name: Setup tmate session
-      #   if: failure()
-      #   uses: mxschmitt/action-tmate@v3
+      - name: Run Forge build
+        run: |
+          forge --version
+          forge build --sizes
 
       - name: Run Forge tests
         run: forge test -vvv
