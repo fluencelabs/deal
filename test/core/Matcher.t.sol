@@ -93,7 +93,7 @@ contract MatcherTest is Test {
         uint256 peerCountPerOffer = 3;
         uint256 minWorkers = 1;
         uint256 maxWorkersPerProvider = unitCountPerPeer * peerCountPerOffer * offerCount;
-        uint256 protocolVersion = 1;
+        uint256 protocolVersion = DeployDealSystem.DEFAULT_MIN_PROTOCOL_VERSION;
 
         // Total workers: offerCount * unitCountPerPeer * peerCountPerOffer. Thus, we have CU in excess.
         uint256 targetWorkers = offerCount * peerCountPerOffer * 1;
@@ -190,7 +190,7 @@ contract DealMock {
     uint256 public targetWorkers;
     uint256 public maxWorkersPerProvider;
     uint256 public minWorkers;
-    uint256 public getProtocolVersion;
+    uint256 private protocolVersion;
 
     CIDV1[] internal _effectors;
 
@@ -219,7 +219,7 @@ contract DealMock {
         _effectors = effectors_;
         appCID = _appCID;
         creationBlock = _creationBlock;
-        getProtocolVersion = protocolVersion_;
+        protocolVersion = protocolVersion_;
     }
 
     function effectors() external view returns (CIDV1[] memory) {
@@ -252,5 +252,9 @@ contract DealMock {
 
     function getComputeUnitCount(address provider) external view returns (uint256) {
         return computeUnitCountByProvider[provider];
+    }
+
+    function getProtocolVersion() external view returns (uint256) {
+        return protocolVersion;
     }
 }
