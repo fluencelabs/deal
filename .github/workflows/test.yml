@@ -72,7 +72,7 @@ jobs:
       - name: Run Forge build
         run: |
           forge --version
-          forge build --sizes
+          forge build --sizes --build-info
 
       - name: Setup tmate session
         if: failure()
