@@ -766,7 +766,11 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         uint256 activeUnitCount_ = cc.info.activeUnitCount;
         uint256 epochCount = epoch - snapshotEpoch;
         uint256 reqSuccessCount = activeUnitCount_ * epochCount;
-        uint256 totalFailCountByPeriod = reqSuccessCount - cc.info.currentCUSuccessCount;
+        uint256 currentCUSuccessCount = cc.info.currentCUSuccessCount;
+        uint256 totalFailCountByPeriod = 0;
+        if (currentCUSuccessCount < reqSuccessCount) {
+            totalFailCountByPeriod = reqSuccessCount - currentCUSuccessCount;
+        }
 
         uint256 unitCount = peer.unitCount;
         uint256 maxFailedRatio_ = maxFailedRatio();
