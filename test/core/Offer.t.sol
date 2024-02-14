@@ -171,11 +171,56 @@ contract OfferTest is Test {
             unitIds: unitIds,
             owner: address(bytes20(TestHelper.pseudoRandom(abi.encode("peerId-address", 0))))
         });
+        bytes32[] memory unitIds2 = new bytes32[](5);
+        for (uint256 j = 0; j < unitIds2.length; j++) {
+            unitIds2[j] = keccak256(abi.encodePacked(TestHelper.pseudoRandom(abi.encode("unitId-2", j))));
+        }
         peers[1] = IOffer.RegisterComputePeer({
             peerId: bytes32(uint256(2)),
-            unitIds: unitIds,
+            unitIds: unitIds2,
             owner: address(bytes20(TestHelper.pseudoRandom(abi.encode("peerId-address", 1))))
         });
+
+        bytes32 offerWithPeersId = deployment.market.registerMarketOffer(
+            1,
+            paymentToken,
+            new CIDV1[](0),
+            peers
+        );
+
+        vm.prank(address(9933293));
+        vm.expectRevert("Only owner can change offer");
+        deployment.market.removeOffer(offerWithPeersId);
+
+        vm.expectRevert("Offer has compute peers");
+        deployment.market.removeOffer(offerWithPeersId);
+
+        vm.expectRevert("Peer has compute units");
+        deployment.market.removeComputePeer(bytes32(uint256(1)));
+
+        // TODO asserts
+
+        for (uint256 j = 0; j < unitIds.length; j++) {
+            vm.expectEmit(true, true, false, false);
+            emit IOffer.ComputeUnitRemoved(bytes32(uint256(1)), unitIds[j]);
+            deployment.market.removeComputeUnit(unitIds[j]);
+        }
+
+        for (uint256 j = 0; j < unitIds2.length; j++) {
+            vm.expectEmit(true, true, false, false);
+            emit IOffer.ComputeUnitRemoved(bytes32(uint256(2)), unitIds2[j]);
+            deployment.market.removeComputeUnit(unitIds2[j]);
+        }
+
+        // TODO all requires
+
+        vm.expectEmit(true, true, false, false);
+        emit IOffer.PeerRemoved(offerWithPeersId, bytes32(uint256(1)));
+        deployment.market.removeComputePeer(bytes32(uint256(1)));
+
+        vm.expectEmit(true, true, false, false);
+        emit IOffer.PeerRemoved(offerWithPeersId, bytes32(uint256(2)));
+        deployment.market.removeComputePeer(bytes32(uint256(2)));
     }
 
 
