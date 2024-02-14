@@ -1,12 +1,15 @@
 // Module is for filter serializers.
+// TODO: into all filters add assert on unrecognised filter.
 import type {
   CapacityCommitmentsFilters,
   DealsFilters,
   OffersFilters,
+  ProofsFilters,
   ProvidersFilters,
 } from "../types/filters.js";
 import type {
   CapacityCommitment_Filter,
+  SubmittedProof_Filter,
   Deal_Filter,
   Offer_Filter,
   Provider_Filter,
@@ -260,7 +263,26 @@ export function serializeCapacityCommitmentsFiltersToIndexer(
     }
     convertedFilters.and?.push({
       endEpoch_lte: currentEpoch,
-    })
+    });
+  }
+  return convertedFilters;
+}
+
+export function serializeProofsFiltersToIndexer(
+  v?: ProofsFilters,
+): SubmittedProof_Filter {
+  if (!v) {
+    return {};
+  }
+  const convertedFilters: SubmittedProof_Filter = { and: [] };
+  if (v.search) {
+    convertedFilters.and?.push({
+      or: [
+        { id: v.search },
+        { provider_: { id: v.search } },
+        { peer_: { id: v.search } },
+      ],
+    });
   }
   return convertedFilters;
 }
