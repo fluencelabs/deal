@@ -753,7 +753,7 @@ export class DealExplorerClient {
     );
   }
 
-  // @notice [Figma] Capacity.
+  // @notice [Figma] Capacity Commitment.
   async getCapacityCommitment(
     capacityCommitmentId: string,
   ): Promise<CapacityCommitmentDetail | null> {
