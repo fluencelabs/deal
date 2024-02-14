@@ -198,7 +198,7 @@ export interface ProofBasic {
 }
 
 export interface ProofBasicListView extends ListViewABC {
-  data: Array<ProofBasic>
+  data: Array<ProofBasic>;
 }
 
 // @deprecated.
@@ -213,7 +213,7 @@ export interface ProofByComputeUnit {
 
 // @deprecated.
 export interface ProofByComputeUnitListView extends ListViewABC {
-  data: Array<ProofByComputeUnit>
+  data: Array<ProofByComputeUnit>;
 }
 
 // Status undefined == problem with networks, etc.

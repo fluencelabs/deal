@@ -35,7 +35,9 @@ import type {
   OrderType,
   PaymentTokenOrderBy,
   ProvidersFilters,
-  ProviderShortOrderBy, ProofsFilters, ProofsOrderBy,
+  ProviderShortOrderBy,
+  ProofsFilters,
+  ProofsOrderBy,
 } from "./types/filters.js";
 import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type {
@@ -59,7 +61,8 @@ import {
   FiltersError,
   serializeCapacityCommitmentsFiltersToIndexer,
   serializeDealsFiltersToIndexer,
-  serializeOffersFiltersToIndexerType, serializeProofsFiltersToIndexer,
+  serializeOffersFiltersToIndexerType,
+  serializeProofsFiltersToIndexer,
   serializeProviderFiltersToIndexer,
   ValidTogetherFiltersError,
 } from "./serializers/filters.js";
@@ -76,7 +79,8 @@ import {
 import {
   serializeCapacityCommitmentsOrderByToIndexer,
   serializeDealShortOrderByToIndexer,
-  serializeOfferShortOrderByToIndexer, serializeProofsOrderByToIndexer,
+  serializeOfferShortOrderByToIndexer,
+  serializeProofsOrderByToIndexer,
 } from "./serializers/orderby.js";
 import type { ICapacity } from "../typechain-types/index.js";
 import type { CapacityCommitmentBasicFragment } from "./indexerClient/queries/capacity-commitments-query.generated.js";
@@ -265,8 +269,13 @@ export class DealExplorerClient {
   ): Promise<OfferShortListView> {
     await this._init();
 
-    const convertedFilters: OffersFilters = { providerId: offersByProviderFilter.providerId.toLowerCase() };
-    if (offersByProviderFilter.status && offersByProviderFilter.status != "all") {
+    const convertedFilters: OffersFilters = {
+      providerId: offersByProviderFilter.providerId.toLowerCase(),
+    };
+    if (
+      offersByProviderFilter.status &&
+      offersByProviderFilter.status != "all"
+    ) {
       convertedFilters.status = offersByProviderFilter.status;
     }
     return await this._getOffersImpl(
@@ -288,7 +297,7 @@ export class DealExplorerClient {
   ): Promise<DealShortListView> {
     await this._init();
 
-    if (dealsByProviderFilter.status &&  dealsByProviderFilter.status != "all") {
+    if (dealsByProviderFilter.status && dealsByProviderFilter.status != "all") {
       console.warn("Filter deals by status if not implemented.");
     }
     return await this._getDealsImpl(
@@ -312,7 +321,10 @@ export class DealExplorerClient {
     const convertedFilters: CapacityCommitmentsFilters = {
       search: capacityCommitmentsByProviderFilter.providerId.toLowerCase(),
     };
-    if (capacityCommitmentsByProviderFilter.status && capacityCommitmentsByProviderFilter.status != "all") {
+    if (
+      capacityCommitmentsByProviderFilter.status &&
+      capacityCommitmentsByProviderFilter.status != "all"
+    ) {
       convertedFilters.status = capacityCommitmentsByProviderFilter.status;
     }
     return await this._getCapacityCommitmentsImpl(
@@ -414,7 +426,7 @@ export class DealExplorerClient {
 
   /*
    * @notice [Figma] Offer.
-  */
+   */
   async getOffer(offerId: string): Promise<OfferDetail | null> {
     const options = {
       id: offerId,
@@ -643,7 +655,11 @@ export class DealExplorerClient {
       serializeCapacityCommitmentsOrderByToIndexer(orderBy);
 
     let currentEpoch = undefined;
-    if (filters?.onlyActive || filters?.status == "active" || filters?.status == "inactive") {
+    if (
+      filters?.onlyActive ||
+      filters?.status == "active" ||
+      filters?.status == "inactive"
+    ) {
       if (this._coreInitTimestamp == null || this._coreEpochDuration == null) {
         throw new Error("Assertion: Class object was not inited correctly.");
       }
@@ -734,7 +750,7 @@ export class DealExplorerClient {
       limit,
       orderBy,
       orderType,
-    )
+    );
   }
 
   // @notice [Figma] Capacity.
@@ -857,29 +873,39 @@ export class DealExplorerClient {
   }
 
   // @notice [Figma] Compute Unit.
-  async getComputeUnit(computeUnitId: string): Promise<ComputeUnitDetail | null> {
+  async getComputeUnit(
+    computeUnitId: string,
+  ): Promise<ComputeUnitDetail | null> {
     await this._init();
 
-    const data = await this._indexerClient.getComputeUnit({ id: computeUnitId });
+    const data = await this._indexerClient.getComputeUnit({
+      id: computeUnitId,
+    });
     if (!data || !data.computeUnit) {
       return null;
     }
     const computeUnit = data.computeUnit;
 
-    const currentPeerCapacityCommitment = computeUnit.peer.currentCapacityCommitment;
-    let expectedProofsDueNow = 0
-    const startEpoch = currentPeerCapacityCommitment?.startEpoch
+    const currentPeerCapacityCommitment =
+      computeUnit.peer.currentCapacityCommitment;
+    let expectedProofsDueNow = 0;
+    const startEpoch = currentPeerCapacityCommitment?.startEpoch;
     if (startEpoch && startEpoch != 0) {
-      expectedProofsDueNow = calculateEpoch(Date.now() / 1000, this._coreInitTimestamp!, this._coreEpochDuration!) - startEpoch
+      expectedProofsDueNow =
+        calculateEpoch(
+          Date.now() / 1000,
+          this._coreInitTimestamp!,
+          this._coreEpochDuration!,
+        ) - startEpoch;
     }
 
-    let status: ComputeUnitStatus = "undefined"
+    let status: ComputeUnitStatus = "undefined";
     if (computeUnit.deal) {
-      status = "deal"
+      status = "deal";
     } else if (currentPeerCapacityCommitment) {
-      status = "capacity"
+      status = "capacity";
     } else {
-      status = "undefined"
+      status = "undefined";
     }
 
     return {
@@ -888,9 +914,13 @@ export class DealExplorerClient {
       providerId: computeUnit.provider.id,
       currentCommitmentId: currentPeerCapacityCommitment?.id,
       peerId: computeUnit.peer.id,
-      collateral: currentPeerCapacityCommitment ? tokenValueToRounded(currentPeerCapacityCommitment.collateralPerUnit) : "0",
+      collateral: currentPeerCapacityCommitment
+        ? tokenValueToRounded(currentPeerCapacityCommitment.collateralPerUnit)
+        : "0",
       expectedProofsDueNow,
-      successProofs: currentPeerCapacityCommitment ? currentPeerCapacityCommitment.submittedProofsCount: 0,
+      successProofs: currentPeerCapacityCommitment
+        ? currentPeerCapacityCommitment.submittedProofsCount
+        : 0,
       collateralToken: FLTToken,
       status,
     };
@@ -906,9 +936,7 @@ export class DealExplorerClient {
   ): Promise<ProofBasicListView> {
     await this._init();
 
-    const filtersSerialized = serializeProofsFiltersToIndexer(
-      filters,
-    );
+    const filtersSerialized = serializeProofsFiltersToIndexer(filters);
     const data = await this._indexerClient.getSubmittedProofs({
       filters: filtersSerialized,
       offset,
@@ -916,13 +944,15 @@ export class DealExplorerClient {
       orderType,
       orderBy: serializeProofsOrderByToIndexer(orderBy),
     });
-    const res: Array<ProofBasic> = data.submittedProofs.map((proof) => {return {
-      transactionId: proof.id,
-      capacityCommitmentId: proof.capacityCommitment.id,
-      computeUnitId: proof.computeUnit.id,
-      peerId: proof.peer.id,
-      createdAt: Number(proof.createdAt),
-    }});
+    const res: Array<ProofBasic> = data.submittedProofs.map((proof) => {
+      return {
+        transactionId: proof.id,
+        capacityCommitmentId: proof.capacityCommitment.id,
+        computeUnitId: proof.computeUnit.id,
+        peerId: proof.peer.id,
+        createdAt: Number(proof.createdAt),
+      };
+    });
 
     // TODO: generalize code below.
     let total = null;

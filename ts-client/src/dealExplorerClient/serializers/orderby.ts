@@ -2,12 +2,14 @@
 import type {
   CapacityCommitmentsOrderBy,
   DealsShortOrderBy,
-  OfferShortOrderBy, ProofsOrderBy,
+  OfferShortOrderBy,
+  ProofsOrderBy,
 } from "../types/filters.js";
 import type {
   CapacityCommitment_OrderBy,
   Deal_OrderBy,
-  Offer_OrderBy, SubmittedProof_OrderBy,
+  Offer_OrderBy,
+  SubmittedProof_OrderBy,
 } from "../indexerClient/generated.types.js";
 
 export function serializeOfferShortOrderByToIndexer(
@@ -46,7 +48,7 @@ export function serializeProofsOrderByToIndexer(
 ): SubmittedProof_OrderBy {
   const res = "createdAt";
   if (v == "createdAt" || v == "epoch") {
-    return res
+    return res;
   }
   throw new Error(`Assertion: unknown ProofsOrderBy value: ${v}`);
 }

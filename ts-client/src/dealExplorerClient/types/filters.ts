@@ -85,6 +85,6 @@ export type CapacityCommitmentsOrderBy =
   | "createdAt"
   | "computeUnitsCount"
   | "expirationAt";
-export type ProofsOrderBy = "createdAt" | "epoch"
+export type ProofsOrderBy = "createdAt" | "epoch";
 
 export type OrderType = "asc" | "desc";

@@ -3,7 +3,8 @@
 import type {
   CapacityCommitmentsFilters,
   DealsFilters,
-  OffersFilters, ProofsFilters,
+  OffersFilters,
+  ProofsFilters,
   ProvidersFilters,
 } from "../types/filters.js";
 import type {
@@ -262,19 +263,25 @@ export function serializeCapacityCommitmentsFiltersToIndexer(
     }
     convertedFilters.and?.push({
       endEpoch_lte: currentEpoch,
-    })
+    });
   }
   return convertedFilters;
 }
 
-export function serializeProofsFiltersToIndexer(v?: ProofsFilters): SubmittedProof_Filter {
+export function serializeProofsFiltersToIndexer(
+  v?: ProofsFilters,
+): SubmittedProof_Filter {
   if (!v) {
     return {};
   }
   const convertedFilters: SubmittedProof_Filter = { and: [] };
   if (v.search) {
     convertedFilters.and?.push({
-      or: [{ id: v.search }, { provider_: { id: v.search }}, { peer_: {id: v.search} }],
+      or: [
+        { id: v.search },
+        { provider_: { id: v.search } },
+        { peer_: { id: v.search } },
+      ],
     });
   }
   return convertedFilters;
