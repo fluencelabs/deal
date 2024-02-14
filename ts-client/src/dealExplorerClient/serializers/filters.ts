@@ -1,4 +1,5 @@
 // Module is for filter serializers.
+// TODO: into all filters add assert on unrecognised filter.
 import type {
   CapacityCommitmentsFilters,
   DealsFilters,

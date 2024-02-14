@@ -201,6 +201,21 @@ export interface ProofBasicListView extends ListViewABC {
   data: Array<ProofBasic>
 }
 
+// @deprecated.
+// @param status: might be failed when no proof submitted for the epoch.
+// @param transactionId: undefined when no proof submitted for the epoch.
+export interface ProofByComputeUnit {
+  status: "success" | "failed";
+  transactionId: string | undefined;
+  createdAt: number;
+  createdAtEpoch: number;
+}
+
+// @deprecated.
+export interface ProofByComputeUnitListView extends ListViewABC {
+  data: Array<ProofByComputeUnit>
+}
+
 // Status undefined == problem with networks, etc.
 export type DealStatus = "inactive" | "active" | "ended" | "undefined";
 export type CapacityCommitmentStatus =

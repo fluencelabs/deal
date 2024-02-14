@@ -46,6 +46,8 @@ query SubmittedProofsQuery(
     id
     capacityCommitment {
       id
+      startEpoch
+      endEpoch
     }
     computeUnit {
       id
