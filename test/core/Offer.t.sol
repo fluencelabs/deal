@@ -2,7 +2,6 @@
 pragma solidity ^0.8.19;
 
 import {Test, console2} from "forge-std/Test.sol";
-import "src/core/Core.sol";
 import "test/utils/DeployDealSystem.sol";
 import "test/utils/TestHelper.sol";
 
@@ -188,6 +187,29 @@ contract OfferTest is Test {
             peers
         );
 
+        IOffer.Offer memory offerWithPeers = deployment.market.getOffer(offerWithPeersId);
+        assertEq(offerWithPeers.provider, address(this), "Provider should be equal to address(this)");
+        assertEq(offerWithPeers.minPricePerWorkerEpoch, 1, "Min price per worker epoch should be equal to 1");
+        assertEq(offerWithPeers.paymentToken, paymentToken, "Payment token should be equal to paymentToken");
+        assertEq(offerWithPeers.peerCount, 2, "Peer count should be equal to 2");
+
+        for (uint256 j = 0; j < peers.length; j++) {
+            IOffer.ComputePeer memory peer = deployment.market.getComputePeer(peers[j].peerId);
+            assertEq(peer.offerId, offerWithPeersId, "OfferId should be equal to offerWithPeersId");
+            assertEq(peer.commitmentId, bytes32(0), "CommitmentId should be equal to 0");
+            assertEq(peer.unitCount, 5, "Unit count should be equal to 5");
+            assertEq(peer.owner, peers[j].owner, "Owner should be equal to peers[j].owner");
+            for (uint256 k = 0; k < peers[j].unitIds.length; k++) {
+                IOffer.ComputeUnit memory unit = deployment.market.getComputeUnit(peers[j].unitIds[k]);
+                assertEq(unit.deal, address(0), "Deal should be equal to 0");
+                assertEq(unit.peerId, peers[j].peerId, "PeerId should be equal to peers[j].peerId");
+                assertEq(unit.startEpoch, 0, "Start epoch should be equal to 0");
+            }
+        }
+
+        IOffer.ComputeUnitView[] memory units = deployment.market.getComputeUnits(bytes32(uint256(1)));
+        assertEq(units.length, 5, "Compute units should be equal to 5");
+
         vm.prank(address(9933293));
         vm.expectRevert("Only owner can change offer");
         deployment.market.removeOffer(offerWithPeersId);
@@ -195,10 +217,25 @@ contract OfferTest is Test {
         vm.expectRevert("Offer has compute peers");
         deployment.market.removeOffer(offerWithPeersId);
 
+        vm.expectRevert("Peer doesn't exist");
+        deployment.market.removeComputePeer(bytes32(uint256(5)));
+
+        vm.prank(address(9933293));
+        vm.expectRevert("Only owner can change offer");
+        deployment.market.removeComputePeer(bytes32(uint256(1)));
+
         vm.expectRevert("Peer has compute units");
         deployment.market.removeComputePeer(bytes32(uint256(1)));
 
-        // TODO asserts
+        vm.expectRevert("Compute unit doesn't exist");
+        deployment.market.removeComputeUnit(bytes32(uint256(666)));
+
+        vm.prank(address(9933293));
+        vm.expectRevert("Only owner can remove compute unit");
+        deployment.market.removeComputeUnit(unitIds[0]);
+
+        // TODO test "Peer has commitment"
+        // TODO test "Compute unit is in deal"
 
         for (uint256 j = 0; j < unitIds.length; j++) {
             vm.expectEmit(true, true, false, false);
@@ -212,8 +249,6 @@ contract OfferTest is Test {
             deployment.market.removeComputeUnit(unitIds2[j]);
         }
 
-        // TODO all requires
-
         vm.expectEmit(true, true, false, false);
         emit IOffer.PeerRemoved(offerWithPeersId, bytes32(uint256(1)));
         deployment.market.removeComputePeer(bytes32(uint256(1)));
@@ -223,5 +258,52 @@ contract OfferTest is Test {
         deployment.market.removeComputePeer(bytes32(uint256(2)));
     }
 
+    function test_AddComputePeers() external {
+        deployment.market.setProviderInfo("test", CIDV1({prefixes: 0x12345678, hash: bytes32(0x00)}));
+        bytes32 retOfferId = deployment.market.registerMarketOffer(
+            1,
+            paymentToken,
+            new CIDV1[](0),
+            new IOffer.RegisterComputePeer[](0)
+        );
 
+        vm.expectRevert("Offer doesn't exist");
+        deployment.market.addComputePeers(bytes32(uint256(123)), new IOffer.RegisterComputePeer[](0));
+
+        vm.expectRevert("Only owner can change offer");
+        vm.prank(address(9933293));
+        deployment.market.addComputePeers(retOfferId, new IOffer.RegisterComputePeer[](0));
+
+        vm.expectRevert("Peers should not be empty");
+        deployment.market.addComputePeers(retOfferId, new IOffer.RegisterComputePeer[](0));
+
+        IOffer.RegisterComputePeer[] memory peers = new IOffer.RegisterComputePeer[](2);
+        bytes32[] memory unitIds = new bytes32[](5);
+        for (uint256 j = 0; j < unitIds.length; j++) {
+            unitIds[j] = keccak256(abi.encodePacked(TestHelper.pseudoRandom(abi.encode("unitId", j))));
+        }
+        peers[0] = IOffer.RegisterComputePeer({
+            peerId: bytes32(uint256(1)),
+            unitIds: unitIds,
+            owner: address(bytes20(TestHelper.pseudoRandom(abi.encode("peerId-address", 0))))
+        });
+        bytes32[] memory unitIds2 = new bytes32[](5);
+        for (uint256 j = 0; j < unitIds2.length; j++) {
+            unitIds2[j] = keccak256(abi.encodePacked(TestHelper.pseudoRandom(abi.encode("unitId-2", j))));
+        }
+        peers[1] = IOffer.RegisterComputePeer({
+            peerId: bytes32(uint256(2)),
+            unitIds: unitIds2,
+            owner: address(bytes20(TestHelper.pseudoRandom(abi.encode("peerId-address", 1))))
+        });
+
+        vm.expectEmit(true, false, false, true);
+        emit IOffer.PeerCreated(retOfferId, peers[0].peerId, peers[0].owner);
+        emit IOffer.PeerCreated(retOfferId, peers[1].peerId, peers[1].owner);
+        deployment.market.addComputePeers(retOfferId, peers);
+    }
+
+    function test_AddComputeUnits() external {
+        
+    }
 }

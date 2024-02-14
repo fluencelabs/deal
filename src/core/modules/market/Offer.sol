@@ -168,6 +168,7 @@ abstract contract Offer is BaseModule, IOffer {
         Offer storage offer = offerStorage.offers[offerId];
         require(offer.provider != address(0x00), "Offer doesn't exist");
         require(offer.provider == msg.sender, "Only owner can change offer");
+        require(peers.length > 0, "Peers should not be empty");
 
         uint256 peerLength = peers.length;
         for (uint256 i = 0; i < peerLength; i++) {
