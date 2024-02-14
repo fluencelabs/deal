@@ -6,7 +6,7 @@ import type {
 } from "./queries/deals-query.generated.js";
 import { getSdk as getDealsSdk } from "./queries/deals-query.generated.js";
 import type {
-  ComputeUnitQueryQueryVariables,
+  ComputeUnitQueryQueryVariables, ComputeUnitsQueryQueryVariables,
   Sdk as PeersSdk,
 } from "./queries/peers-query.generated.js";
 import { getSdk as getPeersSdk } from "./queries/peers-query.generated.js";
@@ -122,7 +122,11 @@ export class IndexerClient extends IndexerClientABC {
   }
 
   async getSubmittedProofs(variables: SubmittedProofsQueryQueryVariables) {
-    console.log("variables", variables);
-    return await this.capacityCommitmentsClient.SubmittedProofsQuery();
+    // TODO: recheck this.
+    return await this.capacityCommitmentsClient.SubmittedProofsQuery(variables);
+  }
+
+  async getComputeUnits(variables: ComputeUnitsQueryQueryVariables) {
+    return await this.peersClient.ComputeUnitsQuery(variables);
   }
 }

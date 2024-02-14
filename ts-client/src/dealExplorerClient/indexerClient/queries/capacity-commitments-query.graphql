@@ -24,7 +24,6 @@ query CapacityCommitmentQuery(
 ) {
   capacityCommitment(id: $id) {
     ...CapacityCommitmentBasic
-      totalCollateral
       rewardDelegatorRate
   }
 }
@@ -76,6 +75,7 @@ fragment CapacityCommitmentBasic on CapacityCommitment {
   startEpoch
   endEpoch
   computeUnitsCount
+  totalCollateral
 }
 
 fragment ComputeUnitBasic on ComputeUnit {

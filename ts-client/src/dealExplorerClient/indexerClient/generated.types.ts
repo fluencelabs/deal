@@ -188,6 +188,7 @@ export type CapacityCommitmentToComputeUnit_OrderBy =
   | 'capacityCommitment__totalCUFailCount'
   | 'capacityCommitment__totalCollateral'
   | 'computeUnit'
+  | 'computeUnit__createdAt'
   | 'computeUnit__id'
   | 'computeUnit__submittedProofsCount'
   | 'computeUnit__workerId'
@@ -452,6 +453,8 @@ export type CapacityCommitment_OrderBy =
 
 export type ComputeUnit = {
   __typename?: 'ComputeUnit';
+  createdAt: Scalars['BigInt']['output'];
+  currentCapacityCommitment?: Maybe<CapacityCommitment>;
   deal?: Maybe<Deal>;
   id: Scalars['ID']['output'];
   peer: Peer;
@@ -475,6 +478,35 @@ export type ComputeUnit_Filter = {
   /** Filter for the block changed event. */
   _change_block?: InputMaybe<BlockChangedFilter>;
   and?: InputMaybe<Array<InputMaybe<ComputeUnit_Filter>>>;
+  createdAt?: InputMaybe<Scalars['BigInt']['input']>;
+  createdAt_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  createdAt_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  createdAt_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  createdAt_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  createdAt_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  createdAt_not?: InputMaybe<Scalars['BigInt']['input']>;
+  createdAt_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  currentCapacityCommitment?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_?: InputMaybe<CapacityCommitment_Filter>;
+  currentCapacityCommitment_contains?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_ends_with?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_gt?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_gte?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  currentCapacityCommitment_lt?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_lte?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_not?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_not_contains?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  currentCapacityCommitment_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_starts_with?: InputMaybe<Scalars['String']['input']>;
+  currentCapacityCommitment_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
   deal?: InputMaybe<Scalars['String']['input']>;
   deal_?: InputMaybe<Deal_Filter>;
   deal_contains?: InputMaybe<Scalars['String']['input']>;
@@ -579,6 +611,28 @@ export type ComputeUnit_Filter = {
 };
 
 export type ComputeUnit_OrderBy =
+  | 'createdAt'
+  | 'currentCapacityCommitment'
+  | 'currentCapacityCommitment__activeUnitCount'
+  | 'currentCapacityCommitment__collateralPerUnit'
+  | 'currentCapacityCommitment__computeUnitsCount'
+  | 'currentCapacityCommitment__createdAt'
+  | 'currentCapacityCommitment__delegator'
+  | 'currentCapacityCommitment__deleted'
+  | 'currentCapacityCommitment__duration'
+  | 'currentCapacityCommitment__endEpoch'
+  | 'currentCapacityCommitment__exitedUnitCount'
+  | 'currentCapacityCommitment__failedEpoch'
+  | 'currentCapacityCommitment__id'
+  | 'currentCapacityCommitment__nextAdditionalActiveUnitCount'
+  | 'currentCapacityCommitment__nextCCFailedEpoch'
+  | 'currentCapacityCommitment__rewardDelegatorRate'
+  | 'currentCapacityCommitment__snapshotEpoch'
+  | 'currentCapacityCommitment__startEpoch'
+  | 'currentCapacityCommitment__status'
+  | 'currentCapacityCommitment__submittedProofsCount'
+  | 'currentCapacityCommitment__totalCUFailCount'
+  | 'currentCapacityCommitment__totalCollateral'
   | 'deal'
   | 'deal__appCID'
   | 'deal__createdAt'
@@ -2368,7 +2422,6 @@ export type SubmittedProof = {
   computeUnit: ComputeUnit;
   createdAt: Scalars['BigInt']['output'];
   createdEpoch: Scalars['BigInt']['output'];
-  globalUnitNonce: Scalars['Bytes']['output'];
   /** Id here is a transaction hash. */
   id: Scalars['ID']['output'];
   localUnitNonce: Scalars['Bytes']['output'];
@@ -2438,16 +2491,6 @@ export type SubmittedProof_Filter = {
   createdEpoch_lte?: InputMaybe<Scalars['BigInt']['input']>;
   createdEpoch_not?: InputMaybe<Scalars['BigInt']['input']>;
   createdEpoch_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  globalUnitNonce?: InputMaybe<Scalars['Bytes']['input']>;
-  globalUnitNonce_contains?: InputMaybe<Scalars['Bytes']['input']>;
-  globalUnitNonce_gt?: InputMaybe<Scalars['Bytes']['input']>;
-  globalUnitNonce_gte?: InputMaybe<Scalars['Bytes']['input']>;
-  globalUnitNonce_in?: InputMaybe<Array<Scalars['Bytes']['input']>>;
-  globalUnitNonce_lt?: InputMaybe<Scalars['Bytes']['input']>;
-  globalUnitNonce_lte?: InputMaybe<Scalars['Bytes']['input']>;
-  globalUnitNonce_not?: InputMaybe<Scalars['Bytes']['input']>;
-  globalUnitNonce_not_contains?: InputMaybe<Scalars['Bytes']['input']>;
-  globalUnitNonce_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>;
   id?: InputMaybe<Scalars['ID']['input']>;
   id_gt?: InputMaybe<Scalars['ID']['input']>;
   id_gte?: InputMaybe<Scalars['ID']['input']>;
@@ -2534,12 +2577,12 @@ export type SubmittedProof_OrderBy =
   | 'capacityCommitment__totalCUFailCount'
   | 'capacityCommitment__totalCollateral'
   | 'computeUnit'
+  | 'computeUnit__createdAt'
   | 'computeUnit__id'
   | 'computeUnit__submittedProofsCount'
   | 'computeUnit__workerId'
   | 'createdAt'
   | 'createdEpoch'
-  | 'globalUnitNonce'
   | 'id'
   | 'localUnitNonce'
   | 'peer'

@@ -135,6 +135,7 @@ type ComputeUnit @entity {
 
   deal: Deal
   workerId: String
+  createdAt: BigInt!
   # TODO: worker status "Expired" how to calculate.
 
   submittedProofs: [SubmittedProof!] @derivedFrom(field: "computeUnit")

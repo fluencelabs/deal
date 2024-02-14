@@ -1,3 +1,5 @@
+// @dev There is a lot of "total: null," in the code - we await subgraph feature:
+//  return counter of filtration (currently 14.02.24 it is impossible).
 import { ethers } from "ethers";
 import type {
   CapacityCommitmentDetail,
@@ -20,8 +22,9 @@ import type {
   ProviderShortListView,
   ComputeUnitDetail,
   ProofBasicListView,
-  ComputeUnitStatus,
   ProofBasic,
+  ComputeUnitsByCapacityCommitmentListView,
+  ComputeUnitsByCapacityCommitment,
 } from "./types/schemes.js";
 import type {
   ChildEntitiesByProviderFilter,
@@ -37,7 +40,7 @@ import type {
   ProvidersFilters,
   ProviderShortOrderBy,
   ProofsFilters,
-  ProofsOrderBy,
+  ProofsOrderBy, ComputeUnitsOrderBy,
 } from "./types/filters.js";
 import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type {
@@ -55,7 +58,10 @@ import {
   FILTER_MULTISELECT_MAX,
   tokenValueToRounded,
 } from "./utils.js";
-import { serializeEffectorDescription } from "./serializers/logics.js";
+import {
+  serializeEffectorDescription,
+  serializeExpectedProofsAndCUStatus
+} from "./serializers/logics.js";
 import { serializeDealProviderAccessLists } from "../utils/serializers.js";
 import {
   FiltersError,
@@ -88,7 +94,7 @@ import { FLTToken } from "./constants.js";
 
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
- * @dev It supports mainnet, testnet by selecting related contractsEnv.
+ * @dev It supports kras, stage, testnet, local by selecting related contractsEnv.
  */
 export class DealExplorerClient {
   DEFAULT_PAGE_LIMIT = 100;
@@ -886,27 +892,12 @@ export class DealExplorerClient {
     }
     const computeUnit = data.computeUnit;
 
-    const currentPeerCapacityCommitment =
-      computeUnit.peer.currentCapacityCommitment;
-    let expectedProofsDueNow = 0;
-    const startEpoch = currentPeerCapacityCommitment?.startEpoch;
-    if (startEpoch && startEpoch != 0) {
-      expectedProofsDueNow =
-        calculateEpoch(
-          Date.now() / 1000,
-          this._coreInitTimestamp!,
-          this._coreEpochDuration!,
-        ) - startEpoch;
-    }
-
-    let status: ComputeUnitStatus = "undefined";
-    if (computeUnit.deal) {
-      status = "deal";
-    } else if (currentPeerCapacityCommitment) {
-      status = "capacity";
-    } else {
-      status = "undefined";
-    }
+    const {expectedProofsDueNow, status} = serializeExpectedProofsAndCUStatus(
+      computeUnit,
+      this._coreInitTimestamp!,
+      this._coreEpochDuration!,
+    );
+    const currentPeerCapacityCommitment = computeUnit.peer.currentCapacityCommitment;
 
     return {
       id: computeUnit.id,
@@ -967,6 +958,61 @@ export class DealExplorerClient {
       data: res,
       total,
     };
+  }
+
+  // @notice [Figma] Capacity Commitment. List of compute units.
+  // @dev It does 2 requests: for CC and for CUs.
+  async getComputeUnitsByCapacityCommitment(
+    capacityCommitmentId: string,
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: ComputeUnitsOrderBy = "createdAt",
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
+  ): Promise<ComputeUnitsByCapacityCommitmentListView> {
+    await this._init();
+
+    const capacityCommitment = await this.getCapacityCommitment(capacityCommitmentId);
+    if (!capacityCommitment) {
+      throw new Error(`Capacity commitment with id ${capacityCommitmentId} not found.`);
+    }
+
+    // To get data of CUs by capacity commitment we filter CUs by peer id of the CC.
+    const data = await this._indexerClient.getComputeUnits(
+      {
+        filters: {
+          peer_: {id: capacityCommitment.peerId}
+        },
+        offset,
+        limit,
+        orderBy,
+        orderType,
+      }
+    )
+
+    let res: Array<ComputeUnitsByCapacityCommitment> = []
+    for (const computeUnit of data.computeUnits) {
+      const {expectedProofsDueNow, status} = serializeExpectedProofsAndCUStatus(
+        computeUnit,
+        this._coreInitTimestamp!,
+        this._coreEpochDuration!,
+      );
+
+      res.push(
+        {
+          id: computeUnit.id,
+          workerId: computeUnit.workerId ?? undefined,
+          status,
+          expectedProofsDueNow,
+          successProofs: computeUnit.submittedProofsCount,
+          collateral: capacityCommitment.totalCollateral,
+        }
+      )
+    }
+
+    return {
+      total: null,
+      data: res
+    }
   }
 }
 

@@ -201,6 +201,17 @@ export interface ProofBasicListView extends ListViewABC {
   data: Array<ProofBasic>;
 }
 
+export interface ComputeUnitsByCapacityCommitment extends ComputeUnit{
+  status: ComputeUnitStatus;
+  expectedProofsDueNow: number;
+  successProofs: number;
+  collateral: string;
+}
+
+export interface ComputeUnitsByCapacityCommitmentListView extends ListViewABC {
+  data: Array<ComputeUnitsByCapacityCommitment>
+}
+
 // @deprecated.
 // @param status: might be failed when no proof submitted for the epoch.
 // @param transactionId: undefined when no proof submitted for the epoch.
