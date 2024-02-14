@@ -6,7 +6,8 @@ import type {
 } from "./queries/deals-query.generated.js";
 import { getSdk as getDealsSdk } from "./queries/deals-query.generated.js";
 import type {
-  ComputeUnitQueryQueryVariables, ComputeUnitsQueryQueryVariables,
+  ComputeUnitQueryQueryVariables,
+  ComputeUnitsQueryQueryVariables,
   Sdk as PeersSdk,
 } from "./queries/peers-query.generated.js";
 import { getSdk as getPeersSdk } from "./queries/peers-query.generated.js";
@@ -26,6 +27,7 @@ import type {
 import { getSdk as getProvidersSdk } from "./queries/providers-query.generated.js";
 import type {
   CapacityCommitmentQueryQueryVariables,
+  CapacityCommitmentStatsPerEpochQueryQueryVariables,
   Sdk as CapacityCommitmentsSdk,
   SubmittedProofsQueryQueryVariables,
 } from "./queries/capacity-commitments-query.generated.js";
@@ -127,5 +129,13 @@ export class IndexerClient extends IndexerClientABC {
 
   async getComputeUnits(variables: ComputeUnitsQueryQueryVariables) {
     return await this.peersClient.ComputeUnitsQuery(variables);
+  }
+
+  async getCapacityCommitmentStatsPerEpoches(
+    variables: CapacityCommitmentStatsPerEpochQueryQueryVariables,
+  ) {
+    return await this.capacityCommitmentsClient.CapacityCommitmentStatsPerEpochQuery(
+      variables,
+    );
   }
 }

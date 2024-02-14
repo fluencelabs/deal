@@ -39,6 +39,7 @@ dataSources:
         - CapacityCommitment
         - Peer
         - SubmittedProof
+        - CapacityCommitmentStatsPerEpoch
       abis:
         - name: Capacity
           file: ../out/Capacity.sol/Capacity.json

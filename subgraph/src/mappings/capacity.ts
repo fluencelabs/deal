@@ -1,6 +1,9 @@
 import {
-  CapacityCommitmentStatus, createOrLoadCapacityCommitmentToComputeUnit,
-  createOrLoadGraphNetwork, UNO_BIG_INT,
+  CapacityCommitmentStatus,
+  createOrLoadCapacityCommitmentStatsPerEpoch,
+  createOrLoadCapacityCommitmentToComputeUnit,
+  createOrLoadGraphNetwork,
+  UNO_BIG_INT,
   ZERO_BIG_INT
 } from "../models";
 import {
@@ -162,6 +165,7 @@ export function handleCommitmentFinished(event: CommitmentFinished): void {
 }
 
 export function handleCommitmentStatsUpdated(event: CommitmentStatsUpdated): void {
+  // Handle current commitment stats.
   let commitment = CapacityCommitment.load(event.params.commitmentId.toHex()) as CapacityCommitment;
 
   commitment.totalCUFailCount = event.params.totalCUFailCount.toI32()
@@ -196,6 +200,20 @@ export function handleCommitmentStatsUpdated(event: CommitmentStatsUpdated): voi
   let peer = Peer.load(commitment.peer) as Peer;
   peer.currentCCNextCCFailedEpoch = _calculatedFailedEpoch;
   peer.save();
+
+  // Save commitment stat for evolution graph.
+  let capacityCommitmentStatsPerEpoch = createOrLoadCapacityCommitmentStatsPerEpoch(
+    commitment.id,
+    currentEpoch.toString(),
+  );
+  capacityCommitmentStatsPerEpoch.totalCUFailCount = commitment.totalCUFailCount;
+  capacityCommitmentStatsPerEpoch.exitedUnitCount = commitment.exitedUnitCount;
+  capacityCommitmentStatsPerEpoch.activeUnitCount = commitment.activeUnitCount;
+  capacityCommitmentStatsPerEpoch.nextAdditionalActiveUnitCount = commitment.nextAdditionalActiveUnitCount;
+  capacityCommitmentStatsPerEpoch.currentCCNextCCFailedEpoch = commitment.nextCCFailedEpoch;
+  // TODO: resolve how to calculate accumulatedAwards here.
+  capacityCommitmentStatsPerEpoch.accumulatedAwards = ZERO_BIG_INT;
+  capacityCommitmentStatsPerEpoch.save();
 }
 
 // Use this event to only check activation/deactivation for the exact unit.
@@ -231,11 +249,12 @@ export function handleProofSubmitted(event: ProofSubmitted): void {
   proofSubmitted.peer = computeUnit.peer;
   proofSubmitted.localUnitNonce = event.params.localUnitNonce;
   proofSubmitted.createdAt = event.block.timestamp;
-  proofSubmitted.createdEpoch = calculateEpoch(
+  const currentEpoch = calculateEpoch(
     event.block.timestamp,
     BigInt.fromI32(graphNetwork.initTimestamp),
     BigInt.fromI32(graphNetwork.coreEpochDuration),
   )
+  proofSubmitted.createdEpoch = currentEpoch;
   proofSubmitted.save()
 
   // Update stats below.
@@ -247,4 +266,8 @@ export function handleProofSubmitted(event: ProofSubmitted): void {
 
   graphNetwork.proofsTotal = graphNetwork.proofsTotal.plus(UNO_BIG_INT);
   graphNetwork.save();
+
+  let capacityCommitmentStatsPerEpoch = createOrLoadCapacityCommitmentStatsPerEpoch(capacityCommitment.id, currentEpoch.toString())
+  capacityCommitmentStatsPerEpoch.submittedProofsCount = capacityCommitmentStatsPerEpoch.submittedProofsCount + 1;
+  capacityCommitmentStatsPerEpoch.save();
 }

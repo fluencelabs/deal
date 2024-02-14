@@ -201,7 +201,7 @@ export interface ProofBasicListView extends ListViewABC {
   data: Array<ProofBasic>;
 }
 
-export interface ComputeUnitsByCapacityCommitment extends ComputeUnit{
+export interface ComputeUnitsByCapacityCommitment extends ComputeUnit {
   status: ComputeUnitStatus;
   expectedProofsDueNow: number;
   successProofs: number;
@@ -209,7 +209,7 @@ export interface ComputeUnitsByCapacityCommitment extends ComputeUnit{
 }
 
 export interface ComputeUnitsByCapacityCommitmentListView extends ListViewABC {
-  data: Array<ComputeUnitsByCapacityCommitment>
+  data: Array<ComputeUnitsByCapacityCommitment>;
 }
 
 // @deprecated.
@@ -220,6 +220,22 @@ export interface ProofByComputeUnit {
   transactionId: string | undefined;
   createdAt: number;
   createdAtEpoch: number;
+}
+
+// @param failedProofsCount: expected - submitted.
+// TODO: add poch period blocks...
+export interface ProofStatsByCapacityCommitment {
+  createdAtEpoch: number;
+  computeUnitsTotal: number;
+  submittedProofsCount: number;
+  failedProofsCount: number;
+  averageProofsPerCU: number;
+  rewardsPerEpochTotal: number;
+  rewardsToken: NativeToken;
+}
+
+export interface ProofStatsByCapacityCommitmentListView extends ListViewABC {
+  data: Array<ProofStatsByCapacityCommitment>;
 }
 
 // @deprecated.
@@ -238,4 +254,6 @@ export type CapacityCommitmentStatus =
   | "removed"
   | "undefined";
 
+// capacityFailed: when CC failed for this CU.
+// TODO: "capacityFailed" status calculate.
 export type ComputeUnitStatus = "deal" | "capacity" | "undefined";

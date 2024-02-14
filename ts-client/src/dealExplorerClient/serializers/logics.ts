@@ -1,11 +1,9 @@
 // To store business logic serializers.
 
 // If provider does not approved: convert a name.
-import type {
-  ComputeUnitWithCcDataBasicFragment
-} from "../indexerClient/queries/peers-query.generated.js";
-import {calculateEpoch} from "../utils.js";
-import type {ComputeUnitStatus} from "../types/schemes.js";
+import type { ComputeUnitWithCcDataBasicFragment } from "../indexerClient/queries/peers-query.generated.js";
+import { calculateEpoch } from "../utils.js";
+import type { ComputeUnitStatus } from "../types/schemes.js";
 
 export function serializeProviderName(
   name: string,
@@ -42,18 +40,15 @@ export function serializeExpectedProofsAndCUStatus(
   coreInitTimestamp: number,
   coreEpochDuration: number,
 ) {
-  const computeUnit = computeUnitWithCcDataBasicFragment
+  const computeUnit = computeUnitWithCcDataBasicFragment;
   const currentPeerCapacityCommitment =
     computeUnit.peer.currentCapacityCommitment;
   let expectedProofsDueNow = 0;
   const startEpoch = currentPeerCapacityCommitment?.startEpoch;
   if (startEpoch && startEpoch != 0) {
     expectedProofsDueNow =
-      calculateEpoch(
-        Date.now() / 1000,
-        coreInitTimestamp,
-        coreEpochDuration,
-      ) - startEpoch;
+      calculateEpoch(Date.now() / 1000, coreInitTimestamp, coreEpochDuration) -
+      startEpoch;
   }
 
   let status: ComputeUnitStatus = "undefined";
@@ -68,5 +63,5 @@ export function serializeExpectedProofsAndCUStatus(
   return {
     expectedProofsDueNow,
     status,
-  }
+  };
 }

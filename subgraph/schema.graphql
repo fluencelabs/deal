@@ -272,3 +272,19 @@ type SubmittedProof @entity(immutable: true) {
   provider: Provider!
   peer: Peer!
 }
+
+"To represent statistics per epoch. This entity represent evaluation of CommitmentStatsUpdated events during time (epoch)."
+type CapacityCommitmentStatsPerEpoch @entity {
+  # Set to `capacityCommitment.id.concat(epoch)`
+  id: ID!
+  capacityCommitment: CapacityCommitment!
+  epoch: BigInt!
+
+  totalCUFailCount: Int!
+  exitedUnitCount: Int!
+  activeUnitCount: Int!
+  nextAdditionalActiveUnitCount: Int!
+  currentCCNextCCFailedEpoch: BigInt!
+  accumulatedAwards: BigInt!
+  submittedProofsCount: Int!
+}

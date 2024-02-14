@@ -23,8 +23,10 @@ import type {
   ComputeUnitDetail,
   ProofBasicListView,
   ProofBasic,
-  ComputeUnitsByCapacityCommitmentListView,
   ComputeUnitsByCapacityCommitment,
+  ProofStatsByCapacityCommitmentListView,
+  ComputeUnitsByCapacityCommitmentListView,
+  ProofStatsByCapacityCommitment,
 } from "./types/schemes.js";
 import type {
   ChildEntitiesByProviderFilter,
@@ -40,7 +42,9 @@ import type {
   ProvidersFilters,
   ProviderShortOrderBy,
   ProofsFilters,
-  ProofsOrderBy, ComputeUnitsOrderBy,
+  ProofsOrderBy,
+  ComputeUnitsOrderBy,
+  ProofStatsByCapacityCommitmentOrderBy,
 } from "./types/filters.js";
 import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type {
@@ -60,7 +64,7 @@ import {
 } from "./utils.js";
 import {
   serializeEffectorDescription,
-  serializeExpectedProofsAndCUStatus
+  serializeExpectedProofsAndCUStatus,
 } from "./serializers/logics.js";
 import { serializeDealProviderAccessLists } from "../utils/serializers.js";
 import {
@@ -892,12 +896,13 @@ export class DealExplorerClient {
     }
     const computeUnit = data.computeUnit;
 
-    const {expectedProofsDueNow, status} = serializeExpectedProofsAndCUStatus(
+    const { expectedProofsDueNow, status } = serializeExpectedProofsAndCUStatus(
       computeUnit,
       this._coreInitTimestamp!,
       this._coreEpochDuration!,
     );
-    const currentPeerCapacityCommitment = computeUnit.peer.currentCapacityCommitment;
+    const currentPeerCapacityCommitment =
+      computeUnit.peer.currentCapacityCommitment;
 
     return {
       id: computeUnit.id,
@@ -971,48 +976,101 @@ export class DealExplorerClient {
   ): Promise<ComputeUnitsByCapacityCommitmentListView> {
     await this._init();
 
-    const capacityCommitment = await this.getCapacityCommitment(capacityCommitmentId);
+    const capacityCommitment =
+      await this.getCapacityCommitment(capacityCommitmentId);
     if (!capacityCommitment) {
-      throw new Error(`Capacity commitment with id ${capacityCommitmentId} not found.`);
+      throw new Error(
+        `Capacity commitment with id ${capacityCommitmentId} not found.`,
+      );
     }
 
     // To get data of CUs by capacity commitment we filter CUs by peer id of the CC.
-    const data = await this._indexerClient.getComputeUnits(
+    const data = await this._indexerClient.getComputeUnits({
+      filters: {
+        peer_: { id: capacityCommitment.peerId },
+      },
+      offset,
+      limit,
+      orderBy,
+      orderType,
+    });
+
+    let res: Array<ComputeUnitsByCapacityCommitment> = [];
+    for (const computeUnit of data.computeUnits) {
+      const { expectedProofsDueNow, status } =
+        serializeExpectedProofsAndCUStatus(
+          computeUnit,
+          this._coreInitTimestamp!,
+          this._coreEpochDuration!,
+        );
+
+      res.push({
+        id: computeUnit.id,
+        workerId: computeUnit.workerId ?? undefined,
+        status,
+        expectedProofsDueNow,
+        successProofs: computeUnit.submittedProofsCount,
+        collateral: capacityCommitment.totalCollateral,
+      });
+    }
+
+    return {
+      total: null,
+      data: res,
+    };
+  }
+
+  // @notice [Figma] Capacity Commitment. Proofs.
+  async getProofsByCapacityCommitment(
+    capacityCommitmentId: string,
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: ProofStatsByCapacityCommitmentOrderBy = "epoch",
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
+  ): Promise<ProofStatsByCapacityCommitmentListView> {
+    await this._init();
+
+    const capacityCommitment =
+      await this.getCapacityCommitment(capacityCommitmentId);
+    if (!capacityCommitment) {
+      throw new Error(
+        `Capacity commitment with id ${capacityCommitmentId} not found.`,
+      );
+    }
+
+    const data = await this._indexerClient.getCapacityCommitmentStatsPerEpoches(
       {
         filters: {
-          peer_: {id: capacityCommitment.peerId}
+          capacityCommitment_: { id: capacityCommitmentId },
         },
         offset,
         limit,
         orderBy,
         orderType,
-      }
-    )
+      },
+    );
 
-    let res: Array<ComputeUnitsByCapacityCommitment> = []
-    for (const computeUnit of data.computeUnits) {
-      const {expectedProofsDueNow, status} = serializeExpectedProofsAndCUStatus(
-        computeUnit,
-        this._coreInitTimestamp!,
-        this._coreEpochDuration!,
-      );
-
-      res.push(
-        {
-          id: computeUnit.id,
-          workerId: computeUnit.workerId ?? undefined,
-          status,
-          expectedProofsDueNow,
-          successProofs: computeUnit.submittedProofsCount,
-          collateral: capacityCommitment.totalCollateral,
-        }
-      )
-    }
+    const res: Array<ProofStatsByCapacityCommitment> =
+      data.capacityCommitmentStatsPerEpoches.map((proofStats) => {
+        return {
+          createdAtEpoch: Number(proofStats.epoch),
+          computeUnitsTotal: proofStats.activeUnitCount,
+          submittedProofsCount: proofStats.submittedProofsCount,
+          failedProofsCount:
+            proofStats.activeUnitCount - proofStats.submittedProofsCount,
+          averageProofsPerCU:
+            proofStats.activeUnitCount != 0
+              ? proofStats.submittedProofsCount / proofStats.activeUnitCount
+              : 0,
+          rewardsPerEpochTotal: proofStats.accumulatedAwards,
+          rewardsToken: FLTToken,
+        };
+      });
 
     return {
       total: null,
-      data: res
-    }
+      data: res,
+    };
   }
 }
 

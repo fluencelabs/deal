@@ -90,3 +90,33 @@ fragment EffectorBasic on Effector {
     id
     description
 }
+
+query CapacityCommitmentStatsPerEpochQuery(
+  $filters: CapacityCommitmentStatsPerEpoch_filter,
+  $offset: Int,
+  $limit: Int,
+  $orderBy: CapacityCommitmentStatsPerEpoch_orderBy,
+  $orderType: OrderDirection,
+) {
+  capacityCommitmentStatsPerEpoches(
+      where: $filters
+      first: $limit
+      skip: $offset
+      orderBy: $orderBy
+      orderDirection: $orderType
+  ) {
+    id
+    epoch
+    capacityCommitment {
+      id
+    }
+    totalCUFailCount
+    exitedUnitCount
+    activeUnitCount
+    nextAdditionalActiveUnitCount
+    currentCCNextCCFailedEpoch
+    accumulatedAwards
+    submittedProofsCount
+  }
+}
+
