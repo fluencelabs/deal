@@ -122,7 +122,6 @@ export class IndexerClient extends IndexerClientABC {
   }
 
   async getSubmittedProofs(variables: SubmittedProofsQueryQueryVariables) {
-    // TODO: recheck this.
     return await this.capacityCommitmentsClient.SubmittedProofsQuery(variables);
   }
 
