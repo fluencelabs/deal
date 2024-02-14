@@ -20,7 +20,8 @@ import type {
   ProviderShortListView,
   ComputeUnitDetail,
   ProofBasicListView,
-  ComputeUnitStatus, ProofBasic
+  ComputeUnitStatus,
+  ProofBasic,
 } from "./types/schemes.js";
 import type {
   ChildEntitiesByProviderFilter,
@@ -58,7 +59,7 @@ import {
   FiltersError,
   serializeCapacityCommitmentsFiltersToIndexer,
   serializeDealsFiltersToIndexer,
-  serializeOffersFiltersToIndexerType,
+  serializeOffersFiltersToIndexerType, serializeProofsFiltersToIndexer,
   serializeProviderFiltersToIndexer,
   ValidTogetherFiltersError,
 } from "./serializers/filters.js";
@@ -905,7 +906,7 @@ export class DealExplorerClient {
   ): Promise<ProofBasicListView> {
     await this._init();
 
-    const filtersSerialized = serializeCapacityCommitmentsFiltersToIndexer(
+    const filtersSerialized = serializeProofsFiltersToIndexer(
       filters,
     );
     const data = await this._indexerClient.getSubmittedProofs({
