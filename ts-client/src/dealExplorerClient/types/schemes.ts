@@ -253,6 +253,4 @@ export type CapacityCommitmentStatus =
   | "removed"
   | "undefined";
 
-// capacityFailed: when CC failed for this CU.
-// TODO: "capacityFailed" status calculate.
 export type ComputeUnitStatus = "deal" | "capacity" | "undefined";
