@@ -135,6 +135,7 @@ type ComputeUnit @entity {
 
   deal: Deal
   workerId: String
+  createdAt: BigInt!
   # TODO: worker status "Expired" how to calculate.
 
   submittedProofs: [SubmittedProof!] @derivedFrom(field: "computeUnit")
@@ -241,6 +242,7 @@ type CapacityCommitment @entity {
   nextAdditionalActiveUnitCount: Int!
   "Collateral of native token (FLT) that has been deposited."
   totalCollateral: BigInt!
+  rewardWithdrawn: BigInt!
 
   submittedProofs: [SubmittedProof!] @derivedFrom(field: "capacityCommitment")
   submittedProofsCount: Int!
@@ -270,4 +272,19 @@ type SubmittedProof @entity(immutable: true) {
   # Add fields for filter purpose below.
   provider: Provider!
   peer: Peer!
+}
+
+"To represent statistics per epoch. This entity represent evaluation of CommitmentStatsUpdated events during time (epoch)."
+type CapacityCommitmentStatsPerEpoch @entity {
+  # Set to `capacityCommitment.id.concat(epoch)`
+  id: ID!
+  capacityCommitment: CapacityCommitment!
+  epoch: BigInt!
+
+  totalCUFailCount: Int!
+  exitedUnitCount: Int!
+  activeUnitCount: Int!
+  nextAdditionalActiveUnitCount: Int!
+  currentCCNextCCFailedEpoch: BigInt!
+  submittedProofsCount: Int!
 }

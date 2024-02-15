@@ -44,14 +44,16 @@ export interface CapacityCommitmentShort {
 // - list of CUs
 // - proofs
 // @param totalCollateral: collateral that deposited.
-// @param unlockedRewards: reward for CC that unlocked to withdraw.
-// @param totalRewards: total rewards collected - already withdrawn.
+// @param rewardsUnlocked: reward for CC that unlocked now to withdraw.
+// @param rewardsNotWithdrawn: total not withdrawn rewards.
+// @param rewardsTotal: total accumulated rewards: withdrawn + still not withdrawn.
 export interface CapacityCommitmentDetail extends CapacityCommitmentShort {
   totalCollateral: string;
   collateralToken: NativeToken;
   rewardDelegatorRate: number;
-  unlockedRewards: string;
-  totalRewards: string;
+  rewardsUnlocked: string;
+  rewardsNotWithdrawn: string;
+  rewardsTotal: string;
 }
 
 export type ProviderBase = {
@@ -201,6 +203,17 @@ export interface ProofBasicListView extends ListViewABC {
   data: Array<ProofBasic>;
 }
 
+export interface ComputeUnitsByCapacityCommitment extends ComputeUnit {
+  status: ComputeUnitStatus;
+  expectedProofsDueNow: number;
+  successProofs: number;
+  collateral: string;
+}
+
+export interface ComputeUnitsByCapacityCommitmentListView extends ListViewABC {
+  data: Array<ComputeUnitsByCapacityCommitment>;
+}
+
 // @deprecated.
 // @param status: might be failed when no proof submitted for the epoch.
 // @param transactionId: undefined when no proof submitted for the epoch.
@@ -209,6 +222,21 @@ export interface ProofByComputeUnit {
   transactionId: string | undefined;
   createdAt: number;
   createdAtEpoch: number;
+}
+
+// @param failedProofsCount: expected - submitted.
+// TODO: add poch period blocks...
+export interface ProofStatsByCapacityCommitment {
+  createdAtEpoch: number;
+  computeUnitsTotal: number;
+  submittedProofsCount: number;
+  failedProofsCount: number;
+  averageProofsPerCU: number;
+  rewardsToken: NativeToken;
+}
+
+export interface ProofStatsByCapacityCommitmentListView extends ListViewABC {
+  data: Array<ProofStatsByCapacityCommitment>;
 }
 
 // @deprecated.
