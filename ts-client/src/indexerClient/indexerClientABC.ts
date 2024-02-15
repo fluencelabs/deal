@@ -12,11 +12,11 @@ export abstract class IndexerClientABC {
   constructor(network?: ContractsENV, indexerUrl?: string) {
     if (indexerUrl) {
       this._graphqlClient = new GraphQLClient(indexerUrl);
-      return;
     }
-    if (!network) {
+    else if (!network) {
       throw new Error("Provide rather indexerUrl or network.");
+    } else {
+      this._graphqlClient = new GraphQLClient(getIndexerUrl(network));
     }
-    this._graphqlClient = new GraphQLClient(getIndexerUrl(network));
   }
 }
