@@ -29,6 +29,40 @@ query CapacityCommitmentQuery(
   }
 }
 
+query SubmittedProofsQuery(
+  $filters: SubmittedProof_filter,
+  $offset: Int,
+  $limit: Int,
+  $orderBy: SubmittedProof_orderBy,
+  $orderType: OrderDirection,
+) {
+  submittedProofs(
+    where: $filters
+    first: $limit
+    skip: $offset
+    orderBy: $orderBy
+    orderDirection: $orderType
+  ){
+    id
+    capacityCommitment {
+      id
+      startEpoch
+      endEpoch
+    }
+    computeUnit {
+      id
+    }
+    createdAt
+    createdEpoch
+    peer {
+      id
+    }
+  }
+  graphNetworks(first: 1) {
+    proofsTotal
+  }
+}
+
 fragment CapacityCommitmentBasic on CapacityCommitment {
   id
   peer {
