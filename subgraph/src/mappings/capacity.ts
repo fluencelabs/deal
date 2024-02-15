@@ -18,7 +18,11 @@ import {
   CommitmentCreated,
   CommitmentFinished,
   CommitmentRemoved,
-  CommitmentStatsUpdated, ProofSubmitted, UnitActivated, UnitDeactivated,
+  CommitmentStatsUpdated,
+  ProofSubmitted,
+  RewardWithdrawn,
+  UnitActivated,
+  UnitDeactivated,
   WhitelistAccessGranted,
   WhitelistAccessRevoked,
 } from "../../generated/Capacity/Capacity";
@@ -62,6 +66,7 @@ export function handleCommitmentCreated(event: CommitmentCreated): void {
 
   commitment.peer = peer.id
   commitment.provider = peer.provider
+  commitment.rewardWithdrawn = ZERO_BIG_INT
   commitment.status = CapacityCommitmentStatus.WaitDelegation
   commitment.collateralPerUnit = event.params.fltCollateralPerUnit
   commitment.createdAt = event.block.timestamp;
@@ -268,4 +273,10 @@ export function handleProofSubmitted(event: ProofSubmitted): void {
   let capacityCommitmentStatsPerEpoch = createOrLoadCapacityCommitmentStatsPerEpoch(capacityCommitment.id, currentEpoch.toString())
   capacityCommitmentStatsPerEpoch.submittedProofsCount = capacityCommitmentStatsPerEpoch.submittedProofsCount + 1;
   capacityCommitmentStatsPerEpoch.save();
+}
+
+export function handleRewardWithdrawn(event: RewardWithdrawn): void {
+  let capacityCommitment = CapacityCommitment.load(event.params.commitmentId.toHex()) as CapacityCommitment;
+  capacityCommitment.rewardWithdrawn = capacityCommitment.rewardWithdrawn.plus(event.params.amount)
+  capacityCommitment.save()
 }

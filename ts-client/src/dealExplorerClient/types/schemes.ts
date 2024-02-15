@@ -44,14 +44,16 @@ export interface CapacityCommitmentShort {
 // - list of CUs
 // - proofs
 // @param totalCollateral: collateral that deposited.
-// @param unlockedRewards: reward for CC that unlocked to withdraw.
-// @param totalRewards: total rewards collected - already withdrawn.
+// @param rewardsUnlocked: reward for CC that unlocked now to withdraw.
+// @param rewardsNotWithdrawn: total not withdrawn rewards.
+// @param rewardsTotal: total accumulated rewards: withdrawn + still not withdrawn.
 export interface CapacityCommitmentDetail extends CapacityCommitmentShort {
   totalCollateral: string;
   collateralToken: NativeToken;
   rewardDelegatorRate: number;
-  unlockedRewards: string;
-  totalRewards: string;
+  rewardsUnlocked: string;
+  rewardsNotWithdrawn: string;
+  rewardsTotal: string;
 }
 
 export type ProviderBase = {

@@ -70,6 +70,8 @@ dataSources:
           handler: handleUnitDeactivated
         - event: ProofSubmitted(indexed bytes32,indexed bytes32,bytes32)
           handler: handleProofSubmitted
+        - event: RewardWithdrawn(indexed bytes32,uint256)
+          handler: handleRewardWithdrawn
       file: ./src/mappings/capacity.ts
   - kind: ethereum/contract
     name: Market

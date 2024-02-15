@@ -793,11 +793,14 @@ export class DealExplorerClient {
       totalCollateral: tokenValueToRounded(capacityCommitment.totalCollateral),
       collateralToken: FLTToken,
       rewardDelegatorRate: capacityCommitment.rewardDelegatorRate,
-      unlockedRewards: capacityCommitmentRpcDetails.unlockedRewards
+      rewardsUnlocked: capacityCommitmentRpcDetails.unlockedRewards
         ? tokenValueToRounded(capacityCommitmentRpcDetails.unlockedRewards)
         : "0",
-      totalRewards: capacityCommitmentRpcDetails.totalRewards
+      rewardsNotWithdrawn: capacityCommitmentRpcDetails.totalRewards
         ? tokenValueToRounded(capacityCommitmentRpcDetails.totalRewards)
+        : "0",
+      rewardsTotal: capacityCommitmentRpcDetails.totalRewards
+        ? tokenValueToRounded(capacityCommitmentRpcDetails.totalRewards + capacityCommitment.rewardWithdrawn)
         : "0",
     };
   }

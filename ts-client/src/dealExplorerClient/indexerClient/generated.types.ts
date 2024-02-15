@@ -56,6 +56,7 @@ export type CapacityCommitment = {
   peer: Peer;
   provider: Provider;
   rewardDelegatorRate: Scalars['Int']['output'];
+  rewardWithdrawn: Scalars['BigInt']['output'];
   snapshotEpoch: Scalars['BigInt']['output'];
   startEpoch: Scalars['BigInt']['output'];
   /** This status represents last stored status on chain (status that does not depends on the current epoch some how). */
@@ -216,6 +217,7 @@ export type CapacityCommitmentStatsPerEpoch_OrderBy =
   | 'capacityCommitment__nextAdditionalActiveUnitCount'
   | 'capacityCommitment__nextCCFailedEpoch'
   | 'capacityCommitment__rewardDelegatorRate'
+  | 'capacityCommitment__rewardWithdrawn'
   | 'capacityCommitment__snapshotEpoch'
   | 'capacityCommitment__startEpoch'
   | 'capacityCommitment__status'
@@ -318,6 +320,7 @@ export type CapacityCommitmentToComputeUnit_OrderBy =
   | 'capacityCommitment__nextAdditionalActiveUnitCount'
   | 'capacityCommitment__nextCCFailedEpoch'
   | 'capacityCommitment__rewardDelegatorRate'
+  | 'capacityCommitment__rewardWithdrawn'
   | 'capacityCommitment__snapshotEpoch'
   | 'capacityCommitment__startEpoch'
   | 'capacityCommitment__status'
@@ -499,6 +502,14 @@ export type CapacityCommitment_Filter = {
   rewardDelegatorRate_lte?: InputMaybe<Scalars['Int']['input']>;
   rewardDelegatorRate_not?: InputMaybe<Scalars['Int']['input']>;
   rewardDelegatorRate_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  rewardWithdrawn?: InputMaybe<Scalars['BigInt']['input']>;
+  rewardWithdrawn_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  rewardWithdrawn_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  rewardWithdrawn_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  rewardWithdrawn_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  rewardWithdrawn_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  rewardWithdrawn_not?: InputMaybe<Scalars['BigInt']['input']>;
+  rewardWithdrawn_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   snapshotEpoch?: InputMaybe<Scalars['BigInt']['input']>;
   snapshotEpoch_gt?: InputMaybe<Scalars['BigInt']['input']>;
   snapshotEpoch_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -580,6 +591,7 @@ export type CapacityCommitment_OrderBy =
   | 'provider__peerCount'
   | 'provider__registered'
   | 'rewardDelegatorRate'
+  | 'rewardWithdrawn'
   | 'snapshotEpoch'
   | 'startEpoch'
   | 'status'
@@ -2043,6 +2055,7 @@ export type Peer_OrderBy =
   | 'currentCapacityCommitment__nextAdditionalActiveUnitCount'
   | 'currentCapacityCommitment__nextCCFailedEpoch'
   | 'currentCapacityCommitment__rewardDelegatorRate'
+  | 'currentCapacityCommitment__rewardWithdrawn'
   | 'currentCapacityCommitment__snapshotEpoch'
   | 'currentCapacityCommitment__startEpoch'
   | 'currentCapacityCommitment__status'
@@ -2684,6 +2697,7 @@ export type SubmittedProof_OrderBy =
   | 'capacityCommitment__nextAdditionalActiveUnitCount'
   | 'capacityCommitment__nextCCFailedEpoch'
   | 'capacityCommitment__rewardDelegatorRate'
+  | 'capacityCommitment__rewardWithdrawn'
   | 'capacityCommitment__snapshotEpoch'
   | 'capacityCommitment__startEpoch'
   | 'capacityCommitment__status'

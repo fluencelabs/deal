@@ -76,6 +76,7 @@ fragment CapacityCommitmentBasic on CapacityCommitment {
   endEpoch
   computeUnitsCount
   totalCollateral
+  rewardWithdrawn
 }
 
 fragment ComputeUnitBasic on ComputeUnit {
