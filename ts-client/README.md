@@ -1,5 +1,7 @@
 # ts-clients
 
+Module consists of several TS clients to access Deal contract logic for different purposes: deal matching, contract address resolving, Network Explorer API, etc.  
+
 * [Requirements](#requirements)
 * [client](#client)
 * [deal-mather-client](#deal-mather-client)
@@ -93,11 +95,13 @@ asyncRuntimeDecorator(main);
 ```
 
 # deal-explorer-client
-This client delivers data for the Explorer Frontend Application. The client consists of 3 ones:
+This client delivers data for the Network Explorer Web Application. The client consists of 3 TS clients:
 
 - DealContractsClient - to load env {kras, testnet, stage} and deployed contracts
 - DealRpcClient - with built-in multicall3 contract feature (1 JSON RPC request per several view calls on different Fluence contracts)
 - IndexerClient - to fetch built GraphQL models from the indexer (i.e. The Graph/Subgraph)
+
+> Each getter method of the DealExplorerClient linked relate to the Figma views accordingly.
 
 ## Install 
 ```bash
