@@ -359,13 +359,16 @@ contract OfferTest is Test {
         }
         deployment.market.addComputeUnits(peer.peerId, unitIdsToAdd);
 
-        // onlyCapacity
-        vm.expectRevert("BaseModule: caller is not the capacity");
-        deployment.market.returnComputeUnitFromDeal(unitIdsToAdd[0]);
-
-        vm.prank(address(deployment.capacity));
         vm.expectRevert("Compute unit already free");
         deployment.market.returnComputeUnitFromDeal(unitIdsToAdd[0]);
+
+        vm.expectRevert("Compute unit doesn't exist");
+        deployment.market.returnComputeUnitFromDeal(bytes32(uint256(34343434)));
+
+        // TODO move to another place where matching occurs
+        // vm.expectRevert("Only deal or offer owner can remove compute unit from deal");
+        // vm.prank(address(43434));
+        // deployment.market.returnComputeUnitFromDeal(unitIdsToAdd[0]);
 
         // TODO match to deal and remove from deal
         // TODO check requires and modifiers for returnComputeUnitFromDeal
@@ -426,7 +429,32 @@ contract OfferTest is Test {
         deployment.market.removeEffector(offerId, effectors);
     }
 
-    // TODO setCommitmentId
-    // TODO setStartEpoch
+    function test_SetCommitmentIdAndStartEpoch() external {
+        bytes32 offerId = _setUpEmptyOffer();
+
+        IOffer.RegisterComputePeer[] memory peers = new IOffer.RegisterComputePeer[](1);
+        bytes32[] memory unitIds = new bytes32[](1);
+        unitIds[0] = bytes32(uint256(43434334));
+        address peerUniqueOwner = address(bytes20(TestHelper.pseudoRandom(abi.encode("peerId-address", 0))));
+        peers[0] = IOffer.RegisterComputePeer({
+            peerId: bytes32(uint256(1)),
+            unitIds: unitIds,
+            owner: peerUniqueOwner
+        });
+        deployment.market.addComputePeers(offerId, peers);
+
+        vm.expectRevert("BaseModule: caller is not the capacity");
+        deployment.market.setCommitmentId(peers[0].peerId, bytes32(uint256(4343434)));
+
+        vm.prank(address(deployment.capacity));
+        deployment.market.setCommitmentId(peers[0].peerId, bytes32(uint256(4343434)));
+
+        vm.expectRevert("BaseModule: caller is not the capacity");
+        deployment.market.setStartEpoch(peers[0].peerId, 123);
+
+        vm.prank(address(deployment.capacity));
+        deployment.market.setStartEpoch(peers[0].peerId, 123);
+    }
+
     // TODO _mvComputeUnitToDeal errors and events, possibly in another test
 }

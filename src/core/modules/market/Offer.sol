@@ -292,7 +292,7 @@ abstract contract Offer is BaseModule, IOffer {
     }
 
     // Unit management
-    function returnComputeUnitFromDeal(bytes32 unitId) public onlyCapacity {
+    function returnComputeUnitFromDeal(bytes32 unitId) public {
         OfferStorage storage offerStorage = _getOfferStorage();
         ComputeUnit storage computeUnit = offerStorage.computeUnits[unitId];
 
