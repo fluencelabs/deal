@@ -5,7 +5,10 @@ import type {
   Sdk as DealsSdk,
 } from "./queries/deals-query.generated.js";
 import { getSdk as getDealsSdk } from "./queries/deals-query.generated.js";
-import type { Sdk as PeersSdk } from "./queries/peers-query.generated.js";
+import type {
+  ComputeUnitQueryQueryVariables,
+  Sdk as PeersSdk,
+} from "./queries/peers-query.generated.js";
 import { getSdk as getPeersSdk } from "./queries/peers-query.generated.js";
 import type {
   EffectorQueryQueryVariables,
@@ -24,6 +27,7 @@ import { getSdk as getProvidersSdk } from "./queries/providers-query.generated.j
 import type {
   CapacityCommitmentQueryQueryVariables,
   Sdk as CapacityCommitmentsSdk,
+  SubmittedProofsQueryQueryVariables,
 } from "./queries/capacity-commitments-query.generated.js";
 import type { Sdk as ContractConstantsSdk } from "./queries/constants-query.generated.js";
 import { getSdk as getContractConstantsSdk } from "./queries/constants-query.generated.js";
@@ -111,5 +115,14 @@ export class IndexerClient extends IndexerClientABC {
   // Get all deals per provided id of a Peer.
   async getPeerDeals(variables: DealsByPeerQueryQueryVariables) {
     return await this.dealsClient.DealsByPeerQuery(variables);
+  }
+
+  async getComputeUnit(variables: ComputeUnitQueryQueryVariables) {
+    return await this.peersClient.ComputeUnitQuery(variables);
+  }
+
+  async getSubmittedProofs(variables: SubmittedProofsQueryQueryVariables) {
+    console.log("variables", variables);
+    return await this.capacityCommitmentsClient.SubmittedProofsQuery();
   }
 }

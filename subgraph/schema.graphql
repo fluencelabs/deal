@@ -12,6 +12,7 @@ type GraphNetwork @entity {
   tokensTotal: BigInt!
   effectorsTotal: BigInt!
   capacityCommitmentsTotal: BigInt!
+  proofsTotal: BigInt!
   # Add constants from Core contract below.
   coreEpochDuration: Int
   initTimestamp: Int
@@ -135,6 +136,11 @@ type ComputeUnit @entity {
   deal: Deal
   workerId: String
   # TODO: worker status "Expired" how to calculate.
+
+  submittedProofs: [SubmittedProof!] @derivedFrom(field: "computeUnit")
+
+  # Add fields for stats below.
+  submittedProofsCount: Int!
 }
 
 # ---- Deal Contract ----
@@ -236,6 +242,9 @@ type CapacityCommitment @entity {
   "Collateral of native token (FLT) that has been deposited."
   totalCollateral: BigInt!
 
+  submittedProofs: [SubmittedProof!] @derivedFrom(field: "capacityCommitment")
+  submittedProofsCount: Int!
+
   computeUnits: [CapacityCommitmentToComputeUnit!] @derivedFrom(field: "capacityCommitment")
   computeUnitsCount: Int!
 
@@ -247,4 +256,18 @@ type CapacityCommitment @entity {
 
   # Add additional fields to filter by below.
   provider: Provider!
+}
+
+type SubmittedProof @entity(immutable: true) {
+  "Id here is a transaction hash."
+  id: ID!
+  capacityCommitment: CapacityCommitment!
+  computeUnit: ComputeUnit!
+  localUnitNonce: Bytes!
+  createdAt: BigInt!
+  createdEpoch: BigInt!
+
+  # Add fields for filter purpose below.
+  provider: Provider!
+  peer: Peer!
 }
