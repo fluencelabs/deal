@@ -23,6 +23,15 @@ To load contract deployments and interfaces for different stands: kras/testnet/s
 
 > TODO: rename, because client says nothing.
 
+# deal-cli-client
+To resolve needs from POV of Fluence CLI. 
+
+Example use - check via [deal-mather-client](#deal-mather-client).
+
+## Contribute
+Under the hood it uses indexer client [src/dealCliClient/indexerClient/indexerClient.ts](src/dealCliClient/indexerClient/indexerClient.ts) to fetch data from the indexer (subgraph). Because the indexer client uses TS, first of all you need to prepare your query as it is in [src/dealCliClient/indexerClient/queries](src/dealCliClient/indexerClient/queries) and then run codegen: `npm run codegen:dealCliClient` (be sure that [codegen script](codegen-deal-cli-indexer.ts) aims to the working subgraph).
+After, you could fetch your queries in typised manner.
+
 # deal-mather-client
 To find preferable compute units for the deal and its configuration via Subgraph (indexer). The main user of the client is https://github.com/fluencelabs/cli (fCli).
 
