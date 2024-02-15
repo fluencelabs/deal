@@ -134,6 +134,7 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
   computeUnit.provider = peer.provider;
   computeUnit.peer = peer.id;
   computeUnit.submittedProofsCount = 0;
+  computeUnit.createdAt = event.block.timestamp;
   computeUnit.save();
 
   // Upd stats.
