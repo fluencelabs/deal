@@ -211,8 +211,6 @@ export function handleCommitmentStatsUpdated(event: CommitmentStatsUpdated): voi
   capacityCommitmentStatsPerEpoch.activeUnitCount = commitment.activeUnitCount;
   capacityCommitmentStatsPerEpoch.nextAdditionalActiveUnitCount = commitment.nextAdditionalActiveUnitCount;
   capacityCommitmentStatsPerEpoch.currentCCNextCCFailedEpoch = commitment.nextCCFailedEpoch;
-  // TODO: resolve how to calculate accumulatedAwards here.
-  capacityCommitmentStatsPerEpoch.accumulatedAwards = ZERO_BIG_INT;
   capacityCommitmentStatsPerEpoch.save();
 }
 

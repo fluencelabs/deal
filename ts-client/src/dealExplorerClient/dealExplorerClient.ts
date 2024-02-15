@@ -1062,7 +1062,6 @@ export class DealExplorerClient {
             proofStats.activeUnitCount != 0
               ? proofStats.submittedProofsCount / proofStats.activeUnitCount
               : 0,
-          rewardsPerEpochTotal: proofStats.accumulatedAwards,
           rewardsToken: FLTToken,
         };
       });

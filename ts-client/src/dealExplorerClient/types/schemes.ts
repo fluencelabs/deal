@@ -230,7 +230,6 @@ export interface ProofStatsByCapacityCommitment {
   submittedProofsCount: number;
   failedProofsCount: number;
   averageProofsPerCU: number;
-  rewardsPerEpochTotal: number;
   rewardsToken: NativeToken;
 }
 

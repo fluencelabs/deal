@@ -232,7 +232,6 @@ export function createOrLoadCapacityCommitmentStatsPerEpoch(capacityCommitmentId
     entity.activeUnitCount = 0
     entity.nextAdditionalActiveUnitCount = 0
     entity.currentCCNextCCFailedEpoch = ZERO_BIG_INT
-    entity.accumulatedAwards = ZERO_BIG_INT
     entity.submittedProofsCount = 0
     entity.save()
   }

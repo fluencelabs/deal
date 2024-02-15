@@ -115,7 +115,6 @@ query CapacityCommitmentStatsPerEpochQuery(
     activeUnitCount
     nextAdditionalActiveUnitCount
     currentCCNextCCFailedEpoch
-    accumulatedAwards
     submittedProofsCount
   }
 }
