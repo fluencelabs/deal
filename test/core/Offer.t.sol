@@ -18,6 +18,16 @@ contract OfferTest is Test {
         paymentToken = address(deployment.tUSD);
     }
 
+    function _setUpEmptyOffer() private returns (bytes32 retOfferId) {
+        deployment.market.setProviderInfo("test", CIDV1({prefixes: 0x12345678, hash: bytes32(0x00)}));
+        retOfferId = deployment.market.registerMarketOffer(
+            1,
+            paymentToken,
+            new CIDV1[](0),
+            new IOffer.RegisterComputePeer[](0)
+        );
+    }
+
     function test_OfferDoesNotExist() external {
         vm.expectRevert("Offer doesn't exist");
         deployment.market.getOffer(0);
@@ -208,7 +218,11 @@ contract OfferTest is Test {
         }
 
         IOffer.ComputeUnitView[] memory units = deployment.market.getComputeUnits(bytes32(uint256(1)));
-        assertEq(units.length, 5, "Compute units should be equal to 5");
+        assertEq(units.length, 5, "Compute units should be length of to 5");
+
+        bytes32[] memory computeUnitIds = deployment.market.getComputeUnitIds(bytes32(uint256(1)));
+        assertEq(computeUnitIds.length, 5, "Compute unit ids should be length of to 5");
+
 
         vm.prank(address(9933293));
         vm.expectRevert("Only owner can change offer");
@@ -259,13 +273,7 @@ contract OfferTest is Test {
     }
 
     function test_AddComputePeers() external {
-        deployment.market.setProviderInfo("test", CIDV1({prefixes: 0x12345678, hash: bytes32(0x00)}));
-        bytes32 retOfferId = deployment.market.registerMarketOffer(
-            1,
-            paymentToken,
-            new CIDV1[](0),
-            new IOffer.RegisterComputePeer[](0)
-        );
+        bytes32 retOfferId = _setUpEmptyOffer();
 
         vm.expectRevert("Offer doesn't exist");
         deployment.market.addComputePeers(bytes32(uint256(123)), new IOffer.RegisterComputePeer[](0));
@@ -304,6 +312,121 @@ contract OfferTest is Test {
     }
 
     function test_AddComputeUnits() external {
-        
+        deployment.market.setProviderInfo("test", CIDV1({prefixes: 0x12345678, hash: bytes32(0x00)}));
+
+        bytes32[] memory unitIds = new bytes32[](5);
+        for (uint256 j = 0; j < unitIds.length; j++) {
+            unitIds[j] = keccak256(abi.encodePacked(TestHelper.pseudoRandom(abi.encode("unitId", j))));
+        }
+        IOffer.RegisterComputePeer memory peer = IOffer.RegisterComputePeer({
+            peerId: bytes32(uint256(1)),
+            unitIds: unitIds,
+            owner: address(bytes20(TestHelper.pseudoRandom(abi.encode("peerId-address", 0))))
+        });
+        IOffer.RegisterComputePeer[] memory peers = new IOffer.RegisterComputePeer[](1);
+        peers[0] = peer;
+
+        bytes32[] memory unitIdsToAdd = new bytes32[](5);
+        for (uint256 j = 0; j < unitIds.length; j++) {
+            unitIdsToAdd[j] = keccak256(abi.encodePacked(TestHelper.pseudoRandom(abi.encode("unitId-toAdd", j))));
+        }
+
+        deployment.market.registerMarketOffer(
+            1,
+            paymentToken,
+            new CIDV1[](0),
+            peers
+        );
+
+        vm.expectRevert("Peer doesn't exist");
+        deployment.market.addComputeUnits(bytes32(uint256(123)), unitIdsToAdd);
+
+        vm.expectRevert("Units should be greater than 0");
+        deployment.market.addComputeUnits(peer.peerId, new bytes32[](0));
+
+        vm.expectRevert("Only owner can change offer");
+        vm.prank(address(9933293));
+        deployment.market.addComputeUnits(peer.peerId, unitIdsToAdd);
+
+        // TODO "Peer has commitment"
+
+        vm.expectRevert("Compute unit already exists");
+        deployment.market.addComputeUnits(peer.peerId, unitIds);
+
+        vm.expectEmit(true, false, false, true);
+        for (uint256 j = 0; j < unitIds.length; j++) {
+            emit IOffer.ComputeUnitCreated(peer.peerId, unitIdsToAdd[j]);
+        }
+        deployment.market.addComputeUnits(peer.peerId, unitIdsToAdd);
+
+        // onlyCapacity
+        vm.expectRevert("BaseModule: caller is not the capacity");
+        deployment.market.returnComputeUnitFromDeal(unitIdsToAdd[0]);
+
+        vm.prank(address(deployment.capacity));
+        vm.expectRevert("Compute unit already free");
+        deployment.market.returnComputeUnitFromDeal(unitIdsToAdd[0]);
+
+        // TODO match to deal and remove from deal
+        // TODO check requires and modifiers for returnComputeUnitFromDeal
     }
+
+    function test_ChangMinPricePerWorkerEpoch() external {
+        bytes32 offerId = _setUpEmptyOffer();
+
+        vm.expectRevert("Min price per epoch should be greater than 0");
+        deployment.market.changeMinPricePerWorkerEpoch(offerId, 0);
+
+        vm.expectRevert("Only owner can change offer");
+        vm.prank(address(87439843));
+        deployment.market.changeMinPricePerWorkerEpoch(offerId, 2);
+
+        vm.expectEmit(true, false, false, true);
+        emit IOffer.MinPricePerEpochUpdated(offerId, 2);
+        deployment.market.changeMinPricePerWorkerEpoch(offerId, 2);
+    }
+
+    function test_ChangePaymentToken() external {
+        bytes32 offerId = _setUpEmptyOffer();
+
+        vm.expectRevert("Only owner can change offer");
+        vm.prank(address(87439843));
+        deployment.market.changePaymentToken(offerId, address(424242));
+
+        vm.expectRevert("Payment token should be not zero address");
+        deployment.market.changePaymentToken(offerId, address(0));
+
+        vm.expectEmit(true, false, false, true);
+        emit IOffer.PaymentTokenUpdated(offerId, address(43434));
+        deployment.market.changePaymentToken(offerId, address(43434));
+    }
+
+    function test_Effectors() external {
+        bytes32 offerId = _setUpEmptyOffer();
+
+        CIDV1[] memory effectors = new CIDV1[](1);
+        effectors[0] = CIDV1({prefixes: 0x12345678, hash: bytes32(uint256(12345))});
+
+        vm.expectRevert("Only owner can change offer");
+        vm.prank(address(87439843));
+        deployment.market.addEffector(offerId, effectors);
+
+        vm.expectEmit(true, false, false, true);
+        emit IOffer.EffectorAdded(offerId, effectors[0]);
+        deployment.market.addEffector(offerId, effectors);
+
+        vm.expectRevert("Effector already exists");
+        deployment.market.addEffector(offerId, effectors);
+
+        vm.expectEmit(true, false, false, true);
+        emit IOffer.EffectorRemoved(offerId, effectors[0]);
+        deployment.market.removeEffector(offerId, effectors);
+
+        vm.expectRevert("Effector doesn't exist");
+        deployment.market.removeEffector(offerId, effectors);
+    }
+
+    // TODO setCommitmentId
+    // TODO setStartEpoch
+    // TODO _mvComputeUnitToDeal errors and events, possibly in another test
 }

@@ -283,7 +283,7 @@ abstract contract Offer is BaseModule, IOffer {
             CIDV1 calldata effectorCID = effectors[i];
             bytes32 effectorHash = _hashEffectorCID(effectorCID);
 
-            require(offerStorage.effectorsByOfferId[offerId].hasEffector[effectorHash], "Effector  doesn't exist");
+            require(offerStorage.effectorsByOfferId[offerId].hasEffector[effectorHash], "Effector doesn't exist");
 
             offerStorage.effectorsByOfferId[offerId].hasEffector[effectorHash] = false;
 
