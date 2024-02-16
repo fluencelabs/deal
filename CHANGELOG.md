@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.5.1](https://github.com/fluencelabs/deal/compare/v0.5.0...v0.5.1) (2024-02-16)
+
+
+### Features
+
+* CC list of CU and proofs [chain-354] ([#260](https://github.com/fluencelabs/deal/issues/260)) ([121a6e8](https://github.com/fluencelabs/deal/commit/121a6e8dc0a24b58089b24a8038b1d7f2bfe46cf))
+* explorer compute unit views and proofs ([#250](https://github.com/fluencelabs/deal/issues/250)) ([b5b80f3](https://github.com/fluencelabs/deal/commit/b5b80f32e627b64ce8e5587d251d101a853cd13f))
+
+
+### Bug Fixes
+
+* First fixes by audit report ([#265](https://github.com/fluencelabs/deal/issues/265)) ([3a0655c](https://github.com/fluencelabs/deal/commit/3a0655c2b99807299d08a11d052347c644c38bdc))
+* matching ([#259](https://github.com/fluencelabs/deal/issues/259)) ([cb6af5f](https://github.com/fluencelabs/deal/commit/cb6af5f7bd95ae47159a6e94f6028a0e1553156e))
+* matching can work only with Active deals ([#251](https://github.com/fluencelabs/deal/issues/251)) ([66bd5a0](https://github.com/fluencelabs/deal/commit/66bd5a097f7598ccf013dbcfb450f0b8824c9b1a))
+* overflow bug ([#257](https://github.com/fluencelabs/deal/issues/257)) ([ddf48a4](https://github.com/fluencelabs/deal/commit/ddf48a4195da7d1be0017476c3f0476ab765117e))
+
 ## [0.5.0](https://github.com/fluencelabs/deal/compare/v0.4.0...v0.5.0) (2024-02-09)
 
 
