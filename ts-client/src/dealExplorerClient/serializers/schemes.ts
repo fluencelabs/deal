@@ -220,7 +220,6 @@ export function serializeCapacityCommitmentShort(
   };
 }
 
-// TODO: when changed TS from indexer
 export function serializeCapacityCommitmentDetail(
   capacityCommitmentFromIndexer: CapacityCommitmentBasicFragment,
   statusFromRpc: CapacityCommitmentStatus,
