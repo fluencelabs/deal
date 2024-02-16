@@ -141,7 +141,7 @@ interface ICapacity is ICapacityConst {
         uint256 maxRewardPerEpoch_,
         uint256 vestingDuration_,
         uint256 slashingRate_,
-        uint256 minRequierdProofsPerEpoch_,
+        uint256 MinRequiredProofsPerEpoch_,
         uint256 maxProofsPerEpoch_,
         uint256 withdrawEpochesAfterFailed_,
         uint256 maxFailedRatio_,
