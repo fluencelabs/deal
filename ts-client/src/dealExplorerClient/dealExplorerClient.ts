@@ -77,6 +77,7 @@ import {
   ValidTogetherFiltersError,
 } from "./serializers/filters.js";
 import {
+  serializeCapacityCommitmentDetail,
   serializeCapacityCommitmentShort,
   serializeComputeUnits,
   serializeDealsShort,
@@ -783,26 +784,17 @@ export class DealExplorerClient {
         capacityCommitment.id,
       );
 
-    return {
-      ...serializeCapacityCommitmentShort(
-        capacityCommitment,
-        capacityCommitmentRpcDetails.status,
-        this._coreInitTimestamp!,
-        this._coreEpochDuration!,
-      ),
-      totalCollateral: tokenValueToRounded(capacityCommitment.totalCollateral),
-      collateralToken: FLTToken,
-      rewardDelegatorRate: capacityCommitment.rewardDelegatorRate,
-      rewardsUnlocked: capacityCommitmentRpcDetails.unlockedRewards
-        ? tokenValueToRounded(capacityCommitmentRpcDetails.unlockedRewards)
-        : "0",
-      rewardsNotWithdrawn: capacityCommitmentRpcDetails.totalRewards
-        ? tokenValueToRounded(capacityCommitmentRpcDetails.totalRewards)
-        : "0",
-      rewardsTotal: capacityCommitmentRpcDetails.totalRewards
-        ? tokenValueToRounded(capacityCommitmentRpcDetails.totalRewards + capacityCommitment.rewardWithdrawn)
-        : "0",
-    };
+    return serializeCapacityCommitmentDetail(
+      capacityCommitment,
+      capacityCommitmentRpcDetails.status,
+      this._coreInitTimestamp!,
+      this._coreEpochDuration!,
+      capacityCommitment.totalCollateral,
+      capacityCommitment.rewardDelegatorRate,
+      capacityCommitmentRpcDetails.unlockedRewards,
+      capacityCommitmentRpcDetails.totalRewards,
+      capacityCommitment.rewardWithdrawn,
+    )
   }
 
   // @notice [Figma] Peer ID.

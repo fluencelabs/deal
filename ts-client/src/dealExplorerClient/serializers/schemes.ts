@@ -1,6 +1,7 @@
 // To store serializers, e.g. from indexer fields/fragments to DealExplorerClient schemes.
 import type { ProviderOfProvidersQueryFragment } from "../indexerClient/queries/providers-query.generated.js";
 import type {
+  CapacityCommitmentDetail,
   CapacityCommitmentShort,
   CapacityCommitmentStatus,
   ComputeUnit,
@@ -30,6 +31,7 @@ import type {
   ComputeUnitBasicFragment,
 } from "../indexerClient/queries/deals-query.generated.js";
 import type { CapacityCommitmentBasicFragment } from "../indexerClient/queries/capacity-commitments-query.generated.js";
+import {FLTToken} from "../constants.js";
 
 // TODO: rename to scheme suffixes not there is a Zoo in naming a little.
 export function serializeEffectors(
@@ -216,4 +218,38 @@ export function serializeCapacityCommitmentShort(
     computeUnitsCount: Number(capacityCommitmentFromIndexer.computeUnitsCount),
     status: statusFromRpc,
   };
+}
+
+// TODO: when changed TS from indexer
+export function serializeCapacityCommitmentDetail(
+  capacityCommitmentFromIndexer: CapacityCommitmentBasicFragment,
+  statusFromRpc: CapacityCommitmentStatus,
+  coreInitTimestamp: number,
+  coreEpochDuration: number,
+  totalCollateral: bigint,
+  rewardDelegatorRate: number,
+  unlockedRewards: bigint | null,
+  totalRewards: bigint | null,
+  rewardWithdrawn: bigint,
+): CapacityCommitmentDetail {
+  const _totalRewards = totalRewards ? totalRewards : BigInt(0);
+  const _unlockedRewards = unlockedRewards ? unlockedRewards : BigInt(0);
+  return {
+    ...serializeCapacityCommitmentShort(
+      capacityCommitmentFromIndexer,
+      statusFromRpc,
+      coreInitTimestamp,
+      coreEpochDuration,
+    ),
+    totalCollateral: tokenValueToRounded(totalCollateral),
+    collateralToken: FLTToken,
+    rewardDelegatorRate: rewardDelegatorRate,
+    rewardsUnlocked: tokenValueToRounded(_unlockedRewards),
+    rewardsUnlockedDelegator: tokenValueToRounded(_unlockedRewards * BigInt(rewardDelegatorRate)),
+    rewardsUnlockedProvider: tokenValueToRounded(_unlockedRewards * BigInt(1 - rewardDelegatorRate)),
+    rewardsNotWithdrawn: tokenValueToRounded(_totalRewards),
+    rewardsNotWithdrawnDelegator: tokenValueToRounded(_totalRewards * BigInt(rewardDelegatorRate)),
+    rewardsNotWithdrawnProvider: tokenValueToRounded(_totalRewards * BigInt(1 - rewardDelegatorRate)),
+    rewardsTotal: tokenValueToRounded(_totalRewards + rewardWithdrawn),
+  }
 }

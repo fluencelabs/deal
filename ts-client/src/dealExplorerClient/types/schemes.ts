@@ -44,15 +44,19 @@ export interface CapacityCommitmentShort {
 // - list of CUs
 // - proofs
 // @param totalCollateral: collateral that deposited.
-// @param rewardsUnlocked: reward for CC that unlocked now to withdraw.
-// @param rewardsNotWithdrawn: total not withdrawn rewards.
-// @param rewardsTotal: total accumulated rewards: withdrawn + still not withdrawn.
+// @param rewardsUnlocked: reward for CC that unlocked now to withdraw (claim).
+// @param rewardsNotWithdrawn: accumulated for now, not yet withdrawn rewards.
+// @param rewardsTotal: total accumulated rewards over time: withdrawn + still not withdrawn.
 export interface CapacityCommitmentDetail extends CapacityCommitmentShort {
   totalCollateral: string;
   collateralToken: NativeToken;
   rewardDelegatorRate: number;
   rewardsUnlocked: string;
+  rewardsUnlockedProvider: string;
+  rewardsUnlockedDelegator: string;
   rewardsNotWithdrawn: string;
+  rewardsNotWithdrawnProvider: string;
+  rewardsNotWithdrawnDelegator: string;
   rewardsTotal: string;
 }
 
