@@ -7,7 +7,9 @@ import {
   DealToPeer,
   DealToJoinedOfferPeer,
   Provider,
-  DealToProvidersAccess, CapacityCommitmentToComputeUnit,
+  DealToProvidersAccess,
+  CapacityCommitmentToComputeUnit,
+  CapacityCommitmentStatsPerEpoch,
 } from "../generated/schema";
 import { BigInt, Bytes } from "@graphprotocol/graph-ts";
 import {getTokenDecimals, getTokenSymbol} from "./contracts";
@@ -162,6 +164,7 @@ export function createOrLoadGraphNetwork(): GraphNetwork {
     graphNetwork.tokensTotal = ZERO_BIG_INT;
     graphNetwork.effectorsTotal = ZERO_BIG_INT;
     graphNetwork.capacityCommitmentsTotal = ZERO_BIG_INT;
+    graphNetwork.proofsTotal = ZERO_BIG_INT;
     graphNetwork.save()
   }
   return graphNetwork as GraphNetwork
@@ -214,4 +217,23 @@ export function createOrLoadCapacityCommitmentToComputeUnit(
     entity.save()
   }
   return entity as CapacityCommitmentToComputeUnit
+}
+
+export function createOrLoadCapacityCommitmentStatsPerEpoch(capacityCommitmentId: string, epoch: string): CapacityCommitmentStatsPerEpoch {
+  const concattedIds = capacityCommitmentId.concat(epoch);
+  let entity = CapacityCommitmentStatsPerEpoch.load(concattedIds);
+
+  if (entity == null) {
+    entity = new CapacityCommitmentStatsPerEpoch(concattedIds)
+    entity.capacityCommitment = capacityCommitmentId
+    entity.epoch = BigInt.fromString(epoch)
+    entity.totalCUFailCount = 0
+    entity.exitedUnitCount = 0
+    entity.activeUnitCount = 0
+    entity.nextAdditionalActiveUnitCount = 0
+    entity.currentCCNextCCFailedEpoch = ZERO_BIG_INT
+    entity.submittedProofsCount = 0
+    entity.save()
+  }
+  return entity as CapacityCommitmentStatsPerEpoch
 }

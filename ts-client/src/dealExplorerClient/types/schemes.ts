@@ -44,14 +44,16 @@ export interface CapacityCommitmentShort {
 // - list of CUs
 // - proofs
 // @param totalCollateral: collateral that deposited.
-// @param unlockedRewards: reward for CC that unlocked to withdraw.
-// @param totalRewards: total rewards collected - already withdrawn.
+// @param rewardsUnlocked: reward for CC that unlocked now to withdraw.
+// @param rewardsNotWithdrawn: total not withdrawn rewards.
+// @param rewardsTotal: total accumulated rewards: withdrawn + still not withdrawn.
 export interface CapacityCommitmentDetail extends CapacityCommitmentShort {
   totalCollateral: string;
   collateralToken: NativeToken;
   rewardDelegatorRate: number;
-  unlockedRewards: string;
-  totalRewards: string;
+  rewardsUnlocked: string;
+  rewardsNotWithdrawn: string;
+  rewardsTotal: string;
 }
 
 export type ProviderBase = {
@@ -126,10 +128,22 @@ export type Peer = {
   computeUnits: Array<ComputeUnit>;
 };
 
-export type ComputeUnit = {
+export interface ComputeUnit {
   id: string;
   workerId: string | undefined;
-};
+}
+
+// @param status: might be undefined when CU not in deal and peer of the CU is not in CC.
+export interface ComputeUnitDetail extends ComputeUnit {
+  providerId: string;
+  currentCommitmentId: string | undefined;
+  peerId: string;
+  collateral: string;
+  status: ComputeUnitStatus;
+  expectedProofsDueNow: number;
+  successProofs: number;
+  collateralToken: NativeToken;
+}
 
 export type DealShort = {
   id: string;
@@ -177,6 +191,59 @@ export interface DealByPeer {
   workerId: string;
 }
 
+export interface ProofBasic {
+  transactionId: string;
+  capacityCommitmentId: string;
+  computeUnitId: string;
+  peerId: string;
+  createdAt: number;
+}
+
+export interface ProofBasicListView extends ListViewABC {
+  data: Array<ProofBasic>;
+}
+
+export interface ComputeUnitsByCapacityCommitment extends ComputeUnit {
+  status: ComputeUnitStatus;
+  expectedProofsDueNow: number;
+  successProofs: number;
+  collateral: string;
+}
+
+export interface ComputeUnitsByCapacityCommitmentListView extends ListViewABC {
+  data: Array<ComputeUnitsByCapacityCommitment>;
+}
+
+// @deprecated.
+// @param status: might be failed when no proof submitted for the epoch.
+// @param transactionId: undefined when no proof submitted for the epoch.
+export interface ProofByComputeUnit {
+  status: "success" | "failed";
+  transactionId: string | undefined;
+  createdAt: number;
+  createdAtEpoch: number;
+}
+
+// @param failedProofsCount: expected - submitted.
+// TODO: add poch period blocks...
+export interface ProofStatsByCapacityCommitment {
+  createdAtEpoch: number;
+  computeUnitsTotal: number;
+  submittedProofsCount: number;
+  failedProofsCount: number;
+  averageProofsPerCU: number;
+  rewardsToken: NativeToken;
+}
+
+export interface ProofStatsByCapacityCommitmentListView extends ListViewABC {
+  data: Array<ProofStatsByCapacityCommitment>;
+}
+
+// @deprecated.
+export interface ProofByComputeUnitListView extends ListViewABC {
+  data: Array<ProofByComputeUnit>;
+}
+
 // Status undefined == problem with networks, etc.
 export type DealStatus = "inactive" | "active" | "ended" | "undefined";
 export type CapacityCommitmentStatus =
@@ -187,3 +254,5 @@ export type CapacityCommitmentStatus =
   | "failed"
   | "removed"
   | "undefined";
+
+export type ComputeUnitStatus = "deal" | "capacity" | "undefined";

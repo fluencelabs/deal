@@ -257,8 +257,8 @@ contract CapacityCommitmentTest is Test {
         vm.etch(address(Actor.CALL_ACTOR_ID), address(new MockActorCallActorPrecompile(targetHash)).code);
 
         vm.startPrank(peerOwner);
-        uint256 minRequiredProofsPerEpoch = deployment.capacity.minRequierdProofsPerEpoch();
-        for (uint256 i = 0; i < minRequiredProofsPerEpoch; i++) {
+        uint256 maxProofsPerEpoch = deployment.capacity.maxProofsPerEpoch();
+        for (uint256 i = 0; i < maxProofsPerEpoch; i++) {
             bytes32 localUnitNonce = keccak256(abi.encodePacked("localUnitNonce", i));
 
             vm.expectEmit(true, true, true, false, address(deployment.capacity));

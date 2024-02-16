@@ -1,3 +1,5 @@
+// @dev There is a lot of "total: null," in the code - we await subgraph feature:
+//  return counter of filtration (currently 14.02.24 it is impossible).
 import { ethers } from "ethers";
 import type {
   CapacityCommitmentDetail,
@@ -18,6 +20,13 @@ import type {
   DealsByPeerListView,
   ProviderDetail,
   ProviderShortListView,
+  ComputeUnitDetail,
+  ProofBasicListView,
+  ProofBasic,
+  ComputeUnitsByCapacityCommitment,
+  ProofStatsByCapacityCommitmentListView,
+  ComputeUnitsByCapacityCommitmentListView,
+  ProofStatsByCapacityCommitment,
 } from "./types/schemes.js";
 import type {
   ChildEntitiesByProviderFilter,
@@ -32,6 +41,10 @@ import type {
   PaymentTokenOrderBy,
   ProvidersFilters,
   ProviderShortOrderBy,
+  ProofsFilters,
+  ProofsOrderBy,
+  ComputeUnitsOrderBy,
+  ProofStatsByCapacityCommitmentOrderBy,
 } from "./types/filters.js";
 import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type {
@@ -49,13 +62,17 @@ import {
   FILTER_MULTISELECT_MAX,
   tokenValueToRounded,
 } from "./utils.js";
-import { serializeEffectorDescription } from "./serializers/logics.js";
+import {
+  serializeEffectorDescription,
+  serializeExpectedProofsAndCUStatus,
+} from "./serializers/logics.js";
 import { serializeDealProviderAccessLists } from "../utils/serializers.js";
 import {
   FiltersError,
   serializeCapacityCommitmentsFiltersToIndexer,
   serializeDealsFiltersToIndexer,
   serializeOffersFiltersToIndexerType,
+  serializeProofsFiltersToIndexer,
   serializeProviderFiltersToIndexer,
   ValidTogetherFiltersError,
 } from "./serializers/filters.js";
@@ -73,6 +90,7 @@ import {
   serializeCapacityCommitmentsOrderByToIndexer,
   serializeDealShortOrderByToIndexer,
   serializeOfferShortOrderByToIndexer,
+  serializeProofsOrderByToIndexer,
 } from "./serializers/orderby.js";
 import type { ICapacity } from "../typechain-types/index.js";
 import type { CapacityCommitmentBasicFragment } from "./indexerClient/queries/capacity-commitments-query.generated.js";
@@ -80,7 +98,7 @@ import { FLTToken } from "./constants.js";
 
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
- * @dev It supports mainnet, testnet by selecting related contractsEnv.
+ * @dev It supports kras, stage, testnet, local by selecting related contractsEnv.
  */
 export class DealExplorerClient {
   DEFAULT_PAGE_LIMIT = 100;
@@ -261,8 +279,13 @@ export class DealExplorerClient {
   ): Promise<OfferShortListView> {
     await this._init();
 
-    const convertedFilters: OffersFilters = { providerId: offersByProviderFilter.providerId.toLowerCase() };
-    if (offersByProviderFilter.status && offersByProviderFilter.status != "all") {
+    const convertedFilters: OffersFilters = {
+      providerId: offersByProviderFilter.providerId.toLowerCase(),
+    };
+    if (
+      offersByProviderFilter.status &&
+      offersByProviderFilter.status != "all"
+    ) {
       convertedFilters.status = offersByProviderFilter.status;
     }
     return await this._getOffersImpl(
@@ -284,7 +307,7 @@ export class DealExplorerClient {
   ): Promise<DealShortListView> {
     await this._init();
 
-    if (dealsByProviderFilter.status &&  dealsByProviderFilter.status != "all") {
+    if (dealsByProviderFilter.status && dealsByProviderFilter.status != "all") {
       console.warn("Filter deals by status if not implemented.");
     }
     return await this._getDealsImpl(
@@ -308,7 +331,10 @@ export class DealExplorerClient {
     const convertedFilters: CapacityCommitmentsFilters = {
       search: capacityCommitmentsByProviderFilter.providerId.toLowerCase(),
     };
-    if (capacityCommitmentsByProviderFilter.status && capacityCommitmentsByProviderFilter.status != "all") {
+    if (
+      capacityCommitmentsByProviderFilter.status &&
+      capacityCommitmentsByProviderFilter.status != "all"
+    ) {
       convertedFilters.status = capacityCommitmentsByProviderFilter.status;
     }
     return await this._getCapacityCommitmentsImpl(
@@ -410,7 +436,7 @@ export class DealExplorerClient {
 
   /*
    * @notice [Figma] Offer.
-  */
+   */
   async getOffer(offerId: string): Promise<OfferDetail | null> {
     const options = {
       id: offerId,
@@ -639,7 +665,11 @@ export class DealExplorerClient {
       serializeCapacityCommitmentsOrderByToIndexer(orderBy);
 
     let currentEpoch = undefined;
-    if (filters?.onlyActive || filters?.status == "active" || filters?.status == "inactive") {
+    if (
+      filters?.onlyActive ||
+      filters?.status == "active" ||
+      filters?.status == "inactive"
+    ) {
       if (this._coreInitTimestamp == null || this._coreEpochDuration == null) {
         throw new Error("Assertion: Class object was not inited correctly.");
       }
@@ -730,10 +760,10 @@ export class DealExplorerClient {
       limit,
       orderBy,
       orderType,
-    )
+    );
   }
 
-  // @notice [Figma] Capacity.
+  // @notice [Figma] Capacity Commitment.
   async getCapacityCommitment(
     capacityCommitmentId: string,
   ): Promise<CapacityCommitmentDetail | null> {
@@ -763,11 +793,14 @@ export class DealExplorerClient {
       totalCollateral: tokenValueToRounded(capacityCommitment.totalCollateral),
       collateralToken: FLTToken,
       rewardDelegatorRate: capacityCommitment.rewardDelegatorRate,
-      unlockedRewards: capacityCommitmentRpcDetails.unlockedRewards
+      rewardsUnlocked: capacityCommitmentRpcDetails.unlockedRewards
         ? tokenValueToRounded(capacityCommitmentRpcDetails.unlockedRewards)
         : "0",
-      totalRewards: capacityCommitmentRpcDetails.totalRewards
+      rewardsNotWithdrawn: capacityCommitmentRpcDetails.totalRewards
         ? tokenValueToRounded(capacityCommitmentRpcDetails.totalRewards)
+        : "0",
+      rewardsTotal: capacityCommitmentRpcDetails.totalRewards
+        ? tokenValueToRounded(capacityCommitmentRpcDetails.totalRewards + capacityCommitment.rewardWithdrawn)
         : "0",
     };
   }
@@ -846,6 +879,196 @@ export class DealExplorerClient {
         workerId: firstCU.workerId!,
       });
     }
+    return {
+      total: null,
+      data: res,
+    };
+  }
+
+  // @notice [Figma] Compute Unit.
+  async getComputeUnit(
+    computeUnitId: string,
+  ): Promise<ComputeUnitDetail | null> {
+    await this._init();
+
+    const data = await this._indexerClient.getComputeUnit({
+      id: computeUnitId,
+    });
+    if (!data || !data.computeUnit) {
+      return null;
+    }
+    const computeUnit = data.computeUnit;
+
+    const { expectedProofsDueNow, status } = serializeExpectedProofsAndCUStatus(
+      computeUnit,
+      this._coreInitTimestamp!,
+      this._coreEpochDuration!,
+    );
+    const currentPeerCapacityCommitment =
+      computeUnit.peer.currentCapacityCommitment;
+
+    return {
+      id: computeUnit.id,
+      workerId: computeUnit.workerId ?? undefined,
+      providerId: computeUnit.provider.id,
+      currentCommitmentId: currentPeerCapacityCommitment?.id,
+      peerId: computeUnit.peer.id,
+      collateral: currentPeerCapacityCommitment
+        ? tokenValueToRounded(currentPeerCapacityCommitment.collateralPerUnit)
+        : "0",
+      expectedProofsDueNow,
+      successProofs: currentPeerCapacityCommitment
+        ? currentPeerCapacityCommitment.submittedProofsCount
+        : 0,
+      collateralToken: FLTToken,
+      status,
+    };
+  }
+
+  // @notice [Figma] List of Proofs.
+  async getProofs(
+    filters?: ProofsFilters,
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: ProofsOrderBy = "createdAt",
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
+  ): Promise<ProofBasicListView> {
+    await this._init();
+
+    const filtersSerialized = serializeProofsFiltersToIndexer(filters);
+    const data = await this._indexerClient.getSubmittedProofs({
+      filters: filtersSerialized,
+      offset,
+      limit,
+      orderType,
+      orderBy: serializeProofsOrderByToIndexer(orderBy),
+    });
+    const res: Array<ProofBasic> = data.submittedProofs.map((proof) => {
+      return {
+        transactionId: proof.id,
+        capacityCommitmentId: proof.capacityCommitment.id,
+        computeUnitId: proof.computeUnit.id,
+        peerId: proof.peer.id,
+        createdAt: Number(proof.createdAt),
+      };
+    });
+
+    // TODO: generalize code below.
+    let total = null;
+    if (
+      data.graphNetworks.length == 1 &&
+      data.graphNetworks[0] &&
+      data.graphNetworks[0].proofsTotal
+    ) {
+      total = data.graphNetworks[0].proofsTotal as string;
+    }
+    return {
+      data: res,
+      total,
+    };
+  }
+
+  // @notice [Figma] Capacity Commitment. List of compute units.
+  // @dev It does 2 requests: for CC and for CUs.
+  async getComputeUnitsByCapacityCommitment(
+    capacityCommitmentId: string,
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: ComputeUnitsOrderBy = "createdAt",
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
+  ): Promise<ComputeUnitsByCapacityCommitmentListView> {
+    await this._init();
+
+    const capacityCommitment =
+      await this.getCapacityCommitment(capacityCommitmentId);
+    if (!capacityCommitment) {
+      throw new Error(
+        `Capacity commitment with id ${capacityCommitmentId} not found.`,
+      );
+    }
+
+    // To get data of CUs by capacity commitment we filter CUs by peer id of the CC.
+    const data = await this._indexerClient.getComputeUnits({
+      filters: {
+        peer_: { id: capacityCommitment.peerId },
+      },
+      offset,
+      limit,
+      orderBy,
+      orderType,
+    });
+
+    let res: Array<ComputeUnitsByCapacityCommitment> = [];
+    for (const computeUnit of data.computeUnits) {
+      const { expectedProofsDueNow, status } =
+        serializeExpectedProofsAndCUStatus(
+          computeUnit,
+          this._coreInitTimestamp!,
+          this._coreEpochDuration!,
+        );
+
+      res.push({
+        id: computeUnit.id,
+        workerId: computeUnit.workerId ?? undefined,
+        status,
+        expectedProofsDueNow,
+        successProofs: computeUnit.submittedProofsCount,
+        collateral: capacityCommitment.totalCollateral,
+      });
+    }
+
+    return {
+      total: null,
+      data: res,
+    };
+  }
+
+  // @notice [Figma] Capacity Commitment. Proofs.
+  async getProofsByCapacityCommitment(
+    capacityCommitmentId: string,
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: ProofStatsByCapacityCommitmentOrderBy = "epoch",
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
+  ): Promise<ProofStatsByCapacityCommitmentListView> {
+    await this._init();
+
+    const capacityCommitment =
+      await this.getCapacityCommitment(capacityCommitmentId);
+    if (!capacityCommitment) {
+      throw new Error(
+        `Capacity commitment with id ${capacityCommitmentId} not found.`,
+      );
+    }
+
+    const data = await this._indexerClient.getCapacityCommitmentStatsPerEpoches(
+      {
+        filters: {
+          capacityCommitment_: { id: capacityCommitmentId },
+        },
+        offset,
+        limit,
+        orderBy,
+        orderType,
+      },
+    );
+
+    const res: Array<ProofStatsByCapacityCommitment> =
+      data.capacityCommitmentStatsPerEpoches.map((proofStats) => {
+        return {
+          createdAtEpoch: Number(proofStats.epoch),
+          computeUnitsTotal: proofStats.activeUnitCount,
+          submittedProofsCount: proofStats.submittedProofsCount,
+          failedProofsCount:
+            proofStats.activeUnitCount - proofStats.submittedProofsCount,
+          averageProofsPerCU:
+            proofStats.activeUnitCount != 0
+              ? proofStats.submittedProofsCount / proofStats.activeUnitCount
+              : 0,
+          rewardsToken: FLTToken,
+        };
+      });
+
     return {
       total: null,
       data: res,
