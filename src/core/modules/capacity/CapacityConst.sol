@@ -35,7 +35,7 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
         uint256 maxRewardPerEpoch;
         uint256 vestingDuration;
         uint256 slashingRate;
-        uint256 minRequierdProofsPerEpoch;
+        uint256 MinRequiredProofsPerEpoch;
         uint256 maxProofsPerEpoch;
         uint256 withdrawEpochesAfterFailed;
         uint256 maxFailedRatio;
@@ -67,7 +67,7 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
         uint256 maxRewardPerEpoch_,
         uint256 vestingDuration_,
         uint256 slashingRate_,
-        uint256 minRequierdProofsPerEpoch_,
+        uint256 MinRequiredProofsPerEpoch_,
         uint256 maxProofsPerEpoch_,
         uint256 withdrawEpochesAfterFailed_,
         uint256 maxFailedRatio_,
@@ -83,7 +83,7 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
         constantsStorage.maxRewardPerEpoch = maxRewardPerEpoch_;
         constantsStorage.vestingDuration = vestingDuration_;
         constantsStorage.slashingRate = slashingRate_;
-        constantsStorage.minRequierdProofsPerEpoch = minRequierdProofsPerEpoch_;
+        constantsStorage.MinRequiredProofsPerEpoch = MinRequiredProofsPerEpoch_;
         constantsStorage.maxProofsPerEpoch = maxProofsPerEpoch_;
         constantsStorage.withdrawEpochesAfterFailed = withdrawEpochesAfterFailed_;
         constantsStorage.maxFailedRatio = maxFailedRatio_;
@@ -136,8 +136,8 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
         return _getConstStorage().slashingRate;
     }
 
-    function minRequierdProofsPerEpoch() public view returns (uint256) {
-        return _getConstStorage().minRequierdProofsPerEpoch;
+    function MinRequiredProofsPerEpoch() public view returns (uint256) {
+        return _getConstStorage().MinRequiredProofsPerEpoch;
     }
 
     function maxProofsPerEpoch() public view returns (uint256) {
@@ -236,8 +236,8 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
             constantsStorage.vestingDuration = v;
         } else if (constantType == ConstantType.SlashingRate) {
             constantsStorage.slashingRate = v;
-        } else if (constantType == ConstantType.MinRequierdProofsPerEpoch) {
-            constantsStorage.minRequierdProofsPerEpoch = v;
+        } else if (constantType == ConstantType.MinRequiredProofsPerEpoch) {
+            constantsStorage.MinRequiredProofsPerEpoch = v;
         } else if (constantType == ConstantType.MaxProofsPerEpoch) {
             constantsStorage.maxProofsPerEpoch = v;
         } else if (constantType == ConstantType.WithdrawEpochesAfterFailed) {

@@ -115,6 +115,7 @@ export class DealExplorerClient {
   private _coreInitTimestamp: number | null;
   private _capacityContract: ICapacity | null;
   private _capacityContractAddress: string | null;
+  private _capacityMinRequiredProofsPerEpoch: number | null;
 
   constructor(
     network: ContractsENV,
@@ -137,6 +138,7 @@ export class DealExplorerClient {
     this._coreInitTimestamp = null;
     this._capacityContract = null;
     this._capacityContractAddress = null;
+    this._capacityMinRequiredProofsPerEpoch = null;
   }
 
   // Add init other async attributes here.
@@ -161,7 +163,7 @@ export class DealExplorerClient {
 
     // Init constants from indexer.
     // TODO: add cache.
-    if (this._coreEpochDuration == null || this._coreInitTimestamp == null) {
+    if (this._coreEpochDuration == null || this._coreInitTimestamp == null || this._capacityMinRequiredProofsPerEpoch == null) {
       console.info("Fetch contract constants from indexer.");
       const data = await this._indexerClient.getContractConstants();
       if (
@@ -174,6 +176,7 @@ export class DealExplorerClient {
       }
       this._coreInitTimestamp = Number(data.graphNetworks[0].initTimestamp);
       this._coreEpochDuration = Number(data.graphNetworks[0].coreEpochDuration);
+      this._capacityMinRequiredProofsPerEpoch = Number(data.graphNetworks[0].MinRequiredProofsPerEpoch);
     }
   }
 
@@ -1045,21 +1048,43 @@ export class DealExplorerClient {
       },
     );
 
-    const res: Array<ProofStatsByCapacityCommitment> =
-      data.capacityCommitmentStatsPerEpoches.map((proofStats) => {
-        return {
+    // TODO: generate table with missed epoches as well (there might be filtration by epoches,
+    //  thus, logic could be complicated, resolve after discussion with PM.
+    let res: Array<ProofStatsByCapacityCommitment> = []
+    for (const proofStats of data.capacityCommitmentStatsPerEpoches)  {
+      // Calculate computeUnits succeed in proof submission.
+      // If some of CUs are not succeeded them are automatically considered as failed.
+      let computeUnitToProofCounter: Record<string, number> = {};
+      let computeUnitsSuccess = new Set();
+      if (proofStats.submittedProofs) {
+        for (const proof of proofStats.submittedProofs) {
+          const computeUnitId = proof.computeUnit.id
+          if (computeUnitId in computeUnitToProofCounter) {
+            computeUnitToProofCounter[computeUnitId] += 1;
+          } else {
+            computeUnitToProofCounter[computeUnitId] = 1;
+          }
+
+          // Compare with required capacity contract constant.
+          if (computeUnitToProofCounter[computeUnitId]! >= this._capacityMinRequiredProofsPerEpoch!) {
+            computeUnitsSuccess.add(computeUnitId);
+          }
+        }
+      }
+
+      res.push(
+        {
           createdAtEpoch: Number(proofStats.epoch),
-          computeUnitsTotal: proofStats.activeUnitCount,
-          submittedProofsCount: proofStats.submittedProofsCount,
-          failedProofsCount:
-            proofStats.activeUnitCount - proofStats.submittedProofsCount,
-          averageProofsPerCU:
-            proofStats.activeUnitCount != 0
-              ? proofStats.submittedProofsCount / proofStats.activeUnitCount
-              : 0,
-          rewardsToken: FLTToken,
-        };
-      });
+          createdAtEpochBlockNumberStart: Number(proofStats.blockNumberStart),
+          createdAtEpochBlockNumberEnd: Number(proofStats.blockNumberEnd),
+          computeUnitsExpected: proofStats.activeUnitCount,
+          submittedProofs: proofStats.submittedProofsCount,
+          computeUnitsFailed: proofStats.activeUnitCount - computeUnitsSuccess.size,
+          computeUnitsSuccess: computeUnitsSuccess.size,
+          submittedProofsPerCU: proofStats.submittedProofsCount / proofStats.activeUnitCount,
+        }
+      )
+    }
 
     return {
       total: null,

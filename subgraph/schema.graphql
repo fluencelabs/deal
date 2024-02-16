@@ -18,6 +18,7 @@ type GraphNetwork @entity {
   initTimestamp: Int
   # Capacity consts are below.
   capacityMaxFailedRatio: Int
+  MinRequiredProofsPerEpoch: Int
 }
 
 type Token @entity(immutable: true) {
@@ -272,6 +273,8 @@ type SubmittedProof @entity(immutable: true) {
   # Add fields for filter purpose below.
   provider: Provider!
   peer: Peer!
+
+  capacityCommitmentStatsPerEpoch: CapacityCommitmentStatsPerEpoch!
 }
 
 "To represent statistics per epoch. This entity represent evaluation of CommitmentStatsUpdated events during time (epoch)."
@@ -280,6 +283,9 @@ type CapacityCommitmentStatsPerEpoch @entity {
   id: ID!
   capacityCommitment: CapacityCommitment!
   epoch: BigInt!
+  # To track period of block numbers with submitted proofs for the concrete epoch.
+  blockNumberStart: BigInt!
+  blockNumberEnd: BigInt!
 
   totalCUFailCount: Int!
   exitedUnitCount: Int!
@@ -287,4 +293,6 @@ type CapacityCommitmentStatsPerEpoch @entity {
   nextAdditionalActiveUnitCount: Int!
   currentCCNextCCFailedEpoch: BigInt!
   submittedProofsCount: Int!
+
+  submittedProofs: [SubmittedProof!] @derivedFrom(field: "capacityCommitmentStatsPerEpoch")
 }

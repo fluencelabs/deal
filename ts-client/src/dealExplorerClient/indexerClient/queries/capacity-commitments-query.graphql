@@ -108,6 +108,8 @@ query CapacityCommitmentStatsPerEpochQuery(
   ) {
     id
     epoch
+    blockNumberEnd
+    blockNumberStart
     capacityCommitment {
       id
     }
@@ -117,6 +119,12 @@ query CapacityCommitmentStatsPerEpochQuery(
     nextAdditionalActiveUnitCount
     currentCCNextCCFailedEpoch
     submittedProofsCount
+    submittedProofs {
+      id
+      computeUnit {
+        id
+      }
+    }
   }
 }
 

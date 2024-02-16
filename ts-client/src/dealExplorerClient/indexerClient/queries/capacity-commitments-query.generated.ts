@@ -50,7 +50,7 @@ export type CapacityCommitmentStatsPerEpochQueryQueryVariables = Types.Exact<{
 }>;
 
 
-export type CapacityCommitmentStatsPerEpochQueryQuery = { __typename?: 'Query', capacityCommitmentStatsPerEpoches: Array<{ __typename?: 'CapacityCommitmentStatsPerEpoch', id: string, epoch: any, totalCUFailCount: number, exitedUnitCount: number, activeUnitCount: number, nextAdditionalActiveUnitCount: number, currentCCNextCCFailedEpoch: any, submittedProofsCount: number, capacityCommitment: { __typename?: 'CapacityCommitment', id: string } }> };
+export type CapacityCommitmentStatsPerEpochQueryQuery = { __typename?: 'Query', capacityCommitmentStatsPerEpoches: Array<{ __typename?: 'CapacityCommitmentStatsPerEpoch', id: string, epoch: any, blockNumberEnd: any, blockNumberStart: any, totalCUFailCount: number, exitedUnitCount: number, activeUnitCount: number, nextAdditionalActiveUnitCount: number, currentCCNextCCFailedEpoch: any, submittedProofsCount: number, capacityCommitment: { __typename?: 'CapacityCommitment', id: string }, submittedProofs?: Array<{ __typename?: 'SubmittedProof', id: string, computeUnit: { __typename?: 'ComputeUnit', id: string } }> | null }> };
 
 export const CapacityCommitmentBasicFragmentDoc = gql`
     fragment CapacityCommitmentBasic on CapacityCommitment {
@@ -149,6 +149,8 @@ export const CapacityCommitmentStatsPerEpochQueryDocument = gql`
   ) {
     id
     epoch
+    blockNumberEnd
+    blockNumberStart
     capacityCommitment {
       id
     }
@@ -158,6 +160,12 @@ export const CapacityCommitmentStatsPerEpochQueryDocument = gql`
     nextAdditionalActiveUnitCount
     currentCCNextCCFailedEpoch
     submittedProofsCount
+    submittedProofs {
+      id
+      computeUnit {
+        id
+      }
+    }
   }
 }
     `;

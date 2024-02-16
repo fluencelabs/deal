@@ -229,14 +229,18 @@ export interface ProofByComputeUnit {
 }
 
 // @param failedProofsCount: expected - submitted.
-// TODO: add poch period blocks...
+// @param computeUnitsSuccess: success means CU that submits proof >= min proofs per epoch.
+// @param computeUnitsFailed: means that CU submits proofs < min proofs per epoch.
+// @param createdAtEpochStartBlockNumber: undefined when no transaction submitted for the epoch with proofs.
 export interface ProofStatsByCapacityCommitment {
   createdAtEpoch: number;
-  computeUnitsTotal: number;
-  submittedProofsCount: number;
-  failedProofsCount: number;
-  averageProofsPerCU: number;
-  rewardsToken: NativeToken;
+  createdAtEpochBlockNumberStart: number | undefined
+  createdAtEpochBlockNumberEnd: number | undefined;
+  computeUnitsExpected: number;
+  computeUnitsSuccess: number
+  computeUnitsFailed: number,
+  submittedProofs: number;
+  submittedProofsPerCU: number;
 }
 
 export interface ProofStatsByCapacityCommitmentListView extends ListViewABC {

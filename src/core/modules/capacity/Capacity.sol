@@ -77,7 +77,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         uint256 maxRewardPerEpoch_,
         uint256 vestingDuration_,
         uint256 slashingRate_,
-        uint256 minRequierdProofsPerEpoch_,
+        uint256 MinRequiredProofsPerEpoch_,
         uint256 maxProofsPerEpoch_,
         uint256 withdrawEpochesAfterFailed_,
         uint256 maxFailedRatio_,
@@ -97,7 +97,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
             maxRewardPerEpoch_,
             vestingDuration_,
             slashingRate_,
-            minRequierdProofsPerEpoch_,
+            MinRequiredProofsPerEpoch_,
             maxProofsPerEpoch_,
             withdrawEpochesAfterFailed_,
             maxFailedRatio_,
@@ -379,7 +379,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
             revert TooManyProofs();
         }
 
-        uint256 minRequierdCCProofs_ = minRequierdProofsPerEpoch();
+        uint256 minRequierdCCProofs_ = MinRequiredProofsPerEpoch();
         if (unitProofsCount == minRequierdCCProofs_) {
             cc.info.currentCUSuccessCount += 1;
             _commitUnitSnapshot(cc, unitProofsInfo, epoch, expiredEpoch, cc.info.failedEpoch);

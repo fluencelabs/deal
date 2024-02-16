@@ -28,7 +28,9 @@ import {
 } from "../../generated/Capacity/Capacity";
 import {
   calculateEpoch,
-  calculateNextFailedCCEpoch, getCapacityMaxFailedRatio,
+  calculateNextFailedCCEpoch,
+  getCapacityMaxFailedRatio,
+  getMinRequiredProofsPerEpoch,
 } from "../contracts";
 import {Initialized} from "../../generated/Capacity/Capacity";
 import {BigInt} from "@graphprotocol/graph-ts";
@@ -51,6 +53,7 @@ export function handleWhitelistAccessRevoked(event: WhitelistAccessRevoked): voi
 export function handleInitialized(event: Initialized): void {
   let graphNetwork = createOrLoadGraphNetwork();
   graphNetwork.capacityMaxFailedRatio = getCapacityMaxFailedRatio(event.address).toI32();
+  graphNetwork.MinRequiredProofsPerEpoch = getMinRequiredProofsPerEpoch(event.address).toI32();
   graphNetwork.save()
 }
 
@@ -216,6 +219,12 @@ export function handleCommitmentStatsUpdated(event: CommitmentStatsUpdated): voi
   capacityCommitmentStatsPerEpoch.activeUnitCount = commitment.activeUnitCount;
   capacityCommitmentStatsPerEpoch.nextAdditionalActiveUnitCount = commitment.nextAdditionalActiveUnitCount;
   capacityCommitmentStatsPerEpoch.currentCCNextCCFailedEpoch = commitment.nextCCFailedEpoch;
+  if (capacityCommitmentStatsPerEpoch.blockNumberStart > event.block.number) {
+    capacityCommitmentStatsPerEpoch.blockNumberStart = event.block.number;
+  }
+  if (capacityCommitmentStatsPerEpoch.blockNumberEnd < event.block.number) {
+    capacityCommitmentStatsPerEpoch.blockNumberEnd = event.block.number;
+  }
   capacityCommitmentStatsPerEpoch.save();
 }
 
@@ -245,18 +254,20 @@ export function handleProofSubmitted(event: ProofSubmitted): void {
   let computeUnit = ComputeUnit.load(event.params.unitId.toHex()) as ComputeUnit;
   const provider = Provider.load(computeUnit.provider) as Provider;
   let graphNetwork = createOrLoadGraphNetwork();
+  const currentEpoch = calculateEpoch(
+    event.block.timestamp,
+    BigInt.fromI32(graphNetwork.initTimestamp),
+    BigInt.fromI32(graphNetwork.coreEpochDuration),
+  )
+  let capacityCommitmentStatsPerEpoch = createOrLoadCapacityCommitmentStatsPerEpoch(capacityCommitment.id, currentEpoch.toString())
 
+  proofSubmitted.capacityCommitmentStatsPerEpoch = capacityCommitmentStatsPerEpoch.id;
   proofSubmitted.capacityCommitment = capacityCommitment.id;
   proofSubmitted.computeUnit = computeUnit.id;
   proofSubmitted.provider = provider.id;
   proofSubmitted.peer = computeUnit.peer;
   proofSubmitted.localUnitNonce = event.params.localUnitNonce;
   proofSubmitted.createdAt = event.block.timestamp;
-  const currentEpoch = calculateEpoch(
-    event.block.timestamp,
-    BigInt.fromI32(graphNetwork.initTimestamp),
-    BigInt.fromI32(graphNetwork.coreEpochDuration),
-  )
   proofSubmitted.createdEpoch = currentEpoch;
   proofSubmitted.save()
 
@@ -270,7 +281,6 @@ export function handleProofSubmitted(event: ProofSubmitted): void {
   graphNetwork.proofsTotal = graphNetwork.proofsTotal.plus(UNO_BIG_INT);
   graphNetwork.save();
 
-  let capacityCommitmentStatsPerEpoch = createOrLoadCapacityCommitmentStatsPerEpoch(capacityCommitment.id, currentEpoch.toString())
   capacityCommitmentStatsPerEpoch.submittedProofsCount = capacityCommitmentStatsPerEpoch.submittedProofsCount + 1;
   capacityCommitmentStatsPerEpoch.save();
 }

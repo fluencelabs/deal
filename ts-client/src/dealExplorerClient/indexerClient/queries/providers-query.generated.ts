@@ -1,11 +1,11 @@
 /* eslint-disable */
 //@ts-nocheck
-import * as Types from "../generated.types.js";
+import * as Types from '../generated.types.js';
 
-import { GraphQLClient } from "graphql-request";
-import type { RequestOptions } from "graphql-request";
-type GraphQLClientRequestHeaders = RequestOptions["requestHeaders"];
-import gql from "graphql-tag";
+import { GraphQLClient } from 'graphql-request';
+import type { RequestOptions } from 'graphql-request';
+type GraphQLClientRequestHeaders = RequestOptions['requestHeaders'];
+import gql from 'graphql-tag';
 export type ProvidersQueryQueryVariables = Types.Exact<{
   filters?: Types.InputMaybe<Types.Provider_Filter>;
   offset?: Types.InputMaybe<Types.Scalars['Int']['input']>;
