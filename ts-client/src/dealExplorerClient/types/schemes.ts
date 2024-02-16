@@ -79,7 +79,6 @@ export interface ProviderDetail extends ProviderBase {
   // revenue: Array<Revenue>;
 }
 
-// TODO: What is offer.name? deprecated.
 export type OfferShort = {
   id: string;
   createdAt: number;
@@ -89,6 +88,7 @@ export type OfferShort = {
   effectors: Array<Effector>;
   pricePerEpoch: string;
   providerId: string;
+  peersCount: number;
 };
 
 // TODO: maxCollateralPerWorker deprecated

@@ -75,6 +75,7 @@ export function serializeOfferShort(offer: BasicOfferFragment): OfferShort {
     ),
     effectors: serializeEffectors(offer.effectors),
     providerId: offer.provider.id,
+    peersCount: offer.peers?.length ?? 0,
   };
 }
 
