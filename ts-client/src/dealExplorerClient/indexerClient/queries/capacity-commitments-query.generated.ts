@@ -15,14 +15,14 @@ export type CapacityCommitmentsQueryQueryVariables = Types.Exact<{
 }>;
 
 
-export type CapacityCommitmentsQueryQuery = { __typename?: 'Query', capacityCommitments: Array<{ __typename?: 'CapacityCommitment', id: string, status?: Types.CapacityCommitmentStatus | null, createdAt: any, startEpoch: any, endEpoch: any, computeUnitsCount: number, peer: { __typename?: 'Peer', id: string, provider: { __typename?: 'Provider', id: string } } }>, graphNetworks: Array<{ __typename?: 'GraphNetwork', capacityCommitmentsTotal: any }> };
+export type CapacityCommitmentsQueryQuery = { __typename?: 'Query', capacityCommitments: Array<{ __typename?: 'CapacityCommitment', id: string, status?: Types.CapacityCommitmentStatus | null, createdAt: any, startEpoch: any, endEpoch: any, computeUnitsCount: number, totalCollateral: any, rewardWithdrawn: any, peer: { __typename?: 'Peer', id: string, provider: { __typename?: 'Provider', id: string } } }>, graphNetworks: Array<{ __typename?: 'GraphNetwork', capacityCommitmentsTotal: any }> };
 
 export type CapacityCommitmentQueryQueryVariables = Types.Exact<{
   id: Types.Scalars['ID']['input'];
 }>;
 
 
-export type CapacityCommitmentQueryQuery = { __typename?: 'Query', capacityCommitment?: { __typename?: 'CapacityCommitment', totalCollateral: any, rewardDelegatorRate: number, id: string, status?: Types.CapacityCommitmentStatus | null, createdAt: any, startEpoch: any, endEpoch: any, computeUnitsCount: number, peer: { __typename?: 'Peer', id: string, provider: { __typename?: 'Provider', id: string } } } | null };
+export type CapacityCommitmentQueryQuery = { __typename?: 'Query', capacityCommitment?: { __typename?: 'CapacityCommitment', rewardDelegatorRate: number, id: string, status?: Types.CapacityCommitmentStatus | null, createdAt: any, startEpoch: any, endEpoch: any, computeUnitsCount: number, totalCollateral: any, rewardWithdrawn: any, peer: { __typename?: 'Peer', id: string, provider: { __typename?: 'Provider', id: string } } } | null };
 
 export type SubmittedProofsQueryQueryVariables = Types.Exact<{
   filters?: Types.InputMaybe<Types.SubmittedProof_Filter>;
@@ -33,13 +33,24 @@ export type SubmittedProofsQueryQueryVariables = Types.Exact<{
 }>;
 
 
-export type SubmittedProofsQueryQuery = { __typename?: 'Query', submittedProofs: Array<{ __typename?: 'SubmittedProof', id: string, createdAt: any, createdEpoch: any, capacityCommitment: { __typename?: 'CapacityCommitment', id: string }, computeUnit: { __typename?: 'ComputeUnit', id: string }, peer: { __typename?: 'Peer', id: string } }>, graphNetworks: Array<{ __typename?: 'GraphNetwork', proofsTotal: any }> };
+export type SubmittedProofsQueryQuery = { __typename?: 'Query', submittedProofs: Array<{ __typename?: 'SubmittedProof', id: string, createdAt: any, createdEpoch: any, capacityCommitment: { __typename?: 'CapacityCommitment', id: string, startEpoch: any, endEpoch: any }, computeUnit: { __typename?: 'ComputeUnit', id: string }, peer: { __typename?: 'Peer', id: string } }>, graphNetworks: Array<{ __typename?: 'GraphNetwork', proofsTotal: any }> };
 
-export type CapacityCommitmentBasicFragment = { __typename?: 'CapacityCommitment', id: string, status?: Types.CapacityCommitmentStatus | null, createdAt: any, startEpoch: any, endEpoch: any, computeUnitsCount: number, peer: { __typename?: 'Peer', id: string, provider: { __typename?: 'Provider', id: string } } };
+export type CapacityCommitmentBasicFragment = { __typename?: 'CapacityCommitment', id: string, status?: Types.CapacityCommitmentStatus | null, createdAt: any, startEpoch: any, endEpoch: any, computeUnitsCount: number, totalCollateral: any, rewardWithdrawn: any, peer: { __typename?: 'Peer', id: string, provider: { __typename?: 'Provider', id: string } } };
 
 export type ComputeUnitBasicFragment = { __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string } };
 
 export type EffectorBasicFragment = { __typename?: 'Effector', id: string, description: string };
+
+export type CapacityCommitmentStatsPerEpochQueryQueryVariables = Types.Exact<{
+  filters?: Types.InputMaybe<Types.CapacityCommitmentStatsPerEpoch_Filter>;
+  offset?: Types.InputMaybe<Types.Scalars['Int']['input']>;
+  limit?: Types.InputMaybe<Types.Scalars['Int']['input']>;
+  orderBy?: Types.InputMaybe<Types.CapacityCommitmentStatsPerEpoch_OrderBy>;
+  orderType?: Types.InputMaybe<Types.OrderDirection>;
+}>;
+
+
+export type CapacityCommitmentStatsPerEpochQueryQuery = { __typename?: 'Query', capacityCommitmentStatsPerEpoches: Array<{ __typename?: 'CapacityCommitmentStatsPerEpoch', id: string, epoch: any, totalCUFailCount: number, exitedUnitCount: number, activeUnitCount: number, nextAdditionalActiveUnitCount: number, currentCCNextCCFailedEpoch: any, submittedProofsCount: number, capacityCommitment: { __typename?: 'CapacityCommitment', id: string } }> };
 
 export const CapacityCommitmentBasicFragmentDoc = gql`
     fragment CapacityCommitmentBasic on CapacityCommitment {
@@ -55,6 +66,8 @@ export const CapacityCommitmentBasicFragmentDoc = gql`
   startEpoch
   endEpoch
   computeUnitsCount
+  totalCollateral
+  rewardWithdrawn
 }
     `;
 export const ComputeUnitBasicFragmentDoc = gql`
@@ -92,7 +105,6 @@ export const CapacityCommitmentQueryDocument = gql`
     query CapacityCommitmentQuery($id: ID!) {
   capacityCommitment(id: $id) {
     ...CapacityCommitmentBasic
-    totalCollateral
     rewardDelegatorRate
   }
 }
@@ -109,6 +121,8 @@ export const SubmittedProofsQueryDocument = gql`
     id
     capacityCommitment {
       id
+      startEpoch
+      endEpoch
     }
     computeUnit {
       id
@@ -121,6 +135,29 @@ export const SubmittedProofsQueryDocument = gql`
   }
   graphNetworks(first: 1) {
     proofsTotal
+  }
+}
+    `;
+export const CapacityCommitmentStatsPerEpochQueryDocument = gql`
+    query CapacityCommitmentStatsPerEpochQuery($filters: CapacityCommitmentStatsPerEpoch_filter, $offset: Int, $limit: Int, $orderBy: CapacityCommitmentStatsPerEpoch_orderBy, $orderType: OrderDirection) {
+  capacityCommitmentStatsPerEpoches(
+    where: $filters
+    first: $limit
+    skip: $offset
+    orderBy: $orderBy
+    orderDirection: $orderType
+  ) {
+    id
+    epoch
+    capacityCommitment {
+      id
+    }
+    totalCUFailCount
+    exitedUnitCount
+    activeUnitCount
+    nextAdditionalActiveUnitCount
+    currentCCNextCCFailedEpoch
+    submittedProofsCount
   }
 }
     `;
@@ -140,6 +177,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     SubmittedProofsQuery(variables?: SubmittedProofsQueryQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<SubmittedProofsQueryQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<SubmittedProofsQueryQuery>(SubmittedProofsQueryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SubmittedProofsQuery', 'query', variables);
+    },
+    CapacityCommitmentStatsPerEpochQuery(variables?: CapacityCommitmentStatsPerEpochQueryQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<CapacityCommitmentStatsPerEpochQueryQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<CapacityCommitmentStatsPerEpochQueryQuery>(CapacityCommitmentStatsPerEpochQueryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'CapacityCommitmentStatsPerEpochQuery', 'query', variables);
     }
   };
 }

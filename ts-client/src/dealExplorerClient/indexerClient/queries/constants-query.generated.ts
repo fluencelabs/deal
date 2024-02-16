@@ -1,14 +1,13 @@
 /* eslint-disable */
 //@ts-nocheck
-import * as Types from "../generated.types.js";
+import * as Types from '../generated.types.js';
 
-import { GraphQLClient } from "graphql-request";
-import type { RequestOptions } from "graphql-request";
-type GraphQLClientRequestHeaders = RequestOptions["requestHeaders"];
-import gql from "graphql-tag";
-export type ConstantsQueryQueryVariables = Types.Exact<{
-  [key: string]: never;
-}>;
+import { GraphQLClient } from 'graphql-request';
+import type { RequestOptions } from 'graphql-request';
+type GraphQLClientRequestHeaders = RequestOptions['requestHeaders'];
+import gql from 'graphql-tag';
+export type ConstantsQueryQueryVariables = Types.Exact<{ [key: string]: never; }>;
+
 
 export type ConstantsQueryQuery = { __typename?: 'Query', graphNetworks: Array<{ __typename?: 'GraphNetwork', coreEpochDuration?: number | null, initTimestamp?: number | null }> };
 
