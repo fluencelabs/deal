@@ -15,7 +15,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@fluencelabs/deal-ts-clients": "https://npm.fluence.dev/@fluencelabs/deal-ts-clients/-/deal-ts-clients-0.4.1-main-ab2b967-1501-1.0.tgz",
+    "@fluencelabs/deal-ts-clients": "https://npm.fluence.dev/@fluencelabs/deal-ts-clients/-/deal-ts-clients-0.5.2-release-please-2269248-1605-1.0.tgz",
     "ethers": "6.7.1",
     "vitest": "^1.2.0"
   },
