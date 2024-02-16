@@ -6,6 +6,7 @@
     "rootDir": "src",
     "moduleResolution": "NodeNext",
     "module": "ESNext",
+    "target": "ESNext",
     "resolveJsonModule": true,
     "verbatimModuleSyntax": true,
     "lib": ["es2023"]
