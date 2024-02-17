@@ -282,13 +282,17 @@ export function handleProofSubmitted(event: ProofSubmitted): void {
   graphNetwork.proofsTotal = graphNetwork.proofsTotal.plus(UNO_BIG_INT);
   graphNetwork.save();
 
-  capacityCommitmentStatsPerEpoch.submittedProofsCount = capacityCommitmentStatsPerEpoch.submittedProofsCount + 1;
-  capacityCommitmentStatsPerEpoch.save();
-
   let computeUnitPerEpochStat = createOrLoadComputeUnitPerEpochStat(computeUnit.id, currentEpoch.toString());
   computeUnitPerEpochStat.submittedProofsCount = computeUnitPerEpochStat.submittedProofsCount + 1;
   computeUnitPerEpochStat.capacityCommitment = capacityCommitment.id
   computeUnitPerEpochStat.save();
+
+  capacityCommitmentStatsPerEpoch.submittedProofsCount = capacityCommitmentStatsPerEpoch.submittedProofsCount + 1;
+  // Let's catch when CU triggered to become succeceed in proof submission for the epoch (and only once) below.
+  if (computeUnitPerEpochStat.submittedProofsCount == graphNetwork.MinRequiredProofsPerEpoch) {
+    capacityCommitmentStatsPerEpoch.computeUnitsWithMinRequiredProofsSubmittedCounter = capacityCommitmentStatsPerEpoch.computeUnitsWithMinRequiredProofsSubmittedCounter + 1;
+  }
+  capacityCommitmentStatsPerEpoch.save();
 }
 
 export function handleRewardWithdrawn(event: RewardWithdrawn): void {

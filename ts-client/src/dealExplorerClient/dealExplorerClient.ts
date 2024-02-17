@@ -899,6 +899,7 @@ export class DealExplorerClient {
 
     const { expectedProofsDueNow, status } = serializeExpectedProofsAndCUStatus(
       computeUnit,
+      this._capacityMinRequiredProofsPerEpoch!,
       this._coreInitTimestamp!,
       this._coreEpochDuration!,
     );
@@ -1003,6 +1004,7 @@ export class DealExplorerClient {
       const { expectedProofsDueNow, status } =
         serializeExpectedProofsAndCUStatus(
           computeUnit,
+          this._capacityMinRequiredProofsPerEpoch!,
           this._coreInitTimestamp!,
           this._coreEpochDuration!,
         );
@@ -1057,29 +1059,6 @@ export class DealExplorerClient {
     //  thus, logic could be complicated, resolve after discussion with PM.
     let res: Array<ProofStatsByCapacityCommitment> = []
     for (const proofStats of data.capacityCommitmentStatsPerEpoches)  {
-      // Calculate computeUnits succeed in proof submission.
-      // If some of CUs are not succeeded them are automatically considered as failed.
-      let computeUnitToProofCounter: Record<string, number> = {};
-      let computeUnitsSuccess = new Set();
-      if (proofStats.submittedProofs) {
-        // TODO: resolve....
-        // Suppose, that for 1 epoch we could have not a lot of proofs (not more than 1k)
-        // TOOD: there could be more submitted proofs than page max size
-        for (const proof of proofStats.submittedProofs) {
-          const computeUnitId = proof.computeUnit.id
-          if (computeUnitId in computeUnitToProofCounter) {
-            computeUnitToProofCounter[computeUnitId] += 1;
-          } else {
-            computeUnitToProofCounter[computeUnitId] = 1;
-          }
-
-          // Compare with required capacity contract constant.
-          if (computeUnitToProofCounter[computeUnitId]! >= this._capacityMinRequiredProofsPerEpoch!) {
-            computeUnitsSuccess.add(computeUnitId);
-          }
-        }
-      }
-
       res.push(
         {
           createdAtEpoch: Number(proofStats.epoch),
@@ -1087,8 +1066,8 @@ export class DealExplorerClient {
           createdAtEpochBlockNumberEnd: Number(proofStats.blockNumberEnd),
           computeUnitsExpected: proofStats.activeUnitCount,
           submittedProofs: proofStats.submittedProofsCount,
-          computeUnitsFailed: proofStats.activeUnitCount - computeUnitsSuccess.size,
-          computeUnitsSuccess: computeUnitsSuccess.size,
+          computeUnitsFailed: proofStats.activeUnitCount - proofStats.computeUnitsWithMinRequiredProofsSubmittedCounter,
+          computeUnitsSuccess: proofStats.computeUnitsWithMinRequiredProofsSubmittedCounter,
           submittedProofsPerCU: proofStats.submittedProofsCount / proofStats.activeUnitCount,
         }
       )

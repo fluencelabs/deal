@@ -295,6 +295,11 @@ type CapacityCommitmentStatsPerEpoch @entity {
   submittedProofsCount: Int!
 
   submittedProofs: [SubmittedProof!] @derivedFrom(field: "capacityCommitmentStatsPerEpoch")
+
+  # Add additional seconds stats (that relate from others) below.
+  # Relates means that related should be updated first, and stats below strictly after.
+  "Should be update after ComputeUnitPerEpochStat.submittedProofsCount reached min proofs border."
+  computeUnitsWithMinRequiredProofsSubmittedCounter: Int!
 }
 
 "Helper stat model to count success proofs per epoch for a CU."

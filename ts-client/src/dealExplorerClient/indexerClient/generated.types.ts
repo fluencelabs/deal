@@ -101,6 +101,7 @@ export type CapacityCommitmentStatsPerEpoch = {
   blockNumberEnd: Scalars['BigInt']['output'];
   blockNumberStart: Scalars['BigInt']['output'];
   capacityCommitment: CapacityCommitment;
+  computeUnitsWithMinRequiredProofsSubmittedCounter: Scalars['Int']['output'];
   currentCCNextCCFailedEpoch: Scalars['BigInt']['output'];
   epoch: Scalars['BigInt']['output'];
   exitedUnitCount: Scalars['Int']['output'];
@@ -170,6 +171,14 @@ export type CapacityCommitmentStatsPerEpoch_Filter = {
   capacityCommitment_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
   capacityCommitment_starts_with?: InputMaybe<Scalars['String']['input']>;
   capacityCommitment_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  computeUnitsWithMinRequiredProofsSubmittedCounter?: InputMaybe<Scalars['Int']['input']>;
+  computeUnitsWithMinRequiredProofsSubmittedCounter_gt?: InputMaybe<Scalars['Int']['input']>;
+  computeUnitsWithMinRequiredProofsSubmittedCounter_gte?: InputMaybe<Scalars['Int']['input']>;
+  computeUnitsWithMinRequiredProofsSubmittedCounter_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  computeUnitsWithMinRequiredProofsSubmittedCounter_lt?: InputMaybe<Scalars['Int']['input']>;
+  computeUnitsWithMinRequiredProofsSubmittedCounter_lte?: InputMaybe<Scalars['Int']['input']>;
+  computeUnitsWithMinRequiredProofsSubmittedCounter_not?: InputMaybe<Scalars['Int']['input']>;
+  computeUnitsWithMinRequiredProofsSubmittedCounter_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
   currentCCNextCCFailedEpoch?: InputMaybe<Scalars['BigInt']['input']>;
   currentCCNextCCFailedEpoch_gt?: InputMaybe<Scalars['BigInt']['input']>;
   currentCCNextCCFailedEpoch_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -256,6 +265,7 @@ export type CapacityCommitmentStatsPerEpoch_OrderBy =
   | 'capacityCommitment__submittedProofsCount'
   | 'capacityCommitment__totalCUFailCount'
   | 'capacityCommitment__totalCollateral'
+  | 'computeUnitsWithMinRequiredProofsSubmittedCounter'
   | 'currentCCNextCCFailedEpoch'
   | 'epoch'
   | 'exitedUnitCount'
@@ -2887,6 +2897,7 @@ export type SubmittedProof_OrderBy =
   | 'capacityCommitmentStatsPerEpoch__activeUnitCount'
   | 'capacityCommitmentStatsPerEpoch__blockNumberEnd'
   | 'capacityCommitmentStatsPerEpoch__blockNumberStart'
+  | 'capacityCommitmentStatsPerEpoch__computeUnitsWithMinRequiredProofsSubmittedCounter'
   | 'capacityCommitmentStatsPerEpoch__currentCCNextCCFailedEpoch'
   | 'capacityCommitmentStatsPerEpoch__epoch'
   | 'capacityCommitmentStatsPerEpoch__exitedUnitCount'

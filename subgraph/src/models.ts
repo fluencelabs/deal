@@ -236,6 +236,7 @@ export function createOrLoadCapacityCommitmentStatsPerEpoch(capacityCommitmentId
     entity.submittedProofsCount = 0
     entity.blockNumberStart = ZERO_BIG_INT
     entity.blockNumberEnd = ZERO_BIG_INT
+    entity.computeUnitsWithMinRequiredProofsSubmittedCounter = 0
     entity.save()
   }
   return entity as CapacityCommitmentStatsPerEpoch

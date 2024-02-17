@@ -127,6 +127,7 @@ query CapacityCommitmentStatsPerEpochQuery(
     nextAdditionalActiveUnitCount
     currentCCNextCCFailedEpoch
     submittedProofsCount
+    computeUnitsWithMinRequiredProofsSubmittedCounter
     submittedProofs {
       id
       computeUnit {
