@@ -924,6 +924,8 @@ export class DealExplorerClient {
   }
 
   // @notice [Figma] List of Proofs.
+  // @notice [Figma] Capacity Commitment. Proofs. Submitted Proofs / fails. use both filters:
+  //  capacityCommitmentStatsPerEpochId, computeUnitId
   async getProofs(
     filters?: ProofsFilters,
     offset: number = 0,
@@ -1060,6 +1062,9 @@ export class DealExplorerClient {
       let computeUnitToProofCounter: Record<string, number> = {};
       let computeUnitsSuccess = new Set();
       if (proofStats.submittedProofs) {
+        // TODO: resolve....
+        // Suppose, that for 1 epoch we could have not a lot of proofs (not more than 1k)
+        // TOOD: there could be more submitted proofs than page max size
         for (const proof of proofStats.submittedProofs) {
           const computeUnitId = proof.computeUnit.id
           if (computeUnitId in computeUnitToProofCounter) {

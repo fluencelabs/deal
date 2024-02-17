@@ -69,6 +69,8 @@ export interface CapacityCommitmentsFilters {
 // @param search: search by provider id, peer id, transaction hash.
 export interface ProofsFilters {
   search?: string | undefined;
+  capacityCommitmentStatsPerEpochId?: string | undefined;
+  computeUnitId?: string | undefined;
 }
 
 // Order Types.
