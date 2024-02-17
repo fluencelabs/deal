@@ -22,7 +22,7 @@ export type CapacityCommitmentQueryQueryVariables = Types.Exact<{
 }>;
 
 
-export type CapacityCommitmentQueryQuery = { __typename?: 'Query', capacityCommitment?: { __typename?: 'CapacityCommitment', rewardDelegatorRate: number, id: string, status?: Types.CapacityCommitmentStatus | null, createdAt: any, startEpoch: any, endEpoch: any, computeUnitsCount: number, totalCollateral: any, rewardWithdrawn: any, computeUnits?: Array<{ __typename?: 'CapacityCommitmentToComputeUnit', computeUnit: { __typename?: 'ComputeUnit', id: string } }> | null, peer: { __typename?: 'Peer', id: string, provider: { __typename?: 'Provider', id: string } } } | null };
+export type CapacityCommitmentQueryQuery = { __typename?: 'Query', capacityCommitment?: { __typename?: 'CapacityCommitment', rewardDelegatorRate: number, id: string, status?: Types.CapacityCommitmentStatus | null, createdAt: any, startEpoch: any, endEpoch: any, computeUnitsCount: number, totalCollateral: any, rewardWithdrawn: any, computeUnits?: Array<{ __typename?: 'CapacityCommitmentToComputeUnit', computeUnit: { __typename?: 'ComputeUnit', id: string, deal?: { __typename?: 'Deal', id: string } | null } }> | null, peer: { __typename?: 'Peer', id: string, provider: { __typename?: 'Provider', id: string } } } | null };
 
 export type SubmittedProofsQueryQueryVariables = Types.Exact<{
   filters?: Types.InputMaybe<Types.SubmittedProof_Filter>;
@@ -120,6 +120,9 @@ export const CapacityCommitmentQueryDocument = gql`
     computeUnits {
       computeUnit {
         id
+        deal {
+          id
+        }
       }
     }
   }

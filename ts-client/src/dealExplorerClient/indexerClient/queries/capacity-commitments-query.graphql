@@ -28,6 +28,9 @@ query CapacityCommitmentQuery(
       computeUnits {
         computeUnit {
           id
+          deal {
+            id
+          }
         }
       }
   }

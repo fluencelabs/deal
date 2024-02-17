@@ -1131,16 +1131,27 @@ export class DealExplorerClient {
       orderBy,
       orderType,
     })
+
     // Extract desirable stats for compute unit if stats have been stored for the CUs.
+    // Also extract info if CU in Deal.
     let computeUnitToSubmittedProofsPerEpoch: Record<string, number> = {}
     computeUnitPerEpochStatsFetched.computeUnitPerEpochStats.map((stats) => {
       computeUnitToSubmittedProofsPerEpoch[stats.computeUnit.id] = stats.submittedProofsCount
     })
-    const allCUsOfCC = capacityCommitmentFetched.capacityCommitment.computeUnits ?? []
+    let allCUsOfCC: Array<string> = []
+    let computeUnitsInDeal = new Set()
+    const capacityCommitmentComputeUnits = capacityCommitmentFetched.capacityCommitment.computeUnits ?? []
+    for (const capacityCommitmentToComputeUnit of capacityCommitmentComputeUnits) {
+      const _computeUnit = capacityCommitmentToComputeUnit.computeUnit
+      allCUsOfCC.push(_computeUnit.id)
+      if (_computeUnit.deal && _computeUnit.deal.id) {
+        computeUnitsInDeal.add(_computeUnit.id)
+      }
+    }
+
     // Merge queries to serialize data.
     let res: Array<ComputeUnitStatsPerCapacityCommitmentEpoch> = []
-    for (const capacityCommitmentToCU of allCUsOfCC) {
-      const computeUnitId = capacityCommitmentToCU.computeUnit.id
+    for (const computeUnitId of allCUsOfCC) {
       let submittedProofs = 0
       if (computeUnitId in computeUnitToSubmittedProofsPerEpoch) {
         submittedProofs = Number(computeUnitToSubmittedProofsPerEpoch[computeUnitId])
@@ -1148,7 +1159,13 @@ export class DealExplorerClient {
       let computeUnitProofStatus: 'failed' | 'success' = 'failed'
       if (submittedProofs >= this._capacityMinRequiredProofsPerEpoch!) {
         computeUnitProofStatus = 'success'
+      } else if (computeUnitId in computeUnitsInDeal) {
+        // Compute unit is not failed if it is not in deal right now.
+        computeUnitProofStatus = 'success'
+      } else {
+        computeUnitProofStatus = 'failed'
       }
+
       res.push(
         {
             capacityCommitmentId: capacityCommitmentId,
