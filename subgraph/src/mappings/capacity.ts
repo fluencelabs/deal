@@ -2,6 +2,7 @@ import {
   CapacityCommitmentStatus,
   createOrLoadCapacityCommitmentStatsPerEpoch,
   createOrLoadCapacityCommitmentToComputeUnit,
+  createOrLoadComputeUnitPerEpochStat,
   createOrLoadGraphNetwork,
   UNO_BIG_INT,
   ZERO_BIG_INT
@@ -283,6 +284,11 @@ export function handleProofSubmitted(event: ProofSubmitted): void {
 
   capacityCommitmentStatsPerEpoch.submittedProofsCount = capacityCommitmentStatsPerEpoch.submittedProofsCount + 1;
   capacityCommitmentStatsPerEpoch.save();
+
+  let computeUnitPerEpochStat = createOrLoadComputeUnitPerEpochStat(computeUnit.id, currentEpoch.toString());
+  computeUnitPerEpochStat.submittedProofsCount = computeUnitPerEpochStat.submittedProofsCount + 1;
+  computeUnitPerEpochStat.capacityCommitment = capacityCommitment.id
+  computeUnitPerEpochStat.save();
 }
 
 export function handleRewardWithdrawn(event: RewardWithdrawn): void {

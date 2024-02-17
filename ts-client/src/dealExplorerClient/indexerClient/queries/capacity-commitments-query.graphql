@@ -25,6 +25,11 @@ query CapacityCommitmentQuery(
   capacityCommitment(id: $id) {
     ...CapacityCommitmentBasic
       rewardDelegatorRate
+      computeUnits {
+        computeUnit {
+          id
+        }
+      }
   }
 }
 
@@ -125,6 +130,29 @@ query CapacityCommitmentStatsPerEpochQuery(
         id
       }
     }
+  }
+}
+
+query ComputeUnitPerEpochStatsQuery(
+  $filters: ComputeUnitPerEpochStat_filter,
+  $offset: Int,
+  $limit: Int,
+  $orderBy: ComputeUnitPerEpochStat_orderBy,
+  $orderType: OrderDirection,
+) {
+  computeUnitPerEpochStats(
+      where: $filters
+      first: $limit
+      skip: $offset
+      orderBy: $orderBy
+      orderDirection: $orderType
+  ) {
+    id
+    computeUnit {
+      id
+    }
+    epoch
+    submittedProofsCount
   }
 }
 

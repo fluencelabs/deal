@@ -296,3 +296,16 @@ type CapacityCommitmentStatsPerEpoch @entity {
 
   submittedProofs: [SubmittedProof!] @derivedFrom(field: "capacityCommitmentStatsPerEpoch")
 }
+
+"Helper stat model to count success proofs per epoch for a CU."
+type ComputeUnitPerEpochStat @entity {
+  id: ID! # Set to `computeUnit.id.concat(epoch)`
+  epoch: BigInt!
+  computeUnit: ComputeUnit!
+
+  # To allow query for all CU by the Capacity Commitment.
+  capacityCommitment: CapacityCommitment
+
+  # Add per epoch stats below.
+  submittedProofsCount: Int!
+}

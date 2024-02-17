@@ -243,6 +243,18 @@ export interface ProofStatsByCapacityCommitment {
   submittedProofsPerCU: number;
 }
 
+export interface ComputeUnitStatsPerCapacityCommitmentEpoch {
+  capacityCommitmentId: string;
+
+  computeUnitId: string;
+  submittedProofs: number;
+  computeUnitProofStatus: "success" | "failed";
+}
+
+export interface ComputeUnitStatsPerCapacityCommitmentEpochListView extends ListViewABC {
+  data: Array<ComputeUnitStatsPerCapacityCommitmentEpoch>;
+}
+
 export interface ProofStatsByCapacityCommitmentListView extends ListViewABC {
   data: Array<ProofStatsByCapacityCommitment>;
 }

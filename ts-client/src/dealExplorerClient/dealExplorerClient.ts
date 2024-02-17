@@ -27,6 +27,8 @@ import type {
   ProofStatsByCapacityCommitmentListView,
   ComputeUnitsByCapacityCommitmentListView,
   ProofStatsByCapacityCommitment,
+  ComputeUnitStatsPerCapacityCommitmentEpoch,
+  ComputeUnitStatsPerCapacityCommitmentEpochListView,
 } from "./types/schemes.js";
 import type {
   ChildEntitiesByProviderFilter,
@@ -45,6 +47,7 @@ import type {
   ProofsOrderBy,
   ComputeUnitsOrderBy,
   ProofStatsByCapacityCommitmentOrderBy,
+  ComputeUnitStatsPerCapacityCommitmentEpochOrderBy,
 } from "./types/filters.js";
 import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type {
@@ -1090,6 +1093,71 @@ export class DealExplorerClient {
       total: null,
       data: res,
     };
+  }
+
+  // @notice [Figma] При клике на карточку эпохи появится окно с перечнем всех CU внутри этого CC.
+  // @dev It does 2 queries: for CC and for CUs stats. TODO: reduce to 1 query.
+  // TODO: move data manipulation to serializer.
+  async getComputeUnitStatsPerCapacityCommitmentEpoch(
+    capacityCommitmentId: string,
+    epoch: number,
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: ComputeUnitStatsPerCapacityCommitmentEpochOrderBy = "id",
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
+  ): Promise<ComputeUnitStatsPerCapacityCommitmentEpochListView> {
+    await this._init()
+    // Get all CU linked to CC.
+    const capacityCommitmentFetched = await this._indexerClient.getCapacityCommitment({
+      id: capacityCommitmentId
+    })
+    if (!capacityCommitmentFetched.capacityCommitment) {
+      throw new Error(`Capacity commitment with id ${capacityCommitmentId} not found.`)
+    }
+
+    // Get stats for all Compute Units of the CC for the epoch.
+    const computeUnitPerEpochStatsFetched = await this._indexerClient.getComputeUnitPerEpochStats({
+      filters: {
+        capacityCommitment_: { id: capacityCommitmentId },
+        epoch: epoch.toString(),
+      },
+      offset,
+      limit,
+      orderBy,
+      orderType,
+    })
+    // Extract desirable stats for compute unit if stats have been stored for the CUs.
+    let computeUnitToSubmittedProofsPerEpoch: Record<string, number> = {}
+    computeUnitPerEpochStatsFetched.computeUnitPerEpochStats.map((stats) => {
+      computeUnitToSubmittedProofsPerEpoch[stats.computeUnit.id] = stats.submittedProofsCount
+    })
+    const allCUsOfCC = capacityCommitmentFetched.capacityCommitment.computeUnits ?? []
+    // Merge queries to serialize data.
+    let res: Array<ComputeUnitStatsPerCapacityCommitmentEpoch> = []
+    for (const capacityCommitmentToCU of allCUsOfCC) {
+      const computeUnitId = capacityCommitmentToCU.computeUnit.id
+      let submittedProofs = 0
+      if (computeUnitId in computeUnitToSubmittedProofsPerEpoch) {
+        submittedProofs = Number(computeUnitToSubmittedProofsPerEpoch[computeUnitId])
+      }
+      let computeUnitProofStatus: 'failed' | 'success' = 'failed'
+      if (submittedProofs >= this._capacityMinRequiredProofsPerEpoch!) {
+        computeUnitProofStatus = 'success'
+      }
+      res.push(
+        {
+            capacityCommitmentId: capacityCommitmentId,
+            computeUnitId: computeUnitId,
+            submittedProofs,
+            computeUnitProofStatus,
+        }
+      )
+    }
+
+    return {
+      total: null,
+      data: res
+    }
   }
 }
 

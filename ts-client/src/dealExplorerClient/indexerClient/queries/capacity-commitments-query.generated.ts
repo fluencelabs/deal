@@ -22,7 +22,7 @@ export type CapacityCommitmentQueryQueryVariables = Types.Exact<{
 }>;
 
 
-export type CapacityCommitmentQueryQuery = { __typename?: 'Query', capacityCommitment?: { __typename?: 'CapacityCommitment', rewardDelegatorRate: number, id: string, status?: Types.CapacityCommitmentStatus | null, createdAt: any, startEpoch: any, endEpoch: any, computeUnitsCount: number, totalCollateral: any, rewardWithdrawn: any, peer: { __typename?: 'Peer', id: string, provider: { __typename?: 'Provider', id: string } } } | null };
+export type CapacityCommitmentQueryQuery = { __typename?: 'Query', capacityCommitment?: { __typename?: 'CapacityCommitment', rewardDelegatorRate: number, id: string, status?: Types.CapacityCommitmentStatus | null, createdAt: any, startEpoch: any, endEpoch: any, computeUnitsCount: number, totalCollateral: any, rewardWithdrawn: any, computeUnits?: Array<{ __typename?: 'CapacityCommitmentToComputeUnit', computeUnit: { __typename?: 'ComputeUnit', id: string } }> | null, peer: { __typename?: 'Peer', id: string, provider: { __typename?: 'Provider', id: string } } } | null };
 
 export type SubmittedProofsQueryQueryVariables = Types.Exact<{
   filters?: Types.InputMaybe<Types.SubmittedProof_Filter>;
@@ -51,6 +51,17 @@ export type CapacityCommitmentStatsPerEpochQueryQueryVariables = Types.Exact<{
 
 
 export type CapacityCommitmentStatsPerEpochQueryQuery = { __typename?: 'Query', capacityCommitmentStatsPerEpoches: Array<{ __typename?: 'CapacityCommitmentStatsPerEpoch', id: string, epoch: any, blockNumberEnd: any, blockNumberStart: any, totalCUFailCount: number, exitedUnitCount: number, activeUnitCount: number, nextAdditionalActiveUnitCount: number, currentCCNextCCFailedEpoch: any, submittedProofsCount: number, capacityCommitment: { __typename?: 'CapacityCommitment', id: string }, submittedProofs?: Array<{ __typename?: 'SubmittedProof', id: string, computeUnit: { __typename?: 'ComputeUnit', id: string } }> | null }> };
+
+export type ComputeUnitPerEpochStatsQueryQueryVariables = Types.Exact<{
+  filters?: Types.InputMaybe<Types.ComputeUnitPerEpochStat_Filter>;
+  offset?: Types.InputMaybe<Types.Scalars['Int']['input']>;
+  limit?: Types.InputMaybe<Types.Scalars['Int']['input']>;
+  orderBy?: Types.InputMaybe<Types.ComputeUnitPerEpochStat_OrderBy>;
+  orderType?: Types.InputMaybe<Types.OrderDirection>;
+}>;
+
+
+export type ComputeUnitPerEpochStatsQueryQuery = { __typename?: 'Query', computeUnitPerEpochStats: Array<{ __typename?: 'ComputeUnitPerEpochStat', id: string, epoch: any, submittedProofsCount: number, computeUnit: { __typename?: 'ComputeUnit', id: string } }> };
 
 export const CapacityCommitmentBasicFragmentDoc = gql`
     fragment CapacityCommitmentBasic on CapacityCommitment {
@@ -106,6 +117,11 @@ export const CapacityCommitmentQueryDocument = gql`
   capacityCommitment(id: $id) {
     ...CapacityCommitmentBasic
     rewardDelegatorRate
+    computeUnits {
+      computeUnit {
+        id
+      }
+    }
   }
 }
     ${CapacityCommitmentBasicFragmentDoc}`;
@@ -169,6 +185,24 @@ export const CapacityCommitmentStatsPerEpochQueryDocument = gql`
   }
 }
     `;
+export const ComputeUnitPerEpochStatsQueryDocument = gql`
+    query ComputeUnitPerEpochStatsQuery($filters: ComputeUnitPerEpochStat_filter, $offset: Int, $limit: Int, $orderBy: ComputeUnitPerEpochStat_orderBy, $orderType: OrderDirection) {
+  computeUnitPerEpochStats(
+    where: $filters
+    first: $limit
+    skip: $offset
+    orderBy: $orderBy
+    orderDirection: $orderType
+  ) {
+    id
+    computeUnit {
+      id
+    }
+    epoch
+    submittedProofsCount
+  }
+}
+    `;
 
 export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string, operationType?: string, variables?: any) => Promise<T>;
 
@@ -188,6 +222,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     CapacityCommitmentStatsPerEpochQuery(variables?: CapacityCommitmentStatsPerEpochQueryQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<CapacityCommitmentStatsPerEpochQueryQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<CapacityCommitmentStatsPerEpochQueryQuery>(CapacityCommitmentStatsPerEpochQueryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'CapacityCommitmentStatsPerEpochQuery', 'query', variables);
+    },
+    ComputeUnitPerEpochStatsQuery(variables?: ComputeUnitPerEpochStatsQueryQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<ComputeUnitPerEpochStatsQueryQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<ComputeUnitPerEpochStatsQueryQuery>(ComputeUnitPerEpochStatsQueryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'ComputeUnitPerEpochStatsQuery', 'query', variables);
     }
   };
 }
