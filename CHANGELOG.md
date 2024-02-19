@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.2](https://github.com/fluencelabs/deal/compare/v0.5.1...v0.5.2) (2024-02-19)
+
+
+### Features
+
+* indexer for cli - get offer with some data [chain-356] ([#263](https://github.com/fluencelabs/deal/issues/263)) ([9fdc6f8](https://github.com/fluencelabs/deal/commit/9fdc6f89d67594f04542c5dfabfaa483976b9b17))
+
 ## [0.5.1](https://github.com/fluencelabs/deal/compare/v0.5.0...v0.5.1) (2024-02-16)
 
 
