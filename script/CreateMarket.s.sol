@@ -30,6 +30,7 @@ contract CreateMarket is Depoyments, Script {
     string[2] effectorDescriptions = ["cURL", "IPFS"];
     IMarket market;
     ICapacity capacity;
+    IDealFactory dealFactory;
     ICore core;
     IERC20 tUSD;
     string envName;
@@ -42,6 +43,7 @@ contract CreateMarket is Depoyments, Script {
 
         market = IMarket(deployments.contracts["Market"].addr);
         capacity = ICapacity(deployments.contracts["Capacity"].addr);
+        dealFactory = IDealFactory(deployments.contracts["DealFactory"].addr);
         core = ICore(deployments.contracts["Core"].addr);
         tUSD = IERC20(deployments.contracts["tUSD"].addr);
     }
@@ -115,7 +117,7 @@ contract CreateMarket is Depoyments, Script {
             }
             // Add zoo into Deals configuration of whitelists.
             if (i % 3 == 0) {
-                IDeal dealCreatedContract = market.deployDeal(
+                IDeal dealCreatedContract = dealFactory.deployDeal(
                     appCID,
                     tUSD,
                     newMinWorkers,
@@ -128,7 +130,7 @@ contract CreateMarket is Depoyments, Script {
                 );
                 createdDeals[i] = address(dealCreatedContract);
             } else if (i % 2 == 0) {
-                IDeal dealCreatedContract = market.deployDeal(
+                IDeal dealCreatedContract = dealFactory.deployDeal(
                     appCID,
                     tUSD,
                     newMinWorkers,
@@ -141,7 +143,7 @@ contract CreateMarket is Depoyments, Script {
                 );
                 createdDeals[i] = address(dealCreatedContract);
             } else {
-                IDeal dealCreatedContract = market.deployDeal(
+                IDeal dealCreatedContract = dealFactory.deployDeal(
                     appCID,
                     tUSD,
                     newMinWorkers,

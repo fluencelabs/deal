@@ -11,7 +11,9 @@ import "src/dev/TestERC20.sol";
 import "src/core/Core.sol";
 import "src/deal/Deal.sol";
 import "src/core/modules/market/Market.sol";
+import "src/core/modules/market/DealFactory.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
+import "src/core/modules/market/interfaces/IDealFactory.sol";
 import "src/core/modules/capacity/Capacity.sol";
 import "src/core/modules/capacity/interfaces/ICapacity.sol";
 
@@ -24,6 +26,7 @@ library DeployDealSystem {
         Core core;
         Market market;
         Capacity capacity;
+        DealFactory dealFactory;
     }
 
     // ------------------ Constants ------------------
@@ -106,7 +109,15 @@ library DeployDealSystem {
             )
         );
 
-        deployment.core.initializeModules(deployment.capacity, deployment.market);
+        deployment.dealFactory = DealFactory(
+            address(
+                new ERC1967Proxy(
+                    address(new DealFactory(deployment.core)), abi.encodeWithSelector(DealFactory.initialize.selector)
+                )
+            )
+        );
+
+        deployment.core.initializeModules(deployment.capacity, deployment.market, deployment.dealFactory);
 
         deployment.initialized = true;
     }

@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "src/utils/OwnableUpgradableDiamond.sol";
 import "src/deal/interfaces/IDeal.sol";
@@ -13,7 +13,7 @@ import "./interfaces/IDealFactory.sol";
 /*
  * @dev On init mas.sender becomes owner.
  */
-abstract contract DealFactory is BaseModule, IDealFactory {
+contract DealFactory is UUPSUpgradeable, BaseModule, IDealFactory {
     using SafeERC20 for IERC20;
 
     // ------------------ Storage ------------------
@@ -21,6 +21,12 @@ abstract contract DealFactory is BaseModule, IDealFactory {
 
     struct DealFactoryStorage {
         mapping(IDeal => bool) hasDeal;
+    }
+
+    constructor(ICore core_) BaseModule(core_) {} // disables initializer, immutable set
+
+    function initialize() public initializer {
+        __UUPSUpgradeable_init();
     }
 
     function _getDealFactoryStorage() private pure returns (DealFactoryStorage storage s) {
@@ -96,4 +102,6 @@ abstract contract DealFactory is BaseModule, IDealFactory {
 
         return deal;
     }
+
+    function _authorizeUpgrade(address) internal override onlyCoreOwner {}
 }

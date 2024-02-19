@@ -16,6 +16,7 @@ import "src/utils/Multicall3.sol";
 import "src/core/Core.sol";
 import "src/core/interfaces/ICore.sol";
 import "src/core/modules/market/Market.sol";
+import "src/core/modules/market/DealFactory.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
 import "src/core/modules/capacity/Capacity.sol";
 import "src/core/modules/capacity/interfaces/ICapacity.sol";
@@ -254,6 +255,8 @@ contract DeployContracts is Depoyments, Script {
         bool needToRedeployMarket = _doNeedToRedeploy("MarketImpl", "Market");
         bool needToRedeployCapacity = _doNeedToRedeploy("CapacityImpl", "Capacity");
 
+        bool needToRedeployDealFactory = _doNeedToRedeploy("DealFactoryImpl", "DealFactory");
+
         (address coreAddr, bool isNewCore) = _tryDeployContract(
             "Core",
             "ERC1967Proxy",
@@ -263,11 +266,13 @@ contract DeployContracts is Depoyments, Script {
                     Core.initialize.selector, epochDuration_, minDepositedEpoches_, minRematchingEpoches_, dealImpl
                 )
             ),
-            needToRedeployMarket || needToRedeployCapacity
+            needToRedeployMarket || needToRedeployCapacity || needToRedeployDealFactory
         );
 
         address marketImpl = _deployContract("MarketImpl", "Market", abi.encode(coreAddr), isNewCore);
         address capacityImpl = _deployContract("CapacityImpl", "Capacity", abi.encode(coreAddr), isNewCore);
+
+        address dealFactoryImpl = _deployContract("DealFactoryImpl", "DealFactory", abi.encode(coreAddr), isNewCore);
 
         address marketProxy = _deployContract(
             "Market", "ERC1967Proxy", abi.encode(marketImpl, abi.encodeWithSelector(Market.initialize.selector))
@@ -300,13 +305,18 @@ contract DeployContracts is Depoyments, Script {
             )
         );
 
+        address dealFactoryProxy = _deployContract(
+            "DealFactory", "ERC1967Proxy", abi.encode(dealFactoryImpl, abi.encodeWithSelector(DealFactory.initialize.selector))
+        );
+
         if (isNewCore) {
             console.log("\nCore deployed, initializing modules as well...");
-            ICore(coreAddr).initializeModules(ICapacity(capacityProxy), IMarket(marketProxy));
+            ICore(coreAddr).initializeModules(ICapacity(capacityProxy), IMarket(marketProxy), IDealFactory(dealFactoryProxy));
         }
 
-        // TODO: if needToRedeployMarket or needToRedeployCapacity - impl proxy should be update with impl.
-        if (!isNewCore && (needToRedeployMarket || needToRedeployCapacity)) {
+        // TODO: if needToRedeployMarket, needToRedeployCapacity or needToRedeployDealFactory
+        //   - impl proxy should be update with impl.
+        if (!isNewCore && (needToRedeployMarket || needToRedeployCapacity || needToRedeployDealFactory)) {
             revert("Update not implemented yet.");
         }
     }

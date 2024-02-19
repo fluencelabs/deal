@@ -44,7 +44,7 @@ contract DealFactoryTest is Test {
         uint256 maxWorkersPerProvider = 1;
         IERC20 paymentToken = IERC20(address(deployment.tUSD));
 
-        IDeal deal = deployment.market.deployDeal(
+        IDeal deal = deployment.dealFactory.deployDeal(
             appCID,
             paymentToken,
             minWorkers,
@@ -105,7 +105,7 @@ contract DealFactoryTest is Test {
             assertEq(dealParams.effectors[i].hash, d.effectors()[i].hash, "Should set effector (hash)");
         }
 
-        assertEq(deployment.market.hasDeal(d), true, "Should deal set in Core");
+        assertEq(deployment.dealFactory.hasDeal(d), true, "Should deal set in Core");
 
         //TODO: Check events
     }
