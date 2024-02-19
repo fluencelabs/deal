@@ -68,8 +68,6 @@ export async function createCommitments(
     await createCommitmentTx.wait(DEFAULT_CONFIRMATIONS);
   }
 
-  console.log("Approve collateral for all sent CC...");
-
   const createdCommitments = peerIds.length;
 
   // Fetch created commitmentIds from chain.
