@@ -20,4 +20,8 @@ contract Market is UUPSUpgradeable, MulticallUpgradeable, DealFactory, Matcher, 
     }
 
     function _authorizeUpgrade(address) internal override onlyCoreOwner {}
+
+    // fallback() external {
+    //     revert("Fallback not supported");
+    // }
 }

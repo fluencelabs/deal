@@ -96,4 +96,8 @@ abstract contract DealFactory is BaseModule, IDealFactory {
 
         return deal;
     }
+
+    fallback() external {
+        revert("Fallback not supported");
+    }
 }

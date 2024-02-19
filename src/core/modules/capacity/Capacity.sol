@@ -812,4 +812,8 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         return newStatus;
     }
     // #endregion
+
+    fallback() external {
+        revert("Fallback not supported");
+    }
 }
