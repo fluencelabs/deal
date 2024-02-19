@@ -20,6 +20,6 @@ extra_output = ["devdoc"]
 local = "http://0.0.0.0:8545"
 arbutrum = "http://0.0.0.0:8545"
 stage = "https://rpc.ankr.com/polygon_mumbai"
-testnet = "https://rpc.ankr.com/polygon_mumbai"
+testnet = "https://ipc.fluence.dev"
 kras = "https://rpc.ankr.com/polygon_mumbai"
 mumbai = "https://rpc.ankr.com/polygon_mumbai"
