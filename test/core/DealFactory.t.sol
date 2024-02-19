@@ -84,7 +84,7 @@ contract DealFactoryTest is Test {
 
         uint256 balanceBefore = deployment.tUSD.balanceOf(address(this));
 
-        deployment.tUSD.safeApprove(address(deployment.market), minAmount);
+        deployment.tUSD.safeApprove(address(deployment.dealFactory), minAmount);
         (IDeal d, DealParams memory dealParams) = _deployDeal(pricePerWorkerEpoch, targetWorkers);
 
         uint256 balanceDiff = balanceBefore - deployment.tUSD.balanceOf(address(this));
@@ -125,7 +125,7 @@ contract DealFactoryTest is Test {
 
         vm.startPrank(address(0x01));
 
-        deployment.tUSD.safeApprove(address(deployment.market), minAmount * 100);
+        deployment.tUSD.safeApprove(address(deployment.dealFactory), minAmount * 100);
 
         vm.expectRevert("ERC20: transfer amount exceeds balance");
         _deployDeal(pricePerWorkerEpoch, targetWorkers);
