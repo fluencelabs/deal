@@ -13,6 +13,7 @@
     "fmt": "prettier 'src/**/*.ts' --w",
     "codegen:explorerIndexerClient": "graphql-codegen --config codegen-deal-explorer-indexer.ts",
     "codegen:matcherIndexerClient": "graphql-codegen --config codegen-deal-matcher-indexer.ts",
+    "codegen:dealCliClient": "graphql-codegen --config codegen-deal-cli-indexer.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },

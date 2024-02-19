@@ -1,0 +1,16 @@
+query OfferQuery(
+  $id: ID!
+) {
+  offer(id: $id) {
+    id
+    effectors {
+      effector {
+        id
+        description
+      }
+    }
+    peers {
+      id
+    }
+  }
+}
