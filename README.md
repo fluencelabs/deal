@@ -34,50 +34,64 @@ is presented. Below are main commands of the makefile.
 - [Develop with Deal Infrastructure](#develop-with-deal-infrastructure)
 
 # Requirements
+Full requirements to develop in this repo.
 
-- foundry
+- foundry (https://book.getfoundry.sh/)
 - makefile (TODO)
 - node version 18.16
 
 # Contract
+To work with contracts we use forge (foundry): to deploy, to test unittests. Thus, to work in the repo you first of all should install Foundry: https://book.getfoundry.sh/
 
-## Install Foundry
+To run foundry commands and commands that create artifacts and insert contract artifacts into packages/modules: ts-client, subgraph we use `makefile` (and we use makefile for even further steps after: to build & deploy those modules after injecting artefacts of contracts into them).
 
-https://book.getfoundry.sh/
+## Env
+Because scripts and makefile supports env (actually makefile reads env from .env) we note that in the repo we leave [.example.env](.example.env).
 
-## Install NPM packages
+### Notable Env
+Below is the list of env. For description we aim you to [.example.env](.example.env) directly.
+
+- PRIVATE_KEY
+- LOCAL_CHAIN_BLOCK_MINING_INTERVAL
+- MAX_FAILED_RATIO
+- IS_MOCKED_RANDOMX
+
+## Makefile
+Below is some of useful **makefile** commands with their descriptions. To check out all commands run `make help`.
+
+### Install NPM packages
 
 ```shell
 $ make install-npms
 ```
 
-## Build
+### Build
 
-### Build contracts and deal-ts-clients and subgraph
+#### Build contracts and deal-ts-clients and subgraph
 
 ```shell
 $ make build-all
 ```
 
-### Build only contracts
+#### Build only contracts
 
 ```shell
 $ make build-contracts
 ```
 
-### Build only in npm packages
+#### Build only in npm packages
 
 ```shell
 $ make build-npms
 ```
 
-## Start Local Subgraph
+### Start Local Subgraph
 
 ```shell
 $ make start-local-subgraph
 ```
 
-## Start local network using docker
+### Start local network using docker
 
 ```shell
 $ docker compose -f docker/docker-compose.yml up
@@ -87,7 +101,7 @@ RPC: [http://0.0.0.0:8545](http://0.0.0.0:8545)
 
 Explorer: [http://localhost:4000](http://localhost:4000)
 
-## Start local network locally
+### Start local network locally
 
 ```shell
 $ make start-local-chain
@@ -97,7 +111,7 @@ $ make start-local-chain
 $ make deploy-local
 ```
 
-## Deploy to network
+### Deploy to network
 
 ```shell
 $ PRIVATE_KEY=${} make deploy-{network_name}
@@ -197,3 +211,6 @@ To stop and cleanup dev environment run:
 ```bash
 docker-compose -f docker/docker-compose.yml down --volumes
 ```
+
+# Ts-Client
+for `ts-client` module check out [README.md](ts-client/README.md).
