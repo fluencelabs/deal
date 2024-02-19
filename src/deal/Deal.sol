@@ -416,4 +416,8 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
 
         emit DealEnded(currentEpoch);
     }
+
+    fallback() external {
+        revert("Fallback not supported");
+    }
 }

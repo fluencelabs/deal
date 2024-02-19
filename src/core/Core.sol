@@ -85,4 +85,8 @@ contract Core is UUPSUpgradeable, GlobalConst, ICore {
     // ------------------ Internal Mutable Functions ------------------
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
+
+    fallback() external {
+        revert("Fallback not supported");
+    }
 }
