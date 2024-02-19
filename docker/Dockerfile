@@ -54,6 +54,7 @@ RUN make build-contracts
 # IPC
 FROM fluencelabs/fendermint:latest as ipc
 COPY docker/keys /testnet/keys
+ENV FM_NETWORK testnet
 RUN --mount=type=bind,source=docker/scripts/fendermint-bootstrap.sh,target=/bootstrap.sh /bootstrap.sh
 COPY --from=actors /ipc/fendermint/builtin-actors/output/bundle.car /fendermint/bundle.car
 COPY --from=actors /ipc/fendermint/actors/output/custom_actors_bundle.car /fendermint/custom_actors_bundle.car

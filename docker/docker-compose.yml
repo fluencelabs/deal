@@ -52,6 +52,7 @@ services:
       dockerfile: ./docker/Dockerfile
       target: ipc
     environment:
+      FM_NETWORK: testnet
       TENDERMINT_RPC_URL: http://cometbft:26657
     ports:
       - "26658:26658"
@@ -66,6 +67,8 @@ services:
       dockerfile: ./docker/Dockerfile
       target: cometbft
     environment:
+      CMT_LOG_LEVEL: "main:info,abci-client:debug,*:error"
+      CMT_LOG_FORMAT: "plain"
       CMT_PROXY_APP: "tcp://ipc:26658"
     ports:
       - "26657:26657"
