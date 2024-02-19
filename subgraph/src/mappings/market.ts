@@ -133,6 +133,8 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
   const computeUnit = new ComputeUnit(event.params.unitId.toHex());
   computeUnit.provider = peer.provider;
   computeUnit.peer = peer.id;
+  computeUnit.submittedProofsCount = 0;
+  computeUnit.createdAt = event.block.timestamp;
   computeUnit.save();
 
   // Upd stats.

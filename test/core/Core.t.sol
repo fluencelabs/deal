@@ -19,11 +19,6 @@ contract CoreTest is Test {
 
     function setUp() external {
         deployment = DeployDealSystem.deployDealSystem();
-        bool initialized = deployment.initialized;
-
-        if (initialized) {
-            return;
-        }
     }
 
     function test_CoreHasInitializedValues() external {

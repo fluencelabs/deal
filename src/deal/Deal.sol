@@ -12,6 +12,7 @@ import "./DealStorageUtils.sol";
 import "./WorkerManager.sol";
 import "./interfaces/IDeal.sol";
 import "./interfaces/IConfig.sol";
+import "forge-std/console.sol";
 
 contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
     using BitMaps for BitMaps.BitMap;
@@ -83,69 +84,74 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
             providersAccessList_
         );
         __Multicall_init();
+
+        uint256 prevEpoch = _globalCore().currentEpoch() - 1;
+
+        DealStorage storage dealStorage = _getDealStorage();
+        dealStorage.maxPaidEpoch = prevEpoch;
+        dealStorage.lastCommitedEpoch = prevEpoch;
     }
 
     // ------------------ Privat Functions ------------------
-    function _calculateMaxPaidEpoch(
-        uint256 currentEpoch,
-        uint256 totalBalance,
-        uint256 pricePerWorkerEpoch_,
-        uint256 workerCount
-    ) private pure returns (uint256) {
-        if (workerCount == 0) {
-            return 0;
-        }
-
-        return currentEpoch + totalBalance / (pricePerWorkerEpoch_ * workerCount);
-    }
-
     function _preCommitPeriod(
         DealStorageUtils.Balance memory balance,
-        uint256 currentEpoch,
+        uint256 prevEpoch,
         uint256 maxPaidEpoch,
         uint256 lastCommitedEpoch,
         uint256 currentWorkerCount,
         uint256 pricePerWorkerEpoch_
-    ) private pure {
-        if (maxPaidEpoch != 0 && currentEpoch > maxPaidEpoch && maxPaidEpoch > lastCommitedEpoch) {
-            uint256 amount = (maxPaidEpoch - lastCommitedEpoch) * pricePerWorkerEpoch_ * currentWorkerCount;
+    ) internal pure {
+        if (lastCommitedEpoch == prevEpoch) {
+            return;
+        }
 
-            balance.setTotalBalance(balance.getTotalBalance() - amount);
-            balance.setLockedBalance(balance.getLockedBalance() + amount);
-            balance.setGapsEpochCount(balance.getGapsEpochCount() + (currentEpoch - maxPaidEpoch));
-        } else if (maxPaidEpoch == 0 || (currentEpoch > maxPaidEpoch && lastCommitedEpoch >= maxPaidEpoch)) {
-            balance.setGapsEpochCount(balance.getGapsEpochCount() + (currentEpoch - lastCommitedEpoch));
-        } else if (maxPaidEpoch != 0 && currentEpoch <= maxPaidEpoch) {
-            uint256 amount = (currentEpoch - lastCommitedEpoch) * pricePerWorkerEpoch_ * currentWorkerCount;
+        // if prevEpoch > maxPaidEpoch, this means that the deposit has run out and we need to write off balance and write gaps
+        if (prevEpoch > maxPaidEpoch) {
+            // but if lastCommitedEpoch >= maxPaidEpoch this means that we spend balance before and we need only write gaps
+            if (lastCommitedEpoch >= maxPaidEpoch) {
+                balance.setGapsEpochCount(balance.getGapsEpochCount() + (prevEpoch - lastCommitedEpoch));
+            } else {
+                // if lastCommitedEpoch < maxPaidEpoch, this means that we didn't record it before
+                uint256 amount = (maxPaidEpoch - lastCommitedEpoch) * pricePerWorkerEpoch_ * currentWorkerCount;
 
-            balance.setTotalBalance(balance.getTotalBalance() - amount);
-            balance.setLockedBalance(balance.getLockedBalance() + amount);
+                balance.setTotalBalance(balance.getTotalBalance() - amount); // write off balance
+                balance.setLockedBalance(balance.getLockedBalance() + amount); // record locked balance for rewards
+                balance.setGapsEpochCount(balance.getGapsEpochCount() + (prevEpoch - maxPaidEpoch)); // write gaps
+            }
+        } else {
+            // prevEpoch <= maxPaidEpoch, this means that we we need to record only active epoches and write off balances. We don't have a gaps.
+            uint256 amount = (prevEpoch - lastCommitedEpoch) * pricePerWorkerEpoch_ * currentWorkerCount;
+
+            balance.setTotalBalance(balance.getTotalBalance() - amount); // write off balance
+            balance.setLockedBalance(balance.getLockedBalance() + amount); // record locked balance for rewards
         }
     }
 
     function _postCommitPeriod(
         DealStorageUtils.Balance memory balance,
-        uint256 currentEpoch,
+        uint256 prevEpoch,
         uint256 prevWorkerCount,
         uint256 newWorkerCount,
         uint256 minWorkerCount,
         uint256 pricePerWorkerEpoch_
-    ) private {
+    ) internal {
         DealStorage storage dealStorage = _getDealStorage();
 
         if (prevWorkerCount >= minWorkerCount && newWorkerCount < minWorkerCount) {
             dealStorage.maxPaidEpoch = 0;
             emit MaxPaidEpochUpdated(0);
         } else if (newWorkerCount >= minWorkerCount) {
-            uint256 maxPaidEpoch =
-                _calculateMaxPaidEpoch(currentEpoch, balance.getTotalBalance(), pricePerWorkerEpoch_, newWorkerCount);
-            dealStorage.maxPaidEpoch = maxPaidEpoch;
+            uint256 maxPaidEpoch = prevEpoch;
+            if (newWorkerCount != 0) {
+                maxPaidEpoch = prevEpoch + balance.getTotalBalance() / (pricePerWorkerEpoch_ * newWorkerCount);
+            }
 
+            dealStorage.maxPaidEpoch = maxPaidEpoch;
             emit MaxPaidEpochUpdated(maxPaidEpoch);
         }
 
         balance.commitToStorage(dealStorage);
-        dealStorage.lastCommitedEpoch = currentEpoch;
+        dealStorage.lastCommitedEpoch = prevEpoch;
     }
 
     // ------------------ Public View Functions ------------------
@@ -156,9 +162,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
             return Status.ENDED;
         }
 
-        if (getWorkerCount() < minWorkers()) {
-            return Status.INACTIVE;
-        } else if (_globalCore().currentEpoch() > dealStorage.maxPaidEpoch) {
+        if (getWorkerCount() < minWorkers() || _globalCore().currentEpoch() > dealStorage.maxPaidEpoch) {
             return Status.INACTIVE;
         } else {
             return Status.ACTIVE;
@@ -171,7 +175,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
         _preCommitPeriod(
             balance,
-            _globalCore().currentEpoch(),
+            _globalCore().currentEpoch() - 1,
             dealStorage.maxPaidEpoch,
             dealStorage.lastCommitedEpoch,
             getWorkerCount(),
@@ -185,14 +189,14 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         DealStorage storage dealStorage = _getDealStorage();
         ComputeUnitPaymentInfo storage computeUnitPaymentInfo = dealStorage.cUnitPaymentInfo[computeUnitId];
 
-        uint256 currentEpoch = _globalCore().currentEpoch();
+        uint256 prevEpoch = _globalCore().currentEpoch() - 1;
         uint256 workerCount = getWorkerCount();
         uint256 pricePerWorkerEpoch_ = pricePerWorkerEpoch();
 
         DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
         _preCommitPeriod(
             balance,
-            currentEpoch,
+            prevEpoch,
             dealStorage.maxPaidEpoch,
             dealStorage.lastCommitedEpoch,
             workerCount,
@@ -200,7 +204,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         );
 
         uint256 reward = (
-            (currentEpoch - computeUnitPaymentInfo.startedEpoch)
+            (prevEpoch - computeUnitPaymentInfo.startedEpoch)
                 - (balance.getGapsEpochCount() - computeUnitPaymentInfo.gapsDelta)
         ) * pricePerWorkerEpoch_;
 
@@ -215,7 +219,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
     function deposit(uint256 amount) external onlyOwner {
         DealStorage storage dealStorage = _getDealStorage();
 
-        uint256 currentEpoch = _globalCore().currentEpoch();
+        uint256 prevEpoch = _globalCore().currentEpoch() - 1;
         uint256 workerCount = getWorkerCount();
         uint256 pricePerWorkerEpoch_ = pricePerWorkerEpoch();
 
@@ -225,12 +229,12 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
 
         DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
         _preCommitPeriod(
-            balance, currentEpoch, maxPaidEpoch, dealStorage.lastCommitedEpoch, workerCount, pricePerWorkerEpoch_
+            balance, prevEpoch, maxPaidEpoch, dealStorage.lastCommitedEpoch, workerCount, pricePerWorkerEpoch_
         );
 
         balance.setTotalBalance(balance.getTotalBalance() + amount);
 
-        _postCommitPeriod(balance, currentEpoch, workerCount, workerCount, minWorkers(), pricePerWorkerEpoch_);
+        _postCommitPeriod(balance, prevEpoch, workerCount, workerCount, minWorkers(), pricePerWorkerEpoch_);
 
         paymentToken().safeTransferFrom(msg.sender, address(this), amount);
 
@@ -241,6 +245,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         DealStorage storage dealStorage = _getDealStorage();
 
         uint256 currentEpoch = _globalCore().currentEpoch();
+        uint256 prevEpoch = currentEpoch - 1;
         uint256 workerCount = getWorkerCount();
         uint256 pricePerWorkerEpoch_ = pricePerWorkerEpoch();
 
@@ -254,7 +259,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
             DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
             _preCommitPeriod(
                 balance,
-                currentEpoch,
+                prevEpoch,
                 dealStorage.maxPaidEpoch,
                 dealStorage.lastCommitedEpoch,
                 workerCount,
@@ -266,7 +271,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
             uint256 minBalance = _globalCore().minDealDepositedEpoches() * pricePerWorkerEpoch_ * targetWorkers();
             require(balance.getTotalBalance() >= minBalance, "Free balance needs to cover minimum 2 epochs");
 
-            _postCommitPeriod(balance, currentEpoch, workerCount, workerCount, minWorkers(), pricePerWorkerEpoch_);
+            _postCommitPeriod(balance, prevEpoch, workerCount, workerCount, minWorkers(), pricePerWorkerEpoch_);
         }
 
         paymentToken().safeTransfer(msg.sender, amount);
@@ -278,14 +283,23 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         DealStorage storage dealStorage = _getDealStorage();
         ComputeUnitPaymentInfo storage computeUnitPaymentInfo = dealStorage.cUnitPaymentInfo[computeUnitId];
 
-        uint256 currentEpoch = _globalCore().currentEpoch();
+        ComputeUnit memory unit = getComputeUnit(computeUnitId);
+        IMarket market = _globalCore().market();
+        IMarket.ComputePeer memory marketPeer = market.getComputePeer(unit.peerId);
+        IMarket.Offer memory marketOffer = market.getOffer(marketPeer.offerId);
+
+        require(
+            marketPeer.owner == msg.sender || marketOffer.provider == msg.sender, "Only provider or owner can withdraw"
+        );
+
+        uint256 prevEpoch = _globalCore().currentEpoch() - 1;
         uint256 workerCount = getWorkerCount();
         uint256 pricePerWorkerEpoch_ = pricePerWorkerEpoch();
 
         DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
         _preCommitPeriod(
             balance,
-            currentEpoch,
+            prevEpoch,
             dealStorage.maxPaidEpoch,
             dealStorage.lastCommitedEpoch,
             workerCount,
@@ -295,19 +309,19 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         uint256 globalGapsEpochCount = balance.getGapsEpochCount();
 
         uint256 reward = (
-            (currentEpoch - computeUnitPaymentInfo.startedEpoch)
+            (prevEpoch - computeUnitPaymentInfo.startedEpoch)
                 - (globalGapsEpochCount - computeUnitPaymentInfo.gapsDelta)
         ) * pricePerWorkerEpoch_;
 
         require(reward > 0, "No rewards");
 
-        computeUnitPaymentInfo.startedEpoch = currentEpoch;
+        computeUnitPaymentInfo.startedEpoch = prevEpoch;
         computeUnitPaymentInfo.gapsDelta = globalGapsEpochCount;
 
         balance.setLockedBalance(balance.getLockedBalance() - reward);
 
         //TODO: fix double check prev state
-        _postCommitPeriod(balance, currentEpoch, workerCount, workerCount, minWorkers(), pricePerWorkerEpoch_);
+        _postCommitPeriod(balance, prevEpoch, workerCount, workerCount, minWorkers(), pricePerWorkerEpoch_);
 
         paymentToken().safeTransfer(msg.sender, reward);
 
@@ -323,7 +337,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
     function removeComputeUnit(bytes32 computeUnitId) public onlyMarket {
         DealStorage storage dealStorage = _getDealStorage();
 
-        uint256 currentEpoch = _globalCore().currentEpoch();
+        uint256 prevEpoch = _globalCore().currentEpoch() - 1;
         //TODO: fix double get worker count
         uint256 prevWorkerCount = getWorkerCount();
         uint256 newWorkerCount = _removeComputeUnit(computeUnitId);
@@ -332,14 +346,15 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
 
         DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
         _preCommitPeriod(
-            balance, currentEpoch, maxPaidEpoch, dealStorage.lastCommitedEpoch, prevWorkerCount, pricePerWorkerEpoch_
+            balance, prevEpoch, maxPaidEpoch, dealStorage.lastCommitedEpoch, prevWorkerCount, pricePerWorkerEpoch_
         );
 
-        _postCommitPeriod(balance, currentEpoch, prevWorkerCount, newWorkerCount, minWorkers(), pricePerWorkerEpoch_);
+        _postCommitPeriod(balance, prevEpoch, prevWorkerCount, newWorkerCount, minWorkers(), pricePerWorkerEpoch_);
     }
 
     function setWorker(bytes32 computeUnitId, bytes32 workerId) public {
         require(getStatus() != Status.ENDED, "Deal is ended");
+        require(workerId != bytes32(0), "WorkerId can't be empty");
 
         DealStorage storage dealStorage = _getDealStorage();
 
@@ -353,7 +368,12 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         uint256 prevWorkerCount = getWorkerCount();
         uint256 newWorkerCounts = _setWorker(computeUnitId, workerId);
 
+        if (prevWorkerCount == newWorkerCounts) {
+            return;
+        }
+
         uint256 currentEpoch = core.currentEpoch();
+        uint256 prevEpoch = currentEpoch - 1;
         uint256 pricePerWorkerEpoch_ = pricePerWorkerEpoch();
 
         ComputeUnitPaymentInfo storage computeUnitPaymentInfo = dealStorage.cUnitPaymentInfo[computeUnitId];
@@ -361,17 +381,17 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         uint256 maxPaidEpoch = dealStorage.maxPaidEpoch;
         DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
         _preCommitPeriod(
-            balance, currentEpoch, maxPaidEpoch, dealStorage.lastCommitedEpoch, prevWorkerCount, pricePerWorkerEpoch_
+            balance, prevEpoch, maxPaidEpoch, dealStorage.lastCommitedEpoch, prevWorkerCount, pricePerWorkerEpoch_
         );
 
-        _postCommitPeriod(balance, currentEpoch, prevWorkerCount, newWorkerCounts, minWorkers(), pricePerWorkerEpoch_);
+        _postCommitPeriod(balance, prevEpoch, prevWorkerCount, newWorkerCounts, minWorkers(), pricePerWorkerEpoch_);
 
         computeUnitPaymentInfo.startedEpoch = currentEpoch;
         computeUnitPaymentInfo.gapsDelta = balance.getGapsEpochCount();
     }
 
     function stop() external onlyOwner {
-        require(getStatus() == Status.ACTIVE, "Deal is not active");
+        require(getStatus() != Status.ENDED, "Deal is not active");
 
         DealStorage storage dealStorage = _getDealStorage();
 
@@ -388,7 +408,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         _postCommitPeriod(balance, currentEpoch, workerCount, workerCount, minWorkers(), pricePerWorkerEpoch_);
 
         //TODO: fix double write maxPaidEpoch
-        dealStorage.maxPaidEpoch = 0;
+        dealStorage.maxPaidEpoch = currentEpoch;
         emit MaxPaidEpochUpdated(currentEpoch);
 
         dealStorage.isEnded = true;

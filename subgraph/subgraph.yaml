@@ -9,8 +9,8 @@ dataSources:
     network: local
     source:
       abi: Core
-      address: "0x75b0B516B47A27b1819D21B26203Abf314d42CCE"
-      startBlock: 17323
+      address: "0x04C89607413713Ec9775E14b954286519d836FEf"
+      startBlock: 171
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -29,8 +29,8 @@ dataSources:
     network: local
     source:
       abi: Capacity
-      address: "0x4f42528B7bF8Da96516bECb22c1c6f53a8Ac7312"
-      startBlock: 17323
+      address: "0xD8a5a9b31c3C0232E196d518E89Fd8bF83AcAd43"
+      startBlock: 171
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -38,6 +38,8 @@ dataSources:
       entities:
         - CapacityCommitment
         - Peer
+        - SubmittedProof
+        - CapacityCommitmentStatsPerEpoch
       abis:
         - name: Capacity
           file: ../out/Capacity.sol/Capacity.json
@@ -66,14 +68,18 @@ dataSources:
           handler: handleUnitActivated
         - event: UnitDeactivated(indexed bytes32,indexed bytes32)
           handler: handleUnitDeactivated
+        - event: ProofSubmitted(indexed bytes32,indexed bytes32,bytes32)
+          handler: handleProofSubmitted
+        - event: RewardWithdrawn(indexed bytes32,uint256)
+          handler: handleRewardWithdrawn
       file: ./src/mappings/capacity.ts
   - kind: ethereum/contract
     name: Market
     network: local
     source:
       abi: Market
-      address: "0xDf951d2061b12922BFbF22cb17B17f3b39183570"
-      startBlock: 17323
+      address: "0x2E2Ed0Cfd3AD2f1d34481277b3204d807Ca2F8c2"
+      startBlock: 171
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7

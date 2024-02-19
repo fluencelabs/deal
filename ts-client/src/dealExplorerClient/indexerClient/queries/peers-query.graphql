@@ -15,3 +15,51 @@ query PeerQuery(
     computeUnitsInCapacityCommitment
   }
 }
+
+fragment ComputeUnitWithCCDataBasic on ComputeUnit {
+  id
+  workerId
+  deal {
+    id
+  }
+  peer {
+    id
+    currentCapacityCommitment {
+      id
+      collateralPerUnit
+      submittedProofsCount
+      startEpoch
+    }
+  }
+}
+
+query ComputeUnitQuery(
+  $id: ID!
+) {
+  computeUnit(id: $id) {
+    ...ComputeUnitWithCCDataBasic
+    provider {
+      id
+      name
+    }
+  }
+}
+
+query ComputeUnitsQuery(
+  $filters: ComputeUnit_filter,
+  $offset: Int,
+  $limit: Int,
+  $orderBy: ComputeUnit_orderBy,
+  $orderType: OrderDirection,
+) {
+  computeUnits(
+    where: $filters
+    first: $limit
+    skip: $offset
+    orderBy: $orderBy
+    orderDirection: $orderType
+  ) {
+    ...ComputeUnitWithCCDataBasic
+    submittedProofsCount
+  }
+}
