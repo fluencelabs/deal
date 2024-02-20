@@ -139,6 +139,16 @@ export interface ComputeUnit {
   workerId: string | undefined;
 }
 
+
+export interface ComputeUnitWorkerDetail extends ComputeUnit {
+  providerId: string;
+  workerStatus: "registered" | "waitingRegistration";
+}
+
+export interface ComputeUnitWorkerDetailListView extends ListViewABC {
+  data: Array<ComputeUnitWorkerDetail>;
+}
+
 // @param status: might be undefined when CU not in deal and peer of the CU is not in CC.
 export interface ComputeUnitDetail extends ComputeUnit {
   providerId: string;

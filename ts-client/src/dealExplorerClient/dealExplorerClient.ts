@@ -29,6 +29,8 @@ import type {
   ProofStatsByCapacityCommitment,
   ComputeUnitStatsPerCapacityCommitmentEpoch,
   ComputeUnitStatsPerCapacityCommitmentEpochListView,
+  ComputeUnitWorkerDetail,
+  ComputeUnitWorkerDetailListView,
 } from "./types/schemes.js";
 import type {
   ChildEntitiesByProviderFilter,
@@ -569,6 +571,44 @@ export class DealExplorerClient {
       orderBy,
       orderType,
     );
+  }
+
+  // @notice [Figma] Deal. Matching Result.
+  async getComputeUnitsByDeal(
+    dealId: string,
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: ComputeUnitsOrderBy = "createdAt",
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
+  ): Promise<ComputeUnitWorkerDetailListView> {
+    await this._init();
+
+    const data = await this._indexerClient.getComputeUnits({
+      filters: {
+        deal_: { id: dealId },
+      },
+      offset,
+      limit,
+      orderBy,
+      orderType,
+    });
+
+    let res: Array<ComputeUnitWorkerDetail> = []
+    for (const computeUnit of data.computeUnits) {
+      res.push(
+        {
+          id: computeUnit.id,
+          providerId: computeUnit.peer.provider.id,
+          workerId: computeUnit.workerId ?? undefined,
+          workerStatus: computeUnit.workerId ? "registered" : "waitingRegistration",
+        }
+      )
+    }
+
+    return {
+      total: null,
+      data: res,
+    }
   }
 
   // @notice [Figma] Deal.
