@@ -50,7 +50,7 @@ export interface DealsFilters {
   status?: DealStatus | undefined;
 }
 
-// @param search: search by provider id, commitment id, peer id
+// @param search: search by provider id, commitment id, peer id, delegator address.
 //  (strict search only).
 // @param onlyActive: deprecated - use status filter instead.
 export interface CapacityCommitmentsFilters {
