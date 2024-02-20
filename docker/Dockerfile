@@ -29,6 +29,8 @@ RUN \
   apt-get install -y --no-install-recommends \
   	make \
     git \
+    curl \
+    jq \
     linux-headers-generic \
     ca-certificates && \
   apt-get clean && \
@@ -45,14 +47,16 @@ WORKDIR /app
 
 RUN make build-contracts
 
+COPY docker/entrypoint.sh /entrypoint.sh
+
 # image with local chain - anvil
 FROM contracts as chain-rpc
-ENTRYPOINT ["make"]
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["start-local-chain"]
 
 # image that deploys contracts to chain-rpc
 FROM contracts as chain-deploy-script
-ENTRYPOINT ["make"]
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["deploy-contracts-in-docker"]
 
 # image that deploys subgraph
@@ -88,7 +92,7 @@ RUN \
 COPY ./deployments /app/deploymens
 RUN cd subgraph && npm install && npm run compile && npm run import-config-networks
 
-ENTRYPOINT ["make"]
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["start-local-subgraph"]
 
 # dev image used in dev.docker-compose.yaml
