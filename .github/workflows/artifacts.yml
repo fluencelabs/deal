@@ -9,7 +9,7 @@ on:
         default: "main"
       release:
         type: boolean
-        default: false
+        default: true
     secrets:
       token:
         description: "fluencebot token to commit local.json"
