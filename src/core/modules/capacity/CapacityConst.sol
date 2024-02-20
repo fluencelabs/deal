@@ -236,7 +236,7 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
             constantsStorage.vestingDuration = v;
         } else if (constantType == ConstantType.SlashingRate) {
             constantsStorage.slashingRate = v;
-        } else if (constantType == ConstantType.minRequierdProofsPerEpoch) {
+        } else if (constantType == ConstantType.MinRequierdProofsPerEpoch) {
             constantsStorage.minRequierdProofsPerEpoch = v;
         } else if (constantType == ConstantType.MaxProofsPerEpoch) {
             constantsStorage.maxProofsPerEpoch = v;
