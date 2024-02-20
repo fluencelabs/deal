@@ -1615,7 +1615,7 @@ export type Effector_OrderBy =
 
 export type GraphNetwork = {
   __typename?: 'GraphNetwork';
-  minRequierdProofsPerEpoch?: Maybe<Scalars['Int']['output']>;
+  MinRequierdProofsPerEpoch?: Maybe<Scalars['Int']['output']>;
   capacityCommitmentsTotal: Scalars['BigInt']['output'];
   capacityMaxFailedRatio?: Maybe<Scalars['Int']['output']>;
   coreEpochDuration?: Maybe<Scalars['Int']['output']>;
@@ -1631,7 +1631,7 @@ export type GraphNetwork = {
 };
 
 export type GraphNetwork_Filter = {
-  minRequierdProofsPerEpoch?: InputMaybe<Scalars['Int']['input']>;
+  MinRequierdProofsPerEpoch?: InputMaybe<Scalars['Int']['input']>;
   MinRequiredProofsPerEpoch_gt?: InputMaybe<Scalars['Int']['input']>;
   MinRequiredProofsPerEpoch_gte?: InputMaybe<Scalars['Int']['input']>;
   MinRequiredProofsPerEpoch_in?: InputMaybe<Array<Scalars['Int']['input']>>;
@@ -1734,7 +1734,7 @@ export type GraphNetwork_Filter = {
 };
 
 export type GraphNetwork_OrderBy =
-  | 'minRequierdProofsPerEpoch'
+  | 'MinRequierdProofsPerEpoch'
   | 'capacityCommitmentsTotal'
   | 'capacityMaxFailedRatio'
   | 'coreEpochDuration'

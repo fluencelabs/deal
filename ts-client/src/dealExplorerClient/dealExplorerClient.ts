@@ -179,7 +179,7 @@ export class DealExplorerClient {
       }
       this._coreInitTimestamp = Number(data.graphNetworks[0].initTimestamp);
       this._coreEpochDuration = Number(data.graphNetworks[0].coreEpochDuration);
-      this._capacityMinRequiredProofsPerEpoch = Number(data.graphNetworks[0].minRequierdProofsPerEpoch);
+      this._capacityMinRequiredProofsPerEpoch = Number(data.graphNetworks[0].MinRequierdProofsPerEpoch);
     }
   }
 

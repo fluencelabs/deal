@@ -54,7 +54,7 @@ export function handleWhitelistAccessRevoked(event: WhitelistAccessRevoked): voi
 export function handleInitialized(event: Initialized): void {
   let graphNetwork = createOrLoadGraphNetwork();
   graphNetwork.capacityMaxFailedRatio = getCapacityMaxFailedRatio(event.address).toI32();
-  graphNetwork.minRequierdProofsPerEpoch = getMinRequiredProofsPerEpoch(event.address).toI32();
+  graphNetwork.MinRequierdProofsPerEpoch = getMinRequiredProofsPerEpoch(event.address).toI32();
   graphNetwork.save()
 }
 
@@ -289,7 +289,7 @@ export function handleProofSubmitted(event: ProofSubmitted): void {
 
   capacityCommitmentStatsPerEpoch.submittedProofsCount = capacityCommitmentStatsPerEpoch.submittedProofsCount + 1;
   // Let's catch when CU triggered to become succeceed in proof submission for the epoch (and only once) below.
-  if (computeUnitPerEpochStat.submittedProofsCount == graphNetwork.minRequierdProofsPerEpoch) {
+  if (computeUnitPerEpochStat.submittedProofsCount == graphNetwork.MinRequierdProofsPerEpoch) {
     capacityCommitmentStatsPerEpoch.computeUnitsWithMinRequiredProofsSubmittedCounter = capacityCommitmentStatsPerEpoch.computeUnitsWithMinRequiredProofsSubmittedCounter + 1;
   }
   capacityCommitmentStatsPerEpoch.save();

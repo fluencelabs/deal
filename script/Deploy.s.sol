@@ -68,7 +68,7 @@ contract DeployContracts is Depoyments, Script {
         uint256 maxRewardPerEpoch;
         uint256 vestingDuration;
         uint256 slashingRate;
-        uint256 minRequierdProofsPerEpoch;
+        uint256 MinRequierdProofsPerEpoch;
         uint256 maxProofsPerEpoch;
         uint256 withdrawEpochesAfterFailed;
         uint256 maxFailedRatio;
@@ -119,7 +119,7 @@ contract DeployContracts is Depoyments, Script {
             env.maxRewardPerEpoch,
             env.vestingDuration,
             env.slashingRate,
-            env.minRequierdProofsPerEpoch,
+            env.MinRequierdProofsPerEpoch,
             env.maxProofsPerEpoch,
             env.withdrawEpochesAfterFailed,
             env.maxFailedRatio,
@@ -146,7 +146,7 @@ contract DeployContracts is Depoyments, Script {
         uint256 maxRewardPerEpoch = vm.envOr("MAX_REWARD_PER_EPOCH", DEFAULT_MAX_REWARD_PER_EPOCH);
         uint256 vestingDuration = vm.envOr("VESTING_DURATION", DEFAULT_VESTING_DURATION);
         uint256 slashingRate = vm.envOr("SLASHING_RATE", DEFAULT_SLASHING_RATE);
-        uint256 minRequierdProofsPerEpoch =
+        uint256 MinRequierdProofsPerEpoch =
             vm.envOr("MIN_REQUIERD_PROOFS_PER_EPOCH", DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH);
         uint256 maxProofsPerEpoch = vm.envOr("MAX_PROOFS_PER_EPOCH", DEFAULT_MAX_PROOFS_PER_EPOCH);
         uint256 withdrawEpochesAfterFailed =
@@ -169,7 +169,7 @@ contract DeployContracts is Depoyments, Script {
         console.log(StdStyle.blue("MAX_REWARD_PER_EPOCH:"), maxRewardPerEpoch);
         console.log(StdStyle.blue("VESTING_DURATION:"), vestingDuration);
         console.log(StdStyle.blue("SLASHING_RATE:"), slashingRate);
-        console.log(StdStyle.blue("MIN_REQUIERD_PROOFS_PER_EPOCH:"), minRequierdProofsPerEpoch);
+        console.log(StdStyle.blue("MIN_REQUIERD_PROOFS_PER_EPOCH:"), MinRequierdProofsPerEpoch);
         console.log(StdStyle.blue("MAX_PROOFS_PER_EPOCH:"), maxProofsPerEpoch);
         console.log(StdStyle.blue("WITHDRAW_EPOCHES_AFTER_FAILED:"), withdrawEpochesAfterFailed);
         console.log(StdStyle.blue("MAX_FAILED_RATIO:"), maxFailedRatio);
@@ -194,7 +194,7 @@ contract DeployContracts is Depoyments, Script {
             maxRewardPerEpoch: maxRewardPerEpoch,
             vestingDuration: vestingDuration,
             slashingRate: slashingRate,
-            minRequierdProofsPerEpoch: minRequierdProofsPerEpoch,
+            MinRequierdProofsPerEpoch: MinRequierdProofsPerEpoch,
             maxProofsPerEpoch: maxProofsPerEpoch,
             withdrawEpochesAfterFailed: withdrawEpochesAfterFailed,
             maxFailedRatio: maxFailedRatio,

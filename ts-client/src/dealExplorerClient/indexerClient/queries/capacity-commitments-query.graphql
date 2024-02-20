@@ -25,6 +25,7 @@ query CapacityCommitmentQuery(
   capacityCommitment(id: $id) {
     ...CapacityCommitmentBasic
       rewardDelegatorRate
+      duration
       computeUnits {
         computeUnit {
           id
