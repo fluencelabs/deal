@@ -67,7 +67,7 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
         uint256 maxRewardPerEpoch_,
         uint256 vestingDuration_,
         uint256 slashingRate_,
-        uint256 MinRequiredProofsPerEpoch_,
+        uint256 minRequierdProofsPerEpoch_,
         uint256 maxProofsPerEpoch_,
         uint256 withdrawEpochesAfterFailed_,
         uint256 maxFailedRatio_,
@@ -83,7 +83,7 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
         constantsStorage.maxRewardPerEpoch = maxRewardPerEpoch_;
         constantsStorage.vestingDuration = vestingDuration_;
         constantsStorage.slashingRate = slashingRate_;
-        constantsStorage.minRequierdProofsPerEpoch = MinRequiredProofsPerEpoch_;
+        constantsStorage.minRequierdProofsPerEpoch = minRequierdProofsPerEpoch_;
         constantsStorage.maxProofsPerEpoch = maxProofsPerEpoch_;
         constantsStorage.withdrawEpochesAfterFailed = withdrawEpochesAfterFailed_;
         constantsStorage.maxFailedRatio = maxFailedRatio_;
