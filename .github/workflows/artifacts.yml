@@ -51,7 +51,7 @@ jobs:
           release: ${{ inputs.release }}
         run: |
           echo $release
-          if [[ $release ]]; then
+          if [[ $release == true ]]; then
             echo release
           else
             echo not release
