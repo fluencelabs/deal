@@ -56,8 +56,8 @@ services:
       - "8545:8545"
     healthcheck:
       test: |
-        curl -s -X POST 'http://localhost:8545' -H 'Content-Type: application/json'
-          --data '{"jsonrpc":"2.0", "method":"eth_chainId", "params":[], "id":1}'
+        curl -s -X POST 'http://localhost:8545' -H 'Content-Type: application/json' \
+          --data '{"jsonrpc":"2.0", "method":"eth_chainId", "params":[], "id":1}' \
           | jq -e '.result != null'
       interval: 8s
       timeout: 10s
