@@ -38,6 +38,8 @@ export interface CapacityCommitmentShort {
   peerId: string;
   computeUnitsCount: number;
   status: CapacityCommitmentStatus;
+  duration: number;
+  rewardDelegatorRate: number;
 }
 
 // Other related fields to CC should be fetched separately, e.g.
@@ -50,7 +52,6 @@ export interface CapacityCommitmentShort {
 export interface CapacityCommitmentDetail extends CapacityCommitmentShort {
   totalCollateral: string;
   collateralToken: NativeToken;
-  rewardDelegatorRate: number;
   rewardsUnlocked: string;
   rewardsUnlockedProvider: string;
   rewardsUnlockedDelegator: string;
@@ -60,6 +61,7 @@ export interface CapacityCommitmentDetail extends CapacityCommitmentShort {
   rewardsTotal: string;
 }
 
+// TODO: check that free compute units - just means not in deal!
 export type ProviderBase = {
   id: string;
   name: string;

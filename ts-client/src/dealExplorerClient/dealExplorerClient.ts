@@ -179,7 +179,7 @@ export class DealExplorerClient {
       }
       this._coreInitTimestamp = Number(data.graphNetworks[0].initTimestamp);
       this._coreEpochDuration = Number(data.graphNetworks[0].coreEpochDuration);
-      this._capacityMinRequiredProofsPerEpoch = Number(data.graphNetworks[0].MinRequierdProofsPerEpoch);
+      this._capacityMinRequiredProofsPerEpoch = Number(data.graphNetworks[0].minRequiredProofsPerEpoch);
     }
   }
 
@@ -1016,8 +1016,6 @@ export class DealExplorerClient {
         expectedProofsDueNow,
         successProofs: computeUnit.submittedProofsCount,
         collateral: capacityCommitment.totalCollateral,
-        rewardDelegatorRate: Number(capacityCommitment.rewardDelegatorRate),
-        duration: Number(capacityCommitment.duration),
       });
     }
 

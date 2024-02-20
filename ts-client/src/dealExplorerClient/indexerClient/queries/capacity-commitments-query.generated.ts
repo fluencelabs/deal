@@ -5,7 +5,6 @@ import * as Types from '../generated.types.js';
 import { GraphQLClient } from 'graphql-request';
 import type { RequestOptions } from 'graphql-request';
 type GraphQLClientRequestHeaders = RequestOptions['requestHeaders'];
-import gql from 'graphql-tag';
 export type CapacityCommitmentsQueryQueryVariables = Types.Exact<{
   filters?: Types.InputMaybe<Types.CapacityCommitment_Filter>;
   offset?: Types.InputMaybe<Types.Scalars['Int']['input']>;
@@ -15,14 +14,14 @@ export type CapacityCommitmentsQueryQueryVariables = Types.Exact<{
 }>;
 
 
-export type CapacityCommitmentsQueryQuery = { __typename?: 'Query', capacityCommitments: Array<{ __typename?: 'CapacityCommitment', id: string, status?: Types.CapacityCommitmentStatus | null, createdAt: any, startEpoch: any, endEpoch: any, computeUnitsCount: number, totalCollateral: any, rewardWithdrawn: any, peer: { __typename?: 'Peer', id: string, provider: { __typename?: 'Provider', id: string } } }>, graphNetworks: Array<{ __typename?: 'GraphNetwork', capacityCommitmentsTotal: any }> };
+export type CapacityCommitmentsQueryQuery = { __typename?: 'Query', capacityCommitments: Array<{ __typename?: 'CapacityCommitment', id: string, status?: Types.CapacityCommitmentStatus | null, createdAt: any, startEpoch: any, endEpoch: any, computeUnitsCount: number, totalCollateral: any, rewardWithdrawn: any, rewardDelegatorRate: number, duration: any, peer: { __typename?: 'Peer', id: string, provider: { __typename?: 'Provider', id: string } } }>, graphNetworks: Array<{ __typename?: 'GraphNetwork', capacityCommitmentsTotal: any }> };
 
 export type CapacityCommitmentQueryQueryVariables = Types.Exact<{
   id: Types.Scalars['ID']['input'];
 }>;
 
 
-export type CapacityCommitmentQueryQuery = { __typename?: 'Query', capacityCommitment?: { __typename?: 'CapacityCommitment', rewardDelegatorRate: number, id: string, status?: Types.CapacityCommitmentStatus | null, createdAt: any, startEpoch: any, endEpoch: any, computeUnitsCount: number, totalCollateral: any, rewardWithdrawn: any, computeUnits?: Array<{ __typename?: 'CapacityCommitmentToComputeUnit', computeUnit: { __typename?: 'ComputeUnit', id: string, deal?: { __typename?: 'Deal', id: string } | null } }> | null, peer: { __typename?: 'Peer', id: string, provider: { __typename?: 'Provider', id: string } } } | null };
+export type CapacityCommitmentQueryQuery = { __typename?: 'Query', capacityCommitment?: { __typename?: 'CapacityCommitment', id: string, status?: Types.CapacityCommitmentStatus | null, createdAt: any, startEpoch: any, endEpoch: any, computeUnitsCount: number, totalCollateral: any, rewardWithdrawn: any, rewardDelegatorRate: number, duration: any, computeUnits?: Array<{ __typename?: 'CapacityCommitmentToComputeUnit', computeUnit: { __typename?: 'ComputeUnit', id: string, deal?: { __typename?: 'Deal', id: string } | null } }> | null, peer: { __typename?: 'Peer', id: string, provider: { __typename?: 'Provider', id: string } } } | null };
 
 export type SubmittedProofsQueryQueryVariables = Types.Exact<{
   filters?: Types.InputMaybe<Types.SubmittedProof_Filter>;
@@ -35,7 +34,7 @@ export type SubmittedProofsQueryQueryVariables = Types.Exact<{
 
 export type SubmittedProofsQueryQuery = { __typename?: 'Query', submittedProofs: Array<{ __typename?: 'SubmittedProof', id: string, createdAt: any, createdEpoch: any, capacityCommitment: { __typename?: 'CapacityCommitment', id: string, startEpoch: any, endEpoch: any }, computeUnit: { __typename?: 'ComputeUnit', id: string }, peer: { __typename?: 'Peer', id: string } }>, graphNetworks: Array<{ __typename?: 'GraphNetwork', proofsTotal: any }> };
 
-export type CapacityCommitmentBasicFragment = { __typename?: 'CapacityCommitment', id: string, status?: Types.CapacityCommitmentStatus | null, createdAt: any, startEpoch: any, endEpoch: any, computeUnitsCount: number, totalCollateral: any, rewardWithdrawn: any, peer: { __typename?: 'Peer', id: string, provider: { __typename?: 'Provider', id: string } } };
+export type CapacityCommitmentBasicFragment = { __typename?: 'CapacityCommitment', id: string, status?: Types.CapacityCommitmentStatus | null, createdAt: any, startEpoch: any, endEpoch: any, computeUnitsCount: number, totalCollateral: any, rewardWithdrawn: any, rewardDelegatorRate: number, duration: any, peer: { __typename?: 'Peer', id: string, provider: { __typename?: 'Provider', id: string } } };
 
 export type ComputeUnitBasicFragment = { __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string } };
 
@@ -79,6 +78,8 @@ export const CapacityCommitmentBasicFragmentDoc = gql`
   computeUnitsCount
   totalCollateral
   rewardWithdrawn
+  rewardDelegatorRate
+  duration
 }
     `;
 export const ComputeUnitBasicFragmentDoc = gql`
@@ -116,7 +117,6 @@ export const CapacityCommitmentQueryDocument = gql`
     query CapacityCommitmentQuery($id: ID!) {
   capacityCommitment(id: $id) {
     ...CapacityCommitmentBasic
-    rewardDelegatorRate
     computeUnits {
       computeUnit {
         id
@@ -211,7 +211,7 @@ export const ComputeUnitPerEpochStatsQueryDocument = gql`
 export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string, operationType?: string, variables?: any) => Promise<T>;
 
 
-const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationType, variables) => action();
+const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationType, _variables) => action();
 
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
   return {

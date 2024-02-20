@@ -101,6 +101,7 @@ export type CapacityCommitmentStatsPerEpoch = {
   blockNumberEnd: Scalars['BigInt']['output'];
   blockNumberStart: Scalars['BigInt']['output'];
   capacityCommitment: CapacityCommitment;
+  /** Should be update after ComputeUnitPerEpochStat.submittedProofsCount reached min proofs border. */
   computeUnitsWithMinRequiredProofsSubmittedCounter: Scalars['Int']['output'];
   currentCCNextCCFailedEpoch: Scalars['BigInt']['output'];
   epoch: Scalars['BigInt']['output'];
@@ -1615,7 +1616,6 @@ export type Effector_OrderBy =
 
 export type GraphNetwork = {
   __typename?: 'GraphNetwork';
-  MinRequierdProofsPerEpoch?: Maybe<Scalars['Int']['output']>;
   capacityCommitmentsTotal: Scalars['BigInt']['output'];
   capacityMaxFailedRatio?: Maybe<Scalars['Int']['output']>;
   coreEpochDuration?: Maybe<Scalars['Int']['output']>;
@@ -1624,6 +1624,7 @@ export type GraphNetwork = {
   /** ID is set to 1 */
   id: Scalars['ID']['output'];
   initTimestamp?: Maybe<Scalars['Int']['output']>;
+  minRequiredProofsPerEpoch?: Maybe<Scalars['Int']['output']>;
   offersTotal: Scalars['BigInt']['output'];
   proofsTotal: Scalars['BigInt']['output'];
   providersTotal: Scalars['BigInt']['output'];
@@ -1631,14 +1632,6 @@ export type GraphNetwork = {
 };
 
 export type GraphNetwork_Filter = {
-  MinRequierdProofsPerEpoch?: InputMaybe<Scalars['Int']['input']>;
-  MinRequiredProofsPerEpoch_gt?: InputMaybe<Scalars['Int']['input']>;
-  MinRequiredProofsPerEpoch_gte?: InputMaybe<Scalars['Int']['input']>;
-  MinRequiredProofsPerEpoch_in?: InputMaybe<Array<Scalars['Int']['input']>>;
-  MinRequiredProofsPerEpoch_lt?: InputMaybe<Scalars['Int']['input']>;
-  MinRequiredProofsPerEpoch_lte?: InputMaybe<Scalars['Int']['input']>;
-  MinRequiredProofsPerEpoch_not?: InputMaybe<Scalars['Int']['input']>;
-  MinRequiredProofsPerEpoch_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
   /** Filter for the block changed event. */
   _change_block?: InputMaybe<BlockChangedFilter>;
   and?: InputMaybe<Array<InputMaybe<GraphNetwork_Filter>>>;
@@ -1698,6 +1691,14 @@ export type GraphNetwork_Filter = {
   initTimestamp_lte?: InputMaybe<Scalars['Int']['input']>;
   initTimestamp_not?: InputMaybe<Scalars['Int']['input']>;
   initTimestamp_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  minRequiredProofsPerEpoch?: InputMaybe<Scalars['Int']['input']>;
+  minRequiredProofsPerEpoch_gt?: InputMaybe<Scalars['Int']['input']>;
+  minRequiredProofsPerEpoch_gte?: InputMaybe<Scalars['Int']['input']>;
+  minRequiredProofsPerEpoch_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  minRequiredProofsPerEpoch_lt?: InputMaybe<Scalars['Int']['input']>;
+  minRequiredProofsPerEpoch_lte?: InputMaybe<Scalars['Int']['input']>;
+  minRequiredProofsPerEpoch_not?: InputMaybe<Scalars['Int']['input']>;
+  minRequiredProofsPerEpoch_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
   offersTotal?: InputMaybe<Scalars['BigInt']['input']>;
   offersTotal_gt?: InputMaybe<Scalars['BigInt']['input']>;
   offersTotal_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -1734,7 +1735,6 @@ export type GraphNetwork_Filter = {
 };
 
 export type GraphNetwork_OrderBy =
-  | 'MinRequierdProofsPerEpoch'
   | 'capacityCommitmentsTotal'
   | 'capacityMaxFailedRatio'
   | 'coreEpochDuration'
@@ -1742,6 +1742,7 @@ export type GraphNetwork_OrderBy =
   | 'effectorsTotal'
   | 'id'
   | 'initTimestamp'
+  | 'minRequiredProofsPerEpoch'
   | 'offersTotal'
   | 'proofsTotal'
   | 'providersTotal'

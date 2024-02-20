@@ -218,6 +218,8 @@ export function serializeCapacityCommitmentShort(
     peerId: capacityCommitmentFromIndexer.peer.id,
     computeUnitsCount: Number(capacityCommitmentFromIndexer.computeUnitsCount),
     status: statusFromRpc,
+    rewardDelegatorRate: Number(capacityCommitmentFromIndexer.rewardDelegatorRate),
+    duration: Number(capacityCommitmentFromIndexer.duration),
   };
 }
 
