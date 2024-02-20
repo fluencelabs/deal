@@ -379,7 +379,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
             revert TooManyProofs();
         }
 
-        uint256 minRequierdCCProofs_ = MinRequierdProofsPerEpoch();
+        uint256 minRequierdCCProofs_ = minRequierdProofsPerEpoch();
         if (unitProofsCount == minRequierdCCProofs_) {
             cc.info.currentCUSuccessCount += 1;
             _commitUnitSnapshot(cc, unitProofsInfo, epoch, expiredEpoch, cc.info.failedEpoch);
