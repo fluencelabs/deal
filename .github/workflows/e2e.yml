@@ -45,6 +45,6 @@ jobs:
   #   uses: fluencelabs/cli/.github/workflows/tests.yml@main
   #   with:
   #     chain-rpc-image: "${{ needs.deal.outputs.chain-rpc-image }}"
-      chain-deploy-script-image: "${{ needs.deal.outputs.chain-deploy-script-image }}"
-      subgraph-deploy-script-image: "${{ needs.deal.outputs.subgraph-deploy-script-image }}"
-      deal-ts-clients-version: "${{ needs.deal.outputs.deal-ts-clients-version }}"
+      # chain-deploy-script-image: "${{ needs.deal.outputs.chain-deploy-script-image }}"
+      # subgraph-deploy-script-image: "${{ needs.deal.outputs.subgraph-deploy-script-image }}"
+      # deal-ts-clients-version: "${{ needs.deal.outputs.deal-ts-clients-version }}"
