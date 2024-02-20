@@ -9,7 +9,7 @@ import gql from 'graphql-tag';
 export type ConstantsQueryQueryVariables = Types.Exact<{ [key: string]: never; }>;
 
 
-export type ConstantsQueryQuery = { __typename?: 'Query', graphNetworks: Array<{ __typename?: 'GraphNetwork', coreEpochDuration?: number | null, initTimestamp?: number | null, MinRequiredProofsPerEpoch?: number | null }> };
+export type ConstantsQueryQuery = { __typename?: 'Query', graphNetworks: Array<{ __typename?: 'GraphNetwork', coreEpochDuration?: number | null, initTimestamp?: number | null, minRequierdProofsPerEpoch?: number | null }> };
 
 
 export const ConstantsQueryDocument = gql`
@@ -17,7 +17,7 @@ export const ConstantsQueryDocument = gql`
   graphNetworks(first: 1) {
     coreEpochDuration
     initTimestamp
-    MinRequiredProofsPerEpoch
+    minRequierdProofsPerEpoch
   }
 }
     `;

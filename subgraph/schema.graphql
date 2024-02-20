@@ -18,7 +18,7 @@ type GraphNetwork @entity {
   initTimestamp: Int
   # Capacity consts are below.
   capacityMaxFailedRatio: Int
-  MinRequiredProofsPerEpoch: Int
+  minRequierdProofsPerEpoch: Int
 }
 
 type Token @entity(immutable: true) {
