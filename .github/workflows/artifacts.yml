@@ -51,11 +51,11 @@ jobs:
           release: ${{ inputs.release }}
         run: |
           echo $release
-          if [[ $release ]]; do
+          if [[ $release ]]; then
             echo release
           else
             echo not release
-          done
+          fi
       # - name: Checkout
       #   uses: actions/checkout@v4
       #   with:
