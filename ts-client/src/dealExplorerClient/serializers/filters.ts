@@ -206,8 +206,8 @@ export function serializeCapacityCommitmentsFiltersToIndexer(
       or: [
         { id: v.search },
         { peer_: { id: v.search } },
-        { provider_: { id: v.search } },
-        { delegator: v.search },
+        { provider_: { id: v.search.toLowerCase() } },
+        { delegator: v.search.toLowerCase() },
       ],
     });
   }

@@ -48,6 +48,7 @@ import type {
   ComputeUnitsOrderBy,
   ProofStatsByCapacityCommitmentOrderBy,
   ComputeUnitStatsPerCapacityCommitmentEpochOrderBy,
+  ChildEntitiesByPeerFilter,
 } from "./types/filters.js";
 import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type {
@@ -337,6 +338,33 @@ export class DealExplorerClient {
     await this._init();
     const convertedFilters: CapacityCommitmentsFilters = {
       search: capacityCommitmentsByProviderFilter.providerId.toLowerCase(),
+    };
+    if (
+      capacityCommitmentsByProviderFilter.status &&
+      capacityCommitmentsByProviderFilter.status != "all"
+    ) {
+      convertedFilters.status = capacityCommitmentsByProviderFilter.status;
+    }
+    return await this._getCapacityCommitmentsImpl(
+      convertedFilters,
+      offset,
+      limit,
+      orderBy,
+      orderType,
+    );
+  }
+
+  // @notice [Figma] Peer ID. Capacity Commitments.
+  async getCapacityCommitmentsByPeer(
+    capacityCommitmentsByProviderFilter: ChildEntitiesByPeerFilter,
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: CapacityCommitmentsOrderBy = "createdAt",
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
+  ) {
+    await this._init();
+    const convertedFilters: CapacityCommitmentsFilters = {
+      search: capacityCommitmentsByProviderFilter.peerId,
     };
     if (
       capacityCommitmentsByProviderFilter.status &&

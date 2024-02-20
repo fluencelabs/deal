@@ -35,6 +35,11 @@ export interface ChildEntitiesByProviderFilter {
   status?: ProviderChildEntityStatusFilter | undefined;
 }
 
+export interface ChildEntitiesByPeerFilter {
+  peerId: string;
+  status?: ProviderChildEntityStatusFilter | undefined;
+}
+
 // @dev Where is "OnlyActive" filter? - currently, it should be filtered by
 // @dev  frontend itself by Deal field: status.
 export interface DealsFilters {
