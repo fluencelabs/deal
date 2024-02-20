@@ -14,7 +14,6 @@ import "./interfaces/IOffer.sol";
 
 abstract contract Offer is BaseModule, IOffer {
     using SafeERC20 for IERC20;
-    using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     // ------------------ Constants ------------------
@@ -157,6 +156,7 @@ abstract contract Offer is BaseModule, IOffer {
         OfferStorage storage offerStorage = _getOfferStorage();
         Offer storage offer = offerStorage.offers[offerId];
 
+        require(offer.provider == msg.sender, "Only owner can change offer");
         require(offer.peerCount == 0, "Offer has compute peers");
 
         delete offerStorage.offers[offerId];
@@ -168,6 +168,7 @@ abstract contract Offer is BaseModule, IOffer {
         Offer storage offer = offerStorage.offers[offerId];
         require(offer.provider != address(0x00), "Offer doesn't exist");
         require(offer.provider == msg.sender, "Only owner can change offer");
+        require(peers.length > 0, "Peers should not be empty");
 
         uint256 peerLength = peers.length;
         for (uint256 i = 0; i < peerLength; i++) {
@@ -282,7 +283,7 @@ abstract contract Offer is BaseModule, IOffer {
             CIDV1 calldata effectorCID = effectors[i];
             bytes32 effectorHash = _hashEffectorCID(effectorCID);
 
-            require(offerStorage.effectorsByOfferId[offerId].hasEffector[effectorHash], "Effector  doesn't exist");
+            require(offerStorage.effectorsByOfferId[offerId].hasEffector[effectorHash], "Effector doesn't exist");
 
             offerStorage.effectorsByOfferId[offerId].hasEffector[effectorHash] = false;
 
@@ -291,7 +292,7 @@ abstract contract Offer is BaseModule, IOffer {
     }
 
     // Unit management
-    function returnComputeUnitFromDeal(bytes32 unitId) public onlyCapacity {
+    function returnComputeUnitFromDeal(bytes32 unitId) public {
         OfferStorage storage offerStorage = _getOfferStorage();
         ComputeUnit storage computeUnit = offerStorage.computeUnits[unitId];
 
