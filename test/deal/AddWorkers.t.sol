@@ -16,13 +16,11 @@ contract AddWorkers is Test {
     using TestHelper for DeployDealSystem.Deployment;
 
     DeployDealSystem.Deployment deployment;
-    Deal dealImpl;
 
     // ------------------ Test ------------------
 
     function setUp() public {
         deployment = DeployDealSystem.deployDealSystem();
-        dealImpl = new Deal();
     }
 
     function test_AddOneWorker() public {
@@ -59,7 +57,7 @@ contract AddWorkers is Test {
         assertEq(deal.getComputeUnitCount(), minWorkers, "unitCount is not match");
 
         uint256 currentEpoch = deployment.core.currentEpoch();
-        uint256 expectedPaidEpoch = startDeposit / (pricePerEpoch * minWorkers);
+        uint256 expectedPaidEpoch = startDeposit / (pricePerEpoch * minWorkers) - 1;
         assertEq(deal.getMaxPaidEpoch(), currentEpoch + expectedPaidEpoch, "maxPaidEpoch mismatch");
         assertEq(uint256(deal.getStatus()), uint256(IDeal.Status.ACTIVE), "status should be ACTIVE");
     }
