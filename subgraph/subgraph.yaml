@@ -9,8 +9,8 @@ dataSources:
     network: local
     source:
       abi: Core
-      address: "0x04C89607413713Ec9775E14b954286519d836FEf"
-      startBlock: 171
+      address: "0x36C02dA8a0983159322a80FFE9F24b1acfF8B570"
+      startBlock: 10
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -25,61 +25,12 @@ dataSources:
           handler: handleInitialized
       file: ./src/mappings/core.ts
   - kind: ethereum/contract
-    name: Capacity
-    network: local
-    source:
-      abi: Capacity
-      address: "0xD8a5a9b31c3C0232E196d518E89Fd8bF83AcAd43"
-      startBlock: 171
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.7
-      language: wasm/assemblyscript
-      entities:
-        - CapacityCommitment
-        - Peer
-        - SubmittedProof
-        - CapacityCommitmentStatsPerEpoch
-      abis:
-        - name: Capacity
-          file: ../out/Capacity.sol/Capacity.json
-      eventHandlers:
-        - event: Initialized(uint8)
-          handler: handleInitialized
-        - event: WhitelistAccessGranted(address)
-          handler: handleWhitelistAccessGranted
-        - event: WhitelistAccessRevoked(address)
-          handler: handleWhitelistAccessRevoked
-        - event: CommitmentCreated(indexed
-            bytes32,bytes32,uint256,address,uint256,uint256)
-          handler: handleCommitmentCreated
-        - event: CommitmentActivated(indexed bytes32,indexed
-            bytes32,uint256,uint256,bytes32[])
-          handler: handleCommitmentActivated
-        - event: CollateralDeposited(indexed bytes32,uint256)
-          handler: handleCollateralDeposited
-        - event: CommitmentStatsUpdated(bytes32,uint256,uint256,uint256,uint256,uint256)
-          handler: handleCommitmentStatsUpdated
-        - event: CommitmentRemoved(indexed bytes32)
-          handler: handleCommitmentRemoved
-        - event: CommitmentFinished(indexed bytes32)
-          handler: handleCommitmentFinished
-        - event: UnitActivated(indexed bytes32,indexed bytes32,uint256)
-          handler: handleUnitActivated
-        - event: UnitDeactivated(indexed bytes32,indexed bytes32)
-          handler: handleUnitDeactivated
-        - event: ProofSubmitted(indexed bytes32,indexed bytes32,bytes32)
-          handler: handleProofSubmitted
-        - event: RewardWithdrawn(indexed bytes32,uint256)
-          handler: handleRewardWithdrawn
-      file: ./src/mappings/capacity.ts
-  - kind: ethereum/contract
     name: Market
     network: local
     source:
       abi: Market
-      address: "0x2E2Ed0Cfd3AD2f1d34481277b3204d807Ca2F8c2"
-      startBlock: 171
+      address: "0x1291Be112d480055DaFd8a610b7d1e203891C274"
+      startBlock: 10
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -130,6 +81,56 @@ dataSources:
             address,address,uint256,address,uint256,uint256,uint256,uint256,(bytes4,bytes32)[],(bytes4,bytes32),uint8,address[])
           handler: handleDealCreated
       file: ./src/mappings/market.ts
+  - kind: ethereum/contract
+    name: Capacity
+    network: local
+    source:
+      abi: Capacity
+      address: "0x5f3f1dBD7B74C6B46e8c44f98792A1dAf8d69154"
+      startBlock: 10
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - CapacityCommitment
+        - Peer
+        - SubmittedProof
+        - CapacityCommitmentStatsPerEpoch
+        - ComputeUnitPerEpochStats
+      abis:
+        - name: Capacity
+          file: ../out/Capacity.sol/Capacity.json
+      eventHandlers:
+        - event: Initialized(uint8)
+          handler: handleInitialized
+        - event: WhitelistAccessGranted(address)
+          handler: handleWhitelistAccessGranted
+        - event: WhitelistAccessRevoked(address)
+          handler: handleWhitelistAccessRevoked
+        - event: CommitmentCreated(indexed
+            bytes32,bytes32,uint256,address,uint256,uint256)
+          handler: handleCommitmentCreated
+        - event: CommitmentActivated(indexed bytes32,indexed
+            bytes32,uint256,uint256,bytes32[])
+          handler: handleCommitmentActivated
+        - event: CollateralDeposited(indexed bytes32,uint256)
+          handler: handleCollateralDeposited
+        - event: CommitmentStatsUpdated(bytes32,uint256,uint256,uint256,uint256,uint256)
+          handler: handleCommitmentStatsUpdated
+        - event: CommitmentRemoved(indexed bytes32)
+          handler: handleCommitmentRemoved
+        - event: CommitmentFinished(indexed bytes32)
+          handler: handleCommitmentFinished
+        - event: UnitActivated(indexed bytes32,indexed bytes32,uint256)
+          handler: handleUnitActivated
+        - event: UnitDeactivated(indexed bytes32,indexed bytes32)
+          handler: handleUnitDeactivated
+        - event: ProofSubmitted(indexed bytes32,indexed bytes32,bytes32)
+          handler: handleProofSubmitted
+        - event: RewardWithdrawn(indexed bytes32,uint256)
+          handler: handleRewardWithdrawn
+      file: ./src/mappings/capacity.ts
 templates:
   - name: Deal
     kind: ethereum/contract

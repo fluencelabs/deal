@@ -30,6 +30,9 @@ fragment ComputeUnitWithCCDataBasic on ComputeUnit {
       submittedProofsCount
       startEpoch
     }
+    provider {
+      id
+    }
   }
 }
 
