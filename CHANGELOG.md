@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/fluencelabs/deal/compare/v0.6.0...v0.6.1) (2024-02-21)
+
+
+### Bug Fixes
+
+* **makefile:** set block time to 1 sec by default ([#281](https://github.com/fluencelabs/deal/issues/281)) ([efbdce6](https://github.com/fluencelabs/deal/commit/efbdce6b4243778ddd66e590459b3575b4c9358a))
+
 ## [0.6.0](https://github.com/fluencelabs/deal/compare/v0.5.2...v0.6.0) (2024-02-21)
 
 
