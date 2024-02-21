@@ -46,6 +46,8 @@ services:
   # Anvil node with deployed contracts
   chain-rpc:
     image: ${CHAIN_RPC_IMAGE:-chain-rpc}
+    environment:
+      LOCAL_CHAIN_BLOCK_MINING_INTERVAL: 1
     build:
       context: ../
       dockerfile: ./docker/Dockerfile
