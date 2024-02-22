@@ -18,6 +18,7 @@ type GraphNetwork @entity {
   initTimestamp: Int
   # Capacity consts are below.
   capacityMaxFailedRatio: Int
+  minRequiredProofsPerEpoch: Int
 }
 
 type Token @entity(immutable: true) {
@@ -272,6 +273,8 @@ type SubmittedProof @entity(immutable: true) {
   # Add fields for filter purpose below.
   provider: Provider!
   peer: Peer!
+
+  capacityCommitmentStatsPerEpoch: CapacityCommitmentStatsPerEpoch!
 }
 
 "To represent statistics per epoch. This entity represent evaluation of CommitmentStatsUpdated events during time (epoch)."
@@ -280,11 +283,34 @@ type CapacityCommitmentStatsPerEpoch @entity {
   id: ID!
   capacityCommitment: CapacityCommitment!
   epoch: BigInt!
+  # To track period of block numbers with submitted proofs for the concrete epoch.
+  blockNumberStart: BigInt!
+  blockNumberEnd: BigInt!
 
   totalCUFailCount: Int!
   exitedUnitCount: Int!
   activeUnitCount: Int!
   nextAdditionalActiveUnitCount: Int!
   currentCCNextCCFailedEpoch: BigInt!
+  submittedProofsCount: Int!
+
+  submittedProofs: [SubmittedProof!] @derivedFrom(field: "capacityCommitmentStatsPerEpoch")
+
+  # Add additional seconds stats (that relate from others) below.
+  # Relates means that related should be updated first, and stats below strictly after.
+  "Should be update after ComputeUnitPerEpochStat.submittedProofsCount reached min proofs border."
+  computeUnitsWithMinRequiredProofsSubmittedCounter: Int!
+}
+
+"Helper stat model to count success proofs per epoch for a CU."
+type ComputeUnitPerEpochStat @entity {
+  id: ID! # Set to `computeUnit.id.concat(epoch)`
+  epoch: BigInt!
+  computeUnit: ComputeUnit!
+
+  # To allow query for all CU by the Capacity Commitment.
+  capacityCommitment: CapacityCommitment
+
+  # Add per epoch stats below.
   submittedProofsCount: Int!
 }

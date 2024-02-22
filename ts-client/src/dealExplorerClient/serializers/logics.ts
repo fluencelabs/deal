@@ -37,6 +37,7 @@ export function serializeEffectorDescription(
 
 export function serializeExpectedProofsAndCUStatus(
   computeUnitWithCcDataBasicFragment: ComputeUnitWithCcDataBasicFragment,
+  expectedMinProofsDueToNow: number,
   coreInitTimestamp: number,
   coreEpochDuration: number,
 ) {
@@ -47,8 +48,8 @@ export function serializeExpectedProofsAndCUStatus(
   const startEpoch = currentPeerCapacityCommitment?.startEpoch;
   if (startEpoch && startEpoch != 0) {
     expectedProofsDueNow =
-      calculateEpoch(Date.now() / 1000, coreInitTimestamp, coreEpochDuration) -
-      startEpoch;
+      (calculateEpoch(Date.now() / 1000, coreInitTimestamp, coreEpochDuration) -
+      startEpoch) * expectedMinProofsDueToNow;
   }
 
   let status: ComputeUnitStatus = "undefined";

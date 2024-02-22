@@ -2,5 +2,6 @@ query ConstantsQuery {
   graphNetworks(first: 1) {
     coreEpochDuration
     initTimestamp
+    minRequiredProofsPerEpoch
   }
 }

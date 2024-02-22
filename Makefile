@@ -5,7 +5,7 @@ export
 .PHONY: help
 
 CHAIN_RPC_URL ?= http://chain-rpc:8545
-LOCAL_CHAIN_BLOCK_MINING_INTERVAL ?= 15
+LOCAL_CHAIN_BLOCK_MINING_INTERVAL ?= 1
 
 verify-command: ## Verify command
 	@command -v $(program) > /dev/null || (echo "\033[0;31m$(program) is not installed. Please install $(program) and try again.\033[0m" && exit 1)

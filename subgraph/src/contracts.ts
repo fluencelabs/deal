@@ -68,6 +68,10 @@ export function getCapacityMaxFailedRatio(contractAddress: Address): BigInt {
   return Capacity.bind(contractAddress).maxFailedRatio();
 }
 
+export function getMinRequiredProofsPerEpoch(contractAddress: Address): BigInt {
+  return Capacity.bind(contractAddress).minRequierdProofsPerEpoch();
+}
+
 // It mirrors _failedEpoch in Capacity.sol.
 export function calculateNextFailedCCEpoch(
     maxFailedRatio: BigInt,
