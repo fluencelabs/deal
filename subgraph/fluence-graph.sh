@@ -55,8 +55,8 @@ case "$network" in
     else
       basic_auth="${BASIC_AUTH_SUBGRAPH}@"
     fi
-    GRAPHNODE_URL="https://${basic_auth}graph-node-admin.fluence.dev"
-    IPFS_URL="https://${basic_auth}graph-node-ipfs.fluence.dev"
+    GRAPHNODE_URL="https://${basic_auth}graph-node-admin-${network}.fluence.dev"
+    IPFS_URL="https://${basic_auth}graph-node-ipfs-${network}.fluence.dev"
 esac
 
 # Prepare subgraph version label.
