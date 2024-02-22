@@ -27,6 +27,8 @@ services:
       - postgres:/var/lib/postgresql/data
   chain-rpc:
     image: docker.fluence.dev/chain-rpc:${SNAPSHOT_ID}
+    environment:
+      LOCAL_CHAIN_BLOCK_MINING_INTERVAL: 1
     ports:
       - 8545:8545
   chain-deploy-script:
