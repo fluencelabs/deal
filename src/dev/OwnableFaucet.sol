@@ -17,4 +17,9 @@ contract OwnableFaucet is Ownable, Multicall {
     function sendUSD(address addr, uint256 value) external onlyOwner {
         usdToken.transfer(addr, value);
     }
+
+    function sendFLT(address addr, uint256 value) external onlyOwner {
+        (bool success, ) = addr.call{value: value}("");
+        require(success, "Cannot send");
+    }
 }
