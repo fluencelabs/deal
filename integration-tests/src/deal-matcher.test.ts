@@ -19,7 +19,7 @@ import {
   DealMatcherClient,
   type GetMatchedOffersOut,
 } from "@fluencelabs/deal-ts-clients";
-import { ethers, JsonRpcProvider, JsonRpcSigner } from "ethers";
+import { ethers, JsonRpcProvider, type JsonRpcSigner, Wallet } from "ethers";
 import dns from "node:dns/promises";
 import { DEFAULT_CONFIRMATIONS } from "./constants.js";
 import {
@@ -33,6 +33,9 @@ import {
 const ip = await dns.lookup("akim-dev.dev.fluence.dev");
 const TEST_NETWORK: ContractsENV = "local";
 const TEST_RPC_URL = `http://${ip.address}:8545`;
+const TEST_RPC_IPC_URL = `https://ipc-stage.fluence.dev`;
+const IPC_PRIVATE_KEY =
+  "0xBA8D6C1FF4C54D156C7ABF8B2615A47BA41B9ED776DD5B03AA1FD89C37EE4AA7";
 const DEFAULT_SUBGRAPH_TIME_INDEXING = 300000;
 const DEFAULT_TEST_TIMEOUT = 180000;
 // Test timeout should include:
@@ -44,7 +47,7 @@ const DEFAULT_TEST_TIMEOUT = 180000;
 const TESTS_TIMEOUT = 120000 + 30000 + DEFAULT_SUBGRAPH_TIME_INDEXING;
 
 let provider: JsonRpcProvider;
-let signer: JsonRpcSigner;
+let signer: Wallet | JsonRpcSigner;
 let contractsClient: DealClient;
 
 /*
@@ -66,8 +69,8 @@ describe("#getMatchedOffersByDealId", () => {
   test(
     `Check that it matched successfully for 1:1 configuration.`,
     async () => {
-      const fromBlock = await provider.getBlock("latest");
-      console.log(fromBlock);
+      const fromBlock = (await provider.getBlock("latest"))?.number;
+      assert(fromBlock, "from block isn't defined");
       const signerAddress = await signer.getAddress();
       const timestamp = (await provider.getBlock("latest"))?.timestamp;
       assert(timestamp, "Timestamp is defined");
@@ -83,6 +86,7 @@ describe("#getMatchedOffersByDealId", () => {
         marketContract,
         signerAddress,
         paymentTokenAddress,
+        fromBlock,
       );
 
       console.log("---- CC Creation ----");
@@ -90,6 +94,7 @@ describe("#getMatchedOffersByDealId", () => {
         capacityContract,
         signerAddress,
         registeredOffer.peers.map((p) => p.peerId),
+        fromBlock,
       );
 
       console.info("Deposit collateral for all sent CC...");
@@ -131,7 +136,10 @@ describe("#getMatchedOffersByDealId", () => {
 
       console.info("Create deal that match default offer...");
       const filter = marketContract.filters.DealCreated;
-      const lastDealsCreatedBefore = await marketContract.queryFilter(filter);
+      const lastDealsCreatedBefore = await marketContract.queryFilter(
+        filter,
+        fromBlock,
+      );
       const deployDealTx = await marketContract.deployDeal(
         {
           prefixes: "0x12345678",
@@ -148,7 +156,10 @@ describe("#getMatchedOffersByDealId", () => {
       );
       await deployDealTx.wait(DEFAULT_CONFIRMATIONS);
 
-      const lastDealsCreatedAfter = await marketContract.queryFilter(filter);
+      const lastDealsCreatedAfter = await marketContract.queryFilter(
+        filter,
+        fromBlock,
+      );
       expect(lastDealsCreatedAfter.length - lastDealsCreatedBefore.length).toBe(
         1,
       );

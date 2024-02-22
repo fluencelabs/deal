@@ -8,6 +8,7 @@ export async function registerMarketOffer(
   market: IMarket,
   signerAddress: string,
   paymentTokenAddress: string,
+  fromBlock: number,
 ) {
   const registeredOffer = getDefaultOfferFixture(
     signerAddress,
@@ -33,6 +34,7 @@ export async function registerMarketOffer(
     market,
     market.filters.MarketOfferRegistered,
     1,
+    fromBlock,
   );
   const lastMarketOffer = events.pop();
   assert(lastMarketOffer, "There is no market offer");
@@ -47,6 +49,7 @@ export async function createCommitments(
   capacity: ICapacity,
   signerAddress: string,
   peerIds: string[],
+  fromBlock: number,
 ) {
   const capacityMinDuration = await capacity.minDuration();
 
@@ -72,8 +75,10 @@ export async function createCommitments(
 
   // Fetch created commitmentIds from chain.
   const filterCreatedCC = capacity.filters.CommitmentCreated;
-  const capacityCommitmentCreatedEvents =
-    await capacity.queryFilter(filterCreatedCC);
+  const capacityCommitmentCreatedEvents = await capacity.queryFilter(
+    filterCreatedCC,
+    fromBlock,
+  );
   const capacityCommitmentCreatedEventsLast = capacityCommitmentCreatedEvents
     .reverse()
     .slice(0, createdCommitments);

@@ -13,8 +13,9 @@ export async function confirmEvents<
   contract: R,
   event: T,
   expectedEventCount: number,
+  from: number,
 ): Promise<TypedEventLog<T>[]> {
-  const events = await contract.queryFilter(event, 213);
+  const events = await contract.queryFilter(event, from);
   const lastEvents = events.reverse().slice(0, expectedEventCount);
   expect(lastEvents.length).toBe(expectedEventCount);
   return lastEvents;
