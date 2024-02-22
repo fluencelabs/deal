@@ -142,9 +142,6 @@ describe(
       const nextStatus = await capacityContract.getCommitment(commitmentId);
       expect(nextStatus.status).toEqual(BigInt(CCStatus.Failed));
     });
-
-    // Should test CC flow from start to end. Time forwarding feature is required
-    test.skip("CC finish 2", async () => {});
   },
   DEFAULT_TEST_TIMEOUT,
 );

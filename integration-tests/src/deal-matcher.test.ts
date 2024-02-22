@@ -63,9 +63,11 @@ describe("#getMatchedOffersByDealId", () => {
 
   // TODO: check that infra is running.
 
-  test.skip(
+  test(
     `Check that it matched successfully for 1:1 configuration.`,
     async () => {
+      const fromBlock = await provider.getBlock("latest");
+      console.log(fromBlock);
       const signerAddress = await signer.getAddress();
       const timestamp = (await provider.getBlock("latest"))?.timestamp;
       assert(timestamp, "Timestamp is defined");
@@ -182,34 +184,32 @@ describe("#getMatchedOffersByDealId", () => {
       // const dealId = "0xd79df1927718b3212fa6e126ec4ad2b3ee1263d9"
       console.log("---- Deal Matching ----");
 
-      // expect(matchedOffersOut.offers.length).toBe(1); // At least with one previously created offer it matched.
+      expect(matchedOffersOut.offers.length).toBe(1); // At least with one previously created offer it matched.
 
-      // throw new Error("Test error");
-
-      // console.log(
-      //   "computeUnitsPerOffers",
-      //   matchedOffersOut.computeUnitsPerOffers,
-      // );
-      // const cuId = matchedOffersOut.computeUnitsPerOffers[0]?.[0];
+      console.log(
+        "computeUnitsPerOffers",
+        matchedOffersOut.computeUnitsPerOffers,
+      );
+      const cuId = matchedOffersOut.computeUnitsPerOffers[0]?.[0];
 
       // Additional check for status of matched CC from chain perspective
-      // for (const commitmentId of commitmentIds) {
-      // e.g. 4 == Failed; 0 - Active.
-      //   expect(Number(await capacityContract.getStatus(commitmentId))).eq(0);
-      // }
+      for (const commitmentId of commitmentIds) {
+        // e.g. 4 == Failed; 0 - Active.
+        expect(Number(await capacityContract.getStatus(commitmentId))).eq(0);
+      }
 
-      // console.info(
-      //   `Match deal with offers structure proposed by indexer: ${JSON.stringify(matchedOffersOut)}...`,
-      // );
-      // const matchDealTx = await marketContract.matchDeal(
-      //   dealId,
-      //   matchedOffersOut.offers,
-      //   matchedOffersOut.computeUnitsPerOffers,
-      // );
+      console.info(
+        `Match deal with offers structure proposed by indexer: ${JSON.stringify(matchedOffersOut)}...`,
+      );
+      const matchDealTx = await marketContract.matchDeal(
+        dealId,
+        matchedOffersOut.offers,
+        matchedOffersOut.computeUnitsPerOffers,
+      );
 
-      // const matchDealTxReceipt = await matchDealTx.wait(DEFAULT_CONFIRMATIONS);
-      // await matchDealTx.wait(DEFAULT_CONFIRMATIONS)
-      // console.log(matchDealTxReceipt);
+      const matchDealTxReceipt = await matchDealTx.wait(DEFAULT_CONFIRMATIONS);
+      await matchDealTx.wait(DEFAULT_CONFIRMATIONS);
+      console.log(matchDealTxReceipt);
       //   TODO: check further.
     },
     TESTS_TIMEOUT,
