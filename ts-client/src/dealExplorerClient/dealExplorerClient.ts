@@ -27,6 +27,10 @@ import type {
   ProofStatsByCapacityCommitmentListView,
   ComputeUnitsByCapacityCommitmentListView,
   ProofStatsByCapacityCommitment,
+  ComputeUnitStatsPerCapacityCommitmentEpoch,
+  ComputeUnitStatsPerCapacityCommitmentEpochListView,
+  ComputeUnitWorkerDetail,
+  ComputeUnitWorkerDetailListView,
 } from "./types/schemes.js";
 import type {
   ChildEntitiesByProviderFilter,
@@ -45,6 +49,8 @@ import type {
   ProofsOrderBy,
   ComputeUnitsOrderBy,
   ProofStatsByCapacityCommitmentOrderBy,
+  ComputeUnitStatsPerCapacityCommitmentEpochOrderBy,
+  ChildEntitiesByPeerFilter,
 } from "./types/filters.js";
 import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type {
@@ -77,6 +83,7 @@ import {
   ValidTogetherFiltersError,
 } from "./serializers/filters.js";
 import {
+  serializeCapacityCommitmentDetail,
   serializeCapacityCommitmentShort,
   serializeComputeUnits,
   serializeDealsShort,
@@ -114,6 +121,7 @@ export class DealExplorerClient {
   private _coreInitTimestamp: number | null;
   private _capacityContract: ICapacity | null;
   private _capacityContractAddress: string | null;
+  private _capacityMinRequiredProofsPerEpoch: number | null;
 
   constructor(
     network: ContractsENV,
@@ -136,6 +144,7 @@ export class DealExplorerClient {
     this._coreInitTimestamp = null;
     this._capacityContract = null;
     this._capacityContractAddress = null;
+    this._capacityMinRequiredProofsPerEpoch = null;
   }
 
   // Add init other async attributes here.
@@ -160,7 +169,7 @@ export class DealExplorerClient {
 
     // Init constants from indexer.
     // TODO: add cache.
-    if (this._coreEpochDuration == null || this._coreInitTimestamp == null) {
+    if (this._coreEpochDuration == null || this._coreInitTimestamp == null || this._capacityMinRequiredProofsPerEpoch == null) {
       console.info("Fetch contract constants from indexer.");
       const data = await this._indexerClient.getContractConstants();
       if (
@@ -173,6 +182,7 @@ export class DealExplorerClient {
       }
       this._coreInitTimestamp = Number(data.graphNetworks[0].initTimestamp);
       this._coreEpochDuration = Number(data.graphNetworks[0].coreEpochDuration);
+      this._capacityMinRequiredProofsPerEpoch = Number(data.graphNetworks[0].minRequiredProofsPerEpoch);
     }
   }
 
@@ -330,6 +340,33 @@ export class DealExplorerClient {
     await this._init();
     const convertedFilters: CapacityCommitmentsFilters = {
       search: capacityCommitmentsByProviderFilter.providerId.toLowerCase(),
+    };
+    if (
+      capacityCommitmentsByProviderFilter.status &&
+      capacityCommitmentsByProviderFilter.status != "all"
+    ) {
+      convertedFilters.status = capacityCommitmentsByProviderFilter.status;
+    }
+    return await this._getCapacityCommitmentsImpl(
+      convertedFilters,
+      offset,
+      limit,
+      orderBy,
+      orderType,
+    );
+  }
+
+  // @notice [Figma] Peer ID. Capacity Commitments.
+  async getCapacityCommitmentsByPeer(
+    capacityCommitmentsByProviderFilter: ChildEntitiesByPeerFilter,
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: CapacityCommitmentsOrderBy = "createdAt",
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
+  ) {
+    await this._init();
+    const convertedFilters: CapacityCommitmentsFilters = {
+      search: capacityCommitmentsByProviderFilter.peerId,
     };
     if (
       capacityCommitmentsByProviderFilter.status &&
@@ -534,6 +571,44 @@ export class DealExplorerClient {
       orderBy,
       orderType,
     );
+  }
+
+  // @notice [Figma] Deal. Matching Result.
+  async getComputeUnitsByDeal(
+    dealId: string,
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: ComputeUnitsOrderBy = "createdAt",
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
+  ): Promise<ComputeUnitWorkerDetailListView> {
+    await this._init();
+
+    const data = await this._indexerClient.getComputeUnits({
+      filters: {
+        deal_: { id: dealId },
+      },
+      offset,
+      limit,
+      orderBy,
+      orderType,
+    });
+
+    let res: Array<ComputeUnitWorkerDetail> = []
+    for (const computeUnit of data.computeUnits) {
+      res.push(
+        {
+          id: computeUnit.id,
+          providerId: computeUnit.peer.provider.id,
+          workerId: computeUnit.workerId ?? undefined,
+          workerStatus: computeUnit.workerId ? "registered" : "waitingRegistration",
+        }
+      )
+    }
+
+    return {
+      total: null,
+      data: res,
+    }
   }
 
   // @notice [Figma] Deal.
@@ -783,26 +858,17 @@ export class DealExplorerClient {
         capacityCommitment.id,
       );
 
-    return {
-      ...serializeCapacityCommitmentShort(
-        capacityCommitment,
-        capacityCommitmentRpcDetails.status,
-        this._coreInitTimestamp!,
-        this._coreEpochDuration!,
-      ),
-      totalCollateral: tokenValueToRounded(capacityCommitment.totalCollateral),
-      collateralToken: FLTToken,
-      rewardDelegatorRate: capacityCommitment.rewardDelegatorRate,
-      rewardsUnlocked: capacityCommitmentRpcDetails.unlockedRewards
-        ? tokenValueToRounded(capacityCommitmentRpcDetails.unlockedRewards)
-        : "0",
-      rewardsNotWithdrawn: capacityCommitmentRpcDetails.totalRewards
-        ? tokenValueToRounded(capacityCommitmentRpcDetails.totalRewards)
-        : "0",
-      rewardsTotal: capacityCommitmentRpcDetails.totalRewards
-        ? tokenValueToRounded(capacityCommitmentRpcDetails.totalRewards + capacityCommitment.rewardWithdrawn)
-        : "0",
-    };
+    return serializeCapacityCommitmentDetail(
+      capacityCommitment,
+      capacityCommitmentRpcDetails.status,
+      this._coreInitTimestamp!,
+      this._coreEpochDuration!,
+      capacityCommitment.totalCollateral,
+      capacityCommitment.rewardDelegatorRate,
+      capacityCommitmentRpcDetails.unlockedRewards,
+      capacityCommitmentRpcDetails.totalRewards,
+      capacityCommitment.rewardWithdrawn,
+    )
   }
 
   // @notice [Figma] Peer ID.
@@ -901,6 +967,7 @@ export class DealExplorerClient {
 
     const { expectedProofsDueNow, status } = serializeExpectedProofsAndCUStatus(
       computeUnit,
+      this._capacityMinRequiredProofsPerEpoch!,
       this._coreInitTimestamp!,
       this._coreEpochDuration!,
     );
@@ -926,6 +993,8 @@ export class DealExplorerClient {
   }
 
   // @notice [Figma] List of Proofs.
+  // @notice [Figma] Capacity Commitment. Proofs. Submitted Proofs / fails. use both filters:
+  //  capacityCommitmentStatsPerEpochId, computeUnitId
   async getProofs(
     filters?: ProofsFilters,
     offset: number = 0,
@@ -1003,6 +1072,7 @@ export class DealExplorerClient {
       const { expectedProofsDueNow, status } =
         serializeExpectedProofsAndCUStatus(
           computeUnit,
+          this._capacityMinRequiredProofsPerEpoch!,
           this._coreInitTimestamp!,
           this._coreEpochDuration!,
         );
@@ -1053,26 +1123,110 @@ export class DealExplorerClient {
       },
     );
 
-    const res: Array<ProofStatsByCapacityCommitment> =
-      data.capacityCommitmentStatsPerEpoches.map((proofStats) => {
-        return {
+    // TODO: generate table with missed epoches as well (there might be filtration by epoches,
+    //  thus, logic could be complicated, resolve after discussion with PM.
+    let res: Array<ProofStatsByCapacityCommitment> = []
+    for (const proofStats of data.capacityCommitmentStatsPerEpoches)  {
+      res.push(
+        {
           createdAtEpoch: Number(proofStats.epoch),
-          computeUnitsTotal: proofStats.activeUnitCount,
-          submittedProofsCount: proofStats.submittedProofsCount,
-          failedProofsCount:
-            proofStats.activeUnitCount - proofStats.submittedProofsCount,
-          averageProofsPerCU:
-            proofStats.activeUnitCount != 0
-              ? proofStats.submittedProofsCount / proofStats.activeUnitCount
-              : 0,
-          rewardsToken: FLTToken,
-        };
-      });
+          createdAtEpochBlockNumberStart: Number(proofStats.blockNumberStart),
+          createdAtEpochBlockNumberEnd: Number(proofStats.blockNumberEnd),
+          computeUnitsExpected: proofStats.activeUnitCount,
+          submittedProofs: proofStats.submittedProofsCount,
+          computeUnitsFailed: proofStats.activeUnitCount - proofStats.computeUnitsWithMinRequiredProofsSubmittedCounter,
+          computeUnitsSuccess: proofStats.computeUnitsWithMinRequiredProofsSubmittedCounter,
+          submittedProofsPerCU: proofStats.submittedProofsCount / proofStats.activeUnitCount,
+        }
+      )
+    }
 
     return {
       total: null,
       data: res,
     };
+  }
+
+  // @notice [Figma] При клике на карточку эпохи появится окно с перечнем всех CU внутри этого CC.
+  // @dev It does 2 queries: for CC and for CUs stats. TODO: reduce to 1 query.
+  // TODO: move data manipulation to serializer.
+  async getComputeUnitStatsPerCapacityCommitmentEpoch(
+    capacityCommitmentId: string,
+    epoch: number,
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: ComputeUnitStatsPerCapacityCommitmentEpochOrderBy = "id",
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
+  ): Promise<ComputeUnitStatsPerCapacityCommitmentEpochListView> {
+    await this._init()
+    // Get all CU linked to CC.
+    const capacityCommitmentFetched = await this._indexerClient.getCapacityCommitment({
+      id: capacityCommitmentId
+    })
+    if (!capacityCommitmentFetched.capacityCommitment) {
+      throw new Error(`Capacity commitment with id ${capacityCommitmentId} not found.`)
+    }
+
+    // Get stats for all Compute Units of the CC for the epoch.
+    const computeUnitPerEpochStatsFetched = await this._indexerClient.getComputeUnitPerEpochStats({
+      filters: {
+        capacityCommitment_: { id: capacityCommitmentId },
+        epoch: epoch.toString(),
+      },
+      offset,
+      limit,
+      orderBy,
+      orderType,
+    })
+
+    // Extract desirable stats for compute unit if stats have been stored for the CUs.
+    // Also extract info if CU in Deal.
+    let computeUnitToSubmittedProofsPerEpoch: Record<string, number> = {}
+    computeUnitPerEpochStatsFetched.computeUnitPerEpochStats.map((stats) => {
+      computeUnitToSubmittedProofsPerEpoch[stats.computeUnit.id] = stats.submittedProofsCount
+    })
+    let allCUsOfCC: Array<string> = []
+    let computeUnitsInDeal = new Set()
+    const capacityCommitmentComputeUnits = capacityCommitmentFetched.capacityCommitment.computeUnits ?? []
+    for (const capacityCommitmentToComputeUnit of capacityCommitmentComputeUnits) {
+      const _computeUnit = capacityCommitmentToComputeUnit.computeUnit
+      allCUsOfCC.push(_computeUnit.id)
+      if (_computeUnit.deal && _computeUnit.deal.id) {
+        computeUnitsInDeal.add(_computeUnit.id)
+      }
+    }
+
+    // Merge queries to serialize data.
+    let res: Array<ComputeUnitStatsPerCapacityCommitmentEpoch> = []
+    for (const computeUnitId of allCUsOfCC) {
+      let submittedProofs = 0
+      if (computeUnitId in computeUnitToSubmittedProofsPerEpoch) {
+        submittedProofs = Number(computeUnitToSubmittedProofsPerEpoch[computeUnitId])
+      }
+      let computeUnitProofStatus: 'failed' | 'success' = 'failed'
+      if (submittedProofs >= this._capacityMinRequiredProofsPerEpoch!) {
+        computeUnitProofStatus = 'success'
+      } else if (computeUnitId in computeUnitsInDeal) {
+        // Compute unit is not failed if it is not in deal right now.
+        computeUnitProofStatus = 'success'
+      } else {
+        computeUnitProofStatus = 'failed'
+      }
+
+      res.push(
+        {
+            capacityCommitmentId: capacityCommitmentId,
+            computeUnitId: computeUnitId,
+            submittedProofs,
+            computeUnitProofStatus,
+        }
+      )
+    }
+
+    return {
+      total: null,
+      data: res
+    }
   }
 }
 

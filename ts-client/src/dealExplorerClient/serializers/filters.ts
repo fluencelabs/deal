@@ -206,7 +206,8 @@ export function serializeCapacityCommitmentsFiltersToIndexer(
       or: [
         { id: v.search },
         { peer_: { id: v.search } },
-        { provider_: { id: v.search } },
+        { provider_: { id: v.search.toLowerCase() } },
+        { delegator: v.search.toLowerCase() },
       ],
     });
   }
@@ -283,6 +284,16 @@ export function serializeProofsFiltersToIndexer(
         { peer_: { id: v.search } },
       ],
     });
+  }
+  if (v.capacityCommitmentStatsPerEpochId) {
+    convertedFilters.and?.push({
+      capacityCommitmentStatsPerEpoch_: {id: v.capacityCommitmentStatsPerEpochId}
+    })
+  }
+  if (v.computeUnitId) {
+    convertedFilters.and?.push({
+      computeUnit_: {id: v.computeUnitId}
+    })
   }
   return convertedFilters;
 }

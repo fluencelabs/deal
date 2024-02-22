@@ -10,6 +10,7 @@ import {
   DealToProvidersAccess,
   CapacityCommitmentToComputeUnit,
   CapacityCommitmentStatsPerEpoch,
+  ComputeUnitPerEpochStat,
 } from "../generated/schema";
 import { BigInt, Bytes } from "@graphprotocol/graph-ts";
 import {getTokenDecimals, getTokenSymbol} from "./contracts";
@@ -233,7 +234,22 @@ export function createOrLoadCapacityCommitmentStatsPerEpoch(capacityCommitmentId
     entity.nextAdditionalActiveUnitCount = 0
     entity.currentCCNextCCFailedEpoch = ZERO_BIG_INT
     entity.submittedProofsCount = 0
+    entity.blockNumberStart = ZERO_BIG_INT
+    entity.blockNumberEnd = ZERO_BIG_INT
+    entity.computeUnitsWithMinRequiredProofsSubmittedCounter = 0
     entity.save()
   }
   return entity as CapacityCommitmentStatsPerEpoch
+}
+
+export function createOrLoadComputeUnitPerEpochStat(computeUnitId: string, epoch: string): ComputeUnitPerEpochStat {
+  const concattedIds = computeUnitId.concat(epoch);
+  let entity = ComputeUnitPerEpochStat.load(concattedIds);
+
+  if (entity == null) {
+    entity = new ComputeUnitPerEpochStat(concattedIds)
+    entity.submittedProofsCount = 0;
+    entity.save()
+  }
+  return entity as ComputeUnitPerEpochStat
 }

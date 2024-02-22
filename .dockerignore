@@ -12,3 +12,4 @@
 !script/
 !out/
 !cache/
+!docker/entrypoint.sh

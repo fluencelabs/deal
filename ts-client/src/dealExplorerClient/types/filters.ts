@@ -35,6 +35,11 @@ export interface ChildEntitiesByProviderFilter {
   status?: ProviderChildEntityStatusFilter | undefined;
 }
 
+export interface ChildEntitiesByPeerFilter {
+  peerId: string;
+  status?: ProviderChildEntityStatusFilter | undefined;
+}
+
 // @dev Where is "OnlyActive" filter? - currently, it should be filtered by
 // @dev  frontend itself by Deal field: status.
 export interface DealsFilters {
@@ -50,7 +55,7 @@ export interface DealsFilters {
   status?: DealStatus | undefined;
 }
 
-// @param search: search by provider id, commitment id, peer id
+// @param search: search by provider id, commitment id, peer id, delegator address.
 //  (strict search only).
 // @param onlyActive: deprecated - use status filter instead.
 export interface CapacityCommitmentsFilters {
@@ -69,6 +74,8 @@ export interface CapacityCommitmentsFilters {
 // @param search: search by provider id, peer id, transaction hash.
 export interface ProofsFilters {
   search?: string | undefined;
+  capacityCommitmentStatsPerEpochId?: string | undefined;
+  computeUnitId?: string | undefined;
 }
 
 // Order Types.
@@ -88,5 +95,6 @@ export type CapacityCommitmentsOrderBy =
 export type ProofsOrderBy = "createdAt" | "epoch";
 export type ComputeUnitsOrderBy = "createdAt";
 export type ProofStatsByCapacityCommitmentOrderBy = "epoch";
+export type ComputeUnitStatsPerCapacityCommitmentEpochOrderBy = "id" | "submittedProofsCount";
 
 export type OrderType = "asc" | "desc";
