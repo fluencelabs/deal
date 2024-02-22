@@ -56,7 +56,8 @@ case "$network" in
       basic_auth="${BASIC_AUTH_SUBGRAPH}@"
     fi
     GRAPHNODE_URL="https://${basic_auth}graph-node-admin-${network}.fluence.dev"
-    IPFS_URL="https://${basic_auth}graph-node-ipfs-${network}.fluence.dev"
+    # TODO: IPFS why does not work with auth.
+    IPFS_URL="https://graph-node-ipfs-${network}.fluence.dev"
 esac
 
 # Prepare subgraph version label.

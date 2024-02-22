@@ -68,6 +68,13 @@ deploy-contracts-in-docker: ## Deploy contracts in docker
 
 	@echo "\033[0;32mSuccess! Contracts deployed to local chain.\033[0m"
 
+deploy-stage: ## Deploy to stage (IPC)
+	@make verify-command program=forge
+	@CONTRACTS_ENV_NAME=$* forge script script/Deploy.s.sol --rpc-url $* \
+	--private-key $(PRIVATE_KEY) --broadcast
+
+	@echo "\033[0;32mSuccess! Contracts deployed to $* chain.\033[0m"
+
 deploy-%: ## Deploy to ...
 	@make verify-command program=forge
 	@CONTRACTS_ENV_NAME=$* forge script script/Deploy.s.sol --rpc-url $* \
