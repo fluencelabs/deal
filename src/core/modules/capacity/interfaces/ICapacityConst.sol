@@ -68,7 +68,8 @@ interface ICapacityConst {
     /// @dev Returns the slashing rate for failed CU
     function slashingRate() external view returns (uint256);
 
-    /// @dev Returns the min required randomX proofs per epoch
+    /// @dev Returns the min required randomX proofs per epoch for the 1 CU.
+    /// @dev  If lower than this - CU is failed and CC slashed.
     function minRequierdProofsPerEpoch() external view returns (uint256);
 
     /// @dev Returns the max randomX proofs per epoch

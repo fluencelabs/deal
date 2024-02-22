@@ -8,8 +8,8 @@ export const getIndexerUrl = (env: ContractsENV) => {
 
   switch (env) {
     case "kras":
-      indexerUrl = "";
-      throw new Error("indexer for kras is not deployed.");
+      indexerUrl = "https://api.thegraph.com/subgraphs/name/alcibiadescleinias/fluence-deal-contracts";
+      break;
     case "testnet":
       indexerUrl =
         "https://api.thegraph.com/subgraphs/name/alcibiadescleinias/fluence-deal-contracts";

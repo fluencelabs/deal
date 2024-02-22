@@ -1,11 +1,11 @@
 /* eslint-disable */
 //@ts-nocheck
-import * as Types from "../generated.types.js";
+import * as Types from '../generated.types.js';
 
-import { GraphQLClient } from "graphql-request";
-import type { RequestOptions } from "graphql-request";
-type GraphQLClientRequestHeaders = RequestOptions["requestHeaders"];
-import gql from "graphql-tag";
+import { GraphQLClient } from 'graphql-request';
+import type { RequestOptions } from 'graphql-request';
+import gql from 'graphql-tag';
+type GraphQLClientRequestHeaders = RequestOptions['requestHeaders'];
 export type PeerQueryQueryVariables = Types.Exact<{
   id: Types.Scalars['ID']['input'];
 }>;
@@ -13,14 +13,14 @@ export type PeerQueryQueryVariables = Types.Exact<{
 
 export type PeerQueryQuery = { __typename?: 'Query', peer?: { __typename?: 'Peer', id: string, computeUnitsTotal: number, computeUnitsInDeal: number, computeUnitsInCapacityCommitment: number, offer: { __typename?: 'Offer', id: string }, provider: { __typename?: 'Provider', id: string, name: string } } | null };
 
-export type ComputeUnitWithCcDataBasicFragment = { __typename?: 'ComputeUnit', id: string, workerId?: string | null, deal?: { __typename?: 'Deal', id: string } | null, peer: { __typename?: 'Peer', id: string, currentCapacityCommitment?: { __typename?: 'CapacityCommitment', id: string, collateralPerUnit: any, submittedProofsCount: number, startEpoch: any } | null } };
+export type ComputeUnitWithCcDataBasicFragment = { __typename?: 'ComputeUnit', id: string, workerId?: string | null, deal?: { __typename?: 'Deal', id: string } | null, peer: { __typename?: 'Peer', id: string, currentCapacityCommitment?: { __typename?: 'CapacityCommitment', id: string, collateralPerUnit: any, submittedProofsCount: number, startEpoch: any } | null, provider: { __typename?: 'Provider', id: string } } };
 
 export type ComputeUnitQueryQueryVariables = Types.Exact<{
   id: Types.Scalars['ID']['input'];
 }>;
 
 
-export type ComputeUnitQueryQuery = { __typename?: 'Query', computeUnit?: { __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string, name: string }, deal?: { __typename?: 'Deal', id: string } | null, peer: { __typename?: 'Peer', id: string, currentCapacityCommitment?: { __typename?: 'CapacityCommitment', id: string, collateralPerUnit: any, submittedProofsCount: number, startEpoch: any } | null } } | null };
+export type ComputeUnitQueryQuery = { __typename?: 'Query', computeUnit?: { __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string, name: string }, deal?: { __typename?: 'Deal', id: string } | null, peer: { __typename?: 'Peer', id: string, currentCapacityCommitment?: { __typename?: 'CapacityCommitment', id: string, collateralPerUnit: any, submittedProofsCount: number, startEpoch: any } | null, provider: { __typename?: 'Provider', id: string } } } | null };
 
 export type ComputeUnitsQueryQueryVariables = Types.Exact<{
   filters?: Types.InputMaybe<Types.ComputeUnit_Filter>;
@@ -31,7 +31,7 @@ export type ComputeUnitsQueryQueryVariables = Types.Exact<{
 }>;
 
 
-export type ComputeUnitsQueryQuery = { __typename?: 'Query', computeUnits: Array<{ __typename?: 'ComputeUnit', submittedProofsCount: number, id: string, workerId?: string | null, deal?: { __typename?: 'Deal', id: string } | null, peer: { __typename?: 'Peer', id: string, currentCapacityCommitment?: { __typename?: 'CapacityCommitment', id: string, collateralPerUnit: any, submittedProofsCount: number, startEpoch: any } | null } }> };
+export type ComputeUnitsQueryQuery = { __typename?: 'Query', computeUnits: Array<{ __typename?: 'ComputeUnit', submittedProofsCount: number, id: string, workerId?: string | null, deal?: { __typename?: 'Deal', id: string } | null, peer: { __typename?: 'Peer', id: string, currentCapacityCommitment?: { __typename?: 'CapacityCommitment', id: string, collateralPerUnit: any, submittedProofsCount: number, startEpoch: any } | null, provider: { __typename?: 'Provider', id: string } } }> };
 
 export const ComputeUnitWithCcDataBasicFragmentDoc = gql`
     fragment ComputeUnitWithCCDataBasic on ComputeUnit {
@@ -47,6 +47,9 @@ export const ComputeUnitWithCcDataBasicFragmentDoc = gql`
       collateralPerUnit
       submittedProofsCount
       startEpoch
+    }
+    provider {
+      id
     }
   }
 }
@@ -97,7 +100,7 @@ export const ComputeUnitsQueryDocument = gql`
 export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string, operationType?: string, variables?: any) => Promise<T>;
 
 
-const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationType, variables) => action();
+const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationType, _variables) => action();
 
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
   return {

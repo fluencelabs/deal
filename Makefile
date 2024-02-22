@@ -5,6 +5,7 @@ export
 .PHONY: help
 
 CHAIN_RPC_URL ?= http://chain-rpc:8545
+LOCAL_CHAIN_BLOCK_MINING_INTERVAL ?= 1
 
 verify-command: ## Verify command
 	@command -v $(program) > /dev/null || (echo "\033[0;31m$(program) is not installed. Please install $(program) and try again.\033[0m" && exit 1)
@@ -45,7 +46,7 @@ run-tests:  ## Test for solidity contracts & ts-clients
 
 start-local-chain: ## Start local chain
 	@make verify-command program=anvil
-	@anvil --host 0.0.0.0 --block-time 15 --state /data/state.db
+	@anvil --host 0.0.0.0 --block-time $(LOCAL_CHAIN_BLOCK_MINING_INTERVAL) --state /data/state.db
 
 start-local-subgraph: ## Start local subgraph
 	@make verify-command program=npm

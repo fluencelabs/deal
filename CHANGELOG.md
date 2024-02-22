@@ -1,5 +1,46 @@
 # Changelog
 
+## [0.6.2](https://github.com/fluencelabs/deal/compare/v0.6.1...v0.6.2) (2024-02-22)
+
+
+### Bug Fixes
+
+* new ipc stage ([#285](https://github.com/fluencelabs/deal/issues/285)) ([3afb49f](https://github.com/fluencelabs/deal/commit/3afb49f58ed27d7b1da8c2b1c715648447954f17))
+
+## [0.6.1](https://github.com/fluencelabs/deal/compare/v0.6.0...v0.6.1) (2024-02-21)
+
+
+### Bug Fixes
+
+* **makefile:** set block time to 1 sec by default ([#281](https://github.com/fluencelabs/deal/issues/281)) ([efbdce6](https://github.com/fluencelabs/deal/commit/efbdce6b4243778ddd66e590459b3575b4c9358a))
+
+## [0.6.0](https://github.com/fluencelabs/deal/compare/v0.5.2...v0.6.0) (2024-02-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* last explorer tunes [chain 364] ([#267](https://github.com/fluencelabs/deal/issues/267))
+
+### Features
+
+* add LOCAL_CHAIN_BLOCK_MINING_INTERVAL and note useful envs ([#271](https://github.com/fluencelabs/deal/issues/271)) ([ed4ded6](https://github.com/fluencelabs/deal/commit/ed4ded6d521761edd648e73bd2beb07d81281642))
+* last explorer tunes [chain 364] ([#267](https://github.com/fluencelabs/deal/issues/267)) ([624b0ba](https://github.com/fluencelabs/deal/commit/624b0bab3f94175e56bcf409c29a30d1ee778030))
+* update chain id for stage ([#277](https://github.com/fluencelabs/deal/issues/277)) ([b31c4a3](https://github.com/fluencelabs/deal/commit/b31c4a324ec47a511be53a3e9e3a5a832491c255))
+
+
+### Bug Fixes
+
+* Add healthchecks and make containers react to ctrl+c ([#275](https://github.com/fluencelabs/deal/issues/275)) ([cedd96e](https://github.com/fluencelabs/deal/commit/cedd96e2e340dadcb51b4ec05273b175dc68064d))
+* package generated files ([#280](https://github.com/fluencelabs/deal/issues/280)) ([a9f1837](https://github.com/fluencelabs/deal/commit/a9f1837220cff1f677cce856b33bd4a0ae1b8fbb))
+* set block time to 1 sec by default ([#279](https://github.com/fluencelabs/deal/issues/279)) ([902299e](https://github.com/fluencelabs/deal/commit/902299e8cd5eb1b4a5835be9a88418e938f0ac33))
+
+## [0.5.2](https://github.com/fluencelabs/deal/compare/v0.5.1...v0.5.2) (2024-02-19)
+
+
+### Features
+
+* indexer for cli - get offer with some data [chain-356] ([#263](https://github.com/fluencelabs/deal/issues/263)) ([9fdc6f8](https://github.com/fluencelabs/deal/commit/9fdc6f89d67594f04542c5dfabfaa483976b9b17))
+
 ## [0.5.1](https://github.com/fluencelabs/deal/compare/v0.5.0...v0.5.1) (2024-02-16)
 
 

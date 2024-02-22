@@ -52,6 +52,9 @@ fragment BasicOffer on Offer {
       approved
       name
     }
+    peers {
+      id
+    }
 }
 
 fragment BasicPeer on Peer {

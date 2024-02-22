@@ -46,6 +46,8 @@ services:
   # Anvil node with deployed contracts
   chain-rpc:
     image: ${CHAIN_RPC_IMAGE:-chain-rpc}
+    environment:
+      LOCAL_CHAIN_BLOCK_MINING_INTERVAL: 1
     build:
       context: ../
       dockerfile: ./docker/Dockerfile
@@ -54,6 +56,14 @@ services:
       - chain-rpc:/data
     ports:
       - "8545:8545"
+    healthcheck:
+      test: |
+        curl -s -X POST 'http://localhost:8545' -H 'Content-Type: application/json' \
+          --data '{"jsonrpc":"2.0", "method":"eth_chainId", "params":[], "id":1}' \
+          | jq -e '.result != null'
+      interval: 8s
+      timeout: 10s
+      retries: 20
 
   chain-deploy-script:
     image: ${CHAIN_DEPLOY_SCRIPT_IMAGE:-chain-deploy-script}
@@ -62,12 +72,13 @@ services:
       dockerfile: ./docker/Dockerfile
       target: chain-deploy-script
     command: ["deploy-contracts-in-docker"]
-    depends_on:
-      - chain-rpc
     volumes:
       - ../deployments/:/app/deployments/
       - ../out/:/app/out/
       - ../cache/:/app/cache/
+    depends_on:
+      chain-rpc:
+        condition: service_healthy
 
   # Blockscout services
   blockscout:
