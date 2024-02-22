@@ -19,7 +19,7 @@ const STAND_TO_SUBGRAPH_CONFIG = {
 }
 const STAND_TO_SUBGRAPH_NETWORK = {
   "kras": "mumbai",
-  "testnet": "mumbai",
+  "testnet": "testnet",
   "stage": "stage",
   "local": "local",
 }
