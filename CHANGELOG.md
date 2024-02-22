@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.2](https://github.com/fluencelabs/deal/compare/v0.6.1...v0.6.2) (2024-02-22)
+
+
+### Bug Fixes
+
+* new ipc stage ([#285](https://github.com/fluencelabs/deal/issues/285)) ([3afb49f](https://github.com/fluencelabs/deal/commit/3afb49f58ed27d7b1da8c2b1c715648447954f17))
+
 ## [0.6.1](https://github.com/fluencelabs/deal/compare/v0.6.0...v0.6.1) (2024-02-21)
 
 
