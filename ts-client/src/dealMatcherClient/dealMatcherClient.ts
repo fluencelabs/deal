@@ -4,7 +4,11 @@ import type { OffersQueryQueryVariables } from "./indexerClient/queries/offers-q
 import { serializeDealProviderAccessLists } from "../utils/serializers.js";
 import debug from "debug";
 
-const dbg = debug("deal-ts-clients:matcher:debug");
+const LOG_PREFIX = "deal-ts-clients:matcher";
+
+const logInfo = debug(`${LOG_PREFIX}:info`);
+const logWarn = debug(`${LOG_PREFIX}:warn`);
+const logDebug = debug(`${LOG_PREFIX}:debug`);
 
 // Structure match matchDeal() arguments.
 // Currently: bytes32[] calldata offers, bytes32[][] calldata computeUnits.
@@ -147,7 +151,7 @@ export class DealMatcherClient {
         id_in: getMatchedOffersIn.providersBlackList,
       };
     }
-    dbg(
+    logInfo(
       `[_getMatchedOffersPage] Requesting indexer for page with page params: ${JSON.stringify(
         indexerGetOffersParams,
         null,
@@ -155,8 +159,9 @@ export class DealMatcherClient {
       )}...`,
     );
     const fetched = await this._indexerClient.getOffers(indexerGetOffersParams);
-    dbg(
-      `[_getMatchedOffersPage] Got response from indexer. Fetched data: ${JSON.stringify(
+    logInfo(`[_getMatchedOffersPage] Got response from indexer.`);
+    logDebug(
+      `[_getMatchedOffersPage] Fetched data: ${JSON.stringify(
         fetched,
         null,
         2,
@@ -175,13 +180,13 @@ export class DealMatcherClient {
       minWorkersToMatch,
       maxWorkersPerProvider,
     } = getMatchedOffersIn;
-    dbg(
+    logInfo(
       "[getMatchedOffers] Try to find matched offers with the next deal configuration:",
     );
-    dbg(JSON.stringify(getMatchedOffersIn, null, 2));
+    logInfo(JSON.stringify(getMatchedOffersIn, null, 2));
 
     if (targetWorkerSlotToMatch > this.MAX_PER_PAGE) {
-      dbg(
+      logWarn(
         `targetWorkerSlotToMatch param is too high, it is better to reduce large query to ${this.MAX_PER_PAGE} per batch.`,
       );
     }
@@ -230,7 +235,7 @@ export class DealMatcherClient {
       );
 
       if (offers.length == 0) {
-        dbg("Got empty data from indexer, break search.");
+        logDebug("Got empty data from indexer, break search.");
         break;
       }
 
@@ -342,7 +347,7 @@ export class DealMatcherClient {
     }
 
     if (minWorkersToMatch > computeUnitsMatchedTotal) {
-      dbg(
+      logWarn(
         "Transaction will be failed because minWorkersToMatch > matchedComputeUnits. Return [].",
       );
       matchedComputeUnitsData.offers = [];
