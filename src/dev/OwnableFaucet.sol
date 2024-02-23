@@ -23,4 +23,6 @@ contract OwnableFaucet is Ownable, Multicall {
         (bool success, ) = addr.call{value: value}("");
         require(success, "Cannot send ether");
     }
+
+    receive() external payable { }
 }
