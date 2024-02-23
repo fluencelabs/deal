@@ -2,7 +2,7 @@ import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type { ContractsENV } from "../client/config.js";
 import type { OffersQueryQueryVariables } from "./indexerClient/queries/offers-query.generated.js";
 import { serializeDealProviderAccessLists } from "../utils/serializers.js";
-import { debug } from "debug";
+import debug from "debug";
 
 const dbg = debug("deal-ts-clients:matcher:debug");
 
