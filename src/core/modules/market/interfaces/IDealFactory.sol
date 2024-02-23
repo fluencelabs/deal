@@ -57,6 +57,7 @@ interface IDealFactory {
     function deployDeal(
         CIDV1 calldata appCID_,
         IERC20 paymentToken_,
+        uint256 depositAmount_,
         uint256 minWorkers_,
         uint256 targetWorkers_,
         uint256 maxWorkersPerProvider_,

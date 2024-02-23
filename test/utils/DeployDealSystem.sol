@@ -36,7 +36,8 @@ library DeployDealSystem {
     uint256 public constant DEFAULT_MIN_DURATION = 1 days;
     uint256 public constant DEFAULT_MIN_REWARD_PER_EPOCH = 10000;
     uint256 public constant DEFAULT_MAX_REWARD_PER_EPOCH = 1;
-    uint256 public constant DEFAULT_VESTING_DURATION = 2 days;
+    uint256 public constant DEFAULT_VESTING_PERIOD_DURATION = 1;
+    uint256 public constant DEFAULT_VESTING_PERIOD_COUNT = 6;
     uint256 public constant DEFAULT_SLASHING_RATE = 100000; // 0.01 = 1% = 100000
     uint256 public constant DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH = 3;
     uint256 public constant DEFAULT_MAX_PROOFS_PER_EPOCH = 5;
@@ -91,7 +92,8 @@ library DeployDealSystem {
                         DEFAULT_MIN_DURATION,
                         DEFAULT_MIN_REWARD_PER_EPOCH,
                         DEFAULT_MAX_REWARD_PER_EPOCH,
-                        DEFAULT_VESTING_DURATION,
+                        DEFAULT_VESTING_PERIOD_DURATION,
+                        DEFAULT_VESTING_PERIOD_COUNT,
                         DEFAULT_SLASHING_RATE,
                         DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH,
                         DEFAULT_MAX_PROOFS_PER_EPOCH,

@@ -105,8 +105,10 @@ contract CreateMarket is Depoyments, Script {
 
             // Generate providersAccessList: 1 pseudo and 1 existed.
             CIDV1 memory appCID = CIDV1({prefixes: 0x12345678, hash: pseudoRandom(abi.encode("dealAppCID", i))});
-            address[] memory providersAccessList = new address[](2);  // TODO: to const.
-            for (uint j = 0; j < 2; j++) {
+            address[] memory providersAccessList = new address[](2); // TODO: to const.
+
+            uint256 minAmount = pricePerWorkerEpoch * newTargetWorkers * core.minDealDepositedEpoches();
+            for (uint256 j = 0; j < 2; j++) {
                 if (j % 2 == 0) {
                     providersAccessList[j] = address(this);
                 } else {
@@ -118,6 +120,7 @@ contract CreateMarket is Depoyments, Script {
                 IDeal dealCreatedContract = market.deployDeal(
                     appCID,
                     tUSD,
+                    minAmount,
                     newMinWorkers,
                     newTargetWorkers,
                     newMaxWorkerPerProvider,
@@ -131,6 +134,7 @@ contract CreateMarket is Depoyments, Script {
                 IDeal dealCreatedContract = market.deployDeal(
                     appCID,
                     tUSD,
+                    minAmount,
                     newMinWorkers,
                     newTargetWorkers,
                     newMaxWorkerPerProvider,
@@ -144,6 +148,7 @@ contract CreateMarket is Depoyments, Script {
                 IDeal dealCreatedContract = market.deployDeal(
                     appCID,
                     tUSD,
+                    minAmount,
                     newMinWorkers,
                     newTargetWorkers,
                     newMaxWorkerPerProvider,
@@ -154,17 +159,16 @@ contract CreateMarket is Depoyments, Script {
                 );
                 createdDeals[i] = address(dealCreatedContract);
             }
-
         }
 
         return createdDeals;
     }
 
     function _createCCs(bytes32[] memory peers) internal returns (bytes32[] memory) {
-        uint capacityMinDuration = capacity.minDuration();
+        uint256 capacityMinDuration = capacity.minDuration();
         bytes32[] memory commitments = new bytes32[](peers.length);
         // TODO: use another signer (deligator)...
-        for (uint i=0; i < peers.length; ++i) {
+        for (uint256 i = 0; i < peers.length; ++i) {
             commitments[i] = capacity.createCommitment(
                 peers[i],
                 capacityMinDuration,
@@ -180,7 +184,7 @@ contract CreateMarket is Depoyments, Script {
         // Setup foundry run.
         // add tokens for local network, if it is local anvil node.
         if (keccak256(bytes(envName)) == keccak256(bytes("local"))) {
-            console.log('envName is local, feed with Eth...');
+            console.log("envName is local, feed with Eth...");
             vm.deal(address(this), 100 ether);
         }
         vm.startBroadcast();
@@ -193,9 +197,7 @@ contract CreateMarket is Depoyments, Script {
             // This transaction will broke system coz of https://github.com/graphprotocol/graph-node/issues/5171
             // TODO: uncomment subgraph handlers and return support for events from this transaction.
             market.setEffectorInfo(
-                effectors[i],
-                effectorDescriptions[i],
-                CIDV1({prefixes: 0x12345678, hash: bytes32(0)})
+                effectors[i], effectorDescriptions[i], CIDV1({prefixes: 0x12345678, hash: bytes32(0)})
             );
         }
 
@@ -214,7 +216,7 @@ contract CreateMarket is Depoyments, Script {
         );
 
         console.log("Create CC for all peers...");
-        for (uint i=0; i < offerIds.length; ++i) {
+        for (uint256 i = 0; i < offerIds.length; ++i) {
             bytes32[] memory commitments = _createCCs(peerIds[i]);
         }
 
