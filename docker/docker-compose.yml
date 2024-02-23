@@ -124,9 +124,6 @@ services:
 
   # Blockscout services
   blockscout:
-    depends_on:
-      - ipc-eth
-      - postgres
     image: offchainlabs/blockscout:v1.0.0-c8db5b1
     restart: always
     links:
@@ -154,6 +151,8 @@ services:
     depends_on:
       ipc-eth:
         condition: service_healthy
+      postgres:
+        condition: service_healthy
 
   graph-node:
     image: graphprotocol/graph-node:v0.33.0
@@ -163,10 +162,6 @@ services:
       - '8020:8020'
       - '8030:8030'
       - '8040:8040'
-    depends_on:
-      - ipfs
-      - postgres
-      - ipc-eth
     environment:
       postgres_host: postgres
       postgres_user: postgres
@@ -179,5 +174,9 @@ services:
       ETHEREUM_REORG_THRESHOLD: 1
       ETHEREUM_ANCESTOR_COUNT: 1
     depends_on:
+      ipfs:
+        condition: service_healthy
       ipc-eth:
+        condition: service_healthy
+      postgres:
         condition: service_healthy
