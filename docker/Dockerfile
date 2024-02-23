@@ -62,6 +62,18 @@ RUN --mount=type=bind,source=docker/scripts/fendermint-bootstrap.sh,target=/boot
 COPY --from=actors /ipc/fendermint/builtin-actors/output/bundle.car /fendermint/bundle.car
 COPY --from=actors /ipc/fendermint/actors/output/custom_actors_bundle.car /fendermint/custom_actors_bundle.car
 
+# install packages that are required for healthcheck
+RUN \
+  apt-get update && \
+  apt-get install -y --no-install-recommends \
+    curl \
+    jq \
+  apt-get clean && \
+  rm -rf \
+  	/tmp/* \
+  	/var/lib/apt/lists/* \
+  	/var/tmp/*
+
 # Blockchain
 FROM cometbft/cometbft:v0.37.x as cometbft
 USER root
