@@ -65,7 +65,7 @@ export function getEpochDuration(contractAddress: Address): i32 {
 export function getInitTimestamp(contractAddress: Address): i32 {
   // TODO: resolve on IPC call of the contracts.
   // return Core.bind(contractAddress).initTimestamp().toI32();
-  return 1708639243;
+  return 1708646567;
 }
 
 export function getCapacityMaxFailedRatio(contractAddress: Address): BigInt {
