@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.4](https://github.com/fluencelabs/deal/compare/v0.6.3...v0.6.4) (2024-02-23)
+
+
+### Bug Fixes
+
+* night 22feb tunes and new contracts on stage ([#291](https://github.com/fluencelabs/deal/issues/291)) ([071e4e0](https://github.com/fluencelabs/deal/commit/071e4e0ac2b1c1fa621b54c3a7f900ac154140ef))
+
 ## [0.6.3](https://github.com/fluencelabs/deal/compare/v0.6.2...v0.6.3) (2024-02-22)
 
 
