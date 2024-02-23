@@ -2,6 +2,9 @@ import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type { ContractsENV } from "../client/config.js";
 import type { OffersQueryQueryVariables } from "./indexerClient/queries/offers-query.generated.js";
 import { serializeDealProviderAccessLists } from "../utils/serializers.js";
+import { debug } from "debug";
+
+const dbg = debug("dealMatcherClient");
 
 // Structure match matchDeal() arguments.
 // Currently: bytes32[] calldata offers, bytes32[][] calldata computeUnits.
@@ -144,7 +147,7 @@ export class DealMatcherClient {
         id_in: getMatchedOffersIn.providersBlackList,
       };
     }
-    console.info(
+    dbg(
       `[_getMatchedOffersPage] Requesting indexer for page with page params: ${JSON.stringify(
         indexerGetOffersParams,
         null,
@@ -152,9 +155,8 @@ export class DealMatcherClient {
       )}...`,
     );
     const fetched = await this._indexerClient.getOffers(indexerGetOffersParams);
-    console.info(`[_getMatchedOffersPage] Got response from indexer.`);
-    console.debug(
-      `[_getMatchedOffersPage] Fetched data: ${JSON.stringify(
+    dbg(
+      `[_getMatchedOffersPage] Got response from indexer. Fetched data: ${JSON.stringify(
         fetched,
         null,
         2,
@@ -173,13 +175,13 @@ export class DealMatcherClient {
       minWorkersToMatch,
       maxWorkersPerProvider,
     } = getMatchedOffersIn;
-    console.group(
+    dbg(
       "[getMatchedOffers] Try to find matched offers with the next deal configuration:",
     );
-    console.info(JSON.stringify(getMatchedOffersIn, null, 2));
+    dbg(JSON.stringify(getMatchedOffersIn, null, 2));
 
     if (targetWorkerSlotToMatch > this.MAX_PER_PAGE) {
-      console.warn(
+      dbg(
         `targetWorkerSlotToMatch param is too high, it is better to reduce large query to ${this.MAX_PER_PAGE} per batch.`,
       );
     }
@@ -228,7 +230,7 @@ export class DealMatcherClient {
       );
 
       if (offers.length == 0) {
-        console.debug("Got empty data from indexer, break search.");
+        dbg("Got empty data from indexer, break search.");
         break;
       }
 
@@ -246,7 +248,7 @@ export class DealMatcherClient {
           matchedComputeUnitsData.offers.push(offerId);
         }
         const peers = offer.peers;
-        console.log("TODO: peers", peers);
+        dbg("TODO: peers", peers);
         // Check if peers are empty and need to fetch next offer page.
         //  It could happen because we have after fetch filter: not more than 1 CU per peer
         //  that filters
@@ -341,13 +343,12 @@ export class DealMatcherClient {
     }
 
     if (minWorkersToMatch > computeUnitsMatchedTotal) {
-      console.warn(
+      dbg(
         "Transaction will be failed because minWorkersToMatch > matchedComputeUnits. Return [].",
       );
       matchedComputeUnitsData.offers = [];
       matchedComputeUnitsData.computeUnitsPerOffers = [];
     }
-    console.groupEnd();
     return matchedComputeUnitsData;
   }
 
