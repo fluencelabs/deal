@@ -77,10 +77,34 @@ dataSources:
           handler: handleComputeUnitAddedToDeal
         - event: ComputeUnitRemovedFromDeal(indexed bytes32,address,bytes32)
           handler: handleComputeUnitRemovedFromDeal
+      file: ./src/mappings/market.ts
+  - kind: ethereum/contract
+    name: DealFactory
+    network: local
+    source:
+      abi: DealFactory
+      address: "0x0000000000000000000000000000000000000000"
+      startBlock: 10
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Offer
+        - Effector
+        - Peer
+        - OfferToEffector
+        - ComputeUnit
+        - Token
+        - GraphNetwork
+      abis:
+        - name: Deal
+          file: ../out/DealFactory.sol/DealFactory.json
+      eventHandlers:
         - event: DealCreated(indexed
             address,address,uint256,address,uint256,uint256,uint256,uint256,(bytes4,bytes32)[],(bytes4,bytes32),uint8,address[])
           handler: handleDealCreated
-      file: ./src/mappings/market.ts
+      file: ./src/mappings/deal-factory.ts
   - kind: ethereum/contract
     name: Capacity
     network: local
