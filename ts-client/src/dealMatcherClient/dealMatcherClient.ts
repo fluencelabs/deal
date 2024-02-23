@@ -248,7 +248,6 @@ export class DealMatcherClient {
           matchedComputeUnitsData.offers.push(offerId);
         }
         const peers = offer.peers;
-        dbg("TODO: peers", peers);
         // Check if peers are empty and need to fetch next offer page.
         //  It could happen because we have after fetch filter: not more than 1 CU per peer
         //  that filters
