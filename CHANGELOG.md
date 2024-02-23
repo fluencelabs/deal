@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.6](https://github.com/fluencelabs/deal/compare/v0.6.5...v0.6.6) (2024-02-23)
+
+
+### Bug Fixes
+
+* remove testnet, remove mocks in subgraph ([#293](https://github.com/fluencelabs/deal/issues/293)) ([f82d2e6](https://github.com/fluencelabs/deal/commit/f82d2e66cab52641f34ae28515407415c8b00eab))
+
 ## [0.6.5](https://github.com/fluencelabs/deal/compare/v0.6.4...v0.6.5) (2024-02-23)
 
 
