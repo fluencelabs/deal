@@ -30,10 +30,10 @@
     "creationCodeHash": "0x07e564c779c66623f5d7ae13d90399ae2251c5dd3660184a7fd3672cb41f8c1f"
   },
   "Faucet": {
-    "addr": "0x412b01f7dE38022c412c8F2BDe57E773A4D52ABa",
-    "blockNumber": 1458,
-    "codeHash": "0xcd0ba87e24491c8332270c761d53c646a3761ff1d00a0924382266dbd5e72164",
-    "creationCodeHash": "0x934104439b81c14371be753836f1cb108c9be522118d862a41cb97aca7894601"
+    "addr": "0x562b49527874CA9f8B6B29Bd3a58F43B0B7D457a",
+    "blockNumber": 35266,
+    "codeHash": "0x14dd51b800181881a7f47051b07d2f969b03d58fb582f9462f65d8fb1a2d64b1",
+    "creationCodeHash": "0xeb5c4b89c4851cab9fcd006e18b1f9a9b045ea913fd008e10115c808ff710950"
   },
   "Market": {
     "addr": "0xde3E9c36478733632aFb28846e8120B9a10b617F",
