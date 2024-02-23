@@ -130,7 +130,7 @@ jobs:
           submodules: recursive
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.8.0
+        uses: hashicorp/vault-action@v3.0.0
         with:
           url: https://vault.fluence.dev
           path: jwt/github
@@ -154,7 +154,7 @@ jobs:
         env:
           release: ${{ inputs.release }}
         run: |
-          if [[ ${release} ]]; then
+          if [[ ${release} == "false" ]]; then
             echo "ipc-image=docker.fluence.dev/ipc:${{ steps.version.outputs.id }}" >> "$GITHUB_OUTPUT"
             echo "ipc-deploy-script-image=docker.fluence.dev/ipc-deploy-script:${{ steps.version.outputs.id }}" >> "$GITHUB_OUTPUT"
             echo "cometbft-image=docker.fluence.dev/cometbft:${{ steps.version.outputs.id }}" >> "$GITHUB_OUTPUT"
@@ -263,7 +263,7 @@ jobs:
           submodules: recursive
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.8.0
+        uses: hashicorp/vault-action@v3.0.0
         with:
           url: https://vault.fluence.dev
           path: jwt/github
@@ -345,7 +345,7 @@ jobs:
           submodules: recursive
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.8.0
+        uses: hashicorp/vault-action@v3.0.0
         with:
           url: https://vault.fluence.dev
           path: jwt/github
@@ -419,7 +419,7 @@ jobs:
         env:
           release: ${{ inputs.release }}
         run: |
-          if [[ $release ]]; then
+          if [[ $release == "false" ]]; then
             echo "deal-ts-clients=${{ steps.deal-ts-clients.outputs.version }}" >> "$GITHUB_OUTPUT"
           else
             version="$(jq -r .[] .github/release-please/manifest.json)"
@@ -456,7 +456,7 @@ jobs:
           submodules: recursive
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.8.0
+        uses: hashicorp/vault-action@v3.0.0
         with:
           url: https://vault.fluence.dev
           path: jwt/github
@@ -496,7 +496,7 @@ jobs:
         env:
           release: ${{ inputs.release }}
         run: |
-          if [[ $release ]]; then
+          if [[ $release == "false" ]]; then
             echo "subgraph-deploy-script-image=docker.fluence.dev/subgraph-deploy-script:${{ steps.version.outputs.id }}" >> "$GITHUB_OUTPUT"
           else
             version="$(jq -r .[] .github/release-please/manifest.json)"
@@ -553,7 +553,7 @@ jobs:
 
     steps:
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.8.0
+        uses: hashicorp/vault-action@v3.0.0
         with:
           url: https://vault.fluence.dev
           path: jwt/github

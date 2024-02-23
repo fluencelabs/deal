@@ -24,8 +24,48 @@ query CapacityCommitmentQuery(
 ) {
   capacityCommitment(id: $id) {
     ...CapacityCommitmentBasic
-      totalCollateral
-      rewardDelegatorRate
+      computeUnits {
+        computeUnit {
+          id
+          deal {
+            id
+          }
+        }
+      }
+  }
+}
+
+query SubmittedProofsQuery(
+  $filters: SubmittedProof_filter,
+  $offset: Int,
+  $limit: Int,
+  $orderBy: SubmittedProof_orderBy,
+  $orderType: OrderDirection,
+) {
+  submittedProofs(
+    where: $filters
+    first: $limit
+    skip: $offset
+    orderBy: $orderBy
+    orderDirection: $orderType
+  ){
+    id
+    capacityCommitment {
+      id
+      startEpoch
+      endEpoch
+    }
+    computeUnit {
+      id
+    }
+    createdAt
+    createdEpoch
+    peer {
+      id
+    }
+  }
+  graphNetworks(first: 1) {
+    proofsTotal
   }
 }
 
@@ -42,6 +82,10 @@ fragment CapacityCommitmentBasic on CapacityCommitment {
   startEpoch
   endEpoch
   computeUnitsCount
+  totalCollateral
+  rewardWithdrawn
+  rewardDelegatorRate
+  duration
 }
 
 fragment ComputeUnitBasic on ComputeUnit {
@@ -56,3 +100,64 @@ fragment EffectorBasic on Effector {
     id
     description
 }
+
+query CapacityCommitmentStatsPerEpochQuery(
+  $filters: CapacityCommitmentStatsPerEpoch_filter,
+  $offset: Int,
+  $limit: Int,
+  $orderBy: CapacityCommitmentStatsPerEpoch_orderBy,
+  $orderType: OrderDirection,
+) {
+  capacityCommitmentStatsPerEpoches(
+      where: $filters
+      first: $limit
+      skip: $offset
+      orderBy: $orderBy
+      orderDirection: $orderType
+  ) {
+    id
+    epoch
+    blockNumberEnd
+    blockNumberStart
+    capacityCommitment {
+      id
+    }
+    totalCUFailCount
+    exitedUnitCount
+    activeUnitCount
+    nextAdditionalActiveUnitCount
+    currentCCNextCCFailedEpoch
+    submittedProofsCount
+    computeUnitsWithMinRequiredProofsSubmittedCounter
+    submittedProofs {
+      id
+      computeUnit {
+        id
+      }
+    }
+  }
+}
+
+query ComputeUnitPerEpochStatsQuery(
+  $filters: ComputeUnitPerEpochStat_filter,
+  $offset: Int,
+  $limit: Int,
+  $orderBy: ComputeUnitPerEpochStat_orderBy,
+  $orderType: OrderDirection,
+) {
+  computeUnitPerEpochStats(
+      where: $filters
+      first: $limit
+      skip: $offset
+      orderBy: $orderBy
+      orderDirection: $orderType
+  ) {
+    id
+    computeUnit {
+      id
+    }
+    epoch
+    submittedProofsCount
+  }
+}
+

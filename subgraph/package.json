@@ -9,9 +9,13 @@
     "create:local": "./fluence-graph.sh create local",
     "remove:local": "./fluence-graph.sh remove local",
     "deploy:local": "./fluence-graph.sh deploy local",
-    "deploy:testnet": "graph deploy --product hosted-service --network-file configs/testnet-networks-config.json --network mumbai alcibiadescleinias/fluence-deal-contracts",
+    "create:testnet": "./fluence-graph.sh create testnet",
+    "deploy:testnet": "./fluence-graph.sh deploy testnet",
+    "deploy:kras": "graph deploy --product hosted-service --network-file configs/testnet-networks-config.json --network mumbai alcibiadescleinias/fluence-deal-contracts",
     "create:stage": "./fluence-graph.sh create stage",
     "deploy:stage": "./fluence-graph.sh deploy stage",
+    "create:dar": "./fluence-graph.sh create dar",
+    "deploy:dar": "./fluence-graph.sh deploy dar",
     "test": "graph test",
     "graph-node": "docker-compose up -d",
     "graph-local-clean": "docker-compose down -v",
@@ -35,5 +39,5 @@
     "matchstick-as": "0.5.0",
     "prettier": "^3.0.2"
   },
-  "version": "0.5.0"
+  "version": "0.6.4"
 }

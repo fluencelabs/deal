@@ -18,8 +18,8 @@ extra_output = ["devdoc"]
 
 [rpc_endpoints]
 local = "http://0.0.0.0:8545"
-arbitrum = "http://0.0.0.0:8545"
-stage = "https://rpc.ankr.com/polygon_mumbai"
-testnet = "https://rpc.ankr.com/polygon_mumbai"
+arbutrum = "http://0.0.0.0:8545"
+stage = "https://ipc-stage.fluence.dev"
+dar = "https://ipc-dar.fluence.dev"
 kras = "https://rpc.ankr.com/polygon_mumbai"
 mumbai = "https://rpc.ankr.com/polygon_mumbai"

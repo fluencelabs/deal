@@ -12,11 +12,13 @@ type GraphNetwork @entity {
   tokensTotal: BigInt!
   effectorsTotal: BigInt!
   capacityCommitmentsTotal: BigInt!
+  proofsTotal: BigInt!
   # Add constants from Core contract below.
   coreEpochDuration: Int
   initTimestamp: Int
   # Capacity consts are below.
   capacityMaxFailedRatio: Int
+  minRequiredProofsPerEpoch: Int
 }
 
 type Token @entity(immutable: true) {
@@ -134,7 +136,13 @@ type ComputeUnit @entity {
 
   deal: Deal
   workerId: String
+  createdAt: BigInt!
   # TODO: worker status "Expired" how to calculate.
+
+  submittedProofs: [SubmittedProof!] @derivedFrom(field: "computeUnit")
+
+  # Add fields for stats below.
+  submittedProofsCount: Int!
 }
 
 # ---- Deal Contract ----
@@ -235,6 +243,10 @@ type CapacityCommitment @entity {
   nextAdditionalActiveUnitCount: Int!
   "Collateral of native token (FLT) that has been deposited."
   totalCollateral: BigInt!
+  rewardWithdrawn: BigInt!
+
+  submittedProofs: [SubmittedProof!] @derivedFrom(field: "capacityCommitment")
+  submittedProofsCount: Int!
 
   computeUnits: [CapacityCommitmentToComputeUnit!] @derivedFrom(field: "capacityCommitment")
   computeUnitsCount: Int!
@@ -247,4 +259,58 @@ type CapacityCommitment @entity {
 
   # Add additional fields to filter by below.
   provider: Provider!
+}
+
+type SubmittedProof @entity(immutable: true) {
+  "Id here is a transaction hash."
+  id: ID!
+  capacityCommitment: CapacityCommitment!
+  computeUnit: ComputeUnit!
+  localUnitNonce: Bytes!
+  createdAt: BigInt!
+  createdEpoch: BigInt!
+
+  # Add fields for filter purpose below.
+  provider: Provider!
+  peer: Peer!
+
+  capacityCommitmentStatsPerEpoch: CapacityCommitmentStatsPerEpoch!
+}
+
+"To represent statistics per epoch. This entity represent evaluation of CommitmentStatsUpdated events during time (epoch)."
+type CapacityCommitmentStatsPerEpoch @entity {
+  # Set to `capacityCommitment.id.concat(epoch)`
+  id: ID!
+  capacityCommitment: CapacityCommitment!
+  epoch: BigInt!
+  # To track period of block numbers with submitted proofs for the concrete epoch.
+  blockNumberStart: BigInt!
+  blockNumberEnd: BigInt!
+
+  totalCUFailCount: Int!
+  exitedUnitCount: Int!
+  activeUnitCount: Int!
+  nextAdditionalActiveUnitCount: Int!
+  currentCCNextCCFailedEpoch: BigInt!
+  submittedProofsCount: Int!
+
+  submittedProofs: [SubmittedProof!] @derivedFrom(field: "capacityCommitmentStatsPerEpoch")
+
+  # Add additional seconds stats (that relate from others) below.
+  # Relates means that related should be updated first, and stats below strictly after.
+  "Should be update after ComputeUnitPerEpochStat.submittedProofsCount reached min proofs border."
+  computeUnitsWithMinRequiredProofsSubmittedCounter: Int!
+}
+
+"Helper stat model to count success proofs per epoch for a CU."
+type ComputeUnitPerEpochStat @entity {
+  id: ID! # Set to `computeUnit.id.concat(epoch)`
+  epoch: BigInt!
+  computeUnit: ComputeUnit!
+
+  # To allow query for all CU by the Capacity Commitment.
+  capacityCommitment: CapacityCommitment
+
+  # Add per epoch stats below.
+  submittedProofsCount: Int!
 }

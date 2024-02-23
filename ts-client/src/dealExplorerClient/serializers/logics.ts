@@ -1,6 +1,10 @@
 // To store business logic serializers.
 
 // If provider does not approved: convert a name.
+import type { ComputeUnitWithCcDataBasicFragment } from "../indexerClient/queries/peers-query.generated.js";
+import { calculateEpoch } from "../utils.js";
+import type { ComputeUnitStatus } from "../types/schemes.js";
+
 export function serializeProviderName(
   name: string,
   providerAddress: string,
@@ -29,4 +33,36 @@ export function serializeEffectorDescription(
     return "cURL";
   }
   return descriptionFromIndexer;
+}
+
+export function serializeExpectedProofsAndCUStatus(
+  computeUnitWithCcDataBasicFragment: ComputeUnitWithCcDataBasicFragment,
+  expectedMinProofsDueToNow: number,
+  coreInitTimestamp: number,
+  coreEpochDuration: number,
+) {
+  const computeUnit = computeUnitWithCcDataBasicFragment;
+  const currentPeerCapacityCommitment =
+    computeUnit.peer.currentCapacityCommitment;
+  let expectedProofsDueNow = 0;
+  const startEpoch = currentPeerCapacityCommitment?.startEpoch;
+  if (startEpoch && startEpoch != 0) {
+    expectedProofsDueNow =
+      (calculateEpoch(Date.now() / 1000, coreInitTimestamp, coreEpochDuration) -
+      startEpoch) * expectedMinProofsDueToNow;
+  }
+
+  let status: ComputeUnitStatus = "undefined";
+  if (computeUnit.deal) {
+    status = "deal";
+  } else if (currentPeerCapacityCommitment) {
+    status = "capacity";
+  } else {
+    status = "undefined";
+  }
+
+  return {
+    expectedProofsDueNow,
+    status,
+  };
 }

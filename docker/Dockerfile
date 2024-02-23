@@ -35,6 +35,8 @@ RUN \
   apt-get install -y --no-install-recommends \
   	make \
     git \
+    curl \
+    jq \
     linux-headers-generic \
     ca-certificates && \
   apt-get clean && \
@@ -50,6 +52,7 @@ COPY . /app
 WORKDIR /app
 
 RUN make build-contracts
+COPY docker/entrypoint.sh /entrypoint.sh
 
 # IPC
 FROM fluencelabs/fendermint:latest as ipc
@@ -70,6 +73,7 @@ CMD ["start"]
 # Image that deploys contracts to IPC
 FROM contracts as ipc-deploy-script
 ENTRYPOINT ["make"]
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["deploy-to-ipc"]
 
 # Image that deploys subgraph
@@ -105,7 +109,7 @@ RUN \
 COPY ./deployments /app/deploymens
 RUN cd subgraph && npm install && npm run compile && npm run import-config-networks
 
-ENTRYPOINT ["make"]
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["start-local-subgraph"]
 
 # dev image used in dev.docker-compose.yaml

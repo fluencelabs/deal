@@ -14,3 +14,4 @@
 !docker/keys/
 !out/
 !cache/
+!docker/entrypoint.sh

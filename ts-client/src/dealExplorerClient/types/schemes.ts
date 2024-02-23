@@ -38,22 +38,30 @@ export interface CapacityCommitmentShort {
   peerId: string;
   computeUnitsCount: number;
   status: CapacityCommitmentStatus;
+  duration: number;
+  rewardDelegatorRate: number;
 }
 
 // Other related fields to CC should be fetched separately, e.g.
 // - list of CUs
 // - proofs
 // @param totalCollateral: collateral that deposited.
-// @param unlockedRewards: reward for CC that unlocked to withdraw.
-// @param totalRewards: total rewards collected - already withdrawn.
+// @param rewardsUnlocked: reward for CC that unlocked now to withdraw (claim).
+// @param rewardsNotWithdrawn: accumulated for now, not yet withdrawn rewards.
+// @param rewardsTotal: total accumulated rewards over time: withdrawn + still not withdrawn.
 export interface CapacityCommitmentDetail extends CapacityCommitmentShort {
   totalCollateral: string;
   collateralToken: NativeToken;
-  rewardDelegatorRate: number;
-  unlockedRewards: string;
-  totalRewards: string;
+  rewardsUnlocked: string;
+  rewardsUnlockedProvider: string;
+  rewardsUnlockedDelegator: string;
+  rewardsNotWithdrawn: string;
+  rewardsNotWithdrawnProvider: string;
+  rewardsNotWithdrawnDelegator: string;
+  rewardsTotal: string;
 }
 
+// TODO: check that free compute units - just means not in deal!
 export type ProviderBase = {
   id: string;
   name: string;
@@ -73,7 +81,6 @@ export interface ProviderDetail extends ProviderBase {
   // revenue: Array<Revenue>;
 }
 
-// TODO: What is offer.name? deprecated.
 export type OfferShort = {
   id: string;
   createdAt: number;
@@ -83,6 +90,7 @@ export type OfferShort = {
   effectors: Array<Effector>;
   pricePerEpoch: string;
   providerId: string;
+  peersCount: number;
 };
 
 // TODO: maxCollateralPerWorker deprecated
@@ -126,10 +134,32 @@ export type Peer = {
   computeUnits: Array<ComputeUnit>;
 };
 
-export type ComputeUnit = {
+export interface ComputeUnit {
   id: string;
   workerId: string | undefined;
-};
+}
+
+
+export interface ComputeUnitWorkerDetail extends ComputeUnit {
+  providerId: string;
+  workerStatus: "registered" | "waitingRegistration";
+}
+
+export interface ComputeUnitWorkerDetailListView extends ListViewABC {
+  data: Array<ComputeUnitWorkerDetail>;
+}
+
+// @param status: might be undefined when CU not in deal and peer of the CU is not in CC.
+export interface ComputeUnitDetail extends ComputeUnit {
+  providerId: string;
+  currentCommitmentId: string | undefined;
+  peerId: string;
+  collateral: string;
+  status: ComputeUnitStatus;
+  expectedProofsDueNow: number;
+  successProofs: number;
+  collateralToken: NativeToken;
+}
 
 export type DealShort = {
   id: string;
@@ -177,6 +207,75 @@ export interface DealByPeer {
   workerId: string;
 }
 
+export interface ProofBasic {
+  transactionId: string;
+  capacityCommitmentId: string;
+  computeUnitId: string;
+  peerId: string;
+  createdAt: number;
+}
+
+export interface ProofBasicListView extends ListViewABC {
+  data: Array<ProofBasic>;
+}
+
+export interface ComputeUnitsByCapacityCommitment extends ComputeUnit {
+  status: ComputeUnitStatus;
+  expectedProofsDueNow: number;
+  successProofs: number;
+  collateral: string;
+}
+
+export interface ComputeUnitsByCapacityCommitmentListView extends ListViewABC {
+  data: Array<ComputeUnitsByCapacityCommitment>;
+}
+
+// @deprecated.
+// @param status: might be failed when no proof submitted for the epoch.
+// @param transactionId: undefined when no proof submitted for the epoch.
+export interface ProofByComputeUnit {
+  status: "success" | "failed";
+  transactionId: string | undefined;
+  createdAt: number;
+  createdAtEpoch: number;
+}
+
+// @param failedProofsCount: expected - submitted.
+// @param computeUnitsSuccess: success means CU that submits proof >= min proofs per epoch.
+// @param computeUnitsFailed: means that CU submits proofs < min proofs per epoch.
+// @param createdAtEpochStartBlockNumber: undefined when no transaction submitted for the epoch with proofs.
+export interface ProofStatsByCapacityCommitment {
+  createdAtEpoch: number;
+  createdAtEpochBlockNumberStart: number | undefined
+  createdAtEpochBlockNumberEnd: number | undefined;
+  computeUnitsExpected: number;
+  computeUnitsSuccess: number
+  computeUnitsFailed: number,
+  submittedProofs: number;
+  submittedProofsPerCU: number;
+}
+
+export interface ComputeUnitStatsPerCapacityCommitmentEpoch {
+  capacityCommitmentId: string;
+
+  computeUnitId: string;
+  submittedProofs: number;
+  computeUnitProofStatus: "success" | "failed";
+}
+
+export interface ComputeUnitStatsPerCapacityCommitmentEpochListView extends ListViewABC {
+  data: Array<ComputeUnitStatsPerCapacityCommitmentEpoch>;
+}
+
+export interface ProofStatsByCapacityCommitmentListView extends ListViewABC {
+  data: Array<ProofStatsByCapacityCommitment>;
+}
+
+// @deprecated.
+export interface ProofByComputeUnitListView extends ListViewABC {
+  data: Array<ProofByComputeUnit>;
+}
+
 // Status undefined == problem with networks, etc.
 export type DealStatus = "inactive" | "active" | "ended" | "undefined";
 export type CapacityCommitmentStatus =
@@ -187,3 +286,5 @@ export type CapacityCommitmentStatus =
   | "failed"
   | "removed"
   | "undefined";
+
+export type ComputeUnitStatus = "deal" | "capacity" | "undefined";

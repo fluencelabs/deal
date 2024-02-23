@@ -89,11 +89,20 @@ services:
       dockerfile: ./docker/Dockerfile
       target: ipc
     environment:
+      FM_NETWORK: testnet
       TENDERMINT_RPC_URL: "http://cometbft:26657"
       TENDERMINT_WS_URL: "ws://cometbft:26657/websocket"
     command: "eth run"
     ports:
       - "8545:8545"
+    healthcheck:
+      test: |
+        curl -s -X POST 'http://localhost:8545' -H 'Content-Type: application/json' \
+          --data '{"jsonrpc":"2.0", "method":"eth_chainId", "params":[], "id":1}' \
+          | jq -e '.result != null'
+      interval: 8s
+      timeout: 10s
+      retries: 20
     depends_on:
       cometbft:
         condition: service_healthy
@@ -105,12 +114,13 @@ services:
       dockerfile: ./docker/Dockerfile
       target: ipc-deploy-script
     command: ["deploy-to-ipc"]
-    depends_on:
-      - ipc-eth
     volumes:
       - ../deployments/:/app/deployments/
       - ../out/:/app/out/
       - ../cache/:/app/cache/
+    depends_on:
+      ipc-eth:
+        condition: service_healthy
 
   # Blockscout services
   blockscout:
@@ -141,6 +151,9 @@ services:
       PORT: 4000
     ports:
       - "127.0.0.1:4000:4000"
+    depends_on:
+      ipc-eth:
+        condition: service_healthy
 
   graph-node:
     image: graphprotocol/graph-node:v0.33.0
@@ -165,3 +178,6 @@ services:
       # https://github.com/graphprotocol/graph-node/issues/3159#issuecomment-1062827725
       ETHEREUM_REORG_THRESHOLD: 1
       ETHEREUM_ANCESTOR_COUNT: 1
+    depends_on:
+      ipc-eth:
+        condition: service_healthy

@@ -5,7 +5,7 @@ import * as fs from "fs";
 const DEPLOYMENTS_DIR = '../../deployments'
 const CONFIGS_DIR =  "../configs"
 const REQUIRED_DEPLOYED_CONTRACT_NAMES = ["Market", "Capacity", "Core"]
-const STANDS = ["kras", "testnet", "stage", "local"]
+const STANDS = ["kras", "testnet", "stage", "local", "dar"]
 // Subgraph repo pattern used to have config dir with networks.json to support
 //  deploy on different networks: {mainnet, mumbai, etc}.
 //  In our case when we can deploy different stands on the same network, e.g. mumbai we have
@@ -15,12 +15,14 @@ const STAND_TO_SUBGRAPH_CONFIG = {
   "kras": "kras-networks-config.json",
   "testnet": "testnet-networks-config.json",
   "stage": "stage-networks-config.json",
+  "dar": "dar-networks-config.json",
   "local": "local-networks-config.json",
 }
 const STAND_TO_SUBGRAPH_NETWORK = {
   "kras": "mumbai",
-  "testnet": "mumbai",
+  "testnet": "testnet",
   "stage": "stage",
+  "dar": "dar",
   "local": "local",
 }
 

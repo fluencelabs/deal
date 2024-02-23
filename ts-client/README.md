@@ -1,5 +1,7 @@
 # ts-clients
 
+Module consists of several TS clients to access Deal contract logic for different purposes: deal matching, contract address resolving, Network Explorer API, etc.  
+
 * [Requirements](#requirements)
 * [client](#client)
 * [deal-mather-client](#deal-mather-client)
@@ -20,6 +22,15 @@
 To load contract deployments and interfaces for different stands: kras/testnet/stage/etc.
 
 > TODO: rename, because client says nothing.
+
+# deal-cli-client
+To resolve needs from POV of Fluence CLI. 
+
+Example use - check via [deal-mather-client](#deal-mather-client).
+
+## Contribute
+Under the hood it uses indexer client [src/dealCliClient/indexerClient/indexerClient.ts](src/dealCliClient/indexerClient/indexerClient.ts) to fetch data from the indexer (subgraph). Because the indexer client uses TS, first of all you need to prepare your query as it is in [src/dealCliClient/indexerClient/queries](src/dealCliClient/indexerClient/queries) and then run codegen: `npm run codegen:dealCliClient` (be sure that [codegen script](codegen-deal-cli-indexer.ts) aims to the working subgraph).
+After, you could fetch your queries in typised manner.
 
 # deal-mather-client
 To find preferable compute units for the deal and its configuration via Subgraph (indexer). The main user of the client is https://github.com/fluencelabs/cli (fCli).
@@ -93,11 +104,13 @@ asyncRuntimeDecorator(main);
 ```
 
 # deal-explorer-client
-This client delivers data for the Explorer Frontend Application. The client consists of 3 ones:
+This client delivers data for the Network Explorer Web Application. The client consists of 3 TS clients:
 
 - DealContractsClient - to load env {kras, testnet, stage} and deployed contracts
 - DealRpcClient - with built-in multicall3 contract feature (1 JSON RPC request per several view calls on different Fluence contracts)
 - IndexerClient - to fetch built GraphQL models from the indexer (i.e. The Graph/Subgraph)
+
+> Each getter method of the DealExplorerClient linked relate to the Figma views accordingly.
 
 ## Install 
 ```bash

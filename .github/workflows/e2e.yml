@@ -42,10 +42,8 @@ jobs:
   # cli:
   #   needs:
   #     - deal
-  #   # TODO: change on main below when https://github.com/fluencelabs/cli/pull/654 is merged.
-  #   uses: fluencelabs/cli/.github/workflows/tests.yml@capacity
+  #   uses: fluencelabs/cli/.github/workflows/tests.yml@main
   #   with:
-  #     ref: main
   #     ipc-image: "${{ needs.deal.outputs.ipc-image }}"
   #     ipc-deploy-script-image: "${{ needs.deal.outputs.ipc-deploy-script-image }}"
   #     cometbft-image: "${{ needs.deal.outputs.cometbft-image }}"

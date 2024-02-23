@@ -45,7 +45,7 @@ run-tests:  ## Test for solidity contracts & ts-clients
 
 start-local-chain: ## Start local chain
 	@make verify-command program=anvil
-	@anvil --host 0.0.0.0 --block-time 15 --state /data/state.db
+	@anvil --host 0.0.0.0 --block-time $(LOCAL_CHAIN_BLOCK_MINING_INTERVAL) --state /data/state.db
 
 start-local-subgraph: ## Start local subgraph
 	@make verify-command program=npm
@@ -74,6 +74,20 @@ deploy-to-ipc:
 	--broadcast --skip-simulation --slow
 
 	@echo "\033[0;32mSuccess! Contracts deployed to ipc chain.\033[0m"
+
+deploy-stage: ## Deploy to stage (IPC)
+	@make verify-command program=forge
+	@CONTRACTS_ENV_NAME=stage forge script script/Deploy.s.sol --rpc-url stage \
+	--private-key $(PRIVATE_KEY) --broadcast --skip-simulation --slow
+
+	@echo "\033[0;32mSuccess! Contracts deployed to $* chain.\033[0m"
+
+deploy-dar: ## Deploy to dar (IPC)
+	@make verify-command program=forge
+	@CONTRACTS_ENV_NAME=dar forge script script/Deploy.s.sol --rpc-url dar \
+	--private-key $(PRIVATE_KEY) --broadcast --skip-simulation --slow
+
+	@echo "\033[0;32mSuccess! Contracts deployed to $* chain.\033[0m"
 
 deploy-%: ## Deploy to ...
 	@make verify-command program=forge
