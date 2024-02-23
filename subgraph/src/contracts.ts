@@ -57,27 +57,19 @@ export function getDealContract(contractAddress: Address): Deal {
 }
 
 export function getEpochDuration(contractAddress: Address): i32 {
-  // return Core.bind(contractAddress).epochDuration().toI32();
-  // TODO: resolve on IPC call of the contracts.
-  return 15
+  return Core.bind(contractAddress).epochDuration().toI32();
 }
 
 export function getInitTimestamp(contractAddress: Address): i32 {
-  // TODO: resolve on IPC call of the contracts.
-  // return Core.bind(contractAddress).initTimestamp().toI32();
-  return 1708648190;
+  return Core.bind(contractAddress).initTimestamp().toI32();
 }
 
 export function getCapacityMaxFailedRatio(contractAddress: Address): BigInt {
-  // return Capacity.bind(contractAddress).maxFailedRatio();
-  // TODO: resolve on IPC call of the contracts.
-  return BigInt.fromString('999999');
+  return Capacity.bind(contractAddress).maxFailedRatio();
 }
 
 export function getMinRequiredProofsPerEpoch(contractAddress: Address): BigInt {
-  // return Capacity.bind(contractAddress).minRequierdProofsPerEpoch();
-  // TODO: resolve on IPC call of the contracts.
-  return BigInt.fromString('2');
+  return Capacity.bind(contractAddress).minRequierdProofsPerEpoch();
 }
 
 // It mirrors _failedEpoch in Capacity.sol.
