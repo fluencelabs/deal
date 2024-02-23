@@ -14,6 +14,8 @@
     "deploy:kras": "graph deploy --product hosted-service --network-file configs/testnet-networks-config.json --network mumbai alcibiadescleinias/fluence-deal-contracts",
     "create:stage": "./fluence-graph.sh create stage",
     "deploy:stage": "./fluence-graph.sh deploy stage",
+    "create:dar": "./fluence-graph.sh create dar",
+    "deploy:dar": "./fluence-graph.sh deploy dar",
     "test": "graph test",
     "graph-node": "docker-compose up -d",
     "graph-local-clean": "docker-compose down -v",
