@@ -19,7 +19,8 @@ contract OwnableFaucet is Ownable, Multicall {
     }
 
     function sendFLT(address addr, uint256 value) external onlyOwner {
+        require(address(this).balance > value, "Not enough ether");
         (bool success, ) = addr.call{value: value}("");
-        require(success, "Cannot send");
+        require(success, "Cannot send ether");
     }
 }
