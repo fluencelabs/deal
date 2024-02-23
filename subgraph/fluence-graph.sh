@@ -8,7 +8,7 @@ cat<<HELP
 Usage: [BASIC_AUTH_SUBGRAPH] ${script_name} network action
 Deploy subgraph to Fluence.
 
-  network       Fluence network to run against - local, stage, testnet or kras
+  network       Fluence network to run against - local, stage, dar, testnet or kras
   action        action to run - create, deploy or remove
 
 Examples:
@@ -27,7 +27,7 @@ while (($#)); do
       action="$1"
       shift
       ;;
-    local|stage|testnet|kras)
+    local|stage|testnet|kras|dar)
       network="$1"
       shift
       ;;
@@ -48,7 +48,7 @@ case "$network" in
     GRAPHNODE_URL="${GRAPHNODE_URL:-http://localhost:8020}"
     IPFS_URL="${IPFS_URL:-http://localhost:5001}"
     ;;
-  stage|testnet|kras)
+  stage|testnet|kras|dar)
     if [[ -z $BASIC_AUTH_SUBGRAPH ]]; then
       echo "Please provide credentials with 'BASIC_AUTH_SUBGRAPH' variable."
       exit 1
@@ -93,6 +93,9 @@ case "$network" in
     ;;
   stage)
     SUBGRAPH_NETWORK="stage"
+    ;;
+  dar)
+    SUBGRAPH_NETWORK="dar"
     ;;
   testnet|kras)
     SUBGRAPH_NETWORK="mumbai"
