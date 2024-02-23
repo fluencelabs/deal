@@ -8,15 +8,16 @@ export const getIndexerUrl = (env: ContractsENV) => {
 
   switch (env) {
     case "kras":
-      indexerUrl = "https://api.thegraph.com/subgraphs/name/alcibiadescleinias/fluence-deal-contracts";
-      break;
-    case "testnet":
       indexerUrl =
         "https://api.thegraph.com/subgraphs/name/alcibiadescleinias/fluence-deal-contracts";
       break;
+    case "dar":
+      indexerUrl =
+        "https://graph-node-dar.fluence.dev/subgraphs/name/fluence-deal-contracts";
+      break;
     case "stage":
       indexerUrl =
-        "https://graph-node.fluence.dev/subgraphs/name/fluence-deal-contracts";
+        "https://graph-node-stage.fluence.dev/subgraphs/name/fluence-deal-contracts";
       break;
     case "local":
       indexerUrl =

@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.6.4](https://github.com/fluencelabs/deal/compare/v0.6.3...v0.6.4) (2024-02-23)
+
+
+### Bug Fixes
+
+* night 22feb tunes and new contracts on stage ([#291](https://github.com/fluencelabs/deal/issues/291)) ([071e4e0](https://github.com/fluencelabs/deal/commit/071e4e0ac2b1c1fa621b54c3a7f900ac154140ef))
+
+## [0.6.3](https://github.com/fluencelabs/deal/compare/v0.6.2...v0.6.3) (2024-02-22)
+
+
+### Features
+
+* up stage graph-node addr ([be1e607](https://github.com/fluencelabs/deal/commit/be1e607ab5044c33b404d6933ea0dbfd58867fa5))
+
+
+### Bug Fixes
+
+* redeploy graph-node on stage ([5c9c5ed](https://github.com/fluencelabs/deal/commit/5c9c5ed00f8c69254a9d4d05a47dfbdabe0b80fe))
+* up stage graph-node addr ([#287](https://github.com/fluencelabs/deal/issues/287)) ([be1e607](https://github.com/fluencelabs/deal/commit/be1e607ab5044c33b404d6933ea0dbfd58867fa5))
+
 ## [0.6.2](https://github.com/fluencelabs/deal/compare/v0.6.1...v0.6.2) (2024-02-22)
 
 
