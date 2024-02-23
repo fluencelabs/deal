@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.5](https://github.com/fluencelabs/deal/compare/v0.6.4...v0.6.5) (2024-02-23)
+
+
+### Features
+
+* new faucet deploys ([#295](https://github.com/fluencelabs/deal/issues/295)) ([4999adf](https://github.com/fluencelabs/deal/commit/4999adfefd6c0c4d066e1f1bc429ea8f42cb51d7))
+* use debug lib [fixes CHAIN-355] ([#294](https://github.com/fluencelabs/deal/issues/294)) ([cb1eace](https://github.com/fluencelabs/deal/commit/cb1eace999300fcbcdb388318e9298fbf05bd112))
+
 ## [0.6.4](https://github.com/fluencelabs/deal/compare/v0.6.3...v0.6.4) (2024-02-23)
 
 
