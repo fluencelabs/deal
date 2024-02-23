@@ -67,7 +67,7 @@ RUN \
   apt-get update && \
   apt-get install -y --no-install-recommends \
     curl \
-    jq \
+    jq && \
   apt-get clean && \
   rm -rf \
   	/tmp/* \
