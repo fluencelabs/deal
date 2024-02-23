@@ -4,7 +4,7 @@ import type { OffersQueryQueryVariables } from "./indexerClient/queries/offers-q
 import { serializeDealProviderAccessLists } from "../utils/serializers.js";
 import { debug } from "debug";
 
-const dbg = debug("dealMatcherClient");
+const dbg = debug("deal-ts-clients:matcher:debug");
 
 // Structure match matchDeal() arguments.
 // Currently: bytes32[] calldata offers, bytes32[][] calldata computeUnits.
