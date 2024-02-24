@@ -363,6 +363,9 @@ export class DealMatcherClient {
     epochControllerStorageInitTimestamp: number,
     epochControllerStorageEpochDuration: number,
   ) {
+    logInfo(
+      `timestamp: ${timestamp} epochControllerStorageInitTimestamp: ${epochControllerStorageInitTimestamp} epochControllerStorageEpochDuration: ${epochControllerStorageEpochDuration}`,
+    );
     return Math.floor(
       1 +
         (timestamp - epochControllerStorageInitTimestamp) /
