@@ -596,6 +596,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
     }
 
     /// @dev This method is mirrored in subgraph module: calculateNextFailedCCEpoch.
+    /// @dev coz of https://github.com/fluencelabs/deal/pull/303 it has difference in logic. TODO: rm
     function _failedEpoch(
         uint256 maxFailedRatio_,
         uint256 unitCount_,
