@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.6.7](https://github.com/fluencelabs/deal/compare/v0.6.6...v0.6.7) (2024-02-24)
+
+
+### Features
+
+* add timestamp-log ([#298](https://github.com/fluencelabs/deal/issues/298)) ([b68a651](https://github.com/fluencelabs/deal/commit/b68a651692061fc1972f507b7f5f178d55fb7acd))
+
+
+### Bug Fixes
+
+* add stop to interfcace ([#299](https://github.com/fluencelabs/deal/issues/299)) ([f43c942](https://github.com/fluencelabs/deal/commit/f43c942d013a1ada69e6a90d722a90160ee5b439))
+* Deploy to dar ([#301](https://github.com/fluencelabs/deal/issues/301)) ([bf4494c](https://github.com/fluencelabs/deal/commit/bf4494c7e31fa3f178816bc779a5248445b71a32))
+* hotfix-new deploy ([#302](https://github.com/fluencelabs/deal/issues/302)) ([aa3a998](https://github.com/fluencelabs/deal/commit/aa3a998449f4a02a6d36dd7d912edff9a8c676c8))
+
+## [0.6.6](https://github.com/fluencelabs/deal/compare/v0.6.5...v0.6.6) (2024-02-23)
+
+
+### Bug Fixes
+
+* remove testnet, remove mocks in subgraph ([#293](https://github.com/fluencelabs/deal/issues/293)) ([f82d2e6](https://github.com/fluencelabs/deal/commit/f82d2e66cab52641f34ae28515407415c8b00eab))
+
+## [0.6.5](https://github.com/fluencelabs/deal/compare/v0.6.4...v0.6.5) (2024-02-23)
+
+
+### Features
+
+* new faucet deploys ([#295](https://github.com/fluencelabs/deal/issues/295)) ([4999adf](https://github.com/fluencelabs/deal/commit/4999adfefd6c0c4d066e1f1bc429ea8f42cb51d7))
+* use debug lib [fixes CHAIN-355] ([#294](https://github.com/fluencelabs/deal/issues/294)) ([cb1eace](https://github.com/fluencelabs/deal/commit/cb1eace999300fcbcdb388318e9298fbf05bd112))
+
 ## [0.6.4](https://github.com/fluencelabs/deal/compare/v0.6.3...v0.6.4) (2024-02-23)
 
 

@@ -27,7 +27,7 @@ export const getDeployment = async (env: ContractsENV) => {
       break;
     case "dar":
       deployment = dar;
-      chainId = 80001;
+      chainId = 3525067388221321;
       break;
     case "stage":
       deployment = stage;
