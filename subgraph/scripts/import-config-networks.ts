@@ -4,7 +4,7 @@ import * as fs from "fs";
 
 const DEPLOYMENTS_DIR = '../../deployments'
 const CONFIGS_DIR =  "../configs"
-const REQUIRED_DEPLOYED_CONTRACT_NAMES = ["Market", "Capacity", "Core"]
+const REQUIRED_DEPLOYED_CONTRACT_NAMES = ["Market", "Capacity", "Core", "DealFactory"]
 const STANDS = ["kras", "stage", "local", "dar"]
 // Subgraph repo pattern used to have config dir with networks.json to support
 //  deploy on different networks: {mainnet, mumbai, etc}.
