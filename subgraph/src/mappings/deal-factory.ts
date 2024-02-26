@@ -13,12 +13,12 @@ import {
   ZERO_BIG_INT,
 } from "../models";
 
-import { log, store } from "@graphprotocol/graph-ts";
+import { log } from "@graphprotocol/graph-ts";
 import {
   Deal,
 } from "../../generated/schema";
 import { Deal as DealTemplate } from "../../generated/templates";
-import {AppCID, formatAddress, getEffectorCID, parseEffectors} from "./utils";
+import { AppCID, formatAddress, getEffectorCID, parseEffectors } from "./utils";
 
 
 // ---- Factory Events ----

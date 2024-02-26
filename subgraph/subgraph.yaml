@@ -90,15 +90,11 @@ dataSources:
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
-        - Offer
         - Effector
-        - Peer
-        - OfferToEffector
-        - ComputeUnit
-        - Token
+        - Deal
         - GraphNetwork
       abis:
-        - name: Deal
+        - name: DealFactory
           file: ../out/DealFactory.sol/DealFactory.json
       eventHandlers:
         - event: DealCreated(indexed
