@@ -1,4 +1,4 @@
-export const CONTRACTS_ENV = ["kras", "testnet", "stage", "local"];
+export const CONTRACTS_ENV = ["kras", "dar", "stage", "local"];
 
 export const DEPLOYMENTS_DIR = "src/deployments";
 export type ContractsENV = (typeof CONTRACTS_ENV)[number];
@@ -12,7 +12,7 @@ export type Deployment = {
 };
 
 import stage from "./../deployments/stage.json" assert { type: "json" };
-import testnet from "./../deployments/testnet.json" assert { type: "json" };
+import dar from "./../deployments/dar.json" assert { type: "json" };
 import kras from "./../deployments/kras.json" assert { type: "json" };
 import local from "./../deployments/local.json" assert { type: "json" };
 
@@ -25,9 +25,9 @@ export const getDeployment = async (env: ContractsENV) => {
       deployment = kras;
       chainId = 80001;
       break;
-    case "testnet":
-      deployment = testnet;
-      chainId = 80001;
+    case "dar":
+      deployment = dar;
+      chainId = 3525067388221321;
       break;
     case "stage":
       deployment = stage;

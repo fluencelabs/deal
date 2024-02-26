@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.6.6](https://github.com/fluencelabs/deal/compare/v0.6.5...v0.6.6) (2024-02-23)
+
+
+### Bug Fixes
+
+* remove testnet, remove mocks in subgraph ([#293](https://github.com/fluencelabs/deal/issues/293)) ([f82d2e6](https://github.com/fluencelabs/deal/commit/f82d2e66cab52641f34ae28515407415c8b00eab))
+
+## [0.6.5](https://github.com/fluencelabs/deal/compare/v0.6.4...v0.6.5) (2024-02-23)
+
+
+### Features
+
+* new faucet deploys ([#295](https://github.com/fluencelabs/deal/issues/295)) ([4999adf](https://github.com/fluencelabs/deal/commit/4999adfefd6c0c4d066e1f1bc429ea8f42cb51d7))
+* use debug lib [fixes CHAIN-355] ([#294](https://github.com/fluencelabs/deal/issues/294)) ([cb1eace](https://github.com/fluencelabs/deal/commit/cb1eace999300fcbcdb388318e9298fbf05bd112))
+
+## [0.6.4](https://github.com/fluencelabs/deal/compare/v0.6.3...v0.6.4) (2024-02-23)
+
+
+### Bug Fixes
+
+* night 22feb tunes and new contracts on stage ([#291](https://github.com/fluencelabs/deal/issues/291)) ([071e4e0](https://github.com/fluencelabs/deal/commit/071e4e0ac2b1c1fa621b54c3a7f900ac154140ef))
+
 ## [0.6.3](https://github.com/fluencelabs/deal/compare/v0.6.2...v0.6.3) (2024-02-22)
 
 
