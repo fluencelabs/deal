@@ -595,6 +595,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         return currentEpoch_ >= failedEpoch;
     }
 
+    /// @dev This method is mirrored in subgraph module: calculateNextFailedCCEpoch.
     function _failedEpoch(
         uint256 maxFailedRatio_,
         uint256 unitCount_,

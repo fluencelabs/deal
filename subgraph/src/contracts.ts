@@ -8,7 +8,7 @@ import { Address, Bytes, BigInt } from "@graphprotocol/graph-ts";
 import { ERC20 } from "../generated/Market/ERC20";
 import {Core} from "../generated/Core/Core";
 import {Capacity} from "../generated/Capacity/Capacity";
-import {UNO_BIG_INT, ZERO_BIG_INT} from "./models";
+import {MAX_UINT_256, UNO_BIG_INT, ZERO_BIG_INT} from "./models";
 
 // TODO: optimise through multicall contract (currently 2 calls only per token).
 export function getTokenSymbol(address: Bytes): string {
@@ -90,6 +90,8 @@ export function calculateNextFailedCCEpoch(
         let failedEpoch = ZERO_BIG_INT;
         if (activeUnitCount > remainingFails) {
             failedEpoch = lastSnapshotEpoch + UNO_BIG_INT;
+        } else if (activeUnitCount == ZERO_BIG_INT) {
+            failedEpoch = MAX_UINT_256;
         } else {
             remainingFails = remainingFails - activeUnitCount;
             activeUnitCount += nextAdditionalActiveUnitCount;
@@ -97,8 +99,8 @@ export function calculateNextFailedCCEpoch(
             failedEpoch = UNO_BIG_INT + lastSnapshotEpoch + (remainingFails / activeUnitCount);
         }
 
-        // currently not used.
-        const remainingFailsForLastEpoch = remainingFails % activeUnitCount;
+        // currently not used. devision on 0.
+        // const remainingFailsForLastEpoch = remainingFails % activeUnitCount;
         return failedEpoch;
     }
 
