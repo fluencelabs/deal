@@ -6,9 +6,9 @@ import {
 import { Deal } from "../generated/Market/Deal";
 import { Address, Bytes, BigInt } from "@graphprotocol/graph-ts";
 import { ERC20 } from "../generated/Market/ERC20";
-import {Core} from "../generated/Core/Core";
-import {Capacity} from "../generated/Capacity/Capacity";
-import {UNO_BIG_INT, ZERO_BIG_INT} from "./models";
+import { Core } from "../generated/Core/Core";
+import { Capacity } from "../generated/Capacity/Capacity";
+import { UNO_BIG_INT, ZERO_BIG_INT } from "./models";
 
 // TODO: optimise through multicall contract (currently 2 calls only per token).
 export function getTokenSymbol(address: Bytes): string {

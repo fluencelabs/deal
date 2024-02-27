@@ -13,7 +13,7 @@ import {
   ComputeUnitPerEpochStat,
 } from "../generated/schema";
 import { BigInt, Bytes } from "@graphprotocol/graph-ts";
-import {getTokenDecimals, getTokenSymbol} from "./contracts";
+import { getTokenDecimals, getTokenSymbol } from "./contracts";
 
 export const ZERO_BIG_INT = BigInt.fromI32(0);
 export const UNO_BIG_INT = BigInt.fromI32(1);
