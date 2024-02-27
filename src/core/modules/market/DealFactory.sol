@@ -45,6 +45,7 @@ contract DealFactory is UUPSUpgradeable, BaseModule, IDealFactory {
     function deployDeal(
         CIDV1 calldata appCID_,
         IERC20 paymentToken_,
+        uint256 depositAmount_,
         uint256 minWorkers_,
         uint256 targetWorkers_,
         uint256 maxWorkersPerProvider_,
@@ -78,10 +79,13 @@ contract DealFactory is UUPSUpgradeable, BaseModule, IDealFactory {
 
         dealFactoryStorage.hasDeal[deal] = true;
 
-        uint256 amount = pricePerWorkerEpoch_ * targetWorkers_ * core.minDealDepositedEpoches();
-        paymentToken_.safeTransferFrom(msg.sender, address(this), amount);
-        paymentToken_.approve(address(deal), amount);
-        deal.deposit(amount);
+        uint256 minAmount = pricePerWorkerEpoch_ * targetWorkers_ * core.minDealDepositedEpoches();
+
+        require(depositAmount_ >= minAmount, "Deposit amount is less than minimum required");
+
+        paymentToken_.safeTransferFrom(msg.sender, address(this), depositAmount_);
+        paymentToken_.approve(address(deal), depositAmount_);
+        deal.deposit(depositAmount_);
 
         OwnableUpgradableDiamond(address(deal)).transferOwnership(msg.sender);
 

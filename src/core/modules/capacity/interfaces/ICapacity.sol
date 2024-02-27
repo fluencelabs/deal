@@ -85,6 +85,12 @@ interface ICapacity is ICapacityConst {
     /// @dev Throws if peer sent too many proofs for the commitment by unit per epoch
     error TooManyProofs();
 
+    /// @dev Capacity commitment is not active
+    error CapacityCommitmentIsNotActive(CCStatus status);
+
+    /// @dev Capacity commitment is active
+    error CapacityCommitmentIsActive(CCStatus status);
+
     // ------------------ Types ------------------
     enum CCStatus {
         Active,
@@ -139,7 +145,8 @@ interface ICapacity is ICapacityConst {
         uint256 minDuration_,
         uint256 minRewardPerEpoch_,
         uint256 maxRewardPerEpoch_,
-        uint256 vestingDuration_,
+        uint256 vestingPeriodDuration_,
+        uint256 vestingPeriodCount_,
         uint256 slashingRate_,
         uint256 minRequierdProofsPerEpoch_,
         uint256 maxProofsPerEpoch_,
@@ -202,8 +209,8 @@ interface ICapacity is ICapacityConst {
     /// @dev Submits a proof for the commitment
     /// @param unitId Compute unit id which provied the proof
     /// @param localUnitNonce The local nonce of the unit for calculating the target hash. It's the proof
-    /// @param targetHash The target hash of this proof
-    function submitProof(bytes32 unitId, bytes32 localUnitNonce, bytes32 targetHash) external;
+    /// @param resultHash The target hash of this proof
+    function submitProof(bytes32 unitId, bytes32 localUnitNonce, bytes32 resultHash) external;
 
     /// @dev Remove CU from Ended or Failed CC. Need to call this function before finish the commitment
     /// @param commitmentId Commitment id

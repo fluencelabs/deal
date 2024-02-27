@@ -40,7 +40,8 @@ contract DeployContracts is Depoyments, Script {
     uint256 constant DEFAULT_MIN_DURATION = 5 minutes;
     uint256 constant DEFAULT_MIN_REWARD_PER_EPOCH = 1 ether;
     uint256 constant DEFAULT_MAX_REWARD_PER_EPOCH = 1 ether;
-    uint256 constant DEFAULT_VESTING_DURATION = 1 minutes;
+    uint256 constant DEFAULT_VESTING_PERIOD_DURATION = 5;
+    uint256 constant DEFAULT_VESTING_PERIOD_COUNT = 6;
     uint256 constant DEFAULT_SLASHING_RATE = 1_000_000; // 0.1 = 10% = 1000000
     uint256 constant DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH = 2;
     uint256 constant DEFAULT_MAX_PROOFS_PER_EPOCH = 5;
@@ -67,7 +68,8 @@ contract DeployContracts is Depoyments, Script {
         uint256 minDuration;
         uint256 minRewardPerEpoch;
         uint256 maxRewardPerEpoch;
-        uint256 vestingDuration;
+        uint256 vestingPeriodDuration;
+        uint256 vestingPeriodCount;
         uint256 slashingRate;
         uint256 minRequierdProofsPerEpoch;
         uint256 maxProofsPerEpoch;
@@ -118,7 +120,8 @@ contract DeployContracts is Depoyments, Script {
             env.minDuration,
             env.minRewardPerEpoch,
             env.maxRewardPerEpoch,
-            env.vestingDuration,
+            env.vestingPeriodDuration,
+            env.vestingPeriodCount,
             env.slashingRate,
             env.minRequierdProofsPerEpoch,
             env.maxProofsPerEpoch,
@@ -145,7 +148,8 @@ contract DeployContracts is Depoyments, Script {
         uint256 minDuration = vm.envOr("MIN_DURATION", DEFAULT_MIN_DURATION);
         uint256 minRewardPerEpoch = vm.envOr("MIN_REWARD_PER_EPOCH", DEFAULT_MIN_REWARD_PER_EPOCH);
         uint256 maxRewardPerEpoch = vm.envOr("MAX_REWARD_PER_EPOCH", DEFAULT_MAX_REWARD_PER_EPOCH);
-        uint256 vestingDuration = vm.envOr("VESTING_DURATION", DEFAULT_VESTING_DURATION);
+        uint256 vestingPeriodDuration = vm.envOr("VESTING_PERIOD_DURATION", DEFAULT_VESTING_PERIOD_DURATION);
+        uint256 vestingPeriodCount = vm.envOr("VESTING_PERIOD_COUNT", DEFAULT_VESTING_PERIOD_COUNT);
         uint256 slashingRate = vm.envOr("SLASHING_RATE", DEFAULT_SLASHING_RATE);
         uint256 minRequierdProofsPerEpoch =
             vm.envOr("MIN_REQUIERD_PROOFS_PER_EPOCH", DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH);
@@ -168,7 +172,8 @@ contract DeployContracts is Depoyments, Script {
         console.log(StdStyle.blue("MIN_DURATION:"), minDuration);
         console.log(StdStyle.blue("MIN_REWARD_PER_EPOCH:"), minRewardPerEpoch);
         console.log(StdStyle.blue("MAX_REWARD_PER_EPOCH:"), maxRewardPerEpoch);
-        console.log(StdStyle.blue("VESTING_DURATION:"), vestingDuration);
+        console.log(StdStyle.blue("VESTING_PERIOD_DURATION:"), vestingPeriodDuration);
+        console.log(StdStyle.blue("VESTING_PERIOD_COUNT:"), vestingPeriodCount);
         console.log(StdStyle.blue("SLASHING_RATE:"), slashingRate);
         console.log(StdStyle.blue("MIN_REQUIERD_PROOFS_PER_EPOCH:"), minRequierdProofsPerEpoch);
         console.log(StdStyle.blue("MAX_PROOFS_PER_EPOCH:"), maxProofsPerEpoch);
@@ -193,7 +198,8 @@ contract DeployContracts is Depoyments, Script {
             minDuration: minDuration,
             minRewardPerEpoch: minRewardPerEpoch,
             maxRewardPerEpoch: maxRewardPerEpoch,
-            vestingDuration: vestingDuration,
+            vestingPeriodDuration: vestingPeriodDuration,
+            vestingPeriodCount: vestingPeriodCount,
             slashingRate: slashingRate,
             minRequierdProofsPerEpoch: minRequierdProofsPerEpoch,
             maxProofsPerEpoch: maxProofsPerEpoch,
@@ -231,7 +237,8 @@ contract DeployContracts is Depoyments, Script {
         uint256 minDuration_,
         uint256 minRewardPerEpoch_,
         uint256 maxRewardPerEpoch_,
-        uint256 vestingDuration_,
+        uint256 vestingPeriodDuration_,
+        uint256 vestingPeriodCount_,
         uint256 slashingRate_,
         uint256 minRequierdProofsPerEpoch_,
         uint256 maxProofsPerEpoch_,
@@ -291,7 +298,8 @@ contract DeployContracts is Depoyments, Script {
                     minDuration_,
                     minRewardPerEpoch_,
                     maxRewardPerEpoch_,
-                    vestingDuration_,
+                    vestingPeriodDuration_,
+                    vestingPeriodCount_,
                     slashingRate_,
                     minRequierdProofsPerEpoch_,
                     maxProofsPerEpoch_,
