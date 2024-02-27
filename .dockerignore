@@ -10,6 +10,8 @@
 !Makefile
 !lib/
 !script/
+!docker/scripts/
+!docker/keys/
 !out/
 !cache/
 !docker/entrypoint.sh
