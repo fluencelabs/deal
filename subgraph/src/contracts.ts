@@ -72,7 +72,7 @@ export function getMinRequiredProofsPerEpoch(contractAddress: Address): BigInt {
   return Capacity.bind(contractAddress).minRequierdProofsPerEpoch();
 }
 
-// It mirrors _failedEpoch in Capacity.sol.
+// It mirrors _failedEpoch internal method in Capacity.sol.
 export function calculateNextFailedCCEpoch(
     maxFailedRatio: BigInt,
     unitCount: BigInt,
@@ -81,6 +81,10 @@ export function calculateNextFailedCCEpoch(
     totalCUFailCount: BigInt,
     lastSnapshotEpoch: BigInt,
   ): BigInt {
+        if (activeUnitCount == ZERO_BIG_INT) {
+            return MAX_UINT_256;
+        }
+
         const maxFails= maxFailedRatio * unitCount;
         let remainingFails = ZERO_BIG_INT;
         if (totalCUFailCount < maxFails) {
@@ -90,8 +94,6 @@ export function calculateNextFailedCCEpoch(
         let failedEpoch = ZERO_BIG_INT;
         if (activeUnitCount > remainingFails) {
             failedEpoch = lastSnapshotEpoch + UNO_BIG_INT;
-        } else if (activeUnitCount == ZERO_BIG_INT) {
-            failedEpoch = MAX_UINT_256;
         } else {
             remainingFails = remainingFails - activeUnitCount;
             activeUnitCount += nextAdditionalActiveUnitCount;
@@ -99,7 +101,7 @@ export function calculateNextFailedCCEpoch(
             failedEpoch = UNO_BIG_INT + lastSnapshotEpoch + (remainingFails / activeUnitCount);
         }
 
-        // currently not used. devision on 0.
+        // CUrrently it is not used. Artifact from contract side.
         // const remainingFailsForLastEpoch = remainingFails % activeUnitCount;
         return failedEpoch;
     }
