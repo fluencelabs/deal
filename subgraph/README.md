@@ -16,6 +16,19 @@ To start local development with TheGraph and Hardhat:
 
 > Note, that when you are working with upgradable contracts - you leave addresses of proxies, but ABIs of real implementations.
 
+# Debug Note
+
+## How to check if error resolved on pre-prod stand?
+All examples below according to DAR stand.
+
+1. Copy pre prod context to your local graph node that you previously created:
+   - set .env for you docker/docker-compose.yml: `GRAPH_NODE_ETHEREUM_PATH=dar:https://ipc-stage.fluence.dev`
+2. Run local infrastructure with `docker compose -f docker/docker-compose.yml up`
+3. Deploy you new version of subgraph:
+   - `graph deploy --node http://localhost:8020 --ipfs http://localhost:5001 --network dar --network-file configs/dar-networks-config.json --version-label 0.0.0 fluence-deal-contracts`
+4. Check logs e.g. via `docker logs -f <contrainer name>`
+5. Redeploy subgraph on dar
+
 ## Setup Environment for Local Subgraph
 1. Run hardhat node from the **root** of the project:
 ```bash
@@ -115,7 +128,6 @@ graph deploy --product hosted-service --network mumbai <githubName>/fluence-deal
 ```
 
 # TODO
-- [ ] integrate subgraph more smoothly with hardhat, and esp. with hardhat-deploy plugin
 - [ ] use subgraph templating as it used with the graph project contracts
 - [ ] check again https://github.com/graphprotocol/hardhat-graph-demo to find the solution for **auto-populating subgraph.yaml with events**
 - [ ] add docker-compose commands to package.json
