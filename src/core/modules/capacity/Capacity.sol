@@ -595,6 +595,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         return currentEpoch_ >= failedEpoch;
     }
 
+    /// @dev This method is mirrored in subgraph module: calculateNextFailedCCEpoch.
     function _failedEpoch(
         uint256 maxFailedRatio_,
         uint256 unitCount_,
@@ -603,6 +604,10 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         uint256 totalCUFailCount_,
         uint256 lastSnapshotEpoch_
     ) private pure returns (uint256 failedEpoch, uint256 remainingFailsForLastEpoch, uint256 maxFails) {
+        if (activeUnitCount_ == 0) {
+            return (type(uint256).max, 0, 0);
+        }
+
         maxFails = maxFailedRatio_ * unitCount_;
         uint256 remainingFails = 0;
         if (totalCUFailCount_ < maxFails) {

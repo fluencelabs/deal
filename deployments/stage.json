@@ -1,33 +1,33 @@
 {
   "Capacity": {
-    "addr": "0x8dc7d48492b9fD2519b65A54816be03758742c60",
-    "blockNumber": 39,
+    "addr": "0xac18a4eC1005a53cB8B11B5D3DE7f896F562d380",
+    "blockNumber": 347401,
     "codeHash": "0x523a00df1c9086aaf013e04b8cef41ddbe98e15401772427be5baa1013cc8d23",
-    "creationCodeHash": "0xc094080ce8101bd17bfe4030de32e36bb80a2f117fb29f6b9271c1f49d609a4e"
+    "creationCodeHash": "0xa1304e2b8beec7ce12252d630e5890d9cd15fb53d1b7b2afb443a84894e9c429"
   },
   "CapacityImpl": {
-    "addr": "0x44f6FD6AC2145f674DCA7908d887c6AD61B96A49",
-    "blockNumber": 39,
-    "codeHash": "0x49e514729b7140db256fa146dbe2a4bba5640bd1ef2c53d18ad7293d883567d1",
-    "creationCodeHash": "0x3ae995079b1b30e76abaf5bbb0e4626854a5e35bb69fe82fc201dddd7d5c96f2"
+    "addr": "0xB6D29c887b04A57E85f1bA7B6Fa293B7Fb827D55",
+    "blockNumber": 347401,
+    "codeHash": "0x4eef834b5a1d25d172a40c85cc776bd9357e37738c19ef6613d1ee090ea30455",
+    "creationCodeHash": "0xd0e3ece9199c69390a43fa5f79d4859e5b535353eda6202dc0adc7a76ed48fc5"
   },
   "Core": {
-    "addr": "0x2B82e6B9491d9f32e39FA4A3ea4C8aedee9250Fe",
-    "blockNumber": 39,
+    "addr": "0xE6d12e1799c61bDA3AdF52F693EA910d8aEbff80",
+    "blockNumber": 347401,
     "codeHash": "0x523a00df1c9086aaf013e04b8cef41ddbe98e15401772427be5baa1013cc8d23",
-    "creationCodeHash": "0xcecb4c38e89169a528cb5f9bd55a49254e9b8960fb9929c8ae74e5a4e3b2d37e"
+    "creationCodeHash": "0x715bb78ec95c4c9bd66ea1afff56ce1ca6fe2efb58e354d3fab1d8ead5d69f28"
   },
   "CoreImpl": {
-    "addr": "0x382b1864EdDd120C4781a2577aE69C1B5CdAEF6F",
-    "blockNumber": 39,
-    "codeHash": "0x333bf5a33a91fd15587933ca4f4bda2fc567a5daf3c7c3399014631dbcbe7d74",
-    "creationCodeHash": "0xc3f9de871d48ca00e722059308a2d7dd24869a9522b2182251d05c1e00199f7b"
+    "addr": "0x73d3C3c5979EBb31D6ae1EAb71Cb8151a3C065bB",
+    "blockNumber": 347401,
+    "codeHash": "0xa9b19b920fe23dad1cd953a8dbe2f26acae5647c4bc3267720d1806622397d53",
+    "creationCodeHash": "0x5318ace77357651eba30c09a3ec12fc02732b788853c23f88528aecf4a29c07d"
   },
   "DealImpl": {
-    "addr": "0x9424ad337093a59A1a274b5431c8eEfb577db4Cf",
-    "blockNumber": 39,
-    "codeHash": "0xfb61ccda43cc417b0c5c22ee86e2358fdb038bca0851e015f6b7c404bc834232",
-    "creationCodeHash": "0x07e564c779c66623f5d7ae13d90399ae2251c5dd3660184a7fd3672cb41f8c1f"
+    "addr": "0xA0ab8534a7CCBb1Aae5862D1ACe65C1DC3d99529",
+    "blockNumber": 347401,
+    "codeHash": "0x5608d4c4082de9f98369cdb2460a800a29b64a77d903955cb9366e7a07db57b8",
+    "creationCodeHash": "0x00c5984283b02c474e80db1acab7ab29a99568e8560607501ab70cc60e454176"
   },
   "Faucet": {
     "addr": "0xf275023f1d182D776a9A4be865Ea1309eAc66DeF",
@@ -36,16 +36,16 @@
     "creationCodeHash": "0xeb5c4b89c4851cab9fcd006e18b1f9a9b045ea913fd008e10115c808ff710950"
   },
   "Market": {
-    "addr": "0xde3E9c36478733632aFb28846e8120B9a10b617F",
-    "blockNumber": 39,
+    "addr": "0x3f3970AFc0BA3fE15b84b59d377E1E55d63C06A9",
+    "blockNumber": 347401,
     "codeHash": "0x523a00df1c9086aaf013e04b8cef41ddbe98e15401772427be5baa1013cc8d23",
-    "creationCodeHash": "0xf49e36969d637278ff178fc5f752b1c971f5ce3310a5325f4f47b1054e1fe555"
+    "creationCodeHash": "0x18b2491c8e203eb405bbadeb4c91dac6e53238f080e6e1c39c005ef652cddd54"
   },
   "MarketImpl": {
-    "addr": "0xeFAD6fB41111b4C48b4314b48C0413F630325A38",
-    "blockNumber": 39,
-    "codeHash": "0xd89893699a0ade54dc77759daea40fe7cd77013e40b1b598e2f146f57f8b0499",
-    "creationCodeHash": "0xba9915ec35fc6c888d6303e6f8c4f638a7125f3b9d4c231893524566f8ac2606"
+    "addr": "0x748270e05F62AE8A1Be9c451d7e2C81CCF7B9e62",
+    "blockNumber": 347401,
+    "codeHash": "0x626796c2f9d88f359ce5478ac56aa7a1a1629c7d67773fb5308131779195f86d",
+    "creationCodeHash": "0xf9ce92bf892112cd2e0f02df74549df3eb92f06d36c8dee9756c6cba70db0e29"
   },
   "Multicall3": {
     "addr": "0xD6A68bcaBDDa9Ea70eB6492f25316f4D6bCcA8fa",
@@ -54,10 +54,10 @@
     "creationCodeHash": "0x4a8ccf76c0bd8c249ecc87102254fc2dbc0444c94cd01e05ae8fb15de3e2d4bc"
   },
   "RandomXProxy": {
-    "addr": "0x831d58C7842B0b3733F77232e52013888BACe0Bb",
-    "blockNumber": 39,
-    "codeHash": "0x2e79cea65fb646b7232c1a4eed31ae638dcaf27eebd739e9a1d08bcbbb920fd9",
-    "creationCodeHash": "0x624b13688ca4209a9cf5baee842d6080f87a918ff8c1c63765ffff2de361ef47"
+    "addr": "0x3b57aEb611fC748eBab16256F40E32222C0aE083",
+    "blockNumber": 347401,
+    "codeHash": "0xeeb897eee213255a0a7a6d5bbaad644f760b017221114cf14acef539fc646f55",
+    "creationCodeHash": "0x46e6e21c9684d1f44b97e3cf141b5cfa3c50363754865b6096b1335c00ebe74b"
   },
   "tUSD": {
     "addr": "0xef1F039b662Aea0A8E5e56F079205Ba02F03b375",
