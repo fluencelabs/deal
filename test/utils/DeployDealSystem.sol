@@ -11,7 +11,9 @@ import "src/dev/TestERC20.sol";
 import "src/core/Core.sol";
 import "src/deal/Deal.sol";
 import "src/core/modules/market/Market.sol";
+import "src/core/modules/market/DealFactory.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
+import "src/core/modules/market/interfaces/IDealFactory.sol";
 import "src/core/modules/capacity/Capacity.sol";
 import "src/core/modules/capacity/interfaces/ICapacity.sol";
 
@@ -24,6 +26,7 @@ library DeployDealSystem {
         Core core;
         Market market;
         Capacity capacity;
+        DealFactory dealFactory;
     }
 
     // ------------------ Constants ------------------
@@ -36,7 +39,8 @@ library DeployDealSystem {
     uint256 public constant DEFAULT_MIN_DURATION = 1 days;
     uint256 public constant DEFAULT_MIN_REWARD_PER_EPOCH = 10000;
     uint256 public constant DEFAULT_MAX_REWARD_PER_EPOCH = 1;
-    uint256 public constant DEFAULT_VESTING_DURATION = 2 days;
+    uint256 public constant DEFAULT_VESTING_PERIOD_DURATION = 1;
+    uint256 public constant DEFAULT_VESTING_PERIOD_COUNT = 6;
     uint256 public constant DEFAULT_SLASHING_RATE = 100000; // 0.01 = 1% = 100000
     uint256 public constant DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH = 3;
     uint256 public constant DEFAULT_MAX_PROOFS_PER_EPOCH = 5;
@@ -91,7 +95,8 @@ library DeployDealSystem {
                         DEFAULT_MIN_DURATION,
                         DEFAULT_MIN_REWARD_PER_EPOCH,
                         DEFAULT_MAX_REWARD_PER_EPOCH,
-                        DEFAULT_VESTING_DURATION,
+                        DEFAULT_VESTING_PERIOD_DURATION,
+                        DEFAULT_VESTING_PERIOD_COUNT,
                         DEFAULT_SLASHING_RATE,
                         DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH,
                         DEFAULT_MAX_PROOFS_PER_EPOCH,
@@ -106,7 +111,15 @@ library DeployDealSystem {
             )
         );
 
-        deployment.core.initializeModules(deployment.capacity, deployment.market);
+        deployment.dealFactory = DealFactory(
+            address(
+                new ERC1967Proxy(
+                    address(new DealFactory(deployment.core)), abi.encodeWithSelector(DealFactory.initialize.selector)
+                )
+            )
+        );
+
+        deployment.core.initializeModules(deployment.capacity, deployment.market, deployment.dealFactory);
 
         deployment.initialized = true;
     }

@@ -46,6 +46,7 @@ interface IDealFactory {
     /// @dev Creates a new deal
     /// @param appCID_ The app cid of the deal
     /// @param paymentToken_ The payment token of the deal. User can choose any ERC20 token for payment
+    /// @param depositAmount_ The deposit amount of the deal
     /// @param minWorkers_ The min workers of the deal. Deel will be activated only if the number of workers is greater
     /// @param targetWorkers_ The target workers of the deal. It's the max number of workers for the deal
     /// @param maxWorkersPerProvider_ The max workers per provider of the deal
@@ -57,6 +58,7 @@ interface IDealFactory {
     function deployDeal(
         CIDV1 calldata appCID_,
         IERC20 paymentToken_,
+        uint256 depositAmount_,
         uint256 minWorkers_,
         uint256 targetWorkers_,
         uint256 maxWorkersPerProvider_,

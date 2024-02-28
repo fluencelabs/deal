@@ -75,7 +75,8 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         uint256 minDuration_,
         uint256 minRewardPerEpoch_,
         uint256 maxRewardPerEpoch_,
-        uint256 vestingDuration_,
+        uint256 vestingPeriodDuration_,
+        uint256 vestingPeriodCount_,
         uint256 slashingRate_,
         uint256 minRequierdProofsPerEpoch_,
         uint256 maxProofsPerEpoch_,
@@ -95,7 +96,8 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
             minDuration_,
             minRewardPerEpoch_,
             maxRewardPerEpoch_,
-            vestingDuration_,
+            vestingPeriodDuration_,
+            vestingPeriodCount_,
             slashingRate_,
             minRequierdProofsPerEpoch_,
             maxProofsPerEpoch_,
@@ -314,7 +316,9 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         uint256 expiredEpoch = _expiredEpoch(cc);
         CCStatus status = _commitCommitmentSnapshot(cc, peer, currentEpoch_ - 1, expiredEpoch);
 
-        require(status == CCStatus.Inactive || status == CCStatus.Failed, "Capacity commitment is active");
+        if (status != CCStatus.Inactive && status != CCStatus.Failed) {
+            revert CapacityCommitmentIsActive(status);
+        }
         if (status == CCStatus.Failed) {
             require(
                 currentEpoch_ >= cc.info.withdrawCCEpochAfterFailed, "Capacity commitment is not ready for withdraw"
@@ -340,7 +344,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         emit CommitmentFinished(commitmentId);
     }
 
-    function submitProof(bytes32 unitId, bytes32 localUnitNonce, bytes32 targetHash) external {
+    function submitProof(bytes32 unitId, bytes32 localUnitNonce, bytes32 resultHash) external {
         IMarket market = core.market();
 
         CommitmentStorage storage s = _getCommitmentStorage();
@@ -357,7 +361,9 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         require(epoch >= cc.info.startEpoch, "Capacity commitment is not started");
 
         CCStatus status = _commitCommitmentSnapshot(cc, peer, epoch - 1, expiredEpoch);
-        require(status == CCStatus.Active, "Capacity commitment is not active");
+        if (status != CCStatus.Active) {
+            revert CapacityCommitmentIsNotActive(status);
+        }
 
         // update global nonce
         if (s.nonceEpochSnapshot != epoch) {
@@ -397,13 +403,13 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         unitProofsInfo.proofsCountByEpoch[epoch] = unitProofsCount;
 
         // check proof
-        (bool success, bytes memory randomXTargetHash) = randomXProxy().delegatecall(
+        (bool success, bytes memory randomXResultHash) = randomXProxy().delegatecall(
             abi.encodeWithSelector(RandomXProxy.run.selector, globalUnitNonce_, localUnitNonce)
         );
 
         require(success, "RandomXProxy.run failed");
-        require(randomXTargetHash.toBytes32() == targetHash, "Proof is not valid");
-        require(targetHash <= difficulty(), "Proof is bigger than difficulty");
+        require(randomXResultHash.toBytes32() == resultHash, "Proof is not valid");
+        require(resultHash <= difficulty(), "Proof is bigger than difficulty");
 
         emit CommitmentStatsUpdated(
             commitmentId,
@@ -429,7 +435,9 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         IMarket.ComputePeer memory peer = market.getComputePeer(peerId);
 
         CCStatus status = _commitCommitmentSnapshot(cc, peer, currentEpoch_ - 1, expiredEpoch);
-        require(status == CCStatus.Inactive || status == CCStatus.Failed, "Capacity commitment is active");
+        if (status != CCStatus.Inactive && status != CCStatus.Failed) {
+            revert CapacityCommitmentIsActive(status);
+        }
 
         uint256 failedEpoch = cc.info.failedEpoch;
 
@@ -519,7 +527,9 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         uint256 epoch = core.currentEpoch() - 1;
         uint256 expiredEpoch = _expiredEpoch(cc);
         CCStatus status = _commitCommitmentSnapshot(cc, peer, epoch, expiredEpoch);
-        require(status == CCStatus.Active, "Capacity commitment is not active");
+        if (status != CCStatus.Active) {
+            revert CapacityCommitmentIsNotActive(status);
+        }
 
         _commitUnitSnapshot(cc, unitProofsInfo, epoch, expiredEpoch, cc.info.failedEpoch);
 
@@ -741,7 +751,14 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
             cumulativeAmount = cc.vestings[vestingLength - 1].cumulativeAmount;
         }
 
-        cc.vestings.push(Vesting({epoch: prevEpoch + vestingDuration(), cumulativeAmount: cumulativeAmount + reward}));
+        uint256 vestingPeriodDuration = vestingPeriodDuration();
+        uint256 vestingPeriodCount = vestingPeriodCount();
+        uint256 epoch = prevEpoch;
+        for (uint256 i = 0; i < vestingPeriodCount; i++) {
+            cumulativeAmount += reward;
+            epoch += vestingPeriodDuration;
+            cc.vestings.push(Vesting({epoch: epoch, cumulativeAmount: cumulativeAmount}));
+        }
 
         delete unitProofsInfo.proofsCountByEpoch[lastMinProofsEpoch];
 

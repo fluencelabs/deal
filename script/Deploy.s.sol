@@ -16,6 +16,7 @@ import "src/utils/Multicall3.sol";
 import "src/core/Core.sol";
 import "src/core/interfaces/ICore.sol";
 import "src/core/modules/market/Market.sol";
+import "src/core/modules/market/DealFactory.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
 import "src/core/modules/capacity/Capacity.sol";
 import "src/core/modules/capacity/interfaces/ICapacity.sol";
@@ -39,7 +40,8 @@ contract DeployContracts is Depoyments, Script {
     uint256 constant DEFAULT_MIN_DURATION = 5 minutes;
     uint256 constant DEFAULT_MIN_REWARD_PER_EPOCH = 1 ether;
     uint256 constant DEFAULT_MAX_REWARD_PER_EPOCH = 1 ether;
-    uint256 constant DEFAULT_VESTING_DURATION = 1 minutes;
+    uint256 constant DEFAULT_VESTING_PERIOD_DURATION = 5;
+    uint256 constant DEFAULT_VESTING_PERIOD_COUNT = 6;
     uint256 constant DEFAULT_SLASHING_RATE = 1_000_000; // 0.1 = 10% = 1000000
     uint256 constant DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH = 2;
     uint256 constant DEFAULT_MAX_PROOFS_PER_EPOCH = 5;
@@ -66,7 +68,8 @@ contract DeployContracts is Depoyments, Script {
         uint256 minDuration;
         uint256 minRewardPerEpoch;
         uint256 maxRewardPerEpoch;
-        uint256 vestingDuration;
+        uint256 vestingPeriodDuration;
+        uint256 vestingPeriodCount;
         uint256 slashingRate;
         uint256 minRequierdProofsPerEpoch;
         uint256 maxProofsPerEpoch;
@@ -117,7 +120,8 @@ contract DeployContracts is Depoyments, Script {
             env.minDuration,
             env.minRewardPerEpoch,
             env.maxRewardPerEpoch,
-            env.vestingDuration,
+            env.vestingPeriodDuration,
+            env.vestingPeriodCount,
             env.slashingRate,
             env.minRequierdProofsPerEpoch,
             env.maxProofsPerEpoch,
@@ -144,7 +148,8 @@ contract DeployContracts is Depoyments, Script {
         uint256 minDuration = vm.envOr("MIN_DURATION", DEFAULT_MIN_DURATION);
         uint256 minRewardPerEpoch = vm.envOr("MIN_REWARD_PER_EPOCH", DEFAULT_MIN_REWARD_PER_EPOCH);
         uint256 maxRewardPerEpoch = vm.envOr("MAX_REWARD_PER_EPOCH", DEFAULT_MAX_REWARD_PER_EPOCH);
-        uint256 vestingDuration = vm.envOr("VESTING_DURATION", DEFAULT_VESTING_DURATION);
+        uint256 vestingPeriodDuration = vm.envOr("VESTING_PERIOD_DURATION", DEFAULT_VESTING_PERIOD_DURATION);
+        uint256 vestingPeriodCount = vm.envOr("VESTING_PERIOD_COUNT", DEFAULT_VESTING_PERIOD_COUNT);
         uint256 slashingRate = vm.envOr("SLASHING_RATE", DEFAULT_SLASHING_RATE);
         uint256 minRequierdProofsPerEpoch =
             vm.envOr("MIN_REQUIERD_PROOFS_PER_EPOCH", DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH);
@@ -167,7 +172,8 @@ contract DeployContracts is Depoyments, Script {
         console.log(StdStyle.blue("MIN_DURATION:"), minDuration);
         console.log(StdStyle.blue("MIN_REWARD_PER_EPOCH:"), minRewardPerEpoch);
         console.log(StdStyle.blue("MAX_REWARD_PER_EPOCH:"), maxRewardPerEpoch);
-        console.log(StdStyle.blue("VESTING_DURATION:"), vestingDuration);
+        console.log(StdStyle.blue("VESTING_PERIOD_DURATION:"), vestingPeriodDuration);
+        console.log(StdStyle.blue("VESTING_PERIOD_COUNT:"), vestingPeriodCount);
         console.log(StdStyle.blue("SLASHING_RATE:"), slashingRate);
         console.log(StdStyle.blue("MIN_REQUIERD_PROOFS_PER_EPOCH:"), minRequierdProofsPerEpoch);
         console.log(StdStyle.blue("MAX_PROOFS_PER_EPOCH:"), maxProofsPerEpoch);
@@ -192,7 +198,8 @@ contract DeployContracts is Depoyments, Script {
             minDuration: minDuration,
             minRewardPerEpoch: minRewardPerEpoch,
             maxRewardPerEpoch: maxRewardPerEpoch,
-            vestingDuration: vestingDuration,
+            vestingPeriodDuration: vestingPeriodDuration,
+            vestingPeriodCount: vestingPeriodCount,
             slashingRate: slashingRate,
             minRequierdProofsPerEpoch: minRequierdProofsPerEpoch,
             maxProofsPerEpoch: maxProofsPerEpoch,
@@ -230,7 +237,8 @@ contract DeployContracts is Depoyments, Script {
         uint256 minDuration_,
         uint256 minRewardPerEpoch_,
         uint256 maxRewardPerEpoch_,
-        uint256 vestingDuration_,
+        uint256 vestingPeriodDuration_,
+        uint256 vestingPeriodCount_,
         uint256 slashingRate_,
         uint256 minRequierdProofsPerEpoch_,
         uint256 maxProofsPerEpoch_,
@@ -254,6 +262,8 @@ contract DeployContracts is Depoyments, Script {
         bool needToRedeployMarket = _doNeedToRedeploy("MarketImpl", "Market");
         bool needToRedeployCapacity = _doNeedToRedeploy("CapacityImpl", "Capacity");
 
+        bool needToRedeployDealFactory = _doNeedToRedeploy("DealFactoryImpl", "DealFactory");
+
         (address coreAddr, bool isNewCore) = _tryDeployContract(
             "Core",
             "ERC1967Proxy",
@@ -263,11 +273,13 @@ contract DeployContracts is Depoyments, Script {
                     Core.initialize.selector, epochDuration_, minDepositedEpoches_, minRematchingEpoches_, dealImpl
                 )
             ),
-            needToRedeployMarket || needToRedeployCapacity
+            needToRedeployMarket || needToRedeployCapacity || needToRedeployDealFactory
         );
 
         address marketImpl = _deployContract("MarketImpl", "Market", abi.encode(coreAddr), isNewCore);
         address capacityImpl = _deployContract("CapacityImpl", "Capacity", abi.encode(coreAddr), isNewCore);
+
+        address dealFactoryImpl = _deployContract("DealFactoryImpl", "DealFactory", abi.encode(coreAddr), isNewCore);
 
         address marketProxy = _deployContract(
             "Market", "ERC1967Proxy", abi.encode(marketImpl, abi.encodeWithSelector(Market.initialize.selector))
@@ -286,7 +298,8 @@ contract DeployContracts is Depoyments, Script {
                     minDuration_,
                     minRewardPerEpoch_,
                     maxRewardPerEpoch_,
-                    vestingDuration_,
+                    vestingPeriodDuration_,
+                    vestingPeriodCount_,
                     slashingRate_,
                     minRequierdProofsPerEpoch_,
                     maxProofsPerEpoch_,
@@ -300,13 +313,18 @@ contract DeployContracts is Depoyments, Script {
             )
         );
 
+        address dealFactoryProxy = _deployContract(
+            "DealFactory", "ERC1967Proxy", abi.encode(dealFactoryImpl, abi.encodeWithSelector(DealFactory.initialize.selector))
+        );
+
         if (isNewCore) {
             console.log("\nCore deployed, initializing modules as well...");
-            ICore(coreAddr).initializeModules(ICapacity(capacityProxy), IMarket(marketProxy));
+            ICore(coreAddr).initializeModules(ICapacity(capacityProxy), IMarket(marketProxy), IDealFactory(dealFactoryProxy));
         }
 
-        // TODO: if needToRedeployMarket or needToRedeployCapacity - impl proxy should be update with impl.
-        if (!isNewCore && (needToRedeployMarket || needToRedeployCapacity)) {
+        // TODO: if needToRedeployMarket, needToRedeployCapacity or needToRedeployDealFactory
+        //   - impl proxy should be update with impl.
+        if (!isNewCore && (needToRedeployMarket || needToRedeployCapacity || needToRedeployDealFactory)) {
             revert("Update not implemented yet.");
         }
     }

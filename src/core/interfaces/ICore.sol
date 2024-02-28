@@ -6,6 +6,7 @@ import "./IGlobalConst.sol";
 import "./IEpochController.sol";
 import "src/core/modules/capacity/interfaces/ICapacity.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
+import "src/core/modules/market/interfaces/IDealFactory.sol";
 import "src/deal/interfaces/IDeal.sol";
 
 /// @title Core contract interface
@@ -30,7 +31,7 @@ interface ICore is IEpochController, IGlobalConst {
     /// @dev Sets modules
     /// @param capacity Capacity module address
     /// @param market Market module address
-    function initializeModules(ICapacity capacity, IMarket market) external;
+    function initializeModules(ICapacity capacity, IMarket market, IDealFactory dealFactory) external;
 
     // ------------------ External View Functions ------------------
     /// @dev Returns capacity module
