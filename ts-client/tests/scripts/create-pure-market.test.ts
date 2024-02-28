@@ -73,6 +73,8 @@ interface DealModel {
     targetWorkers: number;
     maxWorkerPerProvider: number;
     pricePerWorkerEpoch: string;
+    // SHould be calculated: uint256 minAmount = pricePerWorkerEpoch_ * targetWorkers_ * core.minDealDepositedEpoches().
+    depositAmount: string | null;
     effectors: CID[];
     listAccessType: number;  // 0 - standard, 1 - whitelist, 2 - blacklist
     listAccess: string[];
@@ -126,6 +128,8 @@ function initMarketFixture(paymentToken: string): MarketExample {
             developerAddress: "",
             appCID: { prefix: ethers.hexlify(ethers.randomBytes(4)), hash: ethers.hexlify(ethers.randomBytes(32)), description: "dealAPPCID"},
             paymentTokenAddress: paymentToken,
+            // pricePerWorkerEpoch * newTargetWorkers * core.minDealDepositedEpoches();
+            depositAmount: null,
             minWorkers: 2,
             targetWorkers: 2,
             maxWorkerPerProvider: 2,
@@ -138,6 +142,7 @@ function initMarketFixture(paymentToken: string): MarketExample {
             developerAddress: "",
             appCID: { prefix: ethers.hexlify(ethers.randomBytes(4)), hash: ethers.hexlify(ethers.randomBytes(32)), description: "dealAPPCID"},
             paymentTokenAddress: paymentToken,
+            depositAmount: null,
             minWorkers: 1,
             targetWorkers: 1,
             maxWorkerPerProvider: 1,
@@ -150,6 +155,7 @@ function initMarketFixture(paymentToken: string): MarketExample {
             developerAddress: "",
             appCID: { prefix: ethers.hexlify(ethers.randomBytes(4)), hash: ethers.hexlify(ethers.randomBytes(32)), description: "dealAPPCID"},
             paymentTokenAddress: paymentToken,
+            depositAmount: null,
             minWorkers: 1,
             targetWorkers: 1,
             maxWorkerPerProvider: 1,
@@ -193,6 +199,8 @@ async function main() {
     const paymentTokenAddress = await paymentToken.getAddress();
     const coreContract = await contractsClient.getCore()
     const coreContractAddress = await coreContract.getAddress()
+    const dealFactoryContract = await contractsClient.getDealFactory()
+    const dealFactoryContractAddress = await dealFactoryContract.getAddress()
 
     // Print data of signer before running into a bunch of transactions.
     console.info(`Signer address: ${signerAddress}`);
@@ -318,13 +326,15 @@ async function main() {
         console.info(
         `Send approve of payment token for amount = ${toApproveFromDeployer.toString()} to market address: ${marketContractAddress}`
         );
-        const approveTx = await paymentToken.approve(marketContractAddress, toApproveFromDeployer);
+        const approveTx = await paymentToken.approve(dealFactoryContractAddress, toApproveFromDeployer);
         await approveTx.wait(WAIT_CONFIRMATIONS)
 
         console.log('TODO: send transaction itself with params', JSON.stringify(dealFixture))
-        const createDealTx = await marketContract.deployDeal(
+        const depositAmount = BigInt(dealFixture.pricePerWorkerEpoch) * BigInt(dealFixture.targetWorkers) * minDealDepositedEpoches
+        const createDealTx = await dealFactoryContract.deployDeal(
             {prefixes: dealFixture.appCID.prefix, hash: dealFixture.appCID.hash},
             dealFixture.paymentTokenAddress,
+            depositAmount,
             dealFixture.minWorkers,
             dealFixture.targetWorkers,
             dealFixture.maxWorkerPerProvider,
@@ -337,7 +347,7 @@ async function main() {
         dealFixture.dealId = getEventValue(
             {
                 txReceipt: createDealTxResult!,
-                contract: marketContract,
+                contract: dealFactoryContract,
                 eventName: "DealCreated",
                 value: "deal",
             }
@@ -412,6 +422,8 @@ function getEventValue<T extends string, U extends Contract<T>>({
 // asyncRuntimeDecorator(main);
 
 // TODO: deprecate sol script.
+
+const TEST_TIMEOUT = 300000
 test("#asyncRuntimeDecorator for create-pure-market-script", async () => {
   await main()
-})
+}, TEST_TIMEOUT)
