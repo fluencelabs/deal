@@ -8,6 +8,7 @@ import {
   EffectorAdded,
   EffectorInfoRemoved, EffectorInfoSet,
   EffectorRemoved,
+  Initialized,
   MarketOfferRegistered,
   MinPricePerEpochUpdated,
   PaymentTokenUpdated,
@@ -35,6 +36,12 @@ import {
 } from "../../generated/schema";
 import { Deal as DealTemplate } from "../../generated/templates";
 import {AppCID, formatAddress, getEffectorCID, parseEffectors} from "./utils";
+
+export function handleInitialized(event: Initialized): void {
+  let graphNetwork = createOrLoadGraphNetwork();
+  graphNetwork.marketContractAddress = event.address.toHexString();
+  graphNetwork.save()
+}
 
 export function handleProviderInfoUpdated(event: ProviderInfoUpdated): void {
   const addr = formatAddress(event.params.provider);

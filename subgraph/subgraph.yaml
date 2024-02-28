@@ -51,6 +51,8 @@ dataSources:
         - name: ERC20
           file: ../out/ERC20.sol/ERC20.json
       eventHandlers:
+        - event: Initialized(uint8)
+          handler: handleInitialized
         - event: ProviderInfoUpdated(indexed address,string,(bytes4,bytes32))
           handler: handleProviderInfoUpdated
         - event: MarketOfferRegistered(indexed
