@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.7.0](https://github.com/fluencelabs/deal/compare/v0.6.7...v0.7.0) (2024-02-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* move dealfactory out of market ([#268](https://github.com/fluencelabs/deal/issues/268))
+* hotfix in Capacity - calculation of failed epoch ([#303](https://github.com/fluencelabs/deal/issues/303))
+
+### Features
+
+* move dealfactory out of market ([#268](https://github.com/fluencelabs/deal/issues/268)) ([377795d](https://github.com/fluencelabs/deal/commit/377795d28ae2cafc246fedde89af4c42c59ca2d5))
+
+
+### Bug Fixes
+
+* hotfix in Capacity - calculation of failed epoch ([#303](https://github.com/fluencelabs/deal/issues/303)) ([24761b7](https://github.com/fluencelabs/deal/commit/24761b7063c6063b5957ee875147b9b321f6ded9))
+
 ## [0.6.7](https://github.com/fluencelabs/deal/compare/v0.6.6...v0.6.7) (2024-02-24)
 
 

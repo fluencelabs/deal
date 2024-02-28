@@ -9,8 +9,8 @@ dataSources:
     network: local
     source:
       abi: Core
-      address: "0x36C02dA8a0983159322a80FFE9F24b1acfF8B570"
-      startBlock: 10
+      address: "0x0B306BF915C4d645ff596e518fAf3F9669b97016"
+      startBlock: 50
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -29,8 +29,8 @@ dataSources:
     network: local
     source:
       abi: Market
-      address: "0x1291Be112d480055DaFd8a610b7d1e203891C274"
-      startBlock: 10
+      address: "0x68B1D87F95878fE05B998F19b66F4baba5De1aed"
+      startBlock: 9
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -53,11 +53,6 @@ dataSources:
       eventHandlers:
         - event: ProviderInfoUpdated(indexed address,string,(bytes4,bytes32))
           handler: handleProviderInfoUpdated
-#          TODO: uncomment when resolved: https://github.com/graphprotocol/graph-node/issues/5171
-#        - event: EffectorInfoSet((indexed bytes4,bytes32),string,(bytes4,bytes32))
-#          handler: handleEffectorInfoSet
-#        - event: EffectorInfoRemoved((indexed bytes4,bytes32))
-#          handler: handleEffectorInfoRemoved
         - event: MarketOfferRegistered(indexed
             address,bytes32,uint256,address,(bytes4,bytes32)[])
           handler: handleMarketOfferRegistered
@@ -77,17 +72,37 @@ dataSources:
           handler: handleComputeUnitAddedToDeal
         - event: ComputeUnitRemovedFromDeal(indexed bytes32,address,bytes32)
           handler: handleComputeUnitRemovedFromDeal
+      file: ./src/mappings/market.ts
+  - kind: ethereum/contract
+    name: DealFactory
+    network: local
+    source:
+      abi: DealFactory
+      address: "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d"
+      startBlock: 50
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Effector
+        - Deal
+        - GraphNetwork
+      abis:
+        - name: DealFactory
+          file: ../out/DealFactory.sol/DealFactory.json
+      eventHandlers:
         - event: DealCreated(indexed
             address,address,uint256,address,uint256,uint256,uint256,uint256,(bytes4,bytes32)[],(bytes4,bytes32),uint8,address[])
           handler: handleDealCreated
-      file: ./src/mappings/market.ts
+      file: ./src/mappings/deal-factory.ts
   - kind: ethereum/contract
     name: Capacity
     network: local
     source:
       abi: Capacity
-      address: "0x5f3f1dBD7B74C6B46e8c44f98792A1dAf8d69154"
-      startBlock: 10
+      address: "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c"
+      startBlock: 50
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7

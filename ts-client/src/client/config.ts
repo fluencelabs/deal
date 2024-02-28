@@ -6,6 +6,7 @@ export type Deployment = {
   core: string;
   usdc: string;
   market: string;
+  dealFactory: string;
   capacity: string;
   multicall3: string;
   chainId: number;
@@ -43,7 +44,7 @@ export const getDeployment = async (env: ContractsENV) => {
 
   //TODO: add verification of deployment object (JSON schema)
 
-  const contracts = ["Core", "Market", "Capacity", "tUSD", "Multicall3"];
+  const contracts = ["Core", "DealFactory", "Market", "Capacity", "tUSD", "Multicall3"];
 
   for (const contract of contracts) {
     if (deployment[contract] === undefined) {
@@ -55,6 +56,7 @@ export const getDeployment = async (env: ContractsENV) => {
     core: deployment.Core.addr,
     market: deployment.Market.addr,
     capacity: deployment.Capacity.addr,
+    dealFactory: deployment.DealFactory.addr,
     usdc: deployment.tUSD.addr,
     multicall3: deployment.Multicall3.addr,
     chainId: chainId,
