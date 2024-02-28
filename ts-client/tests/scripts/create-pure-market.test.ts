@@ -184,7 +184,6 @@ async function main() {
     }
     console.log('PRIVATE_KEY', PRIVATE_KEY)
 
-    // const signer = ethers.Wallet.fromPhrase("test test test test test test test test test test test junk", provider);
     const signerAddress = await signer.getAddress();
     const contractsClient = new DealClient(signer, FLUENCE_ENV);
     const marketContract = await contractsClient.getMarket();
@@ -357,7 +356,7 @@ async function main() {
     // We want to match with 2 CU and accodring to protocol restriction them should be from different peers
     const matchDealTx = await marketContract.matchDeal(
         marketFixture.dealToMatchWithWhiteListedProvider.dealId!,
-        [marketFixture.providerToBeMatched.offerId!],
+        [marketFixture.providerToBeMatched.offerId!, marketFixture.providerToBeMatched.offerId!],
         [
             [marketFixture.providerToBeMatched.computeUnitsPerPeers[0][0]],
             [marketFixture.providerToBeMatched.computeUnitsPerPeers[1][0]],
