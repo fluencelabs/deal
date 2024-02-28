@@ -1,4 +1,6 @@
 // TODO: relocate or use for CI tests of ts-client APIs (it is not a test, it a dev script for market).
+// To run: you need to have infra: deployed contracts on local and run: `npm run integration`
+
 // It creates market example on chain. Check out MarketExample interface and initMarketFixture with actual configuration.
 // Currently used to sync Network Explorer frontend dev and to create diversed market on chain, and to create load for Subgraph.
 // WARN: To run this script you also should use the Core Owner (it uses some restricted admin methods).
@@ -14,7 +16,7 @@
 // import {
 //     DealClient,
 // } from "@fluencelabs/deal-ts-clients";
-import {DealClient} from "../../src";
+import {DealClient} from "../../../src";
 
 import {ethers, LogDescription} from "ethers";
 import dotenv from "dotenv"
@@ -359,19 +361,17 @@ async function main() {
         throw new Error('[custom] Unexpected state: dealToMatchWithWhiteListedProvider.minWorkers !== 2')
     }
 
-    console.log('DEBUG: marketFixture.dealToMatchWithWhiteListedProvider.dealId =', marketFixture.dealToMatchWithWhiteListedProvider.dealId)
-    console.log('DEBUG: marketFixture.providerToBeMatched.offerId =', marketFixture.providerToBeMatched.offerId)
-    console.log('DEBUG: marketFixture.providerToBeMatched.computeUnitsPerPeers =', marketFixture.providerToBeMatched.computeUnitsPerPeers)
-    // TODO: stoppped here.
-    // We want to match with 2 CU and accodring to protocol restriction them should be from different peers
-    const matchDealTx = await marketContract.matchDeal(
-        marketFixture.dealToMatchWithWhiteListedProvider.dealId!,
-        [marketFixture.providerToBeMatched.offerId!, marketFixture.providerToBeMatched.offerId!],
-        [
-            [marketFixture.providerToBeMatched.computeUnitsPerPeers[0][0]],
-            [marketFixture.providerToBeMatched.computeUnitsPerPeers[1][0]],
-        ],
-    );
+    // We want to match with 2 CU and according to protocol restriction them should be from different peers
+    // TODO: need to resolve this: https://linear.app/fluence/issue/CHAIN-400/bug-in-matchermatchdeal-when-match-with-whitelisted-deal
+    //  or rewrite match with CUs with active CC.
+    // const matchDealTx = await marketContract.matchDeal(
+    //     marketFixture.dealToMatchWithWhiteListedProvider.dealId!,
+    //     [marketFixture.providerToBeMatched.offerId!, marketFixture.providerToBeMatched.offerId!],
+    //     [
+    //         [marketFixture.providerToBeMatched.computeUnitsPerPeers[0][0]],
+    //         [marketFixture.providerToBeMatched.computeUnitsPerPeers[1][0]],
+    //     ],
+    // );
 }
 
 // Log Parsing Module.
@@ -420,8 +420,6 @@ function getEventValue<T extends string, U extends Contract<T>>({
 
 // Uncomment to run as a script.
 // asyncRuntimeDecorator(main);
-
-// TODO: deprecate sol script.
 
 const TEST_TIMEOUT = 300000
 test("#asyncRuntimeDecorator for create-pure-market-script", async () => {
