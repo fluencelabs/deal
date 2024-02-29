@@ -361,7 +361,7 @@ jobs:
 
       - name: Pack ts-client package
         id: pack-ts-client
-        run: echo "TS_CLIENT_ARCHIVE=$(npm pack --silent --pack-destination ../integration-tests)\n" >> $GITHUB_OUTPUT
+        run: echo "TS_CLIENT_ARCHIVE=$(npm pack --silent --pack-destination ../integration-tests)" >> $GITHUB_OUTPUT
         working-directory: ts-client
 
       - name: Install packed ts-client
