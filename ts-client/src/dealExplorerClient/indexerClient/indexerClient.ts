@@ -144,7 +144,7 @@ export class IndexerClient extends IndexerClientABC {
     variables: ComputeUnitPerEpochStatsQueryQueryVariables,
   ) {
     return await this.capacityCommitmentsClient.ComputeUnitPerEpochStatsQuery(
-      variables
-    )
+      variables,
+    );
   }
 }

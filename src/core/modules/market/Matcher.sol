@@ -81,6 +81,7 @@ abstract contract Matcher is Offer, IMatcher {
             Offer memory offer = getOffer(offerId);
 
             if (
+                // Check for blacklisted provider and others.
                 !deal.isProviderAllowed(offer.provider)
                 || pricePerWorkerEpoch < offer.minPricePerWorkerEpoch
                 || paymentToken != offer.paymentToken
@@ -115,6 +116,7 @@ abstract contract Matcher is Offer, IMatcher {
 
                 // Check if CU available.
                 if (
+                    // Blacklisted provider we filtered out above via: !deal.isProviderAllowed(offer.provider).
                     providersAccessType != IConfig.AccessType.WHITELIST
                         && (
                             computeUnit.deal != address(0) || peer.commitmentId == bytes32(0x000000000)

@@ -8,6 +8,7 @@ import {
   EffectorAdded,
   EffectorInfoRemoved, EffectorInfoSet,
   EffectorRemoved,
+  Initialized,
   MarketOfferRegistered,
   MinPricePerEpochUpdated,
   PaymentTokenUpdated,
@@ -35,6 +36,12 @@ import {
 } from "../../generated/schema";
 import { Deal as DealTemplate } from "../../generated/templates";
 import {AppCID, formatAddress, getEffectorCID, parseEffectors} from "./utils";
+
+export function handleInitialized(event: Initialized): void {
+  let graphNetwork = createOrLoadGraphNetwork();
+  graphNetwork.marketContractAddress = event.address.toHexString();
+  graphNetwork.save()
+}
 
 export function handleProviderInfoUpdated(event: ProviderInfoUpdated): void {
   const addr = formatAddress(event.params.provider);
@@ -91,7 +98,7 @@ export function handleMarketOfferRegistered(
   // Create Offer.
   const offer = new Offer(event.params.offerId.toHex());
   offer.provider = provider.id;
-  offer.paymentToken = createOrLoadToken(formatAddress(event.params.paymentToken)).id;
+  offer.paymentToken = createOrLoadToken(event.params.paymentToken).id;
   offer.pricePerEpoch = event.params.minPricePerWorkerEpoch;
   offer.createdAt = event.block.timestamp;
   offer.updatedAt = event.block.timestamp;
@@ -178,7 +185,7 @@ export function handleMinPricePerEpochUpdated(
 
 export function handlePaymentTokenUpdated(event: PaymentTokenUpdated): void {
   const offer = Offer.load(event.params.offerId.toHex()) as Offer;
-  offer.paymentToken = createOrLoadToken(formatAddress(event.params.paymentToken)).id;
+  offer.paymentToken = createOrLoadToken(event.params.paymentToken).id;
   offer.save();
 }
 

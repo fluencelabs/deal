@@ -139,7 +139,6 @@ export interface ComputeUnit {
   workerId: string | undefined;
 }
 
-
 export interface ComputeUnitWorkerDetail extends ComputeUnit {
   providerId: string;
   workerStatus: "registered" | "waitingRegistration";
@@ -246,11 +245,11 @@ export interface ProofByComputeUnit {
 // @param createdAtEpochStartBlockNumber: undefined when no transaction submitted for the epoch with proofs.
 export interface ProofStatsByCapacityCommitment {
   createdAtEpoch: number;
-  createdAtEpochBlockNumberStart: number | undefined
+  createdAtEpochBlockNumberStart: number | undefined;
   createdAtEpochBlockNumberEnd: number | undefined;
   computeUnitsExpected: number;
-  computeUnitsSuccess: number
-  computeUnitsFailed: number,
+  computeUnitsSuccess: number;
+  computeUnitsFailed: number;
   submittedProofs: number;
   submittedProofsPerCU: number;
 }
@@ -263,7 +262,8 @@ export interface ComputeUnitStatsPerCapacityCommitmentEpoch {
   computeUnitProofStatus: "success" | "failed";
 }
 
-export interface ComputeUnitStatsPerCapacityCommitmentEpochListView extends ListViewABC {
+export interface ComputeUnitStatsPerCapacityCommitmentEpochListView
+  extends ListViewABC {
   data: Array<ComputeUnitStatsPerCapacityCommitmentEpoch>;
 }
 

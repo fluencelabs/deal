@@ -48,11 +48,11 @@ start-local-chain: ## Start local chain
 	@make verify-command program=anvil
 	@anvil --host 0.0.0.0 --block-time $(LOCAL_CHAIN_BLOCK_MINING_INTERVAL) --state /data/state.db
 
-start-local-subgraph: ## Start local subgraph
+deploy-subgraph-%: ## Deploy subgraph to network {local, kras, dar, stage}
 	@make verify-command program=npm
-	@cd subgraph && npm run create:local && npm run deploy:local
+	@cd subgraph && npm run create:$* && npm run deploy:$*
 
-deploy-local: ## Deploy contracts to local
+deploy-contracts-local: ## Deploy contracts to local network
 	@make verify-command program=forge
 	@CONTRACTS_ENV_NAME=local forge script script/Deploy.s.sol --rpc-url local  \
 	--mnemonics "test test test test test test test test test test test junk" \
@@ -68,21 +68,21 @@ deploy-contracts-in-docker: ## Deploy contracts in docker
 
 	@echo "\033[0;32mSuccess! Contracts deployed to local chain.\033[0m"
 
-deploy-stage: ## Deploy to stage (IPC)
+deploy-contracts-stage: ## Deploy to stage (IPC)
 	@make verify-command program=forge
 	@CONTRACTS_ENV_NAME=stage forge script script/Deploy.s.sol --rpc-url stage \
 	--private-key $(PRIVATE_KEY) --broadcast --skip-simulation --slow
 
 	@echo "\033[0;32mSuccess! Contracts deployed to $* chain.\033[0m"
 
-deploy-dar: ## Deploy to dar (IPC)
+deploy-contracts-dar: ## Deploy to dar (IPC)
 	@make verify-command program=forge
 	@CONTRACTS_ENV_NAME=dar forge script script/Deploy.s.sol --rpc-url dar \
 	--private-key $(PRIVATE_KEY) --broadcast --skip-simulation --slow
 
 	@echo "\033[0;32mSuccess! Contracts deployed to $* chain.\033[0m"
 
-deploy-%: ## Deploy to ...
+deploy-contracts%: ## Deploy contracts to ...
 	@make verify-command program=forge
 	@CONTRACTS_ENV_NAME=$* forge script script/Deploy.s.sol --rpc-url $* \
 	--private-key $(PRIVATE_KEY) --broadcast
@@ -103,6 +103,13 @@ create-pure-market-%: ## Create market on for a stand...
 	--private-key $(PRIVATE_KEY) --broadcast
 
 	@echo "\033[0;32mSuccess! Pure market created on $* chain - check it out.\033[0m"
+
+#TODO
+deploy-subgraph-fork-%: ## Deploy subgraph to a fork [it uses local subgraph]
+	@make verify-command program=npm
+	@cd subgraph && npm run create:fork && npm run deploy:fork
+
+	@echo "\033[0;32mSuccess! Subgraph deployed to $* chain.\033[0m"
 
 help: ## List makefile targets
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) \

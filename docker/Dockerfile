@@ -93,7 +93,7 @@ COPY ./deployments /app/deploymens
 RUN cd subgraph && npm install && npm run compile && npm run import-config-networks
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["start-local-subgraph"]
+CMD ["deploy-subgraph-local"]
 
 # dev image used in dev.docker-compose.yaml
 FROM contracts as dev
