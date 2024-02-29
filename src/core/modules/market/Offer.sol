@@ -194,6 +194,8 @@ abstract contract Offer is BaseModule, IOffer {
     }
 
     function addComputeUnits(bytes32 peerId, bytes32[] calldata unitIds) external {
+        require(peerId != bytes32(0x00), "Peer id should be not empty");
+
         OfferStorage storage offerStorage = _getOfferStorage();
         ComputePeer storage computePeer = offerStorage.peers[peerId];
 
@@ -404,6 +406,7 @@ abstract contract Offer is BaseModule, IOffer {
         Offer storage offer = offerStorage.offers[offerId];
 
         require(computePeer.offerId == bytes32(0x00), "Peer already exists in another offer");
+        require(peer.peerId != bytes32(0x00), "Peer id should be not empty");
 
         computePeer.offerId = offerId;
         computePeer.owner = peer.owner;
@@ -428,6 +431,7 @@ abstract contract Offer is BaseModule, IOffer {
         for (uint256 i = 0; i < unitCount; i++) {
             bytes32 unitId = unitIds[i];
 
+            require(unitId != bytes32(0x00), "Unit id should be not empty");
             require(offerStorage.computeUnits[unitId].peerId == bytes32(0x00), "Compute unit already exists");
 
             // create compute unit
