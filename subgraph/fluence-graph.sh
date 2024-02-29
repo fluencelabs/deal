@@ -109,12 +109,13 @@ esac
 
 echo "Create unique subgraph name for the current state of contract deployments via git commit hash (ignore this suffix for local)..."
 case "$network" in
-  local)
+  local|stage|kras|dar)
     SUBGRAPH_NAME="${SUBGRAPH_NAME_PREFIX}"
     ;;
-  stage|kras|dar)
-    SUBGRAPH_NAME="${SUBGRAPH_NAME_PREFIX}-$(git rev-parse --short HEAD)"
-    ;;
+#  TODO: resolve: do we need versioning of subgraph or not finally.
+#  stage|kras|dar)
+#    SUBGRAPH_NAME="${SUBGRAPH_NAME_PREFIX}-$(git rev-parse --short HEAD)"
+#    ;;
 esac
 
 case "$action" in
