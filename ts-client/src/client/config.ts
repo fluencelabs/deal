@@ -44,7 +44,14 @@ export const getDeployment = async (env: ContractsENV) => {
 
   //TODO: add verification of deployment object (JSON schema)
 
-  const contracts = ["Core", "DealFactory", "Market", "Capacity", "tUSD", "Multicall3"];
+  const contracts = [
+    "Core",
+    "DealFactory",
+    "Market",
+    "Capacity",
+    "tUSD",
+    "Multicall3",
+  ];
 
   for (const contract of contracts) {
     if (deployment[contract] === undefined) {

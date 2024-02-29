@@ -169,7 +169,11 @@ export class DealExplorerClient {
 
     // Init constants from indexer.
     // TODO: add cache.
-    if (this._coreEpochDuration == null || this._coreInitTimestamp == null || this._capacityMinRequiredProofsPerEpoch == null) {
+    if (
+      this._coreEpochDuration == null ||
+      this._coreInitTimestamp == null ||
+      this._capacityMinRequiredProofsPerEpoch == null
+    ) {
       console.info("Fetch contract constants from indexer.");
       const data = await this._indexerClient.getContractConstants();
       if (
@@ -182,7 +186,9 @@ export class DealExplorerClient {
       }
       this._coreInitTimestamp = Number(data.graphNetworks[0].initTimestamp);
       this._coreEpochDuration = Number(data.graphNetworks[0].coreEpochDuration);
-      this._capacityMinRequiredProofsPerEpoch = Number(data.graphNetworks[0].minRequiredProofsPerEpoch);
+      this._capacityMinRequiredProofsPerEpoch = Number(
+        data.graphNetworks[0].minRequiredProofsPerEpoch,
+      );
     }
   }
 
@@ -593,22 +599,22 @@ export class DealExplorerClient {
       orderType,
     });
 
-    let res: Array<ComputeUnitWorkerDetail> = []
+    let res: Array<ComputeUnitWorkerDetail> = [];
     for (const computeUnit of data.computeUnits) {
-      res.push(
-        {
-          id: computeUnit.id,
-          providerId: computeUnit.peer.provider.id,
-          workerId: computeUnit.workerId ?? undefined,
-          workerStatus: computeUnit.workerId ? "registered" : "waitingRegistration",
-        }
-      )
+      res.push({
+        id: computeUnit.id,
+        providerId: computeUnit.peer.provider.id,
+        workerId: computeUnit.workerId ?? undefined,
+        workerStatus: computeUnit.workerId
+          ? "registered"
+          : "waitingRegistration",
+      });
     }
 
     return {
       total: null,
       data: res,
-    }
+    };
   }
 
   // @notice [Figma] Deal.
@@ -868,7 +874,7 @@ export class DealExplorerClient {
       capacityCommitmentRpcDetails.unlockedRewards,
       capacityCommitmentRpcDetails.totalRewards,
       capacityCommitment.rewardWithdrawn,
-    )
+    );
   }
 
   // @notice [Figma] Peer ID.
@@ -1125,20 +1131,22 @@ export class DealExplorerClient {
 
     // TODO: generate table with missed epoches as well (there might be filtration by epoches,
     //  thus, logic could be complicated, resolve after discussion with PM.
-    let res: Array<ProofStatsByCapacityCommitment> = []
-    for (const proofStats of data.capacityCommitmentStatsPerEpoches)  {
-      res.push(
-        {
-          createdAtEpoch: Number(proofStats.epoch),
-          createdAtEpochBlockNumberStart: Number(proofStats.blockNumberStart),
-          createdAtEpochBlockNumberEnd: Number(proofStats.blockNumberEnd),
-          computeUnitsExpected: proofStats.activeUnitCount,
-          submittedProofs: proofStats.submittedProofsCount,
-          computeUnitsFailed: proofStats.activeUnitCount - proofStats.computeUnitsWithMinRequiredProofsSubmittedCounter,
-          computeUnitsSuccess: proofStats.computeUnitsWithMinRequiredProofsSubmittedCounter,
-          submittedProofsPerCU: proofStats.submittedProofsCount / proofStats.activeUnitCount,
-        }
-      )
+    let res: Array<ProofStatsByCapacityCommitment> = [];
+    for (const proofStats of data.capacityCommitmentStatsPerEpoches) {
+      res.push({
+        createdAtEpoch: Number(proofStats.epoch),
+        createdAtEpochBlockNumberStart: Number(proofStats.blockNumberStart),
+        createdAtEpochBlockNumberEnd: Number(proofStats.blockNumberEnd),
+        computeUnitsExpected: proofStats.activeUnitCount,
+        submittedProofs: proofStats.submittedProofsCount,
+        computeUnitsFailed:
+          proofStats.activeUnitCount -
+          proofStats.computeUnitsWithMinRequiredProofsSubmittedCounter,
+        computeUnitsSuccess:
+          proofStats.computeUnitsWithMinRequiredProofsSubmittedCounter,
+        submittedProofsPerCU:
+          proofStats.submittedProofsCount / proofStats.activeUnitCount,
+      });
     }
 
     return {
@@ -1158,75 +1166,81 @@ export class DealExplorerClient {
     orderBy: ComputeUnitStatsPerCapacityCommitmentEpochOrderBy = "id",
     orderType: OrderType = DEFAULT_ORDER_TYPE,
   ): Promise<ComputeUnitStatsPerCapacityCommitmentEpochListView> {
-    await this._init()
+    await this._init();
     // Get all CU linked to CC.
-    const capacityCommitmentFetched = await this._indexerClient.getCapacityCommitment({
-      id: capacityCommitmentId
-    })
+    const capacityCommitmentFetched =
+      await this._indexerClient.getCapacityCommitment({
+        id: capacityCommitmentId,
+      });
     if (!capacityCommitmentFetched.capacityCommitment) {
-      throw new Error(`Capacity commitment with id ${capacityCommitmentId} not found.`)
+      throw new Error(
+        `Capacity commitment with id ${capacityCommitmentId} not found.`,
+      );
     }
 
     // Get stats for all Compute Units of the CC for the epoch.
-    const computeUnitPerEpochStatsFetched = await this._indexerClient.getComputeUnitPerEpochStats({
-      filters: {
-        capacityCommitment_: { id: capacityCommitmentId },
-        epoch: epoch.toString(),
-      },
-      offset,
-      limit,
-      orderBy,
-      orderType,
-    })
+    const computeUnitPerEpochStatsFetched =
+      await this._indexerClient.getComputeUnitPerEpochStats({
+        filters: {
+          capacityCommitment_: { id: capacityCommitmentId },
+          epoch: epoch.toString(),
+        },
+        offset,
+        limit,
+        orderBy,
+        orderType,
+      });
 
     // Extract desirable stats for compute unit if stats have been stored for the CUs.
     // Also extract info if CU in Deal.
-    let computeUnitToSubmittedProofsPerEpoch: Record<string, number> = {}
+    let computeUnitToSubmittedProofsPerEpoch: Record<string, number> = {};
     computeUnitPerEpochStatsFetched.computeUnitPerEpochStats.map((stats) => {
-      computeUnitToSubmittedProofsPerEpoch[stats.computeUnit.id] = stats.submittedProofsCount
-    })
-    let allCUsOfCC: Array<string> = []
-    let computeUnitsInDeal = new Set()
-    const capacityCommitmentComputeUnits = capacityCommitmentFetched.capacityCommitment.computeUnits ?? []
+      computeUnitToSubmittedProofsPerEpoch[stats.computeUnit.id] =
+        stats.submittedProofsCount;
+    });
+    let allCUsOfCC: Array<string> = [];
+    let computeUnitsInDeal = new Set();
+    const capacityCommitmentComputeUnits =
+      capacityCommitmentFetched.capacityCommitment.computeUnits ?? [];
     for (const capacityCommitmentToComputeUnit of capacityCommitmentComputeUnits) {
-      const _computeUnit = capacityCommitmentToComputeUnit.computeUnit
-      allCUsOfCC.push(_computeUnit.id)
+      const _computeUnit = capacityCommitmentToComputeUnit.computeUnit;
+      allCUsOfCC.push(_computeUnit.id);
       if (_computeUnit.deal && _computeUnit.deal.id) {
-        computeUnitsInDeal.add(_computeUnit.id)
+        computeUnitsInDeal.add(_computeUnit.id);
       }
     }
 
     // Merge queries to serialize data.
-    let res: Array<ComputeUnitStatsPerCapacityCommitmentEpoch> = []
+    let res: Array<ComputeUnitStatsPerCapacityCommitmentEpoch> = [];
     for (const computeUnitId of allCUsOfCC) {
-      let submittedProofs = 0
+      let submittedProofs = 0;
       if (computeUnitId in computeUnitToSubmittedProofsPerEpoch) {
-        submittedProofs = Number(computeUnitToSubmittedProofsPerEpoch[computeUnitId])
+        submittedProofs = Number(
+          computeUnitToSubmittedProofsPerEpoch[computeUnitId],
+        );
       }
-      let computeUnitProofStatus: 'failed' | 'success' = 'failed'
+      let computeUnitProofStatus: "failed" | "success" = "failed";
       if (submittedProofs >= this._capacityMinRequiredProofsPerEpoch!) {
-        computeUnitProofStatus = 'success'
+        computeUnitProofStatus = "success";
       } else if (computeUnitId in computeUnitsInDeal) {
         // Compute unit is not failed if it is not in deal right now.
-        computeUnitProofStatus = 'success'
+        computeUnitProofStatus = "success";
       } else {
-        computeUnitProofStatus = 'failed'
+        computeUnitProofStatus = "failed";
       }
 
-      res.push(
-        {
-            capacityCommitmentId: capacityCommitmentId,
-            computeUnitId: computeUnitId,
-            submittedProofs,
-            computeUnitProofStatus,
-        }
-      )
+      res.push({
+        capacityCommitmentId: capacityCommitmentId,
+        computeUnitId: computeUnitId,
+        submittedProofs,
+        computeUnitProofStatus,
+      });
     }
 
     return {
       total: null,
-      data: res
-    }
+      data: res,
+    };
   }
 }
 
