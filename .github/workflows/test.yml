@@ -81,9 +81,26 @@ jobs:
     name: "Integration tests"
     runs-on: ubuntu-latest
     steps:
-      - name: Run docker network
-        run: docker compose up -d
-        working-directory: .github
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Run Forge build
+        run: |
+          forge --version
+          forge build --sizes
 
       - name: Install deps in ts-client package
         run: npm run i
@@ -101,6 +118,10 @@ jobs:
       - name: Install packed ts-client
         run: npm i ${{ steps.pack-ts-client.outputs.TS_CLIENT_ARCHIVE }}
         working-directory: integration-tests
+
+      - name: Run docker network
+        run: docker compose up -d
+        working-directory: .github
 
       - name: Run integration tests
         run: npm run test deal.test
