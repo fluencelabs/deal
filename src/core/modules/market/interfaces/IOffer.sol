@@ -74,7 +74,9 @@ interface IOffer {
         bytes32 offerId,
         uint256 minPricePerWorkerEpoch,
         address paymentToken,
-        CIDV1[] effectors
+        CIDV1[] effectors,
+        uint256 minProtocolVersion,
+        uint256 maxProtocolVersion
     );
 
     /// @dev Emitted when a peer created for an offer
@@ -180,7 +182,9 @@ interface IOffer {
         uint256 minPricePerWorkerEpoch,
         address paymentToken,
         CIDV1[] calldata effectors,
-        RegisterComputePeer[] calldata peers
+        RegisterComputePeer[] calldata peers,
+        uint256 minProtocolVersion,
+        uint256 maxProtocolVersion
     ) external returns (bytes32);
 
     /// @dev Remove an offer

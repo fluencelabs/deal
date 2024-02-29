@@ -78,7 +78,14 @@ contract CreateMarket is Depoyments, Script {
                 peers[j] = IOffer.RegisterComputePeer({peerId: peerId, unitIds: unitIds[i][j], owner: address(this)});
             }
 
-            offerIds[i] = market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, peers);
+            offerIds[i] = market.registerMarketOffer(
+                minPricePerWorkerEpoch,
+                paymentToken,
+                effectors,
+                peers,
+                core.minProtocolVersion(),
+                core.maxProtocolVersion()
+            );
 
             console.log("Register with offerId...");
             console.logBytes32(offerIds[i]);

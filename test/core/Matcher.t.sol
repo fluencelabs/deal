@@ -31,7 +31,9 @@ contract MatcherTest is Test {
         uint256 unitCountPerPeer,
         CIDV1[] memory effectors,
         address paymentToken,
-        uint256 minPricePerWorkerEpoch
+        uint256 minPricePerWorkerEpoch,
+        uint256 minProtocolVersion,
+        uint256 maxProtocolVersion
     ) internal returns (bytes32[] memory offerIds, bytes32[][] memory peerIds, bytes32[][][] memory unitIds) {
         offerIds = new bytes32[](offerCount);
         peerIds = new bytes32[][](offerCount);
@@ -55,7 +57,14 @@ contract MatcherTest is Test {
             }
 
             deployment.market.setProviderInfo("test", CIDV1({prefixes: 0x12345678, hash: bytes32(0x00)}));
-            offerIds[i] = deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, peers);
+            offerIds[i] = deployment.market.registerMarketOffer(
+                minPricePerWorkerEpoch,
+                paymentToken,
+                effectors,
+                peers,
+                minProtocolVersion,
+                maxProtocolVersion
+            );
 
             uint256 amount;
             bytes32[] memory commitmentIds = new bytes32[](peerCountPerOffer);
@@ -94,6 +103,8 @@ contract MatcherTest is Test {
         uint256 minWorkers = 1;
         uint256 maxWorkersPerProvider = unitCountPerPeer * peerCountPerOffer * offerCount;
         uint256 protocolVersion = DeployDealSystem.DEFAULT_MIN_PROTOCOL_VERSION;
+        uint256 minProtocolVersion = DeployDealSystem.DEFAULT_MIN_PROTOCOL_VERSION;
+        uint256 maxProtocolVersion = DeployDealSystem.DEFAULT_MAX_PROTOCOL_VERSION;
 
         // Total workers: offerCount * unitCountPerPeer * peerCountPerOffer. Thus, we have CU in excess.
         uint256 targetWorkers = offerCount * peerCountPerOffer * 1;
@@ -112,7 +123,14 @@ contract MatcherTest is Test {
         );
 
         (bytes32[] memory offerIds, bytes32[][] memory peerIds, bytes32[][][] memory unitIds) = _registerOffersAndCC(
-            offerCount, peerCountPerOffer, unitCountPerPeer, effectors, paymentToken, pricePerWorkerEpoch
+            offerCount,
+            peerCountPerOffer,
+            unitCountPerPeer,
+            effectors,
+            paymentToken,
+            pricePerWorkerEpoch,
+            minProtocolVersion,
+            maxProtocolVersion
         );
 
         StdCheats.skip(uint256(deployment.core.epochDuration()));

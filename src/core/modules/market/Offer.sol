@@ -116,7 +116,9 @@ abstract contract Offer is BaseModule, IOffer {
         uint256 minPricePerWorkerEpoch,
         address paymentToken,
         CIDV1[] calldata effectors,
-        RegisterComputePeer[] calldata peers
+        RegisterComputePeer[] calldata peers,
+        uint256 minProtocolVersion,
+        uint256 maxProtocolVersion
     ) external returns (bytes32) {
         OfferStorage storage offerStorage = _getOfferStorage();
 
@@ -127,6 +129,12 @@ abstract contract Offer is BaseModule, IOffer {
         require(offerStorage.offers[offerId].paymentToken == address(0x00), "Offer already exists");
         require(minPricePerWorkerEpoch > 0, "Min price per epoch should be greater than 0");
         require(address(paymentToken) != address(0x00), "Payment token should be not zero address");
+        require(
+            minProtocolVersion >= core.minProtocolVersion()
+            && maxProtocolVersion <= core.maxProtocolVersion(),
+            "Protocol verions out of bounds"
+        );
+        require(minProtocolVersion <= maxProtocolVersion, "Wrong protocol versions");
 
         // create market offer
         offerStorage.offers[offerId] = Offer({
@@ -134,8 +142,8 @@ abstract contract Offer is BaseModule, IOffer {
             minPricePerWorkerEpoch: minPricePerWorkerEpoch,
             paymentToken: paymentToken,
             peerCount: 0,
-            minProtocolVersion: core.minProtocolVersion(),
-            maxProtocolVersion: core.maxProtocolVersion()
+            minProtocolVersion: minProtocolVersion,
+            maxProtocolVersion: maxProtocolVersion
         });
 
         // add effectors to offer
@@ -144,7 +152,15 @@ abstract contract Offer is BaseModule, IOffer {
             offerStorage.effectorsByOfferId[offerId].hasEffector[effector] = true;
         }
 
-        emit MarketOfferRegistered(provider, offerId, minPricePerWorkerEpoch, paymentToken, effectors);
+        emit MarketOfferRegistered(
+            provider,
+            offerId,
+            minPricePerWorkerEpoch,
+            paymentToken,
+            effectors,
+            minProtocolVersion,
+            maxProtocolVersion
+        );
 
         uint256 peerLength = peers.length;
         for (uint256 i = 0; i < peerLength; i++) {
