@@ -12,8 +12,9 @@ import {
   CapacityCommitmentStatsPerEpoch,
   ComputeUnitPerEpochStat,
 } from "../generated/schema";
-import { BigInt, Bytes } from "@graphprotocol/graph-ts";
+import {Address, BigInt, Bytes} from "@graphprotocol/graph-ts";
 import { getTokenDecimals, getTokenSymbol } from "./contracts";
+import {formatAddress} from "./mappings/utils";
 
 export const ZERO_BIG_INT = BigInt.fromI32(0);
 export const UNO_BIG_INT = BigInt.fromI32(1);
@@ -42,12 +43,13 @@ export function createOrLoadUnregisteredProvider(providerAddress: string): Provi
   return entity as Provider;
 }
 
-export function createOrLoadToken(tokenAddress: string): Token {
-  let entity = Token.load(tokenAddress);
+export function createOrLoadToken(tokenAddress: Address): Token {
+  const formattedAddress = formatAddress(tokenAddress)
+  let entity = Token.load(formattedAddress);
 
   if (entity == null) {
-    entity = new Token(tokenAddress);
-    const tokenAddressBytes = Bytes.fromHexString(tokenAddress);
+    entity = new Token(formattedAddress);
+    const tokenAddressBytes = Bytes.fromHexString(formattedAddress);
     entity.symbol = getTokenSymbol(tokenAddressBytes);
     entity.decimals = getTokenDecimals(tokenAddressBytes);
     entity.save();
