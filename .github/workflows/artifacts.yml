@@ -307,6 +307,9 @@ jobs:
     needs:
       - chain-rpc
       - subgraph
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - name: Import secrets
         uses: hashicorp/vault-action@v2.4.3

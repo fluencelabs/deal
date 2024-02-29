@@ -80,9 +80,12 @@ jobs:
   integration-tests:
     name: "Integration tests"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.4.3
+        uses: hashicorp/vault-action@v3.0.0
         with:
           url: https://vault.fluence.dev
           path: jwt/github
@@ -90,6 +93,7 @@ jobs:
           method: jwt
           jwtGithubAudience: "https://github.com/fluencelabs"
           jwtTtl: 300
+          exportToken: false
           secrets: |
             kv/docker-registry/basicauth/ci username | DOCKER_USERNAME ;
             kv/docker-registry/basicauth/ci password | DOCKER_PASSWORD
