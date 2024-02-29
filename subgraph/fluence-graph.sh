@@ -1,6 +1,8 @@
 #! /usr/bin/env bash
 
+# Note, only for local it uses prefix as full name to deploy subgraph.
 SUBGRAPH_NAME_PREFIX="fluence-deal-contracts"
+# Directory with saved deployments. It will append rows with other deployments.
 SUBGRAPH_DEPLOYMENTS_DIR="deployments"
 
 help() {
