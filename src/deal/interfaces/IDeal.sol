@@ -84,4 +84,7 @@ interface IDeal is IConfig, IWorkerManager {
 
     /// @dev Set worker ID for a compute unit. Compute unit can have only one worker ID
     function setWorker(bytes32 computeUnitId, bytes32 workerId) external;
+
+    /// @dev Stop the deal
+    function stop() external;
 }

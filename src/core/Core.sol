@@ -6,7 +6,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "src/deal/Deal.sol";
 import "src/core/modules/capacity/interfaces/ICapacity.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
-
+import "src/core/modules/market/interfaces/IDealFactory.sol";
 import "./GlobalConst.sol";
 import "./interfaces/ICore.sol";
 
@@ -18,6 +18,7 @@ contract Core is UUPSUpgradeable, GlobalConst, ICore {
         ICapacity capacity;
         IMarket market;
         IDeal dealImpl;
+        IDealFactory dealFactory;
     }
 
     function _getCoreStorage() private pure returns (CoreStorage storage s) {
@@ -51,15 +52,21 @@ contract Core is UUPSUpgradeable, GlobalConst, ICore {
         emit DealImplSet(dealImpl_);
     }
 
-    function initializeModules(ICapacity capacity_, IMarket market_) external onlyOwner {
+    function initializeModules(
+        ICapacity capacity_,
+        IMarket market_,
+        IDealFactory dealFactory_
+    ) external onlyOwner {
         CoreStorage storage coreStorage = _getCoreStorage();
 
-        require(address(coreStorage.capacity) == address(0), "Core: capacity and market already initialized");
+        require(address(coreStorage.capacity) == address(0), "Core: modules already initialized");
         require(address(capacity_) != address(0), "Core: capacity is zero address");
         require(address(market_) != address(0), "Core: market is zero address");
+        require(address(dealFactory_) != address(0), "Core: deal factory is zero address");
 
         coreStorage.capacity = capacity_;
         coreStorage.market = market_;
+        coreStorage.dealFactory = dealFactory_;
     }
 
     // ------------------ External View Functions ------------------
@@ -69,6 +76,10 @@ contract Core is UUPSUpgradeable, GlobalConst, ICore {
 
     function market() external view returns (IMarket) {
         return _getCoreStorage().market;
+    }
+
+    function dealFactory() external view returns (IDealFactory) {
+        return _getCoreStorage().dealFactory;
     }
 
     function dealImpl() external view returns (IDeal) {

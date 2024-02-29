@@ -60,12 +60,14 @@ contract CoreTest is Test {
         // initialized in DeployDealSystem, lets's check it
         assertNotEq(address(deployment.core.capacity()), address(0), "Capacity not initialized in Core");
         assertNotEq(address(deployment.core.market()), address(0), "Market not initialized in Core");
+        assertNotEq(address(deployment.core.dealFactory()), address(0), "DealFactory not initialized in Core");
 
         // and try again - shall fail
-        vm.expectRevert("Core: capacity and market already initialized");
+        vm.expectRevert("Core: modules already initialized");
         deployment.core.initializeModules(
             ICapacity(address(111)),
-            IMarket(address(222))
+            IMarket(address(222)),
+            IDealFactory(address(333))
         );
     }
 

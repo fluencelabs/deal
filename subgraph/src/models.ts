@@ -13,10 +13,11 @@ import {
   ComputeUnitPerEpochStat,
 } from "../generated/schema";
 import { BigInt, Bytes } from "@graphprotocol/graph-ts";
-import {getTokenDecimals, getTokenSymbol} from "./contracts";
+import { getTokenDecimals, getTokenSymbol } from "./contracts";
 
 export const ZERO_BIG_INT = BigInt.fromI32(0);
 export const UNO_BIG_INT = BigInt.fromI32(1);
+export const MAX_UINT_256 = BigInt.fromString("115792089237316195423570985008687907853269984665640564039457584007913129639935");
 
 export const UNKNOWN_EFFECTOR_DESCRIPTION = "Unknown";
 export const UNREGISTERED_PROVIDER_NAME = "Unregistered";

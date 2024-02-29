@@ -192,6 +192,11 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         ComputeUnitPaymentInfo storage computeUnitPaymentInfo = dealStorage.cUnitPaymentInfo[computeUnitId];
 
         uint256 prevEpoch = _globalCore().currentEpoch() - 1;
+
+        if (prevEpoch < computeUnitPaymentInfo.startedEpoch) {
+            return 0;
+        }
+
         uint256 workerCount = getWorkerCount();
         uint256 pricePerWorkerEpoch_ = pricePerWorkerEpoch();
 
@@ -289,6 +294,11 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         DealStorage storage dealStorage = _getDealStorage();
         ComputeUnitPaymentInfo storage computeUnitPaymentInfo = dealStorage.cUnitPaymentInfo[computeUnitId];
 
+        uint256 prevEpoch = _globalCore().currentEpoch() - 1;
+        if (prevEpoch < computeUnitPaymentInfo.startedEpoch) {
+            return;
+        }
+
         ComputeUnit memory unit = getComputeUnit(computeUnitId);
         IMarket market = _globalCore().market();
         IMarket.ComputePeer memory marketPeer = market.getComputePeer(unit.peerId);
@@ -298,7 +308,6 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
             marketPeer.owner == msg.sender || marketOffer.provider == msg.sender, "Only provider or owner can withdraw"
         );
 
-        uint256 prevEpoch = _globalCore().currentEpoch() - 1;
         uint256 workerCount = getWorkerCount();
         uint256 pricePerWorkerEpoch_ = pricePerWorkerEpoch();
 

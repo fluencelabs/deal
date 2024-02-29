@@ -190,6 +190,7 @@ describe("#getMatchedOffersByDealId", () => {
 
       console.log("---- Deal Creation ----");
       const marketContract = await contractsClient.getMarket();
+      const dealFactoryContract = await contractsClient.getDealFactory();
       const marketAddress = await marketContract.getAddress();
 
       const coreContract = await contractsClient.getCore();
@@ -224,9 +225,9 @@ describe("#getMatchedOffersByDealId", () => {
       await paymentToken.approve(marketAddress, toApproveFromDeployer);
 
       console.info("Create deal that match default offer...");
-      const filter = marketContract.filters.DealCreated;
+      const filter = dealFactoryContract.filters.DealCreated;
       const lastDealsCreatedBefore = await marketContract.queryFilter(filter);
-      const deployDealTx = await marketContract.deployDeal(
+      const deployDealTx = await dealFactoryContract.deployDeal(
         {
           prefixes: "0x12345678",
           hash: ethers.encodeBytes32String(`appCID:${timestamp}`),

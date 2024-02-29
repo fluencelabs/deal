@@ -310,8 +310,9 @@ abstract contract Offer is BaseModule, IOffer {
         Offer storage offer = offerStorage.offers[offerId];
 
         require(
-            OwnableUpgradableDiamond(address(deal)).owner() == msg.sender || offer.provider == msg.sender,
-            "Only deal or offer owner can remove compute unit from deal"
+            OwnableUpgradableDiamond(address(deal)).owner() == msg.sender || offer.provider == msg.sender
+                || computePeer.owner == msg.sender,
+            "Only deal owner, peer owner and provider can remove compute unit from deal"
         );
 
         computeUnit.deal = address(0x00);

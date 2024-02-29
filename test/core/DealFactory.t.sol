@@ -9,69 +9,15 @@ import "src/core/Core.sol";
 import "src/deal/Deal.sol";
 import "src/deal/interfaces/IConfig.sol";
 import "test/utils/DeployDealSystem.sol";
+import "test/utils/DealHelper.sol";
 import "test/utils/TestHelper.sol";
 
 contract DealFactoryTest is Test {
     using SafeERC20 for IERC20;
-
-    // ------------------ Types ------------------
-    struct DealParams {
-        CIDV1 appCID;
-        IERC20 paymentToken;
-        uint256 minWorkers;
-        uint256 targetWorkers;
-        uint256 maxWorkersPerProvider;
-        uint256 pricePerWorkerEpoch;
-        CIDV1[] effectors;
-    }
+    using DealHelper for DeployDealSystem.Deployment;
 
     // ------------------ Variables ------------------
     DeployDealSystem.Deployment deployment;
-
-    // ------------------ Internal ------------------
-    function _deployDeal(uint256 pricePerWorkerEpoch, uint256 targetWorkers, uint256 protocolVersion)
-        internal
-        returns (IDeal, DealParams memory)
-    {
-        CIDV1[] memory effectors = new CIDV1[](10);
-        for (uint256 i = 0; i < 10; i++) {
-            effectors[i] = CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("effector", i))});
-        }
-
-        CIDV1 memory appCID = CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("appCID", 0))});
-
-        uint256 minWorkers = 1;
-        uint256 maxWorkersPerProvider = 1;
-        IERC20 paymentToken = IERC20(address(deployment.tUSD));
-
-        IDeal deal = deployment.market.deployDeal(
-            appCID,
-            paymentToken,
-            minWorkers,
-            targetWorkers,
-            maxWorkersPerProvider,
-            pricePerWorkerEpoch,
-            effectors,
-            IConfig.AccessType.NONE,
-            new address[](0),
-            protocolVersion
-        );
-
-        console.log("Deal deployed");
-
-        return (
-            deal,
-            DealParams({
-                appCID: appCID,
-                paymentToken: paymentToken,
-                minWorkers: minWorkers,
-                targetWorkers: targetWorkers,
-                maxWorkersPerProvider: maxWorkersPerProvider,
-                pricePerWorkerEpoch: pricePerWorkerEpoch,
-                effectors: effectors
-            })
-        );
-    }
 
     // ------------------ Test ------------------
     function setUp() public {
@@ -85,9 +31,10 @@ contract DealFactoryTest is Test {
 
         uint256 balanceBefore = deployment.tUSD.balanceOf(address(this));
 
-        deployment.tUSD.safeApprove(address(deployment.market), minAmount);
+        deployment.tUSD.safeApprove(address(deployment.dealFactory), minAmount);
         uint256 protocolVersion = deployment.core.minProtocolVersion();
-        (IDeal d, DealParams memory dealParams) = _deployDeal(pricePerWorkerEpoch, targetWorkers, protocolVersion);
+        (IDeal d, DealHelper.DealParams memory dealParams) =
+            deployment.deployDeal(1, 2, targetWorkers, pricePerWorkerEpoch, minAmount, protocolVersion);
 
         uint256 balanceDiff = balanceBefore - deployment.tUSD.balanceOf(address(this));
 
@@ -107,7 +54,7 @@ contract DealFactoryTest is Test {
             assertEq(dealParams.effectors[i].hash, d.effectors()[i].hash, "Should set effector (hash)");
         }
 
-        assertEq(deployment.market.hasDeal(d), true, "Should deal set in Core");
+        assertEq(deployment.dealFactory.hasDeal(d), true, "Should deal set in Core");
 
         //TODO: Check events
     }
@@ -115,10 +62,11 @@ contract DealFactoryTest is Test {
     function test_RevertIf_NoTokenAllowance() public {
         uint256 pricePerWorkerEpoch = 1 ether;
         uint256 targetWorkers = 3;
+        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.core.minDealDepositedEpoches();
         uint256 protocolVersion = deployment.core.minProtocolVersion();
 
         vm.expectRevert("ERC20: insufficient allowance");
-        _deployDeal(pricePerWorkerEpoch, targetWorkers, protocolVersion);
+        deployment.deployDeal(1, 2, targetWorkers, pricePerWorkerEpoch, minAmount, protocolVersion);
     }
 
     function test_RevertIf_NoEnoughBalance() public {
@@ -128,11 +76,11 @@ contract DealFactoryTest is Test {
 
         vm.startPrank(address(0x01));
 
-        deployment.tUSD.safeApprove(address(deployment.market), minAmount * 100);
+        deployment.tUSD.safeApprove(address(deployment.dealFactory), minAmount * 100);
         uint256 protocolVersion = deployment.core.minProtocolVersion();
 
         vm.expectRevert("ERC20: transfer amount exceeds balance");
-        _deployDeal(pricePerWorkerEpoch, targetWorkers, protocolVersion);
+        deployment.deployDeal(1, 2, targetWorkers, pricePerWorkerEpoch, minAmount, protocolVersion);
 
         vm.stopPrank();
     }
