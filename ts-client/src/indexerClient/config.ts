@@ -17,7 +17,7 @@ export const getIndexerUrl = (env: ContractsENV) => {
       break;
     case "stage":
       indexerUrl =
-        "https://graph-node-stage.fluence.dev/subgraphs/name/fluence-deal-contracts-c7009d34";
+        "https://graph-node-stage.fluence.dev/subgraphs/name/fluence-deal-contracts-1bba6637";
       break;
     case "local":
       indexerUrl =
