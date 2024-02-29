@@ -1,5 +1,20 @@
 # Subgraph
 
+- [Project Structure](#project-structure)
+- [Develop](#develop)
+- [Debug Note](#debug-note)
+  - [How to check if error resolved on pre-prod stand?](#how-to-check-if-error-resolved-on-pre-prod-stand)
+  - [Setup Environment for Local Subgraph](#setup-environment-for-local-subgraph)
+  - [Dev in Subgraph Repo](#dev-in-subgraph-repo)
+  - [Query through GUI](#query-through-gui)
+  - [Tricks & Tips](#tricks--tips)
+- [Deploy](#deploy)
+  - [Fluence Stands Versioning](#fluence-stands-versioning)
+  - [To Localhost](#to-localhost)
+  - [To TheGraph Studio [not for subnets]](#to-thegraph-studio-not-for-subnets)
+  - [To Hosted Service [not for subnets]](#to-hosted-service-not-for-subnets)
+- [TODO](#todo)
+
 # Project Structure
 
 - `docker-compose.yaml` - instruction for Docker containers to create local dev environment with **local graph node** connected to **local hardhat node** (for instruction how to use - check [#Develop](#Develop) section below).
@@ -41,7 +56,10 @@ cd subgraph && docker-compose up
 ```
 
 ## Dev in Subgraph Repo
-How to run install package and build artifacts flow is below.
+On all steps you could press `npm run compile` to check if everything correct
+- add event handler into subgraph.yaml and event signatures
+- add types into schema.graphql
+- add handler into mappings/<contractName>.ts
 
 0. Ensure you use preferred contract version according to the [subgraph.yaml](subgraph.yaml) 
 
@@ -83,13 +101,24 @@ E.g. the graph query to insert in http://localhost:8000/subgraphs/name/<YourCont
 ## Tricks & Tips
 If you updated contract and want to push this update to the subgraph, I could recommend 1 fully features command:
 
-but first: you should deploy on localhost your updated contract, e.g. `npx hardhat deploy --network localhost`
+> but remember that first off all you ought to build those contract with solc compiller (check README of the root of the project).
 
 ```bash
 npm run compile && npm run create:local && npm run deploy:local
 ```
 
 # Deploy 
+
+## Fluence Stands Versioning
+Logic is inside [fluence-graph.sh](fluence-graph.sh) and it is used in package.json and accessed via makefile commands finally as well. Generally, the deploy flow is the next:
+
+1. It creates subgraph for fluence network (stage, dar, etc) via `npm run create:stage` with subgraph named like `fluence-deal-contracts-<commit hash>` (for local hash commit is ignored).
+   - it creates log of created subgraph inside [deployments](deployments) dir to not forget to remove then outdated subgraphs.
+2. It deploys actual code to index contracts according to [configs](configs) and uses [subgraph.yaml](subgraph.yaml) as template (uses addresses and block number from config). 
+
+TODO: make flow better and use template actually instead.
+TODO: move this flow into CI/CD process.
+
 
 ## To Localhost
 Check `## Dev in Subgraph Repo` section.
