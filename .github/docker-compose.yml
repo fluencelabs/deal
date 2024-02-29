@@ -41,7 +41,7 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
   chain-rpc:
-    image: fluencelabs/chain-rpc:0.6.6
+    image: ${CHAIN_RPC_IMAGE}
     ports:
       - 8545:8545
     healthcheck:
@@ -53,7 +53,7 @@ services:
       timeout: 10s
       retries: 20
   chain-deploy-script:
-    image: fluencelabs/chain-deploy-script:0.6.6
+    image: ${CHAIN_DEPLOY_SCRIPT_IMAGE}
     environment:
       CHAIN_RPC_URL: http://chain-rpc:8545
       MAX_FAILED_RATIO: "9999"
@@ -87,7 +87,7 @@ services:
       ETHEREUM_REORG_THRESHOLD: 1
       ETHEREUM_ANCESTOR_COUNT: 1
   subgraph-deploy-script:
-    image: fluencelabs/subgraph-deploy-script:0.6.6
+    image: ${SUBGRAPH_DEPLOY_SCRIPT_IMAGE}
     environment:
       GRAPHNODE_URL: http://graph-node:8020
       IPFS_URL: http://ipfs:5001

@@ -81,6 +81,26 @@ jobs:
     name: "Integration tests"
     runs-on: ubuntu-latest
     steps:
+      - name: Import secrets
+        uses: hashicorp/vault-action@v2.4.3
+        with:
+          url: https://vault.fluence.dev
+          path: jwt/github
+          role: ci
+          method: jwt
+          jwtGithubAudience: "https://github.com/fluencelabs"
+          jwtTtl: 300
+          secrets: |
+            kv/docker-registry/basicauth/ci username | DOCKER_USERNAME ;
+            kv/docker-registry/basicauth/ci password | DOCKER_PASSWORD
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          registry: docker.fluence.dev
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -122,6 +142,10 @@ jobs:
       - name: Run docker network
         run: docker compose up -d
         working-directory: .github
+        env:
+          CHAIN_RPC_IMAGE: "docker.fluence.dev/chain-rpc:release-please-f33fcf7-2274-1"
+          CHAIN_DEPLOY_SCRIPT_IMAGE: "docker.fluence.dev/chain-deploy-script:release-please-f33fcf7-2274-1"
+          SUBGRAPH_DEPLOY_SCRIPT_IMAGE: "docker.fluence.dev/subgraph-deploy-script:release-please-f33fcf7-2274-1"
 
       - name: Run integration tests
         run: npm run test deal.test
