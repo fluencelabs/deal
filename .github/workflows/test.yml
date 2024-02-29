@@ -76,3 +76,32 @@ jobs:
 
       - name: Run Forge tests
         run: forge test -vvv
+
+  integration-tests:
+    name: "Integration tests"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run docker network
+        run: docker compose up -d
+        working-directory: .github
+
+      - name: Install deps in ts-client package
+        run: npm run i
+        working-directory: ts-client
+
+      - name: Build ts-client package
+        run: npm run build
+        working-directory: ts-client
+
+      - name: Pack ts-client package
+        id: pack-ts-client
+        run: echo "TS_CLIENT_ARCHIVE=$(npm pack --silent --pack-destination ../integration-tests)\n" >> $GITHUB_OUTPUT
+        working-directory: ts-client
+
+      - name: Install packed ts-client
+        run: npm i ${{ steps.pack-ts-client.outputs.TS_CLIENT_ARCHIVE }}
+        working-directory: integration-tests
+
+      - name: Run integration tests
+        run: npm run test deal.test
+        working-directory: integration-tests

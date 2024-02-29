@@ -1,6 +1,6 @@
 import dns from "node:dns/promises";
 import { type ContractsENV, DealClient } from "@fluencelabs/deal-ts-clients";
-import { ethers, JsonRpcProvider, JsonRpcSigner } from "ethers";
+import { ethers, JsonRpcProvider, JsonRpcSigner, type Wallet } from "ethers";
 import { assert, beforeAll, describe, expect, test } from "vitest";
 import { DEFAULT_CONFIRMATIONS } from "./constants.js";
 import { registerMarketOffer } from "./helpers.js";
@@ -8,12 +8,14 @@ import { randomCID } from "./fixtures.js";
 import { confirmEvents } from "./confirmations.js";
 
 const ip = await dns.lookup("akim-dev.dev.fluence.dev");
+// const TEST_NETWORK: ContractsENV = "dar";
 const TEST_NETWORK: ContractsENV = "local";
+// const TEST_RPC_URL = `https://ipc-dar.fluence.dev`;
 const TEST_RPC_URL = `http://${ip.address}:8545`;
 const DEFAULT_TEST_TIMEOUT = 180000;
 
 let provider: JsonRpcProvider;
-let signer: JsonRpcSigner;
+let signer: JsonRpcSigner | Wallet;
 let contractsClient: DealClient;
 
 enum DealStatus {
@@ -27,7 +29,12 @@ describe(
   () => {
     beforeAll(async () => {
       provider = new ethers.JsonRpcProvider(TEST_RPC_URL);
+      // signer = new ethers.Wallet(
+      //   "0x2AE9D3ABFA37CEA42FE829298CAC07CC25AF213A4C82BD74CBEFAD305C749B4F",
+      //   provider,
+      // );
       signer = await provider.getSigner();
+      console.log(await signer.getAddress());
       contractsClient = new DealClient(signer, TEST_NETWORK);
     });
 
@@ -67,21 +74,18 @@ describe(
         toApproveFromDeployer,
       );
       await paymentToken.approve(
-        await marketContract.getAddress(),
+        await dealFactoryContract.getAddress(),
         toApproveFromDeployer,
       );
 
       const deployDealTs = await dealFactoryContract.deployDeal(
         randomCID(),
         registeredOffer.paymentToken,
-        toApproveFromDeployer,
         minWorkersDeal,
         targetWorkersDeal,
         maxWorkerPerProviderDeal,
         pricePerWorkerEpochDeal,
         registeredOffer.effectors,
-        0,
-        [],
       );
 
       await deployDealTs.wait(DEFAULT_CONFIRMATIONS);
