@@ -79,11 +79,14 @@ describe(
       const deployDealTs = await dealFactoryContract.deployDeal(
         randomCID(),
         registeredOffer.paymentToken,
+        toApproveFromDeployer,
         minWorkersDeal,
         targetWorkersDeal,
         maxWorkerPerProviderDeal,
         pricePerWorkerEpochDeal,
         registeredOffer.effectors,
+        0,
+        [],
       );
 
       await deployDealTs.wait(DEFAULT_CONFIRMATIONS);
