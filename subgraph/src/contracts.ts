@@ -9,6 +9,7 @@ import { ERC20 } from "../generated/Market/ERC20";
 import { Core } from "../generated/Core/Core";
 import { Capacity } from "../generated/Capacity/Capacity";
 import { MAX_UINT_256, UNO_BIG_INT, ZERO_BIG_INT } from "./models";
+import {log} from "@graphprotocol/graph-ts/index";
 
 // TODO: optimise through multicall contract (currently 2 calls only per token).
 
@@ -17,6 +18,7 @@ const ERC20_UNKNOWN_SYMBOL = "ERC20_UNKNOWN";
 const ERC20_UNKNOWN_DECIMALS = 1
 
 export function getTokenSymbol(address: Bytes): string {
+  log.info("getTokenSymbol for address: {}...", [address.toHexString()]);
   let contract = ERC20.bind(Address.fromBytes(address));
   let symbolValue = ERC20_UNKNOWN_SYMBOL;
   let symbolResult = contract.try_symbol();
@@ -28,6 +30,7 @@ export function getTokenSymbol(address: Bytes): string {
 }
 
 export function getTokenDecimals(address: Bytes): i32 {
+  log.info("getTokenDecimals for address: {}...", [address.toHexString()]);
   let contract = ERC20.bind(Address.fromBytes(address));
   let value = ERC20_UNKNOWN_DECIMALS; // if ERC20 does not support decimals().
   let result = contract.try_decimals();
