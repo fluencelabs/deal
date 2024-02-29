@@ -1,4 +1,3 @@
-import dns from "node:dns/promises";
 import { type ContractsENV, DealClient } from "@fluencelabs/deal-ts-clients";
 import { ethers, JsonRpcProvider, JsonRpcSigner, type Wallet } from "ethers";
 import { assert, beforeAll, describe, expect, test } from "vitest";
@@ -7,11 +6,10 @@ import { registerMarketOffer } from "./helpers.js";
 import { randomCID } from "./fixtures.js";
 import { confirmEvents } from "./confirmations.js";
 
-const ip = await dns.lookup("akim-dev.dev.fluence.dev");
 // const TEST_NETWORK: ContractsENV = "dar";
 const TEST_NETWORK: ContractsENV = "local";
 // const TEST_RPC_URL = `https://ipc-dar.fluence.dev`;
-const TEST_RPC_URL = `http://${ip.address}:8545`;
+const TEST_RPC_URL = `http://localhost:8545`;
 const DEFAULT_TEST_TIMEOUT = 180000;
 
 let provider: JsonRpcProvider;
