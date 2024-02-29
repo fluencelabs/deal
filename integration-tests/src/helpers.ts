@@ -8,7 +8,6 @@ export async function registerMarketOffer(
   market: IMarket,
   signerAddress: string,
   paymentTokenAddress: string,
-  fromBlock: number,
 ) {
   const registeredOffer = getDefaultOfferFixture(
     signerAddress,
@@ -34,7 +33,7 @@ export async function registerMarketOffer(
     market,
     market.filters.MarketOfferRegistered,
     1,
-    fromBlock,
+    tx,
   );
   const lastMarketOffer = events.pop();
   assert(lastMarketOffer, "There is no market offer");

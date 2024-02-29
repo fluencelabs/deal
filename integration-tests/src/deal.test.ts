@@ -37,6 +37,7 @@ describe(
       const coreContract = await contractsClient.getCore();
       const paymentToken = await contractsClient.getUSDC();
       const paymentTokenAddress = await paymentToken.getAddress();
+      const dealFactoryContract = await contractsClient.getDealFactory();
 
       const signerAddress = await signer.getAddress();
 
@@ -70,24 +71,26 @@ describe(
         toApproveFromDeployer,
       );
 
-      await (
-        await marketContract.deployDeal(
-          randomCID(),
-          registeredOffer.paymentToken,
-          minWorkersDeal,
-          targetWorkersDeal,
-          maxWorkerPerProviderDeal,
-          pricePerWorkerEpochDeal,
-          registeredOffer.effectors,
-          0,
-          [],
-        )
-      ).wait(DEFAULT_CONFIRMATIONS);
+      const deployDealTs = await dealFactoryContract.deployDeal(
+        randomCID(),
+        registeredOffer.paymentToken,
+        toApproveFromDeployer,
+        minWorkersDeal,
+        targetWorkersDeal,
+        maxWorkerPerProviderDeal,
+        pricePerWorkerEpochDeal,
+        registeredOffer.effectors,
+        0,
+        [],
+      );
+
+      await deployDealTs.wait(DEFAULT_CONFIRMATIONS);
 
       const [dealCreatedEvent] = await confirmEvents(
-        marketContract,
-        marketContract.filters.DealCreated,
+        dealFactoryContract,
+        dealFactoryContract.filters.DealCreated,
         1,
+        deployDealTs,
       );
       assert(dealCreatedEvent, "Deal is undefined");
 
@@ -100,11 +103,13 @@ describe(
 
       console.log("Changing AppCID...");
       const newAppCID = randomCID();
-      await (await deal.setAppCID(newAppCID)).wait(DEFAULT_CONFIRMATIONS);
+      const setAppTx = await deal.setAppCID(newAppCID);
+      await setAppTx.wait(DEFAULT_CONFIRMATIONS);
       const [appCIDChangedEvent] = await confirmEvents(
         deal,
         deal.filters.AppCIDChanged,
         1,
+        setAppTx,
       );
       expect(appCIDChangedEvent?.args.newAppCID).toEqual([
         newAppCID.prefixes,
@@ -123,11 +128,13 @@ describe(
         await paymentToken.approve(await deal.getAddress(), amountToDeposit)
       ).wait(DEFAULT_CONFIRMATIONS);
 
-      await (await deal.deposit(amountToDeposit)).wait(DEFAULT_CONFIRMATIONS);
+      const depositTx = await deal.deposit(amountToDeposit);
+      await depositTx.wait(DEFAULT_CONFIRMATIONS);
       const [dealDepositEvent] = await confirmEvents(
         deal,
         deal.filters.Deposited,
         1,
+        depositTx,
       );
       expect(dealDepositEvent?.args.amount).toEqual(amountToDeposit);
 
@@ -150,11 +157,13 @@ describe(
 
       console.log("Deal stop...");
 
-      await (await deal.stop()).wait(DEFAULT_CONFIRMATIONS);
+      const dealStopTx = await deal.stop();
+      await deployDealTs.wait(DEFAULT_CONFIRMATIONS);
       const [dealStopEvent] = await confirmEvents(
         deal,
         deal.filters.DealEnded,
         1,
+        dealStopTx,
       );
       expect(dealStopEvent?.args.endedEpoch).toBeDefined();
     });
