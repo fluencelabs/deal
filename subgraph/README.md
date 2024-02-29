@@ -114,7 +114,9 @@ Logic is inside [fluence-graph.sh](fluence-graph.sh) and it is used in package.j
 
 1. It creates subgraph for fluence network (stage, dar, etc) via `npm run create:stage` with subgraph named like `fluence-deal-contracts-<commit hash>` (for local hash commit is ignored).
    - it creates log of created subgraph inside [deployments](deployments) dir to not forget to remove then outdated subgraphs.
-2. It deploys actual code to index contracts according to [configs](configs) and uses [subgraph.yaml](subgraph.yaml) as template (uses addresses and block number from config). 
+2. It deploys actual code to index contracts according to [configs](configs) and uses [subgraph.yaml](subgraph.yaml) as template (uses addresses and block number from config).
+3. WARN! Currently, after deploy of the new subgraph for the git commit you ought to update url in the [ts-client/src/indexerClient/config.ts](ts-client/src/indexerClient/config.ts) to sync ts-client and newly deployed subraph (ts-client has test for that check).
+4. When need to delete you need to delete subgraph you process manually command: `graph remove --node ${GRAPHNODE_URL} ${SUBGRAPH_NAME}` and delete from file currently. Thus, we free resources for current stand indexer.
 
 TODO: make flow better and use template actually instead.
 TODO: move this flow into CI/CD process.
