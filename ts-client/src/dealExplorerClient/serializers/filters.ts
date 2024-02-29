@@ -287,13 +287,15 @@ export function serializeProofsFiltersToIndexer(
   }
   if (v.capacityCommitmentStatsPerEpochId) {
     convertedFilters.and?.push({
-      capacityCommitmentStatsPerEpoch_: {id: v.capacityCommitmentStatsPerEpochId}
-    })
+      capacityCommitmentStatsPerEpoch_: {
+        id: v.capacityCommitmentStatsPerEpochId,
+      },
+    });
   }
   if (v.computeUnitId) {
     convertedFilters.and?.push({
-      computeUnit_: {id: v.computeUnitId}
-    })
+      computeUnit_: { id: v.computeUnitId },
+    });
   }
   return convertedFilters;
 }

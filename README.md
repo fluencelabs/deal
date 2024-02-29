@@ -24,7 +24,7 @@ is presented. Below are main commands of the makefile.
          * [Build contracts and deal-ts-clients and subgraph](#build-contracts-and-deal-ts-clients-and-subgraph)
          * [Build only contracts](#build-only-contracts)
          * [Build only in npm packages](#build-only-in-npm-packages)
-      * [Start Local Subgraph](#start-local-subgraph)
+      * [Start Local Subgraph](#deploy-subgraph-local)
       * [Start local network using docker](#start-local-network-using-docker)
       * [Start local network locally](#start-local-network-locally)
       * [Deploy to network](#deploy-to-network)
@@ -92,7 +92,7 @@ $ make build-npms
 ### Start Local Subgraph
 
 ```shell
-$ make start-local-subgraph
+$ make deploy-subgraph-local
 ```
 
 ### Start local network using docker
@@ -112,7 +112,7 @@ $ make start-local-chain
 ```
 
 ```shell
-$ make deploy-local
+$ make deploy-contracts-local
 ```
 
 ### Deploy to network
@@ -200,7 +200,7 @@ make build-npms
 4. Deploy subgraph:
 
 ```bash
-make start-local-subgraph
+make deploy-subgraph-{network_name}
 ```
 
 5. [Optional] Since contracts are fresh and empty you can fill them with test

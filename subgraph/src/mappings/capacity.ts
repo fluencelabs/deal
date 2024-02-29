@@ -54,6 +54,7 @@ export function handleWhitelistAccessRevoked(event: WhitelistAccessRevoked): voi
 export function handleInitialized(event: Initialized): void {
   let graphNetwork = createOrLoadGraphNetwork();
   graphNetwork.capacityMaxFailedRatio = getCapacityMaxFailedRatio(event.address).toI32();
+  graphNetwork.capacityContractAddress = event.address.toHexString();
   graphNetwork.minRequiredProofsPerEpoch = getMinRequiredProofsPerEpoch(event.address).toI32();
   graphNetwork.save()
 }

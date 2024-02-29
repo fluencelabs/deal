@@ -1,6 +1,9 @@
 #! /usr/bin/env bash
 
-SUBGRAPH_NAME="fluence-deal-contracts"
+# Note, only for local it uses prefix as full name to deploy subgraph.
+SUBGRAPH_NAME_PREFIX="fluence-deal-contracts"
+# Directory with saved deployments. It will append rows with other deployments.
+SUBGRAPH_DEPLOYMENTS_DIR="deployments"
 
 help() {
 script_name="$(basename $0)"
@@ -56,7 +59,9 @@ case "$network" in
       basic_auth="${BASIC_AUTH_SUBGRAPH}@"
     fi
     GRAPHNODE_URL="https://${basic_auth}graph-node-admin-${network}.fluence.dev"
-    # TODO: IPFS why does not work with auth.
+    # To save logs of created subgraphs on Fluence stands.
+    GRAPH_NODE_QUERY_URL="https://graph-node-${network}.fluence.dev/subgraphs/name/"
+    # TODO: IPFS why does not work with auth (before deploy request Tolay to open ports)
     IPFS_URL="https://graph-node-ipfs-${network}.fluence.dev"
 esac
 
@@ -86,7 +91,7 @@ done
 
 # STAND_TO_SUBGRAPH_NETWORK mapping.
 # The same as in the scripts/import-config-networks.ts.
-# Kinda TODO: locate to 1 place.
+# Kinda TODO: locate to 1 place (now it is duplicated in the scripts/import-config-networks.ts as well)
 case "$network" in
   local)
     SUBGRAPH_NETWORK="local"
@@ -102,6 +107,17 @@ case "$network" in
     ;;
 esac
 
+echo "Create unique subgraph name for the current state of contract deployments via git commit hash (ignore this suffix for local)..."
+case "$network" in
+  local|stage|kras|dar)
+    SUBGRAPH_NAME="${SUBGRAPH_NAME_PREFIX}"
+    ;;
+#  TODO: resolve: do we need versioning of subgraph or not finally.
+#  stage|kras|dar)
+#    SUBGRAPH_NAME="${SUBGRAPH_NAME_PREFIX}-$(git rev-parse --short HEAD)"
+#    ;;
+esac
+
 case "$action" in
   deploy)
     echo "Deploying subgraph on ${network} stand with subgraph name: $SUBGRAPH_NAME and version label $SUBGRAPH_VERSION_LABEL..."
@@ -110,6 +126,7 @@ case "$action" in
   create)
     echo "Creating subgraph on Fluence with name: $SUBGRAPH_NAME..."
     graph create --node ${GRAPHNODE_URL} ${SUBGRAPH_NAME}
+    echo "${GRAPH_NODE_QUERY_URL}${SUBGRAPH_NAME}" >> ${SUBGRAPH_DEPLOYMENTS_DIR}/${network}.txt
     ;;
   remove)
     echo "Removing subgraph on Fluence with name: $SUBGRAPH_NAME..."

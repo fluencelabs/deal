@@ -49,7 +49,8 @@ export function serializeExpectedProofsAndCUStatus(
   if (startEpoch && startEpoch != 0) {
     expectedProofsDueNow =
       (calculateEpoch(Date.now() / 1000, coreInitTimestamp, coreEpochDuration) -
-      startEpoch) * expectedMinProofsDueToNow;
+        startEpoch) *
+      expectedMinProofsDueToNow;
   }
 
   let status: ComputeUnitStatus = "undefined";
