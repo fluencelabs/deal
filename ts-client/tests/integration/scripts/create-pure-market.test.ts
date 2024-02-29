@@ -1,6 +1,7 @@
 // TODO: relocate or use for CI tests of ts-client APIs (it is not a test, it a dev script for market).
 // To run: you need to have infra: deployed contracts on local and run: `npm run integration`
 
+// Instruction below does not work for now, use instruction run above.
 // It creates market example on chain. Check out MarketExample interface and initMarketFixture with actual configuration.
 // Currently used to sync Network Explorer frontend dev and to create diversed market on chain, and to create load for Subgraph.
 // WARN: To run this script you also should use the Core Owner (it uses some restricted admin methods).
@@ -9,8 +10,6 @@
 // 2. cd to ts-client and: npm run build && npm pack
 // Run e.g. with [WARN: check out current package version before the run]:
 // 3. npm i -s ../ts-client/fluencelabs-deal-ts-clients-0.6.7.tgz && node --loader ts-node/esm main-market-create.ts
-// For as in vitest run:
-//
 
 // TODO: uncomment when refactored to the right place.
 // import {
@@ -270,7 +269,9 @@ async function main() {
 
     console.info("3. #createCommitment for providerWithCapacityCommitments only...");
     let createdCCIds: string[] = []
-    for (const peerId of marketFixture.providerWithCapacityCommitments.peerIds) {
+    // TODO: rm CC for providerToBeMatched
+    //  - now it is because of https://linear.app/fluence/issue/CHAIN-400/bug-in-matchermatchdeal-when-match-with-whitelisted-deal.
+    for (const peerId of [...marketFixture.providerWithCapacityCommitments.peerIds, ...marketFixture.providerToBeMatched.peerIds]) {
         const createCommitmentTx = await capacityContract.createCommitment(
             peerId,
             CAPACITY_DEFAULT_DURATION,
@@ -331,7 +332,6 @@ async function main() {
         const approveTx = await paymentToken.approve(dealFactoryContractAddress, toApproveFromDeployer);
         await approveTx.wait(WAIT_CONFIRMATIONS)
 
-        console.log('TODO: send transaction itself with params', JSON.stringify(dealFixture))
         const depositAmount = BigInt(dealFixture.pricePerWorkerEpoch) * BigInt(dealFixture.targetWorkers) * minDealDepositedEpoches
         const createDealTx = await dealFactoryContract.deployDeal(
             {prefixes: dealFixture.appCID.prefix, hash: dealFixture.appCID.hash},
@@ -364,14 +364,14 @@ async function main() {
     // We want to match with 2 CU and according to protocol restriction them should be from different peers
     // TODO: need to resolve this: https://linear.app/fluence/issue/CHAIN-400/bug-in-matchermatchdeal-when-match-with-whitelisted-deal
     //  or rewrite match with CUs with active CC.
-    // const matchDealTx = await marketContract.matchDeal(
-    //     marketFixture.dealToMatchWithWhiteListedProvider.dealId!,
-    //     [marketFixture.providerToBeMatched.offerId!, marketFixture.providerToBeMatched.offerId!],
-    //     [
-    //         [marketFixture.providerToBeMatched.computeUnitsPerPeers[0][0]],
-    //         [marketFixture.providerToBeMatched.computeUnitsPerPeers[1][0]],
-    //     ],
-    // );
+    const matchDealTx = await marketContract.matchDeal(
+        marketFixture.dealToMatchWithWhiteListedProvider.dealId!,
+        [marketFixture.providerToBeMatched.offerId!, marketFixture.providerToBeMatched.offerId!],
+        [
+            [marketFixture.providerToBeMatched.computeUnitsPerPeers[0][0]],
+            [marketFixture.providerToBeMatched.computeUnitsPerPeers[1][0]],
+        ],
+    );
 }
 
 // Log Parsing Module.
