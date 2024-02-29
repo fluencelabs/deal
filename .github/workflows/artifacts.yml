@@ -301,6 +301,55 @@ jobs:
           commit_user_email: devops@fluence.one
           commit_author: fluencebot <devops@fluence.one>
 
+  integration-tests:
+    name: "Integration tests"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Download contract artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: contracts-amd64
+
+      - name: Download deployments/local.json
+        uses: actions/download-artifact@v4
+        with:
+          name: local.json
+          path: deployments/
+
+      - working-directory: ts-client/
+        run: npm install
+
+      - working-directory: ts-client/
+        run: npm run build
+
+      - name: Pack ts-client package
+        id: pack-ts-client
+        run: echo "TS_CLIENT_ARCHIVE=$(npm pack --silent --pack-destination ../integration-tests)\n" >> $GITHUB_OUTPUT
+        working-directory: ts-client
+
+      - name: Install packed ts-client
+        run: npm i ${{ steps.pack-ts-client.outputs.TS_CLIENT_ARCHIVE }}
+        working-directory: integration-tests
+
+      - name: Run docker network
+        run: docker compose up -d
+        working-directory: .github
+
+      - name: Run integration tests
+        run: npm run test deal.test
+        working-directory: integration-tests
+
   deal-ts-clients:
     name: "Publish deal-ts-clients snapshot"
     runs-on: ubuntu-latest
