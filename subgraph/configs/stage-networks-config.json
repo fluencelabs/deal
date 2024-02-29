@@ -1,16 +1,16 @@
 {
   "stage": {
     "Market": {
-      "address": "0x6a54816c67EEcA432e22Be5f8D9bC7b56153FA96",
-      "startBlock": 45147375
+      "address": "0xde3E9c36478733632aFb28846e8120B9a10b617F",
+      "startBlock": 39
     },
     "Capacity": {
-      "address": "0xb8a1cFfd0408e985a2d0250e821d134d3431ecbA",
-      "startBlock": 45147375
+      "address": "0x8dc7d48492b9fD2519b65A54816be03758742c60",
+      "startBlock": 39
     },
     "Core": {
-      "address": "0x3941808e279cF863Fc08C84864c804452f0e5D18",
-      "startBlock": 45147375
+      "address": "0x2B82e6B9491d9f32e39FA4A3ea4C8aedee9250Fe",
+      "startBlock": 39
     }
   }
 }

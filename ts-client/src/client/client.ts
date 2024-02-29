@@ -3,6 +3,7 @@ import type { ethers } from "ethers";
 import {
   Core__factory,
   Deal__factory,
+  DealFactory__factory,
   ERC20__factory,
   Market__factory,
   Capacity__factory,
@@ -14,6 +15,7 @@ import type {
   Deal,
   ICapacity,
   ICore,
+  IDealFactory,
   IERC20,
   IMarket,
   Multicall3,
@@ -48,6 +50,13 @@ export class DealClient {
   async getMarket(): Promise<IMarket> {
     return Market__factory.connect(
       (await this.deployment).market,
+      this.signerOrProvider,
+    );
+  }
+
+  async getDealFactory(): Promise<IDealFactory> {
+    return DealFactory__factory.connect(
+      (await this.deployment).dealFactory,
       this.signerOrProvider,
     );
   }

@@ -1,0 +1,16 @@
+{
+  "dar": {
+    "Market": {
+      "address": "0x9796506E15F0Cdc60b0F90A61053Ef4Bf3792ca0",
+      "startBlock": 111831
+    },
+    "Capacity": {
+      "address": "0xa11C4f2E23cE03ad22a8d604A916CfcfF6e3AE42",
+      "startBlock": 111831
+    },
+    "Core": {
+      "address": "0x179Da5688919cC0D4119F483Ab6533EA2445FFbD",
+      "startBlock": 111831
+    }
+  }
+}

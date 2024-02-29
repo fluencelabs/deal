@@ -33,7 +33,8 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
         uint256 minDuration;
         uint256 minRewardPerEpoch;
         uint256 maxRewardPerEpoch;
-        uint256 vestingDuration;
+        uint256 vestingPeriodDuration;
+        uint256 vestingPeriodCount;
         uint256 slashingRate;
         uint256 minRequierdProofsPerEpoch;
         uint256 maxProofsPerEpoch;
@@ -65,7 +66,8 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
         uint256 minDuration_,
         uint256 minRewardPerEpoch_,
         uint256 maxRewardPerEpoch_,
-        uint256 vestingDuration_,
+        uint256 vestingPeriodDuration_,
+        uint256 vestingPeriodCount_,
         uint256 slashingRate_,
         uint256 minRequierdProofsPerEpoch_,
         uint256 maxProofsPerEpoch_,
@@ -81,7 +83,8 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
         constantsStorage.minDuration = minDuration_;
         constantsStorage.minRewardPerEpoch = minRewardPerEpoch_;
         constantsStorage.maxRewardPerEpoch = maxRewardPerEpoch_;
-        constantsStorage.vestingDuration = vestingDuration_;
+        constantsStorage.vestingPeriodDuration = vestingPeriodDuration_;
+        constantsStorage.vestingPeriodCount = vestingPeriodCount_;
         constantsStorage.slashingRate = slashingRate_;
         constantsStorage.minRequierdProofsPerEpoch = minRequierdProofsPerEpoch_;
         constantsStorage.maxProofsPerEpoch = maxProofsPerEpoch_;
@@ -128,8 +131,12 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
         return _getConstStorage().maxRewardPerEpoch;
     }
 
-    function vestingDuration() public view returns (uint256) {
-        return _getConstStorage().vestingDuration;
+    function vestingPeriodDuration() public view returns (uint256) {
+        return _getConstStorage().vestingPeriodDuration;
+    }
+
+    function vestingPeriodCount() public view returns (uint256) {
+        return _getConstStorage().vestingPeriodCount;
     }
 
     function slashingRate() public view returns (uint256) {
@@ -232,8 +239,10 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
             constantsStorage.minRewardPerEpoch = v;
         } else if (constantType == ConstantType.MaxRewardPerEpoch) {
             constantsStorage.maxRewardPerEpoch = v;
-        } else if (constantType == ConstantType.VestingDuration) {
-            constantsStorage.vestingDuration = v;
+        } else if (constantType == ConstantType.VestingPeriodDuration) {
+            constantsStorage.vestingPeriodDuration = v;
+        } else if (constantType == ConstantType.VestingPeriodCount) {
+            constantsStorage.vestingPeriodCount = v;
         } else if (constantType == ConstantType.SlashingRate) {
             constantsStorage.slashingRate = v;
         } else if (constantType == ConstantType.MinRequierdProofsPerEpoch) {

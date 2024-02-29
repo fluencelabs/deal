@@ -29,7 +29,8 @@ interface ICapacityConst {
         MinDuration,
         MinRewardPerEpoch,
         MaxRewardPerEpoch,
-        VestingDuration,
+        VestingPeriodDuration,
+        VestingPeriodCount,
         SlashingRate,
         MinRequierdProofsPerEpoch,
         MaxProofsPerEpoch,
@@ -62,8 +63,11 @@ interface ICapacityConst {
     /// @dev Returns the max reward pool per epoch
     function maxRewardPerEpoch() external view returns (uint256);
 
-    /// @dev Returns the vesting duration for new rewards
-    function vestingDuration() external view returns (uint256);
+    /// @dev Returns the vesting duration for one period in epoches
+    function vestingPeriodDuration() external view returns (uint256);
+
+    /// @dev Returns the total vesting periods
+    function vestingPeriodCount() external view returns (uint256);
 
     /// @dev Returns the slashing rate for failed CU
     function slashingRate() external view returns (uint256);
