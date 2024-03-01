@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.1](https://github.com/fluencelabs/deal/compare/v0.7.0...v0.7.1) (2024-03-01)
+
+
+### Features
+
+* min and maxProtocolVersion ([#247](https://github.com/fluencelabs/deal/issues/247)) ([b0ef9f3](https://github.com/fluencelabs/deal/commit/b0ef9f3d304dd6f6b5a0bb47fc165365fa0de4ed))
+* new market script and subgraph debug docs [chain-339] ([#306](https://github.com/fluencelabs/deal/issues/306)) ([f105506](https://github.com/fluencelabs/deal/commit/f10550626da4353397bf84c0162e0567fbcb0b01))
+
 ## [0.7.0](https://github.com/fluencelabs/deal/compare/v0.6.7...v0.7.0) (2024-02-28)
 
 
