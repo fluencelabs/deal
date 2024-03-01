@@ -143,6 +143,36 @@ contract OfferTest is Test {
             DeployDealSystem.DEFAULT_MAX_PROTOCOL_VERSION
         );
 
+        vm.expectRevert("Min protocol version too small");
+        deployment.market.registerMarketOffer(
+            1,
+            paymentToken,
+            new CIDV1[](0),
+            new IOffer.RegisterComputePeer[](0),
+            DeployDealSystem.DEFAULT_MIN_PROTOCOL_VERSION - 1, // default 1
+            DeployDealSystem.DEFAULT_MAX_PROTOCOL_VERSION
+        );
+
+        vm.expectRevert("Max protocol version too big");
+        deployment.market.registerMarketOffer(
+            1,
+            paymentToken,
+            new CIDV1[](0),
+            new IOffer.RegisterComputePeer[](0),
+            DeployDealSystem.DEFAULT_MIN_PROTOCOL_VERSION,
+            DeployDealSystem.DEFAULT_MAX_PROTOCOL_VERSION + 1
+        );
+
+        vm.expectRevert("Wrong protocol versions 1");
+        deployment.market.registerMarketOffer(
+            1,
+            paymentToken,
+            new CIDV1[](0),
+            new IOffer.RegisterComputePeer[](0),
+            2,
+            1
+        );
+
         bytes32 offerId = keccak256(
             abi.encodePacked(
                 _OFFER_ID_PREFIX,

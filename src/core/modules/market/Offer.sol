@@ -129,11 +129,8 @@ abstract contract Offer is BaseModule, IOffer {
         require(offerStorage.offers[offerId].paymentToken == address(0x00), "Offer already exists");
         require(minPricePerWorkerEpoch > 0, "Min price per epoch should be greater than 0");
         require(address(paymentToken) != address(0x00), "Payment token should be not zero address");
-        require(
-            minProtocolVersion >= core.minProtocolVersion()
-            && maxProtocolVersion <= core.maxProtocolVersion(),
-            "Protocol verions out of bounds"
-        );
+        require(minProtocolVersion >= core.minProtocolVersion(), "Min protocol version too small");
+        require(maxProtocolVersion <= core.maxProtocolVersion(), "Max protocol version too big");
         require(minProtocolVersion <= maxProtocolVersion, "Wrong protocol versions");
 
         // create market offer
