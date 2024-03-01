@@ -35,6 +35,8 @@ contract DeployContracts is Depoyments, Script {
     uint256 constant DEFAULT_FLT_PRICE = 1 * PRECISION; // 1 USD
     uint256 constant DEFAULT_MIN_DEPOSITED_EPOCHES = 2;
     uint256 constant DEFAULT_MIN_REMATCHING_EPOCHES = 2;
+    uint256 constant DEFAULT_MIN_PROTOCOL_VERSION = 1;
+    uint256 constant DEFAULT_MAX_PROTOCOL_VERSION = 1;
     uint256 constant DEFAULT_USD_COLLATERAL_PER_UNIT = 1 * PRECISION; // 1 USD
     uint256 constant DEFAULT_USD_TARGET_REVENUE_PER_EPOCH = 1_000 * PRECISION; // 1 USD
     uint256 constant DEFAULT_MIN_DURATION = 5 minutes;
@@ -63,6 +65,8 @@ contract DeployContracts is Depoyments, Script {
         uint256 fltPrice;
         uint256 minDepositedEpoches;
         uint256 minRematchingEpoches;
+        uint256 minProtocolVersion;
+        uint256 maxProtocolVersion;
         uint256 usdCollateralPerUnit;
         uint256 usdTargetRevenuePerEpoch;
         uint256 minDuration;
@@ -115,6 +119,8 @@ contract DeployContracts is Depoyments, Script {
             env.fltPrice,
             env.minDepositedEpoches,
             env.minRematchingEpoches,
+            env.minProtocolVersion,
+            env.maxProtocolVersion,
             env.usdCollateralPerUnit,
             env.usdTargetRevenuePerEpoch,
             env.minDuration,
@@ -142,6 +148,8 @@ contract DeployContracts is Depoyments, Script {
         uint256 fltPice = vm.envOr("FLT_PRICE", DEFAULT_FLT_PRICE);
         uint256 minDepositedEpoches = vm.envOr("MIN_DEPOSITED_EPOCHES", DEFAULT_MIN_DEPOSITED_EPOCHES);
         uint256 minRematchingEpoches = vm.envOr("MIN_REMATCHING_EPOCHES", DEFAULT_MIN_REMATCHING_EPOCHES);
+        uint256 minProtocolVersion = vm.envOr("MIN_PROTOCOL_VERSION", DEFAULT_MIN_PROTOCOL_VERSION);
+        uint256 maxProtocolVersion = vm.envOr("MAX_PROTOCOL_VERSION", DEFAULT_MAX_PROTOCOL_VERSION);
         uint256 usdCollateralPerUnit = vm.envOr("USD_COLLATERAL_PER_UNIT", DEFAULT_USD_COLLATERAL_PER_UNIT);
         uint256 usdTargetRevenuePerEpoch =
             vm.envOr("USD_TARGET_REVENUE_PER_EPOCH", DEFAULT_USD_TARGET_REVENUE_PER_EPOCH);
@@ -167,6 +175,8 @@ contract DeployContracts is Depoyments, Script {
         console.log(StdStyle.blue("EPOCH_DURATION:"), epochDuration);
         console.log(StdStyle.blue("MIN_DEPOSITED_EPOCHES:"), minDepositedEpoches);
         console.log(StdStyle.blue("MIN_REMATCHING_EPOCHES:"), minRematchingEpoches);
+        console.log(StdStyle.blue("MIN_PROTOCOL_VERSION:"), minProtocolVersion);
+        console.log(StdStyle.blue("MAX_PROTOCOL_VERSION:"), maxProtocolVersion);
         console.log(StdStyle.blue("USD_COLLATERAL_PER_UNIT:"), usdCollateralPerUnit);
         console.log(StdStyle.blue("USD_TARGET_REVENUE_PER_EPOCH:"), usdTargetRevenuePerEpoch);
         console.log(StdStyle.blue("MIN_DURATION:"), minDuration);
@@ -193,6 +203,8 @@ contract DeployContracts is Depoyments, Script {
             fltPrice: fltPice,
             minDepositedEpoches: minDepositedEpoches,
             minRematchingEpoches: minRematchingEpoches,
+            minProtocolVersion: minProtocolVersion,
+            maxProtocolVersion: maxProtocolVersion,
             usdCollateralPerUnit: usdCollateralPerUnit,
             usdTargetRevenuePerEpoch: usdTargetRevenuePerEpoch,
             minDuration: minDuration,
@@ -232,6 +244,8 @@ contract DeployContracts is Depoyments, Script {
         uint256 fltPrice_,
         uint256 minDepositedEpoches_,
         uint256 minRematchingEpoches_,
+        uint256 minProtocolVersion_,
+        uint256 maxProtocolVersion_,
         uint256 usdCollateralPerUnit_,
         uint256 usdTargetRevenuePerEpoch_,
         uint256 minDuration_,
@@ -270,7 +284,13 @@ contract DeployContracts is Depoyments, Script {
             abi.encode(
                 coreImpl,
                 abi.encodeWithSelector(
-                    Core.initialize.selector, epochDuration_, minDepositedEpoches_, minRematchingEpoches_, dealImpl
+                    Core.initialize.selector,
+                    epochDuration_,
+                    minDepositedEpoches_,
+                    minRematchingEpoches_,
+                    minProtocolVersion_,
+                    maxProtocolVersion_,
+                    dealImpl
                 )
             ),
             needToRedeployMarket || needToRedeployCapacity || needToRedeployDealFactory

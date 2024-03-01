@@ -31,7 +31,9 @@ contract MatcherTest is Test {
         uint256 unitCountPerPeer,
         CIDV1[] memory effectors,
         address paymentToken,
-        uint256 minPricePerWorkerEpoch
+        uint256 minPricePerWorkerEpoch,
+        uint256 minProtocolVersion,
+        uint256 maxProtocolVersion
     ) internal returns (bytes32[] memory offerIds, bytes32[][] memory peerIds, bytes32[][][] memory unitIds) {
         offerIds = new bytes32[](offerCount);
         peerIds = new bytes32[][](offerCount);
@@ -55,7 +57,14 @@ contract MatcherTest is Test {
             }
 
             deployment.market.setProviderInfo("test", CIDV1({prefixes: 0x12345678, hash: bytes32(0x00)}));
-            offerIds[i] = deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, peers);
+            offerIds[i] = deployment.market.registerMarketOffer(
+                minPricePerWorkerEpoch,
+                paymentToken,
+                effectors,
+                peers,
+                minProtocolVersion,
+                maxProtocolVersion
+            );
 
             uint256 amount;
             bytes32[] memory commitmentIds = new bytes32[](peerCountPerOffer);
@@ -93,6 +102,9 @@ contract MatcherTest is Test {
         uint256 peerCountPerOffer = 3;
         uint256 minWorkers = 1;
         uint256 maxWorkersPerProvider = unitCountPerPeer * peerCountPerOffer * offerCount;
+        uint256 protocolVersion = DeployDealSystem.DEFAULT_MIN_PROTOCOL_VERSION;
+        uint256 minProtocolVersion = DeployDealSystem.DEFAULT_MIN_PROTOCOL_VERSION;
+        uint256 maxProtocolVersion = DeployDealSystem.DEFAULT_MAX_PROTOCOL_VERSION;
 
         // Total workers: offerCount * unitCountPerPeer * peerCountPerOffer. Thus, we have CU in excess.
         uint256 targetWorkers = offerCount * peerCountPerOffer * 1;
@@ -106,11 +118,19 @@ contract MatcherTest is Test {
             minWorkers,
             effectors,
             appCID,
-            creationBlock
+            creationBlock,
+            protocolVersion
         );
 
         (bytes32[] memory offerIds, bytes32[][] memory peerIds, bytes32[][][] memory unitIds) = _registerOffersAndCC(
-            offerCount, peerCountPerOffer, unitCountPerPeer, effectors, paymentToken, pricePerWorkerEpoch
+            offerCount,
+            peerCountPerOffer,
+            unitCountPerPeer,
+            effectors,
+            paymentToken,
+            pricePerWorkerEpoch,
+            minProtocolVersion,
+            maxProtocolVersion
         );
 
         StdCheats.skip(uint256(deployment.core.epochDuration()));
@@ -188,6 +208,7 @@ contract DealMock {
     uint256 public targetWorkers;
     uint256 public maxWorkersPerProvider;
     uint256 public minWorkers;
+    uint256 private protocolVersion;
 
     CIDV1[] internal _effectors;
 
@@ -205,7 +226,8 @@ contract DealMock {
         uint256 _minWorkers,
         CIDV1[] memory effectors_,
         CIDV1 memory _appCID,
-        uint256 _creationBlock
+        uint256 _creationBlock,
+        uint256 protocolVersion_
     ) {
         pricePerWorkerEpoch = _pricePerWorkerEpoch;
         paymentToken = _paymentToken;
@@ -215,6 +237,7 @@ contract DealMock {
         _effectors = effectors_;
         appCID = _appCID;
         creationBlock = _creationBlock;
+        protocolVersion = protocolVersion_;
     }
 
     function effectors() external view returns (CIDV1[] memory) {
@@ -251,5 +274,9 @@ contract DealMock {
 
     function getComputeUnitCount(address provider) external view returns (uint256) {
         return computeUnitCountByProvider[provider];
+    }
+
+    function getProtocolVersion() external view returns (uint256) {
+        return protocolVersion;
     }
 }

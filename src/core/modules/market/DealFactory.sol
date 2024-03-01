@@ -52,7 +52,8 @@ contract DealFactory is UUPSUpgradeable, BaseModule, IDealFactory {
         uint256 pricePerWorkerEpoch_,
         CIDV1[] calldata effectors_,
         IConfig.AccessType providersAccessType_,
-        address[] calldata providersAccessList_
+        address[] calldata providersAccessList_,
+        uint256 protocolVersion_
     ) external returns (IDeal) {
         DealFactoryStorage storage dealFactoryStorage = _getDealFactoryStorage();
 
@@ -71,7 +72,8 @@ contract DealFactory is UUPSUpgradeable, BaseModule, IDealFactory {
                         pricePerWorkerEpoch_,
                         effectors_,
                         providersAccessType_,
-                        providersAccessList_
+                        providersAccessList_,
+                        protocolVersion_
                     )
                 )
             )
@@ -101,7 +103,8 @@ contract DealFactory is UUPSUpgradeable, BaseModule, IDealFactory {
             effectors_,
             appCID_,
             providersAccessType_,
-            providersAccessList_
+            providersAccessList_,
+            protocolVersion_
         );
 
         return deal;
