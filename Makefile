@@ -102,13 +102,6 @@ create-pure-market-%: ## Create market on for a stand...
 
 	@echo "\033[0;32mSuccess! Pure market created on $* chain - check it out.\033[0m"
 
-#TODO
-deploy-subgraph-fork-%: ## Deploy subgraph to a fork [it uses local subgraph]
-	@make verify-command program=npm
-	@cd subgraph && npm run create:fork && npm run deploy:fork
-
-	@echo "\033[0;32mSuccess! Subgraph deployed to $* chain.\033[0m"
-
 help: ## List makefile targets
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 	| awk 'BEGIN {FS = ":.*?## "}; {printf "%-30s %s\n", $$1, $$2}'
