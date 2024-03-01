@@ -37,11 +37,11 @@ interface IGlobalConst {
     /// @return min rematching epoches for all deals
     function minDealRematchingEpoches() external view returns (uint256);
 
-    /// @dev Returns min protocol version
+    /// @dev Returns min protocol version which can be specified in offers and deals
     /// @return min protocol version
     function minProtocolVersion() external view returns (uint256);
 
-    /// @dev Returns max protocol version
+    /// @dev Returns max protocol version which can be specified in offers and deals
     /// @return max protocol version
     function maxProtocolVersion() external view returns (uint256);
 
