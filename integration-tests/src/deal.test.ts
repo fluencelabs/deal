@@ -4,7 +4,7 @@ import { assert, beforeAll, describe, expect, test } from "vitest";
 import { DEFAULT_CONFIRMATIONS } from "./constants.js";
 import { registerMarketOffer } from "./helpers.js";
 import { randomCID } from "./fixtures.js";
-import { confirmEvents } from "./confirmations.js";
+import { checkEvents } from "./confirmations.js";
 
 // const TEST_NETWORK: ContractsENV = "dar";
 const TEST_NETWORK: ContractsENV = "local";
@@ -87,7 +87,7 @@ describe(
 
       await deployDealTs.wait(DEFAULT_CONFIRMATIONS);
 
-      const [dealCreatedEvent] = await confirmEvents(
+      const [dealCreatedEvent] = await checkEvents(
         dealFactoryContract,
         dealFactoryContract.filters.DealCreated,
         1,
@@ -106,7 +106,7 @@ describe(
       const newAppCID = randomCID();
       const setAppTx = await deal.setAppCID(newAppCID);
       await setAppTx.wait(DEFAULT_CONFIRMATIONS);
-      const [appCIDChangedEvent] = await confirmEvents(
+      const [appCIDChangedEvent] = await checkEvents(
         deal,
         deal.filters.AppCIDChanged,
         1,
@@ -131,7 +131,7 @@ describe(
 
       const depositTx = await deal.deposit(amountToDeposit);
       await depositTx.wait(DEFAULT_CONFIRMATIONS);
-      const [dealDepositEvent] = await confirmEvents(
+      const [dealDepositEvent] = await checkEvents(
         deal,
         deal.filters.Deposited,
         1,
@@ -161,7 +161,7 @@ describe(
 
       const dealStopTx = await deal.stop();
       await deployDealTs.wait(DEFAULT_CONFIRMATIONS);
-      const [dealStopEvent] = await confirmEvents(
+      const [dealStopEvent] = await checkEvents(
         deal,
         deal.filters.DealEnded,
         1,

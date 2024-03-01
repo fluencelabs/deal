@@ -8,7 +8,7 @@ import {
 import type { TypedEventLog } from "@fluencelabs/deal-ts-clients/dist/typechain-types/common.js";
 import { type ContractTransactionResponse } from "ethers";
 
-export async function confirmEvents<
+export async function checkEvents<
   R extends ICapacity | IMarket | IDeal | IDealFactory,
   T extends R["filters"][keyof R["filters"]],
 >(

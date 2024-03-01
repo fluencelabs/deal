@@ -2,7 +2,7 @@ import { getDefaultOfferFixture, randomCID } from "./fixtures.js";
 import { type ICapacity, type IMarket } from "@fluencelabs/deal-ts-clients";
 import { DEFAULT_CONFIRMATIONS } from "./constants.js";
 import { assert, expect } from "vitest";
-import { confirmEvents } from "./confirmations.js";
+import { checkEvents } from "./confirmations.js";
 
 export async function registerMarketOffer(
   market: IMarket,
@@ -29,7 +29,7 @@ export async function registerMarketOffer(
   );
   await tx.wait(DEFAULT_CONFIRMATIONS);
 
-  const events = await confirmEvents(
+  const events = await checkEvents(
     market,
     market.filters.MarketOfferRegistered,
     1,

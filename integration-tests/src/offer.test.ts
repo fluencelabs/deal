@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, test } from "vitest";
 import { registerMarketOffer } from "./helpers.js";
 import { getPeerFixture, getUnitIdFixture, randomCID } from "./fixtures.js";
 import { DEFAULT_CONFIRMATIONS } from "./constants.js";
-import { confirmEvents } from "./confirmations.js";
+import { checkEvents } from "./confirmations.js";
 import { ethers, JsonRpcProvider, JsonRpcSigner } from "ethers";
 import { type ContractsENV, DealClient } from "@fluencelabs/deal-ts-clients";
 
@@ -46,7 +46,7 @@ describe("Modify Offer", () => {
         ])
       ).wait(DEFAULT_CONFIRMATIONS);
 
-      const peerEvents = await confirmEvents(
+      const peerEvents = await checkEvents(
         marketContract,
         marketContract.filters.PeerCreated,
         1,
@@ -83,7 +83,7 @@ describe("Modify Offer", () => {
         )
       ).wait(DEFAULT_CONFIRMATIONS);
 
-      const peerUnitEvents = await confirmEvents(
+      const peerUnitEvents = await checkEvents(
         marketContract,
         marketContract.filters.ComputeUnitCreated,
         unitIdFixtures.length,
@@ -111,7 +111,7 @@ describe("Modify Offer", () => {
         await marketContract.removeComputeUnit(RemovedCU)
       ).wait(DEFAULT_CONFIRMATIONS);
 
-      const removeCUEvents = await confirmEvents(
+      const removeCUEvents = await checkEvents(
         marketContract,
         marketContract.filters.ComputeUnitRemoved,
         1,
@@ -145,7 +145,7 @@ describe("Modify Offer", () => {
         await marketContract.removeComputePeer(newComputePeerFixture.peerId)
       ).wait(DEFAULT_CONFIRMATIONS);
 
-      const removePeerEvents = await confirmEvents(
+      const removePeerEvents = await checkEvents(
         marketContract,
         marketContract.filters.PeerRemoved,
         1,
@@ -197,7 +197,7 @@ describe("Modify Offer", () => {
       ).wait(DEFAULT_CONFIRMATIONS);
     }
 
-    const addEffectorInfoEvents = await confirmEvents(
+    const addEffectorInfoEvents = await checkEvents(
       marketContract,
       marketContract.filters.EffectorInfoSet,
       newEffectors.length,
@@ -222,7 +222,7 @@ describe("Modify Offer", () => {
       )
     ).wait(DEFAULT_CONFIRMATIONS);
 
-    const addEffectorEvents = await confirmEvents(
+    const addEffectorEvents = await checkEvents(
       marketContract,
       marketContract.filters.EffectorAdded,
       newEffectors.length,
@@ -243,7 +243,7 @@ describe("Modify Offer", () => {
       )
     ).wait(DEFAULT_CONFIRMATIONS);
 
-    const removeEffectorEvents = await confirmEvents(
+    const removeEffectorEvents = await checkEvents(
       marketContract,
       marketContract.filters.EffectorRemoved,
       newEffectors.length,
@@ -262,7 +262,7 @@ describe("Modify Offer", () => {
       ).wait(DEFAULT_CONFIRMATIONS);
     }
 
-    const removeEffectorInfoEvents = await confirmEvents(
+    const removeEffectorInfoEvents = await checkEvents(
       marketContract,
       marketContract.filters.EffectorInfoRemoved,
       newEffectors.length,
@@ -297,7 +297,7 @@ describe("Modify Offer", () => {
       )
     ).wait(DEFAULT_CONFIRMATIONS);
 
-    const tokenUpdateEvents = await confirmEvents(
+    const tokenUpdateEvents = await checkEvents(
       marketContract,
       marketContract.filters.PaymentTokenUpdated,
       1,
@@ -320,7 +320,7 @@ describe("Modify Offer", () => {
       )
     ).wait(DEFAULT_CONFIRMATIONS);
 
-    const minPriceUpdateEvents = await confirmEvents(
+    const minPriceUpdateEvents = await checkEvents(
       marketContract,
       marketContract.filters.MinPricePerEpochUpdated,
       1,

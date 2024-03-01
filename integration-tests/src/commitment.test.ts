@@ -2,7 +2,7 @@ import { assert, beforeAll, describe, expect, test } from "vitest";
 import { createCommitments, registerMarketOffer } from "./helpers.js";
 import { ethers, JsonRpcProvider, JsonRpcSigner } from "ethers";
 import { type ContractsENV, DealClient } from "@fluencelabs/deal-ts-clients";
-import { confirmEvents } from "./confirmations.js";
+import { checkEvents } from "./confirmations.js";
 import { DEFAULT_CONFIRMATIONS } from "./constants.js";
 import { skipEpoch } from "./utils.js";
 
@@ -60,7 +60,7 @@ describe(
         await capacityContract.removeCommitment(commitmentId)
       ).wait(DEFAULT_CONFIRMATIONS);
 
-      const events = await confirmEvents(
+      const events = await checkEvents(
         capacityContract,
         capacityContract.filters.CommitmentRemoved,
         1,
@@ -106,7 +106,7 @@ describe(
 
       const duration = await capacityContract.minDuration();
 
-      const collateralDepositedEvents = await confirmEvents(
+      const collateralDepositedEvents = await checkEvents(
         capacityContract,
         capacityContract.filters.CollateralDeposited,
         1,
@@ -115,7 +115,7 @@ describe(
         [commitmentId, collateralPerUnit],
       ]);
 
-      const capacityActivatedEvents = await confirmEvents(
+      const capacityActivatedEvents = await checkEvents(
         capacityContract,
         capacityContract.filters.CommitmentActivated,
         1,
