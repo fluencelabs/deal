@@ -52,6 +52,8 @@ function getDefaultOfferFixture(
         owner: owner,
       },
     ],
+    minProtocolVersion: 1,
+    maxProtocolVersion: 1,
   };
   return { offerFixture };
 }
@@ -97,6 +99,8 @@ describe("#getMatchedOffersByDealId", () => {
       offerFixture.paymentToken,
       offerFixture.effectors,
       offerFixture.peers,
+      offerFixture.minProtocolVersion,
+      offerFixture.maxProtocolVersion,
     );
     await tx.wait(DEFAULT_CONFIRMATIONS);
 

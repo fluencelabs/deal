@@ -13,6 +13,7 @@ library DealHelper {
         uint256 maxWorkersPerProvider;
         uint256 pricePerWorkerEpoch;
         CIDV1[] effectors;
+        uint256 protocolVersion;
     }
 
     // ------------------ Variables ------------------
@@ -22,7 +23,8 @@ library DealHelper {
         uint256 maxWorkersPerProvider,
         uint256 targetWorkers,
         uint256 pricePerWorkerEpoch,
-        uint256 depositAmount
+        uint256 depositAmount,
+        uint256 protocolVersion
     ) internal returns (IDeal, DealParams memory) {
         CIDV1[] memory effectors = new CIDV1[](10);
         for (uint256 i = 0; i < 10; i++) {
@@ -42,7 +44,8 @@ library DealHelper {
             pricePerWorkerEpoch,
             effectors,
             IConfig.AccessType.NONE,
-            new address[](0)
+            new address[](0),
+            protocolVersion
         );
 
         console.log("Deal deployed");
@@ -56,7 +59,8 @@ library DealHelper {
                 targetWorkers: targetWorkers,
                 maxWorkersPerProvider: maxWorkersPerProvider,
                 pricePerWorkerEpoch: pricePerWorkerEpoch,
-                effectors: effectors
+                effectors: effectors,
+                protocolVersion: protocolVersion
             })
         );
     }

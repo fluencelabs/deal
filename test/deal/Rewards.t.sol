@@ -31,10 +31,17 @@ contract Rewards is Test {
         uint256 targetWorkers = 3;
         uint256 pricePerWorkerEpoch = 1 ether;
         uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.core.minDealDepositedEpoches();
+        uint256 protocolVersion = deployment.core.minProtocolVersion();
 
         deployment.tUSD.safeApprove(address(deployment.dealFactory), minAmount);
-        (IDeal deal,) =
-            deployment.deployDeal(minWorkers, maxWorkersPerProvider, targetWorkers, pricePerWorkerEpoch, minAmount);
+        (IDeal deal,) = deployment.deployDeal(
+            minWorkers,
+            maxWorkersPerProvider,
+            targetWorkers,
+            pricePerWorkerEpoch,
+            minAmount,
+            protocolVersion
+        );
 
         address computeProvider = address(0x1234567890123456789012345678901234567890);
         bytes32 unitId = TestHelper.pseudoRandom(abi.encode(computeProvider, "unitId"));
@@ -62,7 +69,9 @@ contract Rewards is Test {
                     provider: computeProvider,
                     minPricePerWorkerEpoch: pricePerWorkerEpoch,
                     paymentToken: address(deployment.tUSD),
-                    peerCount: 1
+                    peerCount: 1,
+                    minProtocolVersion: deployment.core.minProtocolVersion(),
+                    maxProtocolVersion: deployment.core.maxProtocolVersion()
                 })
             )
         );
@@ -93,7 +102,9 @@ contract Rewards is Test {
                     provider: computeProvider,
                     minPricePerWorkerEpoch: pricePerWorkerEpoch,
                     paymentToken: address(deployment.tUSD),
-                    peerCount: 1
+                    peerCount: 1,
+                    minProtocolVersion: deployment.core.minProtocolVersion(),
+                    maxProtocolVersion: deployment.core.maxProtocolVersion()
                 })
             )
         );

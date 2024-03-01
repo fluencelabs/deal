@@ -15,6 +15,8 @@ contract GlobalConst is OwnableUpgradableDiamond, EpochController, IGlobalConst 
     struct GlobalConstStorage {
         uint256 minDealDepositedEpoches;
         uint256 minDealRematchingEpoches;
+        uint256 minProtocolVersion;
+        uint256 maxProtocolVersion;
     }
 
     function _getGlobalConstStorage() private pure returns (GlobalConstStorage storage s) {
@@ -25,7 +27,12 @@ contract GlobalConst is OwnableUpgradableDiamond, EpochController, IGlobalConst 
     }
 
     // ------------------ Initializer ------------------
-    function __GlobalConst_init(uint256 minDealDepositedEpoches_, uint256 minDealRematchingEpoches_)
+    function __GlobalConst_init(
+        uint256 minDealDepositedEpoches_,
+        uint256 minDealRematchingEpoches_,
+        uint256 minProtocolVersion_,
+        uint256 maxProtocolVersion_
+    )
         internal
         onlyInitializing
     {
@@ -33,6 +40,8 @@ contract GlobalConst is OwnableUpgradableDiamond, EpochController, IGlobalConst 
 
         globalConstantsStorage.minDealDepositedEpoches = minDealDepositedEpoches_;
         globalConstantsStorage.minDealRematchingEpoches = minDealRematchingEpoches_;
+        globalConstantsStorage.minProtocolVersion = minProtocolVersion_;
+        globalConstantsStorage.maxProtocolVersion = maxProtocolVersion_;
     }
 
     // ------------------ External View Functions ------------------
@@ -46,6 +55,14 @@ contract GlobalConst is OwnableUpgradableDiamond, EpochController, IGlobalConst 
 
     function minDealRematchingEpoches() public view override returns (uint256) {
         return _getGlobalConstStorage().minDealRematchingEpoches;
+    }
+
+    function minProtocolVersion() public view override returns (uint256) {
+        return _getGlobalConstStorage().minProtocolVersion;
+    }
+
+    function maxProtocolVersion() public view override returns (uint256) {
+        return _getGlobalConstStorage().maxProtocolVersion;
     }
 
     // ------------------ External Mutable Functions ------------------

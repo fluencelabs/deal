@@ -22,7 +22,9 @@ contract MarketTest is Test {
         bytes32 offerId,
         uint256 minPricePerWorkerEpoch,
         address paymentToken,
-        CIDV1[] effectors
+        CIDV1[] effectors,
+        uint256 minProtocolVersion,
+        uint256 maxProtocolVersion
     );
     event PeerCreated(bytes32 indexed offerId, bytes32 peerId, address owner);
     event ComputeUnitCreated(bytes32 indexed peerId, bytes32 unitId);
@@ -35,6 +37,8 @@ contract MarketTest is Test {
     uint256 minPricePerWorkerEpoch;
     address paymentToken;
     CIDV1[] effectors;
+    uint256 minProtocolVersion;
+    uint256 maxProtocolVersion;
 
     // ------------------ Test ------------------
     function setUp() public {
@@ -47,6 +51,8 @@ contract MarketTest is Test {
 
         paymentToken = address(deployment.tUSD);
         minPricePerWorkerEpoch = 1000;
+        minProtocolVersion = DeployDealSystem.DEFAULT_MIN_PROTOCOL_VERSION;
+        maxProtocolVersion = DeployDealSystem.DEFAULT_MAX_PROTOCOL_VERSION;
 
         for (uint256 i = 0; i < 10; i++) {
             effectors.push(CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("effector", i))}));
@@ -77,7 +83,13 @@ contract MarketTest is Test {
                 address(this),
                 block.number,
                 abi.encodeWithSelector(
-                    IOffer.registerMarketOffer.selector, minPricePerWorkerEpoch, paymentToken, effectors, registerPeers
+                    IOffer.registerMarketOffer.selector,
+                    minPricePerWorkerEpoch,
+                    paymentToken,
+                    effectors,
+                    registerPeers,
+                    minProtocolVersion,
+                    maxProtocolVersion
                 )
             )
         );
@@ -86,7 +98,15 @@ contract MarketTest is Test {
         deployment.market.setProviderInfo("test", CIDV1({prefixes: 0x12345678, hash: bytes32(0x00)}));
 
         vm.expectEmit(true, true, false, true, address(deployment.market));
-        emit MarketOfferRegistered(address(this), offerId, minPricePerWorkerEpoch, paymentToken, effectors);
+        emit MarketOfferRegistered(
+            address(this),
+            offerId,
+            minPricePerWorkerEpoch,
+            paymentToken,
+            effectors,
+            minProtocolVersion,
+            maxProtocolVersion
+        );
 
         for (uint256 i = 0; i < registerPeers.length; i++) {
             IOffer.RegisterComputePeer memory registerPeer = registerPeers[i];
@@ -102,21 +122,35 @@ contract MarketTest is Test {
             }
         }
 
-        bytes32 retOfferId =
-            deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, registerPeers);
+        bytes32 retOfferId = deployment.market.registerMarketOffer(
+            minPricePerWorkerEpoch,
+            paymentToken,
+            effectors,
+            registerPeers,
+            minProtocolVersion,
+            maxProtocolVersion
+        );
 
         assertEq(retOfferId, offerId, "OfferId mismatch");
     }
 
     function test_GetOfferPeersUnits() public {
         deployment.market.setProviderInfo("test", CIDV1({prefixes: 0x12345678, hash: bytes32(0x00)}));
-        bytes32 offerId =
-            deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, registerPeers);
+        bytes32 offerId = deployment.market.registerMarketOffer(
+            minPricePerWorkerEpoch,
+            paymentToken,
+            effectors,
+            registerPeers,
+            minProtocolVersion,
+            maxProtocolVersion
+        );
 
         Market.Offer memory offer = deployment.market.getOffer(offerId);
         assertEq(offer.provider, address(this));
         assertEq(offer.minPricePerWorkerEpoch, minPricePerWorkerEpoch);
         assertEq(offer.paymentToken, paymentToken);
+        assertEq(offer.minProtocolVersion, minProtocolVersion);
+        assertEq(offer.maxProtocolVersion, maxProtocolVersion);
 
         for (uint256 i = 0; i < registerPeers.length; i++) {
             Market.RegisterComputePeer memory registerPeer = registerPeers[i];

@@ -66,6 +66,7 @@ abstract contract Matcher is Offer, IMatcher {
         uint256 freeWorkerSlots = deal.targetWorkers() - dealComputeUnitCount;
         uint256 freeWorkerSlotsCurrent = freeWorkerSlots;
         uint256 maxWorkersPerProvider = deal.maxWorkersPerProvider();
+        uint256 protocolVersion = deal.getProtocolVersion();
         CIDV1[] memory effectors = deal.effectors();
 
         CIDV1 memory appCID = deal.appCID();
@@ -81,8 +82,12 @@ abstract contract Matcher is Offer, IMatcher {
 
             if (
                 // Check for blacklisted provider and others.
-                !deal.isProviderAllowed(offer.provider) || pricePerWorkerEpoch < offer.minPricePerWorkerEpoch
-                    || paymentToken != offer.paymentToken || !_hasOfferEffectors(offerId, effectors)
+                !deal.isProviderAllowed(offer.provider)
+                || pricePerWorkerEpoch < offer.minPricePerWorkerEpoch
+                || paymentToken != offer.paymentToken
+                || !_hasOfferEffectors(offerId, effectors)
+                || offer.minProtocolVersion > protocolVersion
+                || offer.maxProtocolVersion < protocolVersion
             ) {
                 continue;
             }
