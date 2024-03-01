@@ -140,7 +140,7 @@ jobs:
         working-directory: integration-tests
 
       - name: Run docker network
-        run: docker compose up -d
+        run: docker compose up -d --build
         working-directory: docker
 
       - name: Run integration tests

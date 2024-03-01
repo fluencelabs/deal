@@ -27,10 +27,6 @@ describe(
   () => {
     beforeAll(async () => {
       provider = new ethers.JsonRpcProvider(TEST_RPC_URL);
-      // signer = new ethers.Wallet(
-      //   "0x2AE9D3ABFA37CEA42FE829298CAC07CC25AF213A4C82BD74CBEFAD305C749B4F",
-      //   provider,
-      // );
       signer = await provider.getSigner();
       console.log(await signer.getAddress());
       contractsClient = new DealClient(signer, TEST_NETWORK);
@@ -146,6 +142,7 @@ describe(
       freeBalance = await deal.getFreeBalance();
       console.log("deal free balance", freeBalance);
 
+      // TODO: enable deal withdraw
       // console.log("Deal withdraw...");
       // await (
       //   await deal.withdraw(amountToDeposit / 2n)

@@ -24,7 +24,6 @@ export async function confirmEvents<
     blockNumber = internalTx?.blockNumber;
   }
   const events = await contract.queryFilter(event, blockNumber);
-  const lastEvents = events.reverse().slice(0, expectedEventCount);
-  expect(lastEvents.length).toBe(expectedEventCount);
-  return lastEvents;
+  expect(events.length).toBe(expectedEventCount);
+  return events;
 }
