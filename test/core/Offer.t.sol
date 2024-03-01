@@ -163,7 +163,7 @@ contract OfferTest is Test {
             DeployDealSystem.DEFAULT_MAX_PROTOCOL_VERSION + 1
         );
 
-        vm.expectRevert("Wrong protocol versions 1");
+        vm.expectRevert("Wrong protocol versions");
         deployment.market.registerMarketOffer(
             1,
             paymentToken,
