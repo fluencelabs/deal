@@ -63,6 +63,8 @@ interface ProviderModel {
     effectors: CID[];
     minPricePerEpoch: string;
     paymentTokenAddress: string;
+    minProtocolVersion: number;
+    maxProtocolVersion: number;
 }
 
 interface DealModel {
@@ -79,6 +81,7 @@ interface DealModel {
     effectors: CID[];
     listAccessType: number;  // 0 - standard, 1 - whitelist, 2 - blacklist
     listAccess: string[];
+    protocolVersion: number;
 }
 
 function initMarketFixture(paymentToken: string): MarketExample {
@@ -102,6 +105,8 @@ function initMarketFixture(paymentToken: string): MarketExample {
             effectors,
             minPricePerEpoch: minPricePerEpoch.toString(),
             paymentTokenAddress: paymentToken,
+            minProtocolVersion: 1,
+            maxProtocolVersion: 1,
         },
         providerToBeMatched: {
             providerAddress: "",
@@ -113,6 +118,8 @@ function initMarketFixture(paymentToken: string): MarketExample {
             effectors,
             minPricePerEpoch: minPricePerEpoch.toString(),
             paymentTokenAddress: paymentToken,
+            minProtocolVersion: 1,
+            maxProtocolVersion: 1,
         },
         providerWithoutCapacityCommitments: {
             providerAddress: "",
@@ -124,6 +131,8 @@ function initMarketFixture(paymentToken: string): MarketExample {
             effectors,
             minPricePerEpoch: minPricePerEpoch.toString(),
             paymentTokenAddress: paymentToken,
+            minProtocolVersion: 1,
+            maxProtocolVersion: 1,
         },
         dealToMatchWithWhiteListedProvider: {
             developerAddress: "",
@@ -138,6 +147,7 @@ function initMarketFixture(paymentToken: string): MarketExample {
             effectors,
             listAccessType: 1,
             listAccess: [],  // provider address will be added after.
+            protocolVersion: 1,
         },
         dealWithoutWhitelist: {
             developerAddress: "",
@@ -151,6 +161,7 @@ function initMarketFixture(paymentToken: string): MarketExample {
             effectors,
             listAccessType: 0,
             listAccess: [],
+            protocolVersion: 1,
         },
         dealWithWhitelist: {
             developerAddress: "",
@@ -164,6 +175,7 @@ function initMarketFixture(paymentToken: string): MarketExample {
             effectors,
             listAccessType: 0,
             listAccess: [],
+            protocolVersion: 1,
         },
     }
 }
@@ -181,7 +193,7 @@ async function main() {
     console.log('RPC_URL', RPC_URL)
     const provider = new ethers.JsonRpcProvider(RPC_URL);
 
-    let signer = null
+    let signer: ethers.Signer;
     if (FLUENCE_ENV == 'local') {
         console.log(`It used const mnemonic: ${LOCAL_SIGNER_MNEMONIC} for 1st signer...`)
         signer = ethers.Wallet.fromPhrase(LOCAL_SIGNER_MNEMONIC, provider);
@@ -243,6 +255,8 @@ async function main() {
             providerFixture.paymentTokenAddress,
             providerFixture.effectors.map((effector) => ({prefixes: effector.prefix, hash: effector.hash})),
             peerContractData,
+            providerFixture.minProtocolVersion,
+            providerFixture.maxProtocolVersion,
         );
         const registerMarketOfferTxResult = await registerMarketOfferTx.wait(WAIT_CONFIRMATIONS);
         // Save offer ID by parsing event.
@@ -344,6 +358,7 @@ async function main() {
             dealFixture.effectors.map((effector) => ({prefixes: effector.prefix, hash: effector.hash})),
             dealFixture.listAccessType,
             dealFixture.listAccess,
+            dealFixture.protocolVersion,
         );
         const createDealTxResult = await createDealTx.wait(WAIT_CONFIRMATIONS);
         dealFixture.dealId = getEventValue(

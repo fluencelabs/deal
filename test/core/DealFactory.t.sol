@@ -32,8 +32,9 @@ contract DealFactoryTest is Test {
         uint256 balanceBefore = deployment.tUSD.balanceOf(address(this));
 
         deployment.tUSD.safeApprove(address(deployment.dealFactory), minAmount);
+        uint256 protocolVersion = deployment.core.minProtocolVersion();
         (IDeal d, DealHelper.DealParams memory dealParams) =
-            deployment.deployDeal(1, 2, targetWorkers, pricePerWorkerEpoch, minAmount);
+            deployment.deployDeal(1, 2, targetWorkers, pricePerWorkerEpoch, minAmount, protocolVersion);
 
         uint256 balanceDiff = balanceBefore - deployment.tUSD.balanceOf(address(this));
 
@@ -62,9 +63,10 @@ contract DealFactoryTest is Test {
         uint256 pricePerWorkerEpoch = 1 ether;
         uint256 targetWorkers = 3;
         uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.core.minDealDepositedEpoches();
+        uint256 protocolVersion = deployment.core.minProtocolVersion();
 
         vm.expectRevert("ERC20: insufficient allowance");
-        deployment.deployDeal(1, 2, targetWorkers, pricePerWorkerEpoch, minAmount);
+        deployment.deployDeal(1, 2, targetWorkers, pricePerWorkerEpoch, minAmount, protocolVersion);
     }
 
     function test_RevertIf_NoEnoughBalance() public {
@@ -75,9 +77,10 @@ contract DealFactoryTest is Test {
         vm.startPrank(address(0x01));
 
         deployment.tUSD.safeApprove(address(deployment.dealFactory), minAmount * 100);
+        uint256 protocolVersion = deployment.core.minProtocolVersion();
 
         vm.expectRevert("ERC20: transfer amount exceeds balance");
-        deployment.deployDeal(1, 2, targetWorkers, pricePerWorkerEpoch, minAmount * 100);
+        deployment.deployDeal(1, 2, targetWorkers, pricePerWorkerEpoch, minAmount, protocolVersion);
 
         vm.stopPrank();
     }

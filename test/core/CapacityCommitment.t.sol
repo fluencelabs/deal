@@ -90,7 +90,14 @@ contract CapacityCommitmentTest is Test {
 
     function test_CreateCapacityCommitment() public {
         deployment.market.setProviderInfo("name", CIDV1({prefixes: 0x12345678, hash: bytes32(0)}));
-        deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, registerPeers);
+        deployment.market.registerMarketOffer(
+            minPricePerWorkerEpoch,
+            paymentToken,
+            effectors,
+            registerPeers,
+            deployment.core.minProtocolVersion(),
+            deployment.core.maxProtocolVersion()
+        );
 
         bytes32 peerId = registerPeers[0].peerId;
         bytes32 commitmentId =
@@ -114,7 +121,14 @@ contract CapacityCommitmentTest is Test {
     function test_GetCapacityCommitment() public {
         deployment.market.setProviderInfo("name", CIDV1({prefixes: 0x12345678, hash: bytes32(0)}));
 
-        deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, registerPeers);
+        deployment.market.registerMarketOffer(
+            minPricePerWorkerEpoch,
+            paymentToken,
+            effectors,
+            registerPeers,
+            deployment.core.minProtocolVersion(),
+            deployment.core.maxProtocolVersion()
+        );
 
         bytes32 peerId = registerPeers[0].peerId;
 
@@ -154,7 +168,14 @@ contract CapacityCommitmentTest is Test {
     function test_DepositCollateral() public {
         deployment.market.setProviderInfo("name", CIDV1({prefixes: 0x12345678, hash: bytes32(0)}));
 
-        deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, registerPeers);
+        deployment.market.registerMarketOffer(
+            minPricePerWorkerEpoch,
+            paymentToken,
+            effectors,
+            registerPeers,
+            deployment.core.minProtocolVersion(),
+            deployment.core.maxProtocolVersion()
+        );
 
         uint256 amountTotal = 0;
         bytes32[] memory createdCCIds = new bytes32[](registerPeers.length);
@@ -292,7 +313,14 @@ contract CapacityCommitmentTest is Test {
         returns (bytes32 commitmentId, bytes32 offerId)
     {
         deployment.market.setProviderInfo("name", CIDV1({prefixes: 0x12345678, hash: bytes32(0)}));
-        offerId = deployment.market.registerMarketOffer(minPricePerWorkerEpoch, paymentToken, effectors, registerPeers);
+        offerId = deployment.market.registerMarketOffer(
+            minPricePerWorkerEpoch,
+            paymentToken,
+            effectors,
+            registerPeers,
+            deployment.core.minProtocolVersion(),
+            deployment.core.maxProtocolVersion()
+        );
 
         (commitmentId, offerId) = _createCapacityCommitment(peerId);
 
