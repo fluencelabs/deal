@@ -58,9 +58,6 @@
     "typescript": "^5.1.6",
     "vitest": "^1.0.4"
   },
-  "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "4.6.1"
-  },
   "eslintConfig": {
     "env": {
       "browser": true,
