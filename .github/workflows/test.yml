@@ -141,11 +141,7 @@ jobs:
 
       - name: Run docker network
         run: docker compose up -d
-        working-directory: .github
-        env:
-          CHAIN_RPC_IMAGE: "docker.fluence.dev/chain-rpc:release-please-f33fcf7-2274-1"
-          CHAIN_DEPLOY_SCRIPT_IMAGE: "docker.fluence.dev/chain-deploy-script:release-please-f33fcf7-2274-1"
-          SUBGRAPH_DEPLOY_SCRIPT_IMAGE: "docker.fluence.dev/subgraph-deploy-script:release-please-f33fcf7-2274-1"
+        working-directory: docker
 
       - name: Run integration tests
         run: npm run test deal.test
