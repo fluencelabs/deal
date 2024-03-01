@@ -358,10 +358,7 @@ async function main() {
             dealFixture.effectors.map((effector) => ({prefixes: effector.prefix, hash: effector.hash})),
             dealFixture.listAccessType,
             dealFixture.listAccess,
-<<<<<<< HEAD
             dealFixture.protocolVersion,
-=======
->>>>>>> main
         );
         const createDealTxResult = await createDealTx.wait(WAIT_CONFIRMATIONS);
         dealFixture.dealId = getEventValue(
