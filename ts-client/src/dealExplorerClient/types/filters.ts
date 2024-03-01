@@ -95,6 +95,8 @@ export type CapacityCommitmentsOrderBy =
 export type ProofsOrderBy = "createdAt" | "epoch";
 export type ComputeUnitsOrderBy = "createdAt";
 export type ProofStatsByCapacityCommitmentOrderBy = "epoch";
-export type ComputeUnitStatsPerCapacityCommitmentEpochOrderBy = "id" | "submittedProofsCount";
+export type ComputeUnitStatsPerCapacityCommitmentEpochOrderBy =
+  | "id"
+  | "submittedProofsCount";
 
 export type OrderType = "asc" | "desc";

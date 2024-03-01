@@ -31,7 +31,7 @@ import type {
   ComputeUnitBasicFragment,
 } from "../indexerClient/queries/deals-query.generated.js";
 import type { CapacityCommitmentBasicFragment } from "../indexerClient/queries/capacity-commitments-query.generated.js";
-import {FLTToken} from "../constants.js";
+import { FLTToken } from "../constants.js";
 
 // TODO: rename to scheme suffixes not there is a Zoo in naming a little.
 export function serializeEffectors(
@@ -218,7 +218,9 @@ export function serializeCapacityCommitmentShort(
     peerId: capacityCommitmentFromIndexer.peer.id,
     computeUnitsCount: Number(capacityCommitmentFromIndexer.computeUnitsCount),
     status: statusFromRpc,
-    rewardDelegatorRate: Number(capacityCommitmentFromIndexer.rewardDelegatorRate),
+    rewardDelegatorRate: Number(
+      capacityCommitmentFromIndexer.rewardDelegatorRate,
+    ),
     duration: Number(capacityCommitmentFromIndexer.duration),
   };
 }
@@ -247,11 +249,19 @@ export function serializeCapacityCommitmentDetail(
     collateralToken: FLTToken,
     rewardDelegatorRate: rewardDelegatorRate,
     rewardsUnlocked: tokenValueToRounded(_unlockedRewards),
-    rewardsUnlockedDelegator: tokenValueToRounded(_unlockedRewards * BigInt(rewardDelegatorRate)),
-    rewardsUnlockedProvider: tokenValueToRounded(_unlockedRewards * BigInt(1 - rewardDelegatorRate)),
+    rewardsUnlockedDelegator: tokenValueToRounded(
+      _unlockedRewards * BigInt(rewardDelegatorRate),
+    ),
+    rewardsUnlockedProvider: tokenValueToRounded(
+      _unlockedRewards * BigInt(1 - rewardDelegatorRate),
+    ),
     rewardsNotWithdrawn: tokenValueToRounded(_totalRewards),
-    rewardsNotWithdrawnDelegator: tokenValueToRounded(_totalRewards * BigInt(rewardDelegatorRate)),
-    rewardsNotWithdrawnProvider: tokenValueToRounded(_totalRewards * BigInt(1 - rewardDelegatorRate)),
+    rewardsNotWithdrawnDelegator: tokenValueToRounded(
+      _totalRewards * BigInt(rewardDelegatorRate),
+    ),
+    rewardsNotWithdrawnProvider: tokenValueToRounded(
+      _totalRewards * BigInt(1 - rewardDelegatorRate),
+    ),
     rewardsTotal: tokenValueToRounded(_totalRewards + rewardWithdrawn),
-  }
+  };
 }

@@ -7,7 +7,7 @@ import {
 import {
   createOrLoadDealEffector,
   createOrLoadDealToProvidersAccess,
-  createOrLoadGraphNetwork,
+  createOrLoadGraphNetwork, createOrLoadToken,
   createOrLoadUnregisteredProvider,
   UNO_BIG_INT,
   ZERO_BIG_INT,
@@ -34,7 +34,7 @@ export function handleDealCreated(event: DealCreated): void {
   deal.createdAt = event.block.timestamp;
   deal.owner = formatAddress(event.params.owner);
 
-  deal.paymentToken = formatAddress(event.params.paymentToken);
+  deal.paymentToken = createOrLoadToken(event.params.paymentToken).id;
   deal.minWorkers = event.params.minWorkers.toI32();
   deal.targetWorkers = event.params.targetWorkers.toI32();
   deal.maxWorkersPerProvider = event.params.maxWorkersPerProvider.toI32();

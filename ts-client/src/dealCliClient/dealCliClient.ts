@@ -1,6 +1,6 @@
 import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type { ContractsENV } from "../client/config.js";
-import type {OfferDetail} from "./types/schemes.js";
+import type { OfferDetail } from "./types/schemes.js";
 
 /*
  * @dev This client represents endpoints to access desirable indexer data in REST
@@ -13,25 +13,29 @@ export class DealCliClient {
 
   // @param indexerUrl: is optional. If use the param you replace indexer
   //  URL setting from network config mapping.
-  constructor(
-    network: ContractsENV,
-    indexerUrl?: string,
-  ) {
+  constructor(network: ContractsENV, indexerUrl?: string) {
     this.indexerClient = new IndexerClient(network, indexerUrl);
   }
 
   async getOffer(offerId: string): Promise<OfferDetail> {
-    const fetchedOffer = (await this.indexerClient.getOffer({id: offerId,})).offer
+    const fetchedOffer = (await this.indexerClient.getOffer({ id: offerId }))
+      .offer;
     if (!fetchedOffer) {
-      throw new Error(`Offer with id ${offerId} does not exist in indexer.`)
+      throw new Error(`Offer with id ${offerId} does not exist in indexer.`);
     }
     return {
       id: fetchedOffer.id,
-      peerIds: fetchedOffer.peers?.map((peer) => {return peer.id}) ?? [],
-      effectors: fetchedOffer.effectors?.map((data) => {return {
-        cid: data.effector.id,
-        description: data.effector.description,
-      }}) ?? []
-    }
+      peerIds:
+        fetchedOffer.peers?.map((peer) => {
+          return peer.id;
+        }) ?? [],
+      effectors:
+        fetchedOffer.effectors?.map((data) => {
+          return {
+            cid: data.effector.id,
+            description: data.effector.description,
+          };
+        }) ?? [],
+    };
   }
 }
