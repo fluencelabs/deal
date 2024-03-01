@@ -2,14 +2,12 @@ import { assert, beforeAll, describe, expect, test } from "vitest";
 import { createCommitments, registerMarketOffer } from "./helpers.js";
 import { ethers, JsonRpcProvider, JsonRpcSigner } from "ethers";
 import { type ContractsENV, DealClient } from "@fluencelabs/deal-ts-clients";
-import dns from "node:dns/promises";
 import { confirmEvents } from "./confirmations.js";
 import { DEFAULT_CONFIRMATIONS } from "./constants.js";
 import { skipEpoch } from "./utils.js";
 
-const ip = await dns.lookup("akim-dev.dev.fluence.dev");
 const TEST_NETWORK: ContractsENV = "local";
-const TEST_RPC_URL = `http://${ip.address}:8545`;
+const TEST_RPC_URL = `http://localhost:8545`;
 const DEFAULT_TEST_TIMEOUT = 180000;
 
 let provider: JsonRpcProvider;

@@ -20,7 +20,6 @@ import {
   type GetMatchedOffersOut,
 } from "@fluencelabs/deal-ts-clients";
 import { ethers, JsonRpcProvider, type JsonRpcSigner, Wallet } from "ethers";
-import dns from "node:dns/promises";
 import { DEFAULT_CONFIRMATIONS } from "./constants.js";
 import {
   createCommitments,
@@ -30,12 +29,8 @@ import {
 
 // TODO: from env.
 
-const ip = await dns.lookup("akim-dev.dev.fluence.dev");
 const TEST_NETWORK: ContractsENV = "local";
-const TEST_RPC_URL = `http://${ip.address}:8545`;
-const TEST_RPC_IPC_URL = `https://ipc-stage.fluence.dev`;
-const IPC_PRIVATE_KEY =
-  "0xBA8D6C1FF4C54D156C7ABF8B2615A47BA41B9ED776DD5B03AA1FD89C37EE4AA7";
+const TEST_RPC_URL = `http://local:8545`;
 const DEFAULT_SUBGRAPH_TIME_INDEXING = 300000;
 const DEFAULT_TEST_TIMEOUT = 180000;
 // Test timeout should include:
@@ -171,7 +166,7 @@ describe("#getMatchedOffersByDealId", () => {
 
       const dealMatcherClient = new DealMatcherClient(
         TEST_NETWORK,
-        `http://${ip.address}:8000/subgraphs/name/fluence-deal-contracts`,
+        `http://localhost:8000/subgraphs/name/fluence-deal-contracts`,
       );
 
       let matchedOffersOut: GetMatchedOffersOut;
