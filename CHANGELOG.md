@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.3](https://github.com/fluencelabs/deal/compare/v0.7.2...v0.7.3) (2024-03-03)
+
+
+### Features
+
+* **dar:** redeploy contracts with big MAX_FAILED_RATIO ([#312](https://github.com/fluencelabs/deal/issues/312)) ([154bdcd](https://github.com/fluencelabs/deal/commit/154bdcd699d2459603dbd403be1e95792380525d))
+
 ## [0.7.2](https://github.com/fluencelabs/deal/compare/v0.7.1...v0.7.2) (2024-03-02)
 
 
