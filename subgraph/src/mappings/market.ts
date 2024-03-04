@@ -92,10 +92,10 @@ export function handleMarketOfferRegistered(
   // - emit PeerCreated(offerId, peer.peerId);
   // - emit ComputeUnitCreated(offerId, peerId, unitId);
 
-  const provider = Provider.load(event.params.provider.toHex()) as Provider;
+  const provider = Provider.load(event.params.provider.toHexString()) as Provider;
 
   // Create Offer.
-  const offer = new Offer(event.params.offerId.toHex());
+  const offer = new Offer(event.params.offerId.toHexString());
   offer.provider = provider.id;
   offer.paymentToken = createOrLoadToken(event.params.paymentToken).id;
   offer.pricePerEpoch = event.params.minPricePerWorkerEpoch;
@@ -127,12 +127,12 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
   // Parent events:
   // - emit PeerCreated(offerId, peer.peerId);
   // - emit MarketOfferRegistered
-  let peer = Peer.load(event.params.peerId.toHex()) as Peer;
+  let peer = Peer.load(event.params.peerId.toHexString()) as Peer;
   const offer = Offer.load(peer.offer) as Offer;
   const provider = Provider.load(offer.provider) as Provider;
 
   // Since handlePeerCreated could not work with this handler, this logic moved here.
-  const computeUnit = new ComputeUnit(event.params.unitId.toHex());
+  const computeUnit = new ComputeUnit(event.params.unitId.toHexString());
   computeUnit.provider = peer.provider;
   computeUnit.peer = peer.id;
   computeUnit.submittedProofsCount = 0;
@@ -155,8 +155,8 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
 
 // It updates Peer and Offer.
 export function handlePeerCreated(event: PeerCreated): void {
-  const peer = new Peer(event.params.peerId.toHex());
-  const offer = Offer.load(event.params.offerId.toHex()) as Offer;
+  const peer = new Peer(event.params.peerId.toHexString());
+  const offer = Offer.load(event.params.offerId.toHexString()) as Offer;
   const provider = Provider.load(offer.provider) as Provider;
   provider.peerCount = provider.peerCount + 1;
   provider.save();
@@ -177,19 +177,19 @@ export function handlePeerCreated(event: PeerCreated): void {
 export function handleMinPricePerEpochUpdated(
   event: MinPricePerEpochUpdated,
 ): void {
-  const offer = Offer.load(event.params.offerId.toHex()) as Offer;
+  const offer = Offer.load(event.params.offerId.toHexString()) as Offer;
   offer.pricePerEpoch = event.params.minPricePerWorkerEpoch;
   offer.save();
 }
 
 export function handlePaymentTokenUpdated(event: PaymentTokenUpdated): void {
-  const offer = Offer.load(event.params.offerId.toHex()) as Offer;
+  const offer = Offer.load(event.params.offerId.toHexString()) as Offer;
   offer.paymentToken = createOrLoadToken(event.params.paymentToken).id;
   offer.save();
 }
 
 export function handleEffectorAdded(event: EffectorAdded): void {
-  const offer = Offer.load(event.params.offerId.toHex()) as Offer;
+  const offer = Offer.load(event.params.offerId.toHexString()) as Offer;
   const appCID = changetype<AppCID>(event.params.effector);
   const cid = getEffectorCID(appCID);
   const effector = createOrLoadEffector(cid);
@@ -204,7 +204,7 @@ export function handleEffectorAdded(event: EffectorAdded): void {
 }
 
 export function handleEffectorRemoved(event: EffectorRemoved): void {
-  const offer = Offer.load(event.params.offerId.toHex()) as Offer;
+  const offer = Offer.load(event.params.offerId.toHexString()) as Offer;
   const appCID = changetype<AppCID>(event.params.effector);
   const cidToRemove = getEffectorCID(appCID);
   const effector = createOrLoadEffector(cidToRemove);
@@ -224,7 +224,7 @@ export function handleComputeUnitAddedToDeal(
   event: ComputeUnitAddedToDeal,
 ): void {
   // Call the contract to extract peerId of the computeUnit.
-  let peer = Peer.load(event.params.peerId.toHex()) as Peer;
+  let peer = Peer.load(event.params.peerId.toHexString()) as Peer;
   const offer = Offer.load(peer.offer) as Offer;
   const provider = Provider.load(offer.provider) as Provider;
   let deal = Deal.load(formatAddress(event.params.deal)) as Deal;
@@ -258,10 +258,10 @@ export function handleComputeUnitRemovedFromDeal(
   event: ComputeUnitRemovedFromDeal,
 ): void {
   // Call the contract to extract peerId of the computeUnit.
-  let peer = Peer.load(event.params.peerId.toHex()) as Peer;
+  let peer = Peer.load(event.params.peerId.toHexString()) as Peer;
   const offer = Offer.load(peer.offer) as Offer;
   const provider = Provider.load(offer.provider) as Provider;
-  let computeUnit = ComputeUnit.load(event.params.unitId.toHex()) as ComputeUnit;
+  let computeUnit = ComputeUnit.load(event.params.unitId.toHexString()) as ComputeUnit;
   let deal = Deal.load(formatAddress(event.params.deal)) as Deal;
 
   const dealToPeerReturn = createOrLoadDealToPeer(deal.id, peer.id);
