@@ -597,7 +597,7 @@ jobs:
           ${{ needs.chain-rpc.outputs.chain-deploy-script-image }}
           ```
 
-          ## subgraph-seploy-script
+          ## subgraph-deploy-script
           ```
           ${{ needs.subgraph.outputs.subgraph-deploy-script-image }}
           ```
