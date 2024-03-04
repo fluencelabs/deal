@@ -83,6 +83,7 @@ describe(
         registeredOffer.effectors,
         0,
         [],
+        1,
       );
 
       await deployDealTs.wait(DEFAULT_CONFIRMATIONS);
