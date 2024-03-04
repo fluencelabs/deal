@@ -15,16 +15,16 @@ export type DealsQueryQueryVariables = Types.Exact<{
 }>;
 
 
-export type DealsQueryQuery = { __typename?: 'Query', deals: Array<{ __typename?: 'Deal', id: string, createdAt: any, minWorkers: number, targetWorkers: number, owner: string, registeredWorkersCurrentCount: number, matchedWorkersCurrentCount: number, providersAccessType: number, maxPaidEpoch?: any | null, depositedSum: any, withdrawalSum: any, paymentToken: { __typename?: 'Token', id: string, symbol: string, decimals: number }, effectors?: Array<{ __typename?: 'DealToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null, addedComputeUnits?: Array<{ __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string } }> | null, providersAccessList?: Array<{ __typename?: 'DealToProvidersAccess', id: string }> | null }>, graphNetworks: Array<{ __typename?: 'GraphNetwork', dealsTotal: any }> };
+export type DealsQueryQuery = { __typename?: 'Query', deals: Array<{ __typename?: 'Deal', id: string, createdAt: any, minWorkers: number, targetWorkers: number, owner: string, registeredWorkersCurrentCount: number, matchedWorkersCurrentCount: number, providersAccessType: number, maxPaidEpoch?: any | null, depositedSum: any, withdrawalSum: any, paymentToken: { __typename?: 'Token', id: string, symbol: string, decimals: number }, effectors?: Array<{ __typename?: 'DealToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null, addedComputeUnits?: Array<{ __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string } }> | null, providersAccessList?: Array<{ __typename?: 'DealToProvidersAccess', provider: { __typename?: 'Provider', id: string } }> | null }>, graphNetworks: Array<{ __typename?: 'GraphNetwork', dealsTotal: any }> };
 
 export type DealQueryQueryVariables = Types.Exact<{
   id: Types.Scalars['ID']['input'];
 }>;
 
 
-export type DealQueryQuery = { __typename?: 'Query', deal?: { __typename?: 'Deal', maxWorkersPerProvider: number, appCID: string, pricePerWorkerEpoch: any, id: string, createdAt: any, minWorkers: number, targetWorkers: number, owner: string, registeredWorkersCurrentCount: number, matchedWorkersCurrentCount: number, providersAccessType: number, maxPaidEpoch?: any | null, depositedSum: any, withdrawalSum: any, paymentToken: { __typename?: 'Token', id: string, symbol: string, decimals: number }, effectors?: Array<{ __typename?: 'DealToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null, addedComputeUnits?: Array<{ __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string } }> | null, providersAccessList?: Array<{ __typename?: 'DealToProvidersAccess', id: string }> | null } | null };
+export type DealQueryQuery = { __typename?: 'Query', deal?: { __typename?: 'Deal', maxWorkersPerProvider: number, appCID: string, pricePerWorkerEpoch: any, id: string, createdAt: any, minWorkers: number, targetWorkers: number, owner: string, registeredWorkersCurrentCount: number, matchedWorkersCurrentCount: number, providersAccessType: number, maxPaidEpoch?: any | null, depositedSum: any, withdrawalSum: any, paymentToken: { __typename?: 'Token', id: string, symbol: string, decimals: number }, effectors?: Array<{ __typename?: 'DealToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null, addedComputeUnits?: Array<{ __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string } }> | null, providersAccessList?: Array<{ __typename?: 'DealToProvidersAccess', provider: { __typename?: 'Provider', id: string } }> | null } | null };
 
-export type BasicDealFragment = { __typename?: 'Deal', id: string, createdAt: any, minWorkers: number, targetWorkers: number, owner: string, registeredWorkersCurrentCount: number, matchedWorkersCurrentCount: number, providersAccessType: number, maxPaidEpoch?: any | null, depositedSum: any, withdrawalSum: any, paymentToken: { __typename?: 'Token', id: string, symbol: string, decimals: number }, effectors?: Array<{ __typename?: 'DealToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null, addedComputeUnits?: Array<{ __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string } }> | null, providersAccessList?: Array<{ __typename?: 'DealToProvidersAccess', id: string }> | null };
+export type BasicDealFragment = { __typename?: 'Deal', id: string, createdAt: any, minWorkers: number, targetWorkers: number, owner: string, registeredWorkersCurrentCount: number, matchedWorkersCurrentCount: number, providersAccessType: number, maxPaidEpoch?: any | null, depositedSum: any, withdrawalSum: any, paymentToken: { __typename?: 'Token', id: string, symbol: string, decimals: number }, effectors?: Array<{ __typename?: 'DealToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null, addedComputeUnits?: Array<{ __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string } }> | null, providersAccessList?: Array<{ __typename?: 'DealToProvidersAccess', provider: { __typename?: 'Provider', id: string } }> | null };
 
 export type ComputeUnitBasicFragment = { __typename?: 'ComputeUnit', id: string, workerId?: string | null, provider: { __typename?: 'Provider', id: string } };
 
@@ -80,7 +80,9 @@ export const BasicDealFragmentDoc = gql`
   }
   providersAccessType
   providersAccessList {
-    id
+    provider {
+      id
+    }
   }
   maxPaidEpoch
   depositedSum

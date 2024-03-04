@@ -1212,6 +1212,8 @@ export type DealToJoinedOfferPeer_OrderBy =
 
 export type DealToPeer = {
   __typename?: 'DealToPeer';
+  /** Helper field to understand number of connections. */
+  connections: Scalars['Int']['output'];
   deal: Deal;
   id: Scalars['ID']['output'];
   peer: Peer;
@@ -1221,6 +1223,14 @@ export type DealToPeer_Filter = {
   /** Filter for the block changed event. */
   _change_block?: InputMaybe<BlockChangedFilter>;
   and?: InputMaybe<Array<InputMaybe<DealToPeer_Filter>>>;
+  connections?: InputMaybe<Scalars['Int']['input']>;
+  connections_gt?: InputMaybe<Scalars['Int']['input']>;
+  connections_gte?: InputMaybe<Scalars['Int']['input']>;
+  connections_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  connections_lt?: InputMaybe<Scalars['Int']['input']>;
+  connections_lte?: InputMaybe<Scalars['Int']['input']>;
+  connections_not?: InputMaybe<Scalars['Int']['input']>;
+  connections_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
   deal?: InputMaybe<Scalars['String']['input']>;
   deal_?: InputMaybe<Deal_Filter>;
   deal_contains?: InputMaybe<Scalars['String']['input']>;
@@ -1275,6 +1285,7 @@ export type DealToPeer_Filter = {
 };
 
 export type DealToPeer_OrderBy =
+  | 'connections'
   | 'deal'
   | 'deal__appCID'
   | 'deal__createdAt'
