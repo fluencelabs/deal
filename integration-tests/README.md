@@ -13,5 +13,6 @@
 
 - Run the following command `cd ts-client && npm i && npm run build && npm pack`
 - Copy the created archive to **integration-tests** folder
+  - or you could use 1 lined command: `npm i -s ../ts-client/fluencelabs-deal-ts-clients-0.7.3.tgz`
 - Put the archive name to **package.json** e.g. `"@fluencelabs/deal-ts-clients": "./fluencelabs-deal-ts-clients-0.2.22.tgz",`
 - Run `npm i`
