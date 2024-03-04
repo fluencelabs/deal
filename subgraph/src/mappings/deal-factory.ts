@@ -23,11 +23,11 @@ import { AppCID, formatAddress, getEffectorCID, parseEffectors } from "./utils";
 
 // ---- Factory Events ----
 export function handleDealCreated(event: DealCreated): void {
-  const dealAddress = formatAddress(event.params.deal);
-  log.info("[handleDealCreated] New deal created: {} by: {}", [
-    event.params.owner.toString(),
-    dealAddress.toString(),
+  log.info("[handleDealCreated] Create new Deal with address: {} with owner: {}", [
+    event.params.deal.toHexString(),
+    event.params.owner.toHexString()
   ]);
+  const dealAddress = formatAddress(event.params.deal);
 
   const deal = new Deal(dealAddress);
   let graphNetwork = createOrLoadGraphNetwork();
