@@ -34,7 +34,6 @@ import {
   Peer,
   Provider,
 } from "../../generated/schema";
-import { Deal as DealTemplate } from "../../generated/templates";
 import {AppCID, formatAddress, getEffectorCID, parseEffectors} from "./utils";
 
 export function handleInitialized(event: Initialized): void {
@@ -220,6 +219,7 @@ export function handleEffectorRemoved(event: EffectorRemoved): void {
 }
 
 // Note, in Deal we also handle ComputeUnitJoined.
+// Note, this event is kinda the main event for match CU with deal.
 export function handleComputeUnitAddedToDeal(
   event: ComputeUnitAddedToDeal,
 ): void {
@@ -227,14 +227,16 @@ export function handleComputeUnitAddedToDeal(
   let peer = Peer.load(event.params.peerId.toHex()) as Peer;
   const offer = Offer.load(peer.offer) as Offer;
   const provider = Provider.load(offer.provider) as Provider;
-  const deal = Deal.load(formatAddress(event.params.deal)) as Deal;
+  let deal = Deal.load(formatAddress(event.params.deal)) as Deal;
 
   createOrLoadDealToPeer(deal.id, peer.id);
   createOrLoadDealToJoinedOfferPeer(deal.id, offer.id, peer.id);
-
   peer.isAnyJoinedDeals = true;
 
   // Upd stats.
+  deal.matchedWorkersCurrentCount = deal.matchedWorkersCurrentCount + 1;
+  deal.save();
+
   peer.computeUnitsInDeal = peer.computeUnitsInDeal + 1;
   peer.save()
 
@@ -253,6 +255,8 @@ export function handleComputeUnitRemovedFromDeal(
   let peer = Peer.load(event.params.peerId.toHex()) as Peer;
   const offer = Offer.load(peer.offer) as Offer;
   const provider = Provider.load(offer.provider) as Provider;
+  let computeUnit = ComputeUnit.load(event.params.unitId.toHex()) as ComputeUnit;
+  let deal = Deal.load(formatAddress(event.params.deal)) as Deal;
 
   const dealToPeer = createOrLoadDealToPeer(event.address.toHex(), peer.id);
   const dealToJoinedOfferPeer = createOrLoadDealToJoinedOfferPeer(event.address.toHex(), offer.id, peer.id);
@@ -263,6 +267,12 @@ export function handleComputeUnitRemovedFromDeal(
   }
 
   // Upd stats.
+  deal.matchedWorkersCurrentCount = deal.matchedWorkersCurrentCount - 1;
+  if (computeUnit.workerId == null) {
+    deal.registeredWorkersCurrentCount = deal.registeredWorkersCurrentCount - 1;
+  }
+  deal.save();
+
   peer.computeUnitsInDeal = peer.computeUnitsInDeal - 1;
   peer.save()
 

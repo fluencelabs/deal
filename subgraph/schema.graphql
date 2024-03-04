@@ -205,6 +205,9 @@ type Deal @entity {
   withdrawalSum: BigInt!
   depositedSum: BigInt!  # calculated from the withdraw() [no rewards withdraw].
   maxPaidEpoch: BigInt
+  registeredWorkersCurrentCount: Int!
+  "Currently matched workers == matched compute units."
+  matchedWorkersCurrentCount: Int!
 
   "I.e. Matching Result (Figma)."
   addedComputeUnits: [ComputeUnit!] @derivedFrom(field: "deal")

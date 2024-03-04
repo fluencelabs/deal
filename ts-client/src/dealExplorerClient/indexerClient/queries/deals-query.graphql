@@ -36,6 +36,8 @@ fragment BasicDeal on Deal {
     minWorkers
     targetWorkers
     owner
+    registeredWorkersCurrentCount
+    matchedWorkersCurrentCount
     paymentToken {
       id
       symbol

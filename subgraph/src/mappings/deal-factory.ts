@@ -43,6 +43,8 @@ export function handleDealCreated(event: DealCreated): void {
   deal.appCID = getEffectorCID(appCID);
   deal.withdrawalSum = ZERO_BIG_INT;
   deal.depositedSum = ZERO_BIG_INT;
+  deal.registeredWorkersCurrentCount = 0;
+  deal.matchedWorkersCurrentCount = 0;
 
   // Perform provider access lists (whitelist, blacklist or non).
   deal.providersAccessType = event.params.providersAccessType_;
