@@ -229,7 +229,13 @@ export function handleComputeUnitAddedToDeal(
   const provider = Provider.load(offer.provider) as Provider;
   let deal = Deal.load(formatAddress(event.params.deal)) as Deal;
 
-  createOrLoadDealToPeer(deal.id, peer.id);
+  const createOrLoadDealToPeerResult = createOrLoadDealToPeer(deal.id, peer.id);
+  // Check if we need to incr counter if mapping was merely loaded before.
+  if (!createOrLoadDealToPeerResult.created) {
+    const createOrLoadDealToPeer = createOrLoadDealToPeerResult.entity;
+    createOrLoadDealToPeer.connections = createOrLoadDealToPeer.connections + 1;
+    createOrLoadDealToPeer.save();
+  }
   createOrLoadDealToJoinedOfferPeer(deal.id, offer.id, peer.id);
   peer.isAnyJoinedDeals = true;
 
@@ -258,10 +264,14 @@ export function handleComputeUnitRemovedFromDeal(
   let computeUnit = ComputeUnit.load(event.params.unitId.toHex()) as ComputeUnit;
   let deal = Deal.load(formatAddress(event.params.deal)) as Deal;
 
-  const dealToPeer = createOrLoadDealToPeer(event.address.toHex(), peer.id);
-  const dealToJoinedOfferPeer = createOrLoadDealToJoinedOfferPeer(event.address.toHex(), offer.id, peer.id);
-  store.remove("DealToPeer", dealToPeer.id);
-  store.remove("DealToJoinedOfferPeer", dealToJoinedOfferPeer.id);
+  const dealToPeerReturn = createOrLoadDealToPeer(deal.id, peer.id);
+  const dealToPeer = dealToPeerReturn.entity;
+  // Check that deal has other CUs from the same peer before rm connection: Deal Vs Peer.
+  if (dealToPeer.connections == 1) {
+    const dealToJoinedOfferPeer = createOrLoadDealToJoinedOfferPeer(deal.id, offer.id, peer.id);
+    store.remove("DealToPeer", dealToPeer.id);
+    store.remove("DealToJoinedOfferPeer", dealToJoinedOfferPeer.id);
+  }
   if (peer.joinedDeals.load().length == 0) {
     peer.isAnyJoinedDeals = false;
   }

@@ -160,6 +160,8 @@ type DealToPeer @entity(immutable: true) {
     id: ID! # Set to `deal.id.concat(peer.id)`
     deal: Deal!
     peer: Peer!
+    "Helper field to understand number of connections."
+    connections: Int!
 }
 
 """
