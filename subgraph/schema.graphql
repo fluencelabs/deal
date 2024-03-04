@@ -25,7 +25,7 @@ type GraphNetwork @entity {
   minRequiredProofsPerEpoch: Int
 }
 
-type Token @entity(immutable: true) {
+type Token @entity {
   id: ID!  # Token Address
   symbol: String!
   decimals: Int!
@@ -150,13 +150,13 @@ type ComputeUnit @entity {
 }
 
 # ---- Deal Contract ----
-type DealToEffector @entity(immutable: true) {
+type DealToEffector @entity {
     id: ID! # Set to `deal.id.concat(effector.id)`
     deal: Deal!
     effector: Effector!
 }
 
-type DealToPeer @entity(immutable: true) {
+type DealToPeer @entity {
     id: ID! # Set to `deal.id.concat(peer.id)`
     deal: Deal!
     peer: Peer!
@@ -169,7 +169,7 @@ TODO: deprecate.
 To add possibility to filter already joined peers into a Deal from perspective of an Offer
 (protocol does not allow more than one CU per peer for the same Deal).
 """
-type DealToJoinedOfferPeer @entity(immutable: true) {
+type DealToJoinedOfferPeer @entity {
     id: ID! # Set to `deal.id.concat(offer.id.concat(peer.id))`
     deal: Deal!
     offer: Offer!  # search offers initially using this fk relation.
@@ -177,7 +177,7 @@ type DealToJoinedOfferPeer @entity(immutable: true) {
 }
 
 "It represents m2m b/w deal and provider in context of access list."
-type DealToProvidersAccess @entity(immutable: true) {
+type DealToProvidersAccess @entity {
   id: ID! # Set to `deal.id.concat(provider.id)`
   deal: Deal!
   provider: Provider!
@@ -225,7 +225,7 @@ enum CapacityCommitmentStatus {
   Removed
 }
 
-type CapacityCommitmentToComputeUnit @entity(immutable: true) {
+type CapacityCommitmentToComputeUnit @entity {
   id: ID! # Set to `capacityCommitment.id.concat(computeUnit.id)`
   capacityCommitment: CapacityCommitment!
   computeUnit: ComputeUnit!
@@ -270,7 +270,7 @@ type CapacityCommitment @entity {
   provider: Provider!
 }
 
-type SubmittedProof @entity(immutable: true) {
+type SubmittedProof @entity {
   "Id here is a transaction hash."
   id: ID!
   capacityCommitment: CapacityCommitment!
