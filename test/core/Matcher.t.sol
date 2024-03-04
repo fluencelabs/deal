@@ -245,7 +245,7 @@ contract DealMock {
     }
 
     function getStatus() external pure returns (IDeal.Status) {
-        return IDeal.Status.INACTIVE;
+        return IDeal.Status.INSUFFICIENT_FUNDS;
     }
 
     function addComputeUnit(address computeProvider, bytes32 unitId, bytes32 peerId) external {

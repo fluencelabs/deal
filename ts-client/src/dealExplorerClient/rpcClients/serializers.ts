@@ -13,14 +13,18 @@ export function serializeTxDealStatus(result: Result | null): DealStatus {
   const converted = Number(result);
   switch (converted) {
     case 0: {
-      status = "inactive";
+      status = "notEnoughWorkers";
       break;
     }
     case 1: {
-      status = "active";
+      status = "insufficientFunds";
       break;
     }
     case 2: {
+      status = "active";
+      break;
+    }
+    case 3: {
       status = "ended";
       break;
     }
