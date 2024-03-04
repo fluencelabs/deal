@@ -327,7 +327,7 @@ export class DealExplorerClient {
       console.warn("Filter deals by status if not implemented.");
     }
     return await this._getDealsImpl(
-      { providerId: dealsByProviderFilter.providerId?.toLowerCase() },
+      { providerId: dealsByProviderFilter.providerId.toLowerCase() },
       offset,
       limit,
       orderBy,
