@@ -12,7 +12,6 @@ import "src/core/Core.sol";
 import "src/dev/OwnableFaucet.sol";
 import "src/dev/TestERC20.sol";
 import "./utils/Depoyments.sol";
-import "src/utils/Multicall3.sol";
 import "src/core/Core.sol";
 import "src/core/interfaces/ICore.sol";
 import "src/core/modules/market/Market.sol";
@@ -92,10 +91,6 @@ contract DeployContracts is Depoyments, Script {
 
         _startDeploy();
         IERC20 tUSD = _deployTestTokens();
-
-        // Deploy Multicall3 as **helper** contract to fetch info only from the chain.
-        // Thus, this contract is not belongs to Fluence contract ecosystem.
-        _deployMulticall3();
 
         if (env.chainId == LOCAL_CHAIN_ID) {
             string memory mnemonic = vm.envOr("ANVIL_MNEMONIC", DEFAULT_ANVIL_MNEMONIC);
@@ -215,11 +210,6 @@ contract DeployContracts is Depoyments, Script {
     function _deployTestTokens() internal returns (IERC20 tUSD) {
         bytes memory args = abi.encode("USD Token", "tUSD", 6);
         tUSD = IERC20(_deployContract("tUSD", "TestERC20", args));
-    }
-
-    function _deployMulticall3() internal returns (Multicall3 multicall) {
-        bytes memory args = abi.encode();
-        multicall = Multicall3(_deployContract("Multicall3", "Multicall3", args));
     }
 
     function _deployTestFaucet(IERC20 tUSD) internal returns (address faucet, bool isNew) {
