@@ -11,6 +11,7 @@ import {
   CapacityCommitmentToComputeUnit,
   CapacityCommitmentStatsPerEpoch,
   ComputeUnitPerEpochStat,
+  ComputeUnit,
 } from "../generated/schema";
 import {Address, BigInt, Bytes} from "@graphprotocol/graph-ts";
 import { getTokenDecimals, getTokenSymbol } from "./contracts";
@@ -250,8 +251,11 @@ export function createOrLoadComputeUnitPerEpochStat(computeUnitId: string, epoch
   let entity = ComputeUnitPerEpochStat.load(concattedIds);
 
   if (entity == null) {
+    let computeUnit = ComputeUnit.load(computeUnitId) as ComputeUnit;
     entity = new ComputeUnitPerEpochStat(concattedIds)
     entity.submittedProofsCount = 0;
+    entity.epoch = BigInt.fromString(epoch);
+    entity.computeUnit = computeUnit.id;
     entity.save()
   }
   return entity as ComputeUnitPerEpochStat
