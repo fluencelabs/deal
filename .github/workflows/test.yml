@@ -128,7 +128,7 @@ jobs:
           forge build --sizes
 
       - name: Run docker network
-        run: docker compose up -d --build
+        run: docker compose up -d ipfs postgres chain-rpc blockscout graph-node --build && docker compose up chain-deploy-script --build
         working-directory: docker
 
       - name: Install deps in ts-client package
