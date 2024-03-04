@@ -1,3 +1,5 @@
+// All main view methods consist of notice docstring to refer to Figma screen
+//  e.g. // @notice [Figma] Deal.
 // @dev There is a lot of "total: null," in the code - we await subgraph feature:
 //  return counter of filtration (currently 14.02.24 it is impossible).
 import { ethers } from "ethers";
