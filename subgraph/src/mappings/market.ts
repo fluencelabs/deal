@@ -227,9 +227,11 @@ export function handleComputeUnitAddedToDeal(
   let peer = Peer.load(event.params.peerId.toHex()) as Peer;
   const offer = Offer.load(peer.offer) as Offer;
   const provider = Provider.load(offer.provider) as Provider;
+  const deal = Deal.load(formatAddress(event.params.deal)) as Deal;
 
-  createOrLoadDealToPeer(event.address.toHex(), peer.id);
-  createOrLoadDealToJoinedOfferPeer(event.address.toHex(), offer.id, peer.id);
+  createOrLoadDealToPeer(deal.id, peer.id);
+  createOrLoadDealToJoinedOfferPeer(deal.id, offer.id, peer.id);
+
   peer.isAnyJoinedDeals = true;
 
   // Upd stats.
