@@ -31,5 +31,7 @@ export function getDefaultOfferFixture(owner: string, paymentToken: string) {
     paymentToken: paymentToken,
     effectors: [randomCID()],
     peers: [getPeerFixture(owner, 1)],
+    minProtocolVersion: 1,
+    maxProtocolVersion: 1,
   };
 }

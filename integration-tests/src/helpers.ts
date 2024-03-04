@@ -26,6 +26,8 @@ export async function registerMarketOffer(
     registeredOffer.paymentToken,
     registeredOffer.effectors,
     registeredOffer.peers,
+    registeredOffer.minProtocolVersion,
+    registeredOffer.maxProtocolVersion,
   );
   await tx.wait(DEFAULT_CONFIRMATIONS);
 
