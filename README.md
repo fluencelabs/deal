@@ -13,29 +13,32 @@ is presented. Below are main commands of the makefile.
 
 # Table of contents
 
-* [Table of contents](#table-of-contents)
-* [Requirements](#requirements)
-* [Contract](#contract)
-   * [Env](#env)
-      * [Notable Env](#notable-env)
-   * [Makefile](#makefile)
-      * [Install NPM packages](#install-npm-packages)
-      * [Build](#build)
-         * [Build contracts and deal-ts-clients and subgraph](#build-contracts-and-deal-ts-clients-and-subgraph)
-         * [Build only contracts](#build-only-contracts)
-         * [Build only in npm packages](#build-only-in-npm-packages)
-      * [Start Local Subgraph](#deploy-subgraph-local)
-      * [Start local network using docker](#start-local-network-using-docker)
-      * [Start local network locally](#start-local-network-locally)
-      * [Deploy to network](#deploy-to-network)
-   * [Test](#test)
-   * [Format](#format)
-   * [Troubleshooting](#troubleshooting)
-   * [Gas Snapshots](#gas-snapshots)
-* [Subgraph (Contract Indexer)](#subgraph-contract-indexer)
-   * [Development Tricks &amp; Tips](#development-tricks--tips)
-* [Development with Deal Infrastructure](#development-with-deal-infrastructure)
-* [Ts-Client](#ts-client
+- [Deal Contracts System](#deal-contracts-system)
+- [Table of contents](#table-of-contents)
+- [Requirements](#requirements)
+- [Contract](#contract)
+  - [Env](#env)
+    - [Notable Env](#notable-env)
+  - [Makefile](#makefile)
+    - [Install NPM packages](#install-npm-packages)
+    - [Build](#build)
+      - [Build contracts and deal-ts-clients and subgraph](#build-contracts-and-deal-ts-clients-and-subgraph)
+      - [Build only contracts](#build-only-contracts)
+      - [Build only in npm packages](#build-only-in-npm-packages)
+    - [Start Local Subgraph](#start-local-subgraph)
+    - [Start local network using docker](#start-local-network-using-docker)
+    - [Start local network locally](#start-local-network-locally)
+    - [Deploy to network](#deploy-to-network)
+  - [Test](#test)
+  - [Format](#format)
+  - [Troubleshooting](#troubleshooting)
+  - [Gas Snapshots](#gas-snapshots)
+- [Subgraph (Contract Indexer)](#subgraph-contract-indexer)
+  - [Development Tricks & Tips](#development-tricks--tips)
+- [Development Guid (with Deal Infrastructure)](#development-guid-with-deal-infrastructure)
+  - [Tips](#tips)
+- [Ts-Client](#ts-client)
+
 
 # Requirements
 Full requirements to develop in this repo.
@@ -171,12 +174,11 @@ market on our contracts:
 $ make create-pure-market-local
 ```
 
-# Development with Deal Infrastructure
+# Development Guid (with Deal Infrastructure)
 
 > TODO: add flow on how to work with already built images from registry.
 
-Let`s suppose you want to boot up local network and subgraph to develop on the
-infrastructure of the repo locally.
+Let`s suppose you want to boot up local network and subgraph (thus, all deal infrastructure) to develop on the repo locally.
 
 1. Clone this repo. Clone with submodules, e.g.: `git submodule update --init --recursive`
 
@@ -184,10 +186,12 @@ infrastructure of the repo locally.
 2. Start local chain node containers (chain, explorer, deploy script):
 
 ```bash
-docker compose -f docker/docker-compose.yml up -d
+docker compose -f docker/docker-compose.yml up -d --build
 ````
 
-`chain-deploy-script` will produce `deployment/local.json` file that is used in
+| Note, you can omit `--build` flag if you have already built images locally, nothing to rebuild.
+
+| Note, that `chain-deploy-script` will produce `deployment/local.json` file that is used in
 the next steps.
 
 3. Prepare npm packages:
@@ -200,7 +204,7 @@ make build-npms
 4. Deploy subgraph:
 
 ```bash
-make deploy-subgraph-{network_name}
+make deploy-subgraph-local
 ```
 
 5. [Optional] Since contracts are fresh and empty you can fill them with test
@@ -210,11 +214,20 @@ make deploy-subgraph-{network_name}
 make create-pure-market-local
 ```
 
-To stop and cleanup dev environment run:
+## Tips
+- To stop and cleanup dev environment run:
 
 ```bash
 docker-compose -f docker/docker-compose.yml down --volumes
 ```
+
+- To redeploy contracts:
+
+```bash
+make deploy-contracts-local
+```
+
+and do not forget to repeat from 3d step (depends on your needs). 
 
 # Ts-Client
 for `ts-client` module check out [README.md](ts-client/README.md).
