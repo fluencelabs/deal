@@ -127,6 +127,10 @@ jobs:
           forge --version
           forge build --sizes
 
+      - name: Run docker network
+        run: docker compose up -d --build
+        working-directory: docker
+
       - name: Install deps in ts-client package
         run: npm install
         working-directory: ts-client
@@ -138,10 +142,6 @@ jobs:
       - name: Install packed ts-client
         run: npm i
         working-directory: integration-tests
-
-      - name: Run docker network
-        run: docker compose up -d --build
-        working-directory: docker
 
       - name: Run integration tests
         run: npm run test deal.test
