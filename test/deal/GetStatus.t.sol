@@ -40,7 +40,7 @@ contract GetStatus is Test {
         dealContract.setWorkerCount(5);
         dealContract.setMaxPaidEpoch(100);
 
-        assertEq(uint8(dealContract.getStatus()), uint8(IDeal.Status.NOT_ENOUGH_WORKERS), "Status mismatch");
+        assertEq(uint8(dealContract.getStatus()), uint8(IDeal.Status.INACTIVE), "Status mismatc");
     }
 
     function test_WhenCurrentEpochMoreThenMaxPaid() public {
@@ -49,7 +49,7 @@ contract GetStatus is Test {
         testCore.setCurrentEpoch(101);
         dealContract.setMaxPaidEpoch(100);
 
-        assertEq(uint8(dealContract.getStatus()), uint8(IDeal.Status.INSUFFICIENT_FUNDS), "Status mismatch");
+        assertEq(uint8(dealContract.getStatus()), uint8(IDeal.Status.INACTIVE), "Status mismatc");
     }
 
     function test_WhenActive() public {
