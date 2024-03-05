@@ -277,7 +277,12 @@ export interface ProofByComputeUnitListView extends ListViewABC {
 }
 
 // Status undefined == problem with networks, etc.
-export type DealStatus = "inactive" | "active" | "ended" | "undefined";
+export type DealStatus =
+  | "insufficientFunds"
+  | "active"
+  | "ended"
+  | "notEnoughWorkers"
+  | "undefined";
 export type CapacityCommitmentStatus =
   | "active"
   | "waitDelegation"

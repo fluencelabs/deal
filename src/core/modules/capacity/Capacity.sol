@@ -238,22 +238,25 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
             activeUnitCount: 0,
             nextAdditionalActiveUnitCount: 0
         });
-        peer.commitmentId = commitmentId;
-
+        market.setCommitmentId(peerId, commitmentId);
+        
         emit CommitmentCreated(peerId, commitmentId, duration, delegator, rewardDelegationRate, collateralPerUnit);
 
         return commitmentId;
     }
 
     function removeCommitment(bytes32 commitmentId) external {
+        IMarket market = core.market();
         CommitmentStorage storage s = _getCommitmentStorage();
         Commitment storage cc = s.commitments[commitmentId];
-        IMarket.ComputePeer memory peer = core.market().getComputePeer(cc.info.peerId);
+        bytes32 peerId = cc.info.peerId;
+
+        IMarket.ComputePeer memory peer = market.getComputePeer(peerId);
 
         require(cc.info.startEpoch == 0, "Capacity commitment is created");
 
         delete s.commitments[commitmentId];
-        peer.commitmentId = bytes32(0x00);
+        market.setCommitmentId(peerId, bytes32(0x00));
 
         emit CommitmentRemoved(commitmentId);
     }
@@ -294,8 +297,6 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
             _setActiveUnitCount(activeUnitCount() + unitCount);
 
             cc.info.status = CCStatus.Active;
-
-            market.setCommitmentId(peerId, commitmentId);
 
             emit CollateralDeposited(commitmentId, collateral);
             emit CommitmentActivated(
