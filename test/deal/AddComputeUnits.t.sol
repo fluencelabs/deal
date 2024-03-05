@@ -68,7 +68,7 @@ contract AddComputeUnits is Test {
         uint256 targetWorkers = 10;
         Deal deal = deployment.deployDealWithoutFactory(2, targetWorkers, 1, 1 ether, 10 ether);
 
-        assertEq(uint256(deal.getStatus()), uint256(IDeal.Status.NOT_ENOUGH_WORKERS), "status should be INACTIVE");
+        assertEq(uint256(deal.getStatus()), uint256(IDeal.Status.NOT_ENOUGH_WORKERS), "status should be NOT_ENOUGH_WORKERS");
         assertEq(deal.getMaxPaidEpoch(), 0, "maxPaidEpoch should be 0");
 
         (address[] memory computeProviders, bytes32[] memory peerIds, bytes32[] memory unitIds) =
