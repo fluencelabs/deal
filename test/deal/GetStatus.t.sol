@@ -49,7 +49,7 @@ contract GetStatus is Test {
         testCore.setCurrentEpoch(101);
         dealContract.setMaxPaidEpoch(100);
 
-        assertEq(uint8(dealContract.getStatus()), uint8(IDeal.Status.INSUFFICIENT_FUNDS), "Status mismatc");
+        assertEq(uint8(dealContract.getStatus()), uint8(IDeal.Status.INSUFFICIENT_FUNDS), "Status mismatch");
     }
 
     function test_WhenActive() public {
