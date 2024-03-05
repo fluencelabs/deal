@@ -148,22 +148,6 @@ contract CapacityCommitmentTest is Test {
         assertEq(commitment.exitedUnitCount, 0, "ExitedUnitCount mismatch");
     }
 
-    // Mirror function _failedEpoch internal method in this case (after deposit).
-    function _failedEpoch(
-        uint256 maxFailedRatio_,
-        uint256 unitCount_,
-        uint256 activeUnitCount_,
-        uint256 nextAdditionalActiveUnitCount_,
-        uint256 totalCUFailCount_,
-        uint256 lastSnapshotEpoch_
-    ) private pure returns (uint256 failedEpoch) {
-        uint256 maxFails = maxFailedRatio_ * unitCount_;
-        uint256 remainingFails = maxFails - totalCUFailCount_;
-        remainingFails = remainingFails - activeUnitCount_;
-        activeUnitCount_ += nextAdditionalActiveUnitCount_;
-        failedEpoch = 1 + lastSnapshotEpoch_ + (remainingFails / activeUnitCount_);
-    }
-
     // Note, it also tests that it is possible to approve FLT once for total sum, before deposit to several CCs.
     function test_DepositCollateral() public {
         deployment.market.setProviderInfo("name", CIDV1({prefixes: 0x12345678, hash: bytes32(0)}));

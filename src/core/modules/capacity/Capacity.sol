@@ -303,6 +303,8 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
                 peerId, commitmentId, startEpoch, startEpoch + cc.info.duration, market.getComputeUnitIds(peerId)
             );
         }
+
+        require(totalValue == 0, "Excessive value");
     }
 
     function finishCommitment(bytes32 commitmentId) external {
