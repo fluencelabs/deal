@@ -234,6 +234,7 @@ export function serializeCapacityCommitmentDetail(
   unlockedRewards: bigint | null,
   totalRewards: bigint | null,
   rewardWithdrawn: bigint,
+  delegatorAddress: string,
 ): CapacityCommitmentDetail {
   const _totalRewards = totalRewards ? totalRewards : BigInt(0);
   const _unlockedRewards = unlockedRewards ? unlockedRewards : BigInt(0);
@@ -262,5 +263,6 @@ export function serializeCapacityCommitmentDetail(
       _totalRewards * BigInt(1 - rewardDelegatorRate),
     ),
     rewardsTotal: tokenValueToRounded(_totalRewards + rewardWithdrawn),
+    delegatorAddress: delegatorAddress == "0x0000000000000000000000000000000000000000" ? null : delegatorAddress,
   };
 }

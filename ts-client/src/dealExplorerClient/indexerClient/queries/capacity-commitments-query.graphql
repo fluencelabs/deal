@@ -24,6 +24,7 @@ query CapacityCommitmentQuery(
 ) {
   capacityCommitment(id: $id) {
     ...CapacityCommitmentBasic
+      delegator
       computeUnits {
         computeUnit {
           id

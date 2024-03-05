@@ -49,6 +49,7 @@ export interface CapacityCommitmentShort {
 // @param rewardsUnlocked: reward for CC that unlocked now to withdraw (claim).
 // @param rewardsNotWithdrawn: accumulated for now, not yet withdrawn rewards.
 // @param rewardsTotal: total accumulated rewards over time: withdrawn + still not withdrawn.
+// @param delegatorAddress: it returns address if delegator exists otherwise null.
 export interface CapacityCommitmentDetail extends CapacityCommitmentShort {
   totalCollateral: string;
   collateralToken: NativeToken;
@@ -59,6 +60,7 @@ export interface CapacityCommitmentDetail extends CapacityCommitmentShort {
   rewardsNotWithdrawnProvider: string;
   rewardsNotWithdrawnDelegator: string;
   rewardsTotal: string;
+  delegatorAddress: string | null;
 }
 
 // TODO: check that free compute units - just means not in deal!
