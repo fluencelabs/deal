@@ -179,9 +179,8 @@ export function serializeDealsShort(
       DEFAULT_TOKEN_VALUE_ROUNDING,
       deal.paymentToken.decimals,
     ),
-    // TODO: add missed implementations.
-    registeredWorkers: 0,
-    matchedWorkers: 0,
+    registeredWorkers: deal.registeredWorkersCurrentCount,
+    matchedWorkers: deal.matchedWorkersCurrentCount,
   };
 }
 

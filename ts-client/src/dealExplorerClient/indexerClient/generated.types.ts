@@ -903,12 +903,14 @@ export type ComputeUnit_OrderBy =
   | 'deal__createdAt'
   | 'deal__depositedSum'
   | 'deal__id'
+  | 'deal__matchedWorkersCurrentCount'
   | 'deal__maxPaidEpoch'
   | 'deal__maxWorkersPerProvider'
   | 'deal__minWorkers'
   | 'deal__owner'
   | 'deal__pricePerWorkerEpoch'
   | 'deal__providersAccessType'
+  | 'deal__registeredWorkersCurrentCount'
   | 'deal__targetWorkers'
   | 'deal__withdrawalSum'
   | 'id'
@@ -945,6 +947,8 @@ export type Deal = {
   id: Scalars['ID']['output'];
   /** Many to many to access joined peers to maintain protocol restrictions */
   joinedPeers?: Maybe<Array<DealToPeer>>;
+  /** Currently matched workers == matched compute units. */
+  matchedWorkersCurrentCount: Scalars['Int']['output'];
   maxPaidEpoch?: Maybe<Scalars['BigInt']['output']>;
   maxWorkersPerProvider: Scalars['Int']['output'];
   minWorkers: Scalars['Int']['output'];
@@ -954,6 +958,7 @@ export type Deal = {
   providersAccessList?: Maybe<Array<DealToProvidersAccess>>;
   /** It represents AccessType of Deal contract. */
   providersAccessType: Scalars['Int']['output'];
+  registeredWorkersCurrentCount: Scalars['Int']['output'];
   targetWorkers: Scalars['Int']['output'];
   withdrawalSum: Scalars['BigInt']['output'];
 };
@@ -1064,12 +1069,14 @@ export type DealToEffector_OrderBy =
   | 'deal__createdAt'
   | 'deal__depositedSum'
   | 'deal__id'
+  | 'deal__matchedWorkersCurrentCount'
   | 'deal__maxPaidEpoch'
   | 'deal__maxWorkersPerProvider'
   | 'deal__minWorkers'
   | 'deal__owner'
   | 'deal__pricePerWorkerEpoch'
   | 'deal__providersAccessType'
+  | 'deal__registeredWorkersCurrentCount'
   | 'deal__targetWorkers'
   | 'deal__withdrawalSum'
   | 'effector'
@@ -1175,12 +1182,14 @@ export type DealToJoinedOfferPeer_OrderBy =
   | 'deal__createdAt'
   | 'deal__depositedSum'
   | 'deal__id'
+  | 'deal__matchedWorkersCurrentCount'
   | 'deal__maxPaidEpoch'
   | 'deal__maxWorkersPerProvider'
   | 'deal__minWorkers'
   | 'deal__owner'
   | 'deal__pricePerWorkerEpoch'
   | 'deal__providersAccessType'
+  | 'deal__registeredWorkersCurrentCount'
   | 'deal__targetWorkers'
   | 'deal__withdrawalSum'
   | 'id'
@@ -1203,6 +1212,8 @@ export type DealToJoinedOfferPeer_OrderBy =
 
 export type DealToPeer = {
   __typename?: 'DealToPeer';
+  /** Helper field to understand number of connections. */
+  connections: Scalars['Int']['output'];
   deal: Deal;
   id: Scalars['ID']['output'];
   peer: Peer;
@@ -1212,6 +1223,14 @@ export type DealToPeer_Filter = {
   /** Filter for the block changed event. */
   _change_block?: InputMaybe<BlockChangedFilter>;
   and?: InputMaybe<Array<InputMaybe<DealToPeer_Filter>>>;
+  connections?: InputMaybe<Scalars['Int']['input']>;
+  connections_gt?: InputMaybe<Scalars['Int']['input']>;
+  connections_gte?: InputMaybe<Scalars['Int']['input']>;
+  connections_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  connections_lt?: InputMaybe<Scalars['Int']['input']>;
+  connections_lte?: InputMaybe<Scalars['Int']['input']>;
+  connections_not?: InputMaybe<Scalars['Int']['input']>;
+  connections_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
   deal?: InputMaybe<Scalars['String']['input']>;
   deal_?: InputMaybe<Deal_Filter>;
   deal_contains?: InputMaybe<Scalars['String']['input']>;
@@ -1266,17 +1285,20 @@ export type DealToPeer_Filter = {
 };
 
 export type DealToPeer_OrderBy =
+  | 'connections'
   | 'deal'
   | 'deal__appCID'
   | 'deal__createdAt'
   | 'deal__depositedSum'
   | 'deal__id'
+  | 'deal__matchedWorkersCurrentCount'
   | 'deal__maxPaidEpoch'
   | 'deal__maxWorkersPerProvider'
   | 'deal__minWorkers'
   | 'deal__owner'
   | 'deal__pricePerWorkerEpoch'
   | 'deal__providersAccessType'
+  | 'deal__registeredWorkersCurrentCount'
   | 'deal__targetWorkers'
   | 'deal__withdrawalSum'
   | 'id'
@@ -1361,12 +1383,14 @@ export type DealToProvidersAccess_OrderBy =
   | 'deal__createdAt'
   | 'deal__depositedSum'
   | 'deal__id'
+  | 'deal__matchedWorkersCurrentCount'
   | 'deal__maxPaidEpoch'
   | 'deal__maxWorkersPerProvider'
   | 'deal__minWorkers'
   | 'deal__owner'
   | 'deal__pricePerWorkerEpoch'
   | 'deal__providersAccessType'
+  | 'deal__registeredWorkersCurrentCount'
   | 'deal__targetWorkers'
   | 'deal__withdrawalSum'
   | 'id'
@@ -1431,6 +1455,14 @@ export type Deal_Filter = {
   id_not?: InputMaybe<Scalars['ID']['input']>;
   id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>;
   joinedPeers_?: InputMaybe<DealToPeer_Filter>;
+  matchedWorkersCurrentCount?: InputMaybe<Scalars['Int']['input']>;
+  matchedWorkersCurrentCount_gt?: InputMaybe<Scalars['Int']['input']>;
+  matchedWorkersCurrentCount_gte?: InputMaybe<Scalars['Int']['input']>;
+  matchedWorkersCurrentCount_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  matchedWorkersCurrentCount_lt?: InputMaybe<Scalars['Int']['input']>;
+  matchedWorkersCurrentCount_lte?: InputMaybe<Scalars['Int']['input']>;
+  matchedWorkersCurrentCount_not?: InputMaybe<Scalars['Int']['input']>;
+  matchedWorkersCurrentCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
   maxPaidEpoch?: InputMaybe<Scalars['BigInt']['input']>;
   maxPaidEpoch_gt?: InputMaybe<Scalars['BigInt']['input']>;
   maxPaidEpoch_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -1514,6 +1546,14 @@ export type Deal_Filter = {
   providersAccessType_lte?: InputMaybe<Scalars['Int']['input']>;
   providersAccessType_not?: InputMaybe<Scalars['Int']['input']>;
   providersAccessType_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  registeredWorkersCurrentCount?: InputMaybe<Scalars['Int']['input']>;
+  registeredWorkersCurrentCount_gt?: InputMaybe<Scalars['Int']['input']>;
+  registeredWorkersCurrentCount_gte?: InputMaybe<Scalars['Int']['input']>;
+  registeredWorkersCurrentCount_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  registeredWorkersCurrentCount_lt?: InputMaybe<Scalars['Int']['input']>;
+  registeredWorkersCurrentCount_lte?: InputMaybe<Scalars['Int']['input']>;
+  registeredWorkersCurrentCount_not?: InputMaybe<Scalars['Int']['input']>;
+  registeredWorkersCurrentCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
   targetWorkers?: InputMaybe<Scalars['Int']['input']>;
   targetWorkers_gt?: InputMaybe<Scalars['Int']['input']>;
   targetWorkers_gte?: InputMaybe<Scalars['Int']['input']>;
@@ -1540,6 +1580,7 @@ export type Deal_OrderBy =
   | 'effectors'
   | 'id'
   | 'joinedPeers'
+  | 'matchedWorkersCurrentCount'
   | 'maxPaidEpoch'
   | 'maxWorkersPerProvider'
   | 'minWorkers'
@@ -1551,6 +1592,7 @@ export type Deal_OrderBy =
   | 'pricePerWorkerEpoch'
   | 'providersAccessList'
   | 'providersAccessType'
+  | 'registeredWorkersCurrentCount'
   | 'targetWorkers'
   | 'withdrawalSum';
 
@@ -1617,13 +1659,16 @@ export type Effector_OrderBy =
 export type GraphNetwork = {
   __typename?: 'GraphNetwork';
   capacityCommitmentsTotal: Scalars['BigInt']['output'];
+  capacityContractAddress?: Maybe<Scalars['String']['output']>;
   capacityMaxFailedRatio?: Maybe<Scalars['Int']['output']>;
+  coreContractAddress?: Maybe<Scalars['String']['output']>;
   coreEpochDuration?: Maybe<Scalars['Int']['output']>;
   dealsTotal: Scalars['BigInt']['output'];
   effectorsTotal: Scalars['BigInt']['output'];
   /** ID is set to 1 */
   id: Scalars['ID']['output'];
   initTimestamp?: Maybe<Scalars['Int']['output']>;
+  marketContractAddress?: Maybe<Scalars['String']['output']>;
   minRequiredProofsPerEpoch?: Maybe<Scalars['Int']['output']>;
   offersTotal: Scalars['BigInt']['output'];
   proofsTotal: Scalars['BigInt']['output'];
@@ -1643,6 +1688,26 @@ export type GraphNetwork_Filter = {
   capacityCommitmentsTotal_lte?: InputMaybe<Scalars['BigInt']['input']>;
   capacityCommitmentsTotal_not?: InputMaybe<Scalars['BigInt']['input']>;
   capacityCommitmentsTotal_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  capacityContractAddress?: InputMaybe<Scalars['String']['input']>;
+  capacityContractAddress_contains?: InputMaybe<Scalars['String']['input']>;
+  capacityContractAddress_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  capacityContractAddress_ends_with?: InputMaybe<Scalars['String']['input']>;
+  capacityContractAddress_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  capacityContractAddress_gt?: InputMaybe<Scalars['String']['input']>;
+  capacityContractAddress_gte?: InputMaybe<Scalars['String']['input']>;
+  capacityContractAddress_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  capacityContractAddress_lt?: InputMaybe<Scalars['String']['input']>;
+  capacityContractAddress_lte?: InputMaybe<Scalars['String']['input']>;
+  capacityContractAddress_not?: InputMaybe<Scalars['String']['input']>;
+  capacityContractAddress_not_contains?: InputMaybe<Scalars['String']['input']>;
+  capacityContractAddress_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  capacityContractAddress_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  capacityContractAddress_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  capacityContractAddress_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  capacityContractAddress_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  capacityContractAddress_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  capacityContractAddress_starts_with?: InputMaybe<Scalars['String']['input']>;
+  capacityContractAddress_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
   capacityMaxFailedRatio?: InputMaybe<Scalars['Int']['input']>;
   capacityMaxFailedRatio_gt?: InputMaybe<Scalars['Int']['input']>;
   capacityMaxFailedRatio_gte?: InputMaybe<Scalars['Int']['input']>;
@@ -1651,6 +1716,26 @@ export type GraphNetwork_Filter = {
   capacityMaxFailedRatio_lte?: InputMaybe<Scalars['Int']['input']>;
   capacityMaxFailedRatio_not?: InputMaybe<Scalars['Int']['input']>;
   capacityMaxFailedRatio_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  coreContractAddress?: InputMaybe<Scalars['String']['input']>;
+  coreContractAddress_contains?: InputMaybe<Scalars['String']['input']>;
+  coreContractAddress_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  coreContractAddress_ends_with?: InputMaybe<Scalars['String']['input']>;
+  coreContractAddress_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  coreContractAddress_gt?: InputMaybe<Scalars['String']['input']>;
+  coreContractAddress_gte?: InputMaybe<Scalars['String']['input']>;
+  coreContractAddress_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  coreContractAddress_lt?: InputMaybe<Scalars['String']['input']>;
+  coreContractAddress_lte?: InputMaybe<Scalars['String']['input']>;
+  coreContractAddress_not?: InputMaybe<Scalars['String']['input']>;
+  coreContractAddress_not_contains?: InputMaybe<Scalars['String']['input']>;
+  coreContractAddress_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  coreContractAddress_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  coreContractAddress_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  coreContractAddress_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  coreContractAddress_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  coreContractAddress_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  coreContractAddress_starts_with?: InputMaybe<Scalars['String']['input']>;
+  coreContractAddress_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
   coreEpochDuration?: InputMaybe<Scalars['Int']['input']>;
   coreEpochDuration_gt?: InputMaybe<Scalars['Int']['input']>;
   coreEpochDuration_gte?: InputMaybe<Scalars['Int']['input']>;
@@ -1691,6 +1776,26 @@ export type GraphNetwork_Filter = {
   initTimestamp_lte?: InputMaybe<Scalars['Int']['input']>;
   initTimestamp_not?: InputMaybe<Scalars['Int']['input']>;
   initTimestamp_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  marketContractAddress?: InputMaybe<Scalars['String']['input']>;
+  marketContractAddress_contains?: InputMaybe<Scalars['String']['input']>;
+  marketContractAddress_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  marketContractAddress_ends_with?: InputMaybe<Scalars['String']['input']>;
+  marketContractAddress_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  marketContractAddress_gt?: InputMaybe<Scalars['String']['input']>;
+  marketContractAddress_gte?: InputMaybe<Scalars['String']['input']>;
+  marketContractAddress_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  marketContractAddress_lt?: InputMaybe<Scalars['String']['input']>;
+  marketContractAddress_lte?: InputMaybe<Scalars['String']['input']>;
+  marketContractAddress_not?: InputMaybe<Scalars['String']['input']>;
+  marketContractAddress_not_contains?: InputMaybe<Scalars['String']['input']>;
+  marketContractAddress_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  marketContractAddress_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  marketContractAddress_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  marketContractAddress_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  marketContractAddress_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  marketContractAddress_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  marketContractAddress_starts_with?: InputMaybe<Scalars['String']['input']>;
+  marketContractAddress_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
   minRequiredProofsPerEpoch?: InputMaybe<Scalars['Int']['input']>;
   minRequiredProofsPerEpoch_gt?: InputMaybe<Scalars['Int']['input']>;
   minRequiredProofsPerEpoch_gte?: InputMaybe<Scalars['Int']['input']>;
@@ -1736,12 +1841,15 @@ export type GraphNetwork_Filter = {
 
 export type GraphNetwork_OrderBy =
   | 'capacityCommitmentsTotal'
+  | 'capacityContractAddress'
   | 'capacityMaxFailedRatio'
+  | 'coreContractAddress'
   | 'coreEpochDuration'
   | 'dealsTotal'
   | 'effectorsTotal'
   | 'id'
   | 'initTimestamp'
+  | 'marketContractAddress'
   | 'minRequiredProofsPerEpoch'
   | 'offersTotal'
   | 'proofsTotal'
