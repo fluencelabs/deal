@@ -278,7 +278,7 @@ export function handleComputeUnitRemovedFromDeal(
 
   // Upd stats.
   deal.matchedWorkersCurrentCount = deal.matchedWorkersCurrentCount - 1;
-  if (!computeUnit.workerId == null) {
+  if (computeUnit.workerId != null) {
     computeUnit.workerId = null;
     computeUnit.save();
     deal.registeredWorkersCurrentCount = deal.registeredWorkersCurrentCount - 1;

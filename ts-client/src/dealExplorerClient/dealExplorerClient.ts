@@ -873,6 +873,7 @@ export class DealExplorerClient {
       capacityCommitmentRpcDetails.unlockedRewards,
       capacityCommitmentRpcDetails.totalRewards,
       capacityCommitment.rewardWithdrawn,
+      capacityCommitment.delegator,
     );
   }
 
