@@ -379,6 +379,7 @@ async function main() {
     // We want to match with 2 CU and according to protocol restriction them should be from different peers
     // TODO: need to resolve this: https://linear.app/fluence/issue/CHAIN-400/bug-in-matchermatchdeal-when-match-with-whitelisted-deal
     //  or rewrite match with CUs with active CC.
+    console.log('marketFixture.dealToMatchWithWhiteListedProvider.dealId', marketFixture.dealToMatchWithWhiteListedProvider.dealId)
     const matchDealTx = await marketContract.matchDeal(
         marketFixture.dealToMatchWithWhiteListedProvider.dealId!,
         [marketFixture.providerToBeMatched.offerId!, marketFixture.providerToBeMatched.offerId!],

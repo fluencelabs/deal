@@ -39,6 +39,14 @@ export class DealNotFoundError extends Error {
   }
 }
 
+export class DealAlreadyMatchedError extends Error {
+  public static ERROR_PREFIX = "Deal already has target number of compute units (workers) matched.";
+  constructor(dealId: string, targetWorkers: number) {
+    super(`${DealAlreadyMatchedError.ERROR_PREFIX}. Deal Id: ${dealId} Target workers: ${targetWorkers}.`);
+    Object.setPrototypeOf(this, DealAlreadyMatchedError.prototype);
+  }
+}
+
 export class DealMatcherClient {
   private _indexerClient: IndexerClient;
   public MAX_PER_PAGE: number;
@@ -189,6 +197,16 @@ export class DealMatcherClient {
       logWarn(
         `targetWorkerSlotToMatch param is too high, it is better to reduce large query to ${this.MAX_PER_PAGE} per batch.`,
       );
+    }
+    if (targetWorkerSlotToMatch == 0) {
+      logWarn(
+        "No need to match any compute units. Return empty result in early return.",
+      );
+      return {
+        offers: [],
+        computeUnitsPerOffers: [],
+        fulfilled: false,
+      };
     }
     const matchedComputeUnitsData: GetMatchedOffersOut = {
       offers: [],
@@ -400,7 +418,10 @@ export class DealMatcherClient {
       );
     }
     const alreadyMatchedComputeUnits = deal.addedComputeUnits?.length ?? 0;
-    const targetWorkerToMath = deal.targetWorkers - alreadyMatchedComputeUnits;
+    const targetWorkerSlotsToMatch = deal.targetWorkers - alreadyMatchedComputeUnits;
+    if (targetWorkerSlotsToMatch == 0) {
+      throw new DealAlreadyMatchedError(dealId, alreadyMatchedComputeUnits);
+    }
     const minWorkersToMatch = Math.max(
       deal.minWorkers - alreadyMatchedComputeUnits,
       0,
@@ -420,7 +441,7 @@ export class DealMatcherClient {
         return effector.effector.id;
       }),
       paymentToken: deal.paymentToken.id,
-      targetWorkerSlotToMatch: targetWorkerToMath,
+      targetWorkerSlotToMatch: targetWorkerSlotsToMatch,
       minWorkersToMatch: minWorkersToMatch,
       maxWorkersPerProvider: deal.maxWorkersPerProvider,
       currentEpoch: this.calculateEpoch(

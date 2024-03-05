@@ -11,6 +11,7 @@ import {
   CapacityCommitmentToComputeUnit,
   CapacityCommitmentStatsPerEpoch,
   ComputeUnitPerEpochStat,
+  ComputeUnit,
 } from "../generated/schema";
 import {Address, BigInt, Bytes} from "@graphprotocol/graph-ts";
 import { getTokenDecimals, getTokenSymbol } from "./contracts";
@@ -123,20 +124,34 @@ export function createOrLoadDealEffector(
   return entity as DealToEffector;
 }
 
+// Subgprah compiler does not support return mapping/dict,
+//  thus, class is presented.
+class CreateOrLoadDealToPeerReturn {
+  public created: boolean;
+  public entity: DealToPeer;
+  constructor(entity: DealToPeer, created: boolean) {
+    this.created = created;
+    this.entity = entity;
+  }
+}
+
 export function createOrLoadDealToPeer(
   dealId: string,
   peerId: string,
-): DealToPeer {
+): CreateOrLoadDealToPeerReturn {
   const concattedIds = dealId.concat(peerId);
   let entity = DealToPeer.load(concattedIds);
+  let created = false;
 
   if (entity == null) {
     entity = new DealToPeer(concattedIds);
     entity.deal = dealId;
     entity.peer = peerId;
+    entity.connections = 1;
     entity.save();
+    created = true;
   }
-  return entity as DealToPeer;
+  return new CreateOrLoadDealToPeerReturn(entity, created);
 }
 
 export function createOrLoadDealToJoinedOfferPeer(
@@ -250,8 +265,11 @@ export function createOrLoadComputeUnitPerEpochStat(computeUnitId: string, epoch
   let entity = ComputeUnitPerEpochStat.load(concattedIds);
 
   if (entity == null) {
+    let computeUnit = ComputeUnit.load(computeUnitId) as ComputeUnit;
     entity = new ComputeUnitPerEpochStat(concattedIds)
     entity.submittedProofsCount = 0;
+    entity.epoch = BigInt.fromString(epoch);
+    entity.computeUnit = computeUnit.id;
     entity.save()
   }
   return entity as ComputeUnitPerEpochStat

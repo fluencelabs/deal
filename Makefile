@@ -89,18 +89,11 @@ deploy-contracts%: ## Deploy contracts to ...
 
 	@echo "\033[0;32mSuccess! Contracts deployed to $* chain.\033[0m"
 
-create-pure-market-local: ## Create market on a local blockchain with Anvil mnemonic
+create-pure-market-local: ## Create market on a local blockchain with Anvil mnemonic (do not use it with stage,dar,kras)
 	@make verify-command program=forge
 	@cd ts-client && npm run create-pure-market-script
 
 	@echo "\033[0;32mSuccess! Pure market created on local chain - check it out.\033[0m"
-
-create-pure-market-%: ## Create market on for a stand...
-	@make verify-command program=forge
-	@CONTRACTS_ENV_NAME=$* forge script script/CreateMarket.s.sol --rpc-url $*  \
-	--private-key $(PRIVATE_KEY) --broadcast
-
-	@echo "\033[0;32mSuccess! Pure market created on $* chain - check it out.\033[0m"
 
 help: ## List makefile targets
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) \

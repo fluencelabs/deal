@@ -34,7 +34,6 @@ import {
   Peer,
   Provider,
 } from "../../generated/schema";
-import { Deal as DealTemplate } from "../../generated/templates";
 import {AppCID, formatAddress, getEffectorCID, parseEffectors} from "./utils";
 
 export function handleInitialized(event: Initialized): void {
@@ -93,10 +92,10 @@ export function handleMarketOfferRegistered(
   // - emit PeerCreated(offerId, peer.peerId);
   // - emit ComputeUnitCreated(offerId, peerId, unitId);
 
-  const provider = Provider.load(event.params.provider.toHex()) as Provider;
+  const provider = Provider.load(event.params.provider.toHexString()) as Provider;
 
   // Create Offer.
-  const offer = new Offer(event.params.offerId.toHex());
+  const offer = new Offer(event.params.offerId.toHexString());
   offer.provider = provider.id;
   offer.paymentToken = createOrLoadToken(event.params.paymentToken).id;
   offer.pricePerEpoch = event.params.minPricePerWorkerEpoch;
@@ -128,12 +127,12 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
   // Parent events:
   // - emit PeerCreated(offerId, peer.peerId);
   // - emit MarketOfferRegistered
-  let peer = Peer.load(event.params.peerId.toHex()) as Peer;
+  let peer = Peer.load(event.params.peerId.toHexString()) as Peer;
   const offer = Offer.load(peer.offer) as Offer;
   const provider = Provider.load(offer.provider) as Provider;
 
   // Since handlePeerCreated could not work with this handler, this logic moved here.
-  const computeUnit = new ComputeUnit(event.params.unitId.toHex());
+  const computeUnit = new ComputeUnit(event.params.unitId.toHexString());
   computeUnit.provider = peer.provider;
   computeUnit.peer = peer.id;
   computeUnit.submittedProofsCount = 0;
@@ -156,8 +155,8 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
 
 // It updates Peer and Offer.
 export function handlePeerCreated(event: PeerCreated): void {
-  const peer = new Peer(event.params.peerId.toHex());
-  const offer = Offer.load(event.params.offerId.toHex()) as Offer;
+  const peer = new Peer(event.params.peerId.toHexString());
+  const offer = Offer.load(event.params.offerId.toHexString()) as Offer;
   const provider = Provider.load(offer.provider) as Provider;
   provider.peerCount = provider.peerCount + 1;
   provider.save();
@@ -178,19 +177,19 @@ export function handlePeerCreated(event: PeerCreated): void {
 export function handleMinPricePerEpochUpdated(
   event: MinPricePerEpochUpdated,
 ): void {
-  const offer = Offer.load(event.params.offerId.toHex()) as Offer;
+  const offer = Offer.load(event.params.offerId.toHexString()) as Offer;
   offer.pricePerEpoch = event.params.minPricePerWorkerEpoch;
   offer.save();
 }
 
 export function handlePaymentTokenUpdated(event: PaymentTokenUpdated): void {
-  const offer = Offer.load(event.params.offerId.toHex()) as Offer;
+  const offer = Offer.load(event.params.offerId.toHexString()) as Offer;
   offer.paymentToken = createOrLoadToken(event.params.paymentToken).id;
   offer.save();
 }
 
 export function handleEffectorAdded(event: EffectorAdded): void {
-  const offer = Offer.load(event.params.offerId.toHex()) as Offer;
+  const offer = Offer.load(event.params.offerId.toHexString()) as Offer;
   const appCID = changetype<AppCID>(event.params.effector);
   const cid = getEffectorCID(appCID);
   const effector = createOrLoadEffector(cid);
@@ -205,7 +204,7 @@ export function handleEffectorAdded(event: EffectorAdded): void {
 }
 
 export function handleEffectorRemoved(event: EffectorRemoved): void {
-  const offer = Offer.load(event.params.offerId.toHex()) as Offer;
+  const offer = Offer.load(event.params.offerId.toHexString()) as Offer;
   const appCID = changetype<AppCID>(event.params.effector);
   const cidToRemove = getEffectorCID(appCID);
   const effector = createOrLoadEffector(cidToRemove);
@@ -220,19 +219,30 @@ export function handleEffectorRemoved(event: EffectorRemoved): void {
 }
 
 // Note, in Deal we also handle ComputeUnitJoined.
+// Note, this event is kinda the main event for match CU with deal.
 export function handleComputeUnitAddedToDeal(
   event: ComputeUnitAddedToDeal,
 ): void {
   // Call the contract to extract peerId of the computeUnit.
-  let peer = Peer.load(event.params.peerId.toHex()) as Peer;
+  let peer = Peer.load(event.params.peerId.toHexString()) as Peer;
   const offer = Offer.load(peer.offer) as Offer;
   const provider = Provider.load(offer.provider) as Provider;
+  let deal = Deal.load(formatAddress(event.params.deal)) as Deal;
 
-  createOrLoadDealToPeer(event.address.toHex(), peer.id);
-  createOrLoadDealToJoinedOfferPeer(event.address.toHex(), offer.id, peer.id);
+  const createOrLoadDealToPeerResult = createOrLoadDealToPeer(deal.id, peer.id);
+  // Check if we need to incr counter if mapping was merely loaded before.
+  if (!createOrLoadDealToPeerResult.created) {
+    const createOrLoadDealToPeer = createOrLoadDealToPeerResult.entity;
+    createOrLoadDealToPeer.connections = createOrLoadDealToPeer.connections + 1;
+    createOrLoadDealToPeer.save();
+  }
+  createOrLoadDealToJoinedOfferPeer(deal.id, offer.id, peer.id);
   peer.isAnyJoinedDeals = true;
 
   // Upd stats.
+  deal.matchedWorkersCurrentCount = deal.matchedWorkersCurrentCount + 1;
+  deal.save();
+
   peer.computeUnitsInDeal = peer.computeUnitsInDeal + 1;
   peer.save()
 
@@ -248,19 +258,33 @@ export function handleComputeUnitRemovedFromDeal(
   event: ComputeUnitRemovedFromDeal,
 ): void {
   // Call the contract to extract peerId of the computeUnit.
-  let peer = Peer.load(event.params.peerId.toHex()) as Peer;
+  let peer = Peer.load(event.params.peerId.toHexString()) as Peer;
   const offer = Offer.load(peer.offer) as Offer;
   const provider = Provider.load(offer.provider) as Provider;
+  let computeUnit = ComputeUnit.load(event.params.unitId.toHexString()) as ComputeUnit;
+  let deal = Deal.load(formatAddress(event.params.deal)) as Deal;
 
-  const dealToPeer = createOrLoadDealToPeer(event.address.toHex(), peer.id);
-  const dealToJoinedOfferPeer = createOrLoadDealToJoinedOfferPeer(event.address.toHex(), offer.id, peer.id);
-  store.remove("DealToPeer", dealToPeer.id);
-  store.remove("DealToJoinedOfferPeer", dealToJoinedOfferPeer.id);
+  const dealToPeerReturn = createOrLoadDealToPeer(deal.id, peer.id);
+  const dealToPeer = dealToPeerReturn.entity;
+  // Check that deal has other CUs from the same peer before rm connection: Deal Vs Peer.
+  if (dealToPeer.connections == 1) {
+    const dealToJoinedOfferPeer = createOrLoadDealToJoinedOfferPeer(deal.id, offer.id, peer.id);
+    store.remove("DealToPeer", dealToPeer.id);
+    store.remove("DealToJoinedOfferPeer", dealToJoinedOfferPeer.id);
+  }
   if (peer.joinedDeals.load().length == 0) {
     peer.isAnyJoinedDeals = false;
   }
 
   // Upd stats.
+  deal.matchedWorkersCurrentCount = deal.matchedWorkersCurrentCount - 1;
+  if (!computeUnit.workerId == null) {
+    computeUnit.workerId = null;
+    computeUnit.save();
+    deal.registeredWorkersCurrentCount = deal.registeredWorkersCurrentCount - 1;
+  }
+  deal.save();
+
   peer.computeUnitsInDeal = peer.computeUnitsInDeal - 1;
   peer.save()
 
