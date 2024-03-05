@@ -1,3 +1,5 @@
+// All main view methods consist of notice docstring to refer to Figma screen
+//  e.g. // @notice [Figma] Deal.
 // @dev There is a lot of "total: null," in the code - we await subgraph feature:
 //  return counter of filtration (currently 14.02.24 it is impossible).
 import { ethers } from "ethers";
@@ -327,7 +329,7 @@ export class DealExplorerClient {
       console.warn("Filter deals by status if not implemented.");
     }
     return await this._getDealsImpl(
-      { providerId: dealsByProviderFilter.providerId?.toLowerCase() },
+      { providerId: dealsByProviderFilter.providerId.toLowerCase() },
       offset,
       limit,
       orderBy,
@@ -634,10 +636,7 @@ export class DealExplorerClient {
         await this._dealRpcClient!.getFreeBalanceDealBatch([dealId])
       )[0];
       const effectors = serializeEffectors(deal.effectors);
-      const { whitelist, blacklist } = serializeDealProviderAccessLists(
-        deal.providersAccessType,
-        deal.providersAccessList,
-      );
+      const { whitelist, blacklist } = serializeDealProviderAccessLists(deal.providersAccessType, deal.providersAccessList);
       res = {
         ...serializeDealsShort(deal, { dealStatus, freeBalance }),
         pricePerWorkerEpoch: tokenValueToRounded(

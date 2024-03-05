@@ -23,7 +23,9 @@ query DealQuery(
     }
     providersAccessType
     providersAccessList {
-      id
+      provider {
+        id
+      }
     }
   }
 

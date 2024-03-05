@@ -1,12 +1,9 @@
 export function serializeDealProviderAccessLists(
   providersAccessType: number,
-  providersAccessList:
-    | Array<{
-        __typename?: "DealToProvidersAccess";
-        id: string;
-      }>
-    | null
-    | undefined,
+  providersAccessList: Array<{
+    __typename?: "DealToProvidersAccess";
+    provider: { __typename?: "Provider"; id: string }
+  }> | null | undefined
 ): { whitelist: Array<string>; blacklist: Array<string> } {
   const res: { whitelist: Array<string>; blacklist: Array<string> } = {
     whitelist: [],
@@ -17,7 +14,7 @@ export function serializeDealProviderAccessLists(
     return res;
   }
   const providersAccessListStrings = providersAccessList.map((providerObj) => {
-    return providerObj.id;
+    return providerObj.provider.id;
   });
   if (providersAccessType == 1) {
     // whitelist

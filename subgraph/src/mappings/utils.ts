@@ -35,11 +35,11 @@ export function parseEffectors(effectors: Array<AppCID>): Array<string> {
  >>> changetype<AppCID>(event.params.effector)
  */
 export function getEffectorCID(effectorTuple: AppCID): string {
-  const cid = effectorTuple.prefixes.toString() + effectorTuple.hash.toString();
+  const cid = effectorTuple.prefixes.toHexString() + effectorTuple.hash.toHexString();
   log.info("[getEffectorCID] Extract CID from effector: {}", [cid]);
   return cid;
 }
 
 export function formatAddress(address: Address): string {
-  return address.toHex().toLowerCase();
+  return address.toHexString().toLowerCase();
 }

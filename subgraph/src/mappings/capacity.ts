@@ -40,13 +40,13 @@ import {log} from "@graphprotocol/graph-ts/index";
 
 
 export function handleWhitelistAccessGranted(event: WhitelistAccessGranted): void {
-  let provider = Provider.load(event.params.account.toHex()) as Provider;
+  let provider = Provider.load(event.params.account.toHexString()) as Provider;
   provider.approved = true;
   provider.save();
 }
 
 export function handleWhitelistAccessRevoked(event: WhitelistAccessRevoked): void {
-  let provider = Provider.load(event.params.account.toHex()) as Provider;
+  let provider = Provider.load(event.params.account.toHexString()) as Provider;
   provider.approved = false;
   provider.save();
 }
@@ -62,11 +62,11 @@ export function handleInitialized(event: Initialized): void {
 export function handleCommitmentCreated(event: CommitmentCreated): void {
   // TODO: rm those logs if phantom error does not occur.
   log.info("[handleCommitmentCreated] Start...", []);
-  let commitment = new CapacityCommitment(event.params.commitmentId.toHex());
-  log.info("event.params.commitmentId.toHex(): {}", [event.params.commitmentId.toHex()]);
-  log.info("event.params.peerId.toHex(): {}", [event.params.peerId.toHex()]);
+  let commitment = new CapacityCommitment(event.params.commitmentId.toHexString());
+  log.info("event.params.commitmentId.toHexString(): {}", [event.params.commitmentId.toHexString()]);
+  log.info("event.params.peerId.toHexString(): {}", [event.params.peerId.toHexString()]);
   // Load or create peer.
-  let peer = Peer.load(event.params.peerId.toHex()) as Peer;
+  let peer = Peer.load(event.params.peerId.toHexString()) as Peer;
   log.info("peer loaded successfully: {}", [peer.id]);
 
   commitment.peer = peer.id
@@ -104,7 +104,7 @@ export function handleCommitmentCreated(event: CommitmentCreated): void {
 // It is supposed that collateral deposited at the same time as commitment activated
 //  (the same tx).
 export function handleCommitmentActivated(event: CommitmentActivated): void {
-  let commitment = CapacityCommitment.load(event.params.commitmentId.toHex()) as CapacityCommitment;
+  let commitment = CapacityCommitment.load(event.params.commitmentId.toHexString()) as CapacityCommitment;
   commitment.status = CapacityCommitmentStatus.WaitStart
   commitment.startEpoch = event.params.startEpoch
   commitment.endEpoch = event.params.endEpoch
@@ -112,7 +112,7 @@ export function handleCommitmentActivated(event: CommitmentActivated): void {
 
   commitment.computeUnitsCount = event.params.unitIds.length
   for (let i=0; i < event.params.unitIds.length; i++) {
-    const computeUnitId = event.params.unitIds[i].toHex()
+    const computeUnitId = event.params.unitIds[i].toHexString()
     // We rely on contract logic that it is not possible to emit event with not existing CUs.
     //  Also, we relay that previously we save computeUnitId successfully in prev. handler.
     const computeUnit = ComputeUnit.load(computeUnitId) as ComputeUnit
@@ -137,7 +137,7 @@ export function handleCommitmentActivated(event: CommitmentActivated): void {
   commitment.nextCCFailedEpoch = _calculatedFailedEpoch
   commitment.save()
 
-  let peer = Peer.load(event.params.peerId.toHex()) as Peer;
+  let peer = Peer.load(event.params.peerId.toHexString()) as Peer;
   peer.currentCCCollateralDepositedAt = event.params.startEpoch;
   peer.currentCCEndEpoch = event.params.endEpoch;
   peer.currentCCNextCCFailedEpoch = _calculatedFailedEpoch;
@@ -145,13 +145,13 @@ export function handleCommitmentActivated(event: CommitmentActivated): void {
 }
 
 export function handleCollateralDeposited(event: CollateralDeposited): void {
-  let commitment = CapacityCommitment.load(event.params.commitmentId.toHex()) as CapacityCommitment;
+  let commitment = CapacityCommitment.load(event.params.commitmentId.toHexString()) as CapacityCommitment;
   commitment.totalCollateral = event.params.totalCollateral;
   commitment.save()
 }
 
 export function handleCommitmentRemoved(event: CommitmentRemoved): void {
-  let commitment = CapacityCommitment.load(event.params.commitmentId.toHex()) as CapacityCommitment;
+  let commitment = CapacityCommitment.load(event.params.commitmentId.toHexString()) as CapacityCommitment;
   commitment.deleted = true;
   commitment.save();
 
@@ -163,7 +163,7 @@ export function handleCommitmentRemoved(event: CommitmentRemoved): void {
 }
 
 export function handleCommitmentFinished(event: CommitmentFinished): void {
-  let commitment = CapacityCommitment.load(event.params.commitmentId.toHex()) as CapacityCommitment;
+  let commitment = CapacityCommitment.load(event.params.commitmentId.toHexString()) as CapacityCommitment;
   commitment.status = CapacityCommitmentStatus.Removed;
   commitment.save();
 
@@ -176,7 +176,7 @@ export function handleCommitmentFinished(event: CommitmentFinished): void {
 
 export function handleCommitmentStatsUpdated(event: CommitmentStatsUpdated): void {
   // Handle current commitment stats.
-  let commitment = CapacityCommitment.load(event.params.commitmentId.toHex()) as CapacityCommitment;
+  let commitment = CapacityCommitment.load(event.params.commitmentId.toHexString()) as CapacityCommitment;
 
   commitment.totalCUFailCount = event.params.totalCUFailCount.toI32()
   commitment.exitedUnitCount = event.params.exitedUnitCount.toI32()
@@ -233,7 +233,7 @@ export function handleCommitmentStatsUpdated(event: CommitmentStatsUpdated): voi
 // Use this event to only check activation/deactivation for the exact unit.
 // Do not update commitment.activeUnitCount as it is updated in handleCommitmentStatsUpdated.
 export function handleUnitActivated(event: UnitActivated): void {
-  let computeUnit = ComputeUnit.load(event.params.unitId.toHex()) as ComputeUnit;
+  let computeUnit = ComputeUnit.load(event.params.unitId.toHexString()) as ComputeUnit;
   let peer = Peer.load(computeUnit.peer) as Peer;
 
   peer.computeUnitsInCapacityCommitment = peer.computeUnitsInCapacityCommitment + 1;
@@ -243,7 +243,7 @@ export function handleUnitActivated(event: UnitActivated): void {
 // Use this event to only check activation/deactivation for the exact unit.
 // Do not update commitment.activeUnitCount as it is updated in handleCommitmentStatsUpdated.
 export function handleUnitDeactivated(event: UnitDeactivated): void {
-  let computeUnit = ComputeUnit.load(event.params.unitId.toHex()) as ComputeUnit;
+  let computeUnit = ComputeUnit.load(event.params.unitId.toHexString()) as ComputeUnit;
   let peer = Peer.load(computeUnit.peer) as Peer;
 
   peer.computeUnitsInCapacityCommitment = peer.computeUnitsInCapacityCommitment - 1;
@@ -251,9 +251,9 @@ export function handleUnitDeactivated(event: UnitDeactivated): void {
 }
 
 export function handleProofSubmitted(event: ProofSubmitted): void {
-  let proofSubmitted = new SubmittedProof(event.transaction.hash.toHex());
-  let capacityCommitment = CapacityCommitment.load(event.params.commitmentId.toHex()) as CapacityCommitment;
-  let computeUnit = ComputeUnit.load(event.params.unitId.toHex()) as ComputeUnit;
+  let proofSubmitted = new SubmittedProof(event.transaction.hash.toHexString());
+  let capacityCommitment = CapacityCommitment.load(event.params.commitmentId.toHexString()) as CapacityCommitment;
+  let computeUnit = ComputeUnit.load(event.params.unitId.toHexString()) as ComputeUnit;
   const provider = Provider.load(computeUnit.provider) as Provider;
   let graphNetwork = createOrLoadGraphNetwork();
   const currentEpoch = calculateEpoch(
@@ -297,7 +297,7 @@ export function handleProofSubmitted(event: ProofSubmitted): void {
 }
 
 export function handleRewardWithdrawn(event: RewardWithdrawn): void {
-  let capacityCommitment = CapacityCommitment.load(event.params.commitmentId.toHex()) as CapacityCommitment;
+  let capacityCommitment = CapacityCommitment.load(event.params.commitmentId.toHexString()) as CapacityCommitment;
   capacityCommitment.rewardWithdrawn = capacityCommitment.rewardWithdrawn.plus(event.params.amount)
   capacityCommitment.save()
 }

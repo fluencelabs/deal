@@ -36,6 +36,8 @@ fragment BasicDeal on Deal {
     minWorkers
     targetWorkers
     owner
+    registeredWorkersCurrentCount
+    matchedWorkersCurrentCount
     paymentToken {
       id
       symbol
@@ -51,7 +53,9 @@ fragment BasicDeal on Deal {
     }
     providersAccessType
     providersAccessList {
-      id
+      provider {
+        id
+      }
     }
     maxPaidEpoch
     depositedSum
