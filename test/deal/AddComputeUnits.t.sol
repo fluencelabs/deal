@@ -40,7 +40,7 @@ contract AddComputeUnits is Test {
         assertEq(deal.getWorkerCount(), 0, "workerCount should be 0");
         assertEq(deal.getComputeUnitCount(), 1, "unitCount should be 1");
         assertEq(deal.getMaxPaidEpoch(), 0, "maxPaidEpoch should be 0");
-        assertEq(uint256(deal.getStatus()), uint256(IDeal.Status.NOT_ENOUGH_WORKERS), "status should be INACTIVE");
+        assertEq(uint256(deal.getStatus()), uint256(IDeal.Status.NOT_ENOUGH_WORKERS), "status should be NOT_ENOUGH_WORKERS");
     }
 
     function test_AddMinUnits() public {
