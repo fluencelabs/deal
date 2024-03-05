@@ -51,9 +51,7 @@ abstract contract Matcher is Offer, IMatcher {
         ICapacity capacity = core.capacity();
         MatcherStorage storage matcherStorage = _getMatcherStorage();
 
-        IDeal.Status dealStatus = deal.getStatus(); 
-        require(dealStatus != IDeal.Status.ENDED, "Matcher: deal is ended");
-        require(dealStatus != IDeal.Status.INSUFFICIENT_FUNDS, "Matcher: deal has insufficient funds");
+        require(deal.getStatus() != IDeal.Status.ENDED, "Matcher: deal is ended");
 
         uint256 lastMatchedEpoch = matcherStorage.lastMatchedEpoch[address(deal)];
         uint256 currentEpoch = core.currentEpoch();

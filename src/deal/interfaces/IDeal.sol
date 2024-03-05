@@ -10,10 +10,9 @@ import "src/core/interfaces/ICore.sol";
 interface IDeal is IConfig, IWorkerManager {
     // ------------------ Types ------------------
     enum Status {
-        INSUFFICIENT_FUNDS,
+        INACTIVE,
         ACTIVE,
-        ENDED,
-        NOT_ENOUGH_WORKERS
+        ENDED
     }
 
     // ----------------- Events -----------------
