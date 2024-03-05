@@ -246,9 +246,12 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
     }
 
     function removeCommitment(bytes32 commitmentId) external {
+        IMarket market = core.market();
         CommitmentStorage storage s = _getCommitmentStorage();
         Commitment storage cc = s.commitments[commitmentId];
-        IMarket.ComputePeer memory peer = core.market().getComputePeer(cc.info.peerId);
+        bytes32 peerId = cc.info.peerId;
+
+        IMarket.ComputePeer memory peer = market.getComputePeer(peerId);
 
         require(cc.info.startEpoch == 0, "Capacity commitment is created");
 
