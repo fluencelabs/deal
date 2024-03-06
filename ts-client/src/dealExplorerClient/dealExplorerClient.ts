@@ -920,7 +920,7 @@ export class DealExplorerClient {
     if (
       data.peer == undefined ||
       data.peer.joinedDeals == undefined ||
-      data.peer.joinedDeals?.length == 0
+      data.peer.joinedDeals.length == 0
     ) {
       return {
         data: [],
