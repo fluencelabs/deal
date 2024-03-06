@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.8.0](https://github.com/fluencelabs/deal/compare/v0.7.3...v0.8.0) (2024-03-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* revert add new statuses for deal ([#317](https://github.com/fluencelabs/deal/issues/317))
+* add new statuses for deal ([#316](https://github.com/fluencelabs/deal/issues/316))
+
+### Features
+
+* add new statuses for deal ([#316](https://github.com/fluencelabs/deal/issues/316)) ([c824fe7](https://github.com/fluencelabs/deal/commit/c824fe7c62bb62a305e76282d30ef15b44603b2d))
+* Introduce integration tests ([#309](https://github.com/fluencelabs/deal/issues/309)) ([0b102f7](https://github.com/fluencelabs/deal/commit/0b102f710a8f7cccf2517e0a162b9977fb97de7a))
+
+
+### Bug Fixes
+
+* explorer-client-add-delegator-address ([#318](https://github.com/fluencelabs/deal/issues/318)) ([0f4aab7](https://github.com/fluencelabs/deal/commit/0f4aab7e7e30cf7fdb14ce3d16a4a7ee44c258f6))
+* revert add new statuses for deal ([#317](https://github.com/fluencelabs/deal/issues/317)) ([4ab8a2e](https://github.com/fluencelabs/deal/commit/4ab8a2eecc16540ec8f2af4d827dacd8aca581ce))
+* subgraph proof stats model & fix in DealMatcherClient & fix match counters for DealExplorerClient ([#314](https://github.com/fluencelabs/deal/issues/314)) ([bf20af3](https://github.com/fluencelabs/deal/commit/bf20af3ca2620edbc24ca38b8403c815b24c52d2))
+* upd makefile command & doc bump ([#308](https://github.com/fluencelabs/deal/issues/308)) ([71f515c](https://github.com/fluencelabs/deal/commit/71f515c6cfc3914fe46bdac8e97a6585348fe6de))
+
 ## [0.7.3](https://github.com/fluencelabs/deal/compare/v0.7.2...v0.7.3) (2024-03-03)
 
 
