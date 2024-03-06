@@ -891,7 +891,7 @@ export class DealExplorerClient {
       providerId: peer.provider.id,
       offerId: peer.offer.id,
       computeUnitsInDeal: peer.computeUnitsInDeal,
-      computeUnitsInCapacityCommitment: peer.computeUnitsInCapacityCommitment,
+      computeUnitsInCapacityCommitment: peer.currentCapacityCommitment ? peer.currentCapacityCommitment?.activeUnitCount : 0,
       computeUnitsTotal: peer.computeUnitsTotal,
     };
   }
