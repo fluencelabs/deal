@@ -128,8 +128,6 @@ type Peer @entity {
   computeUnitsTotal: Int!
   "Compute units in any deals: update only when moved to deal or out."
   computeUnitsInDeal: Int!
-  "Compute units in any cc: update only when moved to CC or out: {UnitActivated, UnitDeactivated}."
-  computeUnitsInCapacityCommitment: Int!
 }
 
 type ComputeUnit @entity {

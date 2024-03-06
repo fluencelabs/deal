@@ -128,7 +128,7 @@ export const DealsByPeerQueryDocument = gql`
     ) {
       deal {
         id
-        addedComputeUnits {
+        addedComputeUnits(where: {peer_: {id: $peerId}}) {
           id
           workerId
         }

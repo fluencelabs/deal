@@ -12,7 +12,9 @@ query PeerQuery(
     }
     computeUnitsTotal
     computeUnitsInDeal
-    computeUnitsInCapacityCommitment
+    currentCapacityCommitment {
+      activeUnitCount
+    }
   }
 }
 

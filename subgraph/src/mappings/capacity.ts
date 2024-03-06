@@ -230,24 +230,10 @@ export function handleCommitmentStatsUpdated(event: CommitmentStatsUpdated): voi
   capacityCommitmentStatsPerEpoch.save();
 }
 
-// Use this event to only check activation/deactivation for the exact unit.
-// Do not update commitment.activeUnitCount as it is updated in handleCommitmentStatsUpdated.
 export function handleUnitActivated(event: UnitActivated): void {
-  let computeUnit = ComputeUnit.load(event.params.unitId.toHexString()) as ComputeUnit;
-  let peer = Peer.load(computeUnit.peer) as Peer;
-
-  peer.computeUnitsInCapacityCommitment = peer.computeUnitsInCapacityCommitment + 1;
-  peer.save();
 }
 
-// Use this event to only check activation/deactivation for the exact unit.
-// Do not update commitment.activeUnitCount as it is updated in handleCommitmentStatsUpdated.
 export function handleUnitDeactivated(event: UnitDeactivated): void {
-  let computeUnit = ComputeUnit.load(event.params.unitId.toHexString()) as ComputeUnit;
-  let peer = Peer.load(computeUnit.peer) as Peer;
-
-  peer.computeUnitsInCapacityCommitment = peer.computeUnitsInCapacityCommitment - 1;
-  peer.save();
 }
 
 export function handleProofSubmitted(event: ProofSubmitted): void {

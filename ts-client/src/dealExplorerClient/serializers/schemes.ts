@@ -108,18 +108,15 @@ export function serializeProviderShort(
   } as ProviderShort;
 }
 
-// It composes only compute units with linked workerIds.
 export function serializeComputeUnits(
   fetchedComputeUnits: Array<ComputeUnitBasicFragment>,
 ): Array<ComputeUnit> {
   const res: Array<ComputeUnit> = [];
   for (const fetched of fetchedComputeUnits) {
-    if (fetched.workerId) {
-      res.push({
-        id: fetched.id,
-        workerId: fetched.workerId,
-      });
-    }
+    res.push({
+      id: fetched.id,
+      workerId: fetched.workerId ?? undefined,
+    });
   }
   return res;
 }
