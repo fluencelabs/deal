@@ -61,7 +61,7 @@ export async function createCommitments(
   signerAddress: string,
   peerIds: string[],
 ) {
-  const duration = 9999;
+  const duration = 100n;
   const fromBlock = await capacity.runner?.provider?.getBlock("latest");
   assert(fromBlock, "Not current block");
 

@@ -25,7 +25,7 @@ describe(
       contractsClient = new DealClient(signer, TEST_NETWORK);
     });
 
-    test.only("CC can be removed before deposit", async () => {
+    test("CC can be removed before deposit", async () => {
       const marketContract = await contractsClient.getMarket();
       const capacityContract = await contractsClient.getCapacity();
       const paymentToken = await contractsClient.getUSDC();
@@ -98,7 +98,8 @@ describe(
       );
       await depositCollateralTx.wait(DEFAULT_CONFIRMATIONS);
 
-      const duration = await capacityContract.minDuration();
+      // TODO: move to constant
+      const duration = 100n;
 
       const collateralDepositedEvents = await checkEvents(
         capacityContract,
@@ -116,6 +117,7 @@ describe(
         1,
         depositCollateralTx,
       );
+      // TODO: what's 0n?
       expect(
         capacityActivatedEvents.map((e) => [
           e.args.peerId,
