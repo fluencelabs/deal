@@ -163,13 +163,15 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
             return Status.ENDED;
         }
 
+        uint256 maxPaidEpoch = dealStorage.maxPaidEpoch;
+        if (maxPaidEpoch != 0 && _globalCore().currentEpoch() > maxPaidEpoch) {
+            return Status.INSUFFICIENT_FUNDS;
+        } 
+        
         uint256 freeBalance = getFreeBalance();
         uint256 currentWorkerCount = getWorkerCount();
-        uint256 maxPaidEpoch = dealStorage.maxPaidEpoch;
 
-        if (maxPaidEpoch != 0 && _globalCore().currentEpoch() > dealStorage.maxPaidEpoch) {
-            return Status.INSUFFICIENT_FUNDS;
-        } else if (freeBalance < _globalCore().minDealDepositedEpoches() * pricePerWorkerEpoch() * targetWorkers()) {
+        if (freeBalance < _globalCore().minDealDepositedEpoches() * pricePerWorkerEpoch() * targetWorkers()) {
             return Status.SMALL_BALANCE;
         } else if (currentWorkerCount < minWorkers()) {
             return Status.NOT_ENOUGH_WORKERS;
