@@ -109,14 +109,6 @@ jobs:
           forge --version
           forge build --sizes
 
-      - name: Upload contracts
-        uses: actions/upload-artifact@v4
-        with:
-          name: contracts-${{ matrix.arch }}
-          path: |
-            cache/**
-            out/**
-
       - name: Run Forge tests
         run: forge test -vvv
 
