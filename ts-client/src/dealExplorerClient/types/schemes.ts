@@ -284,6 +284,7 @@ export type DealStatus =
   | "active"
   | "ended"
   | "notEnoughWorkers"
+  | "smallBalance"
   | "undefined";
 export type CapacityCommitmentStatus =
   | "active"

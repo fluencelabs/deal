@@ -13,7 +13,8 @@ interface IDeal is IConfig, IWorkerManager {
         INSUFFICIENT_FUNDS,
         ACTIVE,
         ENDED,
-        NOT_ENOUGH_WORKERS
+        NOT_ENOUGH_WORKERS,
+        SMALL_BALANCE
     }
 
     // ----------------- Events -----------------

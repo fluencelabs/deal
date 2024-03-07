@@ -64,4 +64,15 @@ library TestHelper {
 
         return deal;
     }
+
+    function deployDealWithoutFactory(
+        DeployDealSystem.Deployment storage deployment,
+        uint256 minWorkers_,
+        uint256 targetWorkers_,
+        uint256 maxWorkersPerProvider_,
+        uint256 pricePerWorkerEpoch_
+    ) internal returns (Deal) {
+        uint256 deposit_ = deployment.core.minDealDepositedEpoches() * pricePerWorkerEpoch_ * targetWorkers_;
+        return deployDealWithoutFactory(deployment, minWorkers_, targetWorkers_, maxWorkersPerProvider_, pricePerWorkerEpoch_, deposit_);
+    }
 }
