@@ -59,9 +59,10 @@ export class DealMatcherClient {
     this.MAX_PER_PAGE = this._indexerClient.INDEXER_MAX_FIRST;
   }
 
-  // Represents the way to query indexer for available compute units (subgraph).
-  // CU are available if CU are allowed for the matchDeal
+  // Represents the way to query indexer for available compute units (query through subgraph API).
+  // CU are available if CU are allowed for the market.matchDeal
   //  (ref to https://github.com/fluencelabs/deal/blob/main/src/core/modules/market/Matcher.sol#L48).
+  //  Thus, this method mirrors logic of checks in the market.matchDeal.
   async _getMatchedOffersPage(
     getMatchedOffersIn: GetMatchedOffersIn,
     offersPerPageLimit: number, // Possibility to optimise query size.
