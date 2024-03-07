@@ -30,7 +30,7 @@ env:
 jobs:
   integration-tests:
     name: "Integration tests"
-    runs-on: linux-amd64-c-2xlarge
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
