@@ -9,7 +9,7 @@
   "description": "Integration tests for contracts",
   "main": "index.js",
   "scripts": {
-    "test": "vitest run",
+    "test": "vitest run --no-file-parallelism",
     "lint": "prettier src --check && eslint --cache \"./src/**/*.ts\""
   },
   "author": "",
@@ -25,6 +25,7 @@
     "@types/node": "^20.11.5",
     "@typescript-eslint/eslint-plugin": "^6.19.0",
     "@typescript-eslint/parser": "^6.19.0",
+    "dotenv": "^16.4.5",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.29.1",

@@ -3,27 +3,22 @@ import { createCommitments, registerMarketOffer } from "./helpers.js";
 import { ethers, JsonRpcProvider, JsonRpcSigner } from "ethers";
 import { type ContractsENV, DealClient } from "@fluencelabs/deal-ts-clients";
 import { checkEvents } from "./confirmations.js";
-import { DEFAULT_CONFIRMATIONS } from "./constants.js";
+import {
+  CC_DURATION_DEFAULT,
+  CCStatus,
+  DEFAULT_CONFIRMATIONS,
+} from "./constants.js";
 import { skipEpoch } from "./utils.js";
+import { config } from "dotenv";
+config({ path: [".env", ".env.local"] });
 
 const TEST_NETWORK: ContractsENV = "local";
-const TEST_RPC_URL = `http://localhost:8545`;
+const TEST_RPC_URL = process.env.RPC_URL;
 const DEFAULT_TEST_TIMEOUT = 180000;
 
 let provider: JsonRpcProvider;
 let signer: JsonRpcSigner;
 let contractsClient: DealClient;
-
-enum CCStatus {
-  Active,
-  // WaitDelegation - before collateral is deposited.
-  WaitDelegation,
-  // Status is WaitStart - means collateral deposited, and epoch should be proceed before Active.
-  WaitStart,
-  Inactive,
-  Failed,
-  Removed,
-}
 
 describe(
   "Capacity commitment",
@@ -34,7 +29,7 @@ describe(
       contractsClient = new DealClient(signer, TEST_NETWORK);
     });
 
-    test.only("CC can be removed before deposit", async () => {
+    test("CC can be removed before deposit", async () => {
       const marketContract = await contractsClient.getMarket();
       const capacityContract = await contractsClient.getCapacity();
       const paymentToken = await contractsClient.getUSDC();
@@ -56,14 +51,16 @@ describe(
 
       assert(commitmentId, "Commitment ID doesn't exist");
 
-      await (
-        await capacityContract.removeCommitment(commitmentId)
-      ).wait(DEFAULT_CONFIRMATIONS);
+      const removeCommitmentTx =
+        await capacityContract.removeCommitment(commitmentId);
+
+      await removeCommitmentTx.wait(DEFAULT_CONFIRMATIONS);
 
       const events = await checkEvents(
         capacityContract,
         capacityContract.filters.CommitmentRemoved,
         1,
+        removeCommitmentTx,
       );
 
       expect(events.map((e) => e.args)).toEqual([[commitmentId]]);
@@ -97,19 +94,22 @@ describe(
       const collateralPerUnit = await capacityContract.fltCollateralPerUnit();
 
       console.log("Depositing collateral...");
-      await // Payment for single unit
-      (
-        await capacityContract.depositCollateral([commitmentId], {
+      const depositCollateralTx = await capacityContract.depositCollateral(
+        [commitmentId],
+        {
           value: collateralPerUnit,
-        })
-      ).wait(DEFAULT_CONFIRMATIONS);
+        },
+      );
+      await depositCollateralTx.wait(DEFAULT_CONFIRMATIONS);
 
-      const duration = await capacityContract.minDuration();
+      // TODO: move to constant
+      const duration = CC_DURATION_DEFAULT;
 
       const collateralDepositedEvents = await checkEvents(
         capacityContract,
         capacityContract.filters.CollateralDeposited,
         1,
+        depositCollateralTx,
       );
       expect(collateralDepositedEvents.map((e) => e.args)).toEqual([
         [commitmentId, collateralPerUnit],
@@ -119,7 +119,9 @@ describe(
         capacityContract,
         capacityContract.filters.CommitmentActivated,
         1,
+        depositCollateralTx,
       );
+      // TODO: what's 0n?
       expect(
         capacityActivatedEvents.map((e) => [
           e.args.peerId,
