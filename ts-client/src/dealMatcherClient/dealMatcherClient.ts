@@ -85,36 +85,14 @@ export class DealMatcherClient {
         paymentToken: getMatchedOffersIn.paymentToken.toLowerCase(),
         // Check if any of compute units are available in the offer and do not even fetch unrelated offers.
         computeUnitsAvailable_gt: 0,
-        // Do not fetch peers with no any of compute units in "active" status at all.
-        // Check if CU status is Active - if it has current capacity commitment and
-        //  cc.info.startEpoch <= currentEpoch_.
-        peers_: {
-          currentCapacityCommitment_not: null,
-          // Since it is not possible to filter by currentCapacityCommitment_.startEpoch_lt
-          //  we use this help field.
-          currentCCCollateralDepositedAt_lte: currentEpochString,
-          currentCCEndEpoch_gt: currentEpochString,
-          currentCCNextCCFailedEpoch_gt: currentEpochString,
-        },
+
+        // Check if provider whitelisted/blacklisted below, and if CC Active below in case without whitelist below.
       },
       peersFilters: {
         and: [
           {
             computeUnits_: { deal: null },
-            // Check if CU status is Active - if it has current capacity commitment and
-            //  cc.info.startEpoch <= currentEpoch_.
-            currentCapacityCommitment_not: null,
-            currentCapacityCommitment_: {
-              // Duplication as it is in DealExplorerClient: serializeCapacityCommitmentsFiltersToIndexer.
-              startEpoch_lte: currentEpochString,
-              endEpoch_gt: currentEpochString,
-              // On each submitProof indexer should save nextCCFailedEpoch, and
-              //  in query we relay on that field to filter Failed CC.
-              nextCCFailedEpoch_gt: currentEpochString,
-              deleted: false,
-              // Wait delegation is duplicating startEpoch_lte check, though.
-              status_not_in: ["WaitDelegation", "Removed", "Failed"],
-            },
+            // Check for CC Active status below and depends on provider whitlist filter.
           },
           {
             // We do not need peers that already linked to the Deal (protocol restriction).
@@ -144,21 +122,56 @@ export class DealMatcherClient {
         effector_in: getMatchedOffersIn.effectors,
       };
     }
+    // Check for blacklisted Providers.
     if (
-      getMatchedOffersIn.providersWhiteList &&
+      getMatchedOffersIn.providersBlackList.length > 0
+    ) {
+      indexerGetOffersParams.filters!["provider_"] = {
+        id_not_in: getMatchedOffersIn.providersBlackList,
+      };
+    }
+    // We requre rather CU to be in Active CC (and not in blacklist if blacklist exists)
+    //  or CU from Deal whitelist of Providers.
+    if (
       getMatchedOffersIn.providersWhiteList.length > 0
     ) {
       indexerGetOffersParams.filters!["provider_"] = {
         id_in: getMatchedOffersIn.providersWhiteList,
       };
-    }
-    if (
-      getMatchedOffersIn.providersBlackList &&
-      getMatchedOffersIn.providersBlackList.length > 0
-    ) {
-      indexerGetOffersParams.filters!["provider_"] = {
-        id_in: getMatchedOffersIn.providersBlackList,
-      };
+    } else {
+      // No whitelist, thus, check for active cc status is required.
+      // For Peers.
+      indexerGetOffersParams.filters!['peers_'] = {
+        // Do not fetch peers with no any of compute units in "active" status at all.
+        // Check if CU status is Active - if it has current capacity commitment and
+        //  cc.info.startEpoch <= currentEpoch_.
+        currentCapacityCommitment_not: null,
+        // Since it is not possible to filter by currentCapacityCommitment_.startEpoch_lt
+        //  we use this help field.
+        currentCCCollateralDepositedAt_lte: currentEpochString,
+        currentCCEndEpoch_gt: currentEpochString,
+        currentCCNextCCFailedEpoch_gt: currentEpochString,
+      }
+      // For CUs.
+      indexerGetOffersParams.peersFilters!.and![0] = {
+        ...indexerGetOffersParams.peersFilters!.and![0],
+        ...{
+          // Check if CU status is Active - if it has current capacity commitment and
+          //  cc.info.startEpoch <= currentEpoch_.
+          currentCapacityCommitment_not: null,
+          currentCapacityCommitment_: {
+            // Duplication as it is in DealExplorerClient: serializeCapacityCommitmentsFiltersToIndexer.
+            startEpoch_lte: currentEpochString,
+            endEpoch_gt: currentEpochString,
+            // On each submitProof indexer should save nextCCFailedEpoch, and
+            //  in query we relay on that field to filter Failed CC.
+            nextCCFailedEpoch_gt: currentEpochString,
+            deleted: false,
+            // Wait delegation is duplicating startEpoch_lte check, though.
+            status_not_in: ["WaitDelegation", "Removed", "Failed"],
+          },
+        }
+      }
     }
     logInfo(
       `[_getMatchedOffersPage] Requesting indexer for page with page params: ${JSON.stringify(
@@ -375,7 +388,6 @@ export class DealMatcherClient {
     return matchedComputeUnitsData;
   }
 
-  // TODO: mb relocate to Deal contract class (utils extention)?
   // It mirrors `function currentEpoch() public view returns (uint256)`.
   calculateEpoch(
     timestamp: number,
@@ -399,7 +411,7 @@ export class DealMatcherClient {
    *
    * 1. Fetches the deal and its configuration from the Indexer backend
    * 2. Scraps compute units (page by page) until one of the conditions:
-   * - the end of matched offers/peers/compute units
+   * - the end of matched offers/peers/compute units reached,
    * - all target compute units found.
    */
   async getMatchedOffersByDealId(dealId: string): Promise<GetMatchedOffersOut> {
