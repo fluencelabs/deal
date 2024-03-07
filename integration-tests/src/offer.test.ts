@@ -210,7 +210,13 @@ describe(
         block.number,
       );
 
-      expect(addEffectorInfoEvents.map((e) => e.args)).toEqual(
+      expect(
+        addEffectorInfoEvents.map((e) => ({
+          id: e.args.id,
+          description: e.args.description,
+          metadata: e.args.metadata,
+        })),
+      ).toEqual(
         expect.arrayContaining([
           newEffectors.map(({ id, metadata, description }) => [
             id,
