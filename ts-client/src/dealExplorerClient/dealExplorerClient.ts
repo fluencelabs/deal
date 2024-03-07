@@ -891,7 +891,7 @@ export class DealExplorerClient {
       providerId: peer.provider.id,
       offerId: peer.offer.id,
       computeUnitsInDeal: peer.computeUnitsInDeal,
-      computeUnitsInCapacityCommitment: peer.computeUnitsInCapacityCommitment,
+      computeUnitsInCapacityCommitment: peer.currentCapacityCommitment ? peer.currentCapacityCommitment?.activeUnitCount : 0,
       computeUnitsTotal: peer.computeUnitsTotal,
     };
   }
@@ -920,7 +920,7 @@ export class DealExplorerClient {
     if (
       data.peer == undefined ||
       data.peer.joinedDeals == undefined ||
-      data.peer.joinedDeals?.length == 0
+      data.peer.joinedDeals.length == 0
     ) {
       return {
         data: [],

@@ -153,7 +153,6 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
   offer.save();
 }
 
-// It updates Peer and Offer.
 export function handlePeerCreated(event: PeerCreated): void {
   const peer = new Peer(event.params.peerId.toHexString());
   const offer = Offer.load(event.params.offerId.toHexString()) as Offer;
@@ -169,7 +168,6 @@ export function handlePeerCreated(event: PeerCreated): void {
   // Init stats below.
   peer.computeUnitsTotal = 0;
   peer.computeUnitsInDeal = 0;
-  peer.computeUnitsInCapacityCommitment = 0;
   peer.save();
 }
 
