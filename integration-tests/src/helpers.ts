@@ -1,6 +1,6 @@
 import { getDefaultOfferFixture, randomCID } from "./fixtures.js";
 import { type ICapacity, type IMarket } from "@fluencelabs/deal-ts-clients";
-import { DEFAULT_CONFIRMATIONS } from "./constants.js";
+import { CC_DURATION_DEFAULT, DEFAULT_CONFIRMATIONS } from "./constants.js";
 import { assert, expect } from "vitest";
 import { checkEvents } from "./confirmations.js";
 
@@ -61,7 +61,7 @@ export async function createCommitments(
   signerAddress: string,
   peerIds: string[],
 ) {
-  const duration = 100n;
+  const duration = CC_DURATION_DEFAULT;
   const fromBlock = await capacity.runner?.provider?.getBlock("latest");
   assert(fromBlock, "Not current block");
 

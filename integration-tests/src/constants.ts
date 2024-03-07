@@ -10,3 +10,5 @@ export enum CCStatus {
   Failed,
   Removed,
 }
+
+export const CC_DURATION_DEFAULT = 1000n;

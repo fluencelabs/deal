@@ -3,7 +3,11 @@ import { createCommitments, registerMarketOffer } from "./helpers.js";
 import { ethers, JsonRpcProvider, JsonRpcSigner } from "ethers";
 import { type ContractsENV, DealClient } from "@fluencelabs/deal-ts-clients";
 import { checkEvents } from "./confirmations.js";
-import { CCStatus, DEFAULT_CONFIRMATIONS } from "./constants.js";
+import {
+  CC_DURATION_DEFAULT,
+  CCStatus,
+  DEFAULT_CONFIRMATIONS,
+} from "./constants.js";
 import { skipEpoch } from "./utils.js";
 import { config } from "dotenv";
 config({ path: [".env", ".env.local"] });
@@ -99,7 +103,7 @@ describe(
       await depositCollateralTx.wait(DEFAULT_CONFIRMATIONS);
 
       // TODO: move to constant
-      const duration = 100n;
+      const duration = CC_DURATION_DEFAULT;
 
       const collateralDepositedEvents = await checkEvents(
         capacityContract,
