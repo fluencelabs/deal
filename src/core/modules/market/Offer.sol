@@ -472,7 +472,11 @@ abstract contract Offer is BaseModule, IOffer {
 
         deal.addComputeUnit(offer.provider, unitId, peerId);
 
-        core.capacity().onUnitMovedToDeal(computePeer.commitmentId, unitId);
+        // We may have CU not in any CC but still be matched (through whitelist). Thus, we
+        //  oght to check if we need to mv CU from capacity.
+        if (computePeer.commitmentId != bytes32(0x00)) {
+            core.capacity().onUnitMovedToDeal(computePeer.commitmentId, unitId);
+        }
 
         emit ComputeUnitAddedToDeal(unitId, deal, computeUnit.peerId);
     }
