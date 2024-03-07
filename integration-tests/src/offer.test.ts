@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, test } from "vitest";
+import { assert, beforeAll, describe, expect, test } from "vitest";
 import { registerMarketOffer } from "./helpers.js";
 import { getPeerFixture, getUnitIdFixture, randomCID } from "./fixtures.js";
 import { DEFAULT_CONFIRMATIONS } from "./constants.js";
@@ -25,7 +25,6 @@ describe("Modify Offer", () => {
     "Edit compute peers",
     async () => {
       const marketContract = await contractsClient.getMarket();
-      const capacityContract = await contractsClient.getCapacity();
       const paymentToken = await contractsClient.getUSDC();
       const paymentTokenAddress = await paymentToken.getAddress();
 
@@ -40,16 +39,17 @@ describe("Modify Offer", () => {
       console.log("Adding new compute peer...");
       const newComputePeerFixture = getPeerFixture(signerAddress, 1);
 
-      await (
-        await marketContract.addComputePeers(registeredOffer.offerId, [
-          newComputePeerFixture,
-        ])
-      ).wait(DEFAULT_CONFIRMATIONS);
+      const addComputePeersTx = await marketContract.addComputePeers(
+        registeredOffer.offerId,
+        [newComputePeerFixture],
+      );
+      await addComputePeersTx.wait(DEFAULT_CONFIRMATIONS);
 
       const peerEvents = await checkEvents(
         marketContract,
         marketContract.filters.PeerCreated,
         1,
+        addComputePeersTx,
       );
       const [peerCreatedEvent] = peerEvents;
       expect(peerCreatedEvent?.args).toEqual([
@@ -76,17 +76,18 @@ describe("Modify Offer", () => {
         getUnitIdFixture(),
       ] satisfies [string, string];
 
-      await (
-        await marketContract.addComputeUnits(
-          newComputePeerFixture.peerId,
-          unitIdFixtures,
-        )
-      ).wait(DEFAULT_CONFIRMATIONS);
+      const addComputeUnitsTx = await marketContract.addComputeUnits(
+        newComputePeerFixture.peerId,
+        unitIdFixtures,
+      );
+
+      await addComputeUnitsTx.wait(DEFAULT_CONFIRMATIONS);
 
       const peerUnitEvents = await checkEvents(
         marketContract,
         marketContract.filters.ComputeUnitCreated,
         unitIdFixtures.length,
+        addComputeUnitsTx,
       );
 
       expect(peerUnitEvents.map((u) => u.args.unitId)).toEqual(
@@ -107,14 +108,15 @@ describe("Modify Offer", () => {
       console.log("Removing compute units from created compute peer...");
 
       const [RemovedCU, ...restCUs] = allUnitIds;
-      await (
-        await marketContract.removeComputeUnit(RemovedCU)
-      ).wait(DEFAULT_CONFIRMATIONS);
+      const removeComputeUnitTx =
+        await marketContract.removeComputeUnit(RemovedCU);
+      await removeComputeUnitTx.wait(DEFAULT_CONFIRMATIONS);
 
       const removeCUEvents = await checkEvents(
         marketContract,
         marketContract.filters.ComputeUnitRemoved,
         1,
+        removeComputeUnitTx,
       );
 
       expect(removeCUEvents.map((e) => e.args)).toEqual([
@@ -141,14 +143,16 @@ describe("Modify Offer", () => {
 
       expect(peer.unitCount).toEqual(0n);
 
-      await (
-        await marketContract.removeComputePeer(newComputePeerFixture.peerId)
-      ).wait(DEFAULT_CONFIRMATIONS);
+      const removeComputePeerTx = await marketContract.removeComputePeer(
+        newComputePeerFixture.peerId,
+      );
+      await removeComputePeerTx.wait(DEFAULT_CONFIRMATIONS);
 
       const removePeerEvents = await checkEvents(
         marketContract,
         marketContract.filters.PeerRemoved,
         1,
+        removeComputePeerTx,
       );
       expect(removePeerEvents.map((e) => e.args)).toEqual([
         [registeredOffer.offerId, newComputePeerFixture.peerId],
@@ -191,6 +195,9 @@ describe("Modify Offer", () => {
 
     console.log("Setting effectors info...");
 
+    let block = await marketContract.runner?.provider?.getBlock("latest");
+    assert(block, "Block number is not defined");
+
     for (const { id, metadata, description } of newEffectors) {
       await (
         await marketContract.setEffectorInfo(id, description, metadata)
@@ -201,6 +208,7 @@ describe("Modify Offer", () => {
       marketContract,
       marketContract.filters.EffectorInfoSet,
       newEffectors.length,
+      block.number,
     );
 
     expect(addEffectorInfoEvents.map((e) => e.args)).toEqual(
@@ -215,17 +223,18 @@ describe("Modify Offer", () => {
 
     console.log("Adding effector...");
 
-    await (
-      await marketContract.addEffector(
-        registeredOffer.offerId,
-        newEffectors.map((e) => e.id),
-      )
-    ).wait(DEFAULT_CONFIRMATIONS);
+    const addEffectorTx = await marketContract.addEffector(
+      registeredOffer.offerId,
+      newEffectors.map((e) => e.id),
+    );
+
+    await addEffectorTx.wait(DEFAULT_CONFIRMATIONS);
 
     const addEffectorEvents = await checkEvents(
       marketContract,
       marketContract.filters.EffectorAdded,
       newEffectors.length,
+      addEffectorTx,
     );
 
     expect(addEffectorEvents.map((e) => e.args)).toEqual(
@@ -236,17 +245,18 @@ describe("Modify Offer", () => {
 
     console.log("Removing effector...");
 
-    await (
-      await marketContract.removeEffector(
-        registeredOffer.offerId,
-        newEffectors.map((e) => e.id),
-      )
-    ).wait(DEFAULT_CONFIRMATIONS);
+    const removeEffectorTx = await marketContract.removeEffector(
+      registeredOffer.offerId,
+      newEffectors.map((e) => e.id),
+    );
+
+    await removeEffectorTx.wait(DEFAULT_CONFIRMATIONS);
 
     const removeEffectorEvents = await checkEvents(
       marketContract,
       marketContract.filters.EffectorRemoved,
       newEffectors.length,
+      removeEffectorTx,
     );
     expect(removeEffectorEvents.map((e) => e.args)).toEqual(
       expect.arrayContaining(
@@ -255,6 +265,8 @@ describe("Modify Offer", () => {
     );
 
     console.log("Deleting effectors info...");
+    block = await marketContract.runner?.provider?.getBlock("latest");
+    assert(block, "Block number is not defined");
 
     for (const { id } of newEffectors) {
       await (
@@ -266,6 +278,7 @@ describe("Modify Offer", () => {
       marketContract,
       marketContract.filters.EffectorInfoRemoved,
       newEffectors.length,
+      block.number,
     );
     expect(removeEffectorInfoEvents.map((e) => e.args)).toEqual(
       expect.arrayContaining(newEffectors.map((e) => [e.id])),
@@ -290,17 +303,18 @@ describe("Modify Offer", () => {
 
     // TODO: deploy mock token instead
     const newTokenAddress = await coreContract.getAddress();
-    await (
-      await marketContract.changePaymentToken(
-        registeredOffer.offerId,
-        newTokenAddress,
-      )
-    ).wait(DEFAULT_CONFIRMATIONS);
+    const changePaymentTokenTx = await marketContract.changePaymentToken(
+      registeredOffer.offerId,
+      newTokenAddress,
+    );
+
+    await changePaymentTokenTx.wait(DEFAULT_CONFIRMATIONS);
 
     const tokenUpdateEvents = await checkEvents(
       marketContract,
       marketContract.filters.PaymentTokenUpdated,
       1,
+      changePaymentTokenTx,
     );
 
     expect(tokenUpdateEvents.map((e) => e.args)).toEqual([
@@ -313,17 +327,19 @@ describe("Modify Offer", () => {
     console.log("Changing min price per worker epoch...");
 
     const newMinPrice = ethers.parseEther("0.1");
-    await (
+    const changeMinPricePerWorkerEpochTx =
       await marketContract.changeMinPricePerWorkerEpoch(
         registeredOffer.offerId,
         newMinPrice,
-      )
-    ).wait(DEFAULT_CONFIRMATIONS);
+      );
+
+    await changeMinPricePerWorkerEpochTx.wait(DEFAULT_CONFIRMATIONS);
 
     const minPriceUpdateEvents = await checkEvents(
       marketContract,
       marketContract.filters.MinPricePerEpochUpdated,
       1,
+      changeMinPricePerWorkerEpochTx,
     );
 
     expect(minPriceUpdateEvents.map((e) => e.args)).toEqual([

@@ -162,7 +162,7 @@ describe(
       console.log("Deal stop...");
 
       const dealStopTx = await deal.stop();
-      await deployDealTs.wait(DEFAULT_CONFIRMATIONS);
+      await dealStopTx.wait(DEFAULT_CONFIRMATIONS);
       const [dealStopEvent] = await checkEvents(
         deal,
         deal.filters.DealEnded,

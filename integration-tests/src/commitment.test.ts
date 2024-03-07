@@ -45,14 +45,16 @@ describe(
 
       assert(commitmentId, "Commitment ID doesn't exist");
 
-      await (
-        await capacityContract.removeCommitment(commitmentId)
-      ).wait(DEFAULT_CONFIRMATIONS);
+      const removeCommitmentTx =
+        await capacityContract.removeCommitment(commitmentId);
+
+      await removeCommitmentTx.wait(DEFAULT_CONFIRMATIONS);
 
       const events = await checkEvents(
         capacityContract,
         capacityContract.filters.CommitmentRemoved,
         1,
+        removeCommitmentTx,
       );
 
       expect(events.map((e) => e.args)).toEqual([[commitmentId]]);
@@ -86,12 +88,13 @@ describe(
       const collateralPerUnit = await capacityContract.fltCollateralPerUnit();
 
       console.log("Depositing collateral...");
-      await // Payment for single unit
-      (
-        await capacityContract.depositCollateral([commitmentId], {
+      const depositCollateralTx = await capacityContract.depositCollateral(
+        [commitmentId],
+        {
           value: collateralPerUnit,
-        })
-      ).wait(DEFAULT_CONFIRMATIONS);
+        },
+      );
+      await depositCollateralTx.wait(DEFAULT_CONFIRMATIONS);
 
       const duration = await capacityContract.minDuration();
 
@@ -99,6 +102,7 @@ describe(
         capacityContract,
         capacityContract.filters.CollateralDeposited,
         1,
+        depositCollateralTx,
       );
       expect(collateralDepositedEvents.map((e) => e.args)).toEqual([
         [commitmentId, collateralPerUnit],
@@ -108,6 +112,7 @@ describe(
         capacityContract,
         capacityContract.filters.CommitmentActivated,
         1,
+        depositCollateralTx,
       );
       expect(
         capacityActivatedEvents.map((e) => [

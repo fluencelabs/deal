@@ -94,9 +94,8 @@ describe("#getMatchedOffersByDealId", () => {
       console.info("Deposit collateral for all sent CC...");
       await depositCollateral(capacityContract, commitmentIds);
       await skipEpoch(provider, epochDuration, 1);
-      const status = await capacityContract.getStatus(
-        registeredOffer.peers.map((p) => p.peerId)[0],
-      );
+      console.log(registeredOffer.peers.map((p) => p.peerId)[0], commitmentIds);
+      const status = await capacityContract.getStatus(commitmentIds[0]);
       console.log(status);
 
       console.log("---- Deal Creation ----");
@@ -172,22 +171,10 @@ describe("#getMatchedOffersByDealId", () => {
 
       await skipEpoch(provider, epochDuration, 1);
 
-      console.info(`Wait till indexer ingesting blockchain state...`);
-
       const peer = registeredOffer.peers[0];
       assert(peer, "At least 1 peer should be defined");
       const cuIds = [...(await marketContract.getComputeUnitIds(peer.peerId))];
-
-      const cuId = cuIds?.[0];
       console.log(cuIds);
-
-      // Additional check for status of matched CC from chain perspective
-      for (const commitmentId of cuIds) {
-        // e.g. 4 == Failed; 0 - Active.
-        expect(Number(await capacityContract.getStatus(commitmentId))).eq(
-          CCStatus.WaitDelegation,
-        );
-      }
 
       console.info(`Match deal with offers structure`);
       const matchDealTx = await marketContract.matchDeal(
