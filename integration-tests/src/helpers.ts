@@ -64,7 +64,6 @@ export async function createCommitments(
   const duration = 9999;
   const fromBlock = await capacity.runner?.provider?.getBlock("latest");
   assert(fromBlock, "Not current block");
-  console.log(fromBlock, fromBlock.number);
 
   for (const peerId of peerIds) {
     // bytes32 peerId, uint256 duration, address delegator, uint256 rewardDelegationRate
@@ -139,15 +138,11 @@ export async function depositCollateral(
     1,
     depositCollateralTx,
   );
-  console.log();
   const [activatedEvent] = await checkEvents(
     capacity,
     capacity.filters.CommitmentActivated,
     1,
     depositCollateralTx,
   );
-  console.log(activatedEvent);
   assert(activatedEvent, "CC not activated");
-  const status = await capacity.getStatus(activatedEvent.args.commitmentId);
-  console.log(status, "status");
 }

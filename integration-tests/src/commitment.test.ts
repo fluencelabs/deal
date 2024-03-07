@@ -5,9 +5,10 @@ import { type ContractsENV, DealClient } from "@fluencelabs/deal-ts-clients";
 import { checkEvents } from "./confirmations.js";
 import { CCStatus, DEFAULT_CONFIRMATIONS } from "./constants.js";
 import { skipEpoch } from "./utils.js";
+import "dotenv/config";
 
 const TEST_NETWORK: ContractsENV = "local";
-const TEST_RPC_URL = `http://localhost:8545`;
+const TEST_RPC_URL = process.env.RPC_URL;
 const DEFAULT_TEST_TIMEOUT = 180000;
 
 let provider: JsonRpcProvider;

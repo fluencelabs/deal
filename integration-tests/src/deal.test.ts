@@ -5,11 +5,12 @@ import { DEFAULT_CONFIRMATIONS } from "./constants.js";
 import { registerMarketOffer } from "./helpers.js";
 import { randomCID } from "./fixtures.js";
 import { checkEvents } from "./confirmations.js";
+import "dotenv/config";
 
 // const TEST_NETWORK: ContractsENV = "dar";
 const TEST_NETWORK: ContractsENV = "local";
 // const TEST_RPC_URL = `https://ipc-dar.fluence.dev`;
-const TEST_RPC_URL = `http://207.154.227.22:8545`;
+const TEST_RPC_URL = process.env.RPC_URL;
 const DEFAULT_TEST_TIMEOUT = 180000;
 
 let provider: JsonRpcProvider;

@@ -23,20 +23,18 @@ import {
 } from "./helpers.js";
 import { checkEvents } from "./confirmations.js";
 import { skipEpoch } from "./utils.js";
+import "dotenv/config";
 
 // TODO: from env.
 
 const TEST_NETWORK: ContractsENV = "local";
-const TEST_RPC_URL = `http://207.154.227.22:8545`;
-const DEFAULT_SUBGRAPH_TIME_INDEXING = 300000;
+const TEST_RPC_URL = process.env.RPC_URL;
 const DEFAULT_TEST_TIMEOUT = 180000;
 // Test timeout should include:
 // - time for confirmations waits (1 confirmation is setup on anvil chain start)
 // - time for subgraph indexing
 // - time for core epoch
 // - other eps.
-// TODO: get core.epochDuration instead of 30000
-const TESTS_TIMEOUT = 120000 + 30000 + DEFAULT_SUBGRAPH_TIME_INDEXING;
 
 let provider: JsonRpcProvider;
 let signer: Wallet | JsonRpcSigner;
@@ -74,7 +72,6 @@ describe("#getMatchedOffersByDealId", () => {
       const capacityContract = await contractsClient.getCapacity();
       const dealFactoryContract = await contractsClient.getDealFactory();
       const epochDuration = await coreContract.epochDuration();
-      console.log(epochDuration);
 
       const registeredOffer = await registerMarketOffer(
         marketContract,
@@ -92,7 +89,6 @@ describe("#getMatchedOffersByDealId", () => {
       console.info("Deposit collateral for all sent CC...");
       await depositCollateral(capacityContract, commitmentIds);
       await skipEpoch(provider, epochDuration, 1);
-      console.log(registeredOffer.peers.map((p) => p.peerId)[0], commitmentIds);
 
       for (const ccId of commitmentIds) {
         const status = await capacityContract.getStatus(ccId);
@@ -100,8 +96,6 @@ describe("#getMatchedOffersByDealId", () => {
       }
 
       console.log("---- Deal Creation ----");
-      const marketAddress = await marketContract.getAddress();
-
       const minWorkersDeal = 1;
       const targetWorkersDeal = 1;
       const maxWorkerPerProviderDeal = 1;
@@ -121,7 +115,6 @@ describe("#getMatchedOffersByDealId", () => {
       expect(await paymentToken.balanceOf(signerAddress)).toBeGreaterThan(
         toApproveFromDeployer,
       );
-      expect(marketAddress).not.toBe("0x0000000000000000000000000000");
       await paymentToken.approve(
         await dealFactoryContract.getAddress(),
         toApproveFromDeployer,
@@ -154,8 +147,6 @@ describe("#getMatchedOffersByDealId", () => {
         deployDealTx,
       );
 
-      console.log("last deal");
-
       assert(lastDealCreated, "Deal is not created");
 
       expect({
@@ -175,7 +166,6 @@ describe("#getMatchedOffersByDealId", () => {
       const peer = registeredOffer.peers[0];
       assert(peer, "At least 1 peer should be defined");
       const cuIds = [...(await marketContract.getComputeUnitIds(peer.peerId))];
-      console.log(cuIds);
 
       console.info(`Match deal with offers structure`);
       const matchDealTx = await marketContract.matchDeal(
@@ -184,11 +174,9 @@ describe("#getMatchedOffersByDealId", () => {
         [cuIds],
       );
 
-      const matchDealTxReceipt = await matchDealTx.wait(DEFAULT_CONFIRMATIONS);
       await matchDealTx.wait(DEFAULT_CONFIRMATIONS);
-      console.log(matchDealTxReceipt);
       //   TODO: check further.
     },
-    TESTS_TIMEOUT,
+    DEFAULT_TEST_TIMEOUT,
   );
 });

@@ -9,13 +9,13 @@
   "description": "Integration tests for contracts",
   "main": "index.js",
   "scripts": {
-    "test": "vitest run",
+    "test": "vitest run --no-file-parallelism",
     "lint": "prettier src --check && eslint --cache \"./src/**/*.ts\""
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@fluencelabs/deal-ts-clients": "https://npm.fluence.dev/@fluencelabs/deal-ts-clients/-/deal-ts-clients-0.8.1-fix-CHAIN-397-92acf25-2603-1.0.tgz",
+    "@fluencelabs/deal-ts-clients": "file:../ts-client",
     "ethers": "6.7.1",
     "vitest": "^1.2.0"
   },
@@ -25,6 +25,7 @@
     "@types/node": "^20.11.5",
     "@typescript-eslint/eslint-plugin": "^6.19.0",
     "@typescript-eslint/parser": "^6.19.0",
+    "dotenv": "^16.4.5",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.29.1",

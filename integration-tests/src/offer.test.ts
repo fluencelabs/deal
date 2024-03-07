@@ -5,25 +5,26 @@ import { DEFAULT_CONFIRMATIONS } from "./constants.js";
 import { checkEvents } from "./confirmations.js";
 import { ethers, JsonRpcProvider, JsonRpcSigner } from "ethers";
 import { type ContractsENV, DealClient } from "@fluencelabs/deal-ts-clients";
+import "dotenv/config";
 
 const TEST_NETWORK: ContractsENV = "local";
-const TEST_RPC_URL = `http://localhost:8545`;
+const TEST_RPC_URL = process.env.RPC_URL;
 const DEFAULT_TEST_TIMEOUT = 180000;
 
 let provider: JsonRpcProvider;
 let signer: JsonRpcSigner;
 let contractsClient: DealClient;
 
-describe("Modify Offer", () => {
-  beforeAll(async () => {
-    provider = new ethers.JsonRpcProvider(TEST_RPC_URL);
-    signer = await provider.getSigner();
-    contractsClient = new DealClient(signer, TEST_NETWORK);
-  });
+describe(
+  "Modify Offer",
+  () => {
+    beforeAll(async () => {
+      provider = new ethers.JsonRpcProvider(TEST_RPC_URL);
+      signer = await provider.getSigner();
+      contractsClient = new DealClient(signer, TEST_NETWORK);
+    });
 
-  test(
-    "Edit compute peers",
-    async () => {
+    test("Edit compute peers", async () => {
       const marketContract = await contractsClient.getMarket();
       const paymentToken = await contractsClient.getUSDC();
       const paymentTokenAddress = await paymentToken.getAddress();
@@ -163,195 +164,197 @@ describe("Modify Offer", () => {
       );
 
       expect(offerAfterRemove.peerCount).toEqual(1n);
-    },
-    DEFAULT_TEST_TIMEOUT,
-  );
+    });
 
-  test("Edit effectors", async () => {
-    const marketContract = await contractsClient.getMarket();
-    const paymentToken = await contractsClient.getUSDC();
-    const paymentTokenAddress = await paymentToken.getAddress();
+    test("Edit effectors", async () => {
+      const marketContract = await contractsClient.getMarket();
+      const paymentToken = await contractsClient.getUSDC();
+      const paymentTokenAddress = await paymentToken.getAddress();
 
-    const signerAddress = await signer.getAddress();
+      const signerAddress = await signer.getAddress();
 
-    const registeredOffer = await registerMarketOffer(
-      marketContract,
-      signerAddress,
-      paymentTokenAddress,
-    );
-
-    const newEffectors = [
-      {
-        id: randomCID(),
-        description: "description",
-        metadata: randomCID(),
-      },
-      {
-        id: randomCID(),
-        description: "description",
-        metadata: randomCID(),
-      },
-    ] as const;
-
-    console.log("Setting effectors info...");
-
-    let block = await marketContract.runner?.provider?.getBlock("latest");
-    assert(block, "Block number is not defined");
-
-    for (const { id, metadata, description } of newEffectors) {
-      await (
-        await marketContract.setEffectorInfo(id, description, metadata)
-      ).wait(DEFAULT_CONFIRMATIONS);
-    }
-
-    const addEffectorInfoEvents = await checkEvents(
-      marketContract,
-      marketContract.filters.EffectorInfoSet,
-      newEffectors.length,
-      block.number,
-    );
-
-    expect(addEffectorInfoEvents.map((e) => e.args)).toEqual(
-      expect.arrayContaining([
-        newEffectors.map(({ id, metadata, description }) => [
-          id,
-          description,
-          metadata,
-        ]),
-      ]),
-    );
-
-    console.log("Adding effector...");
-
-    const addEffectorTx = await marketContract.addEffector(
-      registeredOffer.offerId,
-      newEffectors.map((e) => e.id),
-    );
-
-    await addEffectorTx.wait(DEFAULT_CONFIRMATIONS);
-
-    const addEffectorEvents = await checkEvents(
-      marketContract,
-      marketContract.filters.EffectorAdded,
-      newEffectors.length,
-      addEffectorTx,
-    );
-
-    expect(addEffectorEvents.map((e) => e.args)).toEqual(
-      expect.arrayContaining(
-        newEffectors.map((e) => [registeredOffer.offerId, e.id]),
-      ),
-    );
-
-    console.log("Removing effector...");
-
-    const removeEffectorTx = await marketContract.removeEffector(
-      registeredOffer.offerId,
-      newEffectors.map((e) => e.id),
-    );
-
-    await removeEffectorTx.wait(DEFAULT_CONFIRMATIONS);
-
-    const removeEffectorEvents = await checkEvents(
-      marketContract,
-      marketContract.filters.EffectorRemoved,
-      newEffectors.length,
-      removeEffectorTx,
-    );
-    expect(removeEffectorEvents.map((e) => e.args)).toEqual(
-      expect.arrayContaining(
-        newEffectors.map((e) => [registeredOffer.offerId, e.id]),
-      ),
-    );
-
-    console.log("Deleting effectors info...");
-    block = await marketContract.runner?.provider?.getBlock("latest");
-    assert(block, "Block number is not defined");
-
-    for (const { id } of newEffectors) {
-      await (
-        await marketContract.removeEffectorInfo(id)
-      ).wait(DEFAULT_CONFIRMATIONS);
-    }
-
-    const removeEffectorInfoEvents = await checkEvents(
-      marketContract,
-      marketContract.filters.EffectorInfoRemoved,
-      newEffectors.length,
-      block.number,
-    );
-    expect(removeEffectorInfoEvents.map((e) => e.args)).toEqual(
-      expect.arrayContaining(newEffectors.map((e) => [e.id])),
-    );
-  });
-
-  test("Edit token and reward", async () => {
-    const marketContract = await contractsClient.getMarket();
-    const paymentToken = await contractsClient.getUSDC();
-    const coreContract = await contractsClient.getCore();
-    const paymentTokenAddress = await paymentToken.getAddress();
-
-    const signerAddress = await signer.getAddress();
-
-    const registeredOffer = await registerMarketOffer(
-      marketContract,
-      signerAddress,
-      paymentTokenAddress,
-    );
-
-    console.log("Changing payment token...");
-
-    // TODO: deploy mock token instead
-    const newTokenAddress = await coreContract.getAddress();
-    const changePaymentTokenTx = await marketContract.changePaymentToken(
-      registeredOffer.offerId,
-      newTokenAddress,
-    );
-
-    await changePaymentTokenTx.wait(DEFAULT_CONFIRMATIONS);
-
-    const tokenUpdateEvents = await checkEvents(
-      marketContract,
-      marketContract.filters.PaymentTokenUpdated,
-      1,
-      changePaymentTokenTx,
-    );
-
-    expect(tokenUpdateEvents.map((e) => e.args)).toEqual([
-      [registeredOffer.offerId, newTokenAddress],
-    ]);
-
-    const updatedOffer = await marketContract.getOffer(registeredOffer.offerId);
-    expect(updatedOffer.paymentToken).toEqual(newTokenAddress);
-
-    console.log("Changing min price per worker epoch...");
-
-    const newMinPrice = ethers.parseEther("0.1");
-    const changeMinPricePerWorkerEpochTx =
-      await marketContract.changeMinPricePerWorkerEpoch(
-        registeredOffer.offerId,
-        newMinPrice,
+      const registeredOffer = await registerMarketOffer(
+        marketContract,
+        signerAddress,
+        paymentTokenAddress,
       );
 
-    await changeMinPricePerWorkerEpochTx.wait(DEFAULT_CONFIRMATIONS);
+      const newEffectors = [
+        {
+          id: randomCID(),
+          description: "description",
+          metadata: randomCID(),
+        },
+        {
+          id: randomCID(),
+          description: "description",
+          metadata: randomCID(),
+        },
+      ] as const;
 
-    const minPriceUpdateEvents = await checkEvents(
-      marketContract,
-      marketContract.filters.MinPricePerEpochUpdated,
-      1,
-      changeMinPricePerWorkerEpochTx,
-    );
+      console.log("Setting effectors info...");
 
-    expect(minPriceUpdateEvents.map((e) => e.args)).toEqual([
-      [registeredOffer.offerId, newMinPrice],
-    ]);
+      let block = await marketContract.runner?.provider?.getBlock("latest");
+      assert(block, "Block number is not defined");
 
-    const updatedOfferByChangingMinPrice = await marketContract.getOffer(
-      registeredOffer.offerId,
-    );
+      for (const { id, metadata, description } of newEffectors) {
+        await (
+          await marketContract.setEffectorInfo(id, description, metadata)
+        ).wait(DEFAULT_CONFIRMATIONS);
+      }
 
-    expect(updatedOfferByChangingMinPrice.minPricePerWorkerEpoch).toEqual(
-      newMinPrice,
-    );
-  });
-});
+      const addEffectorInfoEvents = await checkEvents(
+        marketContract,
+        marketContract.filters.EffectorInfoSet,
+        newEffectors.length,
+        block.number,
+      );
+
+      expect(addEffectorInfoEvents.map((e) => e.args)).toEqual(
+        expect.arrayContaining([
+          newEffectors.map(({ id, metadata, description }) => [
+            id,
+            description,
+            metadata,
+          ]),
+        ]),
+      );
+
+      console.log("Adding effector...");
+
+      const addEffectorTx = await marketContract.addEffector(
+        registeredOffer.offerId,
+        newEffectors.map((e) => e.id),
+      );
+
+      await addEffectorTx.wait(DEFAULT_CONFIRMATIONS);
+
+      const addEffectorEvents = await checkEvents(
+        marketContract,
+        marketContract.filters.EffectorAdded,
+        newEffectors.length,
+        addEffectorTx,
+      );
+
+      expect(addEffectorEvents.map((e) => e.args)).toEqual(
+        expect.arrayContaining(
+          newEffectors.map((e) => [registeredOffer.offerId, e.id]),
+        ),
+      );
+
+      console.log("Removing effector...");
+
+      const removeEffectorTx = await marketContract.removeEffector(
+        registeredOffer.offerId,
+        newEffectors.map((e) => e.id),
+      );
+
+      await removeEffectorTx.wait(DEFAULT_CONFIRMATIONS);
+
+      const removeEffectorEvents = await checkEvents(
+        marketContract,
+        marketContract.filters.EffectorRemoved,
+        newEffectors.length,
+        removeEffectorTx,
+      );
+      expect(removeEffectorEvents.map((e) => e.args)).toEqual(
+        expect.arrayContaining(
+          newEffectors.map((e) => [registeredOffer.offerId, e.id]),
+        ),
+      );
+
+      console.log("Deleting effectors info...");
+      block = await marketContract.runner?.provider?.getBlock("latest");
+      assert(block, "Block number is not defined");
+
+      for (const { id } of newEffectors) {
+        await (
+          await marketContract.removeEffectorInfo(id)
+        ).wait(DEFAULT_CONFIRMATIONS);
+      }
+
+      const removeEffectorInfoEvents = await checkEvents(
+        marketContract,
+        marketContract.filters.EffectorInfoRemoved,
+        newEffectors.length,
+        block.number,
+      );
+      expect(removeEffectorInfoEvents.map((e) => e.args)).toEqual(
+        expect.arrayContaining(newEffectors.map((e) => [e.id])),
+      );
+    });
+
+    test("Edit token and reward", async () => {
+      const marketContract = await contractsClient.getMarket();
+      const paymentToken = await contractsClient.getUSDC();
+      const coreContract = await contractsClient.getCore();
+      const paymentTokenAddress = await paymentToken.getAddress();
+
+      const signerAddress = await signer.getAddress();
+
+      const registeredOffer = await registerMarketOffer(
+        marketContract,
+        signerAddress,
+        paymentTokenAddress,
+      );
+
+      console.log("Changing payment token...");
+
+      // TODO: deploy mock token instead
+      const newTokenAddress = await coreContract.getAddress();
+      const changePaymentTokenTx = await marketContract.changePaymentToken(
+        registeredOffer.offerId,
+        newTokenAddress,
+      );
+
+      await changePaymentTokenTx.wait(DEFAULT_CONFIRMATIONS);
+
+      const tokenUpdateEvents = await checkEvents(
+        marketContract,
+        marketContract.filters.PaymentTokenUpdated,
+        1,
+        changePaymentTokenTx,
+      );
+
+      expect(tokenUpdateEvents.map((e) => e.args)).toEqual([
+        [registeredOffer.offerId, newTokenAddress],
+      ]);
+
+      const updatedOffer = await marketContract.getOffer(
+        registeredOffer.offerId,
+      );
+      expect(updatedOffer.paymentToken).toEqual(newTokenAddress);
+
+      console.log("Changing min price per worker epoch...");
+
+      const newMinPrice = ethers.parseEther("0.1");
+      const changeMinPricePerWorkerEpochTx =
+        await marketContract.changeMinPricePerWorkerEpoch(
+          registeredOffer.offerId,
+          newMinPrice,
+        );
+
+      await changeMinPricePerWorkerEpochTx.wait(DEFAULT_CONFIRMATIONS);
+
+      const minPriceUpdateEvents = await checkEvents(
+        marketContract,
+        marketContract.filters.MinPricePerEpochUpdated,
+        1,
+        changeMinPricePerWorkerEpochTx,
+      );
+
+      expect(minPriceUpdateEvents.map((e) => e.args)).toEqual([
+        [registeredOffer.offerId, newMinPrice],
+      ]);
+
+      const updatedOfferByChangingMinPrice = await marketContract.getOffer(
+        registeredOffer.offerId,
+      );
+
+      expect(updatedOfferByChangingMinPrice.minPricePerWorkerEpoch).toEqual(
+        newMinPrice,
+      );
+    });
+  },
+  DEFAULT_TEST_TIMEOUT,
+);

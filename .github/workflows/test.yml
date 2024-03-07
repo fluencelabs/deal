@@ -144,5 +144,7 @@ jobs:
         working-directory: integration-tests
 
       - name: Run integration tests
-        run: npm run test deal.test
+        run: npm run test
         working-directory: integration-tests
+        env:
+          RPC_URL: "http://localhost:8545"
