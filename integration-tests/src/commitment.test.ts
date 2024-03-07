@@ -3,7 +3,7 @@ import { createCommitments, registerMarketOffer } from "./helpers.js";
 import { ethers, JsonRpcProvider, JsonRpcSigner } from "ethers";
 import { type ContractsENV, DealClient } from "@fluencelabs/deal-ts-clients";
 import { checkEvents } from "./confirmations.js";
-import { DEFAULT_CONFIRMATIONS } from "./constants.js";
+import { CCStatus, DEFAULT_CONFIRMATIONS } from "./constants.js";
 import { skipEpoch } from "./utils.js";
 
 const TEST_NETWORK: ContractsENV = "local";
@@ -13,17 +13,6 @@ const DEFAULT_TEST_TIMEOUT = 180000;
 let provider: JsonRpcProvider;
 let signer: JsonRpcSigner;
 let contractsClient: DealClient;
-
-enum CCStatus {
-  Active,
-  // WaitDelegation - before collateral is deposited.
-  WaitDelegation,
-  // Status is WaitStart - means collateral deposited, and epoch should be proceed before Active.
-  WaitStart,
-  Inactive,
-  Failed,
-  Removed,
-}
 
 describe(
   "Capacity commitment",

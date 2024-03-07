@@ -37,12 +37,22 @@ export async function registerMarketOffer(
     1,
     tx,
   );
+
   const lastMarketOffer = events.pop();
   assert(lastMarketOffer, "There is no market offer");
 
   return {
+    peers: registeredOffer.peers,
     offerId: lastMarketOffer.args.offerId,
-    ...registeredOffer,
+    effectors: lastMarketOffer.args.effectors.map((effector) => ({
+      hash: effector.hash,
+      prefixes: effector.prefixes,
+    })),
+    paymentToken: lastMarketOffer.args.paymentToken,
+    provider: lastMarketOffer.args.provider,
+    minProtocolVersion: lastMarketOffer.args.minProtocolVersion,
+    maxProtocolVersion: lastMarketOffer.args.maxProtocolVersion,
+    minPricePerWorkerEpoch: lastMarketOffer.args.minPricePerWorkerEpoch,
   };
 }
 
@@ -50,9 +60,11 @@ export async function createCommitments(
   capacity: ICapacity,
   signerAddress: string,
   peerIds: string[],
-  fromBlock: number,
 ) {
   const capacityMinDuration = await capacity.minDuration();
+  const fromBlock = await capacity.runner?.provider?.getBlock("latest");
+  assert(fromBlock, "Not current block");
+  console.log(fromBlock, fromBlock.number);
 
   for (const peerId of peerIds) {
     // bytes32 peerId, uint256 duration, address delegator, uint256 rewardDelegationRate
@@ -78,20 +90,19 @@ export async function createCommitments(
   const filterCreatedCC = capacity.filters.CommitmentCreated;
   const capacityCommitmentCreatedEvents = await capacity.queryFilter(
     filterCreatedCC,
-    fromBlock,
+    fromBlock.number,
   );
-  const capacityCommitmentCreatedEventsLast = capacityCommitmentCreatedEvents
-    .reverse()
-    .slice(0, createdCommitments);
   // 1 CC for each peer.
-  expect(capacityCommitmentCreatedEventsLast.length).toBe(createdCommitments);
+  expect(capacityCommitmentCreatedEvents.length).toBe(createdCommitments);
 
-  return capacityCommitmentCreatedEventsLast.map(
+  console.log(capacityCommitmentCreatedEvents);
+
+  return capacityCommitmentCreatedEvents.map(
     (event) => event.args.commitmentId,
   );
 }
 
-export async function depositCapacity(
+export async function depositCollateral(
   capacity: ICapacity,
   commitmentIds: string[],
 ) {
@@ -122,4 +133,19 @@ export async function depositCapacity(
     value: collateralToApproveCommitments,
   });
   await depositCollateralTx.wait(DEFAULT_CONFIRMATIONS);
+  await checkEvents(
+    capacity,
+    capacity.filters.CollateralDeposited,
+    1,
+    depositCollateralTx,
+  );
+  const [activatedEvent] = await checkEvents(
+    capacity,
+    capacity.filters.CommitmentActivated,
+    1,
+    depositCollateralTx,
+  );
+  assert(activatedEvent, "CC not activated");
+  const status = await capacity.getStatus(activatedEvent.args.commitmentId);
+  console.log(status);
 }

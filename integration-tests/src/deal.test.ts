@@ -9,7 +9,7 @@ import { checkEvents } from "./confirmations.js";
 // const TEST_NETWORK: ContractsENV = "dar";
 const TEST_NETWORK: ContractsENV = "local";
 // const TEST_RPC_URL = `https://ipc-dar.fluence.dev`;
-const TEST_RPC_URL = `http://localhost:8545`;
+const TEST_RPC_URL = `http://207.154.227.22:8545`;
 const DEFAULT_TEST_TIMEOUT = 180000;
 
 let provider: JsonRpcProvider;
@@ -72,6 +72,7 @@ describe(
         toApproveFromDeployer,
       );
 
+      const protocolVersion = 1;
       const deployDealTs = await dealFactoryContract.deployDeal(
         randomCID(),
         registeredOffer.paymentToken,
@@ -83,7 +84,7 @@ describe(
         registeredOffer.effectors,
         0,
         [],
-        1,
+        protocolVersion,
       );
 
       await deployDealTs.wait(DEFAULT_CONFIRMATIONS);
