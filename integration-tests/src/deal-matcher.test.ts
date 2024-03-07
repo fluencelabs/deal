@@ -61,8 +61,6 @@ describe("#getMatchedOffersByDealId", () => {
   test(
     `Check that it matched successfully for 1:1 configuration.`,
     async () => {
-      const fromBlock = (await provider.getBlock("latest"))?.number;
-      assert(fromBlock, "from block isn't defined");
       const signerAddress = await signer.getAddress();
       const timestamp = (await provider.getBlock("latest"))?.timestamp;
       assert(timestamp, "Timestamp is defined");
@@ -95,8 +93,11 @@ describe("#getMatchedOffersByDealId", () => {
       await depositCollateral(capacityContract, commitmentIds);
       await skipEpoch(provider, epochDuration, 1);
       console.log(registeredOffer.peers.map((p) => p.peerId)[0], commitmentIds);
-      const status = await capacityContract.getStatus(commitmentIds[0]);
-      console.log(status);
+
+      for (const ccId of commitmentIds) {
+        const status = await capacityContract.getStatus(ccId);
+        assert(Number(status) === CCStatus.Active, "Status is not active");
+      }
 
       console.log("---- Deal Creation ----");
       const marketAddress = await marketContract.getAddress();
