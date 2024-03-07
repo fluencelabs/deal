@@ -5,7 +5,8 @@ import { DEFAULT_CONFIRMATIONS } from "./constants.js";
 import { registerMarketOffer } from "./helpers.js";
 import { randomCID } from "./fixtures.js";
 import { checkEvents } from "./confirmations.js";
-import "dotenv/config";
+import { config } from "dotenv";
+config({ path: [".env", ".env.local"] });
 
 // const TEST_NETWORK: ContractsENV = "dar";
 const TEST_NETWORK: ContractsENV = "local";

@@ -23,7 +23,8 @@ import {
 } from "./helpers.js";
 import { checkEvents } from "./confirmations.js";
 import { skipEpoch } from "./utils.js";
-import "dotenv/config";
+import { config } from "dotenv";
+config({ path: [".env", ".env.local"] });
 
 // TODO: from env.
 

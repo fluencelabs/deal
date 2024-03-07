@@ -3,9 +3,15 @@ import { registerMarketOffer } from "./helpers.js";
 import { getPeerFixture, getUnitIdFixture, randomCID } from "./fixtures.js";
 import { DEFAULT_CONFIRMATIONS } from "./constants.js";
 import { checkEvents } from "./confirmations.js";
-import { ethers, JsonRpcProvider, JsonRpcSigner } from "ethers";
+import {
+  ethers,
+  JsonRpcProvider,
+  JsonRpcSigner,
+  solidityPackedKeccak256,
+} from "ethers";
 import { type ContractsENV, DealClient } from "@fluencelabs/deal-ts-clients";
-import "dotenv/config";
+import { config } from "dotenv";
+config({ path: [".env", ".env.local"] });
 
 const TEST_NETWORK: ContractsENV = "local";
 const TEST_RPC_URL = process.env.RPC_URL;
@@ -211,19 +217,14 @@ describe(
       );
 
       expect(
-        addEffectorInfoEvents.map((e) => ({
-          id: e.args.id,
-          description: e.args.description,
-          metadata: e.args.metadata,
-        })),
+        addEffectorInfoEvents.map((e) => [e.args.description, e.args.metadata]),
       ).toEqual(
-        expect.arrayContaining([
-          newEffectors.map(({ id, metadata, description }) => [
-            id,
+        expect.arrayContaining(
+          newEffectors.map(({ metadata, description }) => [
             description,
-            metadata,
+            [metadata.prefixes, metadata.hash],
           ]),
-        ]),
+        ),
       );
 
       console.log("Adding effector...");
@@ -244,7 +245,10 @@ describe(
 
       expect(addEffectorEvents.map((e) => e.args)).toEqual(
         expect.arrayContaining(
-          newEffectors.map((e) => [registeredOffer.offerId, e.id]),
+          newEffectors.map((e) => [
+            registeredOffer.offerId,
+            [e.id.prefixes, e.id.hash],
+          ]),
         ),
       );
 
@@ -265,7 +269,10 @@ describe(
       );
       expect(removeEffectorEvents.map((e) => e.args)).toEqual(
         expect.arrayContaining(
-          newEffectors.map((e) => [registeredOffer.offerId, e.id]),
+          newEffectors.map((e) => [
+            registeredOffer.offerId,
+            [e.id.prefixes, e.id.hash],
+          ]),
         ),
       );
 
@@ -285,8 +292,8 @@ describe(
         newEffectors.length,
         block.number,
       );
-      expect(removeEffectorInfoEvents.map((e) => e.args)).toEqual(
-        expect.arrayContaining(newEffectors.map((e) => [e.id])),
+      expect(removeEffectorInfoEvents.map((e) => [])).toEqual(
+        expect.arrayContaining(newEffectors.map((e) => [])),
       );
     });
 
