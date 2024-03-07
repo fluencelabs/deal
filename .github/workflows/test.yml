@@ -28,34 +28,6 @@ env:
   FOUNDRY_PROFILE: "ci"
 
 jobs:
-  build:
-    name: "Build contracts and npm packages"
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
-          registry-url: "https://registry.npmjs.org"
-          cache: "npm"
-          cache-dependency-path: |
-            ts-client/package-lock.json
-            subgraph/package-lock.json
-
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: nightly
-
-      - run: make install-npms
-      - run: make build-all
-
   integration-tests:
     name: "Integration tests"
     runs-on: linux-amd64-c-2xlarge
