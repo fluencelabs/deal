@@ -28,6 +28,10 @@ export function serializeTxDealStatus(result: Result | null): DealStatus {
       status = "notEnoughWorkers";
       break;
     }
+    case 4: {
+      status = "smallBalance";
+      break;
+    }
     default: {
       status = "undefined";
       break;

@@ -90,7 +90,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         uint256 prevEpoch = _globalCore().currentEpoch() - 1;
 
         DealStorage storage dealStorage = _getDealStorage();
-        dealStorage.maxPaidEpoch = prevEpoch;
+        dealStorage.maxPaidEpoch = 0;
         dealStorage.lastCommitedEpoch = prevEpoch;
     }
 
@@ -164,16 +164,22 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
             return Status.ENDED;
         }
 
-        if (getWorkerCount() < minWorkers()) {
-            return Status.NOT_ENOUGH_WORKERS;
-        } else if (_globalCore().currentEpoch() > dealStorage.maxPaidEpoch) {
+        uint256 freeBalance = getFreeBalance();
+        uint256 currentWorkerCount = getWorkerCount();
+        uint256 maxPaidEpoch = dealStorage.maxPaidEpoch;
+
+        if (maxPaidEpoch != 0 && _globalCore().currentEpoch() > dealStorage.maxPaidEpoch) {
             return Status.INSUFFICIENT_FUNDS;
+        } else if (freeBalance < _globalCore().minDealDepositedEpoches() * pricePerWorkerEpoch() * targetWorkers()) {
+            return Status.SMALL_BALANCE;
+        } else if (currentWorkerCount < minWorkers()) {
+            return Status.NOT_ENOUGH_WORKERS;
         } else {
             return Status.ACTIVE;
         }
     }
 
-    function getFreeBalance() public view returns (uint256) {
+    function getFreeBalance() public virtual view returns (uint256) {
         DealStorage storage dealStorage = _getDealStorage();
 
         DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
@@ -395,10 +401,9 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
 
         ComputeUnitPaymentInfo storage computeUnitPaymentInfo = dealStorage.cUnitPaymentInfo[computeUnitId];
 
-        uint256 maxPaidEpoch = dealStorage.maxPaidEpoch;
         DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
         _preCommitPeriod(
-            balance, prevEpoch, maxPaidEpoch, dealStorage.lastCommitedEpoch, prevWorkerCount, pricePerWorkerEpoch_
+            balance, prevEpoch, dealStorage.maxPaidEpoch, dealStorage.lastCommitedEpoch, prevWorkerCount, pricePerWorkerEpoch_
         );
 
         _postCommitPeriod(balance, prevEpoch, prevWorkerCount, newWorkerCounts, minWorkers(), pricePerWorkerEpoch_);
