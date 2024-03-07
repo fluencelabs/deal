@@ -1,20 +1,20 @@
 {
   "dar": {
     "Market": {
-      "address": "0xA855A5a13dC61ce1385068fe8768c6b70F4042A2",
-      "startBlock": 598258
+      "address": "0x79f703410237e11F3b6B7EAdB82B2e863b8dB813",
+      "startBlock": 785712
     },
     "Capacity": {
-      "address": "0xDe2C71374D4C91f8E918615B1F3809F8bf379379",
-      "startBlock": 598258
+      "address": "0x97C00A38a5e65091eE84159545Cc2001B45eE31D",
+      "startBlock": 785712
     },
     "Core": {
-      "address": "0xA4E988947750300e4ac757745b4342118E203BDe",
-      "startBlock": 598258
+      "address": "0xC672E2AB76AaBc9A4a86b171330E39b6173E864C",
+      "startBlock": 785712
     },
     "DealFactory": {
-      "address": "0xcf90B969bf643821e3E020D889b862b85e8fFa9f",
-      "startBlock": 598258
+      "address": "0xB7416e71813e0261e967Db29E3e9C95381155761",
+      "startBlock": 785712
     }
   }
 }
