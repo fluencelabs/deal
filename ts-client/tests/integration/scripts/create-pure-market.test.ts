@@ -285,7 +285,7 @@ async function main() {
     let createdCCIds: string[] = []
     // TODO: rm CC for providerToBeMatched
     //  - now it is because of https://linear.app/fluence/issue/CHAIN-400/bug-in-matchermatchdeal-when-match-with-whitelisted-deal.
-    for (const peerId of [...marketFixture.providerWithCapacityCommitments.peerIds, ...marketFixture.providerToBeMatched.peerIds]) {
+    for (const peerId of [...marketFixture.providerWithCapacityCommitments.peerIds]) {
         const createCommitmentTx = await capacityContract.createCommitment(
             peerId,
             CAPACITY_DEFAULT_DURATION,
