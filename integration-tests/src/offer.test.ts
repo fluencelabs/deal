@@ -216,6 +216,7 @@ describe(
         block.number,
       );
 
+      // TODO: check id field
       expect(
         addEffectorInfoEvents.map((e) => [e.args.description, e.args.metadata]),
       ).toEqual(
@@ -292,6 +293,7 @@ describe(
         newEffectors.length,
         block.number,
       );
+      // TODO: check id field
       expect(removeEffectorInfoEvents.map((e) => [])).toEqual(
         expect.arrayContaining(newEffectors.map((e) => [])),
       );
