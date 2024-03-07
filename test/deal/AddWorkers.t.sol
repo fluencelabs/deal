@@ -24,7 +24,7 @@ contract AddWorkers is Test {
     }
 
     function test_AddOneWorker() public {
-        Deal deal = deployment.deployDealWithoutFactory(10, 10, 1, 1 ether, 10 ether);
+        Deal deal = deployment.deployDealWithoutFactory(10, 10, 1, 1 ether);
 
         assertEq(uint256(deal.getStatus()), uint256(IDeal.Status.NOT_ENOUGH_WORKERS), "status should be NOT_ENOUGH_WORKERS");
         assertEq(deal.getMaxPaidEpoch(), 0, "maxPaidEpoch should be 0");
@@ -42,9 +42,10 @@ contract AddWorkers is Test {
 
     function test_AddMinWorkers() public {
         uint256 minWorkers = 10;
-        uint256 startDeposit = 100 ether;
+        uint256 targetWorkers = 100;
         uint256 pricePerEpoch = 1 ether;
-        Deal deal = deployment.deployDealWithoutFactory(minWorkers, 100, 1, pricePerEpoch, startDeposit);
+        uint256 startDeposit = deployment.core.minDealDepositedEpoches() * pricePerEpoch * targetWorkers;
+        Deal deal = deployment.deployDealWithoutFactory(minWorkers, targetWorkers, 1, pricePerEpoch, startDeposit);
 
         (address[] memory computeProviders, bytes32[] memory peerIds, bytes32[] memory unitIds) =
             TestHelper.generateProviders(minWorkers);
