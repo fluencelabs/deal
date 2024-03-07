@@ -90,7 +90,6 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         uint256 prevEpoch = _globalCore().currentEpoch() - 1;
 
         DealStorage storage dealStorage = _getDealStorage();
-        dealStorage.maxPaidEpoch = 0;
         dealStorage.lastCommitedEpoch = prevEpoch;
     }
 
