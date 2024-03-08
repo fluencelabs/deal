@@ -336,6 +336,9 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
 
         uint256 totalCollateral = collateralPerUnit_ * unitCount;
         uint256 slashedCollateral = cc.info.totalCUFailCount * collateralPerUnit_;
+        if (slashedCollateral > totalCollateral) {
+            slashedCollateral = totalCollateral;
+        }
         totalCollateral -= slashedCollateral;
 
         market.setCommitmentId(peerId, bytes32(0x00));
