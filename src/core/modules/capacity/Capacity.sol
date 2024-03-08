@@ -766,6 +766,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         return true;
     }
 
+    event Pivo(uint256, uint256, uint256, uint256, uint256);
     function _commitCommitmentSnapshot(
         Commitment storage cc,
         IMarket.ComputePeer memory peer,
@@ -791,6 +792,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         uint256 reqSuccessCount = activeUnitCount_ * epochCount;
         uint256 currentCUSuccessCount = cc.info.currentCUSuccessCount;
         uint256 totalFailCountByPeriod = 0;
+        emit Pivo(activeUnitCount_, epochCount, reqSuccessCount, currentCUSuccessCount, totalFailCountByPeriod);
         if (currentCUSuccessCount < reqSuccessCount) {
             totalFailCountByPeriod = reqSuccessCount - currentCUSuccessCount;
         }
