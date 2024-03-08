@@ -1,4 +1,4 @@
-import { expect } from "vitest";
+import { assert, expect } from "vitest";
 import {
   type ICapacity,
   type IDeal,
@@ -15,14 +15,20 @@ export async function checkEvents<
   contract: R,
   event: T,
   expectedEventCount: number,
-  tx: ContractTransactionResponse,
+  txOrBlockNumber: ContractTransactionResponse | number,
 ): Promise<TypedEventLog<T>[]> {
-  let blockNumber: number | null | undefined = tx.blockNumber;
-  while (blockNumber == null) {
-    console.log("query transaction...");
-    const internalTx = await tx.getTransaction();
-    blockNumber = internalTx?.blockNumber;
+  let blockNumber: number | null | undefined =
+    typeof txOrBlockNumber === "number"
+      ? txOrBlockNumber
+      : txOrBlockNumber.blockNumber;
+  if (typeof txOrBlockNumber !== "number") {
+    while (blockNumber == null) {
+      console.log("query transaction...");
+      const internalTx = await txOrBlockNumber.getTransaction();
+      blockNumber = internalTx?.blockNumber;
+    }
   }
+  assert(blockNumber, "Block number is not defined");
   const events = await contract.queryFilter(event, blockNumber);
   expect(events.length).toBe(expectedEventCount);
   return events;
