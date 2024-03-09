@@ -260,6 +260,9 @@ export function serializeCapacityCommitmentDetail(
       _totalRewards * BigInt(1 - rewardDelegatorRate),
     ),
     rewardsTotal: tokenValueToRounded(_totalRewards + rewardWithdrawn),
-    delegatorAddress: delegatorAddress == "0x0000000000000000000000000000000000000000" ? null : delegatorAddress,
+    delegatorAddress:
+      delegatorAddress == "0x0000000000000000000000000000000000000000"
+        ? null
+        : delegatorAddress,
   };
 }

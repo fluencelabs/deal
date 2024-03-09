@@ -40,9 +40,12 @@ export class DealNotFoundError extends Error {
 }
 
 export class DealAlreadyMatchedError extends Error {
-  public static ERROR_PREFIX = "Deal already has target number of compute units (workers) matched.";
+  public static ERROR_PREFIX =
+    "Deal already has target number of compute units (workers) matched.";
   constructor(dealId: string, targetWorkers: number) {
-    super(`${DealAlreadyMatchedError.ERROR_PREFIX}. Deal Id: ${dealId} Target workers: ${targetWorkers}.`);
+    super(
+      `${DealAlreadyMatchedError.ERROR_PREFIX}. Deal Id: ${dealId} Target workers: ${targetWorkers}.`,
+    );
     Object.setPrototypeOf(this, DealAlreadyMatchedError.prototype);
   }
 }
@@ -123,25 +126,21 @@ export class DealMatcherClient {
       };
     }
     // Check for blacklisted Providers.
-    if (
-      getMatchedOffersIn.providersBlackList.length > 0
-    ) {
+    if (getMatchedOffersIn.providersBlackList.length > 0) {
       indexerGetOffersParams.filters!["provider_"] = {
         id_not_in: getMatchedOffersIn.providersBlackList,
       };
     }
     // We requre rather CU to be in Active CC (and not in blacklist if blacklist exists)
     //  or CU from Deal whitelist of Providers.
-    if (
-      getMatchedOffersIn.providersWhiteList.length > 0
-    ) {
+    if (getMatchedOffersIn.providersWhiteList.length > 0) {
       indexerGetOffersParams.filters!["provider_"] = {
         id_in: getMatchedOffersIn.providersWhiteList,
       };
     } else {
       // No whitelist, thus, check for active cc status is required.
       // For Peers.
-      indexerGetOffersParams.filters!['peers_'] = {
+      indexerGetOffersParams.filters!["peers_"] = {
         // Do not fetch peers with no any of compute units in "active" status at all.
         // Check if CU status is Active - if it has current capacity commitment and
         //  cc.info.startEpoch <= currentEpoch_.
@@ -151,7 +150,7 @@ export class DealMatcherClient {
         currentCCCollateralDepositedAt_lte: currentEpochString,
         currentCCEndEpoch_gt: currentEpochString,
         currentCCNextCCFailedEpoch_gt: currentEpochString,
-      }
+      };
       // For CUs.
       indexerGetOffersParams.peersFilters!.and![0] = {
         ...indexerGetOffersParams.peersFilters!.and![0],
@@ -170,8 +169,8 @@ export class DealMatcherClient {
             // Wait delegation is duplicating startEpoch_lte check, though.
             status_not_in: ["WaitDelegation", "Removed", "Failed"],
           },
-        }
-      }
+        },
+      };
     }
     logInfo(
       `[_getMatchedOffersPage] Requesting indexer for page with page params: ${JSON.stringify(
@@ -431,7 +430,8 @@ export class DealMatcherClient {
       );
     }
     const alreadyMatchedComputeUnits = deal.addedComputeUnits?.length ?? 0;
-    const targetWorkerSlotsToMatch = deal.targetWorkers - alreadyMatchedComputeUnits;
+    const targetWorkerSlotsToMatch =
+      deal.targetWorkers - alreadyMatchedComputeUnits;
     if (targetWorkerSlotsToMatch == 0) {
       throw new DealAlreadyMatchedError(dealId, alreadyMatchedComputeUnits);
     }
