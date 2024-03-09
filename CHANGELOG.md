@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.10.0](https://github.com/fluencelabs/deal/compare/v0.9.0...v0.10.0) (2024-03-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* add comment to statuses & small RPC optimization ([#328](https://github.com/fluencelabs/deal/issues/328))
+
+### Features
+
+* redeploy dar ([#333](https://github.com/fluencelabs/deal/issues/333)) ([16769a7](https://github.com/fluencelabs/deal/commit/16769a7adffedb94b3249abdcb091a753b1b3090))
+
+
+### Bug Fixes
+
+* add comment to statuses & small RPC optimization ([#328](https://github.com/fluencelabs/deal/issues/328)) ([ddec654](https://github.com/fluencelabs/deal/commit/ddec6548a23ea12deca40ead56327c523d6096e2))
+* overflow ([#331](https://github.com/fluencelabs/deal/issues/331)) ([deff407](https://github.com/fluencelabs/deal/commit/deff40766e75435ba05cb3515e254ee76299c9e3))
+
 ## [0.9.0](https://github.com/fluencelabs/deal/compare/v0.8.0...v0.9.0) (2024-03-07)
 
 
