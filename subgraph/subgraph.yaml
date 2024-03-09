@@ -9,8 +9,8 @@ dataSources:
     network: dar
     source:
       abi: Core
-      address: "0x9d0008132bDb2187DDD6b75Fd73881e552df94a9"
-      startBlock: 868597
+      address: "0xf0c3289B9bc49c6c90Bb004DC96F5877D4e8A3c0"
+      startBlock: 986089
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -29,8 +29,8 @@ dataSources:
     network: dar
     source:
       abi: Market
-      address: "0xA14D55322957B66711F9F3190801f22Bee489BF8"
-      startBlock: 868597
+      address: "0x56b064005d45F0F11536fF2Ce730DE2F9715f55c"
+      startBlock: 986089
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -82,8 +82,8 @@ dataSources:
     network: dar
     source:
       abi: DealFactory
-      address: "0x6709F465BF41B26094D5FeE621744377b388A02c"
-      startBlock: 868597
+      address: "0xcCDfD64e45cFEb4d3165Cb46bc9766B02149AB13"
+      startBlock: 986089
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -109,8 +109,8 @@ dataSources:
     network: dar
     source:
       abi: Capacity
-      address: "0xeA9364f5145D3cbcd720577ABBFB40e136417629"
-      startBlock: 868597
+      address: "0x916450AB79531281E8C9C58ebD6081A9A2C4d1DE"
+      startBlock: 986089
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
