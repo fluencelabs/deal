@@ -727,6 +727,10 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
                 }
             }
 
+            if (slashedCollateral > currentAmount) {
+                slashedCollateral = currentAmount;
+            }
+
             unitProofsInfo.slashedCollateral = slashedCollateral;
         }
 
