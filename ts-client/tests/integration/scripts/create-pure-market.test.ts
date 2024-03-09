@@ -19,8 +19,15 @@ import {DealClient} from "../../../src";
 
 import {ethers, LogDescription} from "ethers";
 import dotenv from "dotenv"
-import assert from "node:assert";
 import {test} from "vitest";
+import {
+  createCommitmentForProviderFixtures,
+  createDealsFromFixtures,
+  depositCollateral,
+  getMarketExampleFixture,
+  registerMarketOfferFromFixture,
+  updateProviderFixtureAddress
+} from "../fixture";
 
 dotenv.config()
 
@@ -32,153 +39,9 @@ const RPC_URL = process.env.RPC_URL || "http://localhost:8545";
 const FLUENCE_ENV = process.env.FLUENCE_ENV || 'local'
 const WAIT_CONFIRMATIONS = Number(process.env.WAIT_CONFIRMATIONS || 1);
 
-const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 const CAPACITY_DEFAULT_DURATION = 60 * 60 * 24 * 30  // 30 days in seconds
 
 type asyncRuntimeDecoratorType = (func: Function) => void;
-
-interface MarketExample {
-    providerWithCapacityCommitments: ProviderModel;
-    providerToBeMatched: ProviderModel;
-    providerWithoutCapacityCommitments: ProviderModel;
-    dealToMatchWithWhiteListedProvider: DealModel;
-    dealWithoutWhitelist: DealModel;
-    dealWithWhitelist: DealModel;
-//     TODO: with CC but without deposit
-//     TODO: with CC that expired soon.
-//     TODO: deal to match with CC active.
-}
-
-interface CID {
-    prefix: string;
-    hash: string;
-    description: string;
-}
-
-interface ProviderModel {
-    offerId?: string; // assigned after offer deployed.
-    providerAddress: string;
-    peerIds: string[];
-    computeUnitsPerPeers: string[][];
-    effectors: CID[];
-    minPricePerEpoch: string;
-    paymentTokenAddress: string;
-    minProtocolVersion: number;
-    maxProtocolVersion: number;
-}
-
-interface DealModel {
-    dealId?: string; // assigned after deal deployed.
-    developerAddress: string;
-    appCID: CID;
-    paymentTokenAddress: string;
-    minWorkers: number;
-    targetWorkers: number;
-    maxWorkerPerProvider: number;
-    pricePerWorkerEpoch: string;
-    // SHould be calculated: uint256 minAmount = pricePerWorkerEpoch_ * targetWorkers_ * core.minDealDepositedEpoches().
-    depositAmount: string | null;
-    effectors: CID[];
-    listAccessType: number;  // 0 - standard, 1 - whitelist, 2 - blacklist
-    listAccess: string[];
-    protocolVersion: number;
-}
-
-function initMarketFixture(paymentToken: string): MarketExample {
-    const effectors: CID[] = [
-        { prefix: "0x12345678", hash: ethers.hexlify(ethers.randomBytes(32)), description: "IPFS"},
-        { prefix: "0x12345678", hash: ethers.hexlify(ethers.randomBytes(32)), description: "cURL"},
-    ];
-    const minPricePerEpoch = ethers.parseEther("0.00001");
-    return {
-        providerWithCapacityCommitments: {
-            providerAddress: "",
-            peerIds: [ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32))],
-            computeUnitsPerPeers: [
-                [
-                    ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),
-                ],
-                [
-                    ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),
-                ],
-            ],
-            effectors,
-            minPricePerEpoch: minPricePerEpoch.toString(),
-            paymentTokenAddress: paymentToken,
-            minProtocolVersion: 1,
-            maxProtocolVersion: 1,
-        },
-        providerToBeMatched: {
-            providerAddress: "",
-            peerIds: [ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32))],
-            computeUnitsPerPeers: [
-                [ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32))],
-                [ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32))],
-            ],
-            effectors,
-            minPricePerEpoch: minPricePerEpoch.toString(),
-            paymentTokenAddress: paymentToken,
-            minProtocolVersion: 1,
-            maxProtocolVersion: 1,
-        },
-        providerWithoutCapacityCommitments: {
-            providerAddress: "",
-            peerIds: [ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32))],
-            computeUnitsPerPeers: [
-                [ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32))],
-                [ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32))],
-            ],
-            effectors,
-            minPricePerEpoch: minPricePerEpoch.toString(),
-            paymentTokenAddress: paymentToken,
-            minProtocolVersion: 1,
-            maxProtocolVersion: 1,
-        },
-        dealToMatchWithWhiteListedProvider: {
-            developerAddress: "",
-            appCID: { prefix: ethers.hexlify(ethers.randomBytes(4)), hash: ethers.hexlify(ethers.randomBytes(32)), description: "dealAPPCID"},
-            paymentTokenAddress: paymentToken,
-            // pricePerWorkerEpoch * newTargetWorkers * core.minDealDepositedEpoches();
-            depositAmount: null,
-            minWorkers: 2,
-            targetWorkers: 2,
-            maxWorkerPerProvider: 2,
-            pricePerWorkerEpoch: ethers.parseEther("0.01").toString(),
-            effectors,
-            listAccessType: 1,
-            listAccess: [],  // provider address will be added after.
-            protocolVersion: 1,
-        },
-        dealWithoutWhitelist: {
-            developerAddress: "",
-            appCID: { prefix: ethers.hexlify(ethers.randomBytes(4)), hash: ethers.hexlify(ethers.randomBytes(32)), description: "dealAPPCID"},
-            paymentTokenAddress: paymentToken,
-            depositAmount: null,
-            minWorkers: 1,
-            targetWorkers: 1,
-            maxWorkerPerProvider: 1,
-            pricePerWorkerEpoch: ethers.parseEther("0.01").toString(),
-            effectors,
-            listAccessType: 0,
-            listAccess: [],
-            protocolVersion: 1,
-        },
-        dealWithWhitelist: {
-            developerAddress: "",
-            appCID: { prefix: ethers.hexlify(ethers.randomBytes(4)), hash: ethers.hexlify(ethers.randomBytes(32)), description: "dealAPPCID"},
-            paymentTokenAddress: paymentToken,
-            depositAmount: null,
-            minWorkers: 1,
-            targetWorkers: 1,
-            maxWorkerPerProvider: 1,
-            pricePerWorkerEpoch: ethers.parseEther("0.01").toString(),
-            effectors,
-            listAccessType: 0,
-            listAccess: [],
-            protocolVersion: 1,
-        },
-    }
-}
 
 const asyncRuntimeDecorator: asyncRuntimeDecoratorType = (func) => {
     func()
@@ -222,11 +85,10 @@ async function main() {
     console.info(`Signer USDC balance: ${ethers.formatUnits(await paymentToken.balanceOf(signerAddress), 6)} USDC`);
 
     // Prepare market fixture.
-    const marketFixture = initMarketFixture(paymentTokenAddress)
+    const marketFixture = getMarketExampleFixture(paymentTokenAddress)
     // Insert signerAddress into fixture.
-    for (const providerFixture of [marketFixture.providerWithCapacityCommitments, marketFixture.providerToBeMatched, marketFixture.providerWithoutCapacityCommitments]) {
-        providerFixture.providerAddress = signerAddress;
-    }
+    updateProviderFixtureAddress(signerAddress, [marketFixture.providerWithCapacityCommitments, marketFixture.providerToBeMatched, marketFixture.providerWithoutCapacityCommitments])
+
     // Insert signerAddress into deal Whitelist.
     marketFixture.dealWithWhitelist.listAccess = [signerAddress];
 
@@ -237,38 +99,11 @@ async function main() {
     await setProviderInfoTx.wait(WAIT_CONFIRMATIONS);
 
     console.info("2. #registerMarketOffer for marketFixture.providerWithCapacityCommitments, marketFixture.providerToBeMatched, marketFixture.providerWithoutCapacityCommitments...")
-    for (const providerFixture of [marketFixture.providerWithCapacityCommitments, marketFixture.providerToBeMatched, marketFixture.providerWithoutCapacityCommitments]) {
-        let peerContractData: Array<{peerId: string, owner: string, unitIds: string[]}> = [];
-        for (let i = 0;  i < providerFixture.peerIds.length; i++) {
-            const peerId = providerFixture.peerIds[i];
-            peerContractData.push(
-                {
-                    peerId: peerId,
-                    owner: providerFixture.providerAddress,
-                    unitIds: providerFixture.computeUnitsPerPeers[i],
-                }
-            )
-        }
-        console.debug(`Register ${JSON.stringify(providerFixture)}...`)
-        const registerMarketOfferTx = await marketContract.registerMarketOffer(
-            providerFixture.minPricePerEpoch,
-            providerFixture.paymentTokenAddress,
-            providerFixture.effectors.map((effector) => ({prefixes: effector.prefix, hash: effector.hash})),
-            peerContractData,
-            providerFixture.minProtocolVersion,
-            providerFixture.maxProtocolVersion,
-        );
-        const registerMarketOfferTxResult = await registerMarketOfferTx.wait(WAIT_CONFIRMATIONS);
-        // Save offer ID by parsing event.
-        providerFixture.offerId = getEventValue(
-            {
-                txReceipt: registerMarketOfferTxResult!,
-                contract: marketContract,
-                eventName: "MarketOfferRegistered",
-                value: "offerId",
-            }
-        ) as string
-    }
+    await registerMarketOfferFromFixture(
+      marketContract,
+      [marketFixture.providerWithCapacityCommitments, marketFixture.providerToBeMatched, marketFixture.providerWithoutCapacityCommitments],
+      WAIT_CONFIRMATIONS,
+    )
 
     console.info('2a. #setEffectorInfo...')
     // It does not matter what provider model to choose: all of them have the same effectors currently.
@@ -282,40 +117,19 @@ async function main() {
     }
 
     console.info("3. #createCommitment for providerWithCapacityCommitments only...");
-    let createdCCIds: string[] = []
-    // TODO: rm CC for providerToBeMatched
-    //  - now it is because of https://linear.app/fluence/issue/CHAIN-400/bug-in-matchermatchdeal-when-match-with-whitelisted-deal.
-    for (const peerId of [...marketFixture.providerWithCapacityCommitments.peerIds]) {
-        const createCommitmentTx = await capacityContract.createCommitment(
-            peerId,
-            CAPACITY_DEFAULT_DURATION,
-            // Delegator will be assigned on deposit.
-            ZERO_ADDRESS,
-            1,
-        );
-        const createCommitmentTxResult = await createCommitmentTx.wait(WAIT_CONFIRMATIONS)
-        createdCCIds.push(
-            getEventValue(
-                {
-                    txReceipt: createCommitmentTxResult!,
-                    contract: capacityContract,
-                    eventName: "CommitmentCreated",
-                    value: "commitmentId",
-                }
-            ) as string
-        )
-    }
+    const createdCCIds = await createCommitmentForProviderFixtures(
+      [marketFixture.providerWithCapacityCommitments],
+      capacityContract,
+      WAIT_CONFIRMATIONS,
+      CAPACITY_DEFAULT_DURATION,
+    )
+
     console.log('3a. #depositCollateral for all capacityCommitments');
-    let valueToSendForCollateralAll = BigInt(0)
-    for (const CCId of createdCCIds) {
-        const capcityCommitment = await capacityContract.getCommitment(CCId)
-        valueToSendForCollateralAll += capcityCommitment.unitCount * capcityCommitment.collateralPerUnit
-    }
-    const depositCollateralTx = await capacityContract.depositCollateral(
-        createdCCIds,
-        {value: valueToSendForCollateralAll},
-    );
-    await depositCollateralTx.wait(WAIT_CONFIRMATIONS);
+    await depositCollateral(
+      createdCCIds,
+      capacityContract,
+      WAIT_CONFIRMATIONS,
+    )
 
     // console.log('3b. Submit several proofs for first of CU in CC...');
     // TODO: Ensure epoch passed for CC to become active.
@@ -334,42 +148,14 @@ async function main() {
     marketFixture.dealToMatchWithWhiteListedProvider.listAccess = [marketFixture.providerToBeMatched.providerAddress];
 
     const minDealDepositedEpoches = await coreContract.minDealDepositedEpoches()
-    for (const dealFixture of [marketFixture.dealToMatchWithWhiteListedProvider, marketFixture.dealWithoutWhitelist, marketFixture.dealWithWhitelist]) {
-        // First of all - approve payment token.
-        const toApproveFromDeployer = BigInt(dealFixture.targetWorkers) * BigInt(dealFixture.pricePerWorkerEpoch) * minDealDepositedEpoches;
-        // Upd data of the Deal model with developer address.
-        dealFixture.developerAddress = signerAddress;
-
-        console.info(
-        `Send approve of payment token for amount = ${toApproveFromDeployer.toString()} to market address: ${marketContractAddress}`
-        );
-        const approveTx = await paymentToken.approve(dealFactoryContractAddress, toApproveFromDeployer);
-        await approveTx.wait(WAIT_CONFIRMATIONS)
-
-        const depositAmount = BigInt(dealFixture.pricePerWorkerEpoch) * BigInt(dealFixture.targetWorkers) * minDealDepositedEpoches
-        const createDealTx = await dealFactoryContract.deployDeal(
-            {prefixes: dealFixture.appCID.prefix, hash: dealFixture.appCID.hash},
-            dealFixture.paymentTokenAddress,
-            depositAmount,
-            dealFixture.minWorkers,
-            dealFixture.targetWorkers,
-            dealFixture.maxWorkerPerProvider,
-            dealFixture.pricePerWorkerEpoch,
-            dealFixture.effectors.map((effector) => ({prefixes: effector.prefix, hash: effector.hash})),
-            dealFixture.listAccessType,
-            dealFixture.listAccess,
-            dealFixture.protocolVersion,
-        );
-        const createDealTxResult = await createDealTx.wait(WAIT_CONFIRMATIONS);
-        dealFixture.dealId = getEventValue(
-            {
-                txReceipt: createDealTxResult!,
-                contract: dealFactoryContract,
-                eventName: "DealCreated",
-                value: "deal",
-            }
-        ) as string
-    }
+    await createDealsFromFixtures(
+      [marketFixture.dealToMatchWithWhiteListedProvider, marketFixture.dealWithoutWhitelist, marketFixture.dealWithWhitelist],
+      signerAddress,
+      paymentToken,
+      dealFactoryContract,
+      minDealDepositedEpoches,
+      WAIT_CONFIRMATIONS,
+    )
 
     console.log('5. Match Deal: providerToBeMatched with dealToMatchWithWhiteListedProvider...');
     if (marketFixture.dealToMatchWithWhiteListedProvider.minWorkers !== 2) {
@@ -388,50 +174,6 @@ async function main() {
             [marketFixture.providerToBeMatched.computeUnitsPerPeers[1][0]],
         ],
     );
-}
-
-// Log Parsing Module.
-type GetEventValueArgs<T extends string, U extends Contract<T>> = {
-  txReceipt: ethers.TransactionReceipt;
-  contract: U;
-  eventName: T;
-  value: string;
-};
-
-type Contract<T> = {
-  getEvent(name: T): {
-    fragment: { topicHash: string };
-  };
-  interface: {
-    parseLog(log: { topics: string[]; data: string }): LogDescription | null;
-  };
-};
-
-function getEventValue<T extends string, U extends Contract<T>>({
-  txReceipt,
-  contract,
-  eventName,
-  value,
-}: GetEventValueArgs<T, U>) {
-  const { topicHash } = contract.getEvent(eventName).fragment;
-
-  const log = txReceipt.logs.find((log) => {
-    return log.topics[0] === topicHash;
-  });
-
-  assert(
-    log !== undefined,
-    `Event '${eventName}' with hash '${topicHash}' not found in logs of the transaction`,
-  );
-
-  const res: unknown = contract.interface
-    .parseLog({
-      data: log.data,
-      topics: [...log.topics],
-    })
-    ?.args.getValue(value);
-
-  return res;
 }
 
 // Uncomment to run as a script.
