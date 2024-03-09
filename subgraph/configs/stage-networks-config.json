@@ -1,20 +1,20 @@
 {
   "stage": {
     "Market": {
-      "address": "0x351973727896b7B1EE5Ffc27De203A1EFdF091c6",
-      "startBlock": 434207
+      "address": "0x027c2fa9e0b24657B621b771E82E019949541191",
+      "startBlock": 490100
     },
     "Capacity": {
-      "address": "0x8672221610858bE36c240a81cDC3BDa6f9FbC019",
-      "startBlock": 434207
+      "address": "0x8b9728a295FA241F83D398067920f7f7B26Da773",
+      "startBlock": 490100
     },
     "Core": {
-      "address": "0x89d3428FC179deBF4C6d80B63DF403a62990Dc09",
-      "startBlock": 434207
+      "address": "0xA2883B0bdDc04Ee655d887cC0A11371166E042aa",
+      "startBlock": 490100
     },
     "DealFactory": {
-      "address": "0xA981C1918E572CCDE0343f4b11B6934deFe8aDC9",
-      "startBlock": 434207
+      "address": "0x8dCB7BE33Ac26700c03a834cdcBfF136356b9B4b",
+      "startBlock": 490100
     }
   }
 }
