@@ -39,8 +39,7 @@ const PRIVATE_KEY_8_ANVIL_ACCOUNT = "0xdbda1821b80551c9d65939329250298aa3472ba22
  * Notice: after each test subgraph should be FLUSHED and contracts should be REDEPLOYED as well.
  * Notice: currently all 2 tests could be run independently for success cases.
  */
-// TODO: rm only.
-describe.only("#getMatchedOffersByDealId", () => {
+describe("#getMatchedOffersByDealId", () => {
   let provider: JsonRpcProvider;
   let signer: Wallet | JsonRpcSigner | HDNodeWallet;
   let contractsClient: DealClient;

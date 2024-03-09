@@ -1,4 +1,4 @@
-// TODO: add source from where it copied from CLI.
+// copied from https://github.com/fluencelabs/cli/blob/5eedb7d9a4fc81fca2dc55656f1b27831e8166b3/src/lib/dealClient.ts#L366.
 import assert from "node:assert";
 import { LogDescription, TransactionReceipt } from "ethers";
 
