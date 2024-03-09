@@ -3,6 +3,8 @@ import { ICapacity, IDealFactory, IERC20, IMarket } from "../../src";
 import { getEventValue } from "./events";
 import { ZERO_ADDRESS } from "./constants";
 
+import { expect } from "vitest";
+
 interface MarketExample {
     providerWithCapacityCommitments: ProviderFixtureModel;
     providerToBeMatched: ProviderFixtureModel;
@@ -154,14 +156,16 @@ export function updateProviderFixtureAddress(address: string, providers: Array<P
 }
 
 // It registers market offer via provided fixture and also updates fixture with offer ID
-export async function registerMarketOfferFromFixture(
-  marketContractWithSigner: IMarket,
+export async function registerMarketOffersFromFixtures(
   providers: Array<ProviderFixtureModel>,
+  marketContractWithSigner: IMarket,
   wait_confirmations: number,
 ) {
   for (const providerFixture of providers) {
     let peerContractData: Array<{peerId: string, owner: string, unitIds: string[]}> = [];
     for (let i = 0;  i < providerFixture.peerIds.length; i++) {
+        expect(providerFixture.providerAddress, "[Fixture validation] provider uddress should be presented.").not.to.equal("")
+
         const peerId = providerFixture.peerIds[i];
         peerContractData.push(
             {
@@ -171,7 +175,6 @@ export async function registerMarketOfferFromFixture(
             }
         )
     }
-    console.debug(`Register ${JSON.stringify(providerFixture)}...`)
     const registerMarketOfferTx = await marketContractWithSigner.registerMarketOffer(
         providerFixture.minPricePerEpoch,
         providerFixture.paymentTokenAddress,

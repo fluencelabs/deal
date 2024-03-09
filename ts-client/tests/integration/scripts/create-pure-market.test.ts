@@ -25,7 +25,7 @@ import {
   createDealsFromFixtures,
   depositCollateral,
   getMarketExampleFixture,
-  registerMarketOfferFromFixture,
+  registerMarketOffersFromFixtures,
   updateProviderFixtureAddress
 } from "../fixture";
 
@@ -88,9 +88,10 @@ async function main() {
     const marketFixture = getMarketExampleFixture(paymentTokenAddress)
     // Insert signerAddress into fixture.
     updateProviderFixtureAddress(signerAddress, [marketFixture.providerWithCapacityCommitments, marketFixture.providerToBeMatched, marketFixture.providerWithoutCapacityCommitments])
-
     // Insert signerAddress into deal Whitelist.
     marketFixture.dealWithWhitelist.listAccess = [signerAddress];
+    // Prepare provider for dealToMatchWithWhiteListedProvider
+    marketFixture.dealToMatchWithWhiteListedProvider.listAccess = [marketFixture.providerToBeMatched.providerAddress];
 
     console.info("1. #setProviderInfo...")
     const setProviderInfoTx = await marketContract.setProviderInfo(
@@ -99,9 +100,9 @@ async function main() {
     await setProviderInfoTx.wait(WAIT_CONFIRMATIONS);
 
     console.info("2. #registerMarketOffer for marketFixture.providerWithCapacityCommitments, marketFixture.providerToBeMatched, marketFixture.providerWithoutCapacityCommitments...")
-    await registerMarketOfferFromFixture(
-      marketContract,
+    await registerMarketOffersFromFixtures(
       [marketFixture.providerWithCapacityCommitments, marketFixture.providerToBeMatched, marketFixture.providerWithoutCapacityCommitments],
+      marketContract,
       WAIT_CONFIRMATIONS,
     )
 
@@ -144,9 +145,6 @@ async function main() {
     //   const receipt = await tx.wait(WAIT_CONFIRMATIONS);
 
     console.log('4. #createDeal for dealToMatch, dealWithoutWhitelist, dealWithWhitelist...');
-    // Prepare provider for dealToMatchWithWhiteListedProvider
-    marketFixture.dealToMatchWithWhiteListedProvider.listAccess = [marketFixture.providerToBeMatched.providerAddress];
-
     const minDealDepositedEpoches = await coreContract.minDealDepositedEpoches()
     await createDealsFromFixtures(
       [marketFixture.dealToMatchWithWhiteListedProvider, marketFixture.dealWithoutWhitelist, marketFixture.dealWithWhitelist],
