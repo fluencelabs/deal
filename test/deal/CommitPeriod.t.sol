@@ -109,7 +109,7 @@ contract TestDealContract is Deal {
         uint256 lastCommitedEpoch,
         uint256 currentWorkerCount,
         uint256 pricePerWorkerEpoch_
-    ) public pure returns (DealStorageUtils.Balance memory) {
+    ) public view returns (DealStorageUtils.Balance memory) {
         _preCommitPeriod(
             balance, currentEpoch, maxPaidEpoch, lastCommitedEpoch, currentWorkerCount, pricePerWorkerEpoch_
         );
