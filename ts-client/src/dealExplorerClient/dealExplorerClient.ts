@@ -1031,6 +1031,7 @@ export class DealExplorerClient {
         peerId: proof.peer.id,
         createdAt: Number(proof.createdAt),
         providerId: proof.peer.provider.id,
+        createdAtEpoch: Number(proof.createdEpoch),
       };
     });
 
