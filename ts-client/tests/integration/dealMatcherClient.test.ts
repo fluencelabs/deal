@@ -77,6 +77,11 @@ describe("#getMatchedOffersByDealId", () => {
       // Post-prepare fixtures.
       updateProviderFixtureAddress(signerAddress, [providerFixture])
 
+      const setProviderInfoTx = await marketContract.setProviderInfo(
+        "TestProvider8AnvilAccount", {prefixes: "0x12345678", hash: ethers.hexlify(ethers.randomBytes(32))},
+      );
+      await setProviderInfoTx.wait(WAIT_CONFIRMATIONS);
+
       await createDealsFromFixtures(
         [dealFixture],
         await signer.getAddress(),
