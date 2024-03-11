@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.10.1](https://github.com/fluencelabs/deal/compare/v0.10.0...v0.10.1) (2024-03-11)
+
+
+### Features
+
+* redeploy dar ([#337](https://github.com/fluencelabs/deal/issues/337)) ([a2a4d29](https://github.com/fluencelabs/deal/commit/a2a4d29198e2735ec18ff2c5e30b1da533187ced))
+
+
+### Bug Fixes
+
+* deal preCommit overflow ([#334](https://github.com/fluencelabs/deal/issues/334)) ([1bb1bca](https://github.com/fluencelabs/deal/commit/1bb1bcaf2840312dd7b816d506774a5dd1eb2088))
+* finishCC ([#332](https://github.com/fluencelabs/deal/issues/332)) ([97e4786](https://github.com/fluencelabs/deal/commit/97e4786e7f48dc4d62595917316623fd85fa68a8))
+
 ## [0.10.0](https://github.com/fluencelabs/deal/compare/v0.9.0...v0.10.0) (2024-03-09)
 
 
