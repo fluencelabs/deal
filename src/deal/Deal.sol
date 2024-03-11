@@ -101,7 +101,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         uint256 lastCommitedEpoch,
         uint256 currentWorkerCount,
         uint256 pricePerWorkerEpoch_
-    ) internal view {
+    ) internal pure {
         if (commitEpoch <= lastCommitedEpoch) {
             return;
         }
@@ -137,6 +137,9 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         uint256 pricePerWorkerEpoch_
     ) internal {
         DealStorage storage dealStorage = _getDealStorage();
+        if (commitEpoch <= dealStorage.lastCommitedEpoch) {
+            return;
+        }
 
         if (prevWorkerCount >= minWorkerCount && newWorkerCount < minWorkerCount) {
             dealStorage.maxPaidEpoch = 0;
