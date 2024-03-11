@@ -214,6 +214,7 @@ export interface ProofBasic {
   computeUnitId: string;
   peerId: string;
   createdAt: number;
+  providerId: string;
 }
 
 export interface ProofBasicListView extends ListViewABC {

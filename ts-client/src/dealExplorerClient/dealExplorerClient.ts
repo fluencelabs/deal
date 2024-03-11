@@ -1030,6 +1030,7 @@ export class DealExplorerClient {
         computeUnitId: proof.computeUnit.id,
         peerId: proof.peer.id,
         createdAt: Number(proof.createdAt),
+        providerId: proof.peer.provider.id,
       };
     });
 
