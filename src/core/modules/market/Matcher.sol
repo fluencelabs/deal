@@ -30,6 +30,9 @@ abstract contract Matcher is Offer, IMatcher {
         }
     }
 
+    event Ryba(uint256 a);
+    event Ryba(uint256 a, uint256 b);
+
     // ----------------- External Mutable -----------------
     /**
      * @dev Match Deal with Compute Units provided.
@@ -50,7 +53,7 @@ abstract contract Matcher is Offer, IMatcher {
     function matchDeal(IDeal deal, bytes32[] calldata offers, bytes32[][] calldata computeUnits) external {
         ICapacity capacity = core.capacity();
         MatcherStorage storage matcherStorage = _getMatcherStorage();
-
+        emit Ryba(1);
         IDeal.Status dealStatus = deal.getStatus(); 
         require(dealStatus == IDeal.Status.ACTIVE || dealStatus == IDeal.Status.NOT_ENOUGH_WORKERS, "Matcher: deal is not active");
 
@@ -60,6 +63,7 @@ abstract contract Matcher is Offer, IMatcher {
             lastMatchedEpoch == 0 || currentEpoch > lastMatchedEpoch + core.minDealRematchingEpoches(),
             "Matcher: too early to rematch"
         );
+        emit Ryba(2);
 
         uint256 pricePerWorkerEpoch = deal.pricePerWorkerEpoch();
         address paymentToken = address(deal.paymentToken());
@@ -69,12 +73,14 @@ abstract contract Matcher is Offer, IMatcher {
         uint256 maxWorkersPerProvider = deal.maxWorkersPerProvider();
         uint256 protocolVersion = deal.getProtocolVersion();
         CIDV1[] memory effectors = deal.effectors();
+        emit Ryba(3);
 
         CIDV1 memory appCID = deal.appCID();
         uint256 creationBlock = deal.creationBlock();
         IConfig.AccessType providersAccessType = deal.providersAccessType();
 
         bool isDealMatched = false;
+        emit Ryba(4);
 
         // Go through offers.
         for (uint256 i = 0; i < offers.length; ++i) {
@@ -92,6 +98,7 @@ abstract contract Matcher is Offer, IMatcher {
             ) {
                 continue;
             }
+        emit Ryba(5);
 
             // To validate that match will be not more than with maxWorkersPerProvider CUs.
             uint256 computeUnitCountInDealByProvider = deal.getComputeUnitCount(offer.provider);
@@ -126,6 +133,7 @@ abstract contract Matcher is Offer, IMatcher {
                 ) {
                     continue;
                 }
+        emit Ryba(6);
 
                 // Currently, protocol does not allow more than one CU per peer for the same Deal.
                 if (deal.isComputePeerExist(peerId)) {
@@ -145,14 +153,18 @@ abstract contract Matcher is Offer, IMatcher {
                 }
             }
         }
+        emit Ryba(7);
 
         uint256 minWorkers = deal.minWorkers();
         if (minWorkers > dealComputeUnitCount + freeWorkerSlots - freeWorkerSlotsCurrent) {
             revert MinWorkersNotMatched(minWorkers);
         }
+        emit Ryba(8);
 
         if (isDealMatched) {
             _getMatcherStorage().lastMatchedEpoch[address(deal)] = currentEpoch;
         }
+        emit Ryba(9);
+
     }
 }

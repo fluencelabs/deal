@@ -365,26 +365,32 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         if (status != CCStatus.Active) {
             revert CapacityCommitmentIsNotActive(status);
         }
-
+        emit Baza(101);
         // update global nonce
         if (s.nonceEpochSnapshot != epoch) {
             s.nonceEpochSnapshot = epoch;
             s.globalNonce = s.nextGlobalNonce;
         }
+        emit Baza(102);
         s.nextGlobalNonce = keccak256(abi.encodePacked(s.globalNonce, blockhash(block.number - 1)));
+        emit Baza(103);
 
         // save localUnitNonce
         bytes32 globalUnitNonce_ = keccak256(abi.encodePacked(s.globalNonce, unitId));
+        emit Baza(104);
         require(!s.isProofSubmittedByUnit[globalUnitNonce_][localUnitNonce], "Proof is already submitted for this unit");
+        emit Baza(105);
         s.isProofSubmittedByUnit[globalUnitNonce_][localUnitNonce] = true;
 
         // save info about proof
         UnitProofsInfo storage unitProofsInfo = cc.unitProofsInfoByUnit[unitId];
         uint256 unitProofsCount = unitProofsInfo.proofsCountByEpoch[epoch];
+        emit Baza(106);
         unitProofsCount += 1;
         if (unitProofsCount > maxProofsPerEpoch()) {
             revert TooManyProofs();
         }
+        emit Baza(107);
 
         uint256 minRequierdCCProofs_ = minRequierdProofsPerEpoch();
         if (unitProofsCount == minRequierdCCProofs_) {
@@ -395,13 +401,16 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
             if (totalSuccessProofs == 0) {
                 s.rewardInfoByEpoch[epoch].minRequierdCCProofs = minRequierdCCProofs_;
             }
+        emit Baza(108);
 
             s.rewardInfoByEpoch[epoch].totalSuccessProofs = totalSuccessProofs + unitProofsCount;
         } else if (unitProofsCount > minRequierdCCProofs_) {
             s.rewardInfoByEpoch[epoch].totalSuccessProofs += 1;
         }
+        emit Baza(109);
 
         unitProofsInfo.proofsCountByEpoch[epoch] = unitProofsCount;
+        emit Baza(110);
 
         // check proof
         (bool success, bytes memory randomXResultHash) = randomXProxy().delegatecall(
@@ -687,16 +696,17 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         uint256 ccFaildEpoch
     ) internal returns (bool) {
         CommitmentStorage storage s = _getCommitmentStorage();
+        emit Baza(1001);
 
         if (unitProofsInfo.isInactive) {
             return false;
         }
-
+        emit Baza(epoch);
         uint256 prevEpoch = epoch - 1;
         if (prevEpoch > expiredEpoch) {
             prevEpoch = expiredEpoch;
         }
-
+        emit Baza(1002);
         if (ccFaildEpoch != 0 && prevEpoch > ccFaildEpoch) {
             prevEpoch = ccFaildEpoch;
         }
@@ -705,14 +715,18 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         if (lastMinProofsEpoch == 0) {
             lastMinProofsEpoch = cc.info.startEpoch - 1;
         }
+        emit Baza(1003);
 
         if (prevEpoch <= lastMinProofsEpoch) {
             return false;
         }
+        emit Baza(1004);
 
         uint256 slashedCollateral = unitProofsInfo.slashedCollateral;
         uint256 collateralPerUnit_ = cc.info.collateralPerUnit;
+        emit Pivo(collateralPerUnit_, slashedCollateral, 0, 0, 0);
         uint256 currentAmount = collateralPerUnit_ - slashedCollateral;
+        emit Baza(1005);
 
         uint256 count = prevEpoch - lastMinProofsEpoch;
         uint256 slashingRate_ = slashingRate();
@@ -733,6 +747,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
 
             unitProofsInfo.slashedCollateral = slashedCollateral;
         }
+        emit Baza(1006);
 
         unitProofsInfo.lastMinProofsEpoch = prevEpoch;
 
@@ -740,6 +755,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         uint256 reward = 0;
 
         uint256 totalSuccessProofs = rewardInfo.totalSuccessProofs;
+        emit Baza(1007);
 
         if (totalSuccessProofs == 0) {
             reward = 0;
@@ -755,6 +771,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         if (vestingLength > 0) {
             cumulativeAmount = cc.vestings[vestingLength - 1].cumulativeAmount;
         }
+        emit Baza(1008);
 
         uint256 vestingPeriodDuration = vestingPeriodDuration();
         uint256 vestingPeriodCount = vestingPeriodCount();
@@ -766,11 +783,13 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         }
 
         delete unitProofsInfo.proofsCountByEpoch[lastMinProofsEpoch];
+        emit Baza(1009);
 
         return true;
     }
 
     event Pivo(uint256, uint256, uint256, uint256, uint256);
+    event Baza(uint256 point);
     function _commitCommitmentSnapshot(
         Commitment storage cc,
         IMarket.ComputePeer memory peer,
@@ -800,26 +819,32 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         if (currentCUSuccessCount < reqSuccessCount) {
             totalFailCountByPeriod = reqSuccessCount - currentCUSuccessCount;
         }
+        emit Baza(1);
 
         uint256 unitCount = peer.unitCount;
         uint256 maxFailedRatio_ = maxFailedRatio();
+        emit Baza(2);
 
         uint256 totalCUFailCount = cc.info.totalCUFailCount;
         totalCUFailCount += totalFailCountByPeriod;
+        emit Baza(3);
 
         uint256 nextAdditionalActiveUnitCount = cc.info.nextAdditionalActiveUnitCount;
 
         (uint256 failedEpoch, uint256 remainingFailsForLastEpoch, uint256 maxFails) = _failedEpoch(
             maxFailedRatio_, unitCount, activeUnitCount_, nextAdditionalActiveUnitCount, totalCUFailCount, snapshotEpoch
         );
+        emit Baza(4);
 
         if (nextAdditionalActiveUnitCount > 0) {
             cc.info.activeUnitCount += nextAdditionalActiveUnitCount;
             cc.info.nextAdditionalActiveUnitCount = 0;
         }
+        emit Baza(5);
 
         if (epoch >= failedEpoch) {
             totalCUFailCount = maxFails;
+        emit Baza(6);
 
             cc.info.failedEpoch = failedEpoch;
             cc.info.remainingFailsForLastEpoch = remainingFailsForLastEpoch;
@@ -827,14 +852,18 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
 
             newStatus = CCStatus.Failed;
         }
+        emit Baza(7);
 
         cc.info.totalCUFailCount = totalCUFailCount;
         cc.info.currentCUSuccessCount = 0;
         cc.info.snapshotEpoch = epoch;
+        emit Baza(8);
 
         if (newStatus != CCStatus.Active) {
+        emit Baza(9);
             cc.info.activeUnitCount = 0;
             _setActiveUnitCount(activeUnitCount() - activeUnitCount_);
+        emit Baza(10);
             cc.info.status = newStatus;
         }
 
