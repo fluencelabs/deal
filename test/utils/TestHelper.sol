@@ -53,7 +53,8 @@ library TestHelper {
                 pricePerWorkerEpoch_,
                 new CIDV1[](0),
                 IConfig.AccessType.NONE,
-                new address[](0)
+                new address[](0),
+                1
             )
         );
 
