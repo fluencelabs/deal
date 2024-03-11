@@ -162,7 +162,10 @@ contract WorkerManager is Config, IWorkerManager {
 
     // ------------------ Public View Functions ---------------------
     function getComputeUnit(bytes32 id) public view returns (ComputeUnit memory) {
-        return _getWorkerManagerStorage().computeUnitById[id];
+        ComputeUnit memory computeUnit = _getWorkerManagerStorage().computeUnitById[id];
+        require(computeUnit.provider != address(0x00), "ComputeUnit not found");
+
+        return computeUnit;
     }
 
     function getComputeUnitCount() public view returns (uint256) {
