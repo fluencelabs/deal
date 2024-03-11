@@ -28,10 +28,10 @@ export function calculateEpoch(
   epochControllerStorageInitTimestamp: number,
   epochControllerStorageEpochDuration: number,
 ): number {
-  return (
-    1 +
+  return parseInt(
+    (1 +
     (timestamp - epochControllerStorageInitTimestamp) /
-      epochControllerStorageEpochDuration
+      epochControllerStorageEpochDuration).toString()
   );
 }
 
