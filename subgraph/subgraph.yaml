@@ -57,6 +57,11 @@ dataSources:
           handler: handleInitialized
         - event: ProviderInfoUpdated(indexed address,string,(bytes4,bytes32))
           handler: handleProviderInfoUpdated
+#          TODO: uncomment when resolved: https://github.com/graphprotocol/graph-node/issues/5171
+#        - event: EffectorInfoSet((indexed bytes4,bytes32),string,(bytes4,bytes32))
+#          handler: handleEffectorInfoSet
+#        - event: EffectorInfoRemoved((indexed bytes4,bytes32))
+#          handler: handleEffectorInfoRemoved
         - event: MarketOfferRegistered(indexed
             address,bytes32,uint256,address,(bytes4,bytes32)[],uint256,uint256)
           handler: handleMarketOfferRegistered

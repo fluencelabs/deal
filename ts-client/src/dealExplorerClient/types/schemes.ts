@@ -157,7 +157,6 @@ export interface ComputeUnitDetail extends ComputeUnit {
   peerId: string;
   collateral: string;
   status: ComputeUnitStatus;
-  expectedProofsDueNow: number;
   successProofs: number;
   collateralToken: NativeToken;
 }
@@ -214,21 +213,22 @@ export interface ProofBasic {
   computeUnitId: string;
   peerId: string;
   createdAt: number;
+  createdAtEpoch: number;
+  providerId: string;
 }
 
 export interface ProofBasicListView extends ListViewABC {
   data: Array<ProofBasic>;
 }
 
-export interface ComputeUnitsByCapacityCommitment extends ComputeUnit {
+export interface ComputeUnitsWithCCStatus extends ComputeUnit {
   status: ComputeUnitStatus;
-  expectedProofsDueNow: number;
+  // deprecated.
   successProofs: number;
-  collateral: string;
 }
 
-export interface ComputeUnitsByCapacityCommitmentListView extends ListViewABC {
-  data: Array<ComputeUnitsByCapacityCommitment>;
+export interface ComputeUnitsWithCCStatusListView extends ListViewABC {
+  data: Array<ComputeUnitsWithCCStatus>;
 }
 
 // @deprecated.

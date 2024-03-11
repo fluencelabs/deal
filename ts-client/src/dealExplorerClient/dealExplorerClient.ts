@@ -25,14 +25,13 @@ import type {
   ComputeUnitDetail,
   ProofBasicListView,
   ProofBasic,
-  ComputeUnitsByCapacityCommitment,
   ProofStatsByCapacityCommitmentListView,
-  ComputeUnitsByCapacityCommitmentListView,
   ProofStatsByCapacityCommitment,
   ComputeUnitStatsPerCapacityCommitmentEpoch,
   ComputeUnitStatsPerCapacityCommitmentEpochListView,
   ComputeUnitWorkerDetail,
   ComputeUnitWorkerDetailListView,
+  ComputeUnitsWithCCStatusListView
 } from "./types/schemes.js";
 import type {
   ChildEntitiesByProviderFilter,
@@ -71,8 +70,8 @@ import {
   tokenValueToRounded,
 } from "./utils.js";
 import {
+  serializeCUStatus,
   serializeEffectorDescription,
-  serializeExpectedProofsAndCUStatus,
 } from "./serializers/logics.js";
 import { serializeDealProviderAccessLists } from "../utils/serializers.js";
 import {
@@ -88,12 +87,13 @@ import {
   serializeCapacityCommitmentDetail,
   serializeCapacityCommitmentShort,
   serializeComputeUnits,
+  serializeComputeUnitsWithStatus,
   serializeDealsShort,
   serializeEffectors,
   serializeOfferShort,
   serializePeers,
   serializeProviderBase,
-  serializeProviderShort,
+  serializeProviderShort
 } from "./serializers/schemes.js";
 import {
   serializeCapacityCommitmentsOrderByToIndexer,
@@ -976,11 +976,8 @@ export class DealExplorerClient {
     }
     const computeUnit = data.computeUnit;
 
-    const { expectedProofsDueNow, status } = serializeExpectedProofsAndCUStatus(
+    const { status } = serializeCUStatus(
       computeUnit,
-      this._capacityMinRequiredProofsPerEpoch!,
-      this._coreInitTimestamp!,
-      this._coreEpochDuration!,
     );
     const currentPeerCapacityCommitment =
       computeUnit.peer.currentCapacityCommitment;
@@ -994,7 +991,6 @@ export class DealExplorerClient {
       collateral: currentPeerCapacityCommitment
         ? tokenValueToRounded(currentPeerCapacityCommitment.collateralPerUnit)
         : "0",
-      expectedProofsDueNow,
       successProofs: currentPeerCapacityCommitment
         ? currentPeerCapacityCommitment.submittedProofsCount
         : 0,
@@ -1030,6 +1026,8 @@ export class DealExplorerClient {
         computeUnitId: proof.computeUnit.id,
         peerId: proof.peer.id,
         createdAt: Number(proof.createdAt),
+        providerId: proof.peer.provider.id,
+        createdAtEpoch: Number(proof.createdEpoch),
       };
     });
 
@@ -1056,7 +1054,7 @@ export class DealExplorerClient {
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: ComputeUnitsOrderBy = "createdAt",
     orderType: OrderType = DEFAULT_ORDER_TYPE,
-  ): Promise<ComputeUnitsByCapacityCommitmentListView> {
+  ): Promise<ComputeUnitsWithCCStatusListView> {
     await this._init();
 
     const capacityCommitment =
@@ -1078,29 +1076,36 @@ export class DealExplorerClient {
       orderType,
     });
 
-    let res: Array<ComputeUnitsByCapacityCommitment> = [];
-    for (const computeUnit of data.computeUnits) {
-      const { expectedProofsDueNow, status } =
-        serializeExpectedProofsAndCUStatus(
-          computeUnit,
-          this._capacityMinRequiredProofsPerEpoch!,
-          this._coreInitTimestamp!,
-          this._coreEpochDuration!,
-        );
+    return {
+      total: null,
+      data: serializeComputeUnitsWithStatus(data.computeUnits),
+    };
+  }
 
-      res.push({
-        id: computeUnit.id,
-        workerId: computeUnit.workerId ?? undefined,
-        status,
-        expectedProofsDueNow,
-        successProofs: computeUnit.submittedProofsCount,
-        collateral: capacityCommitment.totalCollateral,
-      });
-    }
+  // @notice [Figma] Peer Id. List of compute units (currently not in Figma).
+  async getComputeUnitsByPeer(
+    peerId: string,
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: ComputeUnitsOrderBy = "createdAt",
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
+  ): Promise<ComputeUnitsWithCCStatusListView> {
+    await this._init();
+
+    // To get data of CUs by capacity commitment we filter CUs by peer id of the CC.
+    const data = await this._indexerClient.getComputeUnits({
+      filters: {
+        peer_: { id: peerId },
+      },
+      offset,
+      limit,
+      orderBy,
+      orderType,
+    });
 
     return {
       total: null,
-      data: res,
+      data: serializeComputeUnitsWithStatus(data.computeUnits),
     };
   }
 
