@@ -2,7 +2,6 @@
 
 // If provider does not approved: convert a name.
 import type { ComputeUnitWithCcDataBasicFragment } from "../indexerClient/queries/peers-query.generated.js";
-import { calculateEpoch } from "../utils.js";
 import type { ComputeUnitStatus } from "../types/schemes.js";
 
 export function serializeProviderName(
@@ -35,23 +34,12 @@ export function serializeEffectorDescription(
   return descriptionFromIndexer;
 }
 
-export function serializeExpectedProofsAndCUStatus(
+export function serializeCUStatus(
   computeUnitWithCcDataBasicFragment: ComputeUnitWithCcDataBasicFragment,
-  expectedMinProofsDueToNow: number,
-  coreInitTimestamp: number,
-  coreEpochDuration: number,
 ) {
   const computeUnit = computeUnitWithCcDataBasicFragment;
   const currentPeerCapacityCommitment =
     computeUnit.peer.currentCapacityCommitment;
-  let expectedProofsDueNow = 0;
-  const startEpoch = currentPeerCapacityCommitment?.startEpoch;
-  if (startEpoch && startEpoch != 0) {
-    expectedProofsDueNow =
-      (calculateEpoch(Date.now() / 1000, coreInitTimestamp, coreEpochDuration) -
-        startEpoch) *
-      expectedMinProofsDueToNow;
-  }
 
   let status: ComputeUnitStatus = "undefined";
   if (computeUnit.deal) {
@@ -63,7 +51,6 @@ export function serializeExpectedProofsAndCUStatus(
   }
 
   return {
-    expectedProofsDueNow,
     status,
   };
 }

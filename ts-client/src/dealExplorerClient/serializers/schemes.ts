@@ -5,21 +5,23 @@ import type {
   CapacityCommitmentShort,
   CapacityCommitmentStatus,
   ComputeUnit,
+  ComputeUnitsWithCCStatus,
   DealShort,
   DealStatus,
   Effector,
   OfferShort,
   Peer,
   ProviderBase,
-  ProviderShort,
+  ProviderShort
 } from "../types/schemes.js";
 import type {
   BasicOfferFragment,
   BasicPeerFragment,
 } from "../indexerClient/queries/offers-query.generated.js";
 import {
+  serializeCUStatus,
   serializeEffectorDescription,
-  serializeProviderName,
+  serializeProviderName
 } from "./logics.js";
 import {
   calculateTimestamp,
@@ -32,6 +34,9 @@ import type {
 } from "../indexerClient/queries/deals-query.generated.js";
 import type { CapacityCommitmentBasicFragment } from "../indexerClient/queries/capacity-commitments-query.generated.js";
 import { FLTToken } from "../constants.js";
+import type {
+  ComputeUnitWithCcDataBasicFragment
+} from "../indexerClient/queries/peers-query.generated.js";
 
 // TODO: rename to scheme suffixes not there is a Zoo in naming a little.
 export function serializeEffectors(
@@ -119,6 +124,26 @@ export function serializeComputeUnits(
     });
   }
   return res;
+}
+
+export function serializeComputeUnitsWithStatus(
+  computeUnitsWithCcDataBasicFragment: Array<ComputeUnitWithCcDataBasicFragment>
+): Array<ComputeUnitsWithCCStatus> {
+  let res: Array<ComputeUnitsWithCCStatus> = [];
+  for (const computeUnit of computeUnitsWithCcDataBasicFragment) {
+    const { status } =
+      serializeCUStatus(
+        computeUnit,
+      );
+
+    res.push({
+      id: computeUnit.id,
+      workerId: computeUnit.workerId ?? undefined,
+      status,
+      successProofs: computeUnit.submittedProofsCount,
+    });
+  }
+  return res
 }
 
 export function serializePeers(peers: Array<BasicPeerFragment>): Array<Peer> {
