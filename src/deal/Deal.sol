@@ -444,7 +444,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         uint256 pricePerWorkerEpoch_
     ) internal view returns (uint256 reward, DealStorageUtils.Balance memory balance) {
         DealStorage storage dealStorage = _getDealStorage();
-        DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
+        balance = DealStorageUtils.initCache(dealStorage);
 
         if (lastWorkedEpoch == 0) {
             lastWorkedEpoch = prevEpoch;

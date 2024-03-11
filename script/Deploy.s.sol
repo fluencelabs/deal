@@ -19,6 +19,7 @@ import "src/core/modules/market/DealFactory.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
 import "src/core/modules/capacity/Capacity.sol";
 import "src/core/modules/capacity/interfaces/ICapacity.sol";
+import "src/utils/Multicall3.sol";
 
 contract DeployContracts is Depoyments, Script {
     using SafeERC20 for IERC20;
@@ -95,6 +96,10 @@ contract DeployContracts is Depoyments, Script {
 
         _startDeploy();
         IERC20 tUSD = _deployTestTokens();
+
+        // Deploy Multicall3 as **helper** contract to fetch info only from the chain.
+        // Thus, this contract is not belongs to Fluence contract ecosystem.
+        _deployMulticall3();
 
         if (env.chainId == LOCAL_CHAIN_ID) {
             string memory mnemonic = vm.envOr("ANVIL_MNEMONIC", DEFAULT_ANVIL_MNEMONIC);
@@ -224,6 +229,11 @@ contract DeployContracts is Depoyments, Script {
         tUSD = IERC20(_deployContract("tUSD", "TestERC20", args));
     }
 
+    function _deployMulticall3() internal returns (Multicall3 multicall) {
+        bytes memory args = abi.encode();
+        multicall = Multicall3(_deployContract("Multicall3", "Multicall3", args));
+    }
+
     function _deployTestFaucet(IERC20 tUSD) internal returns (address faucet, bool isNew) {
         bytes memory args = abi.encode(tUSD);
         return _tryDeployContract("Faucet", "OwnableFaucet", args);
@@ -324,12 +334,16 @@ contract DeployContracts is Depoyments, Script {
         );
 
         address dealFactoryProxy = _deployContract(
-            "DealFactory", "ERC1967Proxy", abi.encode(dealFactoryImpl, abi.encodeWithSelector(DealFactory.initialize.selector))
+            "DealFactory",
+            "ERC1967Proxy",
+            abi.encode(dealFactoryImpl, abi.encodeWithSelector(DealFactory.initialize.selector))
         );
 
         if (isNewCore) {
             console.log("\nCore deployed, initializing modules as well...");
-            ICore(coreAddr).initializeModules(ICapacity(capacityProxy), IMarket(marketProxy), IDealFactory(dealFactoryProxy));
+            ICore(coreAddr).initializeModules(
+                ICapacity(capacityProxy), IMarket(marketProxy), IDealFactory(dealFactoryProxy)
+            );
         }
 
         // TODO: if needToRedeployMarket, needToRedeployCapacity or needToRedeployDealFactory
