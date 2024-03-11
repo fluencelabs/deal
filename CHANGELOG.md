@@ -1,5 +1,40 @@
 # Changelog
 
+## [0.10.0](https://github.com/fluencelabs/deal/compare/v0.9.0...v0.10.0) (2024-03-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* add comment to statuses & small RPC optimization ([#328](https://github.com/fluencelabs/deal/issues/328))
+
+### Features
+
+* redeploy dar ([#333](https://github.com/fluencelabs/deal/issues/333)) ([16769a7](https://github.com/fluencelabs/deal/commit/16769a7adffedb94b3249abdcb091a753b1b3090))
+
+
+### Bug Fixes
+
+* add comment to statuses & small RPC optimization ([#328](https://github.com/fluencelabs/deal/issues/328)) ([ddec654](https://github.com/fluencelabs/deal/commit/ddec6548a23ea12deca40ead56327c523d6096e2))
+* overflow ([#331](https://github.com/fluencelabs/deal/issues/331)) ([deff407](https://github.com/fluencelabs/deal/commit/deff40766e75435ba05cb3515e254ee76299c9e3))
+
+## [0.9.0](https://github.com/fluencelabs/deal/compare/v0.8.0...v0.9.0) (2024-03-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* New deal status ([#322](https://github.com/fluencelabs/deal/issues/322))
+
+### Features
+
+* New deal status ([#322](https://github.com/fluencelabs/deal/issues/322)) ([e604454](https://github.com/fluencelabs/deal/commit/e60445476a1836e014d38a29dfde1003d03d7199))
+
+
+### Bug Fixes
+
+* dealExplorerClient counters in Peer page and negative CU in CC [chain 397] ([#323](https://github.com/fluencelabs/deal/issues/323)) ([dd53b5b](https://github.com/fluencelabs/deal/commit/dd53b5b80c0ca0a2821abc82c31bf9542a7340e7))
+* **integration-tests:** Add more integration tests to CI ([#324](https://github.com/fluencelabs/deal/issues/324)) ([25e574f](https://github.com/fluencelabs/deal/commit/25e574f163fb7ceff7e20a452c145dbdd08154db))
+* providers-list-peers-counter ([#319](https://github.com/fluencelabs/deal/issues/319)) ([73d27c0](https://github.com/fluencelabs/deal/commit/73d27c0a3cc5e6c8524206e271df3a8b33b382c9))
+
 ## [0.8.0](https://github.com/fluencelabs/deal/compare/v0.7.3...v0.8.0) (2024-03-05)
 
 
