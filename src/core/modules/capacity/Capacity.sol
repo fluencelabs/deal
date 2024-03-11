@@ -276,6 +276,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
 
             require(cc.info.startEpoch == 0, "Capacity commitment is created");
 
+            // Indirect potential delegator address update.
             address delegator = cc.info.delegator;
             if (delegator != address(0x00)) {
                 require(delegator == msg.sender, "Only delegator can lock collateral");
