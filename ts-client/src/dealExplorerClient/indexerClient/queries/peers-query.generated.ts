@@ -11,7 +11,7 @@ export type PeerQueryQueryVariables = Types.Exact<{
 }>;
 
 
-export type PeerQueryQuery = { __typename?: 'Query', peer?: { __typename?: 'Peer', id: string, computeUnitsTotal: number, computeUnitsInDeal: number, computeUnitsInCapacityCommitment: number, offer: { __typename?: 'Offer', id: string }, provider: { __typename?: 'Provider', id: string, name: string } } | null };
+export type PeerQueryQuery = { __typename?: 'Query', peer?: { __typename?: 'Peer', id: string, computeUnitsTotal: number, computeUnitsInDeal: number, offer: { __typename?: 'Offer', id: string }, provider: { __typename?: 'Provider', id: string, name: string }, currentCapacityCommitment?: { __typename?: 'CapacityCommitment', activeUnitCount: number } | null } | null };
 
 export type ComputeUnitWithCcDataBasicFragment = { __typename?: 'ComputeUnit', id: string, workerId?: string | null, deal?: { __typename?: 'Deal', id: string } | null, peer: { __typename?: 'Peer', id: string, currentCapacityCommitment?: { __typename?: 'CapacityCommitment', id: string, collateralPerUnit: any, submittedProofsCount: number, startEpoch: any } | null, provider: { __typename?: 'Provider', id: string } } };
 
@@ -67,7 +67,9 @@ export const PeerQueryDocument = gql`
     }
     computeUnitsTotal
     computeUnitsInDeal
-    computeUnitsInCapacityCommitment
+    currentCapacityCommitment {
+      activeUnitCount
+    }
   }
 }
     `;

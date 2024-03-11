@@ -1,9 +1,12 @@
 export function serializeDealProviderAccessLists(
   providersAccessType: number,
-  providersAccessList: Array<{
-    __typename?: "DealToProvidersAccess";
-    provider: { __typename?: "Provider"; id: string }
-  }> | null | undefined
+  providersAccessList:
+    | Array<{
+        __typename?: "DealToProvidersAccess";
+        provider: { __typename?: "Provider"; id: string };
+      }>
+    | null
+    | undefined,
 ): { whitelist: Array<string>; blacklist: Array<string> } {
   const res: { whitelist: Array<string>; blacklist: Array<string> } = {
     whitelist: [],

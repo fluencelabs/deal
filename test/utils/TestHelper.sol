@@ -53,7 +53,8 @@ library TestHelper {
                 pricePerWorkerEpoch_,
                 new CIDV1[](0),
                 IConfig.AccessType.NONE,
-                new address[](0)
+                new address[](0),
+                1
             )
         );
 
@@ -63,5 +64,16 @@ library TestHelper {
         deal.deposit(deposit_);
 
         return deal;
+    }
+
+    function deployDealWithoutFactory(
+        DeployDealSystem.Deployment storage deployment,
+        uint256 minWorkers_,
+        uint256 targetWorkers_,
+        uint256 maxWorkersPerProvider_,
+        uint256 pricePerWorkerEpoch_
+    ) internal returns (Deal) {
+        uint256 deposit_ = deployment.core.minDealDepositedEpoches() * pricePerWorkerEpoch_ * targetWorkers_;
+        return deployDealWithoutFactory(deployment, minWorkers_, targetWorkers_, maxWorkersPerProvider_, pricePerWorkerEpoch_, deposit_);
     }
 }

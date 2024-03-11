@@ -38,11 +38,13 @@ abstract contract Matcher is Offer, IMatcher {
      * @notice - deal.maxWorkersPerProvider and silently ignore other CUs out of this limit.
      * @notice - Offer, or Peer not allowed to match (deal.isProviderAllowed, allowed prices, paymentToken, effectors)
      * @notice - Compute Unit (CU): Active CC status, also note, protocol does not allow more than one CU per peer
-     * @notice    for the same Deal.
+     * @notice    for the same Deal. But, when deal consists of whitelisted provider - CUs of this Provider
+     * @notice    could be matched without even CC.
      * @notice TODO: consolidate workaround: when it comes to check CC status, on wrong status the whole transaction
      * @notice  will be failed instead of to be silenced.
      * @dev There should be `bytes32[][] calldata peers` as well, but it is not supported by subgraph codegen.
      * @dev  Ref to https://github.com/graphprotocol/graph-tooling/issues/342.
+     * @notice This method is mirrored in ts-client/src/dealMatcherClient/dealMatcherClient.ts.
      * @param deal: Deal to match.
      * @param offers: Offers array that represents offers  in computeUnits 2D array.
      * @param computeUnits: Compute Units per offer id (2D array) to match with.
@@ -52,8 +54,7 @@ abstract contract Matcher is Offer, IMatcher {
         MatcherStorage storage matcherStorage = _getMatcherStorage();
 
         IDeal.Status dealStatus = deal.getStatus(); 
-        require(dealStatus != IDeal.Status.ENDED, "Matcher: deal is ended");
-        require(dealStatus != IDeal.Status.INSUFFICIENT_FUNDS, "Matcher: deal has insufficient funds");
+        require(dealStatus == IDeal.Status.ACTIVE || dealStatus == IDeal.Status.NOT_ENOUGH_WORKERS, "Matcher: deal is not active");
 
         uint256 lastMatchedEpoch = matcherStorage.lastMatchedEpoch[address(deal)];
         uint256 currentEpoch = core.currentEpoch();

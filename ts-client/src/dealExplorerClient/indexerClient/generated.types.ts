@@ -617,7 +617,6 @@ export type CapacityCommitment_OrderBy =
   | 'nextAdditionalActiveUnitCount'
   | 'nextCCFailedEpoch'
   | 'peer'
-  | 'peer__computeUnitsInCapacityCommitment'
   | 'peer__computeUnitsInDeal'
   | 'peer__computeUnitsTotal'
   | 'peer__currentCCCollateralDepositedAt'
@@ -915,7 +914,6 @@ export type ComputeUnit_OrderBy =
   | 'deal__withdrawalSum'
   | 'id'
   | 'peer'
-  | 'peer__computeUnitsInCapacityCommitment'
   | 'peer__computeUnitsInDeal'
   | 'peer__computeUnitsTotal'
   | 'peer__currentCCCollateralDepositedAt'
@@ -1201,7 +1199,6 @@ export type DealToJoinedOfferPeer_OrderBy =
   | 'offer__pricePerEpoch'
   | 'offer__updatedAt'
   | 'peer'
-  | 'peer__computeUnitsInCapacityCommitment'
   | 'peer__computeUnitsInDeal'
   | 'peer__computeUnitsTotal'
   | 'peer__currentCCCollateralDepositedAt'
@@ -1303,7 +1300,6 @@ export type DealToPeer_OrderBy =
   | 'deal__withdrawalSum'
   | 'id'
   | 'peer'
-  | 'peer__computeUnitsInCapacityCommitment'
   | 'peer__computeUnitsInDeal'
   | 'peer__computeUnitsTotal'
   | 'peer__currentCCCollateralDepositedAt'
@@ -2130,8 +2126,6 @@ export type Peer = {
   /** To access history of capacity commitments. */
   capacityCommitments?: Maybe<Array<CapacityCommitment>>;
   computeUnits?: Maybe<Array<ComputeUnit>>;
-  /** Compute units in any cc: update only when moved to CC or out: {UnitActivated, UnitDeactivated}. */
-  computeUnitsInCapacityCommitment: Scalars['Int']['output'];
   /** Compute units in any deals: update only when moved to deal or out. */
   computeUnitsInDeal: Scalars['Int']['output'];
   computeUnitsTotal: Scalars['Int']['output'];
@@ -2180,14 +2174,6 @@ export type Peer_Filter = {
   _change_block?: InputMaybe<BlockChangedFilter>;
   and?: InputMaybe<Array<InputMaybe<Peer_Filter>>>;
   capacityCommitments_?: InputMaybe<CapacityCommitment_Filter>;
-  computeUnitsInCapacityCommitment?: InputMaybe<Scalars['Int']['input']>;
-  computeUnitsInCapacityCommitment_gt?: InputMaybe<Scalars['Int']['input']>;
-  computeUnitsInCapacityCommitment_gte?: InputMaybe<Scalars['Int']['input']>;
-  computeUnitsInCapacityCommitment_in?: InputMaybe<Array<Scalars['Int']['input']>>;
-  computeUnitsInCapacityCommitment_lt?: InputMaybe<Scalars['Int']['input']>;
-  computeUnitsInCapacityCommitment_lte?: InputMaybe<Scalars['Int']['input']>;
-  computeUnitsInCapacityCommitment_not?: InputMaybe<Scalars['Int']['input']>;
-  computeUnitsInCapacityCommitment_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
   computeUnitsInDeal?: InputMaybe<Scalars['Int']['input']>;
   computeUnitsInDeal_gt?: InputMaybe<Scalars['Int']['input']>;
   computeUnitsInDeal_gte?: InputMaybe<Scalars['Int']['input']>;
@@ -2311,7 +2297,6 @@ export type Peer_Filter = {
 export type Peer_OrderBy =
   | 'capacityCommitments'
   | 'computeUnits'
-  | 'computeUnitsInCapacityCommitment'
   | 'computeUnitsInDeal'
   | 'computeUnitsTotal'
   | 'currentCCCollateralDepositedAt'
@@ -3045,7 +3030,6 @@ export type SubmittedProof_OrderBy =
   | 'id'
   | 'localUnitNonce'
   | 'peer'
-  | 'peer__computeUnitsInCapacityCommitment'
   | 'peer__computeUnitsInDeal'
   | 'peer__computeUnitsTotal'
   | 'peer__currentCCCollateralDepositedAt'

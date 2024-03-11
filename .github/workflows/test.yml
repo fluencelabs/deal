@@ -28,8 +28,8 @@ env:
   FOUNDRY_PROFILE: "ci"
 
 jobs:
-  build:
-    name: "Build contracts and npm packages"
+  integration-tests:
+    name: "Integration tests"
     runs-on: ubuntu-latest
 
     steps:
@@ -43,32 +43,38 @@ jobs:
         with:
           node-version: "18"
           registry-url: "https://registry.npmjs.org"
-          cache: "npm"
           cache-dependency-path: |
             ts-client/package-lock.json
-            subgraph/package-lock.json
+            integration-tests/package-lock.json
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
 
-      - run: make install-npms
-      - run: make build-all
-
-  foundry:
-    name: "Foundry unit tests"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Cache contract artifacts
+        uses: actions/cache@v4
         with:
-          submodules: recursive
+          path: |
+            cache
+            out
+          key: ${{ runner.os }}-amd64-contracts-${{ hashFiles('foundry.toml', 'src/**/*') }}
+          restore-keys: |
+            ${{ runner.os }}-amd64-contracts-
 
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
+      - name: Invalidate cache
+        if: >
+          github.event_name == 'push' ||
+          contains(github.event.pull_request.labels.*.name, 'clean-cache')
+        run: forge clean
+
+      - name: Remove "clean-cache" label
+        if: contains(github.event.pull_request.labels.*.name, 'clean-cache')
+        uses: buildsville/add-remove-label@v2.0.1
         with:
-          version: nightly
+          token: ${{ secrets.GITHUB_TOKEN }}
+          labels: clean-cache
+          type: remove
 
       - name: Run Forge build
         run: |
@@ -78,57 +84,46 @@ jobs:
       - name: Run Forge tests
         run: forge test -vvv
 
-  integration-tests:
-    name: "Integration tests"
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-    steps:
-      - name: Import secrets
-        uses: hashicorp/vault-action@v3.0.0
-        with:
-          url: https://vault.fluence.dev
-          path: jwt/github
-          role: ci
-          method: jwt
-          jwtGithubAudience: "https://github.com/fluencelabs"
-          jwtTtl: 300
-          exportToken: false
-          secrets: |
-            kv/docker-registry/basicauth/ci username | DOCKER_USERNAME ;
-            kv/docker-registry/basicauth/ci password | DOCKER_PASSWORD
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
+      - name: Build contracts container base
+        uses: docker/build-push-action@v5
         with:
-          registry: docker.fluence.dev
-          username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ env.DOCKER_PASSWORD }}
+          context: .
+          file: docker/Dockerfile
+          target: contracts
+          tags: contracts
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Build chain-rpc image
+        uses: docker/build-push-action@v5
         with:
-          submodules: recursive
+          context: .
+          file: docker/Dockerfile
+          target: chain-rpc
+          tags: |
+            chain-rpc
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-      - name: Setup node
-        uses: actions/setup-node@v3
+      - name: Build chain-deploy-script image
+        uses: docker/build-push-action@v5
         with:
-          node-version: "18"
-          registry-url: "https://registry.npmjs.org"
-
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: nightly
-
-      - name: Run Forge build
-        run: |
-          forge --version
-          forge build --sizes
+          context: .
+          file: docker/Dockerfile
+          target: chain-deploy-script
+          tags: |
+            chain-deploy-script
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Run docker network
-        run: docker compose up -d ipfs postgres chain-rpc blockscout graph-node --build && docker compose up chain-deploy-script --build
+        env:
+          CHAIN_RPC_IMAGE: "chain-rpc"
+          CHAIN_DEPLOY_SCRIPT_IMAGE: "chain-deploy-script"
+        run: docker compose up -d ipfs postgres chain-rpc blockscout graph-node && docker compose up chain-deploy-script
         working-directory: docker
 
       - name: Install deps in ts-client package
@@ -139,10 +134,16 @@ jobs:
         run: npm run build
         working-directory: ts-client
 
+      - name: Run Unittests in ts-client package
+        run: npm test unittests
+        working-directory: ts-client
+
       - name: Install packed ts-client
         run: npm i
         working-directory: integration-tests
 
       - name: Run integration tests
-        run: npm run test deal.test
+        run: npm run test
         working-directory: integration-tests
+        env:
+          RPC_URL: "http://localhost:8545"

@@ -1,5 +1,74 @@
 # Changelog
 
+## [0.10.1](https://github.com/fluencelabs/deal/compare/v0.10.0...v0.10.1) (2024-03-11)
+
+
+### Features
+
+* redeploy dar ([#337](https://github.com/fluencelabs/deal/issues/337)) ([a2a4d29](https://github.com/fluencelabs/deal/commit/a2a4d29198e2735ec18ff2c5e30b1da533187ced))
+
+
+### Bug Fixes
+
+* deal preCommit overflow ([#334](https://github.com/fluencelabs/deal/issues/334)) ([1bb1bca](https://github.com/fluencelabs/deal/commit/1bb1bcaf2840312dd7b816d506774a5dd1eb2088))
+* finishCC ([#332](https://github.com/fluencelabs/deal/issues/332)) ([97e4786](https://github.com/fluencelabs/deal/commit/97e4786e7f48dc4d62595917316623fd85fa68a8))
+
+## [0.10.0](https://github.com/fluencelabs/deal/compare/v0.9.0...v0.10.0) (2024-03-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* add comment to statuses & small RPC optimization ([#328](https://github.com/fluencelabs/deal/issues/328))
+
+### Features
+
+* redeploy dar ([#333](https://github.com/fluencelabs/deal/issues/333)) ([16769a7](https://github.com/fluencelabs/deal/commit/16769a7adffedb94b3249abdcb091a753b1b3090))
+
+
+### Bug Fixes
+
+* add comment to statuses & small RPC optimization ([#328](https://github.com/fluencelabs/deal/issues/328)) ([ddec654](https://github.com/fluencelabs/deal/commit/ddec6548a23ea12deca40ead56327c523d6096e2))
+* overflow ([#331](https://github.com/fluencelabs/deal/issues/331)) ([deff407](https://github.com/fluencelabs/deal/commit/deff40766e75435ba05cb3515e254ee76299c9e3))
+
+## [0.9.0](https://github.com/fluencelabs/deal/compare/v0.8.0...v0.9.0) (2024-03-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* New deal status ([#322](https://github.com/fluencelabs/deal/issues/322))
+
+### Features
+
+* New deal status ([#322](https://github.com/fluencelabs/deal/issues/322)) ([e604454](https://github.com/fluencelabs/deal/commit/e60445476a1836e014d38a29dfde1003d03d7199))
+
+
+### Bug Fixes
+
+* dealExplorerClient counters in Peer page and negative CU in CC [chain 397] ([#323](https://github.com/fluencelabs/deal/issues/323)) ([dd53b5b](https://github.com/fluencelabs/deal/commit/dd53b5b80c0ca0a2821abc82c31bf9542a7340e7))
+* **integration-tests:** Add more integration tests to CI ([#324](https://github.com/fluencelabs/deal/issues/324)) ([25e574f](https://github.com/fluencelabs/deal/commit/25e574f163fb7ceff7e20a452c145dbdd08154db))
+* providers-list-peers-counter ([#319](https://github.com/fluencelabs/deal/issues/319)) ([73d27c0](https://github.com/fluencelabs/deal/commit/73d27c0a3cc5e6c8524206e271df3a8b33b382c9))
+
+## [0.8.0](https://github.com/fluencelabs/deal/compare/v0.7.3...v0.8.0) (2024-03-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* revert add new statuses for deal ([#317](https://github.com/fluencelabs/deal/issues/317))
+* add new statuses for deal ([#316](https://github.com/fluencelabs/deal/issues/316))
+
+### Features
+
+* add new statuses for deal ([#316](https://github.com/fluencelabs/deal/issues/316)) ([c824fe7](https://github.com/fluencelabs/deal/commit/c824fe7c62bb62a305e76282d30ef15b44603b2d))
+* Introduce integration tests ([#309](https://github.com/fluencelabs/deal/issues/309)) ([0b102f7](https://github.com/fluencelabs/deal/commit/0b102f710a8f7cccf2517e0a162b9977fb97de7a))
+
+
+### Bug Fixes
+
+* explorer-client-add-delegator-address ([#318](https://github.com/fluencelabs/deal/issues/318)) ([0f4aab7](https://github.com/fluencelabs/deal/commit/0f4aab7e7e30cf7fdb14ce3d16a4a7ee44c258f6))
+* revert add new statuses for deal ([#317](https://github.com/fluencelabs/deal/issues/317)) ([4ab8a2e](https://github.com/fluencelabs/deal/commit/4ab8a2eecc16540ec8f2af4d827dacd8aca581ce))
+* subgraph proof stats model & fix in DealMatcherClient & fix match counters for DealExplorerClient ([#314](https://github.com/fluencelabs/deal/issues/314)) ([bf20af3](https://github.com/fluencelabs/deal/commit/bf20af3ca2620edbc24ca38b8403c815b24c52d2))
+* upd makefile command & doc bump ([#308](https://github.com/fluencelabs/deal/issues/308)) ([71f515c](https://github.com/fluencelabs/deal/commit/71f515c6cfc3914fe46bdac8e97a6585348fe6de))
+
 ## [0.7.3](https://github.com/fluencelabs/deal/compare/v0.7.2...v0.7.3) (2024-03-03)
 
 
