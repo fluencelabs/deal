@@ -2,7 +2,3 @@ https://graph-node-stage.fluence.dev/subgraphs/name/fluence-deal-contracts-c7009
 https://graph-node-stage.fluence.dev/subgraphs/name/fluence-deal-contracts
 https://graph-node-stage.fluence.dev/subgraphs/name/fluence-deal-contracts-1bba6637
 https://graph-node-stage.fluence.dev/subgraphs/name/fluence-deal-contracts
-https://graph-node-stage.fluence.dev/subgraphs/name/fluence-deal-contracts
-https://graph-node-stage.fluence.dev/subgraphs/name/fluence-deal-contracts
-https://graph-node-stage.fluence.dev/subgraphs/name/fluence-deal-contracts
-https://graph-node-stage.fluence.dev/subgraphs/name/fluence-deal-contracts
