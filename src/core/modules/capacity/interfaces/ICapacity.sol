@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 
 import "src/core/interfaces/ICore.sol";
 import "./ICapacityConst.sol";
+import "../Vesting.sol";
 
 /// @title Capacity contract interface
 /// @dev Capacity contract is responsible for managing the commitments
@@ -73,7 +74,7 @@ interface ICapacity is ICapacityConst {
     // To fetch updates on changes in CC stats (currently only in stats related to CUs).
     event CommitmentStatsUpdated(
         bytes32 commitmentId,
-        uint256 totalCUFailCount,
+        uint256 totalFailCount,
         uint256 exitedUnitCount,
         uint256 activeUnitCount,
         uint256 nextAdditionalActiveUnitCount,
@@ -93,14 +94,29 @@ interface ICapacity is ICapacityConst {
 
     // ------------------ Types ------------------
     enum CCStatus {
+        Inactive,
         Active,
         // WaitDelegation - before collateral is deposited.
         WaitDelegation,
         // Status is WaitStart - means collateral deposited, and epoch should be proceed before Active.
         WaitStart,
-        Inactive,
         Failed,
         Removed
+    }
+
+    struct UnitInfo {
+        bool isInactive;
+        uint256 lastSnapshotEpoch;
+        uint256 slashedCollateral;
+        mapping(uint256 => uint256) proofCountByEpoch;
+    }
+
+    struct Commitment {
+        CommitmentInfo info;
+        CommitmentPrograss progress;
+        CommitmentFinish finish;
+        Vesting.Info vesting;
+        mapping(bytes32 => UnitInfo) unitInfoById;
     }
 
     struct CommitmentInfo {
@@ -110,15 +126,20 @@ interface ICapacity is ICapacityConst {
         uint256 duration;
         uint256 rewardDelegatorRate;
         address delegator;
-        uint256 currentCUSuccessCount;
-        uint256 totalCUFailCount;
-        uint256 snapshotEpoch;
         uint256 startEpoch;
+    }
+
+    struct CommitmentFinish {
         uint256 failedEpoch;
-        uint256 withdrawCCEpochAfterFailed;
-        uint256 remainingFailsForLastEpoch;
+        uint256 remainingFailedUnitsInLastEpoch;
+        uint256 filledRemainingFailedUnitsInLastEpoch;
         uint256 exitedUnitCount;
-        uint256 totalWithdrawnReward;
+    }
+
+    struct CommitmentPrograss {
+        uint256 currentSuccessCount;
+        uint256 totalFailCount;
+        uint256 snapshotEpoch;
         uint256 activeUnitCount;
         uint256 nextAdditionalActiveUnitCount;
     }
@@ -132,7 +153,7 @@ interface ICapacity is ICapacityConst {
         uint256 endEpoch;
         uint256 rewardDelegatorRate;
         address delegator;
-        uint256 totalCUFailCount;
+        uint256 totalFailCount;
         uint256 failedEpoch;
         uint256 exitedUnitCount;
     }
@@ -155,6 +176,7 @@ interface ICapacity is ICapacityConst {
         bool isWhitelistEnabled_,
         bytes32 initGlobalNonce_,
         bytes32 difficulty_,
+        uint256 initRewardPool_,
         address randomXProxy_
     ) external;
 

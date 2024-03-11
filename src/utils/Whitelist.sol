@@ -39,6 +39,13 @@ contract Whitelist is OwnableUpgradableDiamond {
 
     // #endregion
 
+    // #region ------------------ Modifiers ------------------
+    modifier onlyApproved() {
+        require(isApproved(msg.sender), "Whitelist: provider is not approved");
+        _;
+    }
+    // #endregion
+
     // #region ----------------- Public View -----------------
     function isApproved(address account) public view returns (bool) {
         WhitelistStorage storage s = _getWhitelistStorage();

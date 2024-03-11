@@ -10,8 +10,8 @@ import "./interfaces/ICapacityConst.sol";
 
 contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
     // #region ------------------ Constants ------------------
-    uint256 internal constant _REWARD_POOL_GROWTH_RATE = 9000000; // 90%
-    uint256 internal constant _REWARD_POOL_SHRINK_RATE = 11000000; // 110%
+    uint256 internal constant _REWARD_POOL_GROWTH_RATE = 90 * PRECISION; // 90%
+    uint256 internal constant _REWARD_POOL_SHRINK_RATE = 110 * PRECISION; // 110%
     // #endregion ------------------ Constants ------------------
 
     // #region ------------------ Types ------------------
@@ -24,28 +24,39 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
     // #region ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.capacity.storage.v1.const")) - 1);
 
-    struct ConstStorage {
-        uint256 fltPrice;
-        uint256 fltCollateralPerUnit;
-        uint256 usdCollateralPerUnit;
-        uint256 fltTargetRevenuePerEpoch;
-        uint256 usdTargetRevenuePerEpoch;
+    struct CommitmentConst {
         uint256 minDuration;
+        uint256 usdCollateralPerUnit;
+        uint256 fltCollateralPerUnit;
+        uint256 slashingRate;
+        uint256 withdrawEpochesAfterFailed;
+        uint256 maxFailedRatio;
+    }
+
+    struct ProofConst {
+        uint256 minRequierdProofsPerEpoch;
+        uint256 maxProofsPerEpoch;
+        bytes32 difficulty;
+        bytes32 nextDifficulty;
+        uint256 difficultyChangeEpoch;
+    }
+
+    struct RewardConst {
+        uint256 usdTargetRevenuePerEpoch;
         uint256 minRewardPerEpoch;
         uint256 maxRewardPerEpoch;
         uint256 vestingPeriodDuration;
         uint256 vestingPeriodCount;
-        uint256 slashingRate;
-        uint256 minRequierdProofsPerEpoch;
-        uint256 maxProofsPerEpoch;
-        uint256 withdrawEpochesAfterFailed;
-        uint256 maxFailedRatio;
-        uint256 activeUnitCount;
-        bytes32 difficulty;
-        bytes32 nextDifficulty;
-        uint256 difficultyChangeEpoch;
         RewardPoolPerEpoch[] rewardPoolPerEpoches;
+    }
+
+    struct ConstStorage {
+        uint256 fltPrice;
         address randomXProxy;
+        uint256 activeUnitCount;
+        CommitmentConst commitment;
+        ProofConst proof;
+        RewardConst reward;
     }
 
     function _getConstStorage() private pure returns (ConstStorage storage s) {
@@ -74,27 +85,36 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
         uint256 withdrawEpochesAfterFailed_,
         uint256 maxFailedRatio_,
         bytes32 difficulty_,
+        uint256 initRewardPool_,
         address randomXProxy_
     ) internal onlyInitializing {
         ConstStorage storage constantsStorage = _getConstStorage();
 
-        constantsStorage.usdCollateralPerUnit = usdCollateralPerUnit_;
-        constantsStorage.usdTargetRevenuePerEpoch = usdTargetRevenuePerEpoch_;
-        constantsStorage.minDuration = minDuration_;
-        constantsStorage.minRewardPerEpoch = minRewardPerEpoch_;
-        constantsStorage.maxRewardPerEpoch = maxRewardPerEpoch_;
-        constantsStorage.vestingPeriodDuration = vestingPeriodDuration_;
-        constantsStorage.vestingPeriodCount = vestingPeriodCount_;
-        constantsStorage.slashingRate = slashingRate_;
-        constantsStorage.minRequierdProofsPerEpoch = minRequierdProofsPerEpoch_;
-        constantsStorage.maxProofsPerEpoch = maxProofsPerEpoch_;
-        constantsStorage.withdrawEpochesAfterFailed = withdrawEpochesAfterFailed_;
-        constantsStorage.maxFailedRatio = maxFailedRatio_;
-        constantsStorage.difficulty = difficulty_;
-        constantsStorage.nextDifficulty = difficulty_;
+        constantsStorage.commitment.minDuration = minDuration_;
+        constantsStorage.commitment.usdCollateralPerUnit = usdCollateralPerUnit_;
+        constantsStorage.commitment.slashingRate = slashingRate_;
+        constantsStorage.commitment.withdrawEpochesAfterFailed = withdrawEpochesAfterFailed_;
+        constantsStorage.commitment.maxFailedRatio = maxFailedRatio_;
+
+        constantsStorage.reward.usdTargetRevenuePerEpoch = usdTargetRevenuePerEpoch_;
+        constantsStorage.reward.minRewardPerEpoch = minRewardPerEpoch_;
+        constantsStorage.reward.maxRewardPerEpoch = maxRewardPerEpoch_;
+        constantsStorage.reward.vestingPeriodDuration = vestingPeriodDuration_;
+        constantsStorage.reward.vestingPeriodCount = vestingPeriodCount_;
+
+        constantsStorage.proof.minRequierdProofsPerEpoch = minRequierdProofsPerEpoch_;
+        constantsStorage.proof.maxProofsPerEpoch = maxProofsPerEpoch_;
+        constantsStorage.proof.difficulty = difficulty_;
+        constantsStorage.proof.nextDifficulty = difficulty_;
+
         constantsStorage.randomXProxy = randomXProxy_;
 
-        setFLTPrice(fltPrice_);
+        constantsStorage.reward.rewardPoolPerEpoches.push(
+            RewardPoolPerEpoch({epoch: core.currentEpoch(), value: initRewardPool_})
+        );
+
+        constantsStorage.fltPrice = fltPrice_;
+        constantsStorage.commitment.fltCollateralPerUnit = usdCollateralPerUnit_ / fltPrice_;
     }
     // #endregion ------------------ Initializer ------------------
 
@@ -104,59 +124,55 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
     }
 
     function fltCollateralPerUnit() public view returns (uint256) {
-        return _getConstStorage().fltCollateralPerUnit;
+        return _getConstStorage().commitment.fltCollateralPerUnit;
     }
 
     function usdCollateralPerUnit() public view returns (uint256) {
-        return _getConstStorage().usdCollateralPerUnit;
-    }
-
-    function fltTargetRevenuePerEpoch() public view returns (uint256) {
-        return _getConstStorage().fltTargetRevenuePerEpoch;
+        return _getConstStorage().commitment.usdCollateralPerUnit;
     }
 
     function usdTargetRevenuePerEpoch() public view returns (uint256) {
-        return _getConstStorage().usdTargetRevenuePerEpoch;
+        return _getConstStorage().reward.usdTargetRevenuePerEpoch;
     }
 
     function minDuration() public view returns (uint256) {
-        return _getConstStorage().minDuration;
+        return _getConstStorage().commitment.minDuration;
     }
 
     function minRewardPerEpoch() public view returns (uint256) {
-        return _getConstStorage().minRewardPerEpoch;
+        return _getConstStorage().reward.minRewardPerEpoch;
     }
 
     function maxRewardPerEpoch() public view returns (uint256) {
-        return _getConstStorage().maxRewardPerEpoch;
+        return _getConstStorage().reward.maxRewardPerEpoch;
     }
 
     function vestingPeriodDuration() public view returns (uint256) {
-        return _getConstStorage().vestingPeriodDuration;
+        return _getConstStorage().reward.vestingPeriodDuration;
     }
 
     function vestingPeriodCount() public view returns (uint256) {
-        return _getConstStorage().vestingPeriodCount;
+        return _getConstStorage().reward.vestingPeriodCount;
     }
 
     function slashingRate() public view returns (uint256) {
-        return _getConstStorage().slashingRate;
+        return _getConstStorage().commitment.slashingRate;
     }
 
     function minRequierdProofsPerEpoch() public view returns (uint256) {
-        return _getConstStorage().minRequierdProofsPerEpoch;
+        return _getConstStorage().proof.minRequierdProofsPerEpoch;
     }
 
     function maxProofsPerEpoch() public view returns (uint256) {
-        return _getConstStorage().maxProofsPerEpoch;
+        return _getConstStorage().proof.maxProofsPerEpoch;
     }
 
     function withdrawEpochesAfterFailed() public view returns (uint256) {
-        return _getConstStorage().withdrawEpochesAfterFailed;
+        return _getConstStorage().commitment.withdrawEpochesAfterFailed;
     }
 
     function maxFailedRatio() public view returns (uint256) {
-        return _getConstStorage().maxFailedRatio;
+        return _getConstStorage().commitment.maxFailedRatio;
     }
 
     function activeUnitCount() public view returns (uint256) {
@@ -165,11 +181,11 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
 
     function difficulty() public view returns (bytes32) {
         ConstStorage storage constantsStorage = _getConstStorage();
-        if (constantsStorage.difficultyChangeEpoch >= core.currentEpoch()) {
-            return constantsStorage.nextDifficulty;
+        if (constantsStorage.proof.difficultyChangeEpoch >= core.currentEpoch()) {
+            return constantsStorage.proof.nextDifficulty;
         }
 
-        return _getConstStorage().difficulty;
+        return _getConstStorage().proof.difficulty;
     }
 
     function randomXProxy() public view returns (address) {
@@ -179,14 +195,14 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
     function getRewardPool(uint256 epoch) public view returns (uint256) {
         ConstStorage storage constantsStorage = _getConstStorage();
 
-        uint256 length = constantsStorage.rewardPoolPerEpoches.length;
+        uint256 length = constantsStorage.reward.rewardPoolPerEpoches.length;
         uint256 low = 0;
         uint256 high = length - 1;
 
         uint256 value = 0;
         while (low <= high) {
             uint256 mid = (low + high) / 2;
-            RewardPoolPerEpoch storage rewardPool = constantsStorage.rewardPoolPerEpoches[mid];
+            RewardPoolPerEpoch storage rewardPool = constantsStorage.reward.rewardPoolPerEpoches[mid];
             uint256 rewardPoolEpoch = rewardPool.epoch;
             if (epoch > rewardPoolEpoch) {
                 value = rewardPool.value;
@@ -208,18 +224,16 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
         constantsStorage.fltPrice = fltPrice_;
 
         _setRewardPool(fltPrice_, constantsStorage.activeUnitCount);
-
-        constantsStorage.fltTargetRevenuePerEpoch = constantsStorage.usdTargetRevenuePerEpoch / fltPrice_;
-        constantsStorage.fltCollateralPerUnit = constantsStorage.usdCollateralPerUnit / fltPrice_;
+        constantsStorage.commitment.fltCollateralPerUnit = constantsStorage.commitment.usdCollateralPerUnit / fltPrice_;
 
         emit FLTPriceUpdated(fltPrice_);
     }
 
     function setDifficulty(bytes32 difficulty_) external onlyOwner {
         ConstStorage storage constantsStorage = _getConstStorage();
-        constantsStorage.difficulty = constantsStorage.nextDifficulty;
-        constantsStorage.nextDifficulty = difficulty_;
-        constantsStorage.difficultyChangeEpoch = core.currentEpoch() + 1;
+        constantsStorage.proof.difficulty = constantsStorage.proof.nextDifficulty;
+        constantsStorage.proof.nextDifficulty = difficulty_;
+        constantsStorage.proof.difficultyChangeEpoch = core.currentEpoch() + 1;
 
         emit DifficultyUpdated(difficulty_);
     }
@@ -227,32 +241,32 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
     function setConstant(ConstantType constantType, uint256 v) external onlyOwner {
         ConstStorage storage constantsStorage = _getConstStorage();
 
-        if (constantType == ConstantType.USDCollateralPerUnit) {
-            constantsStorage.usdCollateralPerUnit = v;
-            constantsStorage.fltCollateralPerUnit = v / constantsStorage.fltPrice;
-        } else if (constantType == ConstantType.USDTargetRevenuePerEpoch) {
-            constantsStorage.usdTargetRevenuePerEpoch = v;
-            constantsStorage.fltTargetRevenuePerEpoch = v / constantsStorage.fltPrice;
-        } else if (constantType == ConstantType.MinDuration) {
-            constantsStorage.minDuration = v;
-        } else if (constantType == ConstantType.MinRewardPerEpoch) {
-            constantsStorage.minRewardPerEpoch = v;
-        } else if (constantType == ConstantType.MaxRewardPerEpoch) {
-            constantsStorage.maxRewardPerEpoch = v;
-        } else if (constantType == ConstantType.VestingPeriodDuration) {
-            constantsStorage.vestingPeriodDuration = v;
-        } else if (constantType == ConstantType.VestingPeriodCount) {
-            constantsStorage.vestingPeriodCount = v;
+        // capacity section
+        if (constantType == ConstantType.MinDuration) {
+            constantsStorage.commitment.minDuration = v;
+        } else if (constantType == ConstantType.USDCollateralPerUnit) {
+            constantsStorage.commitment.usdCollateralPerUnit = v;
+            constantsStorage.commitment.fltCollateralPerUnit = v / constantsStorage.fltPrice;
         } else if (constantType == ConstantType.SlashingRate) {
-            constantsStorage.slashingRate = v;
-        } else if (constantType == ConstantType.MinRequierdProofsPerEpoch) {
-            constantsStorage.minRequierdProofsPerEpoch = v;
-        } else if (constantType == ConstantType.MaxProofsPerEpoch) {
-            constantsStorage.maxProofsPerEpoch = v;
+            constantsStorage.commitment.slashingRate = v;
         } else if (constantType == ConstantType.WithdrawEpochesAfterFailed) {
-            constantsStorage.withdrawEpochesAfterFailed = v;
+            constantsStorage.commitment.withdrawEpochesAfterFailed = v;
         } else if (constantType == ConstantType.MaxFailedRatio) {
-            constantsStorage.maxFailedRatio = v;
+            constantsStorage.commitment.maxFailedRatio = v;
+        }
+        // reward section
+        else if (constantType == ConstantType.USDTargetRevenuePerEpoch) {
+            constantsStorage.reward.usdTargetRevenuePerEpoch = v;
+        } else if (constantType == ConstantType.MinRewardPerEpoch) {
+            constantsStorage.reward.minRewardPerEpoch = v;
+        } else if (constantType == ConstantType.MaxRewardPerEpoch) {
+            constantsStorage.reward.maxRewardPerEpoch = v;
+        }
+        // proof section
+        else if (constantType == ConstantType.MinRequierdProofsPerEpoch) {
+            constantsStorage.proof.minRequierdProofsPerEpoch = v;
+        } else if (constantType == ConstantType.MaxProofsPerEpoch) {
+            constantsStorage.proof.maxProofsPerEpoch = v;
         } else {
             revert("GlobalConst: unknown constant type");
         }
@@ -271,42 +285,37 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
 
     function _setRewardPool(uint256 fltPrice_, uint256 activeUnitCount_) internal {
         ConstStorage storage constantsStorage = _getConstStorage();
-
         uint256 currentEpoch_ = core.currentEpoch();
-        uint256 currentTarget = 0;
 
+        uint256 currentTarget;
         if (activeUnitCount_ > 0) {
             currentTarget = fltPrice_ / activeUnitCount_;
         }
 
         // load last reward pool
-        uint256 length = constantsStorage.rewardPoolPerEpoches.length;
+        uint256 length = constantsStorage.reward.rewardPoolPerEpoches.length;
         uint256 lastRewardPoolValue;
         uint256 lastRewardPoolEpoch;
 
-        if (length > 0) {
-            RewardPoolPerEpoch storage lastRewardPool = constantsStorage.rewardPoolPerEpoches[length - 1];
-            lastRewardPoolEpoch = lastRewardPool.epoch;
+        RewardPoolPerEpoch storage lastRewardPool = constantsStorage.reward.rewardPoolPerEpoches[length - 1];
+        lastRewardPoolEpoch = lastRewardPool.epoch;
 
-            if (length < 2) {
-                lastRewardPoolValue = 0;
-            } else if (currentEpoch_ == lastRewardPool.epoch) {
-                lastRewardPoolValue = constantsStorage.rewardPoolPerEpoches[length - 2].value;
-            } else {
-                lastRewardPoolValue = lastRewardPool.value;
-            }
+        if (length > 2 && currentEpoch_ == lastRewardPool.epoch) {
+            lastRewardPoolValue = constantsStorage.reward.rewardPoolPerEpoches[length - 2].value;
+        } else {
+            lastRewardPoolValue = lastRewardPool.value;
         }
 
         // calculate new reward pool
         uint256 newRewardPool;
-        if (currentTarget > constantsStorage.usdTargetRevenuePerEpoch) {
-            uint256 minRewardPerEpoch_ = constantsStorage.minRewardPerEpoch;
+        if (currentTarget > constantsStorage.reward.usdTargetRevenuePerEpoch) {
+            uint256 minRewardPerEpoch_ = constantsStorage.reward.minRewardPerEpoch;
             newRewardPool = lastRewardPoolValue * _REWARD_POOL_SHRINK_RATE / PRECISION;
             if (newRewardPool < minRewardPerEpoch_) {
                 newRewardPool = minRewardPerEpoch_;
             }
         } else {
-            uint256 maxRewardPerEpoch_ = constantsStorage.maxRewardPerEpoch;
+            uint256 maxRewardPerEpoch_ = constantsStorage.reward.maxRewardPerEpoch;
             newRewardPool = lastRewardPoolValue * _REWARD_POOL_GROWTH_RATE / PRECISION;
             if (newRewardPool > maxRewardPerEpoch_) {
                 newRewardPool = maxRewardPerEpoch_;
@@ -315,9 +324,11 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
 
         // save new reward pool
         if (currentEpoch_ == lastRewardPoolEpoch) {
-            constantsStorage.rewardPoolPerEpoches[length - 1].value = newRewardPool;
+            constantsStorage.reward.rewardPoolPerEpoches[length - 1].value = newRewardPool;
         } else {
-            constantsStorage.rewardPoolPerEpoches.push(RewardPoolPerEpoch({epoch: currentEpoch_, value: newRewardPool}));
+            constantsStorage.reward.rewardPoolPerEpoches.push(
+                RewardPoolPerEpoch({epoch: currentEpoch_, value: newRewardPool})
+            );
         }
     }
     // #endregion ------------------ Internal Mutable Functions ------------------

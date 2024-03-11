@@ -142,7 +142,7 @@ contract CapacityCommitmentTest is Test {
         assertEq(commitment.endEpoch, commitment.startEpoch + ccDuration, "Duration mismatch");
         assertEq(commitment.rewardDelegatorRate, rewardCCDelegationRate, "RewardDelegatorRate mismatch");
         assertEq(commitment.delegator, ccDelegator, "Delegator mismatch");
-        assertEq(commitment.totalCUFailCount, 0, "TotalCUFailCount mismatch");
+        assertEq(commitment.totalFailCount, 0, "TotalCUFailCount mismatch");
         assertEq(commitment.startEpoch, 0, "StartEpoch mismatch");
         assertEq(commitment.failedEpoch, 0, "FailedEpoch mismatch");
         assertEq(commitment.exitedUnitCount, 0, "ExitedUnitCount mismatch");
@@ -274,10 +274,27 @@ contract CapacityCommitmentTest is Test {
 
         StdCheats.skip(deployment.core.epochDuration());
 
+        bytes32 localUnitNonce = keccak256(abi.encodePacked("localUnitNonce"));
+        deployment.capacity.submitProof(unitId, localUnitNonce, targetHash);
+
         assertGe(deployment.capacity.totalRewards(commitmentId), 0, "TotalRewards mismatch");
         assertEq(deployment.capacity.unlockedRewards(commitmentId), 0, "UnlockedRewards mismatch");
 
         vm.stopPrank();
+    }
+
+    function test_CloseCapacityCommitment() public {
+        bytes32 peerId = registerPeers[0].peerId;
+        uint256 unitCount = registerPeers[0].unitIds.length;
+        address peerOwner = registerPeers[0].owner;
+        bytes32 unitId = registerPeers[0].unitIds[0];
+
+        (bytes32 commitmentId,) = _createAndDepositCapacityCommitment(peerId, unitCount);
+
+        // warp to next epoch
+        StdCheats.skip(deployment.core.epochDuration());
+
+        bytes32 targetHash = bytes32(uint256(deployment.capacity.difficulty()) - 1);
     }
 
     // ------------------ Internals ------------------

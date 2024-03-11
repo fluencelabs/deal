@@ -13,35 +13,20 @@ import "src/utils/Whitelist.sol";
 import "src/utils/BytesConverter.sol";
 import "./interfaces/ICapacity.sol";
 import "./CapacityConst.sol";
-import "forge-std/console.sol";
+import "./Vesting.sol";
+import "./Snapshot.sol";
 
 contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, Whitelist, ICapacity {
     using SafeERC20 for IERC20;
     using BytesConverter for bytes;
     using Address for address payable;
+    using Vesting for Vesting.Info;
+    using Snapshot for Snapshot.Cache;
 
     // #region ------------------ Types ------------------
-    struct UnitProofsInfo {
-        bool isInactive;
-        uint256 lastMinProofsEpoch;
-        uint256 slashedCollateral;
-        mapping(uint256 => uint256) proofsCountByEpoch;
-    }
-
-    struct Commitment {
-        CommitmentInfo info;
-        Vesting[] vestings;
-        mapping(bytes32 => UnitProofsInfo) unitProofsInfoByUnit;
-    }
-
     struct RewardInfo {
         uint256 minRequierdCCProofs;
         uint256 totalSuccessProofs;
-    }
-
-    struct Vesting {
-        uint256 epoch;
-        uint256 cumulativeAmount;
     }
     // #endregion
 
@@ -53,7 +38,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         mapping(uint256 => RewardInfo) rewardInfoByEpoch;
         bytes32 globalNonce;
         bytes32 nextGlobalNonce;
-        uint256 nonceEpochSnapshot;
+        uint256 changedNonceEpoch;
         mapping(bytes32 => mapping(bytes32 => bool)) isProofSubmittedByUnit;
     }
 
@@ -85,6 +70,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         bool isWhitelistEnabled_,
         bytes32 initGlobalNonce_,
         bytes32 difficulty_,
+        uint256 initRewardPool_,
         address randomXProxy_
     ) external initializer {
         __Ownable_init(msg.sender);
@@ -104,6 +90,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
             withdrawEpochesAfterFailed_,
             maxFailedRatio_,
             difficulty_,
+            initRewardPool_,
             randomXProxy_
         );
         __UUPSUpgradeable_init();
@@ -111,7 +98,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
 
         CommitmentStorage storage s = _getCommitmentStorage();
         s.globalNonce = initGlobalNonce_;
-        s.nonceEpochSnapshot = core.currentEpoch();
+        s.changedNonceEpoch = core.currentEpoch();
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyCoreOwner {}
@@ -119,24 +106,19 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
 
     // #region ----------------- Public View -----------------
     function getStatus(bytes32 commitmentId) public view returns (CCStatus) {
+        IMarket market = core.market();
         CommitmentStorage storage s = _getCommitmentStorage();
-
         Commitment storage cc = s.commitments[commitmentId];
 
-        uint256 currentEpoch_ = core.currentEpoch();
-        if (cc.info.status == CCStatus.Removed) {
-            return CCStatus.Removed;
-        } else if (cc.info.startEpoch == 0) {
-            return CCStatus.WaitDelegation;
-        } else if (cc.info.startEpoch > currentEpoch_) {
-            return CCStatus.WaitStart;
-        } else if (_isFailed(cc, currentEpoch_)) {
-            return CCStatus.Failed;
-        } else if (currentEpoch_ >= _expiredEpoch(cc)) {
-            return CCStatus.Inactive;
-        } else {
-            return CCStatus.Active;
-        }
+        bytes32 peerId = cc.info.peerId;
+        require(peerId != bytes32(0x00), "Capacity commitment doesn't exist");
+
+        IMarket.ComputePeer memory peer = market.getComputePeer(peerId);
+
+        Snapshot.Cache memory snapshotCache = Snapshot.init(cc);
+        CCStatus status = _preCommitCommitmentSnapshot(cc, snapshotCache, peer, core.currentEpoch(), _expiredEpoch(cc));
+
+        return status;
     }
 
     function getCommitment(bytes32 commitmentId) external view returns (CommitmentView memory) {
@@ -152,9 +134,9 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
             endEpoch: cc.info.startEpoch + cc.info.duration,
             rewardDelegatorRate: cc.info.rewardDelegatorRate,
             delegator: cc.info.delegator,
-            totalCUFailCount: cc.info.totalCUFailCount,
-            failedEpoch: cc.info.failedEpoch,
-            exitedUnitCount: cc.info.exitedUnitCount
+            totalFailCount: cc.progress.totalFailCount,
+            failedEpoch: cc.finish.failedEpoch,
+            exitedUnitCount: cc.finish.exitedUnitCount
         });
     }
 
@@ -162,29 +144,19 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         CommitmentStorage storage s = _getCommitmentStorage();
         Commitment storage cc = s.commitments[commitmentId];
 
-        uint256 length = cc.vestings.length;
-        if (length == 0) {
-            return 0;
-        }
-
-        return cc.vestings[length - 1].cumulativeAmount - cc.info.totalWithdrawnReward;
+        return cc.vesting.total();
     }
 
     function unlockedRewards(bytes32 commitmentId) external view returns (uint256) {
         CommitmentStorage storage s = _getCommitmentStorage();
         Commitment storage cc = s.commitments[commitmentId];
 
-        (int256 index,) = _findClosestMinVesting(cc.vestings, core.currentEpoch());
-        if (index < 0) {
-            return 0;
-        }
-
-        return cc.vestings[uint256(index)].cumulativeAmount - cc.info.totalWithdrawnReward;
+        return cc.vesting.unlocked(core.currentEpoch());
     }
 
     function getGlobalNonce() external view returns (bytes32) {
         CommitmentStorage storage s = _getCommitmentStorage();
-        if (core.currentEpoch() != s.nonceEpochSnapshot) {
+        if (core.currentEpoch() != s.changedNonceEpoch) {
             return s.nextGlobalNonce;
         }
 
@@ -195,19 +167,19 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
     // #region ----------------- Public Mutable -----------------
     function createCommitment(bytes32 peerId, uint256 duration, address delegator, uint256 rewardDelegationRate)
         external
+        onlyApproved
         returns (bytes32)
     {
-        require(isApproved(msg.sender), "Only whitelisted provider can create capacity commitment");
-
+        // #region load contracts and storage
         IMarket market = core.market();
-
         CommitmentStorage storage s = _getCommitmentStorage();
-        IMarket.ComputePeer memory peer = market.getComputePeer(peerId);
+        // #endregion
 
+        // #region init and verify variables
+        IMarket.ComputePeer memory peer = market.getComputePeer(peerId);
         require(peer.commitmentId == bytes32(0x00), "Peer already has commitment");
 
         IMarket.Offer memory offer = market.getOffer(peer.offerId);
-
         address provider = offer.provider;
         require(provider != address(0x00), "Offer doesn't exist");
         require(msg.sender == provider, "Only provider can create capacity commitment");
@@ -215,32 +187,27 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         require(duration >= minDuration(), "Duration should be greater than min capacity commitment duration");
         require(rewardDelegationRate > 0, "Reward delegation rate should be greater than 0");
         require(rewardDelegationRate <= PRECISION, "Reward delegation rate should be less or equal 100");
+        // #endregion
 
+        // #region create commitment
+        uint256 collateralPerUnit = fltCollateralPerUnit();
         bytes32 commitmentId =
             keccak256(abi.encodePacked(block.number, peerId, duration, delegator, rewardDelegationRate));
-        uint256 collateralPerUnit = fltCollateralPerUnit();
-        s.commitments[commitmentId].info = CommitmentInfo({
+
+        Commitment storage cc = s.commitments[commitmentId];
+        cc.info = CommitmentInfo({
             status: CCStatus.WaitDelegation,
             peerId: peerId,
             collateralPerUnit: collateralPerUnit,
             duration: duration,
             rewardDelegatorRate: rewardDelegationRate,
             delegator: delegator,
-            currentCUSuccessCount: 0,
-            totalCUFailCount: 0,
-            snapshotEpoch: 0,
-            startEpoch: 0,
-            withdrawCCEpochAfterFailed: 0,
-            failedEpoch: 0,
-            remainingFailsForLastEpoch: 0,
-            exitedUnitCount: 0,
-            totalWithdrawnReward: 0,
-            activeUnitCount: 0,
-            nextAdditionalActiveUnitCount: 0
+            startEpoch: 0
         });
         market.setCommitmentId(peerId, commitmentId);
-        
+
         emit CommitmentCreated(peerId, commitmentId, duration, delegator, rewardDelegationRate, collateralPerUnit);
+        // #endregion
 
         return commitmentId;
     }
@@ -249,163 +216,155 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         IMarket market = core.market();
         CommitmentStorage storage s = _getCommitmentStorage();
         Commitment storage cc = s.commitments[commitmentId];
-        bytes32 peerId = cc.info.peerId;
 
+        bytes32 peerId = cc.info.peerId;
         IMarket.ComputePeer memory peer = market.getComputePeer(peerId);
 
-        require(cc.info.startEpoch == 0, "Capacity commitment is created");
+        require(
+            getStatus(commitmentId) == CCStatus.WaitDelegation, "Capacity commitment is not in WaitDelegation status"
+        );
 
-        delete s.commitments[commitmentId];
         market.setCommitmentId(peerId, bytes32(0x00));
+        delete s.commitments[commitmentId];
 
         emit CommitmentRemoved(commitmentId);
     }
 
     function depositCollateral(bytes32[] calldata commitmentIds) external payable {
+        // #region load contracts and storage
         IMarket market = core.market();
-
         CommitmentStorage storage s = _getCommitmentStorage();
-        uint256 totalValue = msg.value;
+        // #endregion
 
+        uint256 totalValue = msg.value;
         for (uint256 i = 0; i < commitmentIds.length; i++) {
+            // #region init and verify variables
             bytes32 commitmentId = commitmentIds[i];
             Commitment storage cc = s.commitments[commitmentId];
+
+            require(
+                getStatus(commitmentId) == CCStatus.WaitDelegation,
+                "Capacity commitment is not in WaitDelegation status"
+            );
 
             bytes32 peerId = cc.info.peerId;
             IMarket.ComputePeer memory peer = market.getComputePeer(peerId);
 
-            require(cc.info.startEpoch == 0, "Capacity commitment is created");
+            uint256 unitCount = peer.unitCount;
+            uint256 collateral = unitCount * cc.info.collateralPerUnit;
 
-            address delegator = cc.info.delegator;
-            if (delegator != address(0x00)) {
-                require(delegator == msg.sender, "Only delegator can lock collateral");
-            } else {
-                cc.info.delegator = msg.sender;
-            }
+            totalValue -= collateral;
 
             uint256 currentEpoch_ = core.currentEpoch();
+            // #endregion
+
+            // #region save deposit informaton
+            address delegator = cc.info.delegator;
+            if (delegator == address(0x00)) {
+                cc.info.delegator = msg.sender;
+            } else {
+                require(delegator == msg.sender, "Only delegator can lock collateral");
+            }
+
             uint256 startEpoch = currentEpoch_ + 1;
 
             cc.info.startEpoch = startEpoch;
-            cc.info.snapshotEpoch = currentEpoch_;
+            cc.progress.snapshotEpoch = currentEpoch_;
+            cc.progress.activeUnitCount = unitCount;
 
-            uint256 unitCount = peer.unitCount;
-            uint256 collateral = unitCount * cc.info.collateralPerUnit;
-            totalValue -= collateral;
-
-            cc.info.activeUnitCount = unitCount;
             _setActiveUnitCount(activeUnitCount() + unitCount);
-
             cc.info.status = CCStatus.Active;
 
             emit CollateralDeposited(commitmentId, collateral);
             emit CommitmentActivated(
                 peerId, commitmentId, startEpoch, startEpoch + cc.info.duration, market.getComputeUnitIds(peerId)
             );
+            // #endregion
         }
 
         require(totalValue == 0, "Excessive value");
     }
 
-    function finishCommitment(bytes32 commitmentId) external {
-        IMarket market = core.market();
-
-        CommitmentStorage storage s = _getCommitmentStorage();
-        Commitment storage cc = s.commitments[commitmentId];
-        bytes32 peerId = cc.info.peerId;
-        IMarket.ComputePeer memory peer = market.getComputePeer(peerId);
-
-        uint256 currentEpoch_ = core.currentEpoch();
-        uint256 expiredEpoch = _expiredEpoch(cc);
-        CCStatus status = _commitCommitmentSnapshot(cc, peer, currentEpoch_ - 1, expiredEpoch);
-
-        if (status != CCStatus.Inactive && status != CCStatus.Failed) {
-            revert CapacityCommitmentIsActive(status);
-        }
-        if (status == CCStatus.Failed) {
-            require(
-                currentEpoch_ >= cc.info.withdrawCCEpochAfterFailed, "Capacity commitment is not ready for withdraw"
-            );
-        }
-
-        uint256 unitCount = peer.unitCount;
-        require(cc.info.exitedUnitCount == unitCount, "Capacity commitment wait compute units");
-
-        cc.info.status = CCStatus.Removed;
-
-        address payable delegator = payable(cc.info.delegator);
-        uint256 collateralPerUnit_ = cc.info.collateralPerUnit;
-
-        uint256 totalCollateral = collateralPerUnit_ * unitCount;
-        uint256 slashedCollateral = cc.info.totalCUFailCount * collateralPerUnit_;
-        totalCollateral -= slashedCollateral;
-
-        market.setCommitmentId(peerId, bytes32(0x00));
-
-        delegator.sendValue(totalCollateral);
-
-        emit CommitmentFinished(commitmentId);
-    }
-
     function submitProof(bytes32 unitId, bytes32 localUnitNonce, bytes32 resultHash) external {
+        // #region load contracts and storage
         IMarket market = core.market();
-
         CommitmentStorage storage s = _getCommitmentStorage();
+        // #endregion
+
+        // #region init and verify variables
+        uint256 currentEpoch = core.currentEpoch();
+
         IMarket.ComputeUnit memory unit = market.getComputeUnit(unitId);
         IMarket.ComputePeer memory peer = market.getComputePeer(unit.peerId);
         require(peer.owner == msg.sender, "Only compute peer owner can submit proof");
 
         bytes32 commitmentId = peer.commitmentId;
-        Commitment storage cc = s.commitments[commitmentId];
         require(commitmentId != bytes32(0x00), "Compute unit doesn't have commitment");
 
-        uint256 epoch = core.currentEpoch();
-        uint256 expiredEpoch = _expiredEpoch(cc);
-        require(epoch >= cc.info.startEpoch, "Capacity commitment is not started");
+        Commitment storage cc = s.commitments[commitmentId];
+        require(currentEpoch >= cc.info.startEpoch, "Capacity commitment is not started");
 
-        CCStatus status = _commitCommitmentSnapshot(cc, peer, epoch - 1, expiredEpoch);
+        uint256 expiredEpoch = _expiredEpoch(cc);
+        // #endregion
+
+        // #region commit snapshots
+        Snapshot.Cache memory snapshotCache = Snapshot.init(cc);
+        CCStatus status = _preCommitCommitmentSnapshot(cc, snapshotCache, peer, currentEpoch, expiredEpoch);
         if (status != CCStatus.Active) {
             revert CapacityCommitmentIsNotActive(status);
         }
 
-        // update global nonce
-        if (s.nonceEpochSnapshot != epoch) {
-            s.nonceEpochSnapshot = epoch;
+        _postCommitCommitmentSnapshot(cc, snapshotCache);
+        _commitUnitSnapshot(cc, cc.unitInfoById[unitId], currentEpoch, expiredEpoch, snapshotCache.current.failedEpoch);
+        // #endregion
+
+        // #region update global nonce
+        if (s.changedNonceEpoch != currentEpoch) {
+            s.changedNonceEpoch = currentEpoch;
             s.globalNonce = s.nextGlobalNonce;
         }
-        s.nextGlobalNonce = keccak256(abi.encodePacked(s.globalNonce, blockhash(block.number - 1)));
 
-        // save localUnitNonce
+        // pseudo-random next global nonce
+        s.nextGlobalNonce =
+            keccak256(abi.encodePacked(s.globalNonce, blockhash(block.number - 1), unitId, localUnitNonce, resultHash));
+        // #endregion
+
+        // #region save localUnitNonce
         bytes32 globalUnitNonce_ = keccak256(abi.encodePacked(s.globalNonce, unitId));
         require(!s.isProofSubmittedByUnit[globalUnitNonce_][localUnitNonce], "Proof is already submitted for this unit");
         s.isProofSubmittedByUnit[globalUnitNonce_][localUnitNonce] = true;
+        // #endregion
 
-        // save info about proof
-        UnitProofsInfo storage unitProofsInfo = cc.unitProofsInfoByUnit[unitId];
-        uint256 unitProofsCount = unitProofsInfo.proofsCountByEpoch[epoch];
-        unitProofsCount += 1;
-        if (unitProofsCount > maxProofsPerEpoch()) {
+        // #region save info about proof
+        UnitInfo storage unitInfo = cc.unitInfoById[unitId];
+
+        // load unitProofCount and add one because we submit new proof
+        uint256 unitProofCount = unitInfo.proofCountByEpoch[currentEpoch] + 1;
+        if (unitProofCount > maxProofsPerEpoch()) {
             revert TooManyProofs();
         }
 
         uint256 minRequierdCCProofs_ = minRequierdProofsPerEpoch();
-        if (unitProofsCount == minRequierdCCProofs_) {
-            cc.info.currentCUSuccessCount += 1;
-            _commitUnitSnapshot(cc, unitProofsInfo, epoch, expiredEpoch, cc.info.failedEpoch);
+        if (unitProofCount == minRequierdCCProofs_) {
+            // if proofCount is equal to minRequierdCCProofs, then we have one success for the current epoch
+            cc.progress.currentSuccessCount += 1;
 
-            uint256 totalSuccessProofs = s.rewardInfoByEpoch[epoch].totalSuccessProofs;
+            // if totalSuccessProofs is zero, then we save minRequierdCCProofs for this epoch.
+            // This information will be used for rewards calculation. But we need cache it becouse we can change minRequierdCCProofs for all system.
+            uint256 totalSuccessProofs = s.rewardInfoByEpoch[currentEpoch].totalSuccessProofs;
             if (totalSuccessProofs == 0) {
-                s.rewardInfoByEpoch[epoch].minRequierdCCProofs = minRequierdCCProofs_;
+                s.rewardInfoByEpoch[currentEpoch].minRequierdCCProofs = minRequierdCCProofs_;
             }
 
-            s.rewardInfoByEpoch[epoch].totalSuccessProofs = totalSuccessProofs + unitProofsCount;
-        } else if (unitProofsCount > minRequierdCCProofs_) {
-            s.rewardInfoByEpoch[epoch].totalSuccessProofs += 1;
+            s.rewardInfoByEpoch[currentEpoch].totalSuccessProofs = totalSuccessProofs + unitProofCount;
+        } else if (unitProofCount > minRequierdCCProofs_) {
+            s.rewardInfoByEpoch[currentEpoch].totalSuccessProofs += 1;
         }
 
-        unitProofsInfo.proofsCountByEpoch[epoch] = unitProofsCount;
+        unitInfo.proofCountByEpoch[currentEpoch] = unitProofCount;
+        // #endregion
 
-        // check proof
+        // #region check proof
         (bool success, bytes memory randomXResultHash) = randomXProxy().delegatecall(
             abi.encodeWithSelector(RandomXProxy.run.selector, globalUnitNonce_, localUnitNonce)
         );
@@ -413,36 +372,101 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         require(success, "RandomXProxy.run failed");
         require(randomXResultHash.toBytes32() == resultHash, "Proof is not valid");
         require(resultHash <= difficulty(), "Proof is bigger than difficulty");
+        // #endregion
 
         emit CommitmentStatsUpdated(
             commitmentId,
-            cc.info.totalCUFailCount,
-            cc.info.exitedUnitCount,
-            cc.info.activeUnitCount,
-            cc.info.nextAdditionalActiveUnitCount,
-            epoch
+            cc.progress.totalFailCount,
+            cc.finish.exitedUnitCount,
+            cc.progress.activeUnitCount,
+            cc.progress.nextAdditionalActiveUnitCount,
+            currentEpoch - 1
         );
 
         emit ProofSubmitted(commitmentId, unitId, localUnitNonce);
     }
 
-    function removeCUFromCC(bytes32 commitmentId, bytes32[] calldata unitIds) external {
+    function finishCommitment(bytes32 commitmentId) external {
+        // #region load contracts and storage
         IMarket market = core.market();
-
         CommitmentStorage storage s = _getCommitmentStorage();
-        Commitment storage cc = s.commitments[commitmentId];
+        // #endregion
+
+        // #region init and verify variables
         uint256 currentEpoch_ = core.currentEpoch();
+
+        Commitment storage cc = s.commitments[commitmentId];
+        uint256 expiredEpoch = _expiredEpoch(cc);
+
+        bytes32 peerId = cc.info.peerId;
+        IMarket.ComputePeer memory peer = market.getComputePeer(peerId);
+        // #endregion
+
+        // #region pre commit commitment snapshot for the previous epoch
+        Snapshot.Cache memory snapshotCache = Snapshot.init(cc);
+        CCStatus status = _preCommitCommitmentSnapshot(cc, snapshotCache, peer, currentEpoch_, expiredEpoch);
+        if (status != CCStatus.Inactive && status != CCStatus.Failed) {
+            revert CapacityCommitmentIsActive(status);
+        }
+        // #endregion
+
+        require(
+            status != CCStatus.Failed
+                || currentEpoch_ >= snapshotCache.current.failedEpoch + withdrawEpochesAfterFailed(),
+            "Capacity commitment wait withdraw epoches after failed"
+        );
+
+        uint256 unitCount = peer.unitCount;
+        require(cc.finish.exitedUnitCount == unitCount, "For finish commitment all units should be exited");
+
+        // #region post commit commitment snapshot
+        snapshotCache.current.status = CCStatus.Removed;
+        _postCommitCommitmentSnapshot(cc, snapshotCache);
+        market.setCommitmentId(peerId, bytes32(0x00));
+        // #endregion
+
+        // #region withdraw collateral
+        address payable delegator = payable(cc.info.delegator);
+        uint256 collateralPerUnit_ = cc.info.collateralPerUnit;
+
+        uint256 totalCollateral = collateralPerUnit_ * unitCount;
+        uint256 slashedCollateral = cc.progress.totalFailCount * collateralPerUnit_;
+        if (slashedCollateral > totalCollateral) {
+            slashedCollateral = totalCollateral;
+        }
+
+        totalCollateral -= slashedCollateral;
+
+        delegator.sendValue(totalCollateral);
+        // #endregion
+
+        emit CommitmentFinished(commitmentId);
+    }
+
+    function removeCUFromCC(bytes32 commitmentId, bytes32[] calldata unitIds) external {
+        // #region load contracts and storage
+        IMarket market = core.market();
+        CommitmentStorage storage s = _getCommitmentStorage();
+        // #endregion
+
+        // #region init and verify variables
+        uint256 currentEpoch_ = core.currentEpoch();
+
+        Commitment storage cc = s.commitments[commitmentId];
         uint256 expiredEpoch = _expiredEpoch(cc);
 
         bytes32 peerId = cc.info.peerId;
         IMarket.ComputePeer memory peer = market.getComputePeer(peerId);
 
-        CCStatus status = _commitCommitmentSnapshot(cc, peer, currentEpoch_ - 1, expiredEpoch);
+        Snapshot.Cache memory snapshotCache = Snapshot.init(cc);
+        CCStatus status = _preCommitCommitmentSnapshot(cc, snapshotCache, peer, currentEpoch_, expiredEpoch);
+        _postCommitCommitmentSnapshot(cc, snapshotCache);
         if (status != CCStatus.Inactive && status != CCStatus.Failed) {
             revert CapacityCommitmentIsActive(status);
         }
 
-        uint256 failedEpoch = cc.info.failedEpoch;
+        uint256 failedEpoch = snapshotCache.current.failedEpoch;
+        // #endregion
 
         for (uint256 i = 0; i < unitIds.length; i++) {
             bytes32 unitId = unitIds[i];
@@ -454,64 +478,60 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
                 market.returnComputeUnitFromDeal(unitId);
             }
 
-            bool success =
-                _commitUnitSnapshot(cc, cc.unitProofsInfoByUnit[unitId], currentEpoch_, expiredEpoch, failedEpoch);
+            bool success = _commitUnitSnapshot(cc, cc.unitInfoById[unitId], currentEpoch_, expiredEpoch, failedEpoch);
             if (success) {
-                cc.info.exitedUnitCount += 1;
+                cc.finish.exitedUnitCount += 1;
             }
         }
 
         emit CommitmentStatsUpdated(
             commitmentId,
-            cc.info.totalCUFailCount,
-            cc.info.exitedUnitCount,
-            cc.info.activeUnitCount,
-            cc.info.nextAdditionalActiveUnitCount,
+            cc.progress.totalFailCount,
+            cc.finish.exitedUnitCount,
+            cc.progress.activeUnitCount,
+            cc.progress.nextAdditionalActiveUnitCount,
             currentEpoch_
         );
     }
 
     function withdrawReward(bytes32 commitmentId) external {
-        CommitmentStorage storage s = _getCommitmentStorage();
-        Commitment storage cc = s.commitments[commitmentId];
-        uint256 epoch = core.currentEpoch();
-
+        // #region load contracts and storage
         IMarket market = core.market();
+        CommitmentStorage storage s = _getCommitmentStorage();
+        // #endregion
+
+        // #region init and verify variables
+        uint256 currentEpoch = core.currentEpoch();
+        Commitment storage cc = s.commitments[commitmentId];
         IMarket.ComputePeer memory peer = market.getComputePeer(cc.info.peerId);
+        // #endregion
 
-        _commitCommitmentSnapshot(cc, peer, core.currentEpoch() - 1, _expiredEpoch(cc));
-        if (cc.info.failedEpoch != 0) {
-            epoch = cc.info.failedEpoch;
+        // #region commit commitment snapshot for the previous epoch
+        Snapshot.Cache memory snapshotCache = Snapshot.init(cc);
+        CCStatus status = _preCommitCommitmentSnapshot(cc, snapshotCache, peer, currentEpoch, _expiredEpoch(cc));
+        _postCommitCommitmentSnapshot(cc, snapshotCache);
+        if (snapshotCache.current.failedEpoch != 0) {
+            currentEpoch = snapshotCache.current.failedEpoch;
         }
+        // #endregion
 
-        // mv find closest min vesting to offchain
-        (int256 index, uint256 length) = _findClosestMinVesting(cc.vestings, epoch);
-        require(index >= 0, "Nothing to withdraw");
-
-        Vesting storage vesting = cc.vestings[uint256(index)];
-        uint256 totalWithdrawnReward = cc.info.totalWithdrawnReward;
-        uint256 amount = vesting.cumulativeAmount - totalWithdrawnReward;
-
-        if (uint256(index) == (length - 1)) {
-            cc.vestings[cc.vestings.length - 1].cumulativeAmount = 0;
-            cc.info.totalWithdrawnReward = 0;
-        } else {
-            cc.info.totalWithdrawnReward = totalWithdrawnReward + amount;
-        }
-
+        // #region withdraw reward
+        address provider = market.getOffer(peer.offerId).provider;
+        uint256 amount = cc.vesting.withdraw(currentEpoch);
         uint256 delegatorReward = (amount * cc.info.rewardDelegatorRate) / PRECISION;
         uint256 providerReward = amount - delegatorReward;
 
         payable(cc.info.delegator).sendValue(delegatorReward);
-        payable(market.getOffer(peer.offerId).provider).sendValue(providerReward);
+        payable(provider).sendValue(providerReward);
+        // #endregion
 
         emit CommitmentStatsUpdated(
             commitmentId,
-            cc.info.totalCUFailCount,
-            cc.info.exitedUnitCount,
-            cc.info.activeUnitCount,
-            cc.info.nextAdditionalActiveUnitCount,
-            epoch
+            cc.progress.totalFailCount,
+            cc.finish.exitedUnitCount,
+            cc.progress.activeUnitCount,
+            cc.progress.nextAdditionalActiveUnitCount,
+            currentEpoch
         );
         emit RewardWithdrawn(commitmentId, amount);
     }
@@ -519,322 +539,323 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
 
     // region ----------------- Deal Callbacks -----------------
     function onUnitMovedToDeal(bytes32 commitmentId, bytes32 unitId) external {
+        // #region load contracts and storage
         IMarket market = core.market();
-
         CommitmentStorage storage s = _getCommitmentStorage();
+        // #endregion
+
+        // #region init and verify variables
+        uint256 currentEpoch_ = core.currentEpoch();
+
         Commitment storage cc = s.commitments[commitmentId];
         IMarket.ComputePeer memory peer = market.getComputePeer(cc.info.peerId);
+        UnitInfo storage unitInfo = cc.unitInfoById[unitId];
 
-        UnitProofsInfo storage unitProofsInfo = cc.unitProofsInfoByUnit[unitId];
-
-        uint256 epoch = core.currentEpoch() - 1;
         uint256 expiredEpoch = _expiredEpoch(cc);
-        CCStatus status = _commitCommitmentSnapshot(cc, peer, epoch, expiredEpoch);
+        // #endregion
+
+        // #region commit snapshot for unit and commitment
+        Snapshot.Cache memory snapshotCache = Snapshot.init(cc);
+        CCStatus status = _preCommitCommitmentSnapshot(cc, snapshotCache, peer, currentEpoch_, expiredEpoch);
+        _postCommitCommitmentSnapshot(cc, snapshotCache);
         if (status != CCStatus.Active) {
             revert CapacityCommitmentIsNotActive(status);
         }
 
-        _commitUnitSnapshot(cc, unitProofsInfo, epoch, expiredEpoch, cc.info.failedEpoch);
+        _commitUnitSnapshot(cc, unitInfo, currentEpoch_, expiredEpoch, snapshotCache.current.failedEpoch);
+        // #endregion
 
-        unitProofsInfo.isInactive = true;
-        cc.info.activeUnitCount--;
-
+        unitInfo.isInactive = true;
+        cc.progress.activeUnitCount--;
         _setActiveUnitCount(activeUnitCount() - 1);
 
         emit CommitmentStatsUpdated(
             commitmentId,
-            cc.info.totalCUFailCount,
-            cc.info.exitedUnitCount,
-            cc.info.activeUnitCount,
-            cc.info.nextAdditionalActiveUnitCount,
-            epoch
+            cc.progress.totalFailCount,
+            cc.finish.exitedUnitCount,
+            cc.progress.activeUnitCount,
+            cc.progress.nextAdditionalActiveUnitCount,
+            currentEpoch_ - 1
         );
         emit UnitDeactivated(commitmentId, unitId);
     }
 
     function onUnitReturnedFromDeal(bytes32 commitmentId, bytes32 unitId) external {
+        // #region load contracts and storage
         IMarket market = core.market();
-
         CommitmentStorage storage s = _getCommitmentStorage();
+        // #endregion
+
+        // #region init and verify variables
+        uint256 currentEpoch = core.currentEpoch();
+
         Commitment storage cc = s.commitments[commitmentId];
         IMarket.ComputePeer memory peer = market.getComputePeer(cc.info.peerId);
+        UnitInfo storage unitInfo = cc.unitInfoById[unitId];
 
-        UnitProofsInfo storage unitProofsInfo = cc.unitProofsInfoByUnit[unitId];
-
-        uint256 epoch = core.currentEpoch();
         uint256 expiredEpoch = _expiredEpoch(cc);
-        CCStatus status = _commitCommitmentSnapshot(cc, peer, epoch - 1, expiredEpoch);
+        // #endregion
 
-        unitProofsInfo.isInactive = false;
-        unitProofsInfo.lastMinProofsEpoch = epoch;
+        // #region commit snapshot for commitment
+        Snapshot.Cache memory snapshotCache = Snapshot.init(cc);
+        CCStatus status = _preCommitCommitmentSnapshot(cc, snapshotCache, peer, currentEpoch, expiredEpoch);
+        _postCommitCommitmentSnapshot(cc, snapshotCache);
+        // #endregion
 
-        emit UnitActivated(commitmentId, unitId, epoch + 1);
+        // #region activate unit
+        unitInfo.isInactive = false;
+        unitInfo.lastSnapshotEpoch = currentEpoch;
 
+        emit UnitActivated(commitmentId, unitId, currentEpoch + 1);
+        // #endregion
+
+        // if status is not active, then we don't need to update activeUnitCount
         if (status == CCStatus.Inactive || status == CCStatus.Failed) {
             return;
         }
 
-        cc.info.nextAdditionalActiveUnitCount += 1;
-
+        cc.progress.nextAdditionalActiveUnitCount += 1;
         _setActiveUnitCount(activeUnitCount() + 1);
 
-        market.setStartEpoch(unitId, epoch + 1);
+        market.setStartEpoch(unitId, currentEpoch + 1);
+
         emit CommitmentStatsUpdated(
             commitmentId,
-            cc.info.totalCUFailCount,
-            cc.info.exitedUnitCount,
-            cc.info.activeUnitCount,
-            cc.info.nextAdditionalActiveUnitCount,
-            epoch
+            cc.progress.totalFailCount,
+            cc.finish.exitedUnitCount,
+            cc.progress.activeUnitCount,
+            cc.progress.nextAdditionalActiveUnitCount,
+            currentEpoch
         );
     }
     // #endregion
 
     // #region ----------------- Internal View -----------------
-    function _isFailed(Commitment storage cc, uint256 currentEpoch_) private view returns (bool) {
-        IMarket market = core.market();
-
-        IMarket.ComputePeer memory peer = market.getComputePeer(cc.info.peerId);
-
-        (uint256 failedEpoch,,) = _failedEpoch(
-            maxFailedRatio(),
-            peer.unitCount,
-            cc.info.activeUnitCount,
-            cc.info.nextAdditionalActiveUnitCount,
-            cc.info.totalCUFailCount,
-            cc.info.snapshotEpoch
-        );
-
-        return currentEpoch_ >= failedEpoch;
-    }
-
-    /// @dev This method is mirrored in subgraph module: calculateNextFailedCCEpoch.
-    function _failedEpoch(
-        uint256 maxFailedRatio_,
-        uint256 unitCount_,
-        uint256 activeUnitCount_,
-        uint256 nextAdditionalActiveUnitCount_,
-        uint256 totalCUFailCount_,
-        uint256 lastSnapshotEpoch_
-    ) private pure returns (uint256 failedEpoch, uint256 remainingFailsForLastEpoch, uint256 maxFails) {
-        if (activeUnitCount_ == 0) {
-            return (type(uint256).max, 0, 0);
-        }
-
-        maxFails = maxFailedRatio_ * unitCount_;
-        uint256 remainingFails = 0;
-        if (totalCUFailCount_ < maxFails) {
-            remainingFails = maxFails - totalCUFailCount_;
-        }
-
-        if (activeUnitCount_ > remainingFails) {
-            failedEpoch = lastSnapshotEpoch_ + 1;
-        } else {
-            remainingFails = remainingFails - activeUnitCount_;
-            activeUnitCount_ += nextAdditionalActiveUnitCount_;
-
-            failedEpoch = 1 + lastSnapshotEpoch_ + (remainingFails / activeUnitCount_);
-        }
-
-        remainingFailsForLastEpoch = remainingFails % activeUnitCount_;
-    }
-
     function _expiredEpoch(Commitment storage cc) private view returns (uint256) {
         return cc.info.startEpoch + cc.info.duration;
     }
-
-    function _findClosestMinVesting(Vesting[] storage vestings, uint256 epoch)
-        internal
-        view
-        returns (int256 index, uint256 length)
-    {
-        length = vestings.length;
-        index = -1;
-
-        if (length == 0) {
-            return (index, length);
-        }
-
-        uint256 low = 0;
-        uint256 high = length - 1;
-
-        while (low <= high) {
-            uint256 mid = (low + high) / 2;
-
-            Vesting storage vesting = vestings[mid];
-            uint256 vestingEpoch = vesting.epoch;
-
-            if (epoch > vestingEpoch) {
-                index = int256(mid);
-                low = mid + 1;
-            } else if (epoch < vestingEpoch) {
-                if (mid == 0) {
-                    return (-1, length);
-                } else {
-                    high = mid - 1;
-                }
-            } else {
-                return (int256(mid), length);
-            }
-        }
-    }
     // #endregion
-
     // #region ----------------- Internal Mutable -----------------
-    function _commitUnitSnapshot(
+
+    function _preCommitCommitmentSnapshot(
         Commitment storage cc,
-        UnitProofsInfo storage unitProofsInfo,
-        uint256 epoch,
-        uint256 expiredEpoch,
-        uint256 ccFaildEpoch
-    ) internal returns (bool) {
-        CommitmentStorage storage s = _getCommitmentStorage();
-
-        if (unitProofsInfo.isInactive) {
-            return false;
-        }
-
-        uint256 prevEpoch = epoch - 1;
-        if (prevEpoch > expiredEpoch) {
-            prevEpoch = expiredEpoch;
-        }
-
-        if (ccFaildEpoch != 0 && prevEpoch > ccFaildEpoch) {
-            prevEpoch = ccFaildEpoch;
-        }
-
-        uint256 lastMinProofsEpoch = unitProofsInfo.lastMinProofsEpoch;
-        if (lastMinProofsEpoch == 0) {
-            lastMinProofsEpoch = cc.info.startEpoch - 1;
-        }
-
-        if (prevEpoch <= lastMinProofsEpoch) {
-            return false;
-        }
-
-        uint256 slashedCollateral = unitProofsInfo.slashedCollateral;
-        uint256 collateralPerUnit_ = cc.info.collateralPerUnit;
-        uint256 currentAmount = collateralPerUnit_ - slashedCollateral;
-
-        uint256 count = prevEpoch - lastMinProofsEpoch;
-        uint256 slashingRate_ = slashingRate();
-        if (currentAmount > 0) {
-            slashedCollateral += (collateralPerUnit_ * count * slashingRate_) / PRECISION;
-
-            if (prevEpoch == ccFaildEpoch) {
-                uint256 remainingFailsForLastEpoch = cc.info.remainingFailsForLastEpoch;
-                if (remainingFailsForLastEpoch > 0) {
-                    slashedCollateral += (collateralPerUnit_ * slashingRate_) / PRECISION;
-                    cc.info.remainingFailsForLastEpoch = remainingFailsForLastEpoch - 1;
-                }
-            }
-
-            unitProofsInfo.slashedCollateral = slashedCollateral;
-        }
-
-        unitProofsInfo.lastMinProofsEpoch = prevEpoch;
-
-        RewardInfo storage rewardInfo = s.rewardInfoByEpoch[lastMinProofsEpoch];
-        uint256 reward = 0;
-
-        uint256 totalSuccessProofs = rewardInfo.totalSuccessProofs;
-
-        if (totalSuccessProofs == 0) {
-            reward = 0;
-        } else {
-            reward = (
-                getRewardPool(lastMinProofsEpoch)
-                    * ((unitProofsInfo.proofsCountByEpoch[lastMinProofsEpoch] * PRECISION) / rewardInfo.totalSuccessProofs)
-            ) / PRECISION;
-        }
-
-        uint256 vestingLength = cc.vestings.length;
-        uint256 cumulativeAmount = 0;
-        if (vestingLength > 0) {
-            cumulativeAmount = cc.vestings[vestingLength - 1].cumulativeAmount;
-        }
-
-        uint256 vestingPeriodDuration = vestingPeriodDuration();
-        uint256 vestingPeriodCount = vestingPeriodCount();
-        uint256 epoch = prevEpoch;
-        for (uint256 i = 0; i < vestingPeriodCount; i++) {
-            cumulativeAmount += reward;
-            epoch += vestingPeriodDuration;
-            cc.vestings.push(Vesting({epoch: epoch, cumulativeAmount: cumulativeAmount}));
-        }
-
-        delete unitProofsInfo.proofsCountByEpoch[lastMinProofsEpoch];
-
-        return true;
-    }
-
-    function _commitCommitmentSnapshot(
-        Commitment storage cc,
+        Snapshot.Cache memory snapshotCache,
         IMarket.ComputePeer memory peer,
-        uint256 epoch,
+        uint256 currentEpoch_,
         uint256 expiredEpoch
-    ) private returns (CCStatus) {
-        CCStatus storageStatus = cc.info.status;
-        if (storageStatus != CCStatus.Active) {
+    ) private view returns (CCStatus) {
+        CCStatus storageStatus = snapshotCache.current.status;
+        uint256 lastSnapshotEpoch = snapshotCache.current.snapshotEpoch;
+        uint256 snapshotEpoch = currentEpoch_ - 1;
+
+        if (cc.info.startEpoch == 0) {
+            return CCStatus.WaitDelegation;
+        } else if (cc.info.startEpoch > currentEpoch_) {
+            return CCStatus.WaitStart;
+        }
+
+        // only active status can have a snapshot and be changed because with other statuses CC can't work
+        // also if snapshotEpoch is less or equal to lastSnapshotEpoch, then we have snapshot for this epoch
+        if (storageStatus != CCStatus.Active || snapshotEpoch <= lastSnapshotEpoch) {
             return storageStatus;
         }
 
-        uint256 snapshotEpoch = cc.info.snapshotEpoch;
-        require(epoch >= snapshotEpoch, "Epoch is too early");
-
         CCStatus newStatus = CCStatus.Active;
-        if (epoch > expiredEpoch) {
-            epoch = expiredEpoch;
+        // if the snapshotEpoch is greater than expiredEpoch, then you need to take a snapshot only up to expiredEpoch
+        if (snapshotEpoch >= expiredEpoch) {
+            snapshotEpoch = expiredEpoch;
             newStatus = CCStatus.Inactive;
         }
 
-        uint256 activeUnitCount_ = cc.info.activeUnitCount;
-        uint256 epochCount = epoch - snapshotEpoch;
-        uint256 reqSuccessCount = activeUnitCount_ * epochCount;
-        uint256 currentCUSuccessCount = cc.info.currentCUSuccessCount;
-        uint256 totalFailCountByPeriod = 0;
-        if (currentCUSuccessCount < reqSuccessCount) {
-            totalFailCountByPeriod = reqSuccessCount - currentCUSuccessCount;
-        }
-
-        uint256 unitCount = peer.unitCount;
+        // #region init variables
         uint256 maxFailedRatio_ = maxFailedRatio();
+        uint256 activeUnitCount_ = snapshotCache.current.activeUnitCount;
+        uint256 unitCount = peer.unitCount;
+        uint256 totalFailCount = snapshotCache.current.totalFailCount;
+        uint256 currentSuccessCount = snapshotCache.current.currentSuccessCount;
 
-        uint256 totalCUFailCount = cc.info.totalCUFailCount;
-        totalCUFailCount += totalFailCountByPeriod;
+        // maxFailCount is a number of epoches when units not send proofs
+        // if on unit not send proof per one epoch, it's mean that it's one fail
+        // maxFailedRatio is the ratio of failed attempts for all units
+        uint256 maxFailCount = maxFailedRatio_ * unitCount;
+        uint256 snapshotEpochCount = snapshotEpoch - snapshotEpoch;
+        uint256 requiredSuccessCount = activeUnitCount_ * snapshotEpochCount;
+        // #endregion
 
-        uint256 nextAdditionalActiveUnitCount = cc.info.nextAdditionalActiveUnitCount;
+        // #region calculate fail count
 
-        (uint256 failedEpoch, uint256 remainingFailsForLastEpoch, uint256 maxFails) = _failedEpoch(
-            maxFailedRatio_, unitCount, activeUnitCount_, nextAdditionalActiveUnitCount, totalCUFailCount, snapshotEpoch
-        );
-
-        if (nextAdditionalActiveUnitCount > 0) {
-            cc.info.activeUnitCount += nextAdditionalActiveUnitCount;
-            cc.info.nextAdditionalActiveUnitCount = 0;
+        // When unit send min proof per one epoch, it's a one success. successCount is a number of success for all units in the snapshot period
+        // if successCount is less than requiredSuccessCount, then some units didn't send min proof per few epoches
+        uint256 snapshotTotalFailCount = 0;
+        if (currentSuccessCount < requiredSuccessCount) {
+            // snapshotTotalFailCount is a number of fails for all units in the snapshot period
+            snapshotTotalFailCount = requiredSuccessCount - currentSuccessCount;
+            totalFailCount += snapshotTotalFailCount;
         }
 
-        if (epoch >= failedEpoch) {
-            totalCUFailCount = maxFails;
-
-            cc.info.failedEpoch = failedEpoch;
-            cc.info.remainingFailsForLastEpoch = remainingFailsForLastEpoch;
-            cc.info.withdrawCCEpochAfterFailed = failedEpoch + withdrawEpochesAfterFailed();
-
+        // if totalFailCount_ is more than maxFailCount, then CC is failed
+        if (totalFailCount >= maxFailCount) {
+            totalFailCount = maxFailCount;
             newStatus = CCStatus.Failed;
+
+            // numberOfFillFailedEpoch is a number of epochs when units not send proofs
+            uint256 numberOfFillFailedEpoch = snapshotTotalFailCount / activeUnitCount_;
+            uint256 remainingFailedUnitsInLastEpoch = snapshotTotalFailCount % activeUnitCount_;
+            // Math.ceil(numberOfFillFailedEpoch)
+            // if remainingFailedUnitsInLastEpoch is not zero, then we should add one to numberOfFillFailedEpoch becouse the last epoch is not full
+            if (remainingFailedUnitsInLastEpoch != 0) {
+                numberOfFillFailedEpoch += 1;
+            }
+
+            // failedEpoch is a epoche number when the commitment was failed
+            // if snapshotEpoch is more than one inactive epoch before last Snapshot Epoch, then means between lastSnapshotEpoch and failed Epoch we have few epochs
+
+            snapshotCache.current.failedEpoch = lastSnapshotEpoch + numberOfFillFailedEpoch;
+            snapshotCache.current.remainingFailedUnitsInLastEpoch = remainingFailedUnitsInLastEpoch;
         }
 
-        cc.info.totalCUFailCount = totalCUFailCount;
-        cc.info.currentCUSuccessCount = 0;
-        cc.info.snapshotEpoch = epoch;
+        snapshotCache.current.totalFailCount = totalFailCount;
+        // #endregion
 
+        // #region update activeUnitCount
+        // when unit return from deal, unit need to wait one epoch before it will be active
+        // nextAdditionalActiveUnitCount is a number of units that will be active in the next epoch
+        uint256 nextAdditionalActiveUnitCount = snapshotCache.current.nextAdditionalActiveUnitCount;
+
+        // update activeUnitCount if it's needed
+        if (nextAdditionalActiveUnitCount > 0) {
+            snapshotCache.current.activeUnitCount += nextAdditionalActiveUnitCount;
+            snapshotCache.current.nextAdditionalActiveUnitCount = 0;
+        }
+
+        // #endregion
+
+        // #region update status
         if (newStatus != CCStatus.Active) {
-            cc.info.activeUnitCount = 0;
-            _setActiveUnitCount(activeUnitCount() - activeUnitCount_);
-            cc.info.status = newStatus;
+            snapshotCache.current.activeUnitCount = 0;
+            //TODO: _setActiveUnitCount(activeUnitCount() - activeUnitCount_);
+            snapshotCache.current.status = newStatus;
         }
+        // #endregion
+
+        // #region update progress
+        snapshotCache.current.snapshotEpoch = snapshotEpoch;
+        snapshotCache.current.currentSuccessCount = 0;
+        // #endregion
 
         return newStatus;
+    }
+
+    function _postCommitCommitmentSnapshot(Commitment storage cc, Snapshot.Cache memory snapshotCache) internal {
+        uint256 activeUnitCount_ = snapshotCache.current.activeUnitCount;
+        uint256 initialActiveUnitCount_ = snapshotCache.initial.activeUnitCount;
+
+        if (activeUnitCount_ == 0 && initialActiveUnitCount_ > 0) {
+            _setActiveUnitCount(activeUnitCount() - initialActiveUnitCount_);
+        }
+
+        snapshotCache.save(cc);
+    }
+
+    function _commitUnitSnapshot(
+        Commitment storage cc,
+        UnitInfo storage unitInfo,
+        uint256 currentEpoch,
+        uint256 expiredEpoch,
+        uint256 faildEpoch
+    ) internal returns (bool) {
+        CommitmentStorage storage s = _getCommitmentStorage();
+        uint256 snapshotEpoch = currentEpoch - 1;
+
+        // #region verify args
+        // if unit is inactive, then no need to do anything because it's means that unit is in deal
+        if (unitInfo.isInactive) {
+            return false;
+        }
+
+        // if snapshotEpoch is more than expiredEpoch, then we should use expiredEpoch because it means that the commitment is expired before we start making a snapshot
+        if (snapshotEpoch > expiredEpoch) {
+            snapshotEpoch = expiredEpoch;
+        }
+
+        // if faildEpoch is more than 0 and snapshotEpoch is more than faildEpoch, then we should use faildEpoch because it means that the commitment is failed before we start making a snapshot
+        if (faildEpoch != 0 && snapshotEpoch > faildEpoch) {
+            snapshotEpoch = faildEpoch;
+        }
+
+        // if lastMinProofsEpoch is zero then we should use startEpoch - 1 because (startEpoch - 1) is the first 'snapshoted' epoch
+        uint256 lastSnapshotEpoch = unitInfo.lastSnapshotEpoch;
+        if (lastSnapshotEpoch == 0) {
+            lastSnapshotEpoch = cc.info.startEpoch - 1;
+        }
+
+        // if snapshotEpoch is less or equal to lastSnapshotEpoch, then we should return false because it means that we already made a snapshot for this epoch
+        if (snapshotEpoch <= lastSnapshotEpoch) {
+            return false;
+        }
+        // #endregion
+
+        // #region slashing
+        uint256 slashedCollateral = unitInfo.slashedCollateral;
+        uint256 collateralPerUnit_ = cc.info.collateralPerUnit;
+        uint256 currentCollateral = collateralPerUnit_ - slashedCollateral;
+
+        // slashingRate is defined by PRECISION
+        // Example: if real slashing rate is 0.1% then slashingRate_ = 0.1 * PRECISION
+        uint256 slashingRate_ = slashingRate();
+
+        // gapsCount is the number of epochs between lastSnapshotEpoch and snapshotEpoch. In this period unit didn't submit any proof
+        uint256 gapsCount = snapshotEpoch - lastSnapshotEpoch;
+        if (unitInfo.proofCountByEpoch[snapshotEpoch] >= minRequierdProofsPerEpoch()) {
+            gapsCount--;
+        }
+
+        // if currentCollateral is more than 0, then we should slash
+        if (currentCollateral > 0 && gapsCount > 0) {
+            uint256 remainingFailedUnitsInLastEpoch = cc.finish.remainingFailedUnitsInLastEpoch;
+
+            if (snapshotEpoch == faildEpoch && remainingFailedUnitsInLastEpoch != 0) {
+                uint256 filledRemainingFailedUnitsInLastEpoch = cc.finish.filledRemainingFailedUnitsInLastEpoch;
+                if (filledRemainingFailedUnitsInLastEpoch >= remainingFailedUnitsInLastEpoch) {
+                    gapsCount -= 1;
+                } else {
+                    cc.finish.filledRemainingFailedUnitsInLastEpoch = filledRemainingFailedUnitsInLastEpoch + 1;
+                }
+            }
+
+            slashedCollateral += (gapsCount * collateralPerUnit_ * slashingRate_) / PRECISION;
+            if (slashedCollateral > currentCollateral) {
+                slashedCollateral = currentCollateral;
+            }
+            unitInfo.slashedCollateral = slashedCollateral;
+        }
+        // #endregion
+
+        // #region calculate reward for the last snapshoted epoch
+        uint256 lastSnapshotProofCount = unitInfo.proofCountByEpoch[lastSnapshotEpoch];
+        uint256 minRequierdProofsPerEpoch_ = minRequierdProofsPerEpoch();
+        if (lastSnapshotProofCount < minRequierdProofsPerEpoch_) {
+            return true;
+        }
+
+        RewardInfo storage rewardInfo = s.rewardInfoByEpoch[lastSnapshotEpoch];
+        uint256 totalSuccessProofs = rewardInfo.totalSuccessProofs;
+        if (totalSuccessProofs == 0) {
+            return true;
+        }
+
+        uint256 reward = (
+            getRewardPool(lastSnapshotEpoch) * ((lastSnapshotProofCount * PRECISION) / rewardInfo.totalSuccessProofs)
+        ) / PRECISION;
+
+        cc.vesting.add(reward, lastSnapshotEpoch, vestingPeriodDuration(), vestingPeriodCount());
+
+        delete unitInfo.proofCountByEpoch[lastSnapshotEpoch];
+        // #endregion
+
+        unitInfo.lastSnapshotEpoch = snapshotEpoch;
+
+        return true;
     }
     // #endregion
 }

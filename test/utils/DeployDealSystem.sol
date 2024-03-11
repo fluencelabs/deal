@@ -41,13 +41,14 @@ library DeployDealSystem {
     uint256 public constant DEFAULT_MIN_DURATION = 1 days;
     uint256 public constant DEFAULT_MIN_REWARD_PER_EPOCH = 10000;
     uint256 public constant DEFAULT_MAX_REWARD_PER_EPOCH = 1;
-    uint256 public constant DEFAULT_VESTING_PERIOD_DURATION = 1;
+    uint256 public constant DEFAULT_VESTING_PERIOD_DURATION = 10;
     uint256 public constant DEFAULT_VESTING_PERIOD_COUNT = 6;
     uint256 public constant DEFAULT_SLASHING_RATE = 100000; // 0.01 = 1% = 100000
     uint256 public constant DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH = 3;
     uint256 public constant DEFAULT_MAX_PROOFS_PER_EPOCH = 5;
     uint256 public constant DEFAULT_WITHDRAW_EPOCHES_AFTER_FAILED = 2;
     uint256 public constant DEFAULT_MAX_FAILED_RATIO = 10;
+    uint256 public constant DEFAULT_INIT_REWARD_POOL = 1000 ether;
     bool public constant DEFAULT_IS_WHITELIST_ENABLED = false;
     bytes32 public constant DEFAULT_DIFFICULTY_TARGET =
         0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
@@ -109,6 +110,7 @@ library DeployDealSystem {
                         DEFAULT_IS_WHITELIST_ENABLED,
                         DEFAULT_INIT_GLOBAL_NONCE,
                         DEFAULT_DIFFICULTY_TARGET,
+                        DEFAULT_INIT_REWARD_POOL,
                         new RandomXProxy()
                     )
                 )

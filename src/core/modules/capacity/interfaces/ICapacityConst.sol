@@ -24,18 +24,16 @@ interface ICapacityConst {
 
     // ------------------ Types ------------------
     enum ConstantType {
-        USDCollateralPerUnit,
-        USDTargetRevenuePerEpoch,
         MinDuration,
+        USDCollateralPerUnit,
+        SlashingRate,
+        WithdrawEpochesAfterFailed,
+        MaxFailedRatio,
+        USDTargetRevenuePerEpoch,
         MinRewardPerEpoch,
         MaxRewardPerEpoch,
-        VestingPeriodDuration,
-        VestingPeriodCount,
-        SlashingRate,
         MinRequierdProofsPerEpoch,
-        MaxProofsPerEpoch,
-        WithdrawEpochesAfterFailed,
-        MaxFailedRatio
+        MaxProofsPerEpoch
     }
 
     // #region ------------------ External View Functions ------------------
@@ -47,9 +45,6 @@ interface ICapacityConst {
 
     /// @dev Returns the usd collateral per compute for creating CC
     function usdCollateralPerUnit() external view returns (uint256);
-
-    /// @dev Returns the target revenue in flt value per epoch
-    function fltTargetRevenuePerEpoch() external view returns (uint256);
 
     /// @dev Returns the target revenue in usd value per epoch
     function usdTargetRevenuePerEpoch() external view returns (uint256);
