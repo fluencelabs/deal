@@ -35,7 +35,8 @@ export function parseEffectors(effectors: Array<AppCID>): Array<string> {
  >>> changetype<AppCID>(event.params.effector)
  */
 export function getEffectorCID(effectorTuple: AppCID): string {
-  const cid = effectorTuple.prefixes.toHexString() + effectorTuple.hash.toHexString();
+  // Also rm Ox prefix.
+  const cid = effectorTuple.prefixes.toHexString().slice(2) + effectorTuple.hash.toHexString().slice(2);
   log.info("[getEffectorCID] Extract CID from effector: {}", [cid]);
   return cid;
 }
