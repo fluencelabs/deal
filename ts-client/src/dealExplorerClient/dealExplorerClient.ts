@@ -1082,6 +1082,33 @@ export class DealExplorerClient {
     };
   }
 
+  // @notice [Figma] Peer Id. List of compute units (currently not in Figma).
+  async getComputeUnitsByPeer(
+    peerId: string,
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: ComputeUnitsOrderBy = "createdAt",
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
+  ): Promise<ComputeUnitsWithCCStatusListView> {
+    await this._init();
+
+    // To get data of CUs by capacity commitment we filter CUs by peer id of the CC.
+    const data = await this._indexerClient.getComputeUnits({
+      filters: {
+        peer_: { id: peerId },
+      },
+      offset,
+      limit,
+      orderBy,
+      orderType,
+    });
+
+    return {
+      total: null,
+      data: serializeComputeUnitsWithStatus(data.computeUnits),
+    };
+  }
+
   // @notice [Figma] Capacity Commitment. Proofs.
   async getProofsByCapacityCommitment(
     capacityCommitmentId: string,
