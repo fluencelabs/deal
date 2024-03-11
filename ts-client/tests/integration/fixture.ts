@@ -63,12 +63,8 @@ export function getMarketExampleFixture(paymentToken: string): MarketExample {
             providerAddress: "",
             peerIds: [ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32))],
             computeUnitsPerPeers: [
-                [
-                    ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),
-                ],
-                [
-                    ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)),
-                ],
+                  new Array(20).fill("0").map(() => {return ethers.hexlify(ethers.randomBytes(32))}),
+                  new Array(20).fill("0").map(() => {return ethers.hexlify(ethers.randomBytes(32))}),
             ],
             effectors,
             minPricePerEpoch: minPricePerEpoch.toString(),
@@ -80,8 +76,8 @@ export function getMarketExampleFixture(paymentToken: string): MarketExample {
             providerAddress: "",
             peerIds: [ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32))],
             computeUnitsPerPeers: [
-                [ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32))],
-                [ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32))],
+                new Array(4).fill("0").map(() => {return ethers.hexlify(ethers.randomBytes(32))}),
+                new Array(4).fill("0").map(() => {return ethers.hexlify(ethers.randomBytes(32))}),
             ],
             effectors,
             minPricePerEpoch: minPricePerEpoch.toString(),
@@ -93,8 +89,8 @@ export function getMarketExampleFixture(paymentToken: string): MarketExample {
             providerAddress: "",
             peerIds: [ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32))],
             computeUnitsPerPeers: [
-                [ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32))],
-                [ethers.hexlify(ethers.randomBytes(32)), ethers.hexlify(ethers.randomBytes(32))],
+                new Array(2).fill("0").map(() => {return ethers.hexlify(ethers.randomBytes(32))}),
+                new Array(2).fill("0").map(() => {return ethers.hexlify(ethers.randomBytes(32))}),
             ],
             effectors,
             minPricePerEpoch: minPricePerEpoch.toString(),
