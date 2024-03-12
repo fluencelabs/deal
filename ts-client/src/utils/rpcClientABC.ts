@@ -1,5 +1,5 @@
 import type { Interface, Result, ethers } from "ethers";
-import { IMulticall3__factory, type IMulticall3 } from "../../index.js";
+import { IMulticall3__factory, type IMulticall3 } from "../index.js";
 
 export type Multicall3ContractCall = {
   target: string;
@@ -13,7 +13,7 @@ export type TxResultsConverter = (result: Result | null, ...opt: any[]) => any;
  * @description Client to be inherited from to work with Multicall3 contract to perform batch calls.
  * @dev For more info: https://github.com/mds1/multicall/tree/main.
  */
-export abstract class Multicall3ContractClient {
+export abstract class Multicall3ContractClientABC {
   _caller: ethers.Provider | ethers.Signer;
   _multicall3Contract: IMulticall3;
   constructor(

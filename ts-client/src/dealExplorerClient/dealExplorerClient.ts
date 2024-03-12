@@ -61,7 +61,7 @@ import type {
 import { DealClient } from "../client/client.js";
 import type { ContractsENV } from "../client/config.js";
 import type { BasicPeerFragment } from "./indexerClient/queries/offers-query.generated.js";
-import { DealRpcClient } from "./rpcClients/index.js";
+import { DealRpcClient } from "./rpcClient/index.js";
 import {
   calculateEpoch,
   DEFAULT_ORDER_TYPE,
