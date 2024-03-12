@@ -3,7 +3,7 @@ import type {
   Sdk as OffersSdk,
 } from "./queries/offers-query.generated.js";
 import { getSdk as getOffersSdk } from "./queries/offers-query.generated.js";
-import { IndexerClientABC } from "../../indexerClient/indexerClientABC.js";
+import { IndexerClientABC } from "../../indexerClientABC/indexerClientABC.js";
 import type { ContractsENV } from "../../client/config.js";
 
 export class IndexerClient extends IndexerClientABC {

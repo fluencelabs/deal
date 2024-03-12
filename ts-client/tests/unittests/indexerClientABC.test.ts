@@ -1,6 +1,6 @@
 import {describe, expect, test} from "vitest";
 import * as fs from "fs";
-import {getIndexerUrl} from "../../src/indexerClient/config";
+import {getIndexerUrl} from "../../src/indexerClientABC/config";
 
 function getDeploymentPath(stand: string) {
   return `../subgraph/deployments/${stand}.txt`
@@ -18,7 +18,7 @@ function checkFluenceEnvConfig(stand: string) {
   }
   const allSavedSubgraphUrls = fs.readFileSync(getDeploymentPath(stand), "utf8").split('\n').filter((url) => url.length > 0)
   const lastSavedSubgraphUrl = allSavedSubgraphUrls[allSavedSubgraphUrls.length - 1];
-  expect(getIndexerUrl(stand), "Possibly you forgot to update indexerClient/config.ts with the last subgraph URL.").toBe(lastSavedSubgraphUrl)
+  expect(getIndexerUrl(stand), "Possibly you forgot to update indexerClientABC/config.ts with the last subgraph URL.").toBe(lastSavedSubgraphUrl)
 }
 
 describe("#configs", () => {
