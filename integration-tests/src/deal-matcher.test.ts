@@ -159,7 +159,7 @@ describe("#getMatchedOffersByDealId", () => {
         minWorkers: BigInt(minWorkersDeal),
         targetWorkers: BigInt(targetWorkersDeal),
       });
-      const dealId = lastDealCreated?.args.deal;
+      const dealId = lastDealCreated.args.deal;
       assert(dealId, "Deal ID is not defined");
 
       await skipEpoch(provider, epochDuration, 1);

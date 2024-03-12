@@ -168,6 +168,13 @@ export class DealExplorerClient {
     );
     this._capacityContract = await this._dealContractsClient.getCapacity();
     this._capacityContractAddress = await this._capacityContract.getAddress();
+    this._capacityContractAddress = await this._capacityContract.getAddress();
+    this._capacityContractAddress = await this._capacityContract.getAddress();
+    this._capacityContractAddress = await this._capacityContract.getAddress();
+    this._capacityContractAddress = await this._capacityContract.getAddress();
+    this._capacityContractAddress = await this._capacityContract.getAddress();
+    this._capacityContractAddress = await this._capacityContract.getAddress();
+    this._capacityContractAddress = await this._capacityContract.getAddress();
 
     // Init constants from indexer.
     // TODO: add cache.
@@ -636,7 +643,10 @@ export class DealExplorerClient {
         await this._dealRpcClient!.getFreeBalanceDealBatch([dealId])
       )[0];
       const effectors = serializeEffectors(deal.effectors);
-      const { whitelist, blacklist } = serializeDealProviderAccessLists(deal.providersAccessType, deal.providersAccessList);
+      const { whitelist, blacklist } = serializeDealProviderAccessLists(
+        deal.providersAccessType,
+        deal.providersAccessList,
+      );
       res = {
         ...serializeDealsShort(deal, { dealStatus, freeBalance }),
         pricePerWorkerEpoch: tokenValueToRounded(
@@ -891,7 +901,9 @@ export class DealExplorerClient {
       providerId: peer.provider.id,
       offerId: peer.offer.id,
       computeUnitsInDeal: peer.computeUnitsInDeal,
-      computeUnitsInCapacityCommitment: peer.currentCapacityCommitment ? peer.currentCapacityCommitment?.activeUnitCount : 0,
+      computeUnitsInCapacityCommitment: peer.currentCapacityCommitment
+        ? peer.currentCapacityCommitment?.activeUnitCount
+        : 0,
       computeUnitsTotal: peer.computeUnitsTotal,
     };
   }

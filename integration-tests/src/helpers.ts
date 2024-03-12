@@ -15,6 +15,7 @@ export async function registerMarketOffer(
   );
 
   console.log("Register Provider by setProviderInfo...");
+  const appCID = randomCID();
   const setProviderInfoTx = await market.setProviderInfo(
     "CI_PROVIDER",
     randomCID(),
@@ -42,6 +43,7 @@ export async function registerMarketOffer(
   assert(lastMarketOffer, "There is no market offer");
 
   return {
+    appCID,
     peers: registeredOffer.peers,
     offerId: lastMarketOffer.args.offerId,
     effectors: lastMarketOffer.args.effectors.map((effector) => ({

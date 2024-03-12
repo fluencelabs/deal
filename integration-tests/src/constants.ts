@@ -11,4 +11,11 @@ export enum CCStatus {
   Removed,
 }
 
+export enum DealStatus {
+  INSUFFICIENT_FUNDS,
+  ACTIVE,
+  ENDED,
+  NOT_ENOUGH_WORKERS,
+}
+
 export const CC_DURATION_DEFAULT = 1000n;

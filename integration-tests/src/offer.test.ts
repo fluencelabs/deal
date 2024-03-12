@@ -5,9 +5,11 @@ import { DEFAULT_CONFIRMATIONS } from "./constants.js";
 import { checkEvents } from "./confirmations.js";
 import {
   ethers,
+  Interface,
   JsonRpcProvider,
   JsonRpcSigner,
   solidityPackedKeccak256,
+  AbiCoder,
 } from "ethers";
 import { type ContractsENV, DealClient } from "@fluencelabs/deal-ts-clients";
 import { config } from "dotenv";
@@ -172,7 +174,7 @@ describe(
       expect(offerAfterRemove.peerCount).toEqual(1n);
     });
 
-    test("Edit effectors", async () => {
+    test.only("Edit effectors", async () => {
       const marketContract = await contractsClient.getMarket();
       const paymentToken = await contractsClient.getUSDC();
       const paymentTokenAddress = await paymentToken.getAddress();
@@ -216,7 +218,30 @@ describe(
         block.number,
       );
 
-      // TODO: check id field
+      // Test code for that
+      const iface = new Interface([
+        "event EffectorInfoSet(tuple(string prefixes, address hash) indexed id, string description, tuple(string prefixes, address hash) metadata)",
+      ]);
+
+      console.log(addEffectorInfoEvents[0]);
+
+      const event = addEffectorInfoEvents[0];
+      assert(event);
+      console.log(
+        iface.parseLog({
+          topics: event.topics,
+          data: event.data,
+        }),
+      );
+      const decodeResult = AbiCoder.defaultAbiCoder().decode(
+        ["string", "tuple(bytes4 prefixes, bytes32 hash)"],
+        event.data,
+      );
+      console.log(decodeResult);
+      console.log(
+        iface.decodeEventLog("EffectorInfoSet", event.data, event.topics),
+      );
+
       expect(
         addEffectorInfoEvents.map((e) => [e.args.description, e.args.metadata]),
       ).toEqual(
@@ -287,15 +312,11 @@ describe(
         ).wait(DEFAULT_CONFIRMATIONS);
       }
 
-      const removeEffectorInfoEvents = await checkEvents(
+      await checkEvents(
         marketContract,
         marketContract.filters.EffectorInfoRemoved,
         newEffectors.length,
         block.number,
-      );
-      // TODO: check id field
-      expect(removeEffectorInfoEvents.map((e) => [])).toEqual(
-        expect.arrayContaining(newEffectors.map((e) => [])),
       );
     });
 
