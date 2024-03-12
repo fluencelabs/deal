@@ -1,4 +1,4 @@
-import type { ContractsENV } from "../client/config.js";
+import type { ContractsENV } from "../../client/config.js";
 
 // TODO: b/w deployed contracts and deployed subgraphs to the contracts should be
 //  match somehow. Currently, this match is hardcoded in the file (not good).
