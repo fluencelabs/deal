@@ -8,7 +8,7 @@ import {
   getSdk as getDealsSdk,
   type Sdk as DealsSdk,
 } from "./queries/deals-query.generated.js";
-import { IndexerClientABC } from "../../indexerClientABC/indexerClientABC.js";
+import { IndexerClientABC } from "../../utils/indexerClientABC/indexerClientABC.js";
 import type { ContractsENV } from "../../client/config.js";
 
 export class IndexerClient extends IndexerClientABC {
