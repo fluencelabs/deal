@@ -134,6 +134,10 @@ jobs:
         run: npm run build
         working-directory: ts-client
 
+      - name: Run Unittests in ts-client package
+        run: npm test unittests
+        working-directory: ts-client
+
       - name: Install packed ts-client
         run: npm i
         working-directory: integration-tests

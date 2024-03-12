@@ -33,7 +33,7 @@ export type SubmittedProofsQueryQueryVariables = Types.Exact<{
 }>;
 
 
-export type SubmittedProofsQueryQuery = { __typename?: 'Query', submittedProofs: Array<{ __typename?: 'SubmittedProof', id: string, createdAt: any, createdEpoch: any, capacityCommitment: { __typename?: 'CapacityCommitment', id: string, startEpoch: any, endEpoch: any }, computeUnit: { __typename?: 'ComputeUnit', id: string }, peer: { __typename?: 'Peer', id: string } }>, graphNetworks: Array<{ __typename?: 'GraphNetwork', proofsTotal: any }> };
+export type SubmittedProofsQueryQuery = { __typename?: 'Query', submittedProofs: Array<{ __typename?: 'SubmittedProof', id: string, createdAt: any, createdEpoch: any, capacityCommitment: { __typename?: 'CapacityCommitment', id: string, startEpoch: any, endEpoch: any }, computeUnit: { __typename?: 'ComputeUnit', id: string }, peer: { __typename?: 'Peer', id: string, provider: { __typename?: 'Provider', id: string } } }>, graphNetworks: Array<{ __typename?: 'GraphNetwork', proofsTotal: any }> };
 
 export type CapacityCommitmentBasicFragment = { __typename?: 'CapacityCommitment', id: string, status?: Types.CapacityCommitmentStatus | null, createdAt: any, startEpoch: any, endEpoch: any, computeUnitsCount: number, totalCollateral: any, rewardWithdrawn: any, rewardDelegatorRate: number, duration: any, peer: { __typename?: 'Peer', id: string, provider: { __typename?: 'Provider', id: string } } };
 
@@ -152,6 +152,9 @@ export const SubmittedProofsQueryDocument = gql`
     createdEpoch
     peer {
       id
+      provider {
+        id
+      }
     }
   }
   graphNetworks(first: 1) {

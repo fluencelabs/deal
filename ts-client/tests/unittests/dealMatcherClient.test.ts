@@ -97,6 +97,8 @@ describe("#getMatchedOffers", () => {
       maxWorkersPerProvider: maxWorkersPerProvider,
       // Currently, this epoch does not matter.
       currentEpoch: 999,
+      providersBlackList: [],
+      providersWhiteList: [],
     });
 
     expect(_getMatchedOffersPageSpy.mock.calls.length).toEqual(

@@ -9,8 +9,8 @@ dataSources:
     network: dar
     source:
       abi: Core
-      address: "0xf0c3289B9bc49c6c90Bb004DC96F5877D4e8A3c0"
-      startBlock: 986089
+      address: "0xA03B6b3f960efd5554A5AAe35F47561896E5a969"
+      startBlock: 1102306
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -29,8 +29,8 @@ dataSources:
     network: dar
     source:
       abi: Market
-      address: "0x56b064005d45F0F11536fF2Ce730DE2F9715f55c"
-      startBlock: 986089
+      address: "0x90b487bA6Fc7b787a7B561cB754BA1eFEc7e246A"
+      startBlock: 1102306
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -57,6 +57,11 @@ dataSources:
           handler: handleInitialized
         - event: ProviderInfoUpdated(indexed address,string,(bytes4,bytes32))
           handler: handleProviderInfoUpdated
+#          TODO: uncomment when resolved: https://github.com/graphprotocol/graph-node/issues/5171
+#        - event: EffectorInfoSet((indexed bytes4,bytes32),string,(bytes4,bytes32))
+#          handler: handleEffectorInfoSet
+#        - event: EffectorInfoRemoved((indexed bytes4,bytes32))
+#          handler: handleEffectorInfoRemoved
         - event: MarketOfferRegistered(indexed
             address,bytes32,uint256,address,(bytes4,bytes32)[],uint256,uint256)
           handler: handleMarketOfferRegistered
@@ -82,8 +87,8 @@ dataSources:
     network: dar
     source:
       abi: DealFactory
-      address: "0xcCDfD64e45cFEb4d3165Cb46bc9766B02149AB13"
-      startBlock: 986089
+      address: "0xb2f922f9660200662f5B38B77e848c946AC8E426"
+      startBlock: 1102306
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -109,8 +114,8 @@ dataSources:
     network: dar
     source:
       abi: Capacity
-      address: "0x916450AB79531281E8C9C58ebD6081A9A2C4d1DE"
-      startBlock: 986089
+      address: "0x49a6C3b528f31D45F09b1E490539FBC0436bA462"
+      startBlock: 1102306
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
