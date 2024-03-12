@@ -25,8 +25,8 @@ import {
 } from "./logics.js";
 import {
   calculateTimestamp,
-  DEFAULT_TOKEN_VALUE_ROUNDING,
-  tokenValueToRounded,
+  type SerializationSettings,
+  tokenValueToRounded
 } from "../utils.js";
 import type {
   BasicDealFragment,
@@ -62,7 +62,7 @@ export function serializeEffectors(
   return composedEffectors;
 }
 
-export function serializeOfferShort(offer: BasicOfferFragment): OfferShort {
+export function serializeOfferShort(offer: BasicOfferFragment, serializationSettings: SerializationSettings,): OfferShort {
   return {
     id: offer.id,
     createdAt: Number(offer.createdAt),
@@ -73,9 +73,10 @@ export function serializeOfferShort(offer: BasicOfferFragment): OfferShort {
       symbol: offer.paymentToken.symbol,
       decimals: offer.paymentToken.decimals.toString(),
     },
+    // USDC.
     pricePerEpoch: tokenValueToRounded(
       offer.pricePerEpoch,
-      DEFAULT_TOKEN_VALUE_ROUNDING,
+      serializationSettings.parseTokenToFixedDefault,
       offer.paymentToken.decimals,
     ),
     effectors: serializeEffectors(offer.effectors),
@@ -99,12 +100,13 @@ export function serializeProviderBase(
 
 export function serializeProviderShort(
   provider: ProviderOfProvidersQueryFragment,
+  serializationSettings: SerializationSettings,
 ): ProviderShort {
   const providerBase = serializeProviderBase(provider);
   const composedOffers = [];
   if (provider.offers) {
     for (const offer of provider.offers) {
-      composedOffers.push(serializeOfferShort(offer as BasicOfferFragment));
+      composedOffers.push(serializeOfferShort(offer as BasicOfferFragment, serializationSettings));
     }
   }
   return {
@@ -170,6 +172,7 @@ export function serializeDealsShort(
     dealStatus: DealStatus | undefined;
     freeBalance: bigint | null | undefined;
   },
+  serializationSettings: SerializationSettings,
 ): DealShort {
   const freeBalance = fromRpcForDealShort.freeBalance
     ? fromRpcForDealShort.freeBalance
@@ -188,17 +191,19 @@ export function serializeDealsShort(
       symbol: deal.paymentToken.symbol,
       decimals: deal.paymentToken.decimals.toString(),
     },
+    // USDC.
     balance: tokenValueToRounded(
       freeBalance,
-      DEFAULT_TOKEN_VALUE_ROUNDING,
+      serializationSettings.parseTokenToFixedDefault,
       deal.paymentToken.decimals,
     ),
     status: fromRpcForDealShort.dealStatus
       ? fromRpcForDealShort.dealStatus
       : "active",
+    // USDC.
     totalEarnings: tokenValueToRounded(
       totalEarnings,
-      DEFAULT_TOKEN_VALUE_ROUNDING,
+      serializationSettings.parseTokenToFixedDefault,
       deal.paymentToken.decimals,
     ),
     registeredWorkers: deal.registeredWorkersCurrentCount,
@@ -257,6 +262,7 @@ export function serializeCapacityCommitmentDetail(
   totalRewards: bigint | null,
   rewardWithdrawn: bigint,
   delegatorAddress: string,
+  serializationSettings: SerializationSettings,
 ): CapacityCommitmentDetail {
   const _totalRewards = totalRewards ? totalRewards : BigInt(0);
   const _unlockedRewards = unlockedRewards ? unlockedRewards : BigInt(0);
@@ -267,24 +273,42 @@ export function serializeCapacityCommitmentDetail(
       coreInitTimestamp,
       coreEpochDuration,
     ),
-    totalCollateral: tokenValueToRounded(totalCollateral),
+    // FLT.
+    totalCollateral: tokenValueToRounded(
+      totalCollateral,
+      serializationSettings.parseNativeTokenToFixedDefault,
+    ),
     collateralToken: FLTToken,
     rewardDelegatorRate: rewardDelegatorRate,
-    rewardsUnlocked: tokenValueToRounded(_unlockedRewards),
+    // FLT.
+    rewardsUnlocked: tokenValueToRounded(
+      _unlockedRewards,
+      serializationSettings.parseNativeTokenToFixedDefault,
+    ),
     rewardsUnlockedDelegator: tokenValueToRounded(
       _unlockedRewards * BigInt(rewardDelegatorRate),
+      serializationSettings.parseNativeTokenToFixedDefault,
     ),
     rewardsUnlockedProvider: tokenValueToRounded(
       _unlockedRewards * BigInt(1 - rewardDelegatorRate),
+      serializationSettings.parseNativeTokenToFixedDefault,
     ),
-    rewardsNotWithdrawn: tokenValueToRounded(_totalRewards),
+    rewardsNotWithdrawn: tokenValueToRounded(
+      _totalRewards,
+      serializationSettings.parseNativeTokenToFixedDefault,
+    ),
     rewardsNotWithdrawnDelegator: tokenValueToRounded(
       _totalRewards * BigInt(rewardDelegatorRate),
+      serializationSettings.parseNativeTokenToFixedDefault,
     ),
     rewardsNotWithdrawnProvider: tokenValueToRounded(
       _totalRewards * BigInt(1 - rewardDelegatorRate),
+      serializationSettings.parseNativeTokenToFixedDefault,
     ),
-    rewardsTotal: tokenValueToRounded(_totalRewards + rewardWithdrawn),
+    rewardsTotal: tokenValueToRounded(
+      _totalRewards + rewardWithdrawn,
+      serializationSettings.parseNativeTokenToFixedDefault,
+    ),
     delegatorAddress:
       delegatorAddress == "0x0000000000000000000000000000000000000000"
         ? null
