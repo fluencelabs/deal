@@ -9,13 +9,13 @@ import { ERC20 } from "../generated/Market/ERC20";
 import { Core } from "../generated/Core/Core";
 import { Capacity } from "../generated/Capacity/Capacity";
 import { MAX_UINT_256, UNO_BIG_INT, ZERO_BIG_INT } from "./models";
-import {log} from "@graphprotocol/graph-ts/index";
+import { log } from "@graphprotocol/graph-ts/index";
 
 // TODO: optimise through multicall contract (currently 2 calls only per token).
 
 // if ERC20 does not support symbol().
 const ERC20_UNKNOWN_SYMBOL = "ERC20_UNKNOWN";
-const ERC20_UNKNOWN_DECIMALS = 1
+const ERC20_UNKNOWN_DECIMALS = 1;
 
 export function getTokenSymbol(address: Bytes): string {
   log.info("getTokenSymbol for address: {}...", [address.toHexString()]);
@@ -82,37 +82,46 @@ export function getMinRequiredProofsPerEpoch(contractAddress: Address): BigInt {
 
 // It mirrors _failedEpoch internal method in Capacity.sol.
 export function calculateNextFailedCCEpoch(
-    maxFailedRatio: BigInt,
-    unitCount: BigInt,
-    activeUnitCount: BigInt,
-    nextAdditionalActiveUnitCount: BigInt,
-    totalCUFailCount: BigInt,
-    lastSnapshotEpoch: BigInt,
-  ): BigInt {
-        if (activeUnitCount == ZERO_BIG_INT) {
-            return MAX_UINT_256;
-        }
+  maxFailedRatio: BigInt,
+  unitCount: BigInt,
+  activeUnitCount: BigInt,
+  nextAdditionalActiveUnitCount: BigInt,
+  totalFailCount: BigInt,
+  lastSnapshotEpoch: BigInt,
+): BigInt {
+  if (activeUnitCount == ZERO_BIG_INT) {
+    return MAX_UINT_256;
+  }
 
-        const maxFails= maxFailedRatio * unitCount;
-        let remainingFails = ZERO_BIG_INT;
-        if (totalCUFailCount < maxFails) {
-            remainingFails = maxFails - totalCUFailCount;
-        }
+  const maxFails = maxFailedRatio * unitCount;
+  let remainingFails = ZERO_BIG_INT;
+  if (totalFailCount < maxFails) {
+    remainingFails = maxFails - totalFailCount;
+  }
 
-        let failedEpoch = ZERO_BIG_INT;
-        if (activeUnitCount > remainingFails) {
-            failedEpoch = lastSnapshotEpoch + UNO_BIG_INT;
-        } else {
-            remainingFails = remainingFails - activeUnitCount;
-            activeUnitCount += nextAdditionalActiveUnitCount;
+  let failedEpoch = ZERO_BIG_INT;
 
-            failedEpoch = UNO_BIG_INT + lastSnapshotEpoch + (remainingFails / activeUnitCount);
-        }
+  if (activeUnitCount > remainingFails) {
+    failedEpoch = lastSnapshotEpoch + UNO_BIG_INT;
+  } else {
+    remainingFails = remainingFails - activeUnitCount;
+    failedEpoch = lastSnapshotEpoch + UNO_BIG_INT;
 
-        // CUrrently it is not used. Artifact from contract side.
-        // const remainingFailsForLastEpoch = remainingFails % activeUnitCount;
-        return failedEpoch;
+    let newActiveUnitCount = activeUnitCount + nextAdditionalActiveUnitCount;
+    let numberOfFillFailedEpoch = remainingFails / newActiveUnitCount;
+    let remainingFailedUnitsInLastEpoch = remainingFails % newActiveUnitCount;
+
+    if (remainingFailedUnitsInLastEpoch != ZERO_BIG_INT) {
+      numberOfFillFailedEpoch += UNO_BIG_INT;
     }
+
+    failedEpoch += numberOfFillFailedEpoch;
+  }
+
+  // CUrrently it is not used. Artifact from contract side.
+  // const remainingFailsForLastEpoch = remainingFails % activeUnitCount;
+  return failedEpoch;
+}
 
 // It mirrors core.currentEpoch in EpochController.sol.
 export function calculateEpoch(
@@ -120,5 +129,9 @@ export function calculateEpoch(
   epochControllerStorageInitTimestamp: BigInt,
   epochControllerStorageEpochDuration: BigInt,
 ): BigInt {
-  return UNO_BIG_INT + (timestamp - epochControllerStorageInitTimestamp) / epochControllerStorageEpochDuration
+  return (
+    UNO_BIG_INT +
+    (timestamp - epochControllerStorageInitTimestamp) /
+      epochControllerStorageEpochDuration
+  );
 }

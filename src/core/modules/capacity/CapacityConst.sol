@@ -3,15 +3,14 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "src/utils/OwnableUpgradableDiamond.sol";
 import "src/core/modules/BaseModule.sol";
 import {PRECISION, GlobalConst} from "src/core/GlobalConst.sol";
 import "./interfaces/ICapacityConst.sol";
 
-contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
+contract CapacityConst is BaseModule, ICapacityConst {
     // #region ------------------ Constants ------------------
-    uint256 internal constant _REWARD_POOL_GROWTH_RATE = 90 * PRECISION; // 90%
-    uint256 internal constant _REWARD_POOL_SHRINK_RATE = 110 * PRECISION; // 110%
+    uint256 internal constant _REWARD_POOL_SHRINK_RATE = PRECISION / 10 * 9; // 0.9 = 90%
+    uint256 internal constant _REWARD_POOL_GROWTH_RATE = PRECISION + PRECISION / 10; // 1.1 = 110%
     // #endregion ------------------ Constants ------------------
 
     // #region ------------------ Types ------------------
@@ -219,7 +218,7 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
     // #endregion ------------------ External View Functions ------------------
 
     // #region ------------------ External Mutable Functions ------------------
-    function setFLTPrice(uint256 fltPrice_) public onlyOwner {
+    function setFLTPrice(uint256 fltPrice_) public onlyCoreOwner {
         ConstStorage storage constantsStorage = _getConstStorage();
         constantsStorage.fltPrice = fltPrice_;
 
@@ -229,7 +228,7 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
         emit FLTPriceUpdated(fltPrice_);
     }
 
-    function setDifficulty(bytes32 difficulty_) external onlyOwner {
+    function setDifficulty(bytes32 difficulty_) external onlyCoreOwner {
         ConstStorage storage constantsStorage = _getConstStorage();
         constantsStorage.proof.difficulty = constantsStorage.proof.nextDifficulty;
         constantsStorage.proof.nextDifficulty = difficulty_;
@@ -238,7 +237,7 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
         emit DifficultyUpdated(difficulty_);
     }
 
-    function setConstant(ConstantType constantType, uint256 v) external onlyOwner {
+    function setConstant(ConstantType constantType, uint256 v) external onlyCoreOwner {
         ConstStorage storage constantsStorage = _getConstStorage();
 
         // capacity section
@@ -287,20 +286,25 @@ contract CapacityConst is BaseModule, OwnableUpgradableDiamond, ICapacityConst {
         ConstStorage storage constantsStorage = _getConstStorage();
         uint256 currentEpoch_ = core.currentEpoch();
 
-        uint256 currentTarget;
-        if (activeUnitCount_ > 0) {
-            currentTarget = fltPrice_ / activeUnitCount_;
-        }
-
         // load last reward pool
         uint256 length = constantsStorage.reward.rewardPoolPerEpoches.length;
+
+        if (activeUnitCount_ <= 0) {
+            return;
+        }
+
+        uint256 currentTarget = fltPrice_ / activeUnitCount_;
         uint256 lastRewardPoolValue;
         uint256 lastRewardPoolEpoch;
 
         RewardPoolPerEpoch storage lastRewardPool = constantsStorage.reward.rewardPoolPerEpoches[length - 1];
         lastRewardPoolEpoch = lastRewardPool.epoch;
 
-        if (length > 2 && currentEpoch_ == lastRewardPool.epoch) {
+        if (currentEpoch_ == lastRewardPool.epoch) {
+            if (length < 2) {
+                return;
+            }
+
             lastRewardPoolValue = constantsStorage.reward.rewardPoolPerEpoches[length - 2].value;
         } else {
             lastRewardPoolValue = lastRewardPool.value;

@@ -32,26 +32,28 @@ contract DeployContracts is Depoyments, Script {
 
     // ------------------ Default constant ------------------
     uint256 constant DEFAULT_EPOCH_DURATION = 15 seconds;
-    uint256 constant DEFAULT_FLT_PRICE = 1 * PRECISION; // 1 USD
     uint256 constant DEFAULT_MIN_DEPOSITED_EPOCHES = 2;
     uint256 constant DEFAULT_MIN_REMATCHING_EPOCHES = 2;
     uint256 constant DEFAULT_MIN_PROTOCOL_VERSION = 1;
     uint256 constant DEFAULT_MAX_PROTOCOL_VERSION = 1;
-    uint256 constant DEFAULT_USD_COLLATERAL_PER_UNIT = 1 * PRECISION; // 1 USD
-    uint256 constant DEFAULT_USD_TARGET_REVENUE_PER_EPOCH = 1_000 * PRECISION; // 1 USD
-    uint256 constant DEFAULT_MIN_DURATION = 5 minutes;
-    uint256 constant DEFAULT_MIN_REWARD_PER_EPOCH = 1 ether;
-    uint256 constant DEFAULT_MAX_REWARD_PER_EPOCH = 1 ether;
-    uint256 constant DEFAULT_VESTING_PERIOD_DURATION = 5;
+
+    uint256 constant DEFAULT_FLT_PRICE = 1 * PRECISION; // 1 USD
+    uint256 constant DEFAULT_USD_COLLATERAL_PER_UNIT = 100 * PRECISION; // 0.3 USD
+    uint256 constant DEFAULT_USD_TARGET_REVENUE_PER_EPOCH = PRECISION / 10 * 3; // 1 USD
+    uint256 constant DEFAULT_MIN_DURATION = 5;
+    uint256 constant DEFAULT_MIN_REWARD_PER_EPOCH = 100 ether;
+    uint256 constant DEFAULT_MAX_REWARD_PER_EPOCH = 200 ether;
+    uint256 constant DEFAULT_VESTING_PERIOD_DURATION = 3;
     uint256 constant DEFAULT_VESTING_PERIOD_COUNT = 6;
-    uint256 constant DEFAULT_SLASHING_RATE = 1_000_000; // 0.1 = 10% = 1000000
+    uint256 constant DEFAULT_SLASHING_RATE = PRECISION / 100; // 1%
     uint256 constant DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH = 2;
     uint256 constant DEFAULT_MAX_PROOFS_PER_EPOCH = 5;
     uint256 constant DEFAULT_WITHDRAW_EPOCHES_AFTER_FAILED = 2;
     uint256 constant DEFAULT_MAX_FAILED_RATIO = 40;
     bool constant DEFAULT_IS_WHITELIST_ENABLED = false;
-    bytes32 public constant DEFAULT_DIFFICULTY = 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
     bytes32 public constant DEFAULT_INIT_GLOBAL_NONCE = keccak256("init_global_nonce");
+    bytes32 public constant DEFAULT_DIFFICULTY = 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+    uint256 constant DEFAULT_INIT_REWARD_POOL = 100 ether;
     bool constant IS_MOCKED_RANDOMX = true;
 
     // ------------------ Deploy result ------------------
@@ -62,11 +64,11 @@ contract DeployContracts is Depoyments, Script {
     struct ENV {
         uint256 chainId;
         uint256 epochDuration;
-        uint256 fltPrice;
         uint256 minDepositedEpoches;
         uint256 minRematchingEpoches;
         uint256 minProtocolVersion;
         uint256 maxProtocolVersion;
+        uint256 fltPrice;
         uint256 usdCollateralPerUnit;
         uint256 usdTargetRevenuePerEpoch;
         uint256 minDuration;
@@ -80,8 +82,9 @@ contract DeployContracts is Depoyments, Script {
         uint256 withdrawEpochesAfterFailed;
         uint256 maxFailedRatio;
         bool isWhitelistEnabled;
-        bytes32 difficulty;
         bytes32 initGlobalNonce;
+        bytes32 difficulty;
+        uint256 initRewardPool;
         bool isMockedRandomX;
     }
 
@@ -116,11 +119,11 @@ contract DeployContracts is Depoyments, Script {
 
         _deployCore(
             env.epochDuration,
-            env.fltPrice,
             env.minDepositedEpoches,
             env.minRematchingEpoches,
             env.minProtocolVersion,
             env.maxProtocolVersion,
+            env.fltPrice,
             env.usdCollateralPerUnit,
             env.usdTargetRevenuePerEpoch,
             env.minDuration,
@@ -134,8 +137,9 @@ contract DeployContracts is Depoyments, Script {
             env.withdrawEpochesAfterFailed,
             env.maxFailedRatio,
             env.isWhitelistEnabled,
-            env.difficulty,
             env.initGlobalNonce,
+            env.difficulty,
+            env.initRewardPool,
             env.isMockedRandomX
         );
         _stopDeploy();
@@ -144,12 +148,14 @@ contract DeployContracts is Depoyments, Script {
     // ------------------ Internal functions ------------------
     function _loadENV() internal view returns (ENV memory) {
         uint256 chainId = block.chainid;
+
         uint256 epochDuration = vm.envOr("EPOCH_DURATION", DEFAULT_EPOCH_DURATION);
-        uint256 fltPice = vm.envOr("FLT_PRICE", DEFAULT_FLT_PRICE);
         uint256 minDepositedEpoches = vm.envOr("MIN_DEPOSITED_EPOCHES", DEFAULT_MIN_DEPOSITED_EPOCHES);
         uint256 minRematchingEpoches = vm.envOr("MIN_REMATCHING_EPOCHES", DEFAULT_MIN_REMATCHING_EPOCHES);
         uint256 minProtocolVersion = vm.envOr("MIN_PROTOCOL_VERSION", DEFAULT_MIN_PROTOCOL_VERSION);
         uint256 maxProtocolVersion = vm.envOr("MAX_PROTOCOL_VERSION", DEFAULT_MAX_PROTOCOL_VERSION);
+
+        uint256 fltPice = vm.envOr("FLT_PRICE", DEFAULT_FLT_PRICE);
         uint256 usdCollateralPerUnit = vm.envOr("USD_COLLATERAL_PER_UNIT", DEFAULT_USD_COLLATERAL_PER_UNIT);
         uint256 usdTargetRevenuePerEpoch =
             vm.envOr("USD_TARGET_REVENUE_PER_EPOCH", DEFAULT_USD_TARGET_REVENUE_PER_EPOCH);
@@ -166,8 +172,9 @@ contract DeployContracts is Depoyments, Script {
             vm.envOr("WITHDRAW_EPOCHES_AFTER_FAILED", DEFAULT_WITHDRAW_EPOCHES_AFTER_FAILED);
         uint256 maxFailedRatio = vm.envOr("MAX_FAILED_RATIO", DEFAULT_MAX_FAILED_RATIO);
         bool isWhitelistEnabled = vm.envOr("IS_WHITELIST_ENABLED", DEFAULT_IS_WHITELIST_ENABLED);
-        bytes32 difficulty = vm.envOr("DIFFICULTY", DEFAULT_DIFFICULTY);
         bytes32 initGlobalNonce = vm.envOr("INIT_GLOBAL_NONCE", DEFAULT_INIT_GLOBAL_NONCE);
+        bytes32 difficulty = vm.envOr("DIFFICULTY", DEFAULT_DIFFICULTY);
+        uint256 initRewardPool = vm.envOr("INIT_REWARD_POOL", DEFAULT_INIT_REWARD_POOL);
         bool isMockedRandomX = vm.envOr("IS_MOCKED_RANDOMX", IS_MOCKED_RANDOMX);
 
         console.log("----------------- ENV -----------------");
@@ -177,6 +184,8 @@ contract DeployContracts is Depoyments, Script {
         console.log(StdStyle.blue("MIN_REMATCHING_EPOCHES:"), minRematchingEpoches);
         console.log(StdStyle.blue("MIN_PROTOCOL_VERSION:"), minProtocolVersion);
         console.log(StdStyle.blue("MAX_PROTOCOL_VERSION:"), maxProtocolVersion);
+
+        console.log(StdStyle.blue("FLT_PRICE:"), fltPice);
         console.log(StdStyle.blue("USD_COLLATERAL_PER_UNIT:"), usdCollateralPerUnit);
         console.log(StdStyle.blue("USD_TARGET_REVENUE_PER_EPOCH:"), usdTargetRevenuePerEpoch);
         console.log(StdStyle.blue("MIN_DURATION:"), minDuration);
@@ -190,21 +199,22 @@ contract DeployContracts is Depoyments, Script {
         console.log(StdStyle.blue("WITHDRAW_EPOCHES_AFTER_FAILED:"), withdrawEpochesAfterFailed);
         console.log(StdStyle.blue("MAX_FAILED_RATIO:"), maxFailedRatio);
         console.log(StdStyle.blue("IS_WHITELIST_ENABLED:"), isWhitelistEnabled);
-        console.log(StdStyle.blue("DIFFICULTY:"));
-        console.logBytes32(difficulty);
         console.log(StdStyle.blue("INIT_GLOBAL_NONCE:"));
         console.logBytes32(initGlobalNonce);
+        console.log(StdStyle.blue("DIFFICULTY:"));
+        console.logBytes32(difficulty);
+        console.log(StdStyle.blue("INIT_REWARD_POOL:"), initRewardPool);
         console.log(StdStyle.blue("IS_MOCKED_RANDOMX:"), isMockedRandomX);
         console.log("---------------------------------------");
 
         return ENV({
             chainId: chainId,
             epochDuration: epochDuration,
-            fltPrice: fltPice,
             minDepositedEpoches: minDepositedEpoches,
             minRematchingEpoches: minRematchingEpoches,
             minProtocolVersion: minProtocolVersion,
             maxProtocolVersion: maxProtocolVersion,
+            fltPrice: fltPice,
             usdCollateralPerUnit: usdCollateralPerUnit,
             usdTargetRevenuePerEpoch: usdTargetRevenuePerEpoch,
             minDuration: minDuration,
@@ -218,8 +228,9 @@ contract DeployContracts is Depoyments, Script {
             withdrawEpochesAfterFailed: withdrawEpochesAfterFailed,
             maxFailedRatio: maxFailedRatio,
             isWhitelistEnabled: isWhitelistEnabled,
-            difficulty: difficulty,
             initGlobalNonce: initGlobalNonce,
+            difficulty: difficulty,
+            initRewardPool: initRewardPool,
             isMockedRandomX: isMockedRandomX
         });
     }
@@ -241,11 +252,11 @@ contract DeployContracts is Depoyments, Script {
 
     function _deployCore(
         uint256 epochDuration_,
-        uint256 fltPrice_,
         uint256 minDepositedEpoches_,
         uint256 minRematchingEpoches_,
         uint256 minProtocolVersion_,
         uint256 maxProtocolVersion_,
+        uint256 fltPrice_,
         uint256 usdCollateralPerUnit_,
         uint256 usdTargetRevenuePerEpoch_,
         uint256 minDuration_,
@@ -259,8 +270,9 @@ contract DeployContracts is Depoyments, Script {
         uint256 withdrawEpochesAfterFailed_,
         uint256 maxFailedRatio_,
         bool isWhitelistEnabled_,
-        bytes32 difficulty_,
         bytes32 initGlobalNonce_,
+        bytes32 difficulty_,
+        uint256 initRewardPool_,
         bool isMockedRandomX_
     ) internal {
         address coreImpl = _deployContract("CoreImpl", "Core", new bytes(0));
@@ -328,6 +340,7 @@ contract DeployContracts is Depoyments, Script {
                     isWhitelistEnabled_,
                     initGlobalNonce_,
                     difficulty_,
+                    initRewardPool_,
                     randomXProxy
                 )
             )

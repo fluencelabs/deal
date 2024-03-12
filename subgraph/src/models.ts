@@ -246,7 +246,7 @@ export function createOrLoadCapacityCommitmentStatsPerEpoch(capacityCommitmentId
     entity = new CapacityCommitmentStatsPerEpoch(concattedIds)
     entity.capacityCommitment = capacityCommitmentId
     entity.epoch = BigInt.fromString(epoch)
-    entity.totalCUFailCount = 0
+    entity.totalFailCount = 0
     entity.exitedUnitCount = 0
     entity.activeUnitCount = 0
     entity.nextAdditionalActiveUnitCount = 0

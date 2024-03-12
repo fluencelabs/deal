@@ -24,7 +24,7 @@ contract CoreTest is Test {
     function test_CoreHasInitializedValues() external {
         assertNotEq(address(deployment.core.dealImpl()), address(0), "Deal impl not initialized in Core");
         assertEq(
-            deployment.core.epochDuration(),
+            deployment.core.epochDuration(), 
             DeployDealSystem.DEFAULT_EPOCH_DURATION,
             "Epoch duration not set"
         );

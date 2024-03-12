@@ -102,7 +102,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         uint256 lastCommitedEpoch,
         uint256 currentWorkerCount,
         uint256 pricePerWorkerEpoch_
-    ) internal view {
+    ) internal pure {
         if (commitEpoch <= lastCommitedEpoch) {
             return;
         }

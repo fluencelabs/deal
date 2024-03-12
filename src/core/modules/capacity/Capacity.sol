@@ -218,7 +218,6 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         Commitment storage cc = s.commitments[commitmentId];
 
         bytes32 peerId = cc.info.peerId;
-        IMarket.ComputePeer memory peer = market.getComputePeer(peerId);
 
         require(
             getStatus(commitmentId) == CCStatus.WaitDelegation, "Capacity commitment is not in WaitDelegation status"
@@ -490,7 +489,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
             cc.finish.exitedUnitCount,
             cc.progress.activeUnitCount,
             cc.progress.nextAdditionalActiveUnitCount,
-            currentEpoch_
+            currentEpoch_ - 1
         );
     }
 
@@ -508,7 +507,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
 
         // #region commit commitment snapshot for the previous epoch
         Snapshot.Cache memory snapshotCache = Snapshot.init(cc);
-        CCStatus status = _preCommitCommitmentSnapshot(cc, snapshotCache, peer, currentEpoch, _expiredEpoch(cc));
+        _preCommitCommitmentSnapshot(cc, snapshotCache, peer, currentEpoch, _expiredEpoch(cc));
         _postCommitCommitmentSnapshot(cc, snapshotCache);
         if (snapshotCache.current.failedEpoch != 0) {
             currentEpoch = snapshotCache.current.failedEpoch;
@@ -531,7 +530,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
             cc.finish.exitedUnitCount,
             cc.progress.activeUnitCount,
             cc.progress.nextAdditionalActiveUnitCount,
-            currentEpoch
+            currentEpoch - 1
         );
         emit RewardWithdrawn(commitmentId, amount);
     }
@@ -625,7 +624,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
             cc.finish.exitedUnitCount,
             cc.progress.activeUnitCount,
             cc.progress.nextAdditionalActiveUnitCount,
-            currentEpoch
+            currentEpoch - 1
         );
     }
     // #endregion
