@@ -25,14 +25,13 @@ import type {
   ComputeUnitDetail,
   ProofBasicListView,
   ProofBasic,
-  ComputeUnitsByCapacityCommitment,
   ProofStatsByCapacityCommitmentListView,
-  ComputeUnitsByCapacityCommitmentListView,
   ProofStatsByCapacityCommitment,
   ComputeUnitStatsPerCapacityCommitmentEpoch,
   ComputeUnitStatsPerCapacityCommitmentEpochListView,
   ComputeUnitWorkerDetail,
   ComputeUnitWorkerDetailListView,
+  ComputeUnitsWithCCStatusListView
 } from "./types/schemes.js";
 import type {
   ChildEntitiesByProviderFilter,
@@ -66,13 +65,13 @@ import { DealRpcClient } from "./rpcClients/index.js";
 import {
   calculateEpoch,
   DEFAULT_ORDER_TYPE,
-  DEFAULT_TOKEN_VALUE_ROUNDING,
   FILTER_MULTISELECT_MAX,
-  tokenValueToRounded,
+  type SerializationSettings,
+  tokenValueToRounded
 } from "./utils.js";
 import {
+  serializeCUStatus,
   serializeEffectorDescription,
-  serializeExpectedProofsAndCUStatus,
 } from "./serializers/logics.js";
 import { serializeDealProviderAccessLists } from "../utils/serializers.js";
 import {
@@ -88,12 +87,13 @@ import {
   serializeCapacityCommitmentDetail,
   serializeCapacityCommitmentShort,
   serializeComputeUnits,
+  serializeComputeUnitsWithStatus,
   serializeDealsShort,
   serializeEffectors,
   serializeOfferShort,
   serializePeers,
   serializeProviderBase,
-  serializeProviderShort,
+  serializeProviderShort
 } from "./serializers/schemes.js";
 import {
   serializeCapacityCommitmentsOrderByToIndexer,
@@ -124,11 +124,13 @@ export class DealExplorerClient {
   private _capacityContract: ICapacity | null;
   private _capacityContractAddress: string | null;
   private _capacityMinRequiredProofsPerEpoch: number | null;
+  private _serializationSettings: SerializationSettings;
 
   constructor(
     network: ContractsENV,
     chainRpcUrl?: string,
     caller?: ethers.Provider | ethers.Signer,
+    serializationSettings?: SerializationSettings,
   ) {
     if (chainRpcUrl) {
       console.warn("Do not use chainRPCUrl, use provider instead.");
@@ -137,6 +139,14 @@ export class DealExplorerClient {
       this._caller = caller;
     } else {
       throw Error("One of chainRPCUrl or provider should be delclared.");
+    }
+    if (serializationSettings) {
+      this._serializationSettings = serializationSettings;
+    } else {
+      this._serializationSettings = {
+          parseNativeTokenToFixedDefault: 18,
+          parseTokenToFixedDefault: 3,
+        }
     }
     this._indexerClient = new IndexerClient(network);
     this._dealContractsClient = new DealClient(this._caller, network);
@@ -250,7 +260,7 @@ export class DealExplorerClient {
     const res = [];
     if (data) {
       for (const provider of data.providers) {
-        res.push(serializeProviderShort(provider));
+        res.push(serializeProviderShort(provider, this._serializationSettings));
       }
     }
     let total = null;
@@ -440,7 +450,7 @@ export class DealExplorerClient {
     const res = [];
     if (data) {
       for (const offer of data.offers) {
-        res.push(serializeOfferShort(offer));
+        res.push(serializeOfferShort(offer, this._serializationSettings));
       }
     }
     let total = null;
@@ -490,7 +500,7 @@ export class DealExplorerClient {
     let res: OfferDetail | null = null;
     if (data && data.offer) {
       res = {
-        ...serializeOfferShort(data.offer),
+        ...serializeOfferShort(data.offer, this._serializationSettings),
         peers: serializePeers(data.offer.peers as Array<BasicPeerFragment>),
         updatedAt: Number(data.offer.updatedAt),
       };
@@ -542,10 +552,14 @@ export class DealExplorerClient {
       for (let i = 0; i < data.deals.length; i++) {
         const deal = data.deals[i] as BasicDealFragment;
         res.push(
-          serializeDealsShort(deal, {
-            dealStatus: dealStatuses[i],
-            freeBalance: freeBalances[i],
-          }),
+          serializeDealsShort(
+            deal,
+            {
+              dealStatus: dealStatuses[i],
+              freeBalance: freeBalances[i],
+            },
+              this._serializationSettings,
+            ),
         );
       }
     }
@@ -641,10 +655,15 @@ export class DealExplorerClient {
         deal.providersAccessList,
       );
       res = {
-        ...serializeDealsShort(deal, { dealStatus, freeBalance }),
+        ...serializeDealsShort(
+          deal,
+          { dealStatus, freeBalance },
+          this._serializationSettings,
+          ),
+        // USDC.
         pricePerWorkerEpoch: tokenValueToRounded(
           deal.pricePerWorkerEpoch,
-          DEFAULT_TOKEN_VALUE_ROUNDING,
+          this._serializationSettings.parseTokenToFixedDefault,
           deal.paymentToken.decimals,
         ),
         maxWorkersPerProvider: deal.maxWorkersPerProvider,
@@ -877,6 +896,7 @@ export class DealExplorerClient {
       capacityCommitmentRpcDetails.totalRewards,
       capacityCommitment.rewardWithdrawn,
       capacityCommitment.delegator,
+      this._serializationSettings,
     );
   }
 
@@ -976,11 +996,8 @@ export class DealExplorerClient {
     }
     const computeUnit = data.computeUnit;
 
-    const { expectedProofsDueNow, status } = serializeExpectedProofsAndCUStatus(
+    const { status } = serializeCUStatus(
       computeUnit,
-      this._capacityMinRequiredProofsPerEpoch!,
-      this._coreInitTimestamp!,
-      this._coreEpochDuration!,
     );
     const currentPeerCapacityCommitment =
       computeUnit.peer.currentCapacityCommitment;
@@ -991,10 +1008,13 @@ export class DealExplorerClient {
       providerId: computeUnit.provider.id,
       currentCommitmentId: currentPeerCapacityCommitment?.id,
       peerId: computeUnit.peer.id,
+      // FLT.
       collateral: currentPeerCapacityCommitment
-        ? tokenValueToRounded(currentPeerCapacityCommitment.collateralPerUnit)
+        ? tokenValueToRounded(
+            currentPeerCapacityCommitment.collateralPerUnit,
+            this._serializationSettings.parseNativeTokenToFixedDefault,
+          )
         : "0",
-      expectedProofsDueNow,
       successProofs: currentPeerCapacityCommitment
         ? currentPeerCapacityCommitment.submittedProofsCount
         : 0,
@@ -1030,6 +1050,8 @@ export class DealExplorerClient {
         computeUnitId: proof.computeUnit.id,
         peerId: proof.peer.id,
         createdAt: Number(proof.createdAt),
+        providerId: proof.peer.provider.id,
+        createdAtEpoch: Number(proof.createdEpoch),
       };
     });
 
@@ -1056,7 +1078,7 @@ export class DealExplorerClient {
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: ComputeUnitsOrderBy = "createdAt",
     orderType: OrderType = DEFAULT_ORDER_TYPE,
-  ): Promise<ComputeUnitsByCapacityCommitmentListView> {
+  ): Promise<ComputeUnitsWithCCStatusListView> {
     await this._init();
 
     const capacityCommitment =
@@ -1078,29 +1100,36 @@ export class DealExplorerClient {
       orderType,
     });
 
-    let res: Array<ComputeUnitsByCapacityCommitment> = [];
-    for (const computeUnit of data.computeUnits) {
-      const { expectedProofsDueNow, status } =
-        serializeExpectedProofsAndCUStatus(
-          computeUnit,
-          this._capacityMinRequiredProofsPerEpoch!,
-          this._coreInitTimestamp!,
-          this._coreEpochDuration!,
-        );
+    return {
+      total: null,
+      data: serializeComputeUnitsWithStatus(data.computeUnits),
+    };
+  }
 
-      res.push({
-        id: computeUnit.id,
-        workerId: computeUnit.workerId ?? undefined,
-        status,
-        expectedProofsDueNow,
-        successProofs: computeUnit.submittedProofsCount,
-        collateral: capacityCommitment.totalCollateral,
-      });
-    }
+  // @notice [Figma] Peer Id. List of compute units (currently not in Figma).
+  async getComputeUnitsByPeer(
+    peerId: string,
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: ComputeUnitsOrderBy = "createdAt",
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
+  ): Promise<ComputeUnitsWithCCStatusListView> {
+    await this._init();
+
+    // To get data of CUs by capacity commitment we filter CUs by peer id of the CC.
+    const data = await this._indexerClient.getComputeUnits({
+      filters: {
+        peer_: { id: peerId },
+      },
+      offset,
+      limit,
+      orderBy,
+      orderType,
+    });
 
     return {
       total: null,
-      data: res,
+      data: serializeComputeUnitsWithStatus(data.computeUnits),
     };
   }
 

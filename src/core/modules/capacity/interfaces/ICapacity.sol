@@ -225,6 +225,8 @@ interface ICapacity is ICapacityConst {
     function finishCommitment(bytes32 commitmentId) external;
 
     /// @dev Deposits collateral for commitments. It makes commitments active
+    /// @dev Note: this method consists of indirect potential delegator address update
+    /// @dev  (set delegator to msg.sender if 0x0 before).
     /// @param commitmentIds Commitment ids
     function depositCollateral(bytes32[] calldata commitmentIds) external payable;
 

@@ -63,6 +63,9 @@ query SubmittedProofsQuery(
     createdEpoch
     peer {
       id
+      provider {
+        id
+      }
     }
   }
   graphNetworks(first: 1) {

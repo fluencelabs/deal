@@ -5,6 +5,7 @@ import {
   createOrLoadComputeUnitPerEpochStat,
   createOrLoadGraphNetwork,
   UNO_BIG_INT,
+  ZERO_ADDRESS,
   ZERO_BIG_INT,
 } from "../models";
 import {
@@ -165,6 +166,10 @@ export function handleCollateralDeposited(event: CollateralDeposited): void {
   let commitment = CapacityCommitment.load(
     event.params.commitmentId.toHexString(),
   ) as CapacityCommitment;
+  // Mirror logic in capacity.depositCollateral.
+  if (commitment.delegator == ZERO_ADDRESS) {
+    commitment.delegator = formatAddress(event.transaction.from);
+  }
   commitment.totalCollateral = event.params.totalCollateral;
   commitment.save();
 }

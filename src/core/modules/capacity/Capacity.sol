@@ -258,6 +258,8 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
             // #endregion
 
             // #region save deposit informaton
+            // Indirect potential delegator address update.
+            // The flow below is mirrored in subgraph/src/mappings/capacity.ts.
             address delegator = cc.info.delegator;
             if (delegator == address(0x00)) {
                 cc.info.delegator = msg.sender;

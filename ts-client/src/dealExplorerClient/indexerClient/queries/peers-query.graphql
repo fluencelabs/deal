@@ -36,6 +36,7 @@ fragment ComputeUnitWithCCDataBasic on ComputeUnit {
       id
     }
   }
+  submittedProofsCount
 }
 
 query ComputeUnitQuery(
@@ -65,6 +66,5 @@ query ComputeUnitsQuery(
     orderDirection: $orderType
   ) {
     ...ComputeUnitWithCCDataBasic
-    submittedProofsCount
   }
 }

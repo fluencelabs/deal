@@ -102,23 +102,27 @@ export type SubmittedProofsQueryQuery = {
   graphNetworks: Array<{ __typename?: "GraphNetwork"; proofsTotal: any }>;
 };
 
-export type CapacityCommitmentBasicFragment = {
-  __typename?: "CapacityCommitment";
-  id: string;
-  status?: Types.CapacityCommitmentStatus | null;
-  createdAt: any;
-  startEpoch: any;
-  endEpoch: any;
-  computeUnitsCount: number;
-  totalCollateral: any;
-  rewardWithdrawn: any;
-  rewardDelegatorRate: number;
-  duration: any;
-  peer: {
-    __typename?: "Peer";
+export type SubmittedProofsQueryQuery = {
+  __typename?: "Query";
+  submittedProofs: Array<{
+    __typename?: "SubmittedProof";
     id: string;
-    provider: { __typename?: "Provider"; id: string };
-  };
+    createdAt: any;
+    createdEpoch: any;
+    capacityCommitment: {
+      __typename?: "CapacityCommitment";
+      id: string;
+      startEpoch: any;
+      endEpoch: any;
+    };
+    computeUnit: { __typename?: "ComputeUnit"; id: string };
+    peer: {
+      __typename?: "Peer";
+      id: string;
+      provider: { __typename?: "Provider"; id: string };
+    };
+  }>;
+  graphNetworks: Array<{ __typename?: "GraphNetwork"; proofsTotal: any }>;
 };
 
 export type ComputeUnitBasicFragment = {
@@ -341,13 +345,53 @@ export const ComputeUnitPerEpochStatsQueryDocument = gql`
     $orderBy: ComputeUnitPerEpochStat_orderBy
     $orderType: OrderDirection
   ) {
-    computeUnitPerEpochStats(
-      where: $filters
-      first: $limit
-      skip: $offset
-      orderBy: $orderBy
-      orderDirection: $orderType
-    ) {
+    id
+    capacityCommitment {
+      id
+      startEpoch
+      endEpoch
+    }
+    computeUnit {
+      id
+    }
+    createdAt
+    createdEpoch
+    peer {
+      id
+      provider {
+        id
+      }
+    }
+  }
+  graphNetworks(first: 1) {
+    proofsTotal
+  }
+}
+    `;
+export const CapacityCommitmentStatsPerEpochQueryDocument = gql`
+    query CapacityCommitmentStatsPerEpochQuery($filters: CapacityCommitmentStatsPerEpoch_filter, $offset: Int, $limit: Int, $orderBy: CapacityCommitmentStatsPerEpoch_orderBy, $orderType: OrderDirection) {
+  capacityCommitmentStatsPerEpoches(
+    where: $filters
+    first: $limit
+    skip: $offset
+    orderBy: $orderBy
+    orderDirection: $orderType
+  ) {
+    id
+    epoch
+    blockNumberEnd
+    blockNumberStart
+    capacityCommitment {
+      id
+    }
+    totalCUFailCount
+    exitedUnitCount
+    activeUnitCount
+    nextAdditionalActiveUnitCount
+    currentCCNextCCFailedEpoch
+    submittedProofsCount
+    computeUnitsWithMinRequiredProofsSubmittedCounter
+    submittedProofs {
       id
       computeUnit {
         id
