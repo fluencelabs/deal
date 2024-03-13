@@ -9,8 +9,9 @@ import "src/core/modules/market/interfaces/IMarket.sol";
 import "src/core/modules/market/interfaces/IDealFactory.sol";
 import "./GlobalConst.sol";
 import "./interfaces/ICore.sol";
+import "src/utils/Whitelist.sol";
 
-contract Core is UUPSUpgradeable, GlobalConst, ICore {
+contract Core is UUPSUpgradeable, GlobalConst, Whitelist, ICore {
     // ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.core.storage.v1")) - 1);
 
@@ -41,12 +42,14 @@ contract Core is UUPSUpgradeable, GlobalConst, ICore {
         uint256 minRematchingEpochs_,
         uint256 minProtocolVersion_,
         uint256 maxProtocolVersion_,
-        IDeal dealImpl_
+        IDeal dealImpl_,
+        bool isWhitelistEnabled_
     ) public initializer {
         __Ownable_init(msg.sender);
         __EpochController_init(epochDuration_);
         __GlobalConst_init(minDepositedEpochs_, minRematchingEpochs_, minProtocolVersion_, maxProtocolVersion_);
         __UUPSUpgradeable_init();
+        __Whitelist_init(isWhitelistEnabled_);
 
         _getCoreStorage().dealImpl = dealImpl_;
         emit DealImplSet(dealImpl_);

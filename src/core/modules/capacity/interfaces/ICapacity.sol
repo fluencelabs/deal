@@ -175,7 +175,6 @@ interface ICapacity is ICapacityConst {
         uint256 maxProofsPerEpoch_,
         uint256 withdrawEpochsAfterFailed_,
         uint256 maxFailedRatio_,
-        bool isWhitelistEnabled_,
         bytes32 initGlobalNonce_,
         bytes32 difficulty_,
         uint256 initRewardPool_,

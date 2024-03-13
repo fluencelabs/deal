@@ -77,7 +77,7 @@ export function getCapacityMaxFailedRatio(contractAddress: Address): BigInt {
 }
 
 export function getMinRequiredProofsPerEpoch(contractAddress: Address): BigInt {
-  return Capacity.bind(contractAddress).minRequierdProofsPerEpoch();
+  return Capacity.bind(contractAddress).minProofsPerEpoch();
 }
 
 export function calculateNextFailedCCEpoch(

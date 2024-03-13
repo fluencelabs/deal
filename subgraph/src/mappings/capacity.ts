@@ -20,7 +20,6 @@ import {
   CommitmentActivated,
   CommitmentCreated,
   CommitmentFailed,
-  CommitmentFailed,
   CommitmentFinished,
   CommitmentRemoved,
   CommitmentStatsUpdated,
@@ -28,8 +27,6 @@ import {
   RewardWithdrawn,
   UnitActivated,
   UnitDeactivated,
-  WhitelistAccessGranted,
-  WhitelistAccessRevoked,
 } from "../../generated/Capacity/Capacity";
 import {
   calculateEpoch,
@@ -41,22 +38,6 @@ import { Initialized } from "../../generated/Capacity/Capacity";
 import { BigInt } from "@graphprotocol/graph-ts";
 import { formatAddress } from "./utils";
 import { log } from "@graphprotocol/graph-ts/index";
-
-export function handleWhitelistAccessGranted(
-  event: WhitelistAccessGranted,
-): void {
-  let provider = Provider.load(event.params.account.toHexString()) as Provider;
-  provider.approved = true;
-  provider.save();
-}
-
-export function handleWhitelistAccessRevoked(
-  event: WhitelistAccessRevoked,
-): void {
-  let provider = Provider.load(event.params.account.toHexString()) as Provider;
-  provider.approved = false;
-  provider.save();
-}
 
 export function handleInitialized(event: Initialized): void {
   let graphNetwork = createOrLoadGraphNetwork();

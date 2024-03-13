@@ -26,12 +26,12 @@ contract CoreTest is Test {
         assertEq(deployment.core.epochDuration(), DeployDealSystem.DEFAULT_EPOCH_DURATION, "Epoch duration not set");
         assertEq(
             deployment.core.minDealDepositedEpochs(),
-            DeployDealSystem.DEFAULT_MIN_DEPOSITED_Epochs,
+            DeployDealSystem.DEFAULT_MIN_DEPOSITED_EPOCHS,
             "Min deal deposited Epochs not set"
         );
         assertEq(
             deployment.core.minDealRematchingEpochs(),
-            DeployDealSystem.DEFAULT_MIN_REMATCHING_Epochs,
+            DeployDealSystem.DEFAULT_MIN_REMATCHING_EPOCHS,
             "Min deal rematching Epochs not set"
         );
     }
@@ -44,11 +44,12 @@ contract CoreTest is Test {
         vm.expectRevert("Initializable: contract is already initialized");
         coreImpl.initialize(
             DeployDealSystem.DEFAULT_EPOCH_DURATION,
-            DeployDealSystem.DEFAULT_MIN_DEPOSITED_Epochs,
-            DeployDealSystem.DEFAULT_MIN_REMATCHING_Epochs,
+            DeployDealSystem.DEFAULT_MIN_DEPOSITED_EPOCHS,
+            DeployDealSystem.DEFAULT_MIN_REMATCHING_EPOCHS,
             DeployDealSystem.DEFAULT_MIN_PROTOCOL_VERSION,
             DeployDealSystem.DEFAULT_MAX_PROTOCOL_VERSION,
-            dealImpl
+            dealImpl,
+            false
         );
     }
 

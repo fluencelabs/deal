@@ -27,7 +27,8 @@ interface ICore is IEpochController, IGlobalConst {
         uint256 minRematchingEpochs_,
         uint256 minProtocolVersion_,
         uint256 maxProtocolVersion_,
-        IDeal dealImpl_
+        IDeal dealImpl_,
+        bool isWhitelistEnabled_
     ) external;
 
     /// @dev Sets modules

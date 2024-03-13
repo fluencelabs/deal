@@ -9,15 +9,15 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
 import "src/deal/base/Types.sol";
 import "src/utils/RandomXProxy.sol";
-import "src/utils/Whitelist.sol";
 import "src/utils/BytesConverter.sol";
+import "src/utils/Whitelist.sol";
 import "./interfaces/ICapacity.sol";
 import "./CapacityConst.sol";
 import "./Vesting.sol";
 import "./Snapshot.sol";
 import "forge-std/console.sol";
 
-contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, Whitelist, ICapacity {
+contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, ICapacity {
     using SafeERC20 for IERC20;
     using BytesConverter for bytes;
     using Address for address payable;
@@ -68,14 +68,11 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         uint256 maxProofsPerEpoch_,
         uint256 withdrawEpochsAfterFailed_,
         uint256 maxFailedRatio_,
-        bool isWhitelistEnabled_,
         bytes32 initGlobalNonce_,
         bytes32 difficulty_,
         uint256 initRewardPool_,
         address randomXProxy_
     ) external initializer {
-        __Ownable_init(msg.sender);
-        __Whitelist_init(isWhitelistEnabled_);
         __CapacityConst_init(
             fltPrice_,
             usdCollateralPerUnit_,
@@ -103,6 +100,13 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyCoreOwner {}
+    // #endregion
+
+    // #region ------------------ Modifiers ------------------
+    modifier onlyApproved() {
+        require(Whitelist(address(core)).isApproved(msg.sender), "Whitelist: provider is not approved");
+        _;
+    }
     // #endregion
 
     // #region ----------------- Public View -----------------

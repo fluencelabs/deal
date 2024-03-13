@@ -23,6 +23,10 @@ dataSources:
       eventHandlers:
         - event: Initialized(uint8)
           handler: handleInitialized
+        - event: WhitelistAccessGranted(address)
+          handler: handleWhitelistAccessGranted
+        - event: WhitelistAccessRevoked(address)
+          handler: handleWhitelistAccessRevoked
       file: ./src/mappings/core.ts
   - kind: ethereum/contract
     name: Market
@@ -129,10 +133,6 @@ dataSources:
       eventHandlers:
         - event: Initialized(uint8)
           handler: handleInitialized
-        - event: WhitelistAccessGranted(address)
-          handler: handleWhitelistAccessGranted
-        - event: WhitelistAccessRevoked(address)
-          handler: handleWhitelistAccessRevoked
         - event: CommitmentCreated(indexed
             bytes32,bytes32,uint256,address,uint256,uint256)
           handler: handleCommitmentCreated

@@ -301,7 +301,8 @@ contract DeployContracts is Depoyments, Script {
                     minRematchingEpochs_,
                     minProtocolVersion_,
                     maxProtocolVersion_,
-                    dealImpl
+                    dealImpl,
+                    isWhitelistEnabled_
                 )
             ),
             needToRedeployMarket || needToRedeployCapacity || needToRedeployDealFactory
@@ -336,7 +337,6 @@ contract DeployContracts is Depoyments, Script {
                     maxProofsPerEpoch_,
                     withdrawEpochsAfterFailed_,
                     maxFailedRatio_,
-                    isWhitelistEnabled_,
                     initGlobalNonce_,
                     difficulty_,
                     initRewardPool_,
