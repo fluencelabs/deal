@@ -2,7 +2,7 @@ import type { ContractsENV } from "../../client/config.js";
 
 // TODO: b/w deployed contracts and deployed subgraphs to the contracts should be
 //  match somehow. Currently, this match is hardcoded in the file (not good).
-// Method is used only in ./indexerClientABC. To reuse in your code - check above.
+// Method is used only in ./indexerClient. To reuse in your code - check above.
 export const getIndexerUrl = (env: ContractsENV) => {
   let indexerUrl: string | undefined = undefined;
 
