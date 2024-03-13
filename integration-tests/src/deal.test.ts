@@ -55,12 +55,12 @@ describe(
       const maxWorkerPerProviderDeal = 1;
       const pricePerWorkerEpochDeal = registeredOffer.minPricePerWorkerEpoch;
 
-      const minDealDepositedEpoches =
-        await coreContract.minDealDepositedEpoches();
+      const minDealDepositedEpochs =
+        await coreContract.minDealDepositedEpochs();
       const toApproveFromDeployer =
         BigInt(targetWorkersDeal) *
         pricePerWorkerEpochDeal *
-        minDealDepositedEpoches;
+        minDealDepositedEpochs;
 
       console.info(
         "Send approve of payment token for amount = ",
