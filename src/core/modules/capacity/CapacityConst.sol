@@ -180,7 +180,7 @@ contract CapacityConst is BaseModule, ICapacityConst {
 
     function difficulty() public view returns (bytes32) {
         ConstStorage storage constantsStorage = _getConstStorage();
-        if (constantsStorage.proof.difficultyChangeEpoch >= core.currentEpoch()) {
+        if (core.currentEpoch() >= constantsStorage.proof.difficultyChangeEpoch) {
             return constantsStorage.proof.nextDifficulty;
         }
 

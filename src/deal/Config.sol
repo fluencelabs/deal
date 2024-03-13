@@ -79,6 +79,9 @@ contract Config is OwnableUpgradableDiamond, IConfig {
         AccessType providersAccessType_,
         address[] calldata providersAccessList_
     ) internal onlyInitializing {
+        require(minWorkers_ > 0, "Config: minWorkers should be greater than 0");
+        require(minWorkers_ <= targetWorkers_, "Config: minWorkers should be less or equal to targetWorkers");
+
         ConfigStorage storage configStorage = _getConfigStorage();
 
         configStorage.creationBlock = block.number;

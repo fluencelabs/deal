@@ -9,8 +9,8 @@ dataSources:
     network: local
     source:
       abi: Core
-      address: "0x172076E0166D1F9Cc711C77Adf8488051744980C"
-      startBlock: 12131
+      address: "0x52173b6ac069619c206b9A0e75609fC92860AB2A"
+      startBlock: 5410
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -29,8 +29,8 @@ dataSources:
     network: local
     source:
       abi: Market
-      address: "0x2B0d36FACD61B71CC05ab8F3D2355ec3631C0dd5"
-      startBlock: 12131
+      address: "0xd977422c9eE9B646f64A4C4389a6C98ad356d8C4"
+      startBlock: 5410
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -82,8 +82,8 @@ dataSources:
     network: local
     source:
       abi: DealFactory
-      address: "0x46b142DD1E924FAb83eCc3c08e4D46E82f005e0E"
-      startBlock: 12131
+      address: "0x6e0a5725dD4071e46356bD974E13F35DbF9ef367"
+      startBlock: 5410
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -109,8 +109,8 @@ dataSources:
     network: local
     source:
       abi: Capacity
-      address: "0xfbC22278A96299D91d41C453234d97b4F5Eb9B2d"
-      startBlock: 12131
+      address: "0x1eB5C49630E08e95Ba7f139BcF4B9BA171C9a8C7"
+      startBlock: 5410
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -143,6 +143,8 @@ dataSources:
           handler: handleCollateralDeposited
         - event: CommitmentStatsUpdated(bytes32,uint256,uint256,uint256,uint256,uint256)
           handler: handleCommitmentStatsUpdated
+        - event: CommitmentFailed(indexed bytes32,uint256)
+          handler: handleCommitmentFailed
         - event: CommitmentRemoved(indexed bytes32)
           handler: handleCommitmentRemoved
         - event: CommitmentFinished(indexed bytes32)

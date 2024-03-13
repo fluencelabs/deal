@@ -125,6 +125,8 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         CommitmentStorage storage s = _getCommitmentStorage();
         Commitment storage cc = s.commitments[commitmentId];
 
+        require(cc.info.peerId != bytes32(0x00), "Capacity commitment doesn't exist");
+
         return CommitmentView({
             status: getStatus(commitmentId),
             peerId: cc.info.peerId,
@@ -642,6 +644,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
     // #endregion
     // #region ----------------- Internal Mutable -----------------
 
+    // IMPORTANT: This function affects the off-chain indexer. If you change it, make sure to update the indexer accordingly.
     function _preCommitCommitmentSnapshot(
         Commitment storage cc,
         Snapshot.Cache memory snapshotCache,
@@ -683,7 +686,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         // if on unit not send proof per one epoch, it's mean that it's one fail
         // maxFailedRatio is the ratio of failed attempts for all units
         uint256 maxFailCount = maxFailedRatio_ * unitCount;
-        uint256 snapshotEpochCount = snapshotEpoch - snapshotEpoch;
+        uint256 snapshotEpochCount = snapshotEpoch - lastSnapshotEpoch;
         uint256 requiredSuccessCount = activeUnitCount_ * snapshotEpochCount;
         // #endregion
 
@@ -763,7 +766,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
             _setActiveUnitCount(activeUnitCount() - initialActiveUnitCount_);
         }
 
-        if (snapshotCache.current.status == CCStatus.Failed) {
+        if (snapshotCache.initial.status != CCStatus.Failed && snapshotCache.current.status == CCStatus.Failed) {
             emit CommitmentFailed(commitmentId, snapshotCache.current.failedEpoch);
         }
 

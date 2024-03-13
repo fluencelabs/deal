@@ -144,9 +144,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
             emit MaxPaidEpochUpdated(0);
         } else if (newWorkerCount >= minWorkerCount) {
             uint256 maxPaidEpoch = commitEpoch;
-            if (newWorkerCount != 0) {
-                maxPaidEpoch = commitEpoch + balance.getTotalBalance() / (pricePerWorkerEpoch_ * newWorkerCount);
-            }
+            maxPaidEpoch = commitEpoch + balance.getTotalBalance() / (pricePerWorkerEpoch_ * newWorkerCount);
 
             dealStorage.maxPaidEpoch = maxPaidEpoch;
             emit MaxPaidEpochUpdated(maxPaidEpoch);

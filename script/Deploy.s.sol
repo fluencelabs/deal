@@ -40,7 +40,7 @@ contract DeployContracts is Depoyments, Script {
     uint256 constant DEFAULT_FLT_PRICE = 1 * PRECISION; // 1 USD
     uint256 constant DEFAULT_USD_COLLATERAL_PER_UNIT = 100 * PRECISION; // 0.3 USD
     uint256 constant DEFAULT_USD_TARGET_REVENUE_PER_EPOCH = PRECISION / 10 * 3; // 1 USD
-    uint256 constant DEFAULT_MIN_DURATION = 5;
+    uint256 constant DEFAULT_MIN_DURATION = 10;
     uint256 constant DEFAULT_MIN_REWARD_PER_EPOCH = 100 ether;
     uint256 constant DEFAULT_MAX_REWARD_PER_EPOCH = 200 ether;
     uint256 constant DEFAULT_VESTING_PERIOD_DURATION = 3;
@@ -49,7 +49,7 @@ contract DeployContracts is Depoyments, Script {
     uint256 constant DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH = 2;
     uint256 constant DEFAULT_MAX_PROOFS_PER_EPOCH = 5;
     uint256 constant DEFAULT_WITHDRAW_EPOCHES_AFTER_FAILED = 2;
-    uint256 constant DEFAULT_MAX_FAILED_RATIO = 40;
+    uint256 constant DEFAULT_MAX_FAILED_RATIO = 10;
     bool constant DEFAULT_IS_WHITELIST_ENABLED = false;
     bytes32 public constant DEFAULT_INIT_GLOBAL_NONCE = keccak256("init_global_nonce");
     bytes32 public constant DEFAULT_DIFFICULTY = 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff;

@@ -80,7 +80,6 @@ export function getMinRequiredProofsPerEpoch(contractAddress: Address): BigInt {
   return Capacity.bind(contractAddress).minRequierdProofsPerEpoch();
 }
 
-// It mirrors _failedEpoch internal method in Capacity.sol.
 export function calculateNextFailedCCEpoch(
   maxFailedRatio: BigInt,
   unitCount: BigInt,
@@ -89,28 +88,41 @@ export function calculateNextFailedCCEpoch(
   totalFailCount: BigInt,
   lastSnapshotEpoch: BigInt,
 ): BigInt {
+  // if activeUnitCount is 0, then it is impossible to fail.
   if (activeUnitCount == ZERO_BIG_INT) {
     return MAX_UINT_256;
   }
 
+  // calculate the number of max possible fails
   const maxFails = maxFailedRatio * unitCount;
+
+  // calculate the number of remaining fails before the CC will be failed
   let remainingFails = ZERO_BIG_INT;
   if (totalFailCount < maxFails) {
     remainingFails = maxFails - totalFailCount;
+  } else {
+    return lastSnapshotEpoch;
   }
 
+  // calculate the epoch when the CC will be failed if CC will not send any proofs
   let failedEpoch = ZERO_BIG_INT;
 
+  // if activeUnitCount > remainingFails, then the CC will be failed in the next epoch
   if (activeUnitCount > remainingFails) {
     failedEpoch = lastSnapshotEpoch + UNO_BIG_INT;
   } else {
+    // remove activeUnitCount from remainingFails because in the next epoch only activeUnitCount will be failed
     remainingFails = remainingFails - activeUnitCount;
     failedEpoch = lastSnapshotEpoch + UNO_BIG_INT;
 
+    // calculate the rest epoch but with the nextAdditionalActiveUnitCount
     let newActiveUnitCount = activeUnitCount + nextAdditionalActiveUnitCount;
+
+    // count an integer number of failed epochs
     let numberOfFillFailedEpoch = remainingFails / newActiveUnitCount;
     let remainingFailedUnitsInLastEpoch = remainingFails % newActiveUnitCount;
 
+    // if we have remainder then we need to add one more epoch
     if (remainingFailedUnitsInLastEpoch != ZERO_BIG_INT) {
       numberOfFillFailedEpoch += UNO_BIG_INT;
     }

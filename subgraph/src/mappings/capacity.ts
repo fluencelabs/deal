@@ -19,6 +19,8 @@ import {
   CollateralDeposited,
   CommitmentActivated,
   CommitmentCreated,
+  CommitmentFailed,
+  CommitmentFailed,
   CommitmentFinished,
   CommitmentRemoved,
   CommitmentStatsUpdated,
@@ -138,6 +140,7 @@ export function handleCommitmentActivated(event: CommitmentActivated): void {
   }
   commitment.nextAdditionalActiveUnitCount = 0;
   const graphNetwork = createOrLoadGraphNetwork();
+
   commitment.snapshotEpoch = calculateEpoch(
     event.block.timestamp,
     BigInt.fromI32(graphNetwork.initTimestamp),
@@ -202,6 +205,17 @@ export function handleCommitmentFinished(event: CommitmentFinished): void {
   peer.save();
 }
 
+export function handleCommitmentFailed(event: CommitmentFailed): void {
+  let commitment = CapacityCommitment.load(
+    event.params.commitmentId.toHexString(),
+  ) as CapacityCommitment;
+
+  commitment.failedEpoch = event.params.failedEpoch;
+  commitment.status = CapacityCommitmentStatus.Failed;
+
+  commitment.save();
+}
+
 export function handleCommitmentStatsUpdated(
   event: CommitmentStatsUpdated,
 ): void {
@@ -217,31 +231,31 @@ export function handleCommitmentStatsUpdated(
     event.params.nextAdditionalActiveUnitCount.toI32();
 
   const graphNetwork = createOrLoadGraphNetwork();
-  // Calculate next failed epoch.
-  const _calculatedFailedEpoch = calculateNextFailedCCEpoch(
-    BigInt.fromString(graphNetwork.capacityMaxFailedRatio.toString()),
-    BigInt.fromString(commitment.computeUnitsCount.toString()),
-    BigInt.fromString(commitment.activeUnitCount.toString()),
-    BigInt.fromString(commitment.nextAdditionalActiveUnitCount.toString()),
-    BigInt.fromString(commitment.totalFailCount.toString()),
-    BigInt.fromString(event.params.changedEpoch.toString()),
-  );
-  commitment.nextCCFailedEpoch = _calculatedFailedEpoch;
 
-  // Additional check if failedEpoch could be committed in CC model.
+  if (commitment.failedEpoch != ZERO_BIG_INT) {
+    commitment.nextCCFailedEpoch = commitment.failedEpoch;
+  } else {
+    // Calculate next failed epoch.
+    const _calculatedFailedEpoch = calculateNextFailedCCEpoch(
+      BigInt.fromString(graphNetwork.capacityMaxFailedRatio.toString()),
+      BigInt.fromString(commitment.computeUnitsCount.toString()),
+      BigInt.fromString(commitment.activeUnitCount.toString()),
+      BigInt.fromString(commitment.nextAdditionalActiveUnitCount.toString()),
+      BigInt.fromString(commitment.totalFailCount.toString()),
+      BigInt.fromString(event.params.changedEpoch.toString()),
+    );
+    commitment.nextCCFailedEpoch = _calculatedFailedEpoch;
+  }
+  commitment.save();
+
   const currentEpoch = calculateEpoch(
     event.block.timestamp,
     BigInt.fromI32(graphNetwork.initTimestamp),
     BigInt.fromI32(graphNetwork.coreEpochDuration),
   );
-  if (currentEpoch >= _calculatedFailedEpoch) {
-    commitment.failedEpoch = currentEpoch;
-    commitment.status = CapacityCommitmentStatus.Failed;
-  }
-  commitment.save();
 
   let peer = Peer.load(commitment.peer) as Peer;
-  peer.currentCCNextCCFailedEpoch = _calculatedFailedEpoch;
+  peer.currentCCNextCCFailedEpoch = commitment.nextCCFailedEpoch;
   peer.save();
 
   // Save commitment stat for evolution graph.
@@ -250,7 +264,10 @@ export function handleCommitmentStatsUpdated(
       commitment.id,
       currentEpoch.toString(),
     );
+
+  // totalFailCount is calculated by prevEpoch
   capacityCommitmentStatsPerEpoch.totalFailCount = commitment.totalFailCount;
+
   capacityCommitmentStatsPerEpoch.exitedUnitCount = commitment.exitedUnitCount;
   capacityCommitmentStatsPerEpoch.activeUnitCount = commitment.activeUnitCount;
   capacityCommitmentStatsPerEpoch.nextAdditionalActiveUnitCount =
@@ -266,9 +283,9 @@ export function handleCommitmentStatsUpdated(
   capacityCommitmentStatsPerEpoch.save();
 }
 
-export function handleUnitActivated(event: UnitActivated): void { }
+export function handleUnitActivated(event: UnitActivated): void {}
 
-export function handleUnitDeactivated(event: UnitDeactivated): void { }
+export function handleUnitDeactivated(event: UnitDeactivated): void {}
 
 export function handleProofSubmitted(event: ProofSubmitted): void {
   let proofSubmitted = new SubmittedProof(event.transaction.hash.toHexString());
