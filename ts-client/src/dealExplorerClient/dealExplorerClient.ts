@@ -65,9 +65,9 @@ import { DealRpcClient } from "./rpcClient/index.js";
 import {
   calculateEpoch,
   DEFAULT_ORDER_TYPE,
-  DEFAULT_TOKEN_VALUE_ROUNDING,
   FILTER_MULTISELECT_MAX,
-  tokenValueToRounded,
+  type SerializationSettings,
+  tokenValueToRounded
 } from "./utils.js";
 import {
   serializeCUStatus,
@@ -124,11 +124,13 @@ export class DealExplorerClient {
   private _capacityContract: ICapacity | null;
   private _capacityContractAddress: string | null;
   private _capacityMinRequiredProofsPerEpoch: number | null;
+  private _serializationSettings: SerializationSettings;
 
   constructor(
     network: ContractsENV,
     chainRpcUrl?: string,
     caller?: ethers.Provider | ethers.Signer,
+    serializationSettings?: SerializationSettings,
   ) {
     if (chainRpcUrl) {
       console.warn("Do not use chainRPCUrl, use provider instead.");
@@ -137,6 +139,14 @@ export class DealExplorerClient {
       this._caller = caller;
     } else {
       throw Error("One of chainRPCUrl or provider should be delclared.");
+    }
+    if (serializationSettings) {
+      this._serializationSettings = serializationSettings;
+    } else {
+      this._serializationSettings = {
+          parseNativeTokenToFixedDefault: 18,
+          parseTokenToFixedDefault: 3,
+        }
     }
     this._indexerClient = new IndexerClient(network);
     this._dealContractsClient = new DealClient(this._caller, network);
@@ -250,7 +260,7 @@ export class DealExplorerClient {
     const res = [];
     if (data) {
       for (const provider of data.providers) {
-        res.push(serializeProviderShort(provider));
+        res.push(serializeProviderShort(provider, this._serializationSettings));
       }
     }
     let total = null;
@@ -440,7 +450,7 @@ export class DealExplorerClient {
     const res = [];
     if (data) {
       for (const offer of data.offers) {
-        res.push(serializeOfferShort(offer));
+        res.push(serializeOfferShort(offer, this._serializationSettings));
       }
     }
     let total = null;
@@ -490,7 +500,7 @@ export class DealExplorerClient {
     let res: OfferDetail | null = null;
     if (data && data.offer) {
       res = {
-        ...serializeOfferShort(data.offer),
+        ...serializeOfferShort(data.offer, this._serializationSettings),
         peers: serializePeers(data.offer.peers as Array<BasicPeerFragment>),
         updatedAt: Number(data.offer.updatedAt),
       };
@@ -542,10 +552,14 @@ export class DealExplorerClient {
       for (let i = 0; i < data.deals.length; i++) {
         const deal = data.deals[i] as BasicDealFragment;
         res.push(
-          serializeDealsShort(deal, {
-            dealStatus: dealStatuses[i],
-            freeBalance: freeBalances[i],
-          }),
+          serializeDealsShort(
+            deal,
+            {
+              dealStatus: dealStatuses[i],
+              freeBalance: freeBalances[i],
+            },
+              this._serializationSettings,
+            ),
         );
       }
     }
@@ -641,10 +655,15 @@ export class DealExplorerClient {
         deal.providersAccessList,
       );
       res = {
-        ...serializeDealsShort(deal, { dealStatus, freeBalance }),
+        ...serializeDealsShort(
+          deal,
+          { dealStatus, freeBalance },
+          this._serializationSettings,
+          ),
+        // USDC.
         pricePerWorkerEpoch: tokenValueToRounded(
           deal.pricePerWorkerEpoch,
-          DEFAULT_TOKEN_VALUE_ROUNDING,
+          this._serializationSettings.parseTokenToFixedDefault,
           deal.paymentToken.decimals,
         ),
         maxWorkersPerProvider: deal.maxWorkersPerProvider,
@@ -877,6 +896,7 @@ export class DealExplorerClient {
       capacityCommitmentRpcDetails.totalRewards,
       capacityCommitment.rewardWithdrawn,
       capacityCommitment.delegator,
+      this._serializationSettings,
     );
   }
 
@@ -988,8 +1008,12 @@ export class DealExplorerClient {
       providerId: computeUnit.provider.id,
       currentCommitmentId: currentPeerCapacityCommitment?.id,
       peerId: computeUnit.peer.id,
+      // FLT.
       collateral: currentPeerCapacityCommitment
-        ? tokenValueToRounded(currentPeerCapacityCommitment.collateralPerUnit)
+        ? tokenValueToRounded(
+            currentPeerCapacityCommitment.collateralPerUnit,
+            this._serializationSettings.parseNativeTokenToFixedDefault,
+          )
         : "0",
       successProofs: currentPeerCapacityCommitment
         ? currentPeerCapacityCommitment.submittedProofsCount
