@@ -1,6 +1,9 @@
 import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type { ContractsENV } from "../client/config.js";
 import type { OfferDetail } from "./types/schemes.js";
+import { serializeOfferDetail } from "./serializers/schemes.js";
+import type { SerializationSettings } from "../utils/serializers.js";
+
 
 /*
  * @dev This client represents endpoints to access desirable indexer data in REST
@@ -13,29 +16,39 @@ export class DealCliClient {
 
   // @param indexerUrl: is optional. If use the param you replace indexer
   //  URL setting from network config mapping.
-  constructor(network: ContractsENV, indexerUrl?: string) {
+  // @param chainRpcUrl: is optional (or set caller)
+  // @param caller: is optional (or set chainRpcUrl)
+  private _serializationSettings: SerializationSettings;
+  constructor(
+    network: ContractsENV,
+    indexerUrl?: string,
+    serializationSettings?: SerializationSettings,
+  ) {
     this.indexerClient = new IndexerClient(network, indexerUrl);
+    if (serializationSettings) {
+      this._serializationSettings = serializationSettings;
+    } else {
+      this._serializationSettings = {
+          parseNativeTokenToFixedDefault: 18,
+          parseTokenToFixedDefault: 3,
+        }
+    }
   }
 
-  async getOffer(offerId: string): Promise<OfferDetail> {
-    const fetchedOffer = (await this.indexerClient.getOffer({ id: offerId }))
-      .offer;
-    if (!fetchedOffer) {
-      throw new Error(`Offer with id ${offerId} does not exist in indexer.`);
-    }
-    return {
-      id: fetchedOffer.id,
-      peerIds:
-        fetchedOffer.peers?.map((peer) => {
-          return peer.id;
-        }) ?? [],
-      effectors:
-        fetchedOffer.effectors?.map((data) => {
-          return {
-            cid: data.effector.id,
-            description: data.effector.description,
-          };
-        }) ?? [],
+  // Get Offer detail, i.e. with its peers and compute units.
+  // Note, that it can not return more than 1000 peers per offer,
+  //  and more than 1000 compute units per each peer.
+  async getOffer(offerId: string): Promise<OfferDetail | null> {
+    const options = {
+      id: offerId,
     };
+    const data = await this.indexerClient.getOffer(options);
+    if (data.offer) {
+      return serializeOfferDetail(data.offer, this._serializationSettings)
+    }
+    return null
   }
+
+  // TODO: need more info.
+  // async getDealsByProvider(providerId: string): Promise<DealByProviderListView> {}
 }
