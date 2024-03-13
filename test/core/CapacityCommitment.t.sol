@@ -142,7 +142,7 @@ contract CapacityCommitmentTest is Test {
         assertEq(commitment.endEpoch, commitment.startEpoch + ccDuration, "Duration mismatch");
         assertEq(commitment.rewardDelegatorRate, rewardCCDelegationRate, "RewardDelegatorRate mismatch");
         assertEq(commitment.delegator, ccDelegator, "Delegator mismatch");
-        assertEq(commitment.totalFailCount, 0, "TotalCUFailCount mismatch");
+        assertEq(commitment.totalFailCount, 0, "TotalFailCount mismatch");
         assertEq(commitment.startEpoch, 0, "StartEpoch mismatch");
         assertEq(commitment.failedEpoch, 0, "FailedEpoch mismatch");
         assertEq(commitment.exitedUnitCount, 0, "ExitedUnitCount mismatch");

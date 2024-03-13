@@ -126,7 +126,7 @@ query CapacityCommitmentStatsPerEpochQuery(
     capacityCommitment {
       id
     }
-    totalCUFailCount
+    totalFailCount
     exitedUnitCount
     activeUnitCount
     nextAdditionalActiveUnitCount
@@ -164,4 +164,3 @@ query ComputeUnitPerEpochStatsQuery(
     submittedProofsCount
   }
 }
-

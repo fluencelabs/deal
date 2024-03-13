@@ -210,7 +210,7 @@ export function handleCommitmentStatsUpdated(
     event.params.commitmentId.toHexString(),
   ) as CapacityCommitment;
 
-  commitment.totalFailCount = event.params.totalCUFailCount.toI32();
+  commitment.totalFailCount = event.params.totalFailCount.toI32();
   commitment.exitedUnitCount = event.params.exitedUnitCount.toI32();
   commitment.activeUnitCount = event.params.activeUnitCount.toI32();
   commitment.nextAdditionalActiveUnitCount =
