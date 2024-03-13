@@ -191,7 +191,7 @@ asyncRuntimeDecorator(main);
 
 # Develop
 ## GraphQL Scheme Generation
-It generates typescripts for the graphQl schemes declared in [src/indexerClient/queries](src/indexerClient/queries) via fetched graphql schemes. Instruction rules are defined in [codegen-deal-explorer-indexer.ts](codegen-deal-explorer-indexer.ts).
+It generates typescripts for the graphQl schemes declared in [src/dealExplorerClient/indexerClient/queries](src/dealExplorerClient/indexerClient/queries) via fetched graphql schemes. Instruction rules are defined in [codegen-deal-explorer-indexer.ts](codegen-deal-explorer-indexer.ts).
 
 Thus, TS files with `generated` key word you **should not rewrite manually**.
 
