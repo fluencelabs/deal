@@ -6,13 +6,6 @@ config({ path: [".env", ".env.local"] });
 
 const TEST_NETWORK: ContractsENV = "local";
 
-await new Promise((res) =>
-  setTimeout(() => {
-    console.log("set timeout", 30000);
-    res(123);
-  }, 3000),
-);
-
 export const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
 export const signer = await provider.getSigner();
 export const contractsClient = new DealClient(signer, TEST_NETWORK);

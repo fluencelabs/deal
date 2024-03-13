@@ -10,7 +10,8 @@
   "main": "index.js",
   "scripts": {
     "test": "vitest run --no-file-parallelism",
-    "lint": "prettier src --check && eslint --cache \"./src/**/*.ts\""
+    "lint": "prettier src --check && eslint --cache \"./src/**/*.ts\"",
+    "set-local-env": "EPOCH_DURATION=86400 docker compose -f ../docker/docker-compose.yml up -d --build chain-deploy-script"
   },
   "author": "",
   "license": "ISC",
