@@ -31,7 +31,7 @@ import type {
   ComputeUnitStatsPerCapacityCommitmentEpochListView,
   ComputeUnitWorkerDetail,
   ComputeUnitWorkerDetailListView,
-  ComputeUnitsWithCCStatusListView
+  ComputeUnitsWithCCStatusListView,
 } from "./types/schemes.js";
 import type {
   ChildEntitiesByProviderFilter,
@@ -67,7 +67,7 @@ import {
   DEFAULT_ORDER_TYPE,
   FILTER_MULTISELECT_MAX,
   type SerializationSettings,
-  tokenValueToRounded
+  tokenValueToRounded,
 } from "./utils.js";
 import {
   serializeCUStatus,
@@ -93,7 +93,7 @@ import {
   serializeOfferShort,
   serializePeers,
   serializeProviderBase,
-  serializeProviderShort
+  serializeProviderShort,
 } from "./serializers/schemes.js";
 import {
   serializeCapacityCommitmentsOrderByToIndexer,
@@ -144,9 +144,9 @@ export class DealExplorerClient {
       this._serializationSettings = serializationSettings;
     } else {
       this._serializationSettings = {
-          parseNativeTokenToFixedDefault: 18,
-          parseTokenToFixedDefault: 3,
-        }
+        parseNativeTokenToFixedDefault: 18,
+        parseTokenToFixedDefault: 3,
+      };
     }
     this._indexerClient = new IndexerClient(network);
     this._dealContractsClient = new DealClient(this._caller, network);
@@ -558,8 +558,8 @@ export class DealExplorerClient {
               dealStatus: dealStatuses[i],
               freeBalance: freeBalances[i],
             },
-              this._serializationSettings,
-            ),
+            this._serializationSettings,
+          ),
         );
       }
     }
@@ -659,7 +659,7 @@ export class DealExplorerClient {
           deal,
           { dealStatus, freeBalance },
           this._serializationSettings,
-          ),
+        ),
         // USDC.
         pricePerWorkerEpoch: tokenValueToRounded(
           deal.pricePerWorkerEpoch,
@@ -996,9 +996,7 @@ export class DealExplorerClient {
     }
     const computeUnit = data.computeUnit;
 
-    const { status } = serializeCUStatus(
-      computeUnit,
-    );
+    const { status } = serializeCUStatus(computeUnit);
     const currentPeerCapacityCommitment =
       computeUnit.peer.currentCapacityCommitment;
 
