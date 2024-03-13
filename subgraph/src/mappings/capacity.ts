@@ -266,9 +266,9 @@ export function handleCommitmentStatsUpdated(
   capacityCommitmentStatsPerEpoch.save();
 }
 
-export function handleUnitActivated(event: UnitActivated): void {}
+export function handleUnitActivated(event: UnitActivated): void { }
 
-export function handleUnitDeactivated(event: UnitDeactivated): void {}
+export function handleUnitDeactivated(event: UnitDeactivated): void { }
 
 export function handleProofSubmitted(event: ProofSubmitted): void {
   let proofSubmitted = new SubmittedProof(event.transaction.hash.toHexString());
