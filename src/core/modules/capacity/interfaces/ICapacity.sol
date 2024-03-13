@@ -113,7 +113,7 @@ interface ICapacity is ICapacityConst {
 
     struct Commitment {
         CommitmentInfo info;
-        CommitmentPrograss progress;
+        CommitmentProgress progress;
         CommitmentFinish finish;
         Vesting.Info vesting;
         mapping(bytes32 => UnitInfo) unitInfoById;
@@ -136,7 +136,7 @@ interface ICapacity is ICapacityConst {
         uint256 exitedUnitCount;
     }
 
-    struct CommitmentPrograss {
+    struct CommitmentProgress {
         uint256 currentSuccessCount;
         uint256 totalFailCount;
         uint256 snapshotEpoch;

@@ -589,6 +589,8 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
 
         // #region init and verify variables
         uint256 currentEpoch = core.currentEpoch();
+        uint256 startEpoch = currentEpoch + 1;
+        uint256 prevEpoch = currentEpoch - 1;
 
         Commitment storage cc = s.commitments[commitmentId];
         IMarket.ComputePeer memory peer = market.getComputePeer(cc.info.peerId);
@@ -607,7 +609,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         unitInfo.isInactive = false;
         unitInfo.lastSnapshotEpoch = currentEpoch;
 
-        emit UnitActivated(commitmentId, unitId, currentEpoch + 1);
+        emit UnitActivated(commitmentId, unitId, startEpoch);
         // #endregion
 
         // if status is not active, then we don't need to update activeUnitCount
@@ -615,18 +617,20 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
             return;
         }
 
+        // add one active unit to global activeUnitCount and commitment activeUnitCount
         cc.progress.nextAdditionalActiveUnitCount += 1;
         _setActiveUnitCount(activeUnitCount() + 1);
 
-        market.setStartEpoch(unitId, currentEpoch + 1);
+        market.setStartEpoch(unitId, startEpoch);
 
+        // we put here prevEpoch because commit snapshot was made for the previous epoch
         emit CommitmentStatsUpdated(
             commitmentId,
             cc.progress.totalFailCount,
             cc.finish.exitedUnitCount,
             cc.progress.activeUnitCount,
             cc.progress.nextAdditionalActiveUnitCount,
-            currentEpoch - 1
+            prevEpoch
         );
     }
     // #endregion
