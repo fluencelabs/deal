@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import {Test, console2} from "forge-std/Test.sol";
 import "test/utils/DeployDealSystem.sol";
 import "test/utils/TestHelper.sol";
+import "src/core/modules/capacity/Capacity.sol";
 
 contract OfferTest is Test {
     using SafeERC20 for IERC20;
