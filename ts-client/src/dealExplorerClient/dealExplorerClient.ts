@@ -111,8 +111,14 @@ import {
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
  * @dev It supports kras, stage, testnet, local by selecting related contractsEnv.
+ * @dev This client is created in the following hypothesis:
+ * @dev  - not more than 1000 Compute Units per Peer exist.
+ * @dev  - not more than 1000 Peers per Offer possible.
+ * @dev Otherwise there should be additional pagination through child fields of some models
  */
 export class DealExplorerClient {
+  // Default page limit supposed by business logic on Network Explorer.
+  //  It does not used for child models.
   DEFAULT_PAGE_LIMIT = 100;
   // For MVM we suppose that everything is in USDC.
   //  Used only with filters - if no token selected.

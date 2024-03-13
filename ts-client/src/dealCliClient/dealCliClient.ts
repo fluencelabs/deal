@@ -10,6 +10,10 @@ import type { SerializationSettings } from "../utils/serializers.js";
  * @dev  manner from POV of Fluence CLI.
  * @dev Currently, it uses only data from indexer (subgraph) only.
  * @dev It supports mainnet, testnet by selecting related contractsEnv.
+ * @dev This client is created in the following hypothesis:
+ * @dev  - not more than 1000 Compute Units per Peer exist.
+ * @dev  - not more than 1000 Peers per Offer possible.
+ * @dev Otherwise there should be additional pagination through child fields of some models
  */
 export class DealCliClient {
   public indexerClient: IndexerClient;
