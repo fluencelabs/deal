@@ -128,18 +128,6 @@ describe("Deal tests", () => {
     freeBalance = await deal.getFreeBalance();
     console.log("deal free balance", freeBalance);
 
-    // TODO: enable deal withdraw
-    // console.log("Deal withdraw...");
-    // await (
-    //   await deal.withdraw(amountToDeposit / 2n)
-    // ).wait(DEFAULT_CONFIRMATIONS);
-    // const [dealWithdrawEvent] = await confirmEvents(
-    //   deal,
-    //   deal.filters.Withdrawn,
-    //   1,
-    // );
-    // expect(dealWithdrawEvent?.args.amount).toEqual(amountToDeposit);
-
     freeBalance = await deal.getFreeBalance();
     console.log("deal free balance", freeBalance);
 

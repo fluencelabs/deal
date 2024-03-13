@@ -20,8 +20,6 @@ import {
 
 config({ path: [".env", ".env.local"] });
 
-const NEXT_EPOCH_INTERVAL = 200;
-
 async function sendProof(
   sender: string,
   cuId: string,
@@ -30,15 +28,12 @@ async function sendProof(
 ) {
   const difficulty = await capacityContract.difficulty();
   let sentProofRounds = 0;
-  let currentEpoch = await coreContract.currentEpoch();
-  console.log(currentEpoch, "currentEpoch");
-  const provider = capacityContract.runner?.provider;
-  assert(provider, "no provider");
   let currentNonce = await provider.getTransactionCount(sender);
 
-  while (sentProofRounds++ < proofs) {
+  while (sentProofRounds++ < epoches) {
     const txs: Array<ContractTransactionResponse> = [];
-    for (let i = 0; i < epoches; i++) {
+    const epochDuration = await coreContract.epochDuration();
+    for (let i = 0; i < proofs; i++) {
       txs.push(
         await capacityContract.submitProof(
           cuId,
@@ -52,15 +47,7 @@ async function sendProof(
     }
 
     await Promise.all(txs.map((tx) => tx.wait(DEFAULT_CONFIRMATIONS)));
-
-    let newEpoch;
-    do {
-      await new Promise((resolve) => setTimeout(resolve, NEXT_EPOCH_INTERVAL));
-      newEpoch = await coreContract.currentEpoch();
-      console.log(newEpoch, "newEpoch");
-    } while (newEpoch === currentEpoch);
-
-    currentEpoch = newEpoch;
+    await skipEpoch(provider, epochDuration);
   }
 }
 
@@ -97,7 +84,7 @@ describe("Capacity commitment", () => {
     expect(removeCommitmentEvent.args).toEqual([commitmentId]);
   });
 
-  test.only("CC fails if proofs haven't been sent", async () => {
+  test("CC fails if proofs haven't been sent", async () => {
     const registeredOffer = await registerMarketOffer(
       marketContract,
       signerAddress,
@@ -150,20 +137,11 @@ describe("Capacity commitment", () => {
         capacityActivatedEvent.args.startEpoch,
     ]).toEqual([registeredOffer.peers[0]?.peerId, commitmentId, duration]);
 
-    const [epochDuration, currentEpoch] = await Promise.all([
-      coreContract.epochDuration(),
-      coreContract.currentEpoch(),
-    ]);
-    console.log(currentEpoch, "currentEpoch");
+    const epochDuration = await coreContract.epochDuration();
 
-    await skipEpoch(provider, epochDuration, 2);
-
-    const [currentEpoch1] = await Promise.all([coreContract.currentEpoch()]);
-    console.log(currentEpoch1, "currentEpoch1");
+    await skipEpoch(provider, epochDuration, 1);
 
     const currentState = await capacityContract.getCommitment(commitmentId);
-    const [currentEpoch2] = await Promise.all([coreContract.currentEpoch()]);
-    console.log(currentEpoch2, "currentEpoch2");
     expect(currentState.status).toEqual(BigInt(CCStatus.Active));
 
     console.log("Waiting for the fail...");
@@ -173,83 +151,20 @@ describe("Capacity commitment", () => {
     expect(currentStateAfterSomeEpoches.status).toEqual(
       BigInt(CCStatus.Failed),
     );
-  });
 
-  test("CC ends after duration", async () => {
-    const registeredOffer = await registerMarketOffer(
-      marketContract,
-      signerAddress,
-      paymentTokenAddress,
-    );
-
-    const [commitmentId] = await createCommitments(
-      capacityContract,
-      signerAddress,
-      registeredOffer.peers.map((p) => p.peerId),
-    );
-
-    console.log("Commitment is created", commitmentId);
-
-    assert(commitmentId, "Commitment ID doesn't exist");
-
-    const collateralPerUnit = await capacityContract.fltCollateralPerUnit();
-
-    console.log("Depositing collateral...");
-    const depositCollateralReceipt = await capacityContract
-      .depositCollateral([commitmentId], {
-        value: collateralPerUnit,
-      })
-      .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
-
-    // TODO: move to constant
-    const duration = CC_DURATION_DEFAULT;
-
-    const collateralDepositedEvent = checkEvent(
-      capacityContract.filters.CollateralDeposited,
-      depositCollateralReceipt,
-    );
-    expect(collateralDepositedEvent.args).toEqual([
-      commitmentId,
-      collateralPerUnit,
-    ]);
-
-    const capacityActivatedEvent = checkEvent(
-      capacityContract.filters.CommitmentActivated,
-      depositCollateralReceipt,
-    );
-
-    expect([
-      capacityActivatedEvent.args.peerId,
-      capacityActivatedEvent.args.commitmentId,
-      capacityActivatedEvent.args.endEpoch -
-        capacityActivatedEvent.args.startEpoch,
-    ]).toEqual([registeredOffer.peers[0]?.peerId, commitmentId, duration]);
-
-    const epochDuration = await coreContract.epochDuration();
-
-    await skipEpoch(provider, epochDuration, 1);
-
-    const currentState = await capacityContract.getCommitment(commitmentId);
-    expect(currentState.status).toEqual(BigInt(CCStatus.Active));
-
-    await skipEpoch(provider, epochDuration, duration);
-
-    const nextStatus = await capacityContract.getCommitment(commitmentId);
-    expect(nextStatus.status).toEqual(BigInt(CCStatus.Failed));
-
-    const finishCommitmentTx = await capacityContract
+    const finishCommitmentReceipt = await capacityContract
       .finishCommitment(commitmentId)
       .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
 
     const finishCommitmentEvent = checkEvent(
       capacityContract.filters.CommitmentFinished,
-      finishCommitmentTx,
+      finishCommitmentReceipt,
     );
-    assert(finishCommitmentEvent, "Not Finish commitment event");
+    assert(finishCommitmentEvent, "No finish commitment event");
     expect(finishCommitmentEvent.args).toEqual([commitmentId]);
   });
 
-  test("CC receives proofs", async () => {
+  test.only("CC ends after duration", async () => {
     const registeredOffer = await registerMarketOffer(
       marketContract,
       signerAddress,
@@ -275,9 +190,6 @@ describe("Capacity commitment", () => {
       })
       .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
 
-    // TODO: move to constant
-    const duration = CC_DURATION_DEFAULT;
-
     const collateralDepositedEvent = checkEvent(
       capacityContract.filters.CollateralDeposited,
       depositCollateralReceipt,
@@ -297,19 +209,15 @@ describe("Capacity commitment", () => {
       capacityActivatedEvent.args.commitmentId,
       capacityActivatedEvent.args.endEpoch -
         capacityActivatedEvent.args.startEpoch,
-      capacityActivatedEvent.args.unitIds,
     ]).toEqual([
-      [
-        registeredOffer.peers[0]?.peerId,
-        commitmentId,
-        duration,
-        [registeredOffer.peers[0]?.unitIds[0]],
-      ],
+      registeredOffer.peers[0]?.peerId,
+      commitmentId,
+      CC_DURATION_DEFAULT,
     ]);
 
     const epochDuration = await coreContract.epochDuration();
 
-    await skipEpoch(provider, epochDuration, 2);
+    await skipEpoch(provider, epochDuration, 1);
 
     const currentState = await capacityContract.getCommitment(commitmentId);
     expect(currentState.status).toEqual(BigInt(CCStatus.Active));
@@ -318,26 +226,33 @@ describe("Capacity commitment", () => {
     assert(cuId, "cuID not defined");
 
     console.log("Sending proofs...");
+    await sendProof(signerAddress, cuId, 2, Number(CC_DURATION_DEFAULT - 1n));
 
-    await sendProof(signerAddress, cuId, 2, 3);
+    const currentStateAfterSentProofs =
+      await capacityContract.getCommitment(commitmentId);
+    expect(currentStateAfterSentProofs.status).toEqual(BigInt(CCStatus.Active));
 
-    // const submitProofTx = await capacityContract.submitProof(
-    //   cuId,
-    //   ethers.hexlify(ethers.randomBytes(32)),
-    //   difficulty,
-    // );
-    // await submitProofTx.wait(DEFAULT_CONFIRMATIONS);
-    //
-    // const [submitProofEvent] = await checkEvents(
-    //   capacityContract,
-    //   capacityContract.filters.ProofSubmitted,
-    //   1,
-    //   submitProofTx,
-    // );
-    // expect(submitProofEvent?.args).toEqual([commitmentId, cuId]);
+    // Send last proof
+    await sendProof(signerAddress, cuId, 2, 1);
+
+    const nextStatus = await capacityContract.getCommitment(commitmentId);
+    expect(nextStatus.status).toEqual(BigInt(CCStatus.Inactive));
+
+    console.log("Finishing commitment...");
+
+    const finishCommitmentReceipt = await capacityContract
+      .finishCommitment(commitmentId)
+      .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
+
+    const finishCommitmentEvent = checkEvent(
+      capacityContract.filters.CommitmentFinished,
+      finishCommitmentReceipt,
+    );
+    assert(finishCommitmentEvent, "No finish commitment event");
+    expect(finishCommitmentEvent.args).toEqual([commitmentId]);
   });
 
-  test("Provider turns off CC after some time", async () => {
+  test.only("Long-term CC with reward withdrawals", async () => {
     const registeredOffer = await registerMarketOffer(
       marketContract,
       signerAddress,
@@ -363,9 +278,6 @@ describe("Capacity commitment", () => {
       })
       .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
 
-    // TODO: move to constant
-    const duration = CC_DURATION_DEFAULT;
-
     const collateralDepositedEvent = checkEvent(
       capacityContract.filters.CollateralDeposited,
       depositCollateralReceipt,
@@ -385,7 +297,11 @@ describe("Capacity commitment", () => {
       capacityActivatedEvent.args.commitmentId,
       capacityActivatedEvent.args.endEpoch -
         capacityActivatedEvent.args.startEpoch,
-    ]).toEqual([[registeredOffer.peers[0]?.peerId, commitmentId, duration]]);
+    ]).toEqual([
+      registeredOffer.peers[0]?.peerId,
+      commitmentId,
+      CC_DURATION_DEFAULT,
+    ]);
 
     const epochDuration = await coreContract.epochDuration();
 
@@ -393,5 +309,34 @@ describe("Capacity commitment", () => {
 
     const currentState = await capacityContract.getCommitment(commitmentId);
     expect(currentState.status).toEqual(BigInt(CCStatus.Active));
+
+    const cuId = registeredOffer.peers[0]?.unitIds[0];
+    assert(cuId, "cuID not defined");
+
+    console.log("Sending proofs...");
+    await sendProof(signerAddress, cuId, 2, Number(CC_DURATION_DEFAULT - 1n));
+
+    const currentStateAfterSentProofs =
+      await capacityContract.getCommitment(commitmentId);
+    expect(currentStateAfterSentProofs.status).toEqual(BigInt(CCStatus.Active));
+
+    // Send last proof
+    await sendProof(signerAddress, cuId, 2, 1);
+
+    const nextStatus = await capacityContract.getCommitment(commitmentId);
+    expect(nextStatus.status).toEqual(BigInt(CCStatus.Inactive));
+
+    console.log("Finishing commitment...");
+
+    const finishCommitmentReceipt = await capacityContract
+      .finishCommitment(commitmentId)
+      .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
+
+    const finishCommitmentEvent = checkEvent(
+      capacityContract.filters.CommitmentFinished,
+      finishCommitmentReceipt,
+    );
+    assert(finishCommitmentEvent, "No finish commitment event");
+    expect(finishCommitmentEvent.args).toEqual([commitmentId]);
   });
 });

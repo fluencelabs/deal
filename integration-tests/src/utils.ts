@@ -4,11 +4,10 @@ import { assert } from "vitest";
 export async function skipEpoch(
   provider: JsonRpcProvider,
   epochDuration: bigint,
-  epochCount: bigint | number,
+  epochCount: bigint | number = 1,
 ) {
   const block = await provider.getBlock("latest");
   assert(block !== null);
-  block.timestamp;
   await provider.send("evm_increaseTime", [
     (epochDuration * BigInt(epochCount)).toString(),
   ]);
