@@ -171,6 +171,7 @@ describe("Deal tests", () => {
     }
 
     console.log("---- Deal Creation ----");
+    // TODO: Testcase with different values for these vars
     const minWorkersDeal = 1;
     const targetWorkersDeal = 1;
     const maxWorkerPerProviderDeal = 1;
@@ -359,6 +360,7 @@ describe("Deal tests", () => {
     }
 
     console.log("---- Deal Creation ----");
+    // TODO: Testcase with different values for these vars
     const minWorkersDeal = 1;
     const targetWorkersDeal = 1;
     const maxWorkerPerProviderDeal = 1;
@@ -439,6 +441,8 @@ describe("Deal tests", () => {
 
     await matchDealTx.wait(DEFAULT_CONFIRMATIONS);
     //   TODO: check further.
+
+    // TODO: Check thoroughly. See https://github.com/fluencelabs/deal/pull/340#discussion_r1523644398
 
     const [CUMatchedEvent] = await checkEvents(
       marketContract,

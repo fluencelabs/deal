@@ -4,12 +4,23 @@ import { CC_DURATION_DEFAULT, DEFAULT_CONFIRMATIONS } from "./constants.js";
 import { assert, expect } from "vitest";
 import { checkEvents } from "./confirmations.js";
 
+export interface RegisterMarketOfferReturnValue
+  extends Omit<
+    ReturnType<typeof getDefaultOfferFixture>,
+    "minProtocolVersion" | "maxProtocolVersion"
+  > {
+  offerId: string;
+  provider: string;
+  minProtocolVersion: bigint;
+  maxProtocolVersion: bigint;
+}
+
 // TODO: Refactor. Return value is dubious.
 export async function registerMarketOffer(
   market: IMarket,
   signerAddress: string,
   paymentTokenAddress: string,
-) {
+): Promise<RegisterMarketOfferReturnValue> {
   const registeredOffer = getDefaultOfferFixture(
     signerAddress,
     paymentTokenAddress,
