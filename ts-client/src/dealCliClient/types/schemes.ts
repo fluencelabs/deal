@@ -40,11 +40,6 @@ export interface OfferDetail {
   updatedAt: number;
 }
 
-// export interface DealByProvider {
-//   id: string;
-// }
-//
-// export interface DealByProviderListView {
-//   data: Array<DealByProvider>
-//   total: number
-// }
+export interface DealByProvider {
+  id: string;
+}
