@@ -315,7 +315,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
             revert CapacityCommitmentIsNotActive(status);
         }
 
-        _postCommitCommitmentSnapshot(cc, snapshotCache);
+        _postCommitCommitmentSnapshot(commitmentId, cc, snapshotCache);
         _commitUnitSnapshot(cc, cc.unitInfoById[unitId], currentEpoch, expiredEpoch, snapshotCache.current.failedEpoch);
         // #endregion
 
@@ -422,7 +422,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
 
         // #region post commit commitment snapshot
         snapshotCache.current.status = CCStatus.Removed;
-        _postCommitCommitmentSnapshot(cc, snapshotCache);
+        _postCommitCommitmentSnapshot(commitmentId, cc, snapshotCache);
         market.setCommitmentId(peerId, bytes32(0x00));
         // #endregion
 
@@ -461,7 +461,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
 
         Snapshot.Cache memory snapshotCache = Snapshot.init(cc);
         CCStatus status = _preCommitCommitmentSnapshot(cc, snapshotCache, peer, currentEpoch_, expiredEpoch);
-        _postCommitCommitmentSnapshot(cc, snapshotCache);
+        _postCommitCommitmentSnapshot(commitmentId, cc, snapshotCache);
         if (status != CCStatus.Inactive && status != CCStatus.Failed) {
             revert CapacityCommitmentIsActive(status);
         }
@@ -510,7 +510,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         // #region commit commitment snapshot for the previous epoch
         Snapshot.Cache memory snapshotCache = Snapshot.init(cc);
         _preCommitCommitmentSnapshot(cc, snapshotCache, peer, currentEpoch, _expiredEpoch(cc));
-        _postCommitCommitmentSnapshot(cc, snapshotCache);
+        _postCommitCommitmentSnapshot(commitmentId, cc, snapshotCache);
         if (snapshotCache.current.failedEpoch != 0) {
             currentEpoch = snapshotCache.current.failedEpoch;
         }
@@ -558,7 +558,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         // #region commit snapshot for unit and commitment
         Snapshot.Cache memory snapshotCache = Snapshot.init(cc);
         CCStatus status = _preCommitCommitmentSnapshot(cc, snapshotCache, peer, currentEpoch_, expiredEpoch);
-        _postCommitCommitmentSnapshot(cc, snapshotCache);
+        _postCommitCommitmentSnapshot(commitmentId, cc, snapshotCache);
         if (status != CCStatus.Active) {
             revert CapacityCommitmentIsNotActive(status);
         }
@@ -602,7 +602,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         // #region commit snapshot for commitment
         Snapshot.Cache memory snapshotCache = Snapshot.init(cc);
         CCStatus status = _preCommitCommitmentSnapshot(cc, snapshotCache, peer, currentEpoch, expiredEpoch);
-        _postCommitCommitmentSnapshot(cc, snapshotCache);
+        _postCommitCommitmentSnapshot(commitmentId, cc, snapshotCache);
         // #endregion
 
         // #region activate unit
@@ -751,12 +751,20 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         return newStatus;
     }
 
-    function _postCommitCommitmentSnapshot(Commitment storage cc, Snapshot.Cache memory snapshotCache) internal {
+    function _postCommitCommitmentSnapshot(
+        bytes32 commitmentId,
+        Commitment storage cc,
+        Snapshot.Cache memory snapshotCache
+    ) internal {
         uint256 activeUnitCount_ = snapshotCache.current.activeUnitCount;
         uint256 initialActiveUnitCount_ = snapshotCache.initial.activeUnitCount;
 
         if (activeUnitCount_ == 0 && initialActiveUnitCount_ > 0) {
             _setActiveUnitCount(activeUnitCount() - initialActiveUnitCount_);
+        }
+
+        if (snapshotCache.current.status == CCStatus.Failed) {
+            emit CommitmentFailed(commitmentId, snapshotCache.current.failedEpoch);
         }
 
         snapshotCache.save(cc);

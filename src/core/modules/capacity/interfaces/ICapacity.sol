@@ -50,6 +50,8 @@ interface ICapacity is ICapacityConst {
     /// @param totalCollateral The total collateral deposited to commitment
     event CollateralDeposited(bytes32 indexed commitmentId, uint256 totalCollateral);
 
+    event CommitmentFailed(bytes32 indexed commitmentId, uint256 failedEpoch);
+
     /// @dev Emitted when a proof is submitted
     /// @param commitmentId Commitment id
     /// @param unitId Compute unit id which linked to the proof
