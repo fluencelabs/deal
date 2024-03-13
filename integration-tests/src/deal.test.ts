@@ -167,7 +167,7 @@ describe("Deal tests", () => {
 
     for (const ccId of commitmentIds) {
       const status: CCStatus = Number(await capacityContract.getStatus(ccId));
-      assert(status === CCStatus.Active, "Status is not active");
+      assert(status === CCStatus.Active, "CC is not active");
     }
 
     console.log("---- Deal Creation ----");
@@ -356,7 +356,7 @@ describe("Deal tests", () => {
 
     for (const ccId of commitmentIds) {
       const status: CCStatus = Number(await capacityContract.getStatus(ccId));
-      assert(status === CCStatus.Active, "Status is not active");
+      assert(status === CCStatus.Active, "CC is not active");
     }
 
     console.log("---- Deal Creation ----");
