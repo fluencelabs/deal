@@ -350,28 +350,12 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         emit CommitmentFinished(commitmentId);
     }
 
-    function submitProofs(bytes32 unitId, UnitProof[] calldata proofs) external {
+    function submitProofs(UnitProof[] calldata proofs) external {
         require(proofs.length > 0, "Proofs array cannot be empty.");
 
-        IMarket market = core.market();
-
-        CommitmentStorage storage s = _getCommitmentStorage();
-        IMarket.ComputeUnit memory unit = market.getComputeUnit(unitId);
-        IMarket.ComputePeer memory peer = market.getComputePeer(unit.peerId);
-        require(peer.owner == msg.sender, "Only compute peer owner can submit proof");
-
-        bytes32 commitmentId = peer.commitmentId;
-        Commitment storage cc = s.commitments[commitmentId];
-        require(commitmentId != bytes32(0x00), "Compute unit doesn't have commitment");
-
         uint256 epoch = core.currentEpoch();
-        uint256 expiredEpoch = _expiredEpoch(cc);
-        require(epoch >= cc.info.startEpoch, "Capacity commitment is not started");
-
-        CCStatus status = _commitCommitmentSnapshot(cc, peer, epoch - 1, expiredEpoch);
-        if (status != CCStatus.Active) {
-            revert CapacityCommitmentIsNotActive(status);
-        }
+        IMarket market = core.market();
+        CommitmentStorage storage s = _getCommitmentStorage();
 
         // update global nonce
         if (s.nonceEpochSnapshot != epoch) {
@@ -380,65 +364,82 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         }
         s.nextGlobalNonce = keccak256(abi.encodePacked(s.globalNonce, blockhash(block.number - 1)));
 
-        // save localUnitNonce
-        bytes32 globalUnitNonce_ = keccak256(abi.encodePacked(s.globalNonce, unitId));
+        bytes32[] memory globalUnitNonces = new bytes32[](proofs.length);
+        bytes32[] memory localUnitNonces = new bytes32[](proofs.length);
 
         for (uint256 i = 0; i < proofs.length; i++) {
+            bytes32 unitId = proofs[i].unitId;
             bytes32 localUnitNonce = proofs[i].localUnitNonce;
+
+            localUnitNonces[i] = localUnitNonce;
+
+            IMarket.ComputeUnit memory unit = market.getComputeUnit(unitId);
+            IMarket.ComputePeer memory peer = market.getComputePeer(unit.peerId);
+            require(peer.owner == msg.sender, "Only compute peer owner can submit proof");
+
+            bytes32 commitmentId = peer.commitmentId;
+            Commitment storage cc = s.commitments[commitmentId];
+            require(commitmentId != bytes32(0x00), "Compute unit doesn't have commitment");
+
+            uint256 expiredEpoch = _expiredEpoch(cc);
+            require(epoch >= cc.info.startEpoch, "Capacity commitment is not started");
+
+            CCStatus status = _commitCommitmentSnapshot(cc, peer, epoch - 1, expiredEpoch);
+            if (status != CCStatus.Active) {
+                revert CapacityCommitmentIsNotActive(status);
+            }
+
+            // save localUnitNonce
+            bytes32 globalUnitNonce_ = keccak256(abi.encodePacked(s.globalNonce, unitId));
             require(
                 !s.isProofSubmittedByUnit[globalUnitNonce_][localUnitNonce], "Proof is already submitted for this unit"
             );
             s.isProofSubmittedByUnit[globalUnitNonce_][localUnitNonce] = true;
-        }
 
-        // save info about proofs
-        UnitProofsInfo storage unitProofsInfo = cc.unitProofsInfoByUnit[unitId];
-        uint256 unitProofsCountPrev = unitProofsInfo.proofsCountByEpoch[epoch];
-        uint256 unitProofsCount = unitProofsCountPrev + proofs.length;
-        if (unitProofsCount > maxProofsPerEpoch()) {
-            revert TooManyProofs();
-        }
+            globalUnitNonces[i] = globalUnitNonce_;
 
-        uint256 minRequierdCCProofs_ = minRequierdProofsPerEpoch();
-        if (unitProofsCountPrev < minRequierdCCProofs_ && unitProofsCount >= minRequierdCCProofs_) {
-            cc.info.currentCUSuccessCount += 1;
-            _commitUnitSnapshot(cc, unitProofsInfo, epoch, expiredEpoch, cc.info.failedEpoch);
-
-            uint256 totalSuccessProofs = s.rewardInfoByEpoch[epoch].totalSuccessProofs;
-            if (totalSuccessProofs == 0) {
-                s.rewardInfoByEpoch[epoch].minRequierdCCProofs = minRequierdCCProofs_;
+            // save info about proofs
+            UnitProofsInfo storage unitProofsInfo = cc.unitProofsInfoByUnit[unitId];
+            uint256 unitProofsCount = unitProofsInfo.proofsCountByEpoch[epoch] + 1;
+            if (unitProofsCount > maxProofsPerEpoch()) {
+                revert TooManyProofs();
             }
 
-            s.rewardInfoByEpoch[epoch].totalSuccessProofs = totalSuccessProofs + unitProofsCount;
-        } else if (unitProofsCount > minRequierdCCProofs_) {
-            s.rewardInfoByEpoch[epoch].totalSuccessProofs += proofs.length;
-        }
+            uint256 minRequierdCCProofs_ = minRequierdProofsPerEpoch();
+            if (unitProofsCount == minRequierdCCProofs_) {
+                cc.info.currentCUSuccessCount += 1;
+                _commitUnitSnapshot(cc, unitProofsInfo, epoch, expiredEpoch, cc.info.failedEpoch);
 
-        unitProofsInfo.proofsCountByEpoch[epoch] = unitProofsCount;
+                uint256 totalSuccessProofs = s.rewardInfoByEpoch[epoch].totalSuccessProofs;
+                if (totalSuccessProofs == 0) {
+                    s.rewardInfoByEpoch[epoch].minRequierdCCProofs = minRequierdCCProofs_;
+                }
+
+                s.rewardInfoByEpoch[epoch].totalSuccessProofs = totalSuccessProofs + unitProofsCount;
+            } else if (unitProofsCount > minRequierdCCProofs_) {
+                s.rewardInfoByEpoch[epoch].totalSuccessProofs += 1;
+            }
+
+            unitProofsInfo.proofsCountByEpoch[epoch] = unitProofsCount;
+
+            emit CommitmentStatsUpdated(
+                commitmentId,
+                cc.info.totalCUFailCount,
+                cc.info.exitedUnitCount,
+                cc.info.activeUnitCount,
+                cc.info.nextAdditionalActiveUnitCount,
+                epoch
+            );
+
+            emit ProofSubmitted(commitmentId, unitId, proofs[i].localUnitNonce);
+        }
 
         // check proofs
-        bytes32[] memory localUnitNonces = new bytes32[](proofs.length);
-        for (uint256 i = 0; i < proofs.length; i++) {
-            localUnitNonces[i] = proofs[i].localUnitNonce;
-        }
-        bytes32[] memory randomXResultHashes = _runRandomX(globalUnitNonce_, localUnitNonces);
+        bytes32[] memory randomXResultHashes = _runRandomX(globalUnitNonces, localUnitNonces);
 
         for (uint256 i = 0; i < proofs.length; i++) {
             require(randomXResultHashes[i] == proofs[i].resultHash, "Proof is not valid");
             require(randomXResultHashes[i] <= difficulty(), "Proof is bigger than difficulty");
-        }
-
-        emit CommitmentStatsUpdated(
-            commitmentId,
-            cc.info.totalCUFailCount,
-            cc.info.exitedUnitCount,
-            cc.info.activeUnitCount,
-            cc.info.nextAdditionalActiveUnitCount,
-            epoch
-        );
-
-        for (uint256 i = 0; i < proofs.length; i++) {
-            emit ProofSubmitted(commitmentId, unitId, proofs[i].localUnitNonce);
         }
     }
 
@@ -695,12 +696,14 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         }
     }
 
-    function _runRandomX(bytes32 globalUnitNonce, bytes32[] memory localUnitNonces)
+    function _runRandomX(bytes32[] memory globalUnitNonces, bytes32[] memory localUnitNonces)
         internal
         returns (bytes32[] memory)
     {
+        require(globalUnitNonces.length == localUnitNonces.length, "Global and local unit nonces length mismatch");
+
         (bool success, bytes memory result) = randomXProxy().delegatecall(
-            abi.encodeWithSelector(RandomXProxy.run.selector, globalUnitNonce, localUnitNonces)
+            abi.encodeWithSelector(RandomXProxy.run.selector, globalUnitNonces, localUnitNonces)
         );
 
         require(success, "RandomXProxy.run failed");
@@ -708,7 +711,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
 
         bytes32[] memory hashes = abi.decode(result, (bytes32[]));
 
-        require(hashes.length == localUnitNonces.length, "RandomXProxy.run returned wrong number of hashes");
+        require(hashes.length == globalUnitNonces.length, "RandomXProxy.run returned wrong number of hashes");
 
         return hashes;
     }

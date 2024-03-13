@@ -11,9 +11,11 @@ contract RandomXProxyMock {
         difficulty = difficulty_;
     }
 
-    function run(bytes32 k, bytes32[] memory hs) public returns (bytes32[] memory) {
-        bytes32[] memory result = new bytes32[](hs.length);
-        for (uint256 i = 0; i < hs.length; i++) {
+    function run(bytes32[] memory ks, bytes32[] memory hs) public returns (bytes32[] memory) {
+        require(ks.length == hs.length, "Invalid input length");
+
+        bytes32[] memory result = new bytes32[](ks.length);
+        for (uint256 i = 0; i < ks.length; i++) {
             result[i] = difficulty;
         }
 

@@ -138,6 +138,7 @@ interface ICapacity is ICapacityConst {
     }
 
     struct UnitProof {
+        bytes32 unitId;
         bytes32 localUnitNonce;
         bytes32 resultHash;
     }
@@ -214,9 +215,8 @@ interface ICapacity is ICapacityConst {
     function depositCollateral(bytes32[] calldata commitmentIds) external payable;
 
     /// @dev Submits a proof for the commitment
-    /// @param unitId Compute unit id which provied the proof
-    /// @param proofs Proofs for unit, containing localUnitNonce and resultHash
-    function submitProofs(bytes32 unitId, UnitProof[] calldata proofs) external;
+    /// @param proofs Proofs for units, containing unitId, localUnitNonce and resultHash
+    function submitProofs(UnitProof[] calldata proofs) external;
 
     /// @dev Remove CU from Ended or Failed CC. Need to call this function before finish the commitment
     /// @param commitmentId Commitment id

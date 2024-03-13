@@ -17,26 +17,36 @@ contract RandomXProxy {
     uint256 internal constant RunRandomX = 2044353154;
 
     /// @notice runs the Fluence actor which runs RandomX with provided K and H and returns it's result.
-    /// @param k the K parameter (aka "global" nonce) for RandomX, could up to 60 bytes.
+    /// @param ks array of the K parameter (aka "global" nonce) for RandomX, could up to 60 bytes.
     /// @param hs array of the H parameter (aka "local" nonce) for RandomX, could be an arbitrary string.
-    function run(bytes32 k, bytes32[] memory hs) public returns (bytes32[] memory) {
-        bytes memory se_request = _serializeRandomXParameters(k, hs);
+    function run(bytes32[] memory ks, bytes32[] memory hs) public returns (bytes32[] memory) {
+        require(ks.length == hs.length, "Invalid input length");
+
+        bytes memory se_request = _serializeRandomXParameters(ks, hs);
 
         (int256 ret_code, bytes memory actor_result) =
             Actor.callByID(ActorID, RunRandomX, Misc.CBOR_CODEC, se_request, 0, false);
         require(ret_code == 0, "Fluence actor failed");
 
         bytes32[] memory result = _deserializeActorResult(actor_result);
-        require(result.length == hs.length, "Invalid result length");
+        require(result.length == ks.length, "Invalid result length");
 
         return result;
     }
 
-    function _serializeRandomXParameters(bytes32 k, bytes32[] memory hs) private pure returns (bytes memory) {
+    function _serializeRandomXParameters(bytes32[] memory ks, bytes32[] memory hs)
+        private
+        pure
+        returns (bytes memory)
+    {
         uint256 capacity = Misc.getPrefixSize(2);
 
-        bytes memory kBytes = k.toBytes();
-        capacity += Misc.getBytesSize(kBytes);
+        bytes[] memory kBytes = new bytes[](ks.length);
+        capacity += Misc.getPrefixSize(ks.length);
+        for (uint256 i = 0; i < ks.length; i++) {
+            kBytes[i] = hs[i].toBytes();
+            capacity += Misc.getBytesSize(kBytes[i]);
+        }
 
         bytes[] memory hBytes = new bytes[](hs.length);
         capacity += Misc.getPrefixSize(hs.length);
@@ -48,7 +58,10 @@ contract RandomXProxy {
         CBOR.CBORBuffer memory buf = CBOR.create(capacity);
 
         buf.startFixedArray(2);
-        buf.writeBytes(kBytes);
+        buf.startFixedArray(uint64(ks.length));
+        for (uint256 i = 0; i < ks.length; i++) {
+            buf.writeBytes(kBytes[i]);
+        }
         buf.startFixedArray(uint64(hs.length));
         for (uint256 i = 0; i < hs.length; i++) {
             buf.writeBytes(hBytes[i]);

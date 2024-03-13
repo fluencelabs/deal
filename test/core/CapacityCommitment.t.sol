@@ -258,8 +258,8 @@ contract CapacityCommitmentTest is Test {
         vm.etch(address(Actor.CALL_ACTOR_ID), address(new MockActorCallActorPrecompile(targetHash)).code);
 
         ICapacity.UnitProof[] memory proofs = new ICapacity.UnitProof[](1);
-        proofs[0] = ICapacity.UnitProof({localUnitNonce: localUnitNonce, resultHash: targetHash});
-        deployment.capacity.submitProofs(unitId, proofs);
+        proofs[0] = ICapacity.UnitProof({unitId: unitId, localUnitNonce: localUnitNonce, resultHash: targetHash});
+        deployment.capacity.submitProofs(proofs);
 
         vm.stopPrank();
     }
@@ -288,8 +288,8 @@ contract CapacityCommitmentTest is Test {
             emit ProofSubmitted(commitmentId, unitId, localUnitNonce);
 
             ICapacity.UnitProof[] memory proofs = new ICapacity.UnitProof[](1);
-            proofs[0] = ICapacity.UnitProof({localUnitNonce: localUnitNonce, resultHash: targetHash});
-            deployment.capacity.submitProofs(unitId, proofs);
+            proofs[0] = ICapacity.UnitProof({unitId: unitId, localUnitNonce: localUnitNonce, resultHash: targetHash});
+            deployment.capacity.submitProofs(proofs);
         }
 
         StdCheats.skip(deployment.core.epochDuration());
