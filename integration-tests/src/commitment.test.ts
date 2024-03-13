@@ -30,24 +30,27 @@ async function sendProof(
   let sentProofRounds = 0;
   let currentNonce = await provider.getTransactionCount(sender);
 
-  while (sentProofRounds++ < epoches) {
+  while (sentProofRounds < epoches) {
     const txs: Array<ContractTransactionResponse> = [];
     const epochDuration = await coreContract.epochDuration();
-    for (let i = 0; i < proofs; i++) {
+    for (let i = 0; i < proofs; i += 1) {
       txs.push(
         await capacityContract.submitProof(
           cuId,
           ethers.hexlify(ethers.randomBytes(32)),
           difficulty,
           {
-            nonce: currentNonce++,
+            nonce: currentNonce,
           },
         ),
       );
+
+      currentNonce += 1;
     }
 
     await Promise.all(txs.map((tx) => tx.wait(DEFAULT_CONFIRMATIONS)));
     await skipEpoch(provider, epochDuration);
+    sentProofRounds += 1;
   }
 }
 
@@ -79,7 +82,9 @@ describe("Capacity commitment", () => {
       removeCommitmentReceipt,
     );
 
-    console.log(removeCommitmentEvent.args.commitmentId);
+    console.log(
+      `Commitment removed: ${removeCommitmentEvent.args.commitmentId}`,
+    );
 
     expect(removeCommitmentEvent.args).toEqual([commitmentId]);
   });
@@ -110,9 +115,6 @@ describe("Capacity commitment", () => {
       })
       .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
 
-    // TODO: move to constant
-    const duration = CC_DURATION_DEFAULT;
-
     const collateralDepositedEvent = checkEvent(
       capacityContract.filters.CollateralDeposited,
       depositCollateralReceipt,
@@ -135,7 +137,11 @@ describe("Capacity commitment", () => {
       capacityActivatedEvent.args.commitmentId,
       capacityActivatedEvent.args.endEpoch -
         capacityActivatedEvent.args.startEpoch,
-    ]).toEqual([registeredOffer.peers[0]?.peerId, commitmentId, duration]);
+    ]).toEqual([
+      registeredOffer.peers[0]?.peerId,
+      commitmentId,
+      CC_DURATION_DEFAULT,
+    ]);
 
     const epochDuration = await coreContract.epochDuration();
 
@@ -144,7 +150,7 @@ describe("Capacity commitment", () => {
     const currentState = await capacityContract.getCommitment(commitmentId);
     expect(currentState.status).toEqual(BigInt(CCStatus.Active));
 
-    console.log("Waiting for the fail...");
+    console.log("Waiting for CC to fail without proofs...");
     await skipEpoch(provider, epochDuration, 2);
     const currentStateAfterSomeEpoches =
       await capacityContract.getCommitment(commitmentId);

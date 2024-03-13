@@ -4,6 +4,7 @@ import { CC_DURATION_DEFAULT, DEFAULT_CONFIRMATIONS } from "./constants.js";
 import { assert, expect } from "vitest";
 import { checkEvents } from "./confirmations.js";
 
+// TODO: Refactor. Return value is dubious.
 export async function registerMarketOffer(
   market: IMarket,
   signerAddress: string,
@@ -16,10 +17,7 @@ export async function registerMarketOffer(
 
   console.log("Register Provider by setProviderInfo...");
   const appCID = randomCID();
-  const setProviderInfoTx = await market.setProviderInfo(
-    "CI_PROVIDER",
-    randomCID(),
-  );
+  const setProviderInfoTx = await market.setProviderInfo("CI_PROVIDER", appCID);
   await setProviderInfoTx.wait(DEFAULT_CONFIRMATIONS);
 
   const tx = await market.registerMarketOffer(
@@ -43,7 +41,6 @@ export async function registerMarketOffer(
   assert(lastMarketOffer, "There is no market offer");
 
   return {
-    appCID,
     peers: registeredOffer.peers,
     offerId: lastMarketOffer.args.offerId,
     effectors: lastMarketOffer.args.effectors.map((effector) => ({
