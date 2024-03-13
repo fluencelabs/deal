@@ -15,6 +15,7 @@ import "./interfaces/ICapacity.sol";
 import "./CapacityConst.sol";
 import "./Vesting.sol";
 import "./Snapshot.sol";
+import "forge-std/console.sol";
 
 contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, Whitelist, ICapacity {
     using SafeERC20 for IERC20;
@@ -63,9 +64,9 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         uint256 vestingPeriodDuration_,
         uint256 vestingPeriodCount_,
         uint256 slashingRate_,
-        uint256 minRequierdProofsPerEpoch_,
+        uint256 minProofsPerEpoch_,
         uint256 maxProofsPerEpoch_,
-        uint256 withdrawEpochesAfterFailed_,
+        uint256 withdrawEpochsAfterFailed_,
         uint256 maxFailedRatio_,
         bool isWhitelistEnabled_,
         bytes32 initGlobalNonce_,
@@ -85,9 +86,9 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
             vestingPeriodDuration_,
             vestingPeriodCount_,
             slashingRate_,
-            minRequierdProofsPerEpoch_,
+            minProofsPerEpoch_,
             maxProofsPerEpoch_,
-            withdrawEpochesAfterFailed_,
+            withdrawEpochsAfterFailed_,
             maxFailedRatio_,
             difficulty_,
             initRewardPool_,
@@ -307,6 +308,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         Commitment storage cc = s.commitments[commitmentId];
         require(currentEpoch >= cc.info.startEpoch, "Capacity commitment is not started");
 
+        UnitInfo storage unitInfo = cc.unitInfoById[unitId];
         uint256 expiredEpoch = _expiredEpoch(cc);
         // #endregion
 
@@ -318,7 +320,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         }
 
         _postCommitCommitmentSnapshot(commitmentId, cc, snapshotCache);
-        _commitUnitSnapshot(cc, cc.unitInfoById[unitId], currentEpoch, expiredEpoch, snapshotCache.current.failedEpoch);
+        _commitUnitSnapshot(cc, unitInfo, currentEpoch, expiredEpoch, snapshotCache.current.failedEpoch);
         // #endregion
 
         // #region update global nonce
@@ -339,7 +341,6 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         // #endregion
 
         // #region save info about proof
-        UnitInfo storage unitInfo = cc.unitInfoById[unitId];
 
         // load unitProofCount and add one because we submit new proof
         uint256 unitProofCount = unitInfo.proofCountByEpoch[currentEpoch] + 1;
@@ -347,7 +348,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
             revert TooManyProofs();
         }
 
-        uint256 minRequierdCCProofs_ = minRequierdProofsPerEpoch();
+        uint256 minRequierdCCProofs_ = minProofsPerEpoch();
         if (unitProofCount == minRequierdCCProofs_) {
             // if proofCount is equal to minRequierdCCProofs, then we have one success for the current epoch
             cc.progress.currentSuccessCount += 1;
@@ -415,8 +416,8 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
 
         require(
             status != CCStatus.Failed
-                || currentEpoch_ >= snapshotCache.current.failedEpoch + withdrawEpochesAfterFailed(),
-            "Capacity commitment wait withdraw epoches after failed"
+                || currentEpoch_ >= snapshotCache.current.failedEpoch + withdrawEpochsAfterFailed(),
+            "Capacity commitment wait withdraw Epochs after failed"
         );
 
         uint256 unitCount = peer.unitCount;
@@ -541,7 +542,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
     // #endregion
 
     // region ----------------- Deal Callbacks -----------------
-    function onUnitMovedToDeal(bytes32 commitmentId, bytes32 unitId) external {
+    function onUnitMovedToDeal(bytes32 commitmentId, bytes32 unitId) external onlyMarket {
         // #region load contracts and storage
         IMarket market = core.market();
         CommitmentStorage storage s = _getCommitmentStorage();
@@ -583,7 +584,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         emit UnitDeactivated(commitmentId, unitId);
     }
 
-    function onUnitReturnedFromDeal(bytes32 commitmentId, bytes32 unitId) external {
+    function onUnitReturnedFromDeal(bytes32 commitmentId, bytes32 unitId) external onlyMarket {
         // #region load contracts and storage
         IMarket market = core.market();
         CommitmentStorage storage s = _getCommitmentStorage();
@@ -682,7 +683,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         uint256 totalFailCount = snapshotCache.current.totalFailCount;
         uint256 currentSuccessCount = snapshotCache.current.currentSuccessCount;
 
-        // maxFailCount is a number of epoches when units not send proofs
+        // maxFailCount is a number of Epochs when units not send proofs
         // if on unit not send proof per one epoch, it's mean that it's one fail
         // maxFailedRatio is the ratio of failed attempts for all units
         uint256 maxFailCount = maxFailedRatio_ * unitCount;
@@ -693,7 +694,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         // #region calculate fail count
 
         // When unit send min proof per one epoch, it's a one success. successCount is a number of success for all units in the snapshot period
-        // if successCount is less than requiredSuccessCount, then some units didn't send min proof per few epoches
+        // if successCount is less than requiredSuccessCount, then some units didn't send min proof per few Epochs
         uint256 snapshotTotalFailCount = 0;
         if (currentSuccessCount < requiredSuccessCount) {
             // snapshotTotalFailCount is a number of fails for all units in the snapshot period
@@ -803,6 +804,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         uint256 lastSnapshotEpoch = unitInfo.lastSnapshotEpoch;
         if (lastSnapshotEpoch == 0) {
             lastSnapshotEpoch = cc.info.startEpoch - 1;
+            unitInfo.lastSnapshotEpoch = snapshotEpoch;
         }
 
         // if snapshotEpoch is less or equal to lastSnapshotEpoch, then we should return false because it means that we already made a snapshot for this epoch
@@ -810,6 +812,8 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
             return false;
         }
         // #endregion
+
+        unitInfo.lastSnapshotEpoch = snapshotEpoch;
 
         // #region slashing
         uint256 slashedCollateral = unitInfo.slashedCollateral;
@@ -822,7 +826,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
 
         // gapsCount is the number of epochs between lastSnapshotEpoch and snapshotEpoch. In this period unit didn't submit any proof
         uint256 gapsCount = snapshotEpoch - lastSnapshotEpoch;
-        if (unitInfo.proofCountByEpoch[snapshotEpoch] >= minRequierdProofsPerEpoch()) {
+        if (unitInfo.proofCountByEpoch[snapshotEpoch] >= minProofsPerEpoch()) {
             gapsCount--;
         }
 
@@ -848,28 +852,27 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         // #endregion
 
         // #region calculate reward for the last snapshoted epoch
-        uint256 lastSnapshotProofCount = unitInfo.proofCountByEpoch[lastSnapshotEpoch];
-        uint256 minRequierdProofsPerEpoch_ = minRequierdProofsPerEpoch();
-        if (lastSnapshotProofCount < minRequierdProofsPerEpoch_) {
+        uint256 nextEpochAfterSnapshot = lastSnapshotEpoch + 1;
+        uint256 lastProofCount = unitInfo.proofCountByEpoch[nextEpochAfterSnapshot];
+        RewardInfo storage rewardInfo = s.rewardInfoByEpoch[nextEpochAfterSnapshot];
+
+        if (lastProofCount < rewardInfo.minRequierdCCProofs) {
             return true;
         }
 
-        RewardInfo storage rewardInfo = s.rewardInfoByEpoch[lastSnapshotEpoch];
         uint256 totalSuccessProofs = rewardInfo.totalSuccessProofs;
         if (totalSuccessProofs == 0) {
             return true;
         }
 
-        uint256 reward = (
-            getRewardPool(lastSnapshotEpoch) * ((lastSnapshotProofCount * PRECISION) / rewardInfo.totalSuccessProofs)
-        ) / PRECISION;
+        uint256 reward = (getRewardPool(nextEpochAfterSnapshot) * lastProofCount) / rewardInfo.totalSuccessProofs;
 
-        cc.vesting.add(reward, lastSnapshotEpoch, vestingPeriodDuration(), vestingPeriodCount());
+        if (reward > 0) {
+            cc.vesting.add(reward, nextEpochAfterSnapshot, vestingPeriodDuration(), vestingPeriodCount());
+        }
 
-        delete unitInfo.proofCountByEpoch[lastSnapshotEpoch];
+        delete unitInfo.proofCountByEpoch[nextEpochAfterSnapshot];
         // #endregion
-
-        unitInfo.lastSnapshotEpoch = snapshotEpoch;
 
         return true;
     }

@@ -41,7 +41,9 @@ contract GetStatus is Test {
         dealContract.setTargetWorkers(100);
         dealContract.setMaxPaidEpoch(0);
         testCore.setCurrentEpoch(101);
-        dealContract.setFreeBalance(dealContract.targetWorkers() * testCore.minDealDepositedEpoches() * dealContract.pricePerWorkerEpoch());
+        dealContract.setFreeBalance(
+            dealContract.targetWorkers() * testCore.minDealDepositedEpochs() * dealContract.pricePerWorkerEpoch()
+        );
 
         assertEq(uint8(dealContract.getStatus()), uint8(IDeal.Status.NOT_ENOUGH_WORKERS), "Status mismatch");
     }
@@ -53,7 +55,9 @@ contract GetStatus is Test {
         dealContract.setPricePerWorkerEpoch(1 ether);
         dealContract.setMaxPaidEpoch(100);
         dealContract.setTargetWorkers(100);
-        dealContract.setFreeBalance(dealContract.targetWorkers() * testCore.minDealDepositedEpoches() * dealContract.pricePerWorkerEpoch());
+        dealContract.setFreeBalance(
+            dealContract.targetWorkers() * testCore.minDealDepositedEpochs() * dealContract.pricePerWorkerEpoch()
+        );
 
         assertEq(uint8(dealContract.getStatus()), uint8(IDeal.Status.INSUFFICIENT_FUNDS), "Status mismatch");
     }
@@ -66,7 +70,8 @@ contract GetStatus is Test {
         dealContract.setMaxPaidEpoch(0);
         dealContract.setTargetWorkers(100);
 
-        uint256 minBalance = dealContract.targetWorkers() * testCore.minDealDepositedEpoches() * dealContract.pricePerWorkerEpoch();
+        uint256 minBalance =
+            dealContract.targetWorkers() * testCore.minDealDepositedEpochs() * dealContract.pricePerWorkerEpoch();
         dealContract.setFreeBalance(minBalance - 1);
 
         assertEq(uint8(dealContract.getStatus()), uint8(IDeal.Status.SMALL_BALANCE), "Status mismatch");
@@ -78,7 +83,9 @@ contract GetStatus is Test {
         dealContract.setPricePerWorkerEpoch(1 ether);
         testCore.setCurrentEpoch(100);
         dealContract.setMaxPaidEpoch(100);
-        dealContract.setFreeBalance(dealContract.targetWorkers() * testCore.minDealDepositedEpoches() * dealContract.pricePerWorkerEpoch());
+        dealContract.setFreeBalance(
+            dealContract.targetWorkers() * testCore.minDealDepositedEpochs() * dealContract.pricePerWorkerEpoch()
+        );
 
         assertEq(uint8(dealContract.getStatus()), uint8(IDeal.Status.ACTIVE), "Status mismatc");
     }
@@ -91,7 +98,7 @@ contract TestCore {
         currentEpoch = epoch;
     }
 
-    function minDealDepositedEpoches() public pure returns (uint256) {
+    function minDealDepositedEpochs() public pure returns (uint256) {
         return 2;
     }
 }
@@ -99,6 +106,7 @@ contract TestCore {
 contract TestDealContract is Deal {
     uint256 private _freeBalance;
     //#region internal
+
     function _getConfigStorageTest() internal pure returns (ConfigStorage storage s) {
         bytes32 storageSlot = bytes32(uint256(keccak256("fluence.deal.storage.v1.config")) - 1);
         assembly {

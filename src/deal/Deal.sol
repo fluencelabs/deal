@@ -121,7 +121,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
                 balance.setGapsEpochCount(balance.getGapsEpochCount() + (commitEpoch - maxPaidEpoch)); // write gaps
             }
         } else {
-            // commitEpoch <= maxPaidEpoch, this means that we we need to record only active epoches and write off balances. We don't have a gaps.
+            // commitEpoch <= maxPaidEpoch, this means that we we need to record only active Epochs and write off balances. We don't have a gaps.
             uint256 amount = (commitEpoch - lastCommitedEpoch) * pricePerWorkerEpoch_ * currentWorkerCount;
 
             balance.setTotalBalance(balance.getTotalBalance() - amount); // write off balance
@@ -170,7 +170,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         uint256 freeBalance = getFreeBalance();
         uint256 currentWorkerCount = getWorkerCount();
 
-        if (freeBalance < _globalCore().minDealDepositedEpoches() * pricePerWorkerEpoch() * targetWorkers()) {
+        if (freeBalance < _globalCore().minDealDepositedEpochs() * pricePerWorkerEpoch() * targetWorkers()) {
             return Status.SMALL_BALANCE;
         } else if (currentWorkerCount < minWorkers()) {
             return Status.NOT_ENOUGH_WORKERS;
@@ -258,7 +258,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
 
         if (dealStorage.isEnded) {
             require(
-                currentEpoch > dealStorage.endedEpoch + _globalCore().minDealDepositedEpoches(),
+                currentEpoch > dealStorage.endedEpoch + _globalCore().minDealDepositedEpochs(),
                 "Can't withdraw before 2 epochs after deal end"
             );
             dealStorage.totalBalance -= amount;
@@ -275,7 +275,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
 
             balance.setTotalBalance(balance.getTotalBalance() - amount);
 
-            uint256 minBalance = _globalCore().minDealDepositedEpoches() * pricePerWorkerEpoch_ * targetWorkers();
+            uint256 minBalance = _globalCore().minDealDepositedEpochs() * pricePerWorkerEpoch_ * targetWorkers();
             require(balance.getTotalBalance() >= minBalance, "Free balance needs to cover minimum 2 epochs");
 
             _postCommitPeriod(balance, prevEpoch, workerCount, workerCount, minWorkers(), pricePerWorkerEpoch_);

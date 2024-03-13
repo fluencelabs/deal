@@ -148,7 +148,6 @@ contract CapacityCommitmentTest is Test {
         assertEq(commitment.exitedUnitCount, 0, "ExitedUnitCount mismatch");
     }
 
-    // Note, it also tests that it is possible to approve FLT once for total sum, before deposit to several CCs.
     function test_DepositCollateral() public {
         deployment.market.setProviderInfo("name", CIDV1({prefixes: 0x12345678, hash: bytes32(0)}));
 
@@ -253,9 +252,12 @@ contract CapacityCommitmentTest is Test {
         bytes32 unitId = registerPeers[0].unitIds[0];
 
         (bytes32 commitmentId,) = _createAndDepositCapacityCommitment(peerId, unitCount);
+        console.log("curr epoch #1", deployment.core.currentEpoch());
 
         // warp to next epoch
         StdCheats.skip(deployment.core.epochDuration());
+
+        console.log("curr epoch #2", deployment.core.currentEpoch());
 
         bytes32 targetHash = bytes32(uint256(deployment.capacity.difficulty()) - 1);
         //TODO: vm mock not working here :(
@@ -272,29 +274,18 @@ contract CapacityCommitmentTest is Test {
             deployment.capacity.submitProof(unitId, localUnitNonce, targetHash);
         }
 
+        uint256 reward = deployment.capacity.getRewardPool(deployment.core.currentEpoch())
+            / deployment.capacity.vestingPeriodCount() * deployment.capacity.vestingPeriodCount();
         StdCheats.skip(deployment.core.epochDuration());
 
+        console.log("curr epoch #3", deployment.core.currentEpoch());
         bytes32 localUnitNonce = keccak256(abi.encodePacked("localUnitNonce"));
         deployment.capacity.submitProof(unitId, localUnitNonce, targetHash);
 
-        assertGe(deployment.capacity.totalRewards(commitmentId), 0, "TotalRewards mismatch");
+        assertEq(deployment.capacity.totalRewards(commitmentId), reward, "TotalRewards mismatch");
         assertEq(deployment.capacity.unlockedRewards(commitmentId), 0, "UnlockedRewards mismatch");
 
         vm.stopPrank();
-    }
-
-    function test_CloseCapacityCommitment() public {
-        bytes32 peerId = registerPeers[0].peerId;
-        uint256 unitCount = registerPeers[0].unitIds.length;
-        address peerOwner = registerPeers[0].owner;
-        bytes32 unitId = registerPeers[0].unitIds[0];
-
-        (bytes32 commitmentId,) = _createAndDepositCapacityCommitment(peerId, unitCount);
-
-        // warp to next epoch
-        StdCheats.skip(deployment.core.epochDuration());
-
-        bytes32 targetHash = bytes32(uint256(deployment.capacity.difficulty()) - 1);
     }
 
     // ------------------ Internals ------------------

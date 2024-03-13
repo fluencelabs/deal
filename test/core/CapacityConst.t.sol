@@ -53,7 +53,7 @@ contract CpacityConstTest is Test {
         uint256 slashingRate = PRECISION / 10; // 0.1 = 10%
         uint256 minRequierdProofsPerEpoch = 10;
         uint256 maxProofsPerEpoch = 30;
-        uint256 withdrawEpochesAfterFailed = 2;
+        uint256 withdrawEpochsAfterFailed = 2;
         uint256 maxFailedRatio = 100;
         bytes32 difficulty = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
         uint256 initRewardPool = 1500 ether;
@@ -72,7 +72,7 @@ contract CpacityConstTest is Test {
             slashingRate,
             minRequierdProofsPerEpoch,
             maxProofsPerEpoch,
-            withdrawEpochesAfterFailed,
+            withdrawEpochsAfterFailed,
             maxFailedRatio,
             difficulty,
             initRewardPool,
@@ -91,7 +91,7 @@ contract CpacityConstTest is Test {
             slashingRate,
             minRequierdProofsPerEpoch,
             maxProofsPerEpoch,
-            withdrawEpochesAfterFailed,
+            withdrawEpochsAfterFailed,
             maxFailedRatio,
             difficulty,
             initRewardPool,
@@ -110,9 +110,9 @@ contract CpacityConstTest is Test {
         uint256 vestingPeriodDuration = 3;
         uint256 vestingPeriodCount = 10;
         uint256 slashingRate = PRECISION / 10; // 0.1 = 10%
-        uint256 minRequierdProofsPerEpoch = 10;
+        uint256 minProofsPerEpoch = 10;
         uint256 maxProofsPerEpoch = 30;
-        uint256 withdrawEpochesAfterFailed = 2;
+        uint256 withdrawEpochsAfterFailed = 2;
         uint256 maxFailedRatio = 100;
         bytes32 difficulty = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
         uint256 initRewardPool = 1500 ether;
@@ -129,9 +129,9 @@ contract CpacityConstTest is Test {
             vestingPeriodDuration,
             vestingPeriodCount,
             slashingRate,
-            minRequierdProofsPerEpoch,
+            minProofsPerEpoch,
             maxProofsPerEpoch,
-            withdrawEpochesAfterFailed,
+            withdrawEpochsAfterFailed,
             maxFailedRatio,
             difficulty,
             initRewardPool,
@@ -141,12 +141,12 @@ contract CpacityConstTest is Test {
         uint256 newMinDuration = minDuration + 5;
         uint256 newUsdCollateralPerUnit = usdCollateralPerUnit + 100 * PRECISION;
         uint256 newSlashingRate = slashingRate * 2;
-        uint256 newWithdrawEpochesAfterFailed = withdrawEpochesAfterFailed + 3;
+        uint256 newWithdrawEpochsAfterFailed = withdrawEpochsAfterFailed + 3;
         uint256 newMaxFailedRatio = maxFailedRatio + 100;
         uint256 newUsdTargetRevenuePerEpoch = usdTargetRevenuePerEpoch + 1000 * PRECISION;
         uint256 newMinRewardPerEpoch = minRewardPerEpoch + 1000 ether;
         uint256 newMaxRewardPerEpoch = maxRewardPerEpoch + 3000 ether;
-        uint256 newMinRequierdProofsPerEpoch = minRequierdProofsPerEpoch + 10;
+        uint256 newMinRequierdProofsPerEpoch = minProofsPerEpoch + 10;
         uint256 newMaxProofsPerEpoch = maxProofsPerEpoch + 30;
 
         _mockOwner(address(this));
@@ -162,11 +162,11 @@ contract CpacityConstTest is Test {
         assertEq(capacityConst.slashingRate(), newSlashingRate, "SlashingRate not changed");
 
         _mockOwner(address(this));
-        capacityConst.setConstant(ICapacityConst.ConstantType.WithdrawEpochesAfterFailed, newWithdrawEpochesAfterFailed);
+        capacityConst.setConstant(ICapacityConst.ConstantType.WithdrawEpochsAfterFailed, newWithdrawEpochsAfterFailed);
         assertEq(
-            capacityConst.withdrawEpochesAfterFailed(),
-            newWithdrawEpochesAfterFailed,
-            "WithdrawEpochesAfterFailed not changed"
+            capacityConst.withdrawEpochsAfterFailed(),
+            newWithdrawEpochsAfterFailed,
+            "WithdrawEpochsAfterFailed not changed"
         );
 
         _mockOwner(address(this));
@@ -190,12 +190,8 @@ contract CpacityConstTest is Test {
         assertEq(capacityConst.maxRewardPerEpoch(), newMaxRewardPerEpoch, "MaxRewardPerEpoch not changed");
 
         _mockOwner(address(this));
-        capacityConst.setConstant(ICapacityConst.ConstantType.MinRequierdProofsPerEpoch, newMinRequierdProofsPerEpoch);
-        assertEq(
-            capacityConst.minRequierdProofsPerEpoch(),
-            newMinRequierdProofsPerEpoch,
-            "MinRequierdProofsPerEpoch not changed"
-        );
+        capacityConst.setConstant(ICapacityConst.ConstantType.MinProofsPerEpoch, minProofsPerEpoch);
+        assertEq(capacityConst.minProofsPerEpoch(), minProofsPerEpoch, "MinRequierdProofsPerEpoch not changed");
 
         _mockOwner(address(this));
         capacityConst.setConstant(ICapacityConst.ConstantType.MaxProofsPerEpoch, newMaxProofsPerEpoch);
@@ -241,7 +237,7 @@ contract CpacityConstTest is Test {
         uint256 slashingRate = PRECISION / 10; // 0.1 = 10%
         uint256 minRequierdProofsPerEpoch = 10;
         uint256 maxProofsPerEpoch = 30;
-        uint256 withdrawEpochesAfterFailed = 2;
+        uint256 withdrawEpochsAfterFailed = 2;
         uint256 maxFailedRatio = 100;
         bytes32 difficulty = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
         uint256 initRewardPool = 1500 ether;
@@ -260,7 +256,7 @@ contract CpacityConstTest is Test {
             slashingRate,
             minRequierdProofsPerEpoch,
             maxProofsPerEpoch,
-            withdrawEpochesAfterFailed,
+            withdrawEpochsAfterFailed,
             maxFailedRatio,
             difficulty,
             initRewardPool,
@@ -351,7 +347,7 @@ contract CpacityConstTest is Test {
         uint256 slashingRate,
         uint256 minRequierdProofsPerEpoch,
         uint256 maxProofsPerEpoch,
-        uint256 withdrawEpochesAfterFailed,
+        uint256 withdrawEpochsAfterFailed,
         uint256 maxFailedRatio,
         bytes32 difficulty,
         uint256 initRewardPool,
@@ -371,7 +367,7 @@ contract CpacityConstTest is Test {
             slashingRate,
             minRequierdProofsPerEpoch,
             maxProofsPerEpoch,
-            withdrawEpochesAfterFailed,
+            withdrawEpochsAfterFailed,
             maxFailedRatio,
             difficulty,
             initRewardPool,
@@ -392,7 +388,7 @@ contract CpacityConstTest is Test {
         uint256 slashingRate,
         uint256 minRequierdProofsPerEpoch,
         uint256 maxProofsPerEpoch,
-        uint256 withdrawEpochesAfterFailed,
+        uint256 withdrawEpochsAfterFailed,
         uint256 maxFailedRatio,
         bytes32 difficulty,
         uint256 initRewardPool,
@@ -410,14 +406,10 @@ contract CpacityConstTest is Test {
         assertEq(capacityConst.vestingPeriodDuration(), vestingPeriodDuration, "vestingPeriodDuration mismatch");
         assertEq(capacityConst.vestingPeriodCount(), vestingPeriodCount, "vestingPeriodCount mismatch");
         assertEq(capacityConst.slashingRate(), slashingRate, "slashingRate mismatch");
-        assertEq(
-            capacityConst.minRequierdProofsPerEpoch(), minRequierdProofsPerEpoch, "minRequierdProofsPerEpoch mismatch"
-        );
+        assertEq(capacityConst.minProofsPerEpoch(), minRequierdProofsPerEpoch, "minRequierdProofsPerEpoch mismatch");
         assertEq(capacityConst.maxProofsPerEpoch(), maxProofsPerEpoch, "maxProofsPerEpoch mismatch");
         assertEq(
-            capacityConst.withdrawEpochesAfterFailed(),
-            withdrawEpochesAfterFailed,
-            "withdrawEpochesAfterFailed mismatch"
+            capacityConst.withdrawEpochsAfterFailed(), withdrawEpochsAfterFailed, "withdrawEpochsAfterFailed mismatch"
         );
         assertEq(capacityConst.maxFailedRatio(), maxFailedRatio, "maxFailedRatio mismatch");
         assertEq(capacityConst.difficulty(), difficulty, "difficulty mismatch");
@@ -455,7 +447,7 @@ contract TestCapacityConst is CapacityConst {
         uint256 slashingRate_,
         uint256 minRequierdProofsPerEpoch_,
         uint256 maxProofsPerEpoch_,
-        uint256 withdrawEpochesAfterFailed_,
+        uint256 withdrawEpochsAfterFailed_,
         uint256 maxFailedRatio_,
         bytes32 difficulty_,
         uint256 initRewardPool_,
@@ -473,7 +465,7 @@ contract TestCapacityConst is CapacityConst {
             slashingRate_,
             minRequierdProofsPerEpoch_,
             maxProofsPerEpoch_,
-            withdrawEpochesAfterFailed_,
+            withdrawEpochsAfterFailed_,
             maxFailedRatio_,
             difficulty_,
             initRewardPool_,

@@ -37,26 +37,22 @@ contract Core is UUPSUpgradeable, GlobalConst, ICore {
     // ------------------ Initializer ------------------
     function initialize(
         uint256 epochDuration_,
-        uint256 minDepositedEpoches_,
-        uint256 minRematchingEpoches_,
+        uint256 minDepositedEpochs_,
+        uint256 minRematchingEpochs_,
         uint256 minProtocolVersion_,
         uint256 maxProtocolVersion_,
         IDeal dealImpl_
     ) public initializer {
         __Ownable_init(msg.sender);
         __EpochController_init(epochDuration_);
-        __GlobalConst_init(minDepositedEpoches_, minRematchingEpoches_, minProtocolVersion_, maxProtocolVersion_);
+        __GlobalConst_init(minDepositedEpochs_, minRematchingEpochs_, minProtocolVersion_, maxProtocolVersion_);
         __UUPSUpgradeable_init();
 
         _getCoreStorage().dealImpl = dealImpl_;
         emit DealImplSet(dealImpl_);
     }
 
-    function initializeModules(
-        ICapacity capacity_,
-        IMarket market_,
-        IDealFactory dealFactory_
-    ) external onlyOwner {
+    function initializeModules(ICapacity capacity_, IMarket market_, IDealFactory dealFactory_) external onlyOwner {
         CoreStorage storage coreStorage = _getCoreStorage();
 
         require(address(coreStorage.capacity) == address(0), "Core: modules already initialized");

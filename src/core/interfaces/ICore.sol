@@ -18,13 +18,13 @@ interface ICore is IEpochController, IGlobalConst {
 
     /// @dev initializes the contract
     /// @param epochDuration_ Epoch duration in seconds
-    /// @param minDepositedEpoches_ Min deposited epoches constant for new deals
-    /// @param minRematchingEpoches_ Min rematching epoches constant for all deals
+    /// @param minDepositedEpochs_ Min deposited Epochs constant for new deals
+    /// @param minRematchingEpochs_ Min rematching Epochs constant for all deals
     /// @param dealImpl_ Deal implementation contract address
     function initialize(
         uint256 epochDuration_,
-        uint256 minDepositedEpoches_,
-        uint256 minRematchingEpoches_,
+        uint256 minDepositedEpochs_,
+        uint256 minRematchingEpochs_,
         uint256 minProtocolVersion_,
         uint256 maxProtocolVersion_,
         IDeal dealImpl_

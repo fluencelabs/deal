@@ -23,20 +23,16 @@ contract CoreTest is Test {
 
     function test_CoreHasInitializedValues() external {
         assertNotEq(address(deployment.core.dealImpl()), address(0), "Deal impl not initialized in Core");
+        assertEq(deployment.core.epochDuration(), DeployDealSystem.DEFAULT_EPOCH_DURATION, "Epoch duration not set");
         assertEq(
-            deployment.core.epochDuration(), 
-            DeployDealSystem.DEFAULT_EPOCH_DURATION,
-            "Epoch duration not set"
+            deployment.core.minDealDepositedEpochs(),
+            DeployDealSystem.DEFAULT_MIN_DEPOSITED_Epochs,
+            "Min deal deposited Epochs not set"
         );
         assertEq(
-            deployment.core.minDealDepositedEpoches(),
-            DeployDealSystem.DEFAULT_MIN_DEPOSITED_EPOCHES,
-            "Min deal deposited epoches not set"
-        );
-        assertEq(
-            deployment.core.minDealRematchingEpoches(),
-            DeployDealSystem.DEFAULT_MIN_REMATCHING_EPOCHES,
-            "Min deal rematching epoches not set"
+            deployment.core.minDealRematchingEpochs(),
+            DeployDealSystem.DEFAULT_MIN_REMATCHING_Epochs,
+            "Min deal rematching Epochs not set"
         );
     }
 
@@ -48,8 +44,8 @@ contract CoreTest is Test {
         vm.expectRevert("Initializable: contract is already initialized");
         coreImpl.initialize(
             DeployDealSystem.DEFAULT_EPOCH_DURATION,
-            DeployDealSystem.DEFAULT_MIN_DEPOSITED_EPOCHES,
-            DeployDealSystem.DEFAULT_MIN_REMATCHING_EPOCHES,
+            DeployDealSystem.DEFAULT_MIN_DEPOSITED_Epochs,
+            DeployDealSystem.DEFAULT_MIN_REMATCHING_Epochs,
             DeployDealSystem.DEFAULT_MIN_PROTOCOL_VERSION,
             DeployDealSystem.DEFAULT_MAX_PROTOCOL_VERSION,
             dealImpl
@@ -64,11 +60,7 @@ contract CoreTest is Test {
 
         // and try again - shall fail
         vm.expectRevert("Core: modules already initialized");
-        deployment.core.initializeModules(
-            ICapacity(address(111)),
-            IMarket(address(222)),
-            IDealFactory(address(333))
-        );
+        deployment.core.initializeModules(ICapacity(address(111)), IMarket(address(222)), IDealFactory(address(333)));
     }
 
     function test_SetDealImplementation() external {
@@ -102,27 +94,19 @@ contract CoreTest is Test {
     function test_GlobalConst() external {
         assertEq(deployment.core.precision(), 10_000_000, "Wrong precision");
 
-        deployment.core.setConstant(IGlobalConst.ConstantType.MinDealDepositedEpoches, 100);
-        assertEq(
-            deployment.core.minDealDepositedEpoches(),
-            100,
-            "Min deal deposited epoches not set"
-        );
+        deployment.core.setConstant(IGlobalConst.ConstantType.MinDealDepositedEpochs, 100);
+        assertEq(deployment.core.minDealDepositedEpochs(), 100, "Min deal deposited Epochs not set");
 
-        deployment.core.setConstant(IGlobalConst.ConstantType.MinDealRematchingEpoches, 200);
-        assertEq(
-            deployment.core.minDealRematchingEpoches(),
-            200,
-            "Min deal rematching epoches not set"
-        );
+        deployment.core.setConstant(IGlobalConst.ConstantType.MinDealRematchingEpochs, 200);
+        assertEq(deployment.core.minDealRematchingEpochs(), 200, "Min deal rematching Epochs not set");
 
         // ownable test
         vm.expectRevert(abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, NOT_AN_OWNER));
         vm.prank(NOT_AN_OWNER);
-        deployment.core.setConstant(IGlobalConst.ConstantType.MinDealDepositedEpoches, 300);
+        deployment.core.setConstant(IGlobalConst.ConstantType.MinDealDepositedEpochs, 300);
 
         vm.expectRevert(abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, NOT_AN_OWNER));
         vm.prank(NOT_AN_OWNER);
-        deployment.core.setConstant(IGlobalConst.ConstantType.MinDealRematchingEpoches, 400);
+        deployment.core.setConstant(IGlobalConst.ConstantType.MinDealRematchingEpochs, 400);
     }
 }

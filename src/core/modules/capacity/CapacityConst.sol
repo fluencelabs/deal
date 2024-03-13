@@ -28,12 +28,12 @@ contract CapacityConst is BaseModule, ICapacityConst {
         uint256 usdCollateralPerUnit;
         uint256 fltCollateralPerUnit;
         uint256 slashingRate;
-        uint256 withdrawEpochesAfterFailed;
+        uint256 withdrawEpochsAfterFailed;
         uint256 maxFailedRatio;
     }
 
     struct ProofConst {
-        uint256 minRequierdProofsPerEpoch;
+        uint256 minProofsPerEpoch;
         uint256 maxProofsPerEpoch;
         bytes32 difficulty;
         bytes32 nextDifficulty;
@@ -46,7 +46,7 @@ contract CapacityConst is BaseModule, ICapacityConst {
         uint256 maxRewardPerEpoch;
         uint256 vestingPeriodDuration;
         uint256 vestingPeriodCount;
-        RewardPoolPerEpoch[] rewardPoolPerEpoches;
+        RewardPoolPerEpoch[] rewardPoolPerEpochs;
     }
 
     struct ConstStorage {
@@ -79,9 +79,9 @@ contract CapacityConst is BaseModule, ICapacityConst {
         uint256 vestingPeriodDuration_,
         uint256 vestingPeriodCount_,
         uint256 slashingRate_,
-        uint256 minRequierdProofsPerEpoch_,
+        uint256 minProofsPerEpoch_,
         uint256 maxProofsPerEpoch_,
-        uint256 withdrawEpochesAfterFailed_,
+        uint256 withdrawEpochsAfterFailed_,
         uint256 maxFailedRatio_,
         bytes32 difficulty_,
         uint256 initRewardPool_,
@@ -92,7 +92,7 @@ contract CapacityConst is BaseModule, ICapacityConst {
         constantsStorage.commitment.minDuration = minDuration_;
         constantsStorage.commitment.usdCollateralPerUnit = usdCollateralPerUnit_;
         constantsStorage.commitment.slashingRate = slashingRate_;
-        constantsStorage.commitment.withdrawEpochesAfterFailed = withdrawEpochesAfterFailed_;
+        constantsStorage.commitment.withdrawEpochsAfterFailed = withdrawEpochsAfterFailed_;
         constantsStorage.commitment.maxFailedRatio = maxFailedRatio_;
 
         constantsStorage.reward.usdTargetRevenuePerEpoch = usdTargetRevenuePerEpoch_;
@@ -101,14 +101,14 @@ contract CapacityConst is BaseModule, ICapacityConst {
         constantsStorage.reward.vestingPeriodDuration = vestingPeriodDuration_;
         constantsStorage.reward.vestingPeriodCount = vestingPeriodCount_;
 
-        constantsStorage.proof.minRequierdProofsPerEpoch = minRequierdProofsPerEpoch_;
+        constantsStorage.proof.minProofsPerEpoch = minProofsPerEpoch_;
         constantsStorage.proof.maxProofsPerEpoch = maxProofsPerEpoch_;
         constantsStorage.proof.difficulty = difficulty_;
         constantsStorage.proof.nextDifficulty = difficulty_;
 
         constantsStorage.randomXProxy = randomXProxy_;
 
-        constantsStorage.reward.rewardPoolPerEpoches.push(
+        constantsStorage.reward.rewardPoolPerEpochs.push(
             RewardPoolPerEpoch({epoch: core.currentEpoch(), value: initRewardPool_})
         );
 
@@ -158,16 +158,16 @@ contract CapacityConst is BaseModule, ICapacityConst {
         return _getConstStorage().commitment.slashingRate;
     }
 
-    function minRequierdProofsPerEpoch() public view returns (uint256) {
-        return _getConstStorage().proof.minRequierdProofsPerEpoch;
+    function minProofsPerEpoch() public view returns (uint256) {
+        return _getConstStorage().proof.minProofsPerEpoch;
     }
 
     function maxProofsPerEpoch() public view returns (uint256) {
         return _getConstStorage().proof.maxProofsPerEpoch;
     }
 
-    function withdrawEpochesAfterFailed() public view returns (uint256) {
-        return _getConstStorage().commitment.withdrawEpochesAfterFailed;
+    function withdrawEpochsAfterFailed() public view returns (uint256) {
+        return _getConstStorage().commitment.withdrawEpochsAfterFailed;
     }
 
     function maxFailedRatio() public view returns (uint256) {
@@ -194,14 +194,14 @@ contract CapacityConst is BaseModule, ICapacityConst {
     function getRewardPool(uint256 epoch) public view returns (uint256) {
         ConstStorage storage constantsStorage = _getConstStorage();
 
-        uint256 length = constantsStorage.reward.rewardPoolPerEpoches.length;
+        uint256 length = constantsStorage.reward.rewardPoolPerEpochs.length;
         uint256 low = 0;
         uint256 high = length - 1;
 
         uint256 value = 0;
         while (low <= high) {
             uint256 mid = (low + high) / 2;
-            RewardPoolPerEpoch storage rewardPool = constantsStorage.reward.rewardPoolPerEpoches[mid];
+            RewardPoolPerEpoch storage rewardPool = constantsStorage.reward.rewardPoolPerEpochs[mid];
             uint256 rewardPoolEpoch = rewardPool.epoch;
             if (epoch > rewardPoolEpoch) {
                 value = rewardPool.value;
@@ -248,8 +248,8 @@ contract CapacityConst is BaseModule, ICapacityConst {
             constantsStorage.commitment.fltCollateralPerUnit = v / constantsStorage.fltPrice;
         } else if (constantType == ConstantType.SlashingRate) {
             constantsStorage.commitment.slashingRate = v;
-        } else if (constantType == ConstantType.WithdrawEpochesAfterFailed) {
-            constantsStorage.commitment.withdrawEpochesAfterFailed = v;
+        } else if (constantType == ConstantType.WithdrawEpochsAfterFailed) {
+            constantsStorage.commitment.withdrawEpochsAfterFailed = v;
         } else if (constantType == ConstantType.MaxFailedRatio) {
             constantsStorage.commitment.maxFailedRatio = v;
         }
@@ -262,8 +262,8 @@ contract CapacityConst is BaseModule, ICapacityConst {
             constantsStorage.reward.maxRewardPerEpoch = v;
         }
         // proof section
-        else if (constantType == ConstantType.MinRequierdProofsPerEpoch) {
-            constantsStorage.proof.minRequierdProofsPerEpoch = v;
+        else if (constantType == ConstantType.MinProofsPerEpoch) {
+            constantsStorage.proof.minProofsPerEpoch = v;
         } else if (constantType == ConstantType.MaxProofsPerEpoch) {
             constantsStorage.proof.maxProofsPerEpoch = v;
         } else {
@@ -287,7 +287,7 @@ contract CapacityConst is BaseModule, ICapacityConst {
         uint256 currentEpoch_ = core.currentEpoch();
 
         // load last reward pool
-        uint256 length = constantsStorage.reward.rewardPoolPerEpoches.length;
+        uint256 length = constantsStorage.reward.rewardPoolPerEpochs.length;
 
         if (activeUnitCount_ <= 0) {
             return;
@@ -297,7 +297,7 @@ contract CapacityConst is BaseModule, ICapacityConst {
         uint256 lastRewardPoolValue;
         uint256 lastRewardPoolEpoch;
 
-        RewardPoolPerEpoch storage lastRewardPool = constantsStorage.reward.rewardPoolPerEpoches[length - 1];
+        RewardPoolPerEpoch storage lastRewardPool = constantsStorage.reward.rewardPoolPerEpochs[length - 1];
         lastRewardPoolEpoch = lastRewardPool.epoch;
 
         if (currentEpoch_ == lastRewardPool.epoch) {
@@ -305,7 +305,7 @@ contract CapacityConst is BaseModule, ICapacityConst {
                 return;
             }
 
-            lastRewardPoolValue = constantsStorage.reward.rewardPoolPerEpoches[length - 2].value;
+            lastRewardPoolValue = constantsStorage.reward.rewardPoolPerEpochs[length - 2].value;
         } else {
             lastRewardPoolValue = lastRewardPool.value;
         }
@@ -328,9 +328,9 @@ contract CapacityConst is BaseModule, ICapacityConst {
 
         // save new reward pool
         if (currentEpoch_ == lastRewardPoolEpoch) {
-            constantsStorage.reward.rewardPoolPerEpoches[length - 1].value = newRewardPool;
+            constantsStorage.reward.rewardPoolPerEpochs[length - 1].value = newRewardPool;
         } else {
-            constantsStorage.reward.rewardPoolPerEpoches.push(
+            constantsStorage.reward.rewardPoolPerEpochs.push(
                 RewardPoolPerEpoch({epoch: currentEpoch_, value: newRewardPool})
             );
         }

@@ -14,7 +14,7 @@ interface ICapacity is ICapacityConst {
     /// @dev Emitted when a new commitment is created
     /// @param peerId Peer id which linked to the commitment
     /// @param commitmentId Commitment id
-    /// @param duration The duration of the commitment in epoches
+    /// @param duration The duration of the commitment in Epochs
     /// @param delegator The delegator address. If address is zero, the commitment has no delegator
     /// @param rewardDelegationRate The reward delegation rate in precision
     /// @param fltCollateralPerUnit The flt collateral per compute unit
@@ -171,9 +171,9 @@ interface ICapacity is ICapacityConst {
         uint256 vestingPeriodDuration_,
         uint256 vestingPeriodCount_,
         uint256 slashingRate_,
-        uint256 minRequierdProofsPerEpoch_,
+        uint256 minProofsPerEpoch_,
         uint256 maxProofsPerEpoch_,
-        uint256 withdrawEpochesAfterFailed_,
+        uint256 withdrawEpochsAfterFailed_,
         uint256 maxFailedRatio_,
         bool isWhitelistEnabled_,
         bytes32 initGlobalNonce_,
@@ -211,7 +211,7 @@ interface ICapacity is ICapacityConst {
     // ----------------- Mutables -----------------
     /// @dev Creates a new commitment
     /// @param peerId Peer id which linked to the commitment
-    /// @param duration The duration of the commitment in epoches
+    /// @param duration The duration of the commitment in Epochs
     /// @param delegator The delegator address. If address is zero, the commitment has no delegator
     /// @param rewardDelegationRate The reward delegation rate in precision
     function createCommitment(bytes32 peerId, uint256 duration, address delegator, uint256 rewardDelegationRate)
