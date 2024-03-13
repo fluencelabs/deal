@@ -13,9 +13,21 @@
 // TODO: more variates not only 1to1 match.
 import { assert, beforeAll, describe, expect, test } from "vitest";
 
-import { type ContractsENV, DealClient } from "@fluencelabs/deal-ts-clients";
+import {
+  type ContractsENV,
+  DealClient,
+  type ICapacity,
+  type ICore,
+  type IDealFactory,
+  type IERC20,
+  type IMarket,
+} from "@fluencelabs/deal-ts-clients";
 import { ethers, JsonRpcProvider, type JsonRpcSigner, Wallet } from "ethers";
-import { CCStatus, DEFAULT_CONFIRMATIONS } from "./constants.js";
+import {
+  CapacityConstantType,
+  CCStatus,
+  DEFAULT_CONFIRMATIONS,
+} from "./constants.js";
 import {
   createCommitments,
   depositCollateral,
@@ -38,8 +50,15 @@ const DEFAULT_TEST_TIMEOUT = 180000;
 // - other eps.
 
 let provider: JsonRpcProvider;
-let signer: Wallet | JsonRpcSigner;
+let signer: JsonRpcSigner;
 let contractsClient: DealClient;
+let marketContract: IMarket;
+let capacityContract: ICapacity;
+let dealFactoryContract: IDealFactory;
+let coreContract: ICore;
+let paymentToken: IERC20;
+let paymentTokenAddress: string;
+let signerAddress: string;
 
 /*
  * e2e test with dependencies:
@@ -53,25 +72,22 @@ describe("#getMatchedOffersByDealId", () => {
     provider = new ethers.JsonRpcProvider(TEST_RPC_URL);
     signer = await provider.getSigner();
     contractsClient = new DealClient(signer, TEST_NETWORK);
-  });
+    marketContract = contractsClient.getMarket();
+    capacityContract = contractsClient.getCapacity();
+    dealFactoryContract = contractsClient.getDealFactory();
+    coreContract = contractsClient.getCore();
+    paymentToken = contractsClient.getUSDC();
+    paymentTokenAddress = await paymentToken.getAddress();
+    signerAddress = await signer.getAddress();
 
-  // TODO: check that infra is running.
+    await capacityContract.setConstant(CapacityConstantType.MinDuration, 0);
+  });
 
   test(
     `Check that it matched successfully for 1:1 configuration.`,
     async () => {
-      const signerAddress = await signer.getAddress();
       const timestamp = (await provider.getBlock("latest"))?.timestamp;
       assert(timestamp, "Timestamp is defined");
-      console.log("Init contractsClient as signer:", signerAddress);
-      const paymentToken = await contractsClient.getUSDC();
-      const paymentTokenAddress = await paymentToken.getAddress();
-
-      console.info("---- Offer Creation ----");
-      const marketContract = await contractsClient.getMarket();
-      const coreContract = await contractsClient.getCore();
-      const capacityContract = await contractsClient.getCapacity();
-      const dealFactoryContract = await contractsClient.getDealFactory();
       const epochDuration = await coreContract.epochDuration();
 
       const registeredOffer = await registerMarketOffer(
@@ -92,8 +108,8 @@ describe("#getMatchedOffersByDealId", () => {
       await skipEpoch(provider, epochDuration, 1);
 
       for (const ccId of commitmentIds) {
-        const status = await capacityContract.getStatus(ccId);
-        assert(Number(status) === CCStatus.Active, "Status is not active");
+        const status: CCStatus = Number(await capacityContract.getStatus(ccId));
+        assert(status === CCStatus.Active, "Status is not active");
       }
 
       console.log("---- Deal Creation ----");

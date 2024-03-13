@@ -1,12 +1,16 @@
 import type { JsonRpcProvider } from "ethers";
+import { assert } from "vitest";
 
 export async function skipEpoch(
   provider: JsonRpcProvider,
   epochDuration: bigint,
-  n: bigint | number,
+  epochCount: bigint | number,
 ) {
+  const block = await provider.getBlock("latest");
+  assert(block !== null);
+  block.timestamp;
   await provider.send("evm_increaseTime", [
-    (epochDuration * BigInt(n)).toString(),
+    (epochDuration * BigInt(epochCount)).toString(),
   ]);
 
   await provider.send("evm_mine", []);

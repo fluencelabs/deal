@@ -1,18 +1,20 @@
 import { assert, beforeAll, describe, expect, test } from "vitest";
 import { registerMarketOffer } from "./helpers.js";
 import { getPeerFixture, getUnitIdFixture, randomCID } from "./fixtures.js";
-import { DEFAULT_CONFIRMATIONS } from "./constants.js";
+import { CapacityConstantType, DEFAULT_CONFIRMATIONS } from "./constants.js";
 import { checkEvents } from "./confirmations.js";
+import { ethers, JsonRpcProvider, JsonRpcSigner } from "ethers";
 import {
-  ethers,
-  Interface,
-  JsonRpcProvider,
-  JsonRpcSigner,
-  solidityPackedKeccak256,
-  AbiCoder,
-} from "ethers";
-import { type ContractsENV, DealClient } from "@fluencelabs/deal-ts-clients";
+  type ContractsENV,
+  DealClient,
+  type ICapacity,
+  type ICore,
+  type IDealFactory,
+  type IERC20,
+  type IMarket,
+} from "@fluencelabs/deal-ts-clients";
 import { config } from "dotenv";
+
 config({ path: [".env", ".env.local"] });
 
 const TEST_NETWORK: ContractsENV = "local";
@@ -22,6 +24,13 @@ const DEFAULT_TEST_TIMEOUT = 180000;
 let provider: JsonRpcProvider;
 let signer: JsonRpcSigner;
 let contractsClient: DealClient;
+let marketContract: IMarket;
+let capacityContract: ICapacity;
+let dealFactoryContract: IDealFactory;
+let coreContract: ICore;
+let paymentToken: IERC20;
+let paymentTokenAddress: string;
+let signerAddress: string;
 
 describe(
   "Modify Offer",
@@ -30,15 +39,18 @@ describe(
       provider = new ethers.JsonRpcProvider(TEST_RPC_URL);
       signer = await provider.getSigner();
       contractsClient = new DealClient(signer, TEST_NETWORK);
+      marketContract = contractsClient.getMarket();
+      capacityContract = contractsClient.getCapacity();
+      dealFactoryContract = contractsClient.getDealFactory();
+      coreContract = contractsClient.getCore();
+      paymentToken = contractsClient.getUSDC();
+      paymentTokenAddress = await paymentToken.getAddress();
+      signerAddress = await signer.getAddress();
+
+      await capacityContract.setConstant(CapacityConstantType.MinDuration, 0);
     });
 
     test("Edit compute peers", async () => {
-      const marketContract = await contractsClient.getMarket();
-      const paymentToken = await contractsClient.getUSDC();
-      const paymentTokenAddress = await paymentToken.getAddress();
-
-      const signerAddress = await signer.getAddress();
-
       const registeredOffer = await registerMarketOffer(
         marketContract,
         signerAddress,
@@ -174,13 +186,7 @@ describe(
       expect(offerAfterRemove.peerCount).toEqual(1n);
     });
 
-    test.only("Edit effectors", async () => {
-      const marketContract = await contractsClient.getMarket();
-      const paymentToken = await contractsClient.getUSDC();
-      const paymentTokenAddress = await paymentToken.getAddress();
-
-      const signerAddress = await signer.getAddress();
-
+    test("Edit effectors", async () => {
       const registeredOffer = await registerMarketOffer(
         marketContract,
         signerAddress,
@@ -216,30 +222,6 @@ describe(
         marketContract.filters.EffectorInfoSet,
         newEffectors.length,
         block.number,
-      );
-
-      // Test code for that
-      const iface = new Interface([
-        "event EffectorInfoSet(tuple(string prefixes, address hash) indexed id, string description, tuple(string prefixes, address hash) metadata)",
-      ]);
-
-      console.log(addEffectorInfoEvents[0]);
-
-      const event = addEffectorInfoEvents[0];
-      assert(event);
-      console.log(
-        iface.parseLog({
-          topics: event.topics,
-          data: event.data,
-        }),
-      );
-      const decodeResult = AbiCoder.defaultAbiCoder().decode(
-        ["string", "tuple(bytes4 prefixes, bytes32 hash)"],
-        event.data,
-      );
-      console.log(decodeResult);
-      console.log(
-        iface.decodeEventLog("EffectorInfoSet", event.data, event.topics),
       );
 
       expect(
@@ -321,13 +303,6 @@ describe(
     });
 
     test("Edit token and reward", async () => {
-      const marketContract = await contractsClient.getMarket();
-      const paymentToken = await contractsClient.getUSDC();
-      const coreContract = await contractsClient.getCore();
-      const paymentTokenAddress = await paymentToken.getAddress();
-
-      const signerAddress = await signer.getAddress();
-
       const registeredOffer = await registerMarketOffer(
         marketContract,
         signerAddress,

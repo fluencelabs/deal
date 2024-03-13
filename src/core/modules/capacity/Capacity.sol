@@ -689,7 +689,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         UnitProofsInfo storage unitProofsInfo,
         uint256 epoch,
         uint256 expiredEpoch,
-        uint256 ccFaildEpoch
+        uint256 ccFailedEpoch
     ) internal returns (bool) {
         CommitmentStorage storage s = _getCommitmentStorage();
 
@@ -702,8 +702,8 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
             prevEpoch = expiredEpoch;
         }
 
-        if (ccFaildEpoch != 0 && prevEpoch > ccFaildEpoch) {
-            prevEpoch = ccFaildEpoch;
+        if (ccFailedEpoch != 0 && prevEpoch > ccFailedEpoch) {
+            prevEpoch = ccFailedEpoch;
         }
 
         uint256 lastMinProofsEpoch = unitProofsInfo.lastMinProofsEpoch;
@@ -724,7 +724,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         if (currentAmount > 0) {
             slashedCollateral += (collateralPerUnit_ * count * slashingRate_) / PRECISION;
 
-            if (prevEpoch == ccFaildEpoch) {
+            if (prevEpoch == ccFailedEpoch) {
                 uint256 remainingFailsForLastEpoch = cc.info.remainingFailsForLastEpoch;
                 if (remainingFailsForLastEpoch > 0) {
                     slashedCollateral += (collateralPerUnit_ * slashingRate_) / PRECISION;

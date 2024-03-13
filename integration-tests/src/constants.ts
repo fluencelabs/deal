@@ -18,4 +18,19 @@ export enum DealStatus {
   NOT_ENOUGH_WORKERS,
 }
 
-export const CC_DURATION_DEFAULT = 1000n;
+export enum CapacityConstantType {
+  USDCollateralPerUnit,
+  USDTargetRevenuePerEpoch,
+  MinDuration,
+  MinRewardPerEpoch,
+  MaxRewardPerEpoch,
+  VestingPeriodDuration,
+  VestingPeriodCount,
+  SlashingRate,
+  MinRequierdProofsPerEpoch,
+  MaxProofsPerEpoch,
+  WithdrawEpochesAfterFailed,
+  MaxFailedRatio,
+}
+
+export const CC_DURATION_DEFAULT = 5n;

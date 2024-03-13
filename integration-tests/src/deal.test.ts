@@ -1,7 +1,20 @@
-import { type ContractsENV, DealClient } from "@fluencelabs/deal-ts-clients";
+import {
+  type ContractsENV,
+  DealClient,
+  type ICapacity,
+  type ICore,
+  type IDealFactory,
+  type IERC20,
+  type IMarket,
+} from "@fluencelabs/deal-ts-clients";
 import { ethers, JsonRpcProvider, JsonRpcSigner, type Wallet } from "ethers";
 import { assert, beforeAll, describe, expect, test } from "vitest";
-import { CCStatus, DealStatus, DEFAULT_CONFIRMATIONS } from "./constants.js";
+import {
+  CapacityConstantType,
+  CCStatus,
+  DealStatus,
+  DEFAULT_CONFIRMATIONS,
+} from "./constants.js";
 import {
   createCommitments,
   depositCollateral,
@@ -20,8 +33,15 @@ const TEST_RPC_URL = process.env.RPC_URL;
 const DEFAULT_TEST_TIMEOUT = 180000;
 
 let provider: JsonRpcProvider;
-let signer: JsonRpcSigner | Wallet;
+let signer: JsonRpcSigner;
 let contractsClient: DealClient;
+let marketContract: IMarket;
+let capacityContract: ICapacity;
+let dealFactoryContract: IDealFactory;
+let coreContract: ICore;
+let paymentToken: IERC20;
+let paymentTokenAddress: string;
+let signerAddress: string;
 
 describe(
   "Deal tests",
@@ -29,20 +49,19 @@ describe(
     beforeAll(async () => {
       provider = new ethers.JsonRpcProvider(TEST_RPC_URL);
       signer = await provider.getSigner();
-      console.log(await signer.getAddress());
       contractsClient = new DealClient(signer, TEST_NETWORK);
+      marketContract = contractsClient.getMarket();
+      capacityContract = contractsClient.getCapacity();
+      dealFactoryContract = contractsClient.getDealFactory();
+      coreContract = contractsClient.getCore();
+      paymentToken = contractsClient.getUSDC();
+      paymentTokenAddress = await paymentToken.getAddress();
+      signerAddress = await signer.getAddress();
+
+      await capacityContract.setConstant(CapacityConstantType.MinDuration, 0);
     });
 
     test("Deal lifecycle before matching", async () => {
-      const marketContract = await contractsClient.getMarket();
-      const capacityContract = await contractsClient.getCapacity();
-      const coreContract = await contractsClient.getCore();
-      const paymentToken = await contractsClient.getUSDC();
-      const paymentTokenAddress = await paymentToken.getAddress();
-      const dealFactoryContract = await contractsClient.getDealFactory();
-
-      const signerAddress = await signer.getAddress();
-
       const registeredOffer = await registerMarketOffer(
         marketContract,
         signerAddress,
@@ -174,18 +193,7 @@ describe(
     });
 
     test("Suspense matched deal when provider removes worker", async () => {
-      const signerAddress = await signer.getAddress();
       const timestamp = (await provider.getBlock("latest"))?.timestamp;
-      assert(timestamp, "Timestamp is defined");
-      console.log("Init contractsClient as signer:", signerAddress);
-      const paymentToken = await contractsClient.getUSDC();
-      const paymentTokenAddress = await paymentToken.getAddress();
-
-      console.info("---- Offer Creation ----");
-      const marketContract = await contractsClient.getMarket();
-      const coreContract = await contractsClient.getCore();
-      const capacityContract = await contractsClient.getCapacity();
-      const dealFactoryContract = await contractsClient.getDealFactory();
       const epochDuration = await coreContract.epochDuration();
 
       const registeredOffer = await registerMarketOffer(
@@ -340,19 +348,9 @@ describe(
     });
 
     test("End deal after it was created", async () => {
-      const signerAddress = await signer.getAddress();
+      const epochDuration = await coreContract.epochDuration();
       const timestamp = (await provider.getBlock("latest"))?.timestamp;
       assert(timestamp, "Timestamp is defined");
-      console.log("Init contractsClient as signer:", signerAddress);
-      const paymentToken = await contractsClient.getUSDC();
-      const paymentTokenAddress = await paymentToken.getAddress();
-
-      console.info("---- Offer Creation ----");
-      const marketContract = await contractsClient.getMarket();
-      const coreContract = await contractsClient.getCore();
-      const capacityContract = await contractsClient.getCapacity();
-      const dealFactoryContract = await contractsClient.getDealFactory();
-      const epochDuration = await coreContract.epochDuration();
 
       const registeredOffer = await registerMarketOffer(
         marketContract,
