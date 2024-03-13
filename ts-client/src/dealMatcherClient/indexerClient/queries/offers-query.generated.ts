@@ -1,11 +1,10 @@
 /* eslint-disable */
 //@ts-nocheck
-import * as Types from "../generated.types.js";
+import * as Types from '../generated.types.js';
 
-import { GraphQLClient } from "graphql-request";
-import type { RequestOptions } from "graphql-request";
-type GraphQLClientRequestHeaders = RequestOptions["requestHeaders"];
-import gql from "graphql-tag";
+import { GraphQLClient, RequestOptions } from 'graphql-request';
+import gql from 'graphql-tag';
+type GraphQLClientRequestHeaders = RequestOptions['requestHeaders'];
 export type OffersQueryQueryVariables = Types.Exact<{
   filters?: Types.InputMaybe<Types.Offer_Filter>;
   peersFilters?: Types.InputMaybe<Types.Peer_Filter>;

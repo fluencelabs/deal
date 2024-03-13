@@ -53,13 +53,16 @@ abstract contract Matcher is Offer, IMatcher {
         ICapacity capacity = core.capacity();
         MatcherStorage storage matcherStorage = _getMatcherStorage();
 
-        IDeal.Status dealStatus = deal.getStatus(); 
-        require(dealStatus == IDeal.Status.ACTIVE || dealStatus == IDeal.Status.NOT_ENOUGH_WORKERS, "Matcher: deal is not active");
+        IDeal.Status dealStatus = deal.getStatus();
+        require(
+            dealStatus == IDeal.Status.ACTIVE || dealStatus == IDeal.Status.NOT_ENOUGH_WORKERS,
+            "Matcher: deal is not active"
+        );
 
         uint256 lastMatchedEpoch = matcherStorage.lastMatchedEpoch[address(deal)];
         uint256 currentEpoch = core.currentEpoch();
         require(
-            lastMatchedEpoch == 0 || currentEpoch > lastMatchedEpoch + core.minDealRematchingEpoches(),
+            lastMatchedEpoch == 0 || currentEpoch > lastMatchedEpoch + core.minDealRematchingEpochs(),
             "Matcher: too early to rematch"
         );
 
@@ -85,12 +88,9 @@ abstract contract Matcher is Offer, IMatcher {
 
             if (
                 // Check for blacklisted provider and others.
-                !deal.isProviderAllowed(offer.provider)
-                || pricePerWorkerEpoch < offer.minPricePerWorkerEpoch
-                || paymentToken != offer.paymentToken
-                || !_hasOfferEffectors(offerId, effectors)
-                || offer.minProtocolVersion > protocolVersion
-                || offer.maxProtocolVersion < protocolVersion
+                !deal.isProviderAllowed(offer.provider) || pricePerWorkerEpoch < offer.minPricePerWorkerEpoch
+                    || paymentToken != offer.paymentToken || !_hasOfferEffectors(offerId, effectors)
+                    || offer.minProtocolVersion > protocolVersion || offer.maxProtocolVersion < protocolVersion
             ) {
                 continue;
             }

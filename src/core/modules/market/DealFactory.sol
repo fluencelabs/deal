@@ -81,7 +81,7 @@ contract DealFactory is UUPSUpgradeable, BaseModule, IDealFactory {
 
         dealFactoryStorage.hasDeal[deal] = true;
 
-        uint256 minAmount = pricePerWorkerEpoch_ * targetWorkers_ * core.minDealDepositedEpoches();
+        uint256 minAmount = pricePerWorkerEpoch_ * targetWorkers_ * core.minDealDepositedEpochs();
 
         require(depositAmount_ >= minAmount, "Deposit amount is less than minimum required");
 
