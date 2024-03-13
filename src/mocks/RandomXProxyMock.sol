@@ -11,7 +11,12 @@ contract RandomXProxyMock {
         difficulty = difficulty_;
     }
 
-    function run(bytes32 k, bytes32 h) public view returns (bytes32) {
-        return difficulty;
+    function run(bytes32 k, bytes32[] memory hs) public returns (bytes32[] memory) {
+        bytes32[] memory result = new bytes32[](hs.length);
+        for (uint256 i = 0; i < hs.length; i++) {
+            result[i] = difficulty;
+        }
+
+        return result;
     }
 }
