@@ -1,8 +1,10 @@
 import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type { ContractsENV } from "../client/config.js";
 import type { OffersQueryQueryVariables } from "./indexerClient/queries/offers-query.generated.js";
-import { serializeDealProviderAccessLists } from "../utils/serializers.js";
 import debug from "debug";
+import {
+  serializeDealProviderAccessLists
+} from "../utils/indexerClient/serializers.js";
 
 const LOG_PREFIX = "deal-ts-clients:matcher";
 

@@ -66,14 +66,10 @@ import {
   calculateEpoch,
   DEFAULT_ORDER_TYPE,
   FILTER_MULTISELECT_MAX,
-  type SerializationSettings,
-  tokenValueToRounded
 } from "./utils.js";
 import {
   serializeCUStatus,
-  serializeEffectorDescription,
 } from "./serializers/logics.js";
-import { serializeDealProviderAccessLists } from "../utils/serializers.js";
 import {
   FiltersError,
   serializeCapacityCommitmentsFiltersToIndexer,
@@ -104,6 +100,13 @@ import {
 import type { ICapacity } from "../typechain-types/index.js";
 import type { CapacityCommitmentBasicFragment } from "./indexerClient/queries/capacity-commitments-query.generated.js";
 import { FLTToken } from "./constants.js";
+import {
+  serializeDealProviderAccessLists
+} from "../utils/indexerClient/serializers.js";
+import {
+  type SerializationSettings,
+  tokenValueToRounded
+} from "../utils/serializers.js";
 
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
