@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import { ethers, randomBytes } from "ethers";
 import { assert, describe, expect, test } from "vitest";
 import { CCStatus, DealStatus, DEFAULT_CONFIRMATIONS } from "./constants.js";
 import {
@@ -6,8 +6,8 @@ import {
   depositCollateral,
   registerMarketOffer,
 } from "./helpers.js";
-import { randomCID } from "./fixtures.js";
-import { checkEvents } from "./confirmations.js";
+import { randomCID, randomWorkerId } from "./fixtures.js";
+import { checkEvent, checkEvents } from "./confirmations.js";
 import { config } from "dotenv";
 import { skipEpoch } from "./utils.js";
 import {
@@ -274,10 +274,28 @@ describe("Deal tests", () => {
       [dealAppCID.prefixes, dealAppCID.hash],
     ]);
 
-    console.log("Remove compute unit participating in deal...");
+    const dealContract = contractsClient.getDeal(dealId);
     const cuID = registeredOffer.peers[0]?.unitIds[0];
     assert(cuID, "At least one cuID should be specified");
-    const dealContract = contractsClient.getDeal(dealId);
+
+    let dealStatus: DealStatus = Number(await dealContract.getStatus());
+    expect(dealStatus).toEqual(DealStatus.NOT_ENOUGH_WORKERS);
+
+    const workerId = randomWorkerId();
+    const setWorkerReceipt = await dealContract
+      .setWorker(cuID, workerId)
+      .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
+    const setWorkerEvent = checkEvent(
+      dealContract.filters.WorkerIdUpdated,
+      setWorkerReceipt,
+    );
+    expect(setWorkerEvent.args).toEqual([cuID, workerId]);
+
+    dealStatus = Number(await dealContract.getStatus());
+    expect(dealStatus).toEqual(DealStatus.ACTIVE);
+
+    console.log("Remove compute unit participating in deal...");
+
     const removeComputeUnitTx =
       await marketContract.returnComputeUnitFromDeal(cuID);
     // const removeComputeUnitTx = await dealContract.removeComputeUnit(cuID);
@@ -294,9 +312,23 @@ describe("Deal tests", () => {
       dealId,
       CUMatchedEvent.args.peerId,
     ]);
-    const dealStatus: DealStatus = Number(await dealContract.getStatus());
-    console.log(dealStatus, "deal status");
-    expect(dealStatus === DealStatus.INSUFFICIENT_FUNDS);
+
+    dealStatus = Number(await dealContract.getStatus());
+    expect(dealStatus === DealStatus.NOT_ENOUGH_WORKERS);
+
+    console.log("Stopping matched deal...");
+    const dealStopTx = await dealContract.stop();
+    await dealStopTx.wait(DEFAULT_CONFIRMATIONS);
+    const [dealStopEvent] = await checkEvents(
+      dealContract,
+      dealContract.filters.DealEnded,
+      1,
+      dealStopTx,
+    );
+    expect(dealStopEvent?.args.endedEpoch).toBeDefined();
+
+    dealStatus = Number(await dealContract.getStatus());
+    expect(dealStatus === DealStatus.ENDED);
   });
 
   test("End deal after it was created", async () => {
@@ -461,4 +493,6 @@ describe("Deal tests", () => {
 
     expect(initialBalance).toEqual(afterWithdrawBalance);
   });
+
+  // TODO: Tests for deal withdraw
 });

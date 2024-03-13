@@ -2,6 +2,10 @@ import { ethers } from "ethers";
 
 const pseudoRandomValue = () => Math.trunc(Date.now() * Math.random());
 
+export function randomWorkerId() {
+  return ethers.encodeBytes32String(`workerId:${pseudoRandomValue()}`);
+}
+
 export function randomCID() {
   return {
     prefixes: "0x12345678",

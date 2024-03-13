@@ -59,8 +59,9 @@ export async function createCommitments(
   capacity: ICapacity,
   signerAddress: string,
   peerIds: string[],
+  _duration: bigint | undefined = undefined,
 ) {
-  const duration = CC_DURATION_DEFAULT;
+  const duration = _duration ?? CC_DURATION_DEFAULT;
   const fromBlock = await capacity.runner?.provider?.getBlock("latest");
   assert(fromBlock, "Not current block");
 
