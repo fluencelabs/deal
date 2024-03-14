@@ -61,6 +61,7 @@ library Vesting {
             cumulativeAmount += rewardPerPeriod;
             if (index >= 0 && index < int256(length)) {
                 Item storage item = self.items[uint256(index)];
+                // TODO audit: should it be cumulativeAmount += item.cumulativeAmount;
                 item.cumulativeAmount += item.cumulativeAmount;
                 item.cumulativeAmount = cumulativeAmount;
                 index++;
@@ -71,6 +72,7 @@ library Vesting {
         }
     }
 
+    // TODO audit: must return epoch which is <= withdrawEpoch
     function _findClosest(Info storage self, uint256 withdrawEpoch) private view returns (int256 index) {
         uint256 length = self.items.length;
         index = -1;

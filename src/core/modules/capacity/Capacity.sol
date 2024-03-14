@@ -188,6 +188,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
 
         require(duration >= minDuration(), "Duration should be greater than min capacity commitment duration");
         require(rewardDelegationRate > 0, "Reward delegation rate should be greater than 0");
+        // TODO audit: misleading error message, maybe 100*PRECISION, 100?
         require(rewardDelegationRate <= PRECISION, "Reward delegation rate should be less or equal 100");
         // #endregion
 
@@ -221,6 +222,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
 
         bytes32 peerId = cc.info.peerId;
 
+        // TODO audit: check that peer owns this commitment
         require(
             getStatus(commitmentId) == CCStatus.WaitDelegation, "Capacity commitment is not in WaitDelegation status"
         );
@@ -252,8 +254,10 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
             IMarket.ComputePeer memory peer = market.getComputePeer(peerId);
 
             uint256 unitCount = peer.unitCount;
+            // TODO audit: overflow?
             uint256 collateral = unitCount * cc.info.collateralPerUnit;
 
+            // TODO audit: underflow?
             totalValue -= collateral;
 
             uint256 currentEpoch_ = core.currentEpoch();
@@ -276,6 +280,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
             cc.progress.activeUnitCount = unitCount;
 
             _setActiveUnitCount(activeUnitCount() + unitCount);
+            // TODO audit: should it be WaitStart?
             cc.info.status = CCStatus.Active;
 
             emit CollateralDeposited(commitmentId, collateral);
@@ -335,6 +340,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         // #region save localUnitNonce
         bytes32 globalUnitNonce_ = keccak256(abi.encodePacked(s.globalNonce, unitId));
         require(!s.isProofSubmittedByUnit[globalUnitNonce_][localUnitNonce], "Proof is already submitted for this unit");
+        // TODO audit: it could became too big, maybe it's should cleared at each epoch
         s.isProofSubmittedByUnit[globalUnitNonce_][localUnitNonce] = true;
         // #endregion
 
@@ -343,6 +349,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
 
         // load unitProofCount and add one because we submit new proof
         uint256 unitProofCount = unitInfo.proofCountByEpoch[currentEpoch] + 1;
+        // TODO audit: it's better too place this check before keccak256 calculation
         if (unitProofCount > maxProofsPerEpoch()) {
             revert TooManyProofs();
         }
@@ -355,12 +362,14 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
             // if totalSuccessProofs is zero, then we save minRequierdCCProofs for this epoch.
             // This information will be used for rewards calculation. But we need cache it becouse we can change minRequierdCCProofs for all system.
             uint256 totalSuccessProofs = s.rewardInfoByEpoch[currentEpoch].totalSuccessProofs;
+            // TODO audit: s.rewardInfoByEpoch[currentEpoch].minRequierdCCProofs is used only here
             if (totalSuccessProofs == 0) {
                 s.rewardInfoByEpoch[currentEpoch].minRequierdCCProofs = minRequierdCCProofs_;
             }
 
             s.rewardInfoByEpoch[currentEpoch].totalSuccessProofs = totalSuccessProofs + unitProofCount;
         } else if (unitProofCount > minRequierdCCProofs_) {
+            // TODO audit: if minRequierdCCProofs_ changed then we can loose some proofs
             s.rewardInfoByEpoch[currentEpoch].totalSuccessProofs += 1;
         }
 
@@ -383,6 +392,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
             cc.finish.exitedUnitCount,
             cc.progress.activeUnitCount,
             cc.progress.nextAdditionalActiveUnitCount,
+            // TODO audit: why -1?
             currentEpoch - 1
         );
 
@@ -432,7 +442,9 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         address payable delegator = payable(cc.info.delegator);
         uint256 collateralPerUnit_ = cc.info.collateralPerUnit;
 
+        // TODO audit: can we increase unit count without adding collateral?
         uint256 totalCollateral = collateralPerUnit_ * unitCount;
+        // TODO audit: given the fact that slashing is done in submit proof
         uint256 slashedCollateral = cc.progress.totalFailCount * collateralPerUnit_;
         if (slashedCollateral > totalCollateral) {
             slashedCollateral = totalCollateral;
@@ -447,6 +459,8 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
     }
 
     function removeCUFromCC(bytes32 commitmentId, bytes32[] calldata unitIds) external {
+        // TODO audit: check sender
+
         // #region load contracts and storage
         IMarket market = core.market();
         CommitmentStorage storage s = _getCommitmentStorage();
@@ -481,6 +495,8 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
                 market.returnComputeUnitFromDeal(unitId);
             }
 
+            // TODO audit: looks like unitInfo.isInactive is not updated and _commitUnitSnapshot could return false
+            // TODO audit: looks like snapshotEpoch <= lastSnapshotEpoch could also work in _commitUnitSnapshot and it returns false
             bool success = _commitUnitSnapshot(cc, cc.unitInfoById[unitId], currentEpoch_, expiredEpoch, failedEpoch);
             if (success) {
                 cc.finish.exitedUnitCount += 1;
@@ -498,6 +514,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
     }
 
     function withdrawReward(bytes32 commitmentId) external {
+        // TODO audit: restrict access
         // #region load contracts and storage
         IMarket market = core.market();
         CommitmentStorage storage s = _getCommitmentStorage();
@@ -639,6 +656,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
 
     // #region ----------------- Internal View -----------------
     function _expiredEpoch(Commitment storage cc) private view returns (uint256) {
+        // TODO audit: can we overflow?
         return cc.info.startEpoch + cc.info.duration;
     }
     // #endregion
@@ -652,6 +670,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         uint256 currentEpoch_,
         uint256 expiredEpoch
     ) private view returns (CCStatus) {
+        // it's a commitment status not storage, right?
         CCStatus storageStatus = snapshotCache.current.status;
         uint256 lastSnapshotEpoch = snapshotCache.current.snapshotEpoch;
         uint256 snapshotEpoch = currentEpoch_ - 1;
@@ -662,7 +681,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
             return CCStatus.WaitStart;
         }
 
-        // only active status can have a snapshot and be changed because with other statuses CC can't work
+        // only active status can have a snapshot and be changed because with other statuses CC can't work.
         // also if snapshotEpoch is less or equal to lastSnapshotEpoch, then we have snapshot for this epoch
         if (storageStatus != CCStatus.Active || snapshotEpoch <= lastSnapshotEpoch) {
             return storageStatus;
@@ -682,11 +701,16 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         uint256 totalFailCount = snapshotCache.current.totalFailCount;
         uint256 currentSuccessCount = snapshotCache.current.currentSuccessCount;
 
-        // maxFailCount is a number of epoches when units not send proofs
-        // if on unit not send proof per one epoch, it's mean that it's one fail
+        // maxFailCount is a number of epochs when all units from the CC could not send proofs
+        // if one unit not send proofs per one epoch, it's mean that it's one fail
         // maxFailedRatio is the ratio of failed attempts for all units
+        // fail = epoch * CU
+        // fail = fail/CU * CU
         uint256 maxFailCount = maxFailedRatio_ * unitCount;
+        // TODO audit: can snapshotEpoch be less than lastSnapshotEpoch
         uint256 snapshotEpochCount = snapshotEpoch - lastSnapshotEpoch;
+        // number of results, = fail + success
+        // TODO audit: while here activeUnitCount_ and not unitCount
         uint256 requiredSuccessCount = activeUnitCount_ * snapshotEpochCount;
         // #endregion
 
@@ -707,10 +731,11 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
             newStatus = CCStatus.Failed;
 
             // numberOfFillFailedEpoch is a number of epochs when units not send proofs
+            // (epoch * CU) / CU
             uint256 numberOfFillFailedEpoch = snapshotTotalFailCount / activeUnitCount_;
             uint256 remainingFailedUnitsInLastEpoch = snapshotTotalFailCount % activeUnitCount_;
             // Math.ceil(numberOfFillFailedEpoch)
-            // if remainingFailedUnitsInLastEpoch is not zero, then we should add one to numberOfFillFailedEpoch becouse the last epoch is not full
+            // if remainingFailedUnitsInLastEpoch is not zero, then we should add one to numberOfFillFailedEpoch because the last epoch is not full
             if (remainingFailedUnitsInLastEpoch != 0) {
                 numberOfFillFailedEpoch += 1;
             }
@@ -748,6 +773,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
 
         // #region update progress
         snapshotCache.current.snapshotEpoch = snapshotEpoch;
+        // TODO audit: why is it needed?
         snapshotCache.current.currentSuccessCount = 0;
         // #endregion
 
@@ -762,6 +788,8 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         uint256 activeUnitCount_ = snapshotCache.current.activeUnitCount;
         uint256 initialActiveUnitCount_ = snapshotCache.initial.activeUnitCount;
 
+        // TODO audit: why not activeUnitCount_ < initialActiveUnitCount_,
+        // otherwise it seems that we can use only all CUs at once
         if (activeUnitCount_ == 0 && initialActiveUnitCount_ > 0) {
             _setActiveUnitCount(activeUnitCount() - initialActiveUnitCount_);
         }
@@ -839,6 +867,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
                 }
             }
 
+            // epochs * FLT/CU * k/epoch
             slashedCollateral += (gapsCount * collateralPerUnit_ * slashingRate_) / PRECISION;
             if (slashedCollateral > currentCollateral) {
                 slashedCollateral = currentCollateral;
@@ -860,6 +889,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
             return true;
         }
 
+        // TODO audit: it's better just go through the list
         uint256 reward = (
             getRewardPool(lastSnapshotEpoch) * ((lastSnapshotProofCount * PRECISION) / rewardInfo.totalSuccessProofs)
         ) / PRECISION;

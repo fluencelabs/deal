@@ -16,6 +16,7 @@ contract CapacityConst is BaseModule, ICapacityConst {
     // #region ------------------ Types ------------------
     struct RewardPoolPerEpoch {
         uint256 epoch;
+        /// FLT
         uint256 value;
     }
     // #endregion ------------------ Types ------------------
@@ -24,11 +25,16 @@ contract CapacityConst is BaseModule, ICapacityConst {
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.capacity.storage.v1.const")) - 1);
 
     struct CommitmentConst {
+        // in epochs
         uint256 minDuration;
+        /// USD/CU
         uint256 usdCollateralPerUnit;
+        /// FLT/CU
         uint256 fltCollateralPerUnit;
+        // percent per epoch
         uint256 slashingRate;
         uint256 withdrawEpochesAfterFailed;
+        /// Fails/CU
         uint256 maxFailedRatio;
     }
 
@@ -41,15 +47,27 @@ contract CapacityConst is BaseModule, ICapacityConst {
     }
 
     struct RewardConst {
+        // how much reward each CU will receive per epoch in USD
+        // each CU will receive reward around this parameters
+        // USD/CU
         uint256 usdTargetRevenuePerEpoch;
+
+        // bounds for RewardPoolPerEpoch.value
         uint256 minRewardPerEpoch;
         uint256 maxRewardPerEpoch;
+
+        // how long will reward be vested
+        // TODO: figure out?
         uint256 vestingPeriodDuration;
         uint256 vestingPeriodCount;
+
+        // represent an array of exact reward count in FLT per some epoch
+        //
         RewardPoolPerEpoch[] rewardPoolPerEpoches;
     }
 
     struct ConstStorage {
+        /// USD/FLT
         uint256 fltPrice;
         address randomXProxy;
         uint256 activeUnitCount;
@@ -191,6 +209,7 @@ contract CapacityConst is BaseModule, ICapacityConst {
         return _getConstStorage().randomXProxy;
     }
 
+    /// Q: why should I care about prices in old epochs
     function getRewardPool(uint256 epoch) public view returns (uint256) {
         ConstStorage storage constantsStorage = _getConstStorage();
 
@@ -255,6 +274,7 @@ contract CapacityConst is BaseModule, ICapacityConst {
         }
         // reward section
         else if (constantType == ConstantType.USDTargetRevenuePerEpoch) {
+            // Why we don't call _setRewardPool here
             constantsStorage.reward.usdTargetRevenuePerEpoch = v;
         } else if (constantType == ConstantType.MinRewardPerEpoch) {
             constantsStorage.reward.minRewardPerEpoch = v;
@@ -282,6 +302,9 @@ contract CapacityConst is BaseModule, ICapacityConst {
         _setRewardPool(constantsStorage.fltPrice, activeUnitCount_);
     }
 
+    /// guarantee that a new array value will differ from the previous in 10%
+    /// in other words, foreach i, |rewardPoolPerEpoches[i], rewardPoolPerEpoches[i+1]| = 10%
+    // _setRewardPool(10, 5), 10 USD/FLT
     function _setRewardPool(uint256 fltPrice_, uint256 activeUnitCount_) internal {
         ConstStorage storage constantsStorage = _getConstStorage();
         uint256 currentEpoch_ = core.currentEpoch();
@@ -293,6 +316,7 @@ contract CapacityConst is BaseModule, ICapacityConst {
             return;
         }
 
+        /// 10 / 5 = 2 USD/FLT for each CU
         uint256 currentTarget = fltPrice_ / activeUnitCount_;
         uint256 lastRewardPoolValue;
         uint256 lastRewardPoolEpoch;
@@ -312,7 +336,9 @@ contract CapacityConst is BaseModule, ICapacityConst {
 
         // calculate new reward pool
         uint256 newRewardPool;
+        // USD/CU * 1/FLT > USD/CU
         if (currentTarget > constantsStorage.reward.usdTargetRevenuePerEpoch) {
+            // if we distribute more tokens than
             uint256 minRewardPerEpoch_ = constantsStorage.reward.minRewardPerEpoch;
             newRewardPool = lastRewardPoolValue * _REWARD_POOL_SHRINK_RATE / PRECISION;
             if (newRewardPool < minRewardPerEpoch_) {

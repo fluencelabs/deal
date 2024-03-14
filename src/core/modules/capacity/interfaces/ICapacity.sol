@@ -124,8 +124,11 @@ interface ICapacity is ICapacityConst {
     struct CommitmentInfo {
         CCStatus status;
         bytes32 peerId;
+        // Ethers
         uint256 collateralPerUnit;
+        // in epochs
         uint256 duration;
+        // either [0,100*PRECISION] or [0,100], [0, PRECISION]
         uint256 rewardDelegatorRate;
         address delegator;
         uint256 startEpoch;
@@ -133,12 +136,14 @@ interface ICapacity is ICapacityConst {
 
     struct CommitmentFinish {
         uint256 failedEpoch;
+        // remainder of CUs which should be slashed
         uint256 remainingFailedUnitsInLastEpoch;
         uint256 filledRemainingFailedUnitsInLastEpoch;
         uint256 exitedUnitCount;
     }
 
     struct CommitmentProgress {
+        // number of epochs where all proofs were successfully provided ?
         uint256 currentSuccessCount;
         uint256 totalFailCount;
         uint256 snapshotEpoch;
