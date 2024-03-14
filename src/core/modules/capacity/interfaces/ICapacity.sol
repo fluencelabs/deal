@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 
 import "src/core/interfaces/ICore.sol";
 import "./ICapacityConst.sol";
+import "../Vesting.sol";
 
 /// @title Capacity contract interface
 /// @dev Capacity contract is responsible for managing the commitments
@@ -13,7 +14,7 @@ interface ICapacity is ICapacityConst {
     /// @dev Emitted when a new commitment is created
     /// @param peerId Peer id which linked to the commitment
     /// @param commitmentId Commitment id
-    /// @param duration The duration of the commitment in epoches
+    /// @param duration The duration of the commitment in Epochs
     /// @param delegator The delegator address. If address is zero, the commitment has no delegator
     /// @param rewardDelegationRate The reward delegation rate in precision
     /// @param fltCollateralPerUnit The flt collateral per compute unit
@@ -49,6 +50,8 @@ interface ICapacity is ICapacityConst {
     /// @param totalCollateral The total collateral deposited to commitment
     event CollateralDeposited(bytes32 indexed commitmentId, uint256 totalCollateral);
 
+    event CommitmentFailed(bytes32 indexed commitmentId, uint256 failedEpoch);
+
     /// @dev Emitted when a proof is submitted
     /// @param commitmentId Commitment id
     /// @param unitId Compute unit id which linked to the proof
@@ -73,7 +76,7 @@ interface ICapacity is ICapacityConst {
     // To fetch updates on changes in CC stats (currently only in stats related to CUs).
     event CommitmentStatsUpdated(
         bytes32 commitmentId,
-        uint256 totalCUFailCount,
+        uint256 totalFailCount,
         uint256 exitedUnitCount,
         uint256 activeUnitCount,
         uint256 nextAdditionalActiveUnitCount,
@@ -93,14 +96,29 @@ interface ICapacity is ICapacityConst {
 
     // ------------------ Types ------------------
     enum CCStatus {
+        Inactive,
         Active,
         // WaitDelegation - before collateral is deposited.
         WaitDelegation,
         // Status is WaitStart - means collateral deposited, and epoch should be proceed before Active.
         WaitStart,
-        Inactive,
         Failed,
         Removed
+    }
+
+    struct UnitInfo {
+        bool isInactive;
+        uint256 lastSnapshotEpoch;
+        uint256 slashedCollateral;
+        mapping(uint256 => uint256) proofCountByEpoch;
+    }
+
+    struct Commitment {
+        CommitmentInfo info;
+        CommitmentProgress progress;
+        CommitmentFinish finish;
+        Vesting.Info vesting;
+        mapping(bytes32 => UnitInfo) unitInfoById;
     }
 
     struct CommitmentInfo {
@@ -110,15 +128,20 @@ interface ICapacity is ICapacityConst {
         uint256 duration;
         uint256 rewardDelegatorRate;
         address delegator;
-        uint256 currentCUSuccessCount;
-        uint256 totalCUFailCount;
-        uint256 snapshotEpoch;
         uint256 startEpoch;
+    }
+
+    struct CommitmentFinish {
         uint256 failedEpoch;
-        uint256 withdrawCCEpochAfterFailed;
-        uint256 remainingFailsForLastEpoch;
+        uint256 remainingFailedUnitsInLastEpoch;
+        uint256 filledRemainingFailedUnitsInLastEpoch;
         uint256 exitedUnitCount;
-        uint256 totalWithdrawnReward;
+    }
+
+    struct CommitmentProgress {
+        uint256 currentSuccessCount;
+        uint256 totalFailCount;
+        uint256 snapshotEpoch;
         uint256 activeUnitCount;
         uint256 nextAdditionalActiveUnitCount;
     }
@@ -132,7 +155,7 @@ interface ICapacity is ICapacityConst {
         uint256 endEpoch;
         uint256 rewardDelegatorRate;
         address delegator;
-        uint256 totalCUFailCount;
+        uint256 totalFailCount;
         uint256 failedEpoch;
         uint256 exitedUnitCount;
     }
@@ -154,13 +177,13 @@ interface ICapacity is ICapacityConst {
         uint256 vestingPeriodDuration_,
         uint256 vestingPeriodCount_,
         uint256 slashingRate_,
-        uint256 minRequierdProofsPerEpoch_,
+        uint256 minProofsPerEpoch_,
         uint256 maxProofsPerEpoch_,
-        uint256 withdrawEpochesAfterFailed_,
+        uint256 withdrawEpochsAfterFailed_,
         uint256 maxFailedRatio_,
-        bool isWhitelistEnabled_,
         bytes32 initGlobalNonce_,
         bytes32 difficulty_,
+        uint256 initRewardPool_,
         address randomXProxy_
     ) external;
 
@@ -193,7 +216,7 @@ interface ICapacity is ICapacityConst {
     // ----------------- Mutables -----------------
     /// @dev Creates a new commitment
     /// @param peerId Peer id which linked to the commitment
-    /// @param duration The duration of the commitment in epoches
+    /// @param duration The duration of the commitment in Epochs
     /// @param delegator The delegator address. If address is zero, the commitment has no delegator
     /// @param rewardDelegationRate The reward delegation rate in precision
     function createCommitment(bytes32 peerId, uint256 duration, address delegator, uint256 rewardDelegationRate)

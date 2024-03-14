@@ -13,8 +13,8 @@ contract GlobalConst is OwnableUpgradableDiamond, EpochController, IGlobalConst 
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.core.storage.v1.globalConst")) - 1);
 
     struct GlobalConstStorage {
-        uint256 minDealDepositedEpoches;
-        uint256 minDealRematchingEpoches;
+        uint256 minDealDepositedEpochs;
+        uint256 minDealRematchingEpochs;
         uint256 minProtocolVersion;
         uint256 maxProtocolVersion;
     }
@@ -28,18 +28,15 @@ contract GlobalConst is OwnableUpgradableDiamond, EpochController, IGlobalConst 
 
     // ------------------ Initializer ------------------
     function __GlobalConst_init(
-        uint256 minDealDepositedEpoches_,
-        uint256 minDealRematchingEpoches_,
+        uint256 minDealDepositedEpochs_,
+        uint256 minDealRematchingEpochs_,
         uint256 minProtocolVersion_,
         uint256 maxProtocolVersion_
-    )
-        internal
-        onlyInitializing
-    {
+    ) internal onlyInitializing {
         GlobalConstStorage storage globalConstantsStorage = _getGlobalConstStorage();
 
-        globalConstantsStorage.minDealDepositedEpoches = minDealDepositedEpoches_;
-        globalConstantsStorage.minDealRematchingEpoches = minDealRematchingEpoches_;
+        globalConstantsStorage.minDealDepositedEpochs = minDealDepositedEpochs_;
+        globalConstantsStorage.minDealRematchingEpochs = minDealRematchingEpochs_;
         globalConstantsStorage.minProtocolVersion = minProtocolVersion_;
         globalConstantsStorage.maxProtocolVersion = maxProtocolVersion_;
     }
@@ -49,12 +46,12 @@ contract GlobalConst is OwnableUpgradableDiamond, EpochController, IGlobalConst 
         return PRECISION;
     }
 
-    function minDealDepositedEpoches() public view override returns (uint256) {
-        return _getGlobalConstStorage().minDealDepositedEpoches;
+    function minDealDepositedEpochs() public view override returns (uint256) {
+        return _getGlobalConstStorage().minDealDepositedEpochs;
     }
 
-    function minDealRematchingEpoches() public view override returns (uint256) {
-        return _getGlobalConstStorage().minDealRematchingEpoches;
+    function minDealRematchingEpochs() public view override returns (uint256) {
+        return _getGlobalConstStorage().minDealRematchingEpochs;
     }
 
     function minProtocolVersion() public view override returns (uint256) {
@@ -69,10 +66,10 @@ contract GlobalConst is OwnableUpgradableDiamond, EpochController, IGlobalConst 
     function setConstant(ConstantType constantType, uint256 v) external onlyOwner {
         GlobalConstStorage storage globalConstantsStorage = _getGlobalConstStorage();
 
-        if (constantType == ConstantType.MinDealDepositedEpoches) {
-            globalConstantsStorage.minDealDepositedEpoches = v;
-        } else if (constantType == ConstantType.MinDealRematchingEpoches) {
-            globalConstantsStorage.minDealRematchingEpoches = v;
+        if (constantType == ConstantType.MinDealDepositedEpochs) {
+            globalConstantsStorage.minDealDepositedEpochs = v;
+        } else if (constantType == ConstantType.MinDealRematchingEpochs) {
+            globalConstantsStorage.minDealRematchingEpochs = v;
         } else {
             revert("GlobalConst: unknown constant type");
         }

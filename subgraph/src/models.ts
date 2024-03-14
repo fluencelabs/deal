@@ -13,14 +13,16 @@ import {
   ComputeUnitPerEpochStat,
   ComputeUnit,
 } from "../generated/schema";
-import {Address, BigInt, Bytes} from "@graphprotocol/graph-ts";
+import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts";
 import { getTokenDecimals, getTokenSymbol } from "./contracts";
-import {formatAddress} from "./mappings/utils";
+import { formatAddress } from "./mappings/utils";
 
 export const ZERO_BIG_INT = BigInt.fromI32(0);
 export const UNO_BIG_INT = BigInt.fromI32(1);
-export const MAX_UINT_256 = BigInt.fromString("115792089237316195423570985008687907853269984665640564039457584007913129639935");
-export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
+export const MAX_UINT_256 = BigInt.fromString(
+  "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+);
+export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 export const UNKNOWN_EFFECTOR_DESCRIPTION = "Unknown";
 export const UNREGISTERED_PROVIDER_NAME = "Unregistered";
@@ -28,7 +30,9 @@ export const UNREGISTERED_PROVIDER_NAME = "Unregistered";
 // In contracts flow to register provider exists, but on e.g. deal
 //  creation some unregistered providers could be used.
 // @notice Those unregistered providers does not count in total providers.
-export function createOrLoadUnregisteredProvider(providerAddress: string): Provider {
+export function createOrLoadUnregisteredProvider(
+  providerAddress: string,
+): Provider {
   let entity = Provider.load(providerAddress);
 
   if (entity == null) {
@@ -46,7 +50,7 @@ export function createOrLoadUnregisteredProvider(providerAddress: string): Provi
 }
 
 export function createOrLoadToken(tokenAddress: Address): Token {
-  const formattedAddress = formatAddress(tokenAddress)
+  const formattedAddress = formatAddress(tokenAddress);
   let entity = Token.load(formattedAddress);
 
   if (entity == null) {
@@ -58,7 +62,7 @@ export function createOrLoadToken(tokenAddress: Address): Token {
 
     let graphNetwork = createOrLoadGraphNetwork();
     graphNetwork.tokensTotal = graphNetwork.tokensTotal.plus(UNO_BIG_INT);
-    graphNetwork.save()
+    graphNetwork.save();
   }
   return entity as Token;
 }
@@ -73,7 +77,7 @@ export function createOrLoadEffector(cid: string): Effector {
 
     let graphNetwork = createOrLoadGraphNetwork();
     graphNetwork.effectorsTotal = graphNetwork.effectorsTotal.plus(UNO_BIG_INT);
-    graphNetwork.save()
+    graphNetwork.save();
   }
   return entity as Effector;
 }
@@ -175,9 +179,9 @@ export function createOrLoadDealToJoinedOfferPeer(
 }
 
 export function createOrLoadGraphNetwork(): GraphNetwork {
-  let graphNetwork = GraphNetwork.load('1')
+  let graphNetwork = GraphNetwork.load("1");
   if (graphNetwork == null) {
-    graphNetwork = new GraphNetwork('1')
+    graphNetwork = new GraphNetwork("1");
     graphNetwork.dealsTotal = ZERO_BIG_INT;
     graphNetwork.providersTotal = ZERO_BIG_INT;
     graphNetwork.offersTotal = ZERO_BIG_INT;
@@ -185,9 +189,9 @@ export function createOrLoadGraphNetwork(): GraphNetwork {
     graphNetwork.effectorsTotal = ZERO_BIG_INT;
     graphNetwork.capacityCommitmentsTotal = ZERO_BIG_INT;
     graphNetwork.proofsTotal = ZERO_BIG_INT;
-    graphNetwork.save()
+    graphNetwork.save();
   }
-  return graphNetwork as GraphNetwork
+  return graphNetwork as GraphNetwork;
 }
 
 export function createOrLoadDealToProvidersAccess(
@@ -198,12 +202,12 @@ export function createOrLoadDealToProvidersAccess(
   let entity = DealToProvidersAccess.load(concattedIds);
 
   if (entity == null) {
-    entity = new DealToProvidersAccess(concattedIds)
-    entity.deal = dealId
-    entity.provider = providerId
-    entity.save()
+    entity = new DealToProvidersAccess(concattedIds);
+    entity.deal = dealId;
+    entity.provider = providerId;
+    entity.save();
   }
-  return entity as DealToProvidersAccess
+  return entity as DealToProvidersAccess;
 }
 
 // Statuses that could be saved in Subgraph.
@@ -211,11 +215,11 @@ export function createOrLoadDealToProvidersAccess(
 // We have to mirror enums according to
 //  https://ethereum.stackexchange.com/questions/139078/how-to-use-subgraph-enums-in-the-mapping.
 export class CapacityCommitmentStatus {
+  static Inactive: string = "Inactive"; // Should not be stored!
   static Active: string = "Active"; // Should not be stored!
   static WaitDelegation: string = "WaitDelegation";
   // Status is WaitStart - means collateral deposited.
   static WaitStart: string = "WaitStart";
-  static Inactive: string = "Inactive";  // Should not be stored!
   // It is stored when subgraph could be certain that Failed
   //  (when CommitmentStatsUpdated event emitted), but before this transaction
   //  if Failed should be checked in another way (not by relaying on this status).
@@ -231,47 +235,53 @@ export function createOrLoadCapacityCommitmentToComputeUnit(
   let entity = CapacityCommitmentToComputeUnit.load(concattedIds);
 
   if (entity == null) {
-    entity = new CapacityCommitmentToComputeUnit(concattedIds)
-    entity.capacityCommitment = capacityCommitmentId
-    entity.computeUnit = computeUnitId
-    entity.save()
+    entity = new CapacityCommitmentToComputeUnit(concattedIds);
+    entity.capacityCommitment = capacityCommitmentId;
+    entity.computeUnit = computeUnitId;
+    entity.save();
   }
-  return entity as CapacityCommitmentToComputeUnit
+  return entity as CapacityCommitmentToComputeUnit;
 }
 
-export function createOrLoadCapacityCommitmentStatsPerEpoch(capacityCommitmentId: string, epoch: string): CapacityCommitmentStatsPerEpoch {
+export function createOrLoadCapacityCommitmentStatsPerEpoch(
+  capacityCommitmentId: string,
+  epoch: string,
+): CapacityCommitmentStatsPerEpoch {
   const concattedIds = capacityCommitmentId.concat(epoch);
   let entity = CapacityCommitmentStatsPerEpoch.load(concattedIds);
 
   if (entity == null) {
-    entity = new CapacityCommitmentStatsPerEpoch(concattedIds)
-    entity.capacityCommitment = capacityCommitmentId
-    entity.epoch = BigInt.fromString(epoch)
-    entity.totalCUFailCount = 0
-    entity.exitedUnitCount = 0
-    entity.activeUnitCount = 0
-    entity.nextAdditionalActiveUnitCount = 0
-    entity.currentCCNextCCFailedEpoch = ZERO_BIG_INT
-    entity.submittedProofsCount = 0
-    entity.blockNumberStart = ZERO_BIG_INT
-    entity.blockNumberEnd = ZERO_BIG_INT
-    entity.computeUnitsWithMinRequiredProofsSubmittedCounter = 0
-    entity.save()
+    entity = new CapacityCommitmentStatsPerEpoch(concattedIds);
+    entity.capacityCommitment = capacityCommitmentId;
+    entity.epoch = BigInt.fromString(epoch);
+    entity.totalFailCount = 0;
+    entity.exitedUnitCount = 0;
+    entity.activeUnitCount = 0;
+    entity.nextAdditionalActiveUnitCount = 0;
+    entity.currentCCNextCCFailedEpoch = ZERO_BIG_INT;
+    entity.submittedProofsCount = 0;
+    entity.blockNumberStart = ZERO_BIG_INT;
+    entity.blockNumberEnd = ZERO_BIG_INT;
+    entity.computeUnitsWithMinRequiredProofsSubmittedCounter = 0;
+    entity.save();
   }
-  return entity as CapacityCommitmentStatsPerEpoch
+  return entity as CapacityCommitmentStatsPerEpoch;
 }
 
-export function createOrLoadComputeUnitPerEpochStat(computeUnitId: string, epoch: string): ComputeUnitPerEpochStat {
+export function createOrLoadComputeUnitPerEpochStat(
+  computeUnitId: string,
+  epoch: string,
+): ComputeUnitPerEpochStat {
   const concattedIds = computeUnitId.concat(epoch);
   let entity = ComputeUnitPerEpochStat.load(concattedIds);
 
   if (entity == null) {
     let computeUnit = ComputeUnit.load(computeUnitId) as ComputeUnit;
-    entity = new ComputeUnitPerEpochStat(concattedIds)
+    entity = new ComputeUnitPerEpochStat(concattedIds);
     entity.submittedProofsCount = 0;
     entity.epoch = BigInt.fromString(epoch);
     entity.computeUnit = computeUnit.id;
-    entity.save()
+    entity.save();
   }
-  return entity as ComputeUnitPerEpochStat
+  return entity as ComputeUnitPerEpochStat;
 }

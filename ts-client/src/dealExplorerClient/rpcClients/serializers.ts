@@ -2,10 +2,6 @@ import type { Result } from "ethers";
 import type { CapacityCommitmentStatus, DealStatus } from "../types/schemes.js";
 
 export function serializeTxDealStatus(result: Result | null): DealStatus {
-  // Values are:
-  // ENDED
-  // INACTIVE
-  // ACTIVE and undefined
   if (!result) {
     return "undefined";
   }
@@ -44,10 +40,10 @@ export function serializeTxCapacityCommitmentStatus(
   result: Result | null,
 ): CapacityCommitmentStatus {
   // Values are:
+  // inactive
   // active
   // waitDelegation
   // waitStart
-  // inactive
   // failed
   // removed
   // undefined
@@ -58,19 +54,19 @@ export function serializeTxCapacityCommitmentStatus(
   const converted = Number(result);
   switch (converted) {
     case 0: {
-      status = "active";
+      status = "inactive";
       break;
     }
     case 1: {
-      status = "waitDelegation";
+      status = "active";
       break;
     }
     case 2: {
-      status = "waitStart";
+      status = "waitDelegation";
       break;
     }
     case 3: {
-      status = "inactive";
+      status = "waitStart";
       break;
     }
     case 4: {

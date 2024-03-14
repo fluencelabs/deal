@@ -73,7 +73,9 @@ library TestHelper {
         uint256 maxWorkersPerProvider_,
         uint256 pricePerWorkerEpoch_
     ) internal returns (Deal) {
-        uint256 deposit_ = deployment.core.minDealDepositedEpoches() * pricePerWorkerEpoch_ * targetWorkers_;
-        return deployDealWithoutFactory(deployment, minWorkers_, targetWorkers_, maxWorkersPerProvider_, pricePerWorkerEpoch_, deposit_);
+        uint256 deposit_ = deployment.core.minDealDepositedEpochs() * pricePerWorkerEpoch_ * targetWorkers_;
+        return deployDealWithoutFactory(
+            deployment, minWorkers_, targetWorkers_, maxWorkersPerProvider_, pricePerWorkerEpoch_, deposit_
+        );
     }
 }

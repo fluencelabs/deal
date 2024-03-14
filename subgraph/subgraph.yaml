@@ -6,11 +6,11 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: Core
-    network: dar
+    network: local
     source:
       abi: Core
-      address: "0xA03B6b3f960efd5554A5AAe35F47561896E5a969"
-      startBlock: 1102306
+      address: "0x52173b6ac069619c206b9A0e75609fC92860AB2A"
+      startBlock: 5410
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -23,14 +23,18 @@ dataSources:
       eventHandlers:
         - event: Initialized(uint8)
           handler: handleInitialized
+        - event: WhitelistAccessGranted(address)
+          handler: handleWhitelistAccessGranted
+        - event: WhitelistAccessRevoked(address)
+          handler: handleWhitelistAccessRevoked
       file: ./src/mappings/core.ts
   - kind: ethereum/contract
     name: Market
-    network: dar
+    network: local
     source:
       abi: Market
-      address: "0x90b487bA6Fc7b787a7B561cB754BA1eFEc7e246A"
-      startBlock: 1102306
+      address: "0xd977422c9eE9B646f64A4C4389a6C98ad356d8C4"
+      startBlock: 5410
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -57,11 +61,6 @@ dataSources:
           handler: handleInitialized
         - event: ProviderInfoUpdated(indexed address,string,(bytes4,bytes32))
           handler: handleProviderInfoUpdated
-#          TODO: uncomment when resolved: https://github.com/graphprotocol/graph-node/issues/5171
-#        - event: EffectorInfoSet((indexed bytes4,bytes32),string,(bytes4,bytes32))
-#          handler: handleEffectorInfoSet
-#        - event: EffectorInfoRemoved((indexed bytes4,bytes32))
-#          handler: handleEffectorInfoRemoved
         - event: MarketOfferRegistered(indexed
             address,bytes32,uint256,address,(bytes4,bytes32)[],uint256,uint256)
           handler: handleMarketOfferRegistered
@@ -84,11 +83,11 @@ dataSources:
       file: ./src/mappings/market.ts
   - kind: ethereum/contract
     name: DealFactory
-    network: dar
+    network: local
     source:
       abi: DealFactory
-      address: "0xb2f922f9660200662f5B38B77e848c946AC8E426"
-      startBlock: 1102306
+      address: "0x6e0a5725dD4071e46356bD974E13F35DbF9ef367"
+      startBlock: 5410
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -111,11 +110,11 @@ dataSources:
       file: ./src/mappings/deal-factory.ts
   - kind: ethereum/contract
     name: Capacity
-    network: dar
+    network: local
     source:
       abi: Capacity
-      address: "0x49a6C3b528f31D45F09b1E490539FBC0436bA462"
-      startBlock: 1102306
+      address: "0x1eB5C49630E08e95Ba7f139BcF4B9BA171C9a8C7"
+      startBlock: 5410
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -134,10 +133,6 @@ dataSources:
       eventHandlers:
         - event: Initialized(uint8)
           handler: handleInitialized
-        - event: WhitelistAccessGranted(address)
-          handler: handleWhitelistAccessGranted
-        - event: WhitelistAccessRevoked(address)
-          handler: handleWhitelistAccessRevoked
         - event: CommitmentCreated(indexed
             bytes32,bytes32,uint256,address,uint256,uint256)
           handler: handleCommitmentCreated
@@ -148,6 +143,8 @@ dataSources:
           handler: handleCollateralDeposited
         - event: CommitmentStatsUpdated(bytes32,uint256,uint256,uint256,uint256,uint256)
           handler: handleCommitmentStatsUpdated
+        - event: CommitmentFailed(indexed bytes32,uint256)
+          handler: handleCommitmentFailed
         - event: CommitmentRemoved(indexed bytes32)
           handler: handleCommitmentRemoved
         - event: CommitmentFinished(indexed bytes32)
@@ -164,7 +161,7 @@ dataSources:
 templates:
   - name: Deal
     kind: ethereum/contract
-    network: dar
+    network: local
     source:
       abi: Deal
     mapping:

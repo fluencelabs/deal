@@ -2,8 +2,7 @@
 //@ts-nocheck
 import * as Types from '../generated.types.js';
 
-import { GraphQLClient } from 'graphql-request';
-import type { RequestOptions } from 'graphql-request';
+import { GraphQLClient, RequestOptions } from 'graphql-request';
 import gql from 'graphql-tag';
 type GraphQLClientRequestHeaders = RequestOptions['requestHeaders'];
 export type OffersQueryQueryVariables = Types.Exact<{
