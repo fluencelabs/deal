@@ -15,6 +15,7 @@ contract RandomXProxy {
 
     CommonTypes.FilActorId internal constant ActorID = CommonTypes.FilActorId.wrap(0x70768565);
     uint256 internal constant RunRandomX = 2044353154;
+    uint256 internal constant RunRandomXBatched = 4200016682;
 
     /// @notice runs the Fluence actor which runs RandomX with provided K and H and returns it's result.
     /// @param ks array of the K parameter (aka "global" nonce) for RandomX, could up to 60 bytes.
@@ -25,7 +26,7 @@ contract RandomXProxy {
         bytes memory se_request = _serializeRandomXParameters(ks, hs);
 
         (int256 ret_code, bytes memory actor_result) =
-            Actor.callByID(ActorID, RunRandomX, Misc.CBOR_CODEC, se_request, 0, false);
+            Actor.callByID(ActorID, RunRandomXBatched, Misc.CBOR_CODEC, se_request, 0, false);
         require(ret_code == 0, "Fluence actor failed");
 
         bytes32[] memory result = _deserializeActorResult(actor_result);
