@@ -52,16 +52,14 @@ library Vesting {
     ) internal {
         uint256 length = self.items.length;
         uint256 rewardPerPeriod = reward / vestingPeriodCount;
+
         // find next epoch divisible by vestingPeriodDuration
         uint256 startVestingEpoch = (startEpoch + (vestingPeriodDuration - startEpoch % vestingPeriodDuration));
-
         int256 index = _findClosest(self, startVestingEpoch);
-        uint256 thisRewardCumulativeAmount = 0;
-        uint256 lastExistingCumulativeAmount = 0;
 
         // if startVestingEpoch is lower than all epochs in self.items, then it will be added to the back of the array,
         // making self.items[i] non-monotonous
-        assert(index >= 0 || self.items.length == 0);
+        assert(index >= 0 || length == 0);
 
         // if startEpoch does not exist in self.items, add a corresponding item without increasing cumulativeAmount
         // without it first part of the reward will be added to an epoch in the past
@@ -71,6 +69,8 @@ library Vesting {
             index++;
         }
 
+        uint256 thisRewardCumulativeAmount = 0;
+        uint256 lastExistingCumulativeAmount = 0;
         for (uint256 i = 0; i < vestingPeriodCount; i++) {
             thisRewardCumulativeAmount += rewardPerPeriod;
             if (index >= 0 && index < int256(length)) {
