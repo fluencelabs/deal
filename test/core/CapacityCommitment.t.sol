@@ -266,12 +266,12 @@ contract CapacityCommitmentTest is Test {
         vm.startPrank(peerOwner);
         uint256 maxProofsPerEpoch = deployment.capacity.maxProofsPerEpoch();
         for (uint256 i = 0; i < maxProofsPerEpoch; i++) {
-            bytes32 localUnitNonce = keccak256(abi.encodePacked("localUnitNonce", i));
+            bytes32 localUnitNonce_ = keccak256(abi.encodePacked("localUnitNonce", i));
 
             vm.expectEmit(true, true, true, false, address(deployment.capacity));
-            emit ProofSubmitted(commitmentId, unitId, localUnitNonce);
+            emit ProofSubmitted(commitmentId, unitId, localUnitNonce_);
 
-            deployment.capacity.submitProof(unitId, localUnitNonce, targetHash);
+            deployment.capacity.submitProof(unitId, localUnitNonce_, targetHash);
         }
 
         uint256 reward = deployment.capacity.getRewardPool(deployment.core.currentEpoch())

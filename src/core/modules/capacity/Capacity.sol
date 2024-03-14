@@ -225,7 +225,9 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, ICapa
         Commitment storage cc = s.commitments[commitmentId];
 
         bytes32 peerId = cc.info.peerId;
+        IMarket.Offer memory offer = market.getOffer(market.getComputePeer(peerId).offerId);
 
+        require(offer.provider == msg.sender, "Only provider can remove capacity commitment");
         require(
             getStatus(commitmentId) == CCStatus.WaitDelegation, "Capacity commitment is not in WaitDelegation status"
         );
