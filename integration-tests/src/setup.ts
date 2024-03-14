@@ -4,6 +4,7 @@ import { CapacityConstantType, DEFAULT_CONFIRMATIONS } from "./constants.js";
 
 async function moveToStartOfNextEpoch() {
   const epochDuration = await coreContract.epochDuration();
+  console.log("Current epoch duration", epochDuration);
   const currentBlock = await provider.getBlock("latest");
   if (currentBlock === null) {
     throw new Error("current block isn't defined");
