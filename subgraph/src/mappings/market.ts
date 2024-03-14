@@ -49,9 +49,11 @@ export function handleProviderInfoUpdated(event: ProviderInfoUpdated): void {
     provider = new Provider(addr);
   }
   // Loaded or created provider - does not meter for this function logic.
+  // Note, we do not change approved to false, because possibly provider have
+  //  been approved  through whitelist contract already. Thus, no need to
+  //  change approved field here.
   provider.name = event.params.name;
   provider.registered = true;
-  provider.approved = false;
   provider.createdAt = event.block.timestamp;
   provider.computeUnitsAvailable = 0;
   provider.computeUnitsTotal = 0;
