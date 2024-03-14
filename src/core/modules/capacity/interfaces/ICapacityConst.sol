@@ -24,18 +24,16 @@ interface ICapacityConst {
 
     // ------------------ Types ------------------
     enum ConstantType {
-        USDCollateralPerUnit,
-        USDTargetRevenuePerEpoch,
         MinDuration,
+        USDCollateralPerUnit,
+        SlashingRate,
+        WithdrawEpochsAfterFailed,
+        MaxFailedRatio,
+        USDTargetRevenuePerEpoch,
         MinRewardPerEpoch,
         MaxRewardPerEpoch,
-        VestingPeriodDuration,
-        VestingPeriodCount,
-        SlashingRate,
-        MinRequierdProofsPerEpoch,
-        MaxProofsPerEpoch,
-        WithdrawEpochesAfterFailed,
-        MaxFailedRatio
+        MinProofsPerEpoch,
+        MaxProofsPerEpoch
     }
 
     // #region ------------------ External View Functions ------------------
@@ -48,13 +46,10 @@ interface ICapacityConst {
     /// @dev Returns the usd collateral per compute for creating CC
     function usdCollateralPerUnit() external view returns (uint256);
 
-    /// @dev Returns the target revenue in flt value per epoch
-    function fltTargetRevenuePerEpoch() external view returns (uint256);
-
     /// @dev Returns the target revenue in usd value per epoch
     function usdTargetRevenuePerEpoch() external view returns (uint256);
 
-    /// @dev Returns the min duration of CC in epoches
+    /// @dev Returns the min duration of CC in Epochs
     function minDuration() external view returns (uint256);
 
     /// @dev Returns the min reward pool per epoch
@@ -63,7 +58,7 @@ interface ICapacityConst {
     /// @dev Returns the max reward pool per epoch
     function maxRewardPerEpoch() external view returns (uint256);
 
-    /// @dev Returns the vesting duration for one period in epoches
+    /// @dev Returns the vesting duration for one period in Epochs
     function vestingPeriodDuration() external view returns (uint256);
 
     /// @dev Returns the total vesting periods
@@ -74,13 +69,13 @@ interface ICapacityConst {
 
     /// @dev Returns the min required randomX proofs per epoch for the 1 CU.
     /// @dev  If lower than this - CU is failed and CC slashed.
-    function minRequierdProofsPerEpoch() external view returns (uint256);
+    function minProofsPerEpoch() external view returns (uint256);
 
     /// @dev Returns the max randomX proofs per epoch
     function maxProofsPerEpoch() external view returns (uint256);
 
-    /// @dev Returns the delay for withdraw collateral in epoches after failed CC
-    function withdrawEpochesAfterFailed() external view returns (uint256);
+    /// @dev Returns the delay for withdraw collateral in Epochs after failed CC
+    function withdrawEpochsAfterFailed() external view returns (uint256);
 
     /// @dev Returns the max failed ratio for CC
     function maxFailedRatio() external view returns (uint256);

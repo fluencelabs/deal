@@ -31,7 +31,7 @@ import type {
   ComputeUnitStatsPerCapacityCommitmentEpochListView,
   ComputeUnitWorkerDetail,
   ComputeUnitWorkerDetailListView,
-  ComputeUnitsWithCCStatusListView
+  ComputeUnitsWithCCStatusListView,
 } from "./types/schemes.js";
 import type {
   ChildEntitiesByProviderFilter,
@@ -67,7 +67,7 @@ import {
   DEFAULT_ORDER_TYPE,
   FILTER_MULTISELECT_MAX,
   type SerializationSettings,
-  tokenValueToRounded
+  tokenValueToRounded,
 } from "./utils.js";
 import {
   serializeCUStatus,
@@ -93,7 +93,7 @@ import {
   serializeOfferShort,
   serializePeers,
   serializeProviderBase,
-  serializeProviderShort
+  serializeProviderShort,
 } from "./serializers/schemes.js";
 import {
   serializeCapacityCommitmentsOrderByToIndexer,
@@ -144,9 +144,9 @@ export class DealExplorerClient {
       this._serializationSettings = serializationSettings;
     } else {
       this._serializationSettings = {
-          parseNativeTokenToFixedDefault: 18,
-          parseTokenToFixedDefault: 3,
-        }
+        parseNativeTokenToFixedDefault: 18,
+        parseTokenToFixedDefault: 3,
+      };
     }
     this._indexerClient = new IndexerClient(network);
     this._dealContractsClient = new DealClient(this._caller, network);
@@ -565,8 +565,8 @@ export class DealExplorerClient {
               dealStatus: dealStatuses[i],
               freeBalance: freeBalances[i],
             },
-              this._serializationSettings,
-            ),
+            this._serializationSettings,
+          ),
         );
       }
     }
@@ -666,7 +666,7 @@ export class DealExplorerClient {
           deal,
           { dealStatus, freeBalance },
           this._serializationSettings,
-          ),
+        ),
         // USDC.
         pricePerWorkerEpoch: tokenValueToRounded(
           deal.pricePerWorkerEpoch,
@@ -1003,9 +1003,7 @@ export class DealExplorerClient {
     }
     const computeUnit = data.computeUnit;
 
-    const { status } = serializeCUStatus(
-      computeUnit,
-    );
+    const { status } = serializeCUStatus(computeUnit);
     const currentPeerCapacityCommitment =
       computeUnit.peer.currentCapacityCommitment;
 
@@ -1158,22 +1156,20 @@ export class DealExplorerClient {
       );
     }
 
-    const data = await this._indexerClient.getCapacityCommitmentStatsPerEpoches(
-      {
-        filters: {
-          capacityCommitment_: { id: capacityCommitmentId },
-        },
-        offset,
-        limit,
-        orderBy,
-        orderType,
+    const data = await this._indexerClient.getCapacityCommitmentStatsPerEpochs({
+      filters: {
+        capacityCommitment_: { id: capacityCommitmentId },
       },
-    );
+      offset,
+      limit,
+      orderBy,
+      orderType,
+    });
 
     // TODO: generate table with missed epoches as well (there might be filtration by epoches,
     //  thus, logic could be complicated, resolve after discussion with PM.
     let res: Array<ProofStatsByCapacityCommitment> = [];
-    for (const proofStats of data.capacityCommitmentStatsPerEpoches) {
+    for (const proofStats of data.capacityCommitmentStatsPerEpochs) {
       res.push({
         createdAtEpoch: Number(proofStats.epoch),
         createdAtEpochBlockNumberStart: Number(proofStats.blockNumberStart),

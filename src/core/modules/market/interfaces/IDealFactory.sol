@@ -12,7 +12,7 @@ interface IDealFactory {
     /// @dev Emitted when a new deal is created
     /// @param owner The owner of the deal
     /// @param deal The deal address
-    /// @param createdAtEpoch The creation time of the deal in epoches
+    /// @param createdAtEpoch The creation time of the deal in Epochs
     /// @param paymentToken The payment token of the deal. User can choose any ERC20 token for payment
     /// @param minWorkers The min workers of the deal. Deel will be activated only if the number of workers is greater
     /// @param targetWorkers The target workers of the deal. It's the max number of workers for the deal

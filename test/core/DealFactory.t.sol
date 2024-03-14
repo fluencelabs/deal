@@ -27,7 +27,7 @@ contract DealFactoryTest is Test {
     function test_Deploy() public {
         uint256 pricePerWorkerEpoch = 1 ether;
         uint256 targetWorkers = 3;
-        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.core.minDealDepositedEpoches();
+        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.core.minDealDepositedEpochs();
 
         uint256 balanceBefore = deployment.tUSD.balanceOf(address(this));
 
@@ -62,7 +62,7 @@ contract DealFactoryTest is Test {
     function test_RevertIf_NoTokenAllowance() public {
         uint256 pricePerWorkerEpoch = 1 ether;
         uint256 targetWorkers = 3;
-        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.core.minDealDepositedEpoches();
+        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.core.minDealDepositedEpochs();
         uint256 protocolVersion = deployment.core.minProtocolVersion();
 
         vm.expectRevert("ERC20: insufficient allowance");
@@ -72,7 +72,7 @@ contract DealFactoryTest is Test {
     function test_RevertIf_NoEnoughBalance() public {
         uint256 pricePerWorkerEpoch = 1 ether;
         uint256 targetWorkers = 3;
-        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.core.minDealDepositedEpoches();
+        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.core.minDealDepositedEpochs();
 
         vm.startPrank(address(0x01));
 
