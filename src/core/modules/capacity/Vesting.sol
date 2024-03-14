@@ -59,6 +59,8 @@ library Vesting {
         uint256 thisRewardCumulativeAmount = 0;
         uint256 lastExistingCumulativeAmount = 0;
 
+        // if startVestingEpoch is lower than all epochs in self.items, then it will be added to the back of the array,
+        // making self.items[i] non-monotonous
         assert(index >= 0 || self.items.length == 0);
 
         // if startEpoch does not exist in self.items, add a corresponding item without increasing cumulativeAmount
