@@ -19,18 +19,16 @@ export enum DealStatus {
 }
 
 export enum CapacityConstantType {
-  USDCollateralPerUnit,
-  USDTargetRevenuePerEpoch,
   MinDuration,
+  USDCollateralPerUnit,
+  SlashingRate,
+  WithdrawEpochsAfterFailed,
+  MaxFailedRatio,
+  USDTargetRevenuePerEpoch,
   MinRewardPerEpoch,
   MaxRewardPerEpoch,
-  VestingPeriodDuration,
-  VestingPeriodCount,
-  SlashingRate,
-  MinRequierdProofsPerEpoch,
+  MinProofsPerEpoch,
   MaxProofsPerEpoch,
-  WithdrawEpochesAfterFailed,
-  MaxFailedRatio,
 }
 
 export const CC_DURATION_DEFAULT = 5n;

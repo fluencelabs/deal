@@ -37,8 +37,7 @@ describe("Deal tests", () => {
     const maxWorkerPerProviderDeal = 1;
     const pricePerWorkerEpochDeal = registeredOffer.minPricePerWorkerEpoch;
 
-    const minDealDepositedEpochs =
-      await coreContract.minDealDepositedEpochs();
+    const minDealDepositedEpochs = await coreContract.minDealDepositedEpochs();
     const toApproveFromDeployer =
       BigInt(targetWorkersDeal) *
       pricePerWorkerEpochDeal *
@@ -177,8 +176,7 @@ describe("Deal tests", () => {
     const maxWorkerPerProviderDeal = 1;
     const pricePerWorkerEpochDeal = registeredOffer.minPricePerWorkerEpoch;
 
-    const minDealDepositedEpoches =
-      await coreContract.minDealDepositedEpoches();
+    const minDealDepositedEpoches = await coreContract.minDealDepositedEpochs();
     const toApproveFromDeployer =
       BigInt(targetWorkersDeal) *
       pricePerWorkerEpochDeal *
@@ -366,8 +364,7 @@ describe("Deal tests", () => {
     const maxWorkerPerProviderDeal = 1;
     const pricePerWorkerEpochDeal = registeredOffer.minPricePerWorkerEpoch;
 
-    const minDealDepositedEpoches =
-      await coreContract.minDealDepositedEpoches();
+    const minDealDepositedEpoches = await coreContract.minDealDepositedEpochs();
     const toApproveFromDeployer =
       BigInt(targetWorkersDeal) *
       pricePerWorkerEpochDeal *
