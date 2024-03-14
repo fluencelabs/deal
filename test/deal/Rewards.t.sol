@@ -30,17 +30,12 @@ contract Rewards is Test {
         uint256 maxWorkersPerProvider = 2;
         uint256 targetWorkers = 3;
         uint256 pricePerWorkerEpoch = 1 ether;
-        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.core.minDealDepositedEpoches();
+        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.core.minDealDepositedEpochs();
         uint256 protocolVersion = deployment.core.minProtocolVersion();
 
         deployment.tUSD.safeApprove(address(deployment.dealFactory), minAmount);
         (IDeal deal,) = deployment.deployDeal(
-            minWorkers,
-            maxWorkersPerProvider,
-            targetWorkers,
-            pricePerWorkerEpoch,
-            minAmount,
-            protocolVersion
+            minWorkers, maxWorkersPerProvider, targetWorkers, pricePerWorkerEpoch, minAmount, protocolVersion
         );
 
         address computeProvider = address(0x1234567890123456789012345678901234567890);
@@ -82,10 +77,10 @@ contract Rewards is Test {
         vm.startPrank(computeProvider);
         deal.setWorker(unitId, workerId);
 
-        StdCheats.skip(deployment.core.epochDuration() * deployment.core.minDealDepositedEpoches());
+        StdCheats.skip(deployment.core.epochDuration() * deployment.core.minDealDepositedEpochs());
 
         uint256 amount = deal.getRewardAmount(unitId);
-        assertEq(amount, pricePerWorkerEpoch * (deployment.core.minDealDepositedEpoches() - 1), "reward amount");
+        assertEq(amount, pricePerWorkerEpoch * (deployment.core.minDealDepositedEpochs() - 1), "reward amount");
 
         vm.mockCall(
             address(deployment.market),

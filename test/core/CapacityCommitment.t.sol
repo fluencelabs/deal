@@ -142,29 +142,12 @@ contract CapacityCommitmentTest is Test {
         assertEq(commitment.endEpoch, commitment.startEpoch + ccDuration, "Duration mismatch");
         assertEq(commitment.rewardDelegatorRate, rewardCCDelegationRate, "RewardDelegatorRate mismatch");
         assertEq(commitment.delegator, ccDelegator, "Delegator mismatch");
-        assertEq(commitment.totalCUFailCount, 0, "TotalCUFailCount mismatch");
+        assertEq(commitment.totalFailCount, 0, "TotalFailCount mismatch");
         assertEq(commitment.startEpoch, 0, "StartEpoch mismatch");
         assertEq(commitment.failedEpoch, 0, "FailedEpoch mismatch");
         assertEq(commitment.exitedUnitCount, 0, "ExitedUnitCount mismatch");
     }
 
-    // Mirror function _failedEpoch internal method in this case (after deposit).
-    function _failedEpoch(
-        uint256 maxFailedRatio_,
-        uint256 unitCount_,
-        uint256 activeUnitCount_,
-        uint256 nextAdditionalActiveUnitCount_,
-        uint256 totalCUFailCount_,
-        uint256 lastSnapshotEpoch_
-    ) private pure returns (uint256 failedEpoch) {
-        uint256 maxFails = maxFailedRatio_ * unitCount_;
-        uint256 remainingFails = maxFails - totalCUFailCount_;
-        remainingFails = remainingFails - activeUnitCount_;
-        activeUnitCount_ += nextAdditionalActiveUnitCount_;
-        failedEpoch = 1 + lastSnapshotEpoch_ + (remainingFails / activeUnitCount_);
-    }
-
-    // Note, it also tests that it is possible to approve FLT once for total sum, before deposit to several CCs.
     function test_DepositCollateral() public {
         deployment.market.setProviderInfo("name", CIDV1({prefixes: 0x12345678, hash: bytes32(0)}));
 
@@ -269,9 +252,12 @@ contract CapacityCommitmentTest is Test {
         bytes32 unitId = registerPeers[0].unitIds[0];
 
         (bytes32 commitmentId,) = _createAndDepositCapacityCommitment(peerId, unitCount);
+        console.log("curr epoch #1", deployment.core.currentEpoch());
 
         // warp to next epoch
         StdCheats.skip(deployment.core.epochDuration());
+
+        console.log("curr epoch #2", deployment.core.currentEpoch());
 
         bytes32 targetHash = bytes32(uint256(deployment.capacity.difficulty()) - 1);
         //TODO: vm mock not working here :(
@@ -288,9 +274,15 @@ contract CapacityCommitmentTest is Test {
             deployment.capacity.submitProof(unitId, localUnitNonce, targetHash);
         }
 
+        uint256 reward = deployment.capacity.getRewardPool(deployment.core.currentEpoch())
+            / deployment.capacity.vestingPeriodCount() * deployment.capacity.vestingPeriodCount();
         StdCheats.skip(deployment.core.epochDuration());
 
-        assertGe(deployment.capacity.totalRewards(commitmentId), 0, "TotalRewards mismatch");
+        console.log("curr epoch #3", deployment.core.currentEpoch());
+        bytes32 localUnitNonce = keccak256(abi.encodePacked("localUnitNonce"));
+        deployment.capacity.submitProof(unitId, localUnitNonce, targetHash);
+
+        assertEq(deployment.capacity.totalRewards(commitmentId), reward, "TotalRewards mismatch");
         assertEq(deployment.capacity.unlockedRewards(commitmentId), 0, "UnlockedRewards mismatch");
 
         vm.stopPrank();

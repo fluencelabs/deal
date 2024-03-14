@@ -3,7 +3,7 @@
 
 type GraphNetwork @entity {
   "ID is set to 1"
-  id: ID!  # for example trick thanks to https://github.com/graphprotocol/graph-network-analytics-subgraph/blob/00d32f153f7b6bcef4344b934e3c9a9286304658/schema.graphql#L4.
+  id: ID! # for example trick thanks to https://github.com/graphprotocol/graph-network-analytics-subgraph/blob/00d32f153f7b6bcef4344b934e3c9a9286304658/schema.graphql#L4.
   # Contract addresses add below.
   coreContractAddress: String
   capacityContractAddress: String
@@ -26,7 +26,7 @@ type GraphNetwork @entity {
 }
 
 type Token @entity {
-  id: ID!  # Token Address
+  id: ID! # Token Address
   symbol: String!
   decimals: Int!
 }
@@ -42,22 +42,23 @@ type Provider @entity {
   offers: [Offer!] @derivedFrom(field: "provider")
 
   # Add Statistics below.
-  computeUnitsAvailable: Int!  # Sum of all available compute units in the offer (not in the deals).
-  computeUnitsTotal: Int!  # Sum of all compute units registered in the offer. TODO: when CU deleted?
+  computeUnitsAvailable: Int! # Sum of all available compute units in the offer (not in the deals).
+  computeUnitsTotal: Int! # Sum of all compute units registered in the offer. TODO: when CU deleted?
   peerCount: Int!
 }
 
 # ---- Core Contract ----
 type Offer @entity {
-  """Used in the next figma views:
-    - Offer from List Of offers 1.2.
-    - Offer 1.2
   """
-  id: ID!  # Ref to offerId in contract.
+  Used in the next figma views:
+  - Offer from List Of offers 1.2.
+  - Offer 1.2
+  """
+  id: ID! # Ref to offerId in contract.
   createdAt: BigInt!
   updatedAt: BigInt!
   provider: Provider!
-#   TODO: price per epoch and price per worker epoch are the same essentials?
+  #   TODO: price per epoch and price per worker epoch are the same essentials?
   pricePerEpoch: BigInt!
   paymentToken: Token!
 
@@ -65,16 +66,15 @@ type Offer @entity {
   effectors: [OfferToEffector!] @derivedFrom(field: "offer")
 
   # Add Statistics below.
-  computeUnitsAvailable: Int  # Sum of all available compute units in the offer (not in the deals).
-  computeUnitsTotal: Int  # Sum of all compute units registered in the offer. TODO: when CU deleted?
-
+  computeUnitsAvailable: Int # Sum of all available compute units in the offer (not in the deals).
+  computeUnitsTotal: Int # Sum of all compute units registered in the offer. TODO: when CU deleted?
   # Add helpers fields to support some queries below.
   "To support check that a peer already in a deal."
   joinedOfferPeers: [DealToJoinedOfferPeer!] @derivedFrom(field: "offer")
 }
 
-
-"""To support many2many b/w offer and effector.
+"""
+To support many2many b/w offer and effector.
 E.g. to use
 {
   offers {
@@ -87,16 +87,15 @@ E.g. to use
 }
 """
 type OfferToEffector @entity {
-    id: ID! # Set to `user.id.concat(organization.id)`
-    offer: Offer!
-    effector: Effector!
+  id: ID! # Set to `user.id.concat(organization.id)`
+  offer: Offer!
+  effector: Effector!
 }
-
 
 "Effector table is obsolete table since it is a simple mapping."
 type Effector @entity {
   "id and CID are the same."
-  id: ID!  # Currently effector id is merged(prefix + hash) aka 1 CID.
+  id: ID! # Currently effector id is merged(prefix + hash) aka 1 CID.
   description: String!
   offers: [OfferToEffector!] @derivedFrom(field: "effector")
 }
@@ -149,17 +148,17 @@ type ComputeUnit @entity {
 
 # ---- Deal Contract ----
 type DealToEffector @entity {
-    id: ID! # Set to `deal.id.concat(effector.id)`
-    deal: Deal!
-    effector: Effector!
+  id: ID! # Set to `deal.id.concat(effector.id)`
+  deal: Deal!
+  effector: Effector!
 }
 
 type DealToPeer @entity {
-    id: ID! # Set to `deal.id.concat(peer.id)`
-    deal: Deal!
-    peer: Peer!
-    "Helper field to understand number of connections."
-    connections: Int!
+  id: ID! # Set to `deal.id.concat(peer.id)`
+  deal: Deal!
+  peer: Peer!
+  "Helper field to understand number of connections."
+  connections: Int!
 }
 
 """
@@ -168,10 +167,10 @@ To add possibility to filter already joined peers into a Deal from perspective o
 (protocol does not allow more than one CU per peer for the same Deal).
 """
 type DealToJoinedOfferPeer @entity {
-    id: ID! # Set to `deal.id.concat(offer.id.concat(peer.id))`
-    deal: Deal!
-    offer: Offer!  # search offers initially using this fk relation.
-    peer: Peer!
+  id: ID! # Set to `deal.id.concat(offer.id.concat(peer.id))`
+  deal: Deal!
+  offer: Offer! # search offers initially using this fk relation.
+  peer: Peer!
 }
 
 "It represents m2m b/w deal and provider in context of access list."
@@ -182,7 +181,7 @@ type DealToProvidersAccess @entity {
 }
 
 type Deal @entity {
-  id: ID!  # Ref to offerId in contract.
+  id: ID! # Ref to offerId in contract.
   appCID: String!
   createdAt: BigInt!
   owner: String!
@@ -203,7 +202,7 @@ type Deal @entity {
 
   # Add Statistics below.
   withdrawalSum: BigInt!
-  depositedSum: BigInt!  # calculated from the withdraw() [no rewards withdraw].
+  depositedSum: BigInt! # calculated from the withdraw() [no rewards withdraw].
   maxPaidEpoch: BigInt
   registeredWorkersCurrentCount: Int!
   "Currently matched workers == matched compute units."
@@ -229,7 +228,9 @@ type CapacityCommitmentToComputeUnit @entity {
   computeUnit: ComputeUnit!
 }
 
-"""To represent that Peer has capacity commitment for some time."""
+"""
+To represent that Peer has capacity commitment for some time.
+"""
 type CapacityCommitment @entity {
   id: ID!
   peer: Peer!
@@ -243,7 +244,7 @@ type CapacityCommitment @entity {
   createdAt: BigInt!
   startEpoch: BigInt!
   endEpoch: BigInt!
-  totalCUFailCount: Int!
+  totalFailCount: Int!
   failedEpoch: BigInt!
   exitedUnitCount: Int!
   activeUnitCount: Int!
@@ -255,7 +256,8 @@ type CapacityCommitment @entity {
   submittedProofs: [SubmittedProof!] @derivedFrom(field: "capacityCommitment")
   submittedProofsCount: Int!
 
-  computeUnits: [CapacityCommitmentToComputeUnit!] @derivedFrom(field: "capacityCommitment")
+  computeUnits: [CapacityCommitmentToComputeUnit!]
+    @derivedFrom(field: "capacityCommitment")
   computeUnitsCount: Int!
 
   snapshotEpoch: BigInt!
@@ -294,14 +296,15 @@ type CapacityCommitmentStatsPerEpoch @entity {
   blockNumberStart: BigInt!
   blockNumberEnd: BigInt!
 
-  totalCUFailCount: Int!
+  totalFailCount: Int!
   exitedUnitCount: Int!
   activeUnitCount: Int!
   nextAdditionalActiveUnitCount: Int!
   currentCCNextCCFailedEpoch: BigInt!
   submittedProofsCount: Int!
 
-  submittedProofs: [SubmittedProof!] @derivedFrom(field: "capacityCommitmentStatsPerEpoch")
+  submittedProofs: [SubmittedProof!]
+    @derivedFrom(field: "capacityCommitmentStatsPerEpoch")
 
   # Add additional seconds stats (that relate from others) below.
   # Relates means that related should be updated first, and stats below strictly after.

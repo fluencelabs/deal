@@ -132,7 +132,7 @@ export class IndexerClient extends IndexerClientABC {
     return await this.peersClient.ComputeUnitsQuery(variables);
   }
 
-  async getCapacityCommitmentStatsPerEpoches(
+  async getCapacityCommitmentStatsPerEpochs(
     variables: CapacityCommitmentStatsPerEpochQueryQueryVariables,
   ) {
     return await this.capacityCommitmentsClient.CapacityCommitmentStatsPerEpochQuery(

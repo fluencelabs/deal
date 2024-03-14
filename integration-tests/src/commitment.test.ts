@@ -130,6 +130,8 @@ describe(
         ]),
       ).toEqual([[registeredOffer.peers[0]?.peerId, commitmentId, duration]]);
 
+      let startEpoch = capacityActivatedEvents[0].args.startEpoch;
+
       const epochDuration = await coreContract.epochDuration();
 
       await skipEpoch(provider, epochDuration, 1);
@@ -137,7 +139,7 @@ describe(
       const currentState = await capacityContract.getCommitment(commitmentId);
       expect(currentState.status).toEqual(BigInt(CCStatus.Active));
 
-      await skipEpoch(provider, epochDuration, duration);
+      await skipEpoch(provider, epochDuration, startEpoch + duration);
 
       const nextStatus = await capacityContract.getCommitment(commitmentId);
       expect(nextStatus.status).toEqual(BigInt(CCStatus.Failed));
