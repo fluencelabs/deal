@@ -258,7 +258,7 @@ describe("Capacity commitment", () => {
     expect(finishCommitmentEvent.args).toEqual([commitmentId]);
   });
 
-  test.only("Long-term CC with reward withdrawals", async () => {
+  test("Long-term CC with reward withdrawals", async () => {
     const registeredOffer = await registerMarketOffer(
       marketContract,
       signerAddress,
