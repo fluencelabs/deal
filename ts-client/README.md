@@ -2,21 +2,31 @@
 
 Module consists of several TS clients to access Deal contract logic for different purposes: deal matching, contract address resolving, Network Explorer API, etc.  
 
-* [Requirements](#requirements)
-* [client](#client)
-* [deal-mather-client](#deal-mather-client)
-   * [Context Diagram](#context-diagram)
-   * [Example Local Package Use](#example-local-package-use)
-   * [Start Dependencies](#start-dependencies)
-* [deal-explorer-client](#deal-explorer-client)
-   * [Install](#install)
-   * [Example UseCase](#example-usecase)
-* [Develop](#develop)
-   * [GraphQL Scheme Generation](#graphql-scheme-generation)
-* [ToDo](#todo)
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-## Requirements
+- [Requirements](#requirements)
+- [Logging](#logging)
+- [client](#client)
+- [deal-cli-client](#deal-cli-client)
+  - [Contribute](#contribute)
+- [deal-mather-client](#deal-mather-client)
+  - [Context Diagram](#context-diagram)
+  - [Example Local Package Use](#example-local-package-use)
+- [deal-explorer-client](#deal-explorer-client)
+  - [Install](#install)
+  - [Example UseCase](#example-usecase)
+- [Develop](#develop)
+  - [GraphQL Scheme Generation](#graphql-scheme-generation)
+- [ToDo](#todo)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+# Requirements
 - node version: v18.16.1
+
+# Logging
+Now all clients migrate from **console** to [debug](https://www.npmjs.com/package/debug) lib for logging. To control logging with this library check the doc: https://www.npmjs.com/package/debug#usage
 
 # client
 To load contract deployments and interfaces for different stands: kras/testnet/stage/etc.
