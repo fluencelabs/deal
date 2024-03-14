@@ -435,11 +435,20 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
         }
 
         // check proofs
-        bytes32[] memory randomXResultHashes = _runRandomX(globalUnitNonces, localUnitNonces);
+        (bool success, bytes memory result) = randomXProxy().delegatecall(
+            abi.encodeWithSelector(RandomXProxy.run.selector, globalUnitNonces, localUnitNonces)
+        );
+
+        require(success, "RandomXProxy.run failed");
+        require(result.length > 0, "RandomXProxy.run returned empty result");
+
+        bytes32[] memory hashes = abi.decode(result, (bytes32[]));
+
+        require(hashes.length == proofs.length, "Invalid result length");
 
         for (uint256 i = 0; i < proofs.length; i++) {
-            require(randomXResultHashes[i] == proofs[i].resultHash, "Proof is not valid");
-            require(randomXResultHashes[i] <= difficulty(), "Proof is bigger than difficulty");
+            require(hashes[i] == proofs[i].resultHash, "Proof is not valid");
+            require(hashes[i] <= difficulty(), "Proof is bigger than difficulty");
         }
     }
 
@@ -694,26 +703,6 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, White
                 return (int256(mid), length);
             }
         }
-    }
-
-    function _runRandomX(bytes32[] memory globalUnitNonces, bytes32[] memory localUnitNonces)
-        internal
-        returns (bytes32[] memory)
-    {
-        require(globalUnitNonces.length == localUnitNonces.length, "Global and local unit nonces length mismatch");
-
-        (bool success, bytes memory result) = randomXProxy().delegatecall(
-            abi.encodeWithSelector(RandomXProxy.run.selector, globalUnitNonces, localUnitNonces)
-        );
-
-        require(success, "RandomXProxy.run failed");
-        require(result.length > 0, "RandomXProxy.run returned empty result");
-
-        bytes32[] memory hashes = abi.decode(result, (bytes32[]));
-
-        require(hashes.length == globalUnitNonces.length, "RandomXProxy.run returned wrong number of hashes");
-
-        return hashes;
     }
 
     // #endregion
