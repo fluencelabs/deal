@@ -158,9 +158,6 @@ describe("Capacity commitment", () => {
       BigInt(CCStatus.Failed),
     );
 
-    return;
-    // TODO: fix finishing
-
     const finishCommitmentReceipt = await capacityContract
       .finishCommitment(commitmentId)
       .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
@@ -247,8 +244,6 @@ describe("Capacity commitment", () => {
     const nextStatus = await capacityContract.getCommitment(commitmentId);
     expect(nextStatus.status).toEqual(BigInt(CCStatus.Inactive));
 
-    return;
-    // TODO: fix finishing
     console.log("Finishing commitment...");
 
     const finishCommitmentReceipt = await capacityContract
@@ -358,10 +353,6 @@ describe("Capacity commitment", () => {
 
     const nextStatus = await capacityContract.getCommitment(commitmentId);
     expect(nextStatus.status).toEqual(BigInt(CCStatus.Inactive));
-
-    return;
-    // TODO: fix finishing
-    console.log("Finishing commitment...");
 
     const finishCommitmentReceipt = await capacityContract
       .finishCommitment(commitmentId)
