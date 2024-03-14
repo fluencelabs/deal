@@ -59,10 +59,12 @@ library Vesting {
 
         // if startVestingEpoch is lower than all epochs in self.items, then it will be added to the back of the array,
         // making self.items[i] non-monotonous
-        assert(index >= 0 || length == 0);
+        if (index == -1 && length != 0) {
+            revert("startEpoch is below than all seen epochs");
+        }
 
-        // if startEpoch does not exist in self.items, add a corresponding item without increasing cumulativeAmount
-        // without it first part of the reward will be added to an epoch in the past
+        // if startVestingEpoch is larger than any epoch in items, add a corresponding item without increasing
+        // cumulativeAmount, without it first part of the reward will be added to an epoch in the past
         if (index >= 0 && self.items[uint256(index)].epoch < startVestingEpoch) {
             uint256 prevCumulativeAmount = self.items[uint256(index)].cumulativeAmount;
             self.items.push(Item({epoch: startVestingEpoch, cumulativeAmount: prevCumulativeAmount}));
