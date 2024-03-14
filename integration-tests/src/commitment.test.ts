@@ -4,6 +4,7 @@ import { type ContractTransactionResponse, ethers, zeroPadBytes } from "ethers";
 import { checkEvent } from "./confirmations.js";
 import {
   CC_DURATION_DEFAULT,
+  CC_MAX_FAILED_RATION,
   CCStatus,
   DEFAULT_CONFIRMATIONS,
 } from "./constants.js";
@@ -89,7 +90,7 @@ describe("Capacity commitment", () => {
     expect(removeCommitmentEvent.args).toEqual([commitmentId]);
   });
 
-  test("CC fails if proofs haven't been sent", async () => {
+  test.only("CC fails if proofs haven't been sent", async () => {
     const registeredOffer = await registerMarketOffer(
       marketContract,
       signerAddress,
@@ -145,13 +146,23 @@ describe("Capacity commitment", () => {
 
     const epochDuration = await coreContract.epochDuration();
 
+    const currentStateBeforeDelegation =
+      await capacityContract.getCommitment(commitmentId);
+    expect(currentStateBeforeDelegation.status).toEqual(
+      BigInt(CCStatus.WaitDelegation),
+    );
+
+    const ce1 = await coreContract.currentEpoch();
+    console.log(ce1);
     await skipEpoch(provider, epochDuration, 1);
+    const ce2 = await coreContract.currentEpoch();
+    console.log(ce2);
 
     const currentState = await capacityContract.getCommitment(commitmentId);
     expect(currentState.status).toEqual(BigInt(CCStatus.Active));
 
     console.log("Waiting for CC to fail without proofs...");
-    await skipEpoch(provider, epochDuration, 2);
+    await skipEpoch(provider, epochDuration, CC_MAX_FAILED_RATION);
     const currentStateAfterSomeEpoches =
       await capacityContract.getCommitment(commitmentId);
     expect(currentStateAfterSomeEpoches.status).toEqual(

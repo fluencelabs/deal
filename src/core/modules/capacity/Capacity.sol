@@ -114,6 +114,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, ICapa
         IMarket market = core.market();
         CommitmentStorage storage s = _getCommitmentStorage();
         Commitment storage cc = s.commitments[commitmentId];
+        console.logBytes32(commitmentId);
 
         bytes32 peerId = cc.info.peerId;
         require(peerId != bytes32(0x00), "Capacity commitment doesn't exist");

@@ -105,8 +105,6 @@ export async function createCommitments(
   // 1 CC for each peer.
   expect(capacityCommitmentCreatedEvents.length).toBe(createdCommitments);
 
-  console.log(capacityCommitmentCreatedEvents);
-
   return capacityCommitmentCreatedEvents.map(
     (event) => event.args.commitmentId,
   );
