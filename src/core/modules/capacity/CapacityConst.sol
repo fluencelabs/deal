@@ -274,8 +274,8 @@ contract CapacityConst is BaseModule, ICapacityConst {
         }
         // reward section
         else if (constantType == ConstantType.USDTargetRevenuePerEpoch) {
-            // Why we don't call _setRewardPool here
             constantsStorage.reward.usdTargetRevenuePerEpoch = v;
+            // TODO audit: call _setRewardPool
         } else if (constantType == ConstantType.MinRewardPerEpoch) {
             constantsStorage.reward.minRewardPerEpoch = v;
         } else if (constantType == ConstantType.MaxRewardPerEpoch) {
