@@ -1,5 +1,8 @@
 import type { Interface, Result, ethers } from "ethers";
 import { IMulticall3__factory, type IMulticall3 } from "../index.js";
+import { getLogger } from "./logger.js";
+
+const logger = getLogger("deal-ts-clients:rpcClientABC")
 
 export type Multicall3ContractCall = {
   target: string;
@@ -53,14 +56,12 @@ export abstract class Multicall3ContractClientABC {
         "Assertion: callsEncoded, callResultsInterfaces, contractMethods, txResultsConverters should have the same length.",
       );
     }
-    console.group("[_callBatch]");
-    console.info(
-      "Send batch request with callsEncoded = %s...",
-      JSON.stringify(callsEncoded),
+    logger.info(
+      `[_callBatch] Send batch request with callsEncoded = ${JSON.stringify(callsEncoded)}...`,
     );
     const multicallContractCallResults: Aggregate3Response[] =
       await this._multicall3Contract.aggregate3.staticCall(callsEncoded);
-    console.debug("Got: %s", JSON.stringify(multicallContractCallResults));
+    logger.debug(`[_callBatch] Got: ${JSON.stringify(multicallContractCallResults)}`);
 
     let decodedResults: Array<any> = [];
     for (let i = 0; i < multicallContractCallResults.length; i++) {
@@ -84,17 +85,16 @@ export abstract class Multicall3ContractClientABC {
       }
 
       const rawReturnData = rawResult.returnData;
-      console.debug("Raw data: %s", rawReturnData);
+      logger.debug(`[_callBatch] Raw data: ${rawReturnData}`);
 
       const decoded = callResultsInterface.decodeFunctionResult(
         contractMethod,
         rawReturnData,
       );
-      console.debug("Got after decoding: %s", decoded);
-      console.info("Apply converter: %s", txResultsConverter.name);
+      logger.debug(`[_callBatch] Got after decoding: ${decoded}`);
+      logger.info(`[_callBatch] Apply converter: ${txResultsConverter.name}`);
       decodedResults.push(txResultsConverter(decoded));
     }
-    console.groupEnd();
     return decodedResults;
   }
 

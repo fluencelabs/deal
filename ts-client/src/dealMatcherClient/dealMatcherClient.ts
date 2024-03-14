@@ -1,16 +1,12 @@
 import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type { ContractsENV } from "../client/config.js";
 import type { OffersQueryQueryVariables } from "./indexerClient/queries/offers-query.generated.js";
-import debug from "debug";
 import {
   serializeDealProviderAccessLists
 } from "../utils/indexerClient/serializers.js";
+import { getLogger } from "../utils/logger.js";
 
-const LOG_PREFIX = "deal-ts-clients:matcher";
-
-const logInfo = debug(`${LOG_PREFIX}:info`);
-const logWarn = debug(`${LOG_PREFIX}:warn`);
-const logDebug = debug(`${LOG_PREFIX}:debug`);
+const logger = getLogger("deal-ts-clients:dealMatcherClient")
 
 // Structure match matchDeal() arguments.
 // Currently: bytes32[] calldata offers, bytes32[][] calldata computeUnits.
@@ -174,7 +170,7 @@ export class DealMatcherClient {
         },
       };
     }
-    logInfo(
+    logger.info(
       `[_getMatchedOffersPage] Requesting indexer for page with page params: ${JSON.stringify(
         indexerGetOffersParams,
         null,
@@ -182,8 +178,8 @@ export class DealMatcherClient {
       )}...`,
     );
     const fetched = await this._indexerClient.getOffers(indexerGetOffersParams);
-    logInfo(`[_getMatchedOffersPage] Got response from indexer.`);
-    logDebug(
+    logger.info(`[_getMatchedOffersPage] Got response from indexer.`);
+    logger.debug(
       `[_getMatchedOffersPage] Fetched data: ${JSON.stringify(
         fetched,
         null,
@@ -203,18 +199,18 @@ export class DealMatcherClient {
       minWorkersToMatch,
       maxWorkersPerProvider,
     } = getMatchedOffersIn;
-    logInfo(
+    logger.info(
       "[getMatchedOffers] Try to find matched offers with the next deal configuration:",
     );
-    logInfo(JSON.stringify(getMatchedOffersIn, null, 2));
+    logger.info(JSON.stringify(getMatchedOffersIn, null, 2));
 
     if (targetWorkerSlotToMatch > this.MAX_PER_PAGE) {
-      logWarn(
+      logger.warn(
         `targetWorkerSlotToMatch param is too high, it is better to reduce large query to ${this.MAX_PER_PAGE} per batch.`,
       );
     }
     if (targetWorkerSlotToMatch == 0) {
-      logWarn(
+      logger.warn(
         "No need to match any compute units. Return empty result in early return.",
       );
       return {
@@ -268,7 +264,7 @@ export class DealMatcherClient {
       );
 
       if (offers.length == 0) {
-        logDebug("Got empty data from indexer, break search.");
+        logger.debug("Got empty data from indexer, break search.");
         break;
       }
 
@@ -380,7 +376,7 @@ export class DealMatcherClient {
     }
 
     if (minWorkersToMatch > computeUnitsMatchedTotal) {
-      logWarn(
+      logger.warn(
         "Transaction will be failed because minWorkersToMatch > matchedComputeUnits. Return [].",
       );
       matchedComputeUnitsData.offers = [];
@@ -395,7 +391,7 @@ export class DealMatcherClient {
     epochControllerStorageInitTimestamp: number,
     epochControllerStorageEpochDuration: number,
   ) {
-    logInfo(
+    logger.info(
       `timestamp: ${timestamp} epochControllerStorageInitTimestamp: ${epochControllerStorageInitTimestamp} epochControllerStorageEpochDuration: ${epochControllerStorageEpochDuration}`,
     );
     return Math.floor(
