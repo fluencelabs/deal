@@ -25,6 +25,6 @@ export class IndexerClient extends IndexerClientABC {
   }
 
   async getDeals(variables: DealsQueryQueryVariables) {
-    return await this.offersClient.DealsQuery(variables);
+    return await this.dealsClient.DealsQuery(variables);
   }
 }

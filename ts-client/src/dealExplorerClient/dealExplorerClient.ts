@@ -85,7 +85,6 @@ import {
   serializeComputeUnits,
   serializeComputeUnitsWithStatus,
   serializeDealsShort,
-  serializeEffectors,
   serializeOfferShort,
   serializePeers,
   serializeProviderBase,
@@ -101,7 +100,9 @@ import type { ICapacity } from "../typechain-types/index.js";
 import type { CapacityCommitmentBasicFragment } from "./indexerClient/queries/capacity-commitments-query.generated.js";
 import { FLTToken } from "./constants.js";
 import {
-  serializeDealProviderAccessLists
+  serializeDealProviderAccessLists,
+  serializeEffectorDescription,
+  serializeEffectors
 } from "../utils/indexerClient/serializers.js";
 import {
   type SerializationSettings,

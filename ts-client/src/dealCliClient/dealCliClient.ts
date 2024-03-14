@@ -56,10 +56,12 @@ export class DealCliClient {
   async getDealsByProvider(providerId: string): Promise<Array<DealByProvider>> {
     const data = await this.indexerClient.getDeals(
       {
-        addedComputeUnits_: { provider: providerId.toLowerCase() }
+        filters: {
+          addedComputeUnits_: { provider: providerId.toLowerCase() }
+        }
       }
     )
-    return data.deals?.map((deal) => {
+    return data.deals.map((deal) => {
       return {
         id: deal.id,
       }
