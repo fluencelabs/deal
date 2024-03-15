@@ -79,6 +79,8 @@ services:
     depends_on:
       chain-rpc:
         condition: service_healthy
+    environment:
+      - EPOCH_DURATION
 
   # Blockscout services
   blockscout:
