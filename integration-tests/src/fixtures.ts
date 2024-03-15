@@ -1,6 +1,16 @@
 import { ethers } from "ethers";
 
+export interface Peer {
+  owner: string;
+  peerId: string;
+  unitIds: string[];
+}
+
 const pseudoRandomValue = () => Math.trunc(Date.now() * Math.random());
+
+export function randomWorkerId() {
+  return ethers.encodeBytes32String(`workerId:${pseudoRandomValue()}`);
+}
 
 export function randomCID() {
   return {
