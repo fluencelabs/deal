@@ -14,7 +14,6 @@ interface IOffer {
     struct ProviderInfo {
         string name;
         CIDV1 metadata;
-        bool approved;
     }
 
     struct RegisterComputePeer {

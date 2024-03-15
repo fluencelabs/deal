@@ -11,12 +11,10 @@ import "src/deal/interfaces/IConfig.sol";
 import "src/core/modules/market/Offer.sol";
 import "test/utils/DeployDealSystem.sol";
 import "test/utils/TestHelper.sol";
-import "src/deal/DealStorageUtils.sol";
 
 contract GetStatus is Test {
     using SafeERC20 for IERC20;
     using TestHelper for DeployDealSystem.Deployment;
-    using DealStorageUtils for DealStorageUtils.Balance;
 
     DeployDealSystem.Deployment deployment;
     TestCore testCore;
@@ -30,20 +28,26 @@ contract GetStatus is Test {
     }
 
     function test_WhenEnded() public {
-        dealContract.setIsEnded(true);
-        assertEq(uint8(dealContract.getStatus()), uint8(IDeal.Status.ENDED), "Status mismatc");
+        testCore.setCurrentEpoch(101);
+        dealContract.setEndedEpoch(101);
+        assertEq(uint8(dealContract.getStatus()), uint8(IDeal.Status.ENDED), "Status mismatch");
     }
 
     function test_WhenWorkersCountIsNotMin() public {
         dealContract.setMinWorkers(10);
         dealContract.setWorkerCount(5);
+        dealContract.setTargetWorkers(10);
+
         dealContract.setPricePerWorkerEpoch(1 ether);
-        dealContract.setTargetWorkers(100);
         dealContract.setMaxPaidEpoch(0);
+
         testCore.setCurrentEpoch(101);
-        dealContract.setFreeBalance(
-            dealContract.targetWorkers() * testCore.minDealDepositedEpochs() * dealContract.pricePerWorkerEpoch()
-        );
+        dealContract.setLastCommitedEpoch(100);
+        dealContract.setMaxPaidEpoch(0);
+
+        uint256 minBalance =
+            dealContract.targetWorkers() * testCore.minDealDepositedEpochs() * dealContract.pricePerWorkerEpoch();
+        dealContract.setTotalBalance(minBalance);
 
         assertEq(uint8(dealContract.getStatus()), uint8(IDeal.Status.NOT_ENOUGH_WORKERS), "Status mismatch");
     }
@@ -51,13 +55,11 @@ contract GetStatus is Test {
     function test_WhenCurrentEpochMoreThenMaxPaid() public {
         dealContract.setMinWorkers(10);
         dealContract.setWorkerCount(10);
-        testCore.setCurrentEpoch(101);
         dealContract.setPricePerWorkerEpoch(1 ether);
+        testCore.setCurrentEpoch(101);
         dealContract.setMaxPaidEpoch(100);
         dealContract.setTargetWorkers(100);
-        dealContract.setFreeBalance(
-            dealContract.targetWorkers() * testCore.minDealDepositedEpochs() * dealContract.pricePerWorkerEpoch()
-        );
+        dealContract.setLastCommitedEpoch(100);
 
         assertEq(uint8(dealContract.getStatus()), uint8(IDeal.Status.INSUFFICIENT_FUNDS), "Status mismatch");
     }
@@ -72,20 +74,23 @@ contract GetStatus is Test {
 
         uint256 minBalance =
             dealContract.targetWorkers() * testCore.minDealDepositedEpochs() * dealContract.pricePerWorkerEpoch();
-        dealContract.setFreeBalance(minBalance - 1);
+
+        dealContract.setTotalBalance(minBalance - 1);
 
         assertEq(uint8(dealContract.getStatus()), uint8(IDeal.Status.SMALL_BALANCE), "Status mismatch");
     }
 
     function test_WhenActive() public {
         dealContract.setMinWorkers(10);
+        dealContract.setTargetWorkers(10);
         dealContract.setWorkerCount(10);
         dealContract.setPricePerWorkerEpoch(1 ether);
         testCore.setCurrentEpoch(100);
+        dealContract.setLastCommitedEpoch(99);
         dealContract.setMaxPaidEpoch(100);
-        dealContract.setFreeBalance(
-            dealContract.targetWorkers() * testCore.minDealDepositedEpochs() * dealContract.pricePerWorkerEpoch()
-        );
+        uint256 minBalance =
+            dealContract.targetWorkers() * testCore.minDealDepositedEpochs() * dealContract.pricePerWorkerEpoch();
+        dealContract.setTotalBalance(minBalance);
 
         assertEq(uint8(dealContract.getStatus()), uint8(IDeal.Status.ACTIVE), "Status mismatc");
     }
@@ -135,8 +140,12 @@ contract TestDealContract is Deal {
         _getConfigStorageTest().globalCore = ICore(core);
     }
 
-    function getFreeBalance() public view override returns (uint256) {
-        return _freeBalance;
+    function setTotalBalance(uint256 totalBalance) public {
+        _getDealStorageTest().totalBalance = totalBalance;
+    }
+
+    function setLastCommitedEpoch(uint256 lastCommitedEpoch) public {
+        _getDealStorageTest().lastCommitedEpoch = lastCommitedEpoch;
     }
 
     function setWorkerCount(uint256 workerCount) public {
@@ -159,11 +168,7 @@ contract TestDealContract is Deal {
         _getDealStorageTest().maxPaidEpoch = maxPaidEpoch;
     }
 
-    function setIsEnded(bool isEnded) public {
-        _getDealStorageTest().isEnded = isEnded;
-    }
-
-    function setFreeBalance(uint256 freeBalance_) public {
-        _freeBalance = freeBalance_;
+    function setEndedEpoch(uint256 endedEpoch_) public {
+        _getDealStorageTest().endedEpoch = endedEpoch_;
     }
 }

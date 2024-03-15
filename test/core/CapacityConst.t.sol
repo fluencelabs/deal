@@ -146,7 +146,7 @@ contract CpacityConstTest is Test {
         uint256 newUsdTargetRevenuePerEpoch = usdTargetRevenuePerEpoch + 1000 * PRECISION;
         uint256 newMinRewardPerEpoch = minRewardPerEpoch + 1000 ether;
         uint256 newMaxRewardPerEpoch = maxRewardPerEpoch + 3000 ether;
-        uint256 newMinRequierdProofsPerEpoch = minProofsPerEpoch + 10;
+        uint256 newMinProofsPerEpoch = minProofsPerEpoch + 10;
         uint256 newMaxProofsPerEpoch = maxProofsPerEpoch + 30;
 
         _mockOwner(address(this));
@@ -190,8 +190,8 @@ contract CpacityConstTest is Test {
         assertEq(capacityConst.maxRewardPerEpoch(), newMaxRewardPerEpoch, "MaxRewardPerEpoch not changed");
 
         _mockOwner(address(this));
-        capacityConst.setConstant(ICapacityConst.ConstantType.MinProofsPerEpoch, minProofsPerEpoch);
-        assertEq(capacityConst.minProofsPerEpoch(), minProofsPerEpoch, "MinRequierdProofsPerEpoch not changed");
+        capacityConst.setConstant(ICapacityConst.ConstantType.MinProofsPerEpoch, newMinProofsPerEpoch);
+        assertEq(capacityConst.minProofsPerEpoch(), newMinProofsPerEpoch, "MinRequierdProofsPerEpoch not changed");
 
         _mockOwner(address(this));
         capacityConst.setConstant(ICapacityConst.ConstantType.MaxProofsPerEpoch, newMaxProofsPerEpoch);
