@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.1](https://github.com/fluencelabs/deal/compare/v0.11.0...v0.11.1) (2024-03-15)
+
+
+### Features
+
+* deploy dar ([#351](https://github.com/fluencelabs/deal/issues/351)) ([fc36c6f](https://github.com/fluencelabs/deal/commit/fc36c6fcf6743036025c8ecde543d2cc455bcb31))
+* **integration-tests:** Provider cleanup scenarios ([#340](https://github.com/fluencelabs/deal/issues/340)) ([616a830](https://github.com/fluencelabs/deal/commit/616a83066a1302720480d135f37748ed7827efc6))
+
 ## [0.11.0](https://github.com/fluencelabs/deal/compare/v0.10.1...v0.11.0) (2024-03-14)
 
 
