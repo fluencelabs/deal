@@ -161,21 +161,22 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
 
         DealSnapshot.Cache memory snapshot = _preCommitPeriod();
 
-        if (snapshot.isEnded()) {
+        uint256 minBalance =
+            _globalCore().minDealDepositedEpochs() * snapshot.getPricePerWorkerEpoch() * targetWorkers();
+        snapshot.setTotalBalance(snapshot.getTotalBalance() - amount);
+
+        uint256 newTotalBalance = snapshot.getTotalBalance();
+        if (snapshot.isEnded() && newTotalBalance < minBalance) {
             require(
                 snapshot.getCurrentEpoch() > dealStorage.endedEpoch + _globalCore().minDealDepositedEpochs(),
-                "Can't withdraw before 2 epochs after deal end"
+                "Can't withdraw before minDealDepositedEpochs after deal end"
             );
             dealStorage.totalBalance -= amount;
         } else {
-            snapshot.setTotalBalance(snapshot.getTotalBalance() - amount);
-
-            uint256 minBalance =
-                _globalCore().minDealDepositedEpochs() * snapshot.getPricePerWorkerEpoch() * targetWorkers();
-            require(snapshot.getTotalBalance() >= minBalance, "Free balance needs to cover minimum 2 epochs");
-
-            _postCommitPeriod(snapshot, snapshot.getCurrentWorkerCount());
+            require(newTotalBalance >= minBalance, "Free balance needs to cover minDealDepositedEpochs");
         }
+
+        _postCommitPeriod(snapshot, snapshot.getCurrentWorkerCount());
 
         paymentToken().safeTransfer(msg.sender, amount);
 

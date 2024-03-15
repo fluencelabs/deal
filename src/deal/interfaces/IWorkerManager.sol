@@ -2,8 +2,6 @@
 
 pragma solidity ^0.8.19;
 
-import "src/utils/LinkedListWithUniqueKeys.sol";
-
 /// @title Worker manager contract interface
 /// @dev Worker manager contract is responsible for managing the workers in the deal
 interface IWorkerManager {

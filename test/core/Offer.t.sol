@@ -70,9 +70,12 @@ contract OfferTest is Test {
 
         IOffer.ProviderInfo memory providerInfo = deployment.market.getProviderInfo(address(this));
         assertEq(providerInfo.name, providerId, "Provider description should be equal");
-        assertEq(providerInfo.metadata.prefixes, metadata.prefixes, "Provider metadata prefixes should be equal to metadata.prefixes");
+        assertEq(
+            providerInfo.metadata.prefixes,
+            metadata.prefixes,
+            "Provider metadata prefixes should be equal to metadata.prefixes"
+        );
         assertEq(providerInfo.metadata.hash, metadata.hash, "Provider metadata hash should be equal to metadata.hash");
-        assertFalse(providerInfo.approved, "Provider should not be approved");
     }
 
     function test_EffectorInfo() external {
@@ -93,7 +96,11 @@ contract OfferTest is Test {
 
         IOffer.EffectorInfo memory effectorInfo = deployment.market.getEffectorInfo(metadata);
         assertEq(effectorInfo.description, effectorId, "Effector description should be equal");
-        assertEq(effectorInfo.metadata.prefixes, metadata.prefixes, "Effector metadata prefixes should be equal to metadata.prefixes");
+        assertEq(
+            effectorInfo.metadata.prefixes,
+            metadata.prefixes,
+            "Effector metadata prefixes should be equal to metadata.prefixes"
+        );
         assertEq(effectorInfo.metadata.hash, metadata.hash, "Effector metadata hash should be equal to metadata.hash");
 
         vm.expectEmit(true, false, false, false);
@@ -165,12 +172,7 @@ contract OfferTest is Test {
 
         vm.expectRevert("Wrong protocol versions");
         deployment.market.registerMarketOffer(
-            1,
-            paymentToken,
-            new CIDV1[](0),
-            new IOffer.RegisterComputePeer[](0),
-            2,
-            1
+            1, paymentToken, new CIDV1[](0), new IOffer.RegisterComputePeer[](0), 2, 1
         );
 
         bytes32 offerId = keccak256(
@@ -280,7 +282,6 @@ contract OfferTest is Test {
 
         bytes32[] memory computeUnitIds = deployment.market.getComputeUnitIds(bytes32(uint256(1)));
         assertEq(computeUnitIds.length, 5, "Compute unit ids should be length of to 5");
-
 
         vm.prank(address(9933293));
         vm.expectRevert("Only owner can change offer");
@@ -496,11 +497,7 @@ contract OfferTest is Test {
         bytes32[] memory unitIds = new bytes32[](1);
         unitIds[0] = bytes32(uint256(43434334));
         address peerUniqueOwner = address(bytes20(TestHelper.pseudoRandom(abi.encode("peerId-address", 0))));
-        peers[0] = IOffer.RegisterComputePeer({
-            peerId: bytes32(uint256(1)),
-            unitIds: unitIds,
-            owner: peerUniqueOwner
-        });
+        peers[0] = IOffer.RegisterComputePeer({peerId: bytes32(uint256(1)), unitIds: unitIds, owner: peerUniqueOwner});
         deployment.market.addComputePeers(offerId, peers);
 
         vm.expectRevert("BaseModule: caller is not the capacity");

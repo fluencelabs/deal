@@ -136,6 +136,7 @@ interface ICapacity is ICapacityConst {
         uint256 remainingFailedUnitsInLastEpoch;
         uint256 filledRemainingFailedUnitsInLastEpoch;
         uint256 exitedUnitCount;
+        uint256 totalSlashedCollateral;
     }
 
     struct CommitmentProgress {
