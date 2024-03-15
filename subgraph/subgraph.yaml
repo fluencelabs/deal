@@ -6,11 +6,11 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: Core
-    network: local
+    network: dar
     source:
       abi: Core
-      address: "0x52173b6ac069619c206b9A0e75609fC92860AB2A"
-      startBlock: 5410
+      address: "0x7f714Ca601bfAB4BBDdD0d2cBB5282F98161CAEA"
+      startBlock: 1356248
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -30,11 +30,11 @@ dataSources:
       file: ./src/mappings/core.ts
   - kind: ethereum/contract
     name: Market
-    network: local
+    network: dar
     source:
       abi: Market
-      address: "0xd977422c9eE9B646f64A4C4389a6C98ad356d8C4"
-      startBlock: 5410
+      address: "0x8A19851cDE0A5420F2aFb498136F6fF83517E1D9"
+      startBlock: 1356248
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -83,11 +83,11 @@ dataSources:
       file: ./src/mappings/market.ts
   - kind: ethereum/contract
     name: DealFactory
-    network: local
+    network: dar
     source:
       abi: DealFactory
-      address: "0x6e0a5725dD4071e46356bD974E13F35DbF9ef367"
-      startBlock: 5410
+      address: "0x2F2f7357B1c7d9f361be3cB4f63E65eDD6df971B"
+      startBlock: 1356248
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -110,11 +110,11 @@ dataSources:
       file: ./src/mappings/deal-factory.ts
   - kind: ethereum/contract
     name: Capacity
-    network: local
+    network: dar
     source:
       abi: Capacity
-      address: "0x1eB5C49630E08e95Ba7f139BcF4B9BA171C9a8C7"
-      startBlock: 5410
+      address: "0xb142bAe7266655040911A9e5beCcbDf0bB6F688F"
+      startBlock: 1356248
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -161,7 +161,7 @@ dataSources:
 templates:
   - name: Deal
     kind: ethereum/contract
-    network: local
+    network: dar
     source:
       abi: Deal
     mapping:
