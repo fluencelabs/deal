@@ -8,8 +8,8 @@
   "CapacityImpl": {
     "addr": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE",
     "blockNumber": 8,
-    "codeHash": "0x7a6bb99b368925d0264fd0ace58fa842bac24674616c55b313bb50b878c63e44",
-    "creationCodeHash": "0xb4acd61a81df8da02d67a51d3884365ca179d44d7d5bc54ebb46df05b77e0394"
+    "codeHash": "0x79eeb5cff48845aafce643baeb7775a05b6e9be287fe167a0495ac9dc9cb18e1",
+    "creationCodeHash": "0x130415b0eb3cde69e79b4ce35a7a9b95053ed2bd95f56ef9e50a0999868c1972"
   },
   "Core": {
     "addr": "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
