@@ -198,8 +198,6 @@ contract CapacityCommitmentTest is Test {
         vm.stopPrank();
 
         StdCheats.skip(uint256(deployment.core.epochDuration()));
-        console.logBytes32(createdCCIds[0]);
-        ICapacity.CCStatus status = deployment.capacity.getStatus(createdCCIds[0]);
 
         uint256 activeUnitCountAfter = deployment.capacity.activeUnitCount();
         assertEq(activeUnitCountAfter, activeUnitCountBefore + unitCountTotal, "ActiveUnitCount mismatch");
