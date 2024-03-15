@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.3](https://github.com/fluencelabs/deal/compare/v0.11.2...v0.11.3) (2024-03-15)
+
+
+### Bug Fixes
+
+* **indexer-client:** fix typo in filter functon name ([#355](https://github.com/fluencelabs/deal/issues/355)) ([6fddcd3](https://github.com/fluencelabs/deal/commit/6fddcd306aa225db8f32bd70ebb11859f92642e8))
+
 ## [0.11.2](https://github.com/fluencelabs/deal/compare/v0.11.1...v0.11.2) (2024-03-15)
 
 
