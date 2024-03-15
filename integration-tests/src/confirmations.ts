@@ -50,24 +50,20 @@ export function checkEvent<E extends TypedContractEvent>(
   event: E,
   tx: ContractTransactionReceipt | null,
 ): E extends TypedContractEvent<infer I, infer O, infer R>
-  ? TypedEventLog<TypedContractEvent<I, O, R>>
+  ? Array<TypedEventLog<TypedContractEvent<I, O, R>>>
   : never;
 
 export function checkEvent<E extends TypedContractEvent>(
   event: E,
   tx: ContractTransactionReceipt | null,
-): TypedEventLog<TypedContractEvent> {
-  const log = tx?.logs.find((log) => {
+): Array<TypedEventLog<TypedContractEvent>> {
+  assert(tx, "TX is null");
+
+  return tx.logs.filter((log): log is EventLog => {
+    if (!isEventLog(log)) {
+      throw new Error("Log doesn't contain args");
+    }
+
     return log.topics[0] === event.fragment.topicHash;
   });
-
-  assert(
-    log !== undefined,
-    `Event ${event.name} not found in transaction logs`,
-  );
-  if (!isEventLog(log)) {
-    throw new Error("Log doesn't contain args");
-  }
-
-  return log;
 }

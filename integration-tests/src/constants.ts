@@ -38,4 +38,4 @@ export enum CapacityConstantType {
 
 export const CC_DURATION_DEFAULT = 5n;
 export const CC_MIN_DURATION = 0n;
-export const CC_MAX_FAILED_RATION = 3n;
+export const CC_MAX_FAILED_RATIO = 3n;
