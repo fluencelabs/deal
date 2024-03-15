@@ -284,11 +284,11 @@ describe("Deal tests", () => {
     const setWorkerReceipt = await dealContract
       .setWorker(cuID, workerId)
       .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
-    const setWorkerEvent = checkEvent(
+    const [setWorkerEvent] = checkEvent(
       dealContract.filters.WorkerIdUpdated,
       setWorkerReceipt,
     );
-    expect(setWorkerEvent.args).toEqual([cuID, workerId]);
+    expect(setWorkerEvent?.args).toEqual([cuID, workerId]);
 
     dealStatus = Number(await dealContract.getStatus());
     expect(dealStatus).toEqual(DealStatus.ACTIVE);
