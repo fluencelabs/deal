@@ -170,13 +170,13 @@ export class DealExplorerClient {
       return;
     }
     console.info(`[DealExplorerClient] Init client...`);
-    const multicall3Contract = await this._dealContractsClient.getMulticall3();
+    const multicall3Contract = this._dealContractsClient.getMulticall3();
     const multicall3ContractAddress = await multicall3Contract.getAddress();
     this._dealRpcClient = new DealRpcClient(
       this._caller,
       multicall3ContractAddress,
     );
-    this._capacityContract = await this._dealContractsClient.getCapacity();
+    this._capacityContract = this._dealContractsClient.getCapacity();
     this._capacityContractAddress = await this._capacityContract.getAddress();
 
     // Init constants from indexer.

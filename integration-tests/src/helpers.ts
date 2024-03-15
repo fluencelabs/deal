@@ -4,21 +4,31 @@ import { CC_DURATION_DEFAULT, DEFAULT_CONFIRMATIONS } from "./constants.js";
 import { assert, expect } from "vitest";
 import { checkEvents } from "./confirmations.js";
 
+export interface RegisterMarketOfferReturnValue
+  extends Omit<
+    ReturnType<typeof getDefaultOfferFixture>,
+    "minProtocolVersion" | "maxProtocolVersion"
+  > {
+  offerId: string;
+  provider: string;
+  minProtocolVersion: bigint;
+  maxProtocolVersion: bigint;
+}
+
+// TODO: Refactor. Return value is dubious.
 export async function registerMarketOffer(
   market: IMarket,
   signerAddress: string,
   paymentTokenAddress: string,
-) {
+): Promise<RegisterMarketOfferReturnValue> {
   const registeredOffer = getDefaultOfferFixture(
     signerAddress,
     paymentTokenAddress,
   );
 
   console.log("Register Provider by setProviderInfo...");
-  const setProviderInfoTx = await market.setProviderInfo(
-    "CI_PROVIDER",
-    randomCID(),
-  );
+  const appCID = randomCID();
+  const setProviderInfoTx = await market.setProviderInfo("CI_PROVIDER", appCID);
   await setProviderInfoTx.wait(DEFAULT_CONFIRMATIONS);
 
   const tx = await market.registerMarketOffer(
@@ -60,8 +70,9 @@ export async function createCommitments(
   capacity: ICapacity,
   signerAddress: string,
   peerIds: string[],
+  _duration: bigint | undefined = undefined,
 ) {
-  const duration = CC_DURATION_DEFAULT;
+  const duration = _duration ?? CC_DURATION_DEFAULT;
   const fromBlock = await capacity.runner?.provider?.getBlock("latest");
   assert(fromBlock, "Not current block");
 
@@ -93,8 +104,6 @@ export async function createCommitments(
   );
   // 1 CC for each peer.
   expect(capacityCommitmentCreatedEvents.length).toBe(createdCommitments);
-
-  console.log(capacityCommitmentCreatedEvents);
 
   return capacityCommitmentCreatedEvents.map(
     (event) => event.args.commitmentId,
