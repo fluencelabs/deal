@@ -2,17 +2,18 @@
 
 pragma solidity ^0.8.19;
 
+import "./IEpochController.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "src/core/interfaces/ICore.sol";
 
 /// @title Capacity constants contract interface
 /// @dev The constants contract is responsible for managing the constants for the capacity commitment
-interface ICapacityConst {
+interface ICapacityConst is IEpochController {
     // ------------------ Events ------------------
     /// @dev Emitted when a constant with a uint256 value is updated
     /// @param constantType The type of the constant
     /// @param newValue The new value of the constant
-    event ConstantUpdated(ConstantType constantType, uint256 newValue);
+    event CapacityConstantUpdated(CapacityConstantType constantType, uint256 newValue);
 
     /// @dev Emitted when the FLT price is updated
     /// @param newValue The new value of the FLT price
@@ -23,7 +24,7 @@ interface ICapacityConst {
     event DifficultyUpdated(bytes32 difficulty);
 
     // ------------------ Types ------------------
-    enum ConstantType {
+    enum CapacityConstantType {
         MinDuration,
         USDCollateralPerUnit,
         SlashingRate,
@@ -101,6 +102,6 @@ interface ICapacityConst {
     function setDifficulty(bytes32 difficulty_) external;
 
     /// @dev Sets a constant with a uint256 value
-    function setConstant(ConstantType constantType, uint256 v) external;
+    function setCapacityConstant(CapacityConstantType constantType, uint256 v) external;
     // #endregion ------------------ External Mutable Functions ------------------
 }

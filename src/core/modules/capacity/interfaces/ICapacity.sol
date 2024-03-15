@@ -3,12 +3,11 @@
 pragma solidity ^0.8.19;
 
 import "src/core/interfaces/ICore.sol";
-import "./ICapacityConst.sol";
 import "../Vesting.sol";
 
 /// @title Capacity contract interface
 /// @dev Capacity contract is responsible for managing the commitments
-interface ICapacity is ICapacityConst {
+interface ICapacity {
     // ------------------ Events ------------------
 
     /// @dev Emitted when a new commitment is created
@@ -162,25 +161,7 @@ interface ICapacity is ICapacityConst {
     }
 
     // ------------------ Initializer ------------------
-    function initialize(
-        uint256 fltPrice_,
-        uint256 usdCollateralPerUnit_,
-        uint256 usdTargetRevenuePerEpoch_,
-        uint256 minDuration_,
-        uint256 minRewardPerEpoch_,
-        uint256 maxRewardPerEpoch_,
-        uint256 vestingPeriodDuration_,
-        uint256 vestingPeriodCount_,
-        uint256 slashingRate_,
-        uint256 minProofsPerEpoch_,
-        uint256 maxProofsPerEpoch_,
-        uint256 withdrawEpochsAfterFailed_,
-        uint256 maxFailedRatio_,
-        bytes32 initGlobalNonce_,
-        bytes32 difficulty_,
-        uint256 initRewardPool_,
-        address randomXProxy_
-    ) external;
+    function initialize(bytes32 initGlobalNonce_) external;
 
     // ------------------ Views ------------------
     /// @dev Returns the commitment status

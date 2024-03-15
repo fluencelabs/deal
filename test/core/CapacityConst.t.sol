@@ -7,8 +7,8 @@ import "forge-std/Vm.sol";
 import "forge-std/StdCheats.sol";
 import "filecoin-solidity/v0.8/utils/Actor.sol";
 import "src/core/Core.sol";
-import "src/core/modules/capacity/CapacityConst.sol";
-import "src/core/modules/capacity/interfaces/ICapacityConst.sol";
+import "src/core/CapacityConst.sol";
+import "src/core/interfaces/ICapacityConst.sol";
 import "src/utils/OwnableUpgradableDiamond.sol";
 import "src/core/interfaces/IEpochController.sol";
 import "src/utils/BytesConverter.sol";
@@ -19,7 +19,7 @@ import "test/utils/TestHelper.sol";
 import "forge-std/StdCheats.sol";
 
 interface ISetConstant {
-    function setConstant(uint8 constantType, uint256 newValue) external;
+    function setCapacityConstant(uint8 constantType, uint256 newValue) external;
 }
 
 contract CpacityConstTest is Test {
@@ -27,17 +27,15 @@ contract CpacityConstTest is Test {
     using BytesConverter for bytes32;
 
     // ------------------ Events ------------------
+    error OwnableUnauthorizedAccount(address account);
 
     // ------------------ Variables ------------------
 
     // ------------------ Test ------------------
     TestCapacityConst capacityConst;
-    address mockedCore = address(0x123);
 
     function setUp() public {
-        capacityConst = TestCapacityConst(
-            address(new ERC1967Proxy(address(new TestCapacityConst(ICore(mockedCore))), new bytes(0)))
-        );
+        capacityConst = TestCapacityConst(address(new ERC1967Proxy(address(new TestCapacityConst()), new bytes(0))));
     }
 
     function test_Init() public {
@@ -60,7 +58,6 @@ contract CpacityConstTest is Test {
         address randomXProxy = address(0x123);
 
         _initCapacityConst(
-            currentEpoch,
             fltPrice,
             usdCollateralPerUnit,
             usdTargetRevenuePerEpoch,
@@ -119,7 +116,6 @@ contract CpacityConstTest is Test {
         address randomXProxy = address(0x123);
 
         _initCapacityConst(
-            currentEpoch,
             fltPrice,
             usdCollateralPerUnit,
             usdTargetRevenuePerEpoch,
@@ -149,58 +145,53 @@ contract CpacityConstTest is Test {
         uint256 newMinProofsPerEpoch = minProofsPerEpoch + 10;
         uint256 newMaxProofsPerEpoch = maxProofsPerEpoch + 30;
 
-        _mockOwner(address(this));
-        capacityConst.setConstant(ICapacityConst.ConstantType.MinDuration, newMinDuration);
+        capacityConst.setCapacityConstant(ICapacityConst.CapacityConstantType.MinDuration, newMinDuration);
         assertEq(capacityConst.minDuration(), newMinDuration, "MinDuration not changed");
 
-        _mockOwner(address(this));
-        capacityConst.setConstant(ICapacityConst.ConstantType.USDCollateralPerUnit, newUsdCollateralPerUnit);
+        capacityConst.setCapacityConstant(
+            ICapacityConst.CapacityConstantType.USDCollateralPerUnit, newUsdCollateralPerUnit
+        );
         assertEq(capacityConst.usdCollateralPerUnit(), newUsdCollateralPerUnit, "USDCollateralPerUnit not changed");
 
-        _mockOwner(address(this));
-        capacityConst.setConstant(ICapacityConst.ConstantType.SlashingRate, newSlashingRate);
+        capacityConst.setCapacityConstant(ICapacityConst.CapacityConstantType.SlashingRate, newSlashingRate);
         assertEq(capacityConst.slashingRate(), newSlashingRate, "SlashingRate not changed");
 
-        _mockOwner(address(this));
-        capacityConst.setConstant(ICapacityConst.ConstantType.WithdrawEpochsAfterFailed, newWithdrawEpochsAfterFailed);
+        capacityConst.setCapacityConstant(
+            ICapacityConst.CapacityConstantType.WithdrawEpochsAfterFailed, newWithdrawEpochsAfterFailed
+        );
         assertEq(
             capacityConst.withdrawEpochsAfterFailed(),
             newWithdrawEpochsAfterFailed,
             "WithdrawEpochsAfterFailed not changed"
         );
 
-        _mockOwner(address(this));
-        capacityConst.setConstant(ICapacityConst.ConstantType.MaxFailedRatio, newMaxFailedRatio);
+        capacityConst.setCapacityConstant(ICapacityConst.CapacityConstantType.MaxFailedRatio, newMaxFailedRatio);
         assertEq(capacityConst.maxFailedRatio(), newMaxFailedRatio, "MaxFailedRatio not changed");
 
-        _mockOwner(address(this));
-        capacityConst.setConstant(ICapacityConst.ConstantType.USDTargetRevenuePerEpoch, newUsdTargetRevenuePerEpoch);
+        capacityConst.setCapacityConstant(
+            ICapacityConst.CapacityConstantType.USDTargetRevenuePerEpoch, newUsdTargetRevenuePerEpoch
+        );
         assertEq(
             capacityConst.usdTargetRevenuePerEpoch(),
             newUsdTargetRevenuePerEpoch,
             "USDTargetRevenuePerEpoch not changed"
         );
 
-        _mockOwner(address(this));
-        capacityConst.setConstant(ICapacityConst.ConstantType.MinRewardPerEpoch, newMinRewardPerEpoch);
+        capacityConst.setCapacityConstant(ICapacityConst.CapacityConstantType.MinRewardPerEpoch, newMinRewardPerEpoch);
         assertEq(capacityConst.minRewardPerEpoch(), newMinRewardPerEpoch, "MinRewardPerEpoch not changed");
 
-        _mockOwner(address(this));
-        capacityConst.setConstant(ICapacityConst.ConstantType.MaxRewardPerEpoch, newMaxRewardPerEpoch);
+        capacityConst.setCapacityConstant(ICapacityConst.CapacityConstantType.MaxRewardPerEpoch, newMaxRewardPerEpoch);
         assertEq(capacityConst.maxRewardPerEpoch(), newMaxRewardPerEpoch, "MaxRewardPerEpoch not changed");
 
-        _mockOwner(address(this));
-        capacityConst.setConstant(ICapacityConst.ConstantType.MinProofsPerEpoch, newMinProofsPerEpoch);
+        capacityConst.setCapacityConstant(ICapacityConst.CapacityConstantType.MinProofsPerEpoch, newMinProofsPerEpoch);
         assertEq(capacityConst.minProofsPerEpoch(), newMinProofsPerEpoch, "MinRequierdProofsPerEpoch not changed");
 
-        _mockOwner(address(this));
-        capacityConst.setConstant(ICapacityConst.ConstantType.MaxProofsPerEpoch, newMaxProofsPerEpoch);
+        capacityConst.setCapacityConstant(ICapacityConst.CapacityConstantType.MaxProofsPerEpoch, newMaxProofsPerEpoch);
         assertEq(capacityConst.maxProofsPerEpoch(), newMaxProofsPerEpoch, "MaxProofsPerEpoch not changed");
     }
 
     function test_RevertIf_ChangerNotOwner() public {
         _initCapacityConst(
-            1,
             3 * PRECISION,
             100 * PRECISION,
             1000 * PRECISION,
@@ -219,9 +210,11 @@ contract CpacityConstTest is Test {
             address(0x123)
         );
 
-        _mockOwner(address(0x1234567890123456789012345678901234567890));
-        vm.expectRevert("BaseModule: caller is not the owner");
-        capacityConst.setConstant(ICapacityConst.ConstantType.MinDuration, 10);
+        address sender = address(0x1234567890123456789012345678901234567890);
+        vm.prank(sender);
+
+        vm.expectRevert(abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, sender));
+        capacityConst.setCapacityConstant(ICapacityConst.CapacityConstantType.MinDuration, 10);
     }
 
     function test_setPrice() public {
@@ -244,7 +237,6 @@ contract CpacityConstTest is Test {
         address randomXProxy = address(0x123);
 
         _initCapacityConst(
-            currentEpoch,
             fltPrice,
             usdCollateralPerUnit,
             usdTargetRevenuePerEpoch,
@@ -269,8 +261,6 @@ contract CpacityConstTest is Test {
         uint256 newPrice = 4 * PRECISION;
 
         // #region set price in first epoch
-        _mockOwner(address(this));
-        _mockCurrentEpoch(currentEpoch);
         capacityConst.setFLTPrice(newPrice);
 
         assertEq(capacityConst.fltPrice(), newPrice, "fltPrice not changed");
@@ -283,10 +273,10 @@ contract CpacityConstTest is Test {
         // #endregion
 
         // #region set price in second epoch
-        newPrice = 5 * PRECISION;
+        newPrice = 20 * PRECISION;
         uint256 nextEpoch = currentEpoch + 1;
-        _mockOwner(address(this));
-        _mockCurrentEpoch(nextEpoch);
+
+        _skipEpochs(1);
         capacityConst.setFLTPrice(newPrice);
 
         assertEq(capacityConst.fltPrice(), newPrice, "second epoch: fltPrice not changed");
@@ -296,7 +286,7 @@ contract CpacityConstTest is Test {
             "second epoch: fltCollateralPerUnit not changed"
         );
 
-        uint256 currentRewardPool = initRewardPool * (PRECISION + PRECISION / 10) / PRECISION;
+        uint256 currentRewardPool = initRewardPool * (PRECISION / 10 * 9) / PRECISION;
 
         assertEq(
             capacityConst.getRewardPool(currentEpoch), initRewardPool, "second epoch: Reward pool should not change"
@@ -306,9 +296,7 @@ contract CpacityConstTest is Test {
         // #endregion
 
         // #region set price in second epoch again
-        newPrice = 100 * PRECISION;
-        _mockOwner(address(this));
-        _mockCurrentEpoch(nextEpoch);
+        newPrice = PRECISION / 20;
         capacityConst.setFLTPrice(newPrice);
 
         assertEq(capacityConst.fltPrice(), newPrice, "second epoch again: fltPrice not changed");
@@ -333,9 +321,11 @@ contract CpacityConstTest is Test {
     }
 
     // ------------------ Internals ------------------
+    function _skipEpochs(uint256 epochs) internal {
+        StdCheats.skip(capacityConst.EPOCH_DURATION() * epochs);
+    }
 
     function _initCapacityConst(
-        uint256 currentEpoch,
         uint256 fltPrice,
         uint256 usdCollateralPerUnit,
         uint256 usdTargetRevenuePerEpoch,
@@ -353,8 +343,6 @@ contract CpacityConstTest is Test {
         uint256 initRewardPool,
         address randomXProxy
     ) internal {
-        _mockCurrentEpoch(currentEpoch);
-
         capacityConst.init(
             fltPrice,
             usdCollateralPerUnit,
@@ -416,24 +404,10 @@ contract CpacityConstTest is Test {
         assertEq(capacityConst.randomXProxy(), randomXProxy, "randomXProxy mismatch");
         assertEq(capacityConst.getRewardPool(currentEpoch), initRewardPool, "initRewardPool mismatch");
     }
-
-    function _mockCurrentEpoch(uint256 currentEpoch) internal {
-        vm.mockCall(
-            address(mockedCore),
-            abi.encodeWithSelector(IEpochController.currentEpoch.selector),
-            abi.encode(currentEpoch)
-        );
-    }
-
-    function _mockOwner(address owner) internal {
-        vm.mockCall(
-            address(mockedCore), abi.encodeWithSelector(OwnableUpgradableDiamond.owner.selector), abi.encode(owner)
-        );
-    }
 }
 
 contract TestCapacityConst is CapacityConst {
-    constructor(ICore core_) CapacityConst(core_) {}
+    uint256 public constant EPOCH_DURATION = 1 days;
 
     function init(
         uint256 fltPrice_,
@@ -453,6 +427,8 @@ contract TestCapacityConst is CapacityConst {
         uint256 initRewardPool_,
         address randomXProxy_
     ) public initializer {
+        __EpochController_init(EPOCH_DURATION);
+        __Ownable_init(msg.sender);
         __CapacityConst_init(
             fltPrice_,
             usdCollateralPerUnit_,

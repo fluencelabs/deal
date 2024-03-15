@@ -146,7 +146,7 @@ contract DeployContracts is Depoyments, Script {
     }
 
     // ------------------ Internal functions ------------------
-    function _loadENV() internal view returns (ENV memory) {
+    function _loadENV() internal returns (ENV memory) {
         uint256 chainId = block.chainid;
 
         uint256 epochDuration = vm.envOr("EPOCH_DURATION", DEFAULT_EPOCH_DURATION);
@@ -302,7 +302,23 @@ contract DeployContracts is Depoyments, Script {
                     minProtocolVersion_,
                     maxProtocolVersion_,
                     dealImpl,
-                    isWhitelistEnabled_
+                    isWhitelistEnabled_,
+                    fltPrice_,
+                    usdCollateralPerUnit_,
+                    usdTargetRevenuePerEpoch_,
+                    minDuration_,
+                    minRewardPerEpoch_,
+                    maxRewardPerEpoch_,
+                    vestingPeriodDuration_,
+                    vestingPeriodCount_,
+                    slashingRate_,
+                    minProofsPerEpoch_,
+                    maxProofsPerEpoch_,
+                    withdrawEpochsAfterFailed_,
+                    maxFailedRatio_,
+                    difficulty_,
+                    initRewardPool_,
+                    randomXProxy
                 )
             ),
             needToRedeployMarket || needToRedeployCapacity || needToRedeployDealFactory
@@ -321,27 +337,7 @@ contract DeployContracts is Depoyments, Script {
             "Capacity",
             "ERC1967Proxy",
             abi.encode(
-                capacityImpl,
-                abi.encodeWithSelector(
-                    Capacity.initialize.selector,
-                    fltPrice_,
-                    usdCollateralPerUnit_,
-                    usdTargetRevenuePerEpoch_,
-                    minDuration_,
-                    minRewardPerEpoch_,
-                    maxRewardPerEpoch_,
-                    vestingPeriodDuration_,
-                    vestingPeriodCount_,
-                    slashingRate_,
-                    minProofsPerEpoch_,
-                    maxProofsPerEpoch_,
-                    withdrawEpochsAfterFailed_,
-                    maxFailedRatio_,
-                    initGlobalNonce_,
-                    difficulty_,
-                    initRewardPool_,
-                    randomXProxy
-                )
+                capacityImpl, abi.encodeWithSelector(Capacity.initialize.selector, initGlobalNonce_, randomXProxy)
             )
         );
 

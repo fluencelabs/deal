@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "src/core/modules/BaseModule.sol";
 import "@openzeppelin/contracts-upgradeable/utils/MulticallUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
@@ -12,12 +13,12 @@ import "src/utils/RandomXProxy.sol";
 import "src/utils/BytesConverter.sol";
 import "src/utils/Whitelist.sol";
 import "./interfaces/ICapacity.sol";
-import "./CapacityConst.sol";
 import "./Vesting.sol";
 import "./Snapshot.sol";
 import "forge-std/console.sol";
+import {PRECISION} from "src/core/GlobalConst.sol";
 
-contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, ICapacity {
+contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacity {
     using SafeERC20 for IERC20;
     using BytesConverter for bytes;
     using Address for address payable;
@@ -52,45 +53,9 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, ICapa
     // #endregion
 
     // #region ------------------ Initializer & Upgradeable ------------------
-    constructor(ICore core_) CapacityConst(core_) {}
+    constructor(ICore core_) BaseModule(core_) {}
 
-    function initialize(
-        uint256 fltPrice_,
-        uint256 usdCollateralPerUnit_,
-        uint256 usdTargetRevenuePerEpoch_,
-        uint256 minDuration_,
-        uint256 minRewardPerEpoch_,
-        uint256 maxRewardPerEpoch_,
-        uint256 vestingPeriodDuration_,
-        uint256 vestingPeriodCount_,
-        uint256 slashingRate_,
-        uint256 minProofsPerEpoch_,
-        uint256 maxProofsPerEpoch_,
-        uint256 withdrawEpochsAfterFailed_,
-        uint256 maxFailedRatio_,
-        bytes32 initGlobalNonce_,
-        bytes32 difficulty_,
-        uint256 initRewardPool_,
-        address randomXProxy_
-    ) external initializer {
-        __CapacityConst_init(
-            fltPrice_,
-            usdCollateralPerUnit_,
-            usdTargetRevenuePerEpoch_,
-            minDuration_,
-            minRewardPerEpoch_,
-            maxRewardPerEpoch_,
-            vestingPeriodDuration_,
-            vestingPeriodCount_,
-            slashingRate_,
-            minProofsPerEpoch_,
-            maxProofsPerEpoch_,
-            withdrawEpochsAfterFailed_,
-            maxFailedRatio_,
-            difficulty_,
-            initRewardPool_,
-            randomXProxy_
-        );
+    function initialize(bytes32 initGlobalNonce_) external initializer {
         __UUPSUpgradeable_init();
         __Multicall_init();
 
@@ -190,13 +155,13 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, ICapa
         address provider = offer.provider;
         require(msg.sender == provider, "Only provider can create capacity commitment");
 
-        require(duration >= minDuration(), "Duration should be greater than min capacity commitment duration");
+        require(duration >= core.minDuration(), "Duration should be greater than min capacity commitment duration");
         require(rewardDelegationRate > 0, "Reward delegation rate should be greater than 0");
         require(rewardDelegationRate <= PRECISION, "Reward delegation rate should be less or equal 1");
         // #endregion
 
         // #region create commitment
-        uint256 collateralPerUnit = fltCollateralPerUnit();
+        uint256 collateralPerUnit = core.fltCollateralPerUnit();
         bytes32 commitmentId =
             keccak256(abi.encodePacked(block.number, peerId, duration, delegator, rewardDelegationRate));
 
@@ -281,7 +246,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, ICapa
             cc.progress.snapshotEpoch = currentEpoch_;
             cc.progress.activeUnitCount = unitCount;
 
-            _setActiveUnitCount(activeUnitCount() + unitCount);
+            core.setActiveUnitCount(core.activeUnitCount() + unitCount);
             cc.info.status = CCStatus.Active; // it's not WaitStart because WaitStart is dynamic status
 
             emit CollateralDeposited(commitmentId, collateral);
@@ -340,7 +305,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, ICapa
         // #endregion
 
         uint256 unitProofCount = unitInfo.proofCountByEpoch[currentEpoch] + 1;
-        if (unitProofCount > maxProofsPerEpoch()) {
+        if (unitProofCount > core.maxProofsPerEpoch()) {
             revert TooManyProofs();
         }
 
@@ -357,7 +322,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, ICapa
         RewardInfo storage rewardInfo = s.rewardInfoByEpoch[currentEpoch];
         uint256 minProofsPerEpoch_ = rewardInfo.minProofsPerEpoch;
         if (minProofsPerEpoch_ == 0) {
-            minProofsPerEpoch_ = minProofsPerEpoch();
+            minProofsPerEpoch_ = core.minProofsPerEpoch();
             rewardInfo.minProofsPerEpoch = minProofsPerEpoch_;
         }
 
@@ -373,13 +338,13 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, ICapa
         // #endregion
 
         // #region check proof
-        (bool success, bytes memory randomXResultHash) = randomXProxy().delegatecall(
+        (bool success, bytes memory randomXResultHash) = core.randomXProxy().delegatecall(
             abi.encodeWithSelector(RandomXProxy.run.selector, globalUnitNonce_, localUnitNonce)
         );
 
         require(success, "RandomXProxy.run failed");
         require(randomXResultHash.toBytes32() == resultHash, "Proof is not valid");
-        require(resultHash <= difficulty(), "Proof is bigger than difficulty");
+        require(resultHash <= core.difficulty(), "Proof is bigger than difficulty");
         // #endregion
 
         emit CommitmentStatsUpdated(
@@ -417,7 +382,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, ICapa
         // #endregion
 
         require(
-            status != CCStatus.Failed || currentEpoch_ >= cc.finish.failedEpoch + withdrawEpochsAfterFailed(),
+            status != CCStatus.Failed || currentEpoch_ >= cc.finish.failedEpoch + core.withdrawEpochsAfterFailed(),
             "Capacity commitment is failed and not enough epochs passed"
         );
 
@@ -578,7 +543,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, ICapa
 
         unitInfo.isInactive = true;
         cc.progress.activeUnitCount--;
-        _setActiveUnitCount(activeUnitCount() - 1);
+        core.setActiveUnitCount(core.activeUnitCount() - 1);
 
         emit CommitmentStatsUpdated(
             commitmentId,
@@ -629,7 +594,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, ICapa
 
         // add one active unit to global activeUnitCount and commitment activeUnitCount
         cc.progress.nextAdditionalActiveUnitCount += 1;
-        _setActiveUnitCount(activeUnitCount() + 1);
+        core.setActiveUnitCount(core.activeUnitCount() + 1);
 
         market.setStartEpoch(unitId, startEpoch);
 
@@ -685,7 +650,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, ICapa
         }
 
         // #region init variables
-        uint256 maxFailedRatio_ = maxFailedRatio();
+        uint256 maxFailedRatio_ = core.maxFailedRatio();
         uint256 activeUnitCount_ = snapshotCache.current.activeUnitCount;
         uint256 nextAdditionalActiveUnitCount_ = snapshotCache.current.nextAdditionalActiveUnitCount;
         uint256 totalFailCount = snapshotCache.current.totalFailCount;
@@ -784,9 +749,9 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, ICapa
             if (snapshotCache.current.status == CCStatus.Failed) {
                 emit CommitmentFailed(commitmentId, snapshotCache.current.failedEpoch);
 
-                _setActiveUnitCount(activeUnitCount() - initialActiveUnitCount_);
+                core.setActiveUnitCount(core.activeUnitCount() - initialActiveUnitCount_);
             } else if (snapshotCache.current.status == CCStatus.Inactive) {
-                _setActiveUnitCount(activeUnitCount() - initialActiveUnitCount_);
+                core.setActiveUnitCount(core.activeUnitCount() - initialActiveUnitCount_);
             }
         }
 
@@ -841,7 +806,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, ICapa
 
         // slashingRate is defined by PRECISION
         // Example: if real slashing rate is 0.1% then slashingRate_ = 0.1 * PRECISION
-        uint256 slashingRate_ = slashingRate();
+        uint256 slashingRate_ = core.slashingRate();
 
         // gapsCount is the number of epochs between lastSnapshotEpoch and snapshotEpoch. In this period unit didn't submit any proof
         uint256 gapsCount = snapshotEpoch - lastSnapshotEpoch;
@@ -886,10 +851,11 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, ICapa
             return true;
         }
 
-        uint256 reward = (getRewardPool(nextEpochAfterLastSnapshot) * lastProofCount) / rewardInfo.totalSuccessProofs;
+        uint256 reward =
+            (core.getRewardPool(nextEpochAfterLastSnapshot) * lastProofCount) / rewardInfo.totalSuccessProofs;
 
         if (reward > 0) {
-            cc.vesting.add(reward, nextEpochAfterLastSnapshot, vestingPeriodDuration(), vestingPeriodCount());
+            cc.vesting.add(reward, nextEpochAfterLastSnapshot, core.vestingPeriodDuration(), core.vestingPeriodCount());
         }
 
         delete unitInfo.proofCountByEpoch[nextEpochAfterLastSnapshot];

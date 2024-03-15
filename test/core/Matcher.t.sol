@@ -65,9 +65,8 @@ contract MatcherTest is Test {
             bytes32[] memory commitmentIds = new bytes32[](peerCountPerOffer);
 
             for (uint256 j = 0; j < peerCountPerOffer; j++) {
-                bytes32 commitmentId = deployment.capacity.createCommitment(
-                    peerIds[i][j], deployment.capacity.minDuration(), address(this), 1
-                );
+                bytes32 commitmentId =
+                    deployment.capacity.createCommitment(peerIds[i][j], deployment.core.minDuration(), address(this), 1);
                 commitmentIds[j] = commitmentId;
 
                 amount += deployment.capacity.getCommitment(commitmentId).collateralPerUnit * unitIds[i][j].length;

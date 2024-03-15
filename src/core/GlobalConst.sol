@@ -4,11 +4,13 @@ pragma solidity ^0.8.19;
 
 import "src/utils/OwnableUpgradableDiamond.sol";
 import "src/core/EpochController.sol";
+import "./CapacityConst.sol";
 import "./interfaces/IGlobalConst.sol";
+import "./interfaces/ICapacityConst.sol";
 
 uint256 constant PRECISION = 10000000; // min: 0.0000001
 
-contract GlobalConst is OwnableUpgradableDiamond, EpochController, IGlobalConst {
+contract GlobalConst is IGlobalConst, CapacityConst {
     // ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.core.storage.v1.globalConst")) - 1);
 
