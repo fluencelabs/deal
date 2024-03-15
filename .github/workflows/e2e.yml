@@ -44,6 +44,7 @@ jobs:
       - deal
     uses: fluencelabs/cli/.github/workflows/tests.yml@main
     with:
+      ref: up-dtc
       chain-rpc-image: "${{ needs.deal.outputs.chain-rpc-image }}"
       chain-deploy-script-image: "${{ needs.deal.outputs.chain-deploy-script-image }}"
       subgraph-deploy-script-image: "${{ needs.deal.outputs.subgraph-deploy-script-image }}"

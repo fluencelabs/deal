@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.11.0](https://github.com/fluencelabs/deal/compare/v0.10.1...v0.11.0) (2024-03-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* refactoring ([#343](https://github.com/fluencelabs/deal/issues/343))
+* support-deal-whitlists [CHAIN-368] ([#325](https://github.com/fluencelabs/deal/issues/325))
+
+### Features
+
+* numbers in DealExplorerClient ([#341](https://github.com/fluencelabs/deal/issues/341)) ([6801c1f](https://github.com/fluencelabs/deal/commit/6801c1fb1a7719b54b252d2a84424cb385267342))
+* support-deal-whitlists [CHAIN-368] ([#325](https://github.com/fluencelabs/deal/issues/325)) ([b59ae1c](https://github.com/fluencelabs/deal/commit/b59ae1ca6a09bfadf76a24d6b5c5e0bd9d574d68))
+
+
+### Bug Fixes
+
+* CHAIN-426, CHAIN-423 ([#339](https://github.com/fluencelabs/deal/issues/339)) ([58ea746](https://github.com/fluencelabs/deal/commit/58ea74604fcb81c79edca77296bb4829e52d2fb9))
+* refactoring ([#343](https://github.com/fluencelabs/deal/issues/343)) ([75cda77](https://github.com/fluencelabs/deal/commit/75cda77604c54b3cfb60f316ef17b583d18f3a5a))
+* type imports ([#347](https://github.com/fluencelabs/deal/issues/347)) ([78662ec](https://github.com/fluencelabs/deal/commit/78662ecdcfe4ba6a167022e838803bc8be2d4b41))
+
 ## [0.10.1](https://github.com/fluencelabs/deal/compare/v0.10.0...v0.10.1) (2024-03-11)
 
 
