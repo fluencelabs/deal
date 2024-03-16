@@ -110,7 +110,7 @@ query CapacityCommitmentStatsPerEpochQuery(
   $orderBy: CapacityCommitmentStatsPerEpoch_orderBy
   $orderType: OrderDirection
 ) {
-  capacityCommitmentStatsPerEpoch(
+  capacityCommitmentStatsPerEpoches(
     where: $filters
     first: $limit
     skip: $offset
