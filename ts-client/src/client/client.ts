@@ -23,9 +23,9 @@ import type {
 import type { Deployment, ContractsENV } from "./config.js";
 
 export class DealClient {
-  private deployment: Promise<Deployment>;
+  private deployment: Deployment;
 
-  static async getContractAddresses(env: ContractsENV): Promise<Deployment> {
+  static getContractAddresses(env: ContractsENV): Deployment {
     return getDeployment(env);
   }
 
@@ -40,44 +40,38 @@ export class DealClient {
     return Deal__factory.connect(address, this.signerOrProvider);
   }
 
-  async getCore(): Promise<ICore> {
-    return Core__factory.connect(
-      (await this.deployment).core,
-      this.signerOrProvider,
-    );
+  getCore(): ICore {
+    return Core__factory.connect(this.deployment.core, this.signerOrProvider);
   }
 
-  async getMarket(): Promise<IMarket> {
+  getMarket(): IMarket {
     return Market__factory.connect(
-      (await this.deployment).market,
+      this.deployment.market,
       this.signerOrProvider,
     );
   }
 
-  async getDealFactory(): Promise<IDealFactory> {
+  getDealFactory(): IDealFactory {
     return DealFactory__factory.connect(
-      (await this.deployment).dealFactory,
+      this.deployment.dealFactory,
       this.signerOrProvider,
     );
   }
 
-  async getCapacity(): Promise<ICapacity> {
+  getCapacity(): ICapacity {
     return Capacity__factory.connect(
-      (await this.deployment).capacity,
+      this.deployment.capacity,
       this.signerOrProvider,
     );
   }
 
-  async getUSDC(): Promise<IERC20> {
-    return ERC20__factory.connect(
-      (await this.deployment).usdc,
-      this.signerOrProvider,
-    );
+  getUSDC(): IERC20 {
+    return ERC20__factory.connect(this.deployment.usdc, this.signerOrProvider);
   }
 
-  async getMulticall3(): Promise<Multicall3> {
+  getMulticall3(): Multicall3 {
     return Multicall3__factory.connect(
-      (await this.deployment).multicall3,
+      this.deployment.multicall3,
       this.signerOrProvider,
     );
   }

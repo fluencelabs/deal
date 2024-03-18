@@ -123,7 +123,8 @@ jobs:
         env:
           CHAIN_RPC_IMAGE: "chain-rpc"
           CHAIN_DEPLOY_SCRIPT_IMAGE: "chain-deploy-script"
-        run: docker compose up -d ipfs postgres chain-rpc blockscout graph-node && docker compose up chain-deploy-script
+          EPOCH_DURATION: "86400"
+        run: docker compose up -d chain-rpc && docker compose up chain-deploy-script
         working-directory: docker
 
       - name: Install deps in ts-client package

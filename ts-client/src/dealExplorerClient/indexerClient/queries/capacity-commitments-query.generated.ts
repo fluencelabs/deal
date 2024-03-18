@@ -1,10 +1,10 @@
 /* eslint-disable */
 //@ts-nocheck
-import * as Types from "../generated.types.js";
+import * as Types from '../generated.types.js';
 
-import { GraphQLClient, RequestOptions } from "graphql-request";
-import gql from "graphql-tag";
-type GraphQLClientRequestHeaders = RequestOptions["requestHeaders"];
+import { GraphQLClient, RequestOptions } from 'graphql-request';
+import gql from 'graphql-tag';
+type GraphQLClientRequestHeaders = RequestOptions['requestHeaders'];
 export type CapacityCommitmentsQueryQueryVariables = Types.Exact<{
   filters?: Types.InputMaybe<Types.CapacityCommitment_Filter>;
   offset?: Types.InputMaybe<Types.Scalars['Int']['input']>;
