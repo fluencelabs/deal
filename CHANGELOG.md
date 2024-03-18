@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.1](https://github.com/fluencelabs/deal/compare/v0.12.0...v0.12.1) (2024-03-18)
+
+
+### Features
+
+* add kras contracts env ([#362](https://github.com/fluencelabs/deal/issues/362)) ([78a28e9](https://github.com/fluencelabs/deal/commit/78a28e91a200be5eed87573844306f5cff003b68))
+
 ## [0.12.0](https://github.com/fluencelabs/deal/compare/v0.11.4...v0.12.0) (2024-03-18)
 
 
