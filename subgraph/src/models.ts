@@ -25,6 +25,7 @@ export const MAX_UINT_256 = BigInt.fromString(
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 export const UNKNOWN_EFFECTOR_DESCRIPTION = "Unknown";
+export const REMOVED_EFFECTOR_INFO_DESCRIPTION = "Removed";
 export const UNREGISTERED_PROVIDER_NAME = "Unregistered";
 
 // In contracts flow to register provider exists, but on e.g. deal
