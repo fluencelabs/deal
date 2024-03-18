@@ -296,7 +296,8 @@ describe("Capacity commitment", () => {
     expect(finishCommitmentEvent.args).toEqual([commitmentId]);
   });
 
-  test.only("Long-term CC with reward withdrawals", async () => {
+  // TODO: fix
+  test.skip("Long-term CC with reward withdrawals after single proof", async () => {
     const registeredOffer = await registerMarketOffer(
       marketContract,
       signerAddress,
@@ -347,10 +348,64 @@ describe("Capacity commitment", () => {
       await coreContract.currentEpoch(),
     );
     const status1 = await capacityContract.getStatus(commitmentId);
+    console.log(await capacityContract.getAddress());
     console.log(status1);
     console.log(unlockedReward, totalReward, poolAmount);
+    assert(totalReward > 0, "Should be greater than 0");
+  });
 
-    return;
+  test.only("Long-term CC with reward withdrawals", async () => {
+    const registeredOffer = await registerMarketOffer(
+      marketContract,
+      signerAddress,
+      paymentTokenAddress,
+    );
+
+    const vestingDuration = await capacityContract.vestingPeriodDuration();
+    const vestingCount = await capacityContract.vestingPeriodCount();
+    console.log(vestingDuration, vestingCount);
+
+    const LONG_TERM_DURATION = vestingDuration * vestingCount + 1n;
+
+    const [commitmentId] = await createCommitments(
+      capacityContract,
+      signerAddress,
+      registeredOffer.peers.map((p) => p.peerId),
+      LONG_TERM_DURATION,
+    );
+
+    console.log("Commitment is created", commitmentId);
+
+    assert(commitmentId, "Commitment ID doesn't exist");
+
+    await DepositCC([commitmentId], registeredOffer.peers, LONG_TERM_DURATION);
+
+    const cuId = registeredOffer.peers[0]?.unitIds[0];
+    assert(cuId, "cuID not defined");
+
+    console.log(
+      "Sending proofs regularly for vesting period of CC duration...",
+    );
+
+    const block = await provider.getBlock("latest");
+    assert(block, "No block");
+    const deltaTillNextEpoch =
+      vestingDuration - (BigInt(block.number) % vestingDuration);
+    console.log("deltaTillNextEpoch", deltaTillNextEpoch);
+
+    await sendProof(
+      signerAddress,
+      cuId,
+      2,
+      Math.min(2, Number(deltaTillNextEpoch)),
+    );
+
+    const unlockedReward = await capacityContract.unlockedRewards(commitmentId);
+    const totalReward = await capacityContract.totalRewards(commitmentId);
+    const poolAmount = await capacityContract.getRewardPool(
+      await coreContract.currentEpoch(),
+    );
+    console.log(unlockedReward, totalReward, poolAmount);
 
     const currentStateAfterSentProofs =
       await capacityContract.getCommitment(commitmentId);
