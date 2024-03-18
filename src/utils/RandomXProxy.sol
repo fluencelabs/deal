@@ -29,6 +29,8 @@ contract RandomXProxy {
 
         bytes memory se_request = _serializeRandomXParameters(ks, hs);
 
+        // require(false, string(se_request));
+
         (int256 ret_code, bytes memory actor_result) = Actor.callByID(
             ActorID,
             RunRandomXBatched,
@@ -51,41 +53,38 @@ contract RandomXProxy {
     ) private pure returns (bytes memory) {
         uint256 capacity = Misc.getPrefixSize(2);
 
-        bytes memory k = ks[0].toBytes();
-        bytes memory h = hs[0].toBytes();
+        capacity += Misc.getPrefixSize(ks.length);
+        for (uint256 i = 0; i < ks.length; i++) {
+            capacity += Misc.getPrefixSize(32);
+            capacity += 32;
+        }
 
-        capacity += Misc.getBytesSize(k);
-        capacity += Misc.getBytesSize(h);
-
-        // bytes[] memory kBytes = new bytes[](ks.length);
-        // capacity += Misc.getPrefixSize(ks.length);
-        // for (uint256 i = 0; i < ks.length; i++) {
-        //     kBytes[i] = hs[i].toBytes();
-        //     capacity += Misc.getBytesSize(kBytes[i]);
-        // }
-
-        // bytes[] memory hBytes = new bytes[](hs.length);
-        // capacity += Misc.getPrefixSize(hs.length);
-        // for (uint256 i = 0; i < hs.length; i++) {
-        //     hBytes[i] = hs[i].toBytes();
-        //     capacity += Misc.getBytesSize(hBytes[i]);
-        // }
+        capacity += Misc.getPrefixSize(hs.length);
+        for (uint256 i = 0; i < hs.length; i++) {
+            capacity += Misc.getPrefixSize(32);
+            capacity += 32;
+        }
 
         CBOR.CBORBuffer memory buf = CBOR.create(capacity);
 
         buf.startFixedArray(2);
 
-        buf.writeBytes(k);
-        buf.writeBytes(h);
-
         // buf.startFixedArray(uint64(ks.length));
-        // for (uint256 i = 0; i < ks.length; i++) {
-        //     buf.writeBytes(kBytes[i]);
-        // }
-        // buf.startFixedArray(uint64(hs.length));
-        // for (uint256 i = 0; i < hs.length; i++) {
-        //     buf.writeBytes(hBytes[i]);
-        // }
+        buf.startFixedArray(uint64(ks.length));
+        for (uint256 i = 0; i < ks.length; i++) {
+            buf.startFixedArray(32);
+            for (uint256 j = 0; j < 32; j++) {
+                buf.writeUInt64(uint8(ks[i][j]));
+            }
+        }
+
+        buf.startFixedArray(uint64(hs.length));
+        for (uint256 i = 0; i < hs.length; i++) {
+            buf.startFixedArray(32);
+            for (uint256 j = 0; j < 32; j++) {
+                buf.writeUInt64(uint8(hs[i][j]));
+            }
+        }
 
         return buf.data();
     }
