@@ -1,4 +1,4 @@
-export const CONTRACTS_ENV = ["dar", "stage", "local"];
+export const CONTRACTS_ENV = ["dar", "stage", "local", "kras"];
 
 export type ContractsENV = (typeof CONTRACTS_ENV)[number];
 export type Deployment = {
@@ -14,6 +14,7 @@ export type Deployment = {
 import stage from "./../deployments/stage.json" assert { type: "json" };
 import dar from "./../deployments/dar.json" assert { type: "json" };
 import local from "./../deployments/local.json" assert { type: "json" };
+import kras from "./../deployments/kras.json" assert { type: "json" };
 
 export const getDeployment = (env: ContractsENV) => {
   let chainId = 0;
@@ -27,6 +28,10 @@ export const getDeployment = (env: ContractsENV) => {
       break;
     case "stage":
       deployment = stage;
+      chainId = 3521768853336688;
+      break;
+    case "kras":
+      deployment = kras;
       chainId = 3521768853336688;
       break;
     case "local":
