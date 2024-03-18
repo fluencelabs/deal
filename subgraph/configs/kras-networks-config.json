@@ -1,16 +1,20 @@
 {
-  "mumbai": {
+  "kras": {
     "Market": {
-      "address": "0x89C354Eb7A9E0A63d52b0773063212ed91548ce2",
-      "startBlock": 46143086
+      "address": "0x1dC1eB8fc8dBc35be6fE75ceba05C7D410a2e721",
+      "startBlock": 131
     },
     "Capacity": {
-      "address": "0x17F8e54d341F0283bDA2e58a079024Ae29B52D48",
-      "startBlock": 46143086
+      "address": "0x0E62f5cfA5189CA34E79CCB03829C064405790aD",
+      "startBlock": 131
     },
     "Core": {
-      "address": "0x1a3496c2151933DCa5b2EA4ca7e07b4c22034F5a",
-      "startBlock": 46143086
+      "address": "0x2f5224b7Cb8bd98d9Ef61c247F4741758E8E873d",
+      "startBlock": 131
+    },
+    "DealFactory": {
+      "address": "0x12F1f768151F17400571548ec64c95487c56a210",
+      "startBlock": 131
     }
   }
 }
