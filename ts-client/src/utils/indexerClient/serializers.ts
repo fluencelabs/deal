@@ -45,8 +45,10 @@ export function serializeEffectors(
     composedEffectors.push({
       cid: effector.effector.id,
       description: serializeEffectorDescription(
-        effector.effector.id,
-        effector.effector.description,
+        {
+          cid: effector.effector.id,
+          description: effector.effector.description,
+        }
       ),
     });
   }
@@ -54,18 +56,9 @@ export function serializeEffectors(
   return composedEffectors;
 }
 
-// TODO: rm when https://github.com/graphprotocol/graph-node/issues/5171 is fixed.
-// Currently this method is synced with scripts/CreateMarket.s.sol script data.
-// It is used for dev purpose as scripts/CreateMarket.s.sol itself as well.
 export function serializeEffectorDescription(
-  cid: string,
-  descriptionFromIndexer: string,
+  effectorIn: {cid: string, description: string},
 ): string {
-  if (cid == "\u00124VxDoge") {
-    return "IPFS";
-  }
-  if (cid == "\u00124VxDogu") {
-    return "cURL";
-  }
-  return descriptionFromIndexer;
+  // Add custom serialization logic here.
+  return effectorIn.description;
 }

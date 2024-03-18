@@ -707,10 +707,11 @@ export class DealExplorerClient {
       res = data.effectors.map((effector) => {
         return {
           cid: effector.id,
-          description: serializeEffectorDescription(
-            effector.id,
-            effector.description,
-          ),
+          description: serializeEffectorDescription({
+            cid: effector.id,
+            description: effector.description
+          }
+      ),
         };
       });
     }
