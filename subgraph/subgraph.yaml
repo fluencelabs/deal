@@ -61,6 +61,10 @@ dataSources:
           handler: handleInitialized
         - event: ProviderInfoUpdated(indexed address,string,(bytes4,bytes32))
           handler: handleProviderInfoUpdated
+        - event: EffectorInfoSet((bytes4,bytes32),string,(bytes4,bytes32))
+          handler: handleEffectorInfoSet
+        - event: EffectorInfoRemoved((bytes4,bytes32))
+          handler: handleEffectorInfoRemoved
         - event: MarketOfferRegistered(indexed
             address,bytes32,uint256,address,(bytes4,bytes32)[],uint256,uint256)
           handler: handleMarketOfferRegistered

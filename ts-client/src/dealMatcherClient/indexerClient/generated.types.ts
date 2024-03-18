@@ -20,10 +20,6 @@ export type Scalars = {
   Int8: { input: any; output: any; }
 };
 
-export type Aggregation_Interval =
-  | 'day'
-  | 'hour';
-
 export type BlockChangedFilter = {
   number_gte: Scalars['Int']['input'];
 };
@@ -67,9 +63,9 @@ export type CapacityCommitment = {
   status?: Maybe<CapacityCommitmentStatus>;
   submittedProofs?: Maybe<Array<SubmittedProof>>;
   submittedProofsCount: Scalars['Int']['output'];
-  totalCUFailCount: Scalars['Int']['output'];
   /** Collateral of native token (FLT) that has been deposited. */
   totalCollateral: Scalars['BigInt']['output'];
+  totalFailCount: Scalars['Int']['output'];
 };
 
 
@@ -114,7 +110,7 @@ export type CapacityCommitmentStatsPerEpoch = {
   nextAdditionalActiveUnitCount: Scalars['Int']['output'];
   submittedProofs?: Maybe<Array<SubmittedProof>>;
   submittedProofsCount: Scalars['Int']['output'];
-  totalCUFailCount: Scalars['Int']['output'];
+  totalFailCount: Scalars['Int']['output'];
 };
 
 
@@ -234,14 +230,14 @@ export type CapacityCommitmentStatsPerEpoch_Filter = {
   submittedProofsCount_not?: InputMaybe<Scalars['Int']['input']>;
   submittedProofsCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
   submittedProofs_?: InputMaybe<SubmittedProof_Filter>;
-  totalCUFailCount?: InputMaybe<Scalars['Int']['input']>;
-  totalCUFailCount_gt?: InputMaybe<Scalars['Int']['input']>;
-  totalCUFailCount_gte?: InputMaybe<Scalars['Int']['input']>;
-  totalCUFailCount_in?: InputMaybe<Array<Scalars['Int']['input']>>;
-  totalCUFailCount_lt?: InputMaybe<Scalars['Int']['input']>;
-  totalCUFailCount_lte?: InputMaybe<Scalars['Int']['input']>;
-  totalCUFailCount_not?: InputMaybe<Scalars['Int']['input']>;
-  totalCUFailCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  totalFailCount?: InputMaybe<Scalars['Int']['input']>;
+  totalFailCount_gt?: InputMaybe<Scalars['Int']['input']>;
+  totalFailCount_gte?: InputMaybe<Scalars['Int']['input']>;
+  totalFailCount_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  totalFailCount_lt?: InputMaybe<Scalars['Int']['input']>;
+  totalFailCount_lte?: InputMaybe<Scalars['Int']['input']>;
+  totalFailCount_not?: InputMaybe<Scalars['Int']['input']>;
+  totalFailCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
 };
 
 export type CapacityCommitmentStatsPerEpoch_OrderBy =
@@ -268,8 +264,8 @@ export type CapacityCommitmentStatsPerEpoch_OrderBy =
   | 'capacityCommitment__startEpoch'
   | 'capacityCommitment__status'
   | 'capacityCommitment__submittedProofsCount'
-  | 'capacityCommitment__totalCUFailCount'
   | 'capacityCommitment__totalCollateral'
+  | 'capacityCommitment__totalFailCount'
   | 'computeUnitsWithMinRequiredProofsSubmittedCounter'
   | 'currentCCNextCCFailedEpoch'
   | 'epoch'
@@ -278,7 +274,7 @@ export type CapacityCommitmentStatsPerEpoch_OrderBy =
   | 'nextAdditionalActiveUnitCount'
   | 'submittedProofs'
   | 'submittedProofsCount'
-  | 'totalCUFailCount';
+  | 'totalFailCount';
 
 export type CapacityCommitmentStatus =
   | 'Active'
@@ -373,8 +369,8 @@ export type CapacityCommitmentToComputeUnit_OrderBy =
   | 'capacityCommitment__startEpoch'
   | 'capacityCommitment__status'
   | 'capacityCommitment__submittedProofsCount'
-  | 'capacityCommitment__totalCUFailCount'
   | 'capacityCommitment__totalCollateral'
+  | 'capacityCommitment__totalFailCount'
   | 'computeUnit'
   | 'computeUnit__createdAt'
   | 'computeUnit__id'
@@ -587,14 +583,6 @@ export type CapacityCommitment_Filter = {
   submittedProofsCount_not?: InputMaybe<Scalars['Int']['input']>;
   submittedProofsCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
   submittedProofs_?: InputMaybe<SubmittedProof_Filter>;
-  totalCUFailCount?: InputMaybe<Scalars['Int']['input']>;
-  totalCUFailCount_gt?: InputMaybe<Scalars['Int']['input']>;
-  totalCUFailCount_gte?: InputMaybe<Scalars['Int']['input']>;
-  totalCUFailCount_in?: InputMaybe<Array<Scalars['Int']['input']>>;
-  totalCUFailCount_lt?: InputMaybe<Scalars['Int']['input']>;
-  totalCUFailCount_lte?: InputMaybe<Scalars['Int']['input']>;
-  totalCUFailCount_not?: InputMaybe<Scalars['Int']['input']>;
-  totalCUFailCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
   totalCollateral?: InputMaybe<Scalars['BigInt']['input']>;
   totalCollateral_gt?: InputMaybe<Scalars['BigInt']['input']>;
   totalCollateral_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -603,6 +591,14 @@ export type CapacityCommitment_Filter = {
   totalCollateral_lte?: InputMaybe<Scalars['BigInt']['input']>;
   totalCollateral_not?: InputMaybe<Scalars['BigInt']['input']>;
   totalCollateral_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  totalFailCount?: InputMaybe<Scalars['Int']['input']>;
+  totalFailCount_gt?: InputMaybe<Scalars['Int']['input']>;
+  totalFailCount_gte?: InputMaybe<Scalars['Int']['input']>;
+  totalFailCount_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  totalFailCount_lt?: InputMaybe<Scalars['Int']['input']>;
+  totalFailCount_lte?: InputMaybe<Scalars['Int']['input']>;
+  totalFailCount_not?: InputMaybe<Scalars['Int']['input']>;
+  totalFailCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
 };
 
 export type CapacityCommitment_OrderBy =
@@ -644,8 +640,8 @@ export type CapacityCommitment_OrderBy =
   | 'status'
   | 'submittedProofs'
   | 'submittedProofsCount'
-  | 'totalCUFailCount'
-  | 'totalCollateral';
+  | 'totalCollateral'
+  | 'totalFailCount';
 
 export type ComputeUnit = {
   __typename?: 'ComputeUnit';
@@ -773,8 +769,8 @@ export type ComputeUnitPerEpochStat_OrderBy =
   | 'capacityCommitment__startEpoch'
   | 'capacityCommitment__status'
   | 'capacityCommitment__submittedProofsCount'
-  | 'capacityCommitment__totalCUFailCount'
   | 'capacityCommitment__totalCollateral'
+  | 'capacityCommitment__totalFailCount'
   | 'computeUnit'
   | 'computeUnit__createdAt'
   | 'computeUnit__id'
@@ -2326,8 +2322,8 @@ export type Peer_OrderBy =
   | 'currentCapacityCommitment__startEpoch'
   | 'currentCapacityCommitment__status'
   | 'currentCapacityCommitment__submittedProofsCount'
-  | 'currentCapacityCommitment__totalCUFailCount'
   | 'currentCapacityCommitment__totalCollateral'
+  | 'currentCapacityCommitment__totalFailCount'
   | 'id'
   | 'isAnyJoinedDeals'
   | 'joinedDeals'
@@ -3002,7 +2998,7 @@ export type SubmittedProof_OrderBy =
   | 'capacityCommitmentStatsPerEpoch__id'
   | 'capacityCommitmentStatsPerEpoch__nextAdditionalActiveUnitCount'
   | 'capacityCommitmentStatsPerEpoch__submittedProofsCount'
-  | 'capacityCommitmentStatsPerEpoch__totalCUFailCount'
+  | 'capacityCommitmentStatsPerEpoch__totalFailCount'
   | 'capacityCommitment__activeUnitCount'
   | 'capacityCommitment__collateralPerUnit'
   | 'capacityCommitment__computeUnitsCount'
@@ -3022,8 +3018,8 @@ export type SubmittedProof_OrderBy =
   | 'capacityCommitment__startEpoch'
   | 'capacityCommitment__status'
   | 'capacityCommitment__submittedProofsCount'
-  | 'capacityCommitment__totalCUFailCount'
   | 'capacityCommitment__totalCollateral'
+  | 'capacityCommitment__totalFailCount'
   | 'computeUnit'
   | 'computeUnit__createdAt'
   | 'computeUnit__id'
@@ -3483,8 +3479,6 @@ export type _Block_ = {
   hash?: Maybe<Scalars['Bytes']['output']>;
   /** The block number */
   number: Scalars['Int']['output'];
-  /** The hash of the parent block */
-  parentHash?: Maybe<Scalars['Bytes']['output']>;
   /** Integer representation of the timestamp stored in blocks for the chain */
   timestamp?: Maybe<Scalars['Int']['output']>;
 };

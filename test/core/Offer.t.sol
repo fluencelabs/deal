@@ -72,7 +72,6 @@ contract OfferTest is Test {
         assertEq(providerInfo.name, providerId, "Provider description should be equal");
         assertEq(providerInfo.metadata.prefixes, metadata.prefixes, "Provider metadata prefixes should be equal to metadata.prefixes");
         assertEq(providerInfo.metadata.hash, metadata.hash, "Provider metadata hash should be equal to metadata.hash");
-        assertFalse(providerInfo.approved, "Provider should not be approved");
     }
 
     function test_EffectorInfo() external {
