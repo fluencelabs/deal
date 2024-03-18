@@ -8,13 +8,12 @@ import "./interfaces/IMatcher.sol";
 import "./interfaces/IMatcher.sol";
 import "src/deal/interfaces/IDeal.sol";
 import "src/deal/interfaces/IConfig.sol";
-import "src/utils/LinkedListWithUniqueKeys.sol";
 import "src/core/modules/BaseModule.sol";
+import "src/utils/OwnableUpgradableDiamond.sol";
 import "./Offer.sol";
 
 abstract contract Matcher is Offer, IMatcher {
     using SafeERC20 for IERC20;
-    using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
 
     // ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.market.storage.v1.matcher")) - 1);
@@ -52,6 +51,8 @@ abstract contract Matcher is Offer, IMatcher {
     function matchDeal(IDeal deal, bytes32[] calldata offers, bytes32[][] calldata computeUnits) external {
         ICapacity capacity = core.capacity();
         MatcherStorage storage matcherStorage = _getMatcherStorage();
+
+        require(OwnableUpgradableDiamond(address(deal)).owner() == msg.sender, "Matcher: sender is not deal owner");
 
         IDeal.Status dealStatus = deal.getStatus();
         require(
@@ -136,7 +137,6 @@ abstract contract Matcher is Offer, IMatcher {
 
                 _mvComputeUnitToDeal(computeUnitId, deal);
 
-                // TODO: only for NOX -- remove in future
                 emit ComputeUnitMatched(peerId, deal, computeUnitId, creationBlock, appCID);
 
                 computeUnitCountInDealByProvider++;

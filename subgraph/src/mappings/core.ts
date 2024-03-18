@@ -1,6 +1,15 @@
 import { createOrLoadGraphNetwork } from "../models";
-import { Initialized, WhitelistAccessGranted, WhitelistAccessRevoked } from "../../generated/Core/Core";
-import { getEpochDuration, getInitTimestamp } from "../contracts";
+import {
+  Initialized,
+  WhitelistAccessGranted,
+  WhitelistAccessRevoked,
+} from "../../generated/Core/Core";
+import {
+  getCapacityMaxFailedRatio,
+  getEpochDuration,
+  getInitTimestamp,
+  getMinRequiredProofsPerEpoch,
+} from "../contracts";
 import { Provider } from "../../generated/schema";
 
 export function handleInitialized(event: Initialized): void {
@@ -8,6 +17,13 @@ export function handleInitialized(event: Initialized): void {
   graphNetwork.coreEpochDuration = getEpochDuration(event.address);
   graphNetwork.coreContractAddress = event.address.toHexString();
   graphNetwork.initTimestamp = getInitTimestamp(event.address);
+  graphNetwork.capacityMaxFailedRatio = getCapacityMaxFailedRatio(
+    event.address,
+  ).toI32();
+  graphNetwork.minRequiredProofsPerEpoch = getMinRequiredProofsPerEpoch(
+    event.address,
+  ).toI32();
+
   graphNetwork.save();
 }
 

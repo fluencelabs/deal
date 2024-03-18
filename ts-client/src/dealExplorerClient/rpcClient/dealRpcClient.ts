@@ -1,8 +1,8 @@
 import type { ethers } from "ethers";
 import {
-  Multicall3ContractClient,
+  Multicall3ContractClientABC,
   type Multicall3ContractCall,
-} from "./multicall3ContractClient.js";
+} from "../../utils/rpcClientABC.js";
 import { Capacity__factory, Deal__factory } from "../../index.js";
 import {
   serializeTxCapacityCommitmentStatus,
@@ -11,7 +11,7 @@ import {
 } from "./serializers.js";
 import type { CapacityCommitmentStatus } from "../types/schemes.js";
 
-export class DealRpcClient extends Multicall3ContractClient {
+export class DealRpcClient extends Multicall3ContractClientABC {
   constructor(
     caller: ethers.Provider | ethers.Signer,
     multicall3ContractAddress: string,
