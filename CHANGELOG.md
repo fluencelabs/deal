@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.12.0](https://github.com/fluencelabs/deal/compare/v0.11.4...v0.12.0) (2024-03-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* deal rewards ([#349](https://github.com/fluencelabs/deal/issues/349))
+* provider whitelist - persist logic in Whitelist Contract only and support effectorInfoSet ([#346](https://github.com/fluencelabs/deal/issues/346))
+
+### Features
+
+* deal cli client with more methods [chain-412] ([#342](https://github.com/fluencelabs/deal/issues/342)) ([a6e5d7f](https://github.com/fluencelabs/deal/commit/a6e5d7f069be1c5f3020c685725ac80d2057bd0c))
+* deploy kras ([#360](https://github.com/fluencelabs/deal/issues/360)) ([77942c7](https://github.com/fluencelabs/deal/commit/77942c7e05655f329037c9296f47796a504a07c3))
+
+
+### Bug Fixes
+
+* deal rewards ([#349](https://github.com/fluencelabs/deal/issues/349)) ([a502073](https://github.com/fluencelabs/deal/commit/a50207396364770694fc0313fa6ba2295625a940))
+* provider whitelist - persist logic in Whitelist Contract only and support effectorInfoSet ([#346](https://github.com/fluencelabs/deal/issues/346)) ([f175797](https://github.com/fluencelabs/deal/commit/f17579735981aee4d25dcf9c7f094d7f0d6565cd))
+
 ## [0.11.4](https://github.com/fluencelabs/deal/compare/v0.11.3...v0.11.4) (2024-03-16)
 
 
