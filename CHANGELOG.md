@@ -1,5 +1,54 @@
 # Changelog
 
+## [0.11.4](https://github.com/fluencelabs/deal/compare/v0.11.3...v0.11.4) (2024-03-16)
+
+
+### Bug Fixes
+
+* **indexer:** fix typos in indexer query names ([#357](https://github.com/fluencelabs/deal/issues/357)) ([0345d67](https://github.com/fluencelabs/deal/commit/0345d67ddad96894ee3db8a6610481f59b3d816e))
+
+## [0.11.3](https://github.com/fluencelabs/deal/compare/v0.11.2...v0.11.3) (2024-03-15)
+
+
+### Bug Fixes
+
+* **indexer-client:** fix typo in filter functon name ([#355](https://github.com/fluencelabs/deal/issues/355)) ([6fddcd3](https://github.com/fluencelabs/deal/commit/6fddcd306aa225db8f32bd70ebb11859f92642e8))
+
+## [0.11.2](https://github.com/fluencelabs/deal/compare/v0.11.1...v0.11.2) (2024-03-15)
+
+
+### Features
+
+* redeploy dar ([#352](https://github.com/fluencelabs/deal/issues/352)) ([adf4667](https://github.com/fluencelabs/deal/commit/adf46678283e0d4ee0448982be1c94841d5dc37e))
+
+## [0.11.1](https://github.com/fluencelabs/deal/compare/v0.11.0...v0.11.1) (2024-03-15)
+
+
+### Features
+
+* deploy dar ([#351](https://github.com/fluencelabs/deal/issues/351)) ([fc36c6f](https://github.com/fluencelabs/deal/commit/fc36c6fcf6743036025c8ecde543d2cc455bcb31))
+* **integration-tests:** Provider cleanup scenarios ([#340](https://github.com/fluencelabs/deal/issues/340)) ([616a830](https://github.com/fluencelabs/deal/commit/616a83066a1302720480d135f37748ed7827efc6))
+
+## [0.11.0](https://github.com/fluencelabs/deal/compare/v0.10.1...v0.11.0) (2024-03-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* refactoring ([#343](https://github.com/fluencelabs/deal/issues/343))
+* support-deal-whitlists [CHAIN-368] ([#325](https://github.com/fluencelabs/deal/issues/325))
+
+### Features
+
+* numbers in DealExplorerClient ([#341](https://github.com/fluencelabs/deal/issues/341)) ([6801c1f](https://github.com/fluencelabs/deal/commit/6801c1fb1a7719b54b252d2a84424cb385267342))
+* support-deal-whitlists [CHAIN-368] ([#325](https://github.com/fluencelabs/deal/issues/325)) ([b59ae1c](https://github.com/fluencelabs/deal/commit/b59ae1ca6a09bfadf76a24d6b5c5e0bd9d574d68))
+
+
+### Bug Fixes
+
+* CHAIN-426, CHAIN-423 ([#339](https://github.com/fluencelabs/deal/issues/339)) ([58ea746](https://github.com/fluencelabs/deal/commit/58ea74604fcb81c79edca77296bb4829e52d2fb9))
+* refactoring ([#343](https://github.com/fluencelabs/deal/issues/343)) ([75cda77](https://github.com/fluencelabs/deal/commit/75cda77604c54b3cfb60f316ef17b583d18f3a5a))
+* type imports ([#347](https://github.com/fluencelabs/deal/issues/347)) ([78662ec](https://github.com/fluencelabs/deal/commit/78662ecdcfe4ba6a167022e838803bc8be2d4b41))
+
 ## [0.10.1](https://github.com/fluencelabs/deal/compare/v0.10.0...v0.10.1) (2024-03-11)
 
 
