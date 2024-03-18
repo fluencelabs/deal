@@ -4,7 +4,7 @@ import { exec } from "child_process";
 
 const config: CodegenConfig = {
     overwrite: true,
-    schema: "https://api.thegraph.com/subgraphs/name/alcibiadescleinias/fluence-deal-contracts",
+    schema: "http://localhost:8000/subgraphs/name/fluence-deal-contracts",
     documents: "src/dealMatcherClient/indexerClient/queries/*.graphql",
     emitLegacyCommonJSImports: false,
     generates: {
