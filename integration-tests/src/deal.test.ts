@@ -1,4 +1,4 @@
-import { ethers, randomBytes } from "ethers";
+import { ethers } from "ethers";
 import { assert, describe, expect, test } from "vitest";
 import { CCStatus, DealStatus, DEFAULT_CONFIRMATIONS } from "./constants.js";
 import {
