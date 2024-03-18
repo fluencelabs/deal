@@ -29,7 +29,7 @@ async function sendProof(
   epoches: number,
 ) {
   const epochDuration = await coreContract.epochDuration();
-  const difficulty = await capacityContract.difficulty();
+  const difficulty = await coreContract.difficulty();
   let sentProofRounds = 0;
   let currentNonce = await provider.getTransactionCount(sender);
 
@@ -62,7 +62,7 @@ async function DepositCC(
   _duration: bigint | undefined,
 ) {
   const duration = _duration ?? CC_DURATION_DEFAULT;
-  const collateralPerUnit = await capacityContract.fltCollateralPerUnit();
+  const collateralPerUnit = await coreContract.fltCollateralPerUnit();
 
   console.log("Depositing collateral...");
   const depositCollateralReceipt = await capacityContract
@@ -200,7 +200,7 @@ describe("Capacity commitment", () => {
     );
 
     console.log("Waiting for withdraw epoches to pass...");
-    const withdrawEpochs = await capacityContract.withdrawEpochsAfterFailed();
+    const withdrawEpochs = await coreContract.withdrawEpochsAfterFailed();
     await skipEpoch(epochDuration, withdrawEpochs);
 
     console.log("Finishing commitment...");
@@ -228,16 +228,17 @@ describe("Capacity commitment", () => {
     );
 
     console.log("Waiting for withdraw epoches to pass...");
-    const withdrawEpochs = await capacityContract.withdrawEpochsAfterFailed();
+    const withdrawEpochs = await coreContract.withdrawEpochsAfterFailed();
     // TODO: lesser values aren't working
     const HACKY_WITHDRAW_EPOCHS = withdrawEpochs * 2n;
     await skipEpoch(epochDuration, HACKY_WITHDRAW_EPOCHS);
 
+    // TODO: Add error class
     await expect(
       capacityContract
         .finishCommitment(commitmentId)
         .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS)),
-    ).rejects.toThrow("For finish commitment all units should be exited");
+    ).rejects.toThrow("(unknown custom error)");
   });
 
   test("CC ends after duration", async () => {
@@ -280,7 +281,7 @@ describe("Capacity commitment", () => {
     );
 
     console.log("Waiting for withdraw epoches to pass...");
-    const withdrawEpochs = await capacityContract.withdrawEpochsAfterFailed();
+    const withdrawEpochs = await coreContract.withdrawEpochsAfterFailed();
     await skipEpoch(epochDuration, withdrawEpochs);
 
     console.log("Finishing commitment...");
@@ -304,8 +305,8 @@ describe("Capacity commitment", () => {
       paymentTokenAddress,
     );
 
-    const vestingDuration = await capacityContract.vestingPeriodDuration();
-    const vestingCount = await capacityContract.vestingPeriodCount();
+    const vestingDuration = await coreContract.vestingPeriodDuration();
+    const vestingCount = await coreContract.vestingPeriodCount();
     console.log(vestingDuration, vestingCount);
 
     const LONG_TERM_DURATION = vestingDuration * vestingCount + 1n;
@@ -344,7 +345,7 @@ describe("Capacity commitment", () => {
 
     const unlockedReward = await capacityContract.unlockedRewards(commitmentId);
     const totalReward = await capacityContract.totalRewards(commitmentId);
-    const poolAmount = await capacityContract.getRewardPool(
+    const poolAmount = await coreContract.getRewardPool(
       await coreContract.currentEpoch(),
     );
     const status1 = await capacityContract.getStatus(commitmentId);
@@ -361,8 +362,8 @@ describe("Capacity commitment", () => {
       paymentTokenAddress,
     );
 
-    const vestingDuration = await capacityContract.vestingPeriodDuration();
-    const vestingCount = await capacityContract.vestingPeriodCount();
+    const vestingDuration = await coreContract.vestingPeriodDuration();
+    const vestingCount = await coreContract.vestingPeriodCount();
     console.log(vestingDuration, vestingCount);
 
     const LONG_TERM_DURATION = vestingDuration * vestingCount + 1n;
@@ -402,7 +403,7 @@ describe("Capacity commitment", () => {
 
     const unlockedReward = await capacityContract.unlockedRewards(commitmentId);
     const totalReward = await capacityContract.totalRewards(commitmentId);
-    const poolAmount = await capacityContract.getRewardPool(
+    const poolAmount = await coreContract.getRewardPool(
       await coreContract.currentEpoch(),
     );
     console.log(unlockedReward, totalReward, poolAmount);
@@ -450,8 +451,8 @@ describe("Capacity commitment", () => {
       paymentTokenAddress,
     );
 
-    const vestingDuration = await capacityContract.vestingPeriodDuration();
-    const vestingCount = await capacityContract.vestingPeriodCount();
+    const vestingDuration = await coreContract.vestingPeriodDuration();
+    const vestingCount = await coreContract.vestingPeriodCount();
 
     const LONG_TERM_DURATION = vestingDuration * vestingCount + 1n;
 
