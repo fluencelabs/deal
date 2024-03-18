@@ -240,11 +240,12 @@ describe("Capacity commitment", () => {
     const HACKY_WITHDRAW_EPOCHS = withdrawEpochs * 2n;
     await skipEpoch(provider, epochDuration, HACKY_WITHDRAW_EPOCHS);
 
+    // TODO: Add error class
     await expect(
       capacityContract
         .finishCommitment(commitmentId)
         .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS)),
-    ).rejects.toThrow("For finish commitment all units should be exited");
+    ).rejects.toThrow("(unknown custom error)");
   });
 
   test("CC ends after duration", async () => {
