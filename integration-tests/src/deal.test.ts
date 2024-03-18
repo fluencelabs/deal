@@ -162,7 +162,7 @@ describe("Deal tests", () => {
 
     console.info("Deposit collateral for all sent CC...");
     await depositCollateral(capacityContract, commitmentIds);
-    await skipEpoch(provider, epochDuration, 1);
+    await skipEpoch(epochDuration, 1);
 
     for (const ccId of commitmentIds) {
       const status: CCStatus = Number(await capacityContract.getStatus(ccId));
@@ -236,7 +236,7 @@ describe("Deal tests", () => {
     const dealId = lastDealCreated.args.deal;
     assert(dealId, "Deal ID is not defined");
 
-    await skipEpoch(provider, epochDuration, 1);
+    await skipEpoch(epochDuration, 1);
 
     const peer = registeredOffer.peers[0];
     assert(peer, "At least 1 peer should be defined");
@@ -350,7 +350,7 @@ describe("Deal tests", () => {
 
     console.info("Deposit collateral for all sent CC...");
     await depositCollateral(capacityContract, commitmentIds);
-    await skipEpoch(provider, epochDuration, 1);
+    await skipEpoch(epochDuration, 1);
 
     for (const ccId of commitmentIds) {
       const status: CCStatus = Number(await capacityContract.getStatus(ccId));
@@ -423,7 +423,7 @@ describe("Deal tests", () => {
     const dealId = lastDealCreated.args.deal;
     assert(dealId, "Deal ID is not defined");
 
-    await skipEpoch(provider, epochDuration, 1);
+    await skipEpoch(epochDuration, 1);
 
     const peer = registeredOffer.peers[0];
     assert(peer, "At least 1 peer should be defined");
@@ -463,7 +463,7 @@ describe("Deal tests", () => {
     ]);
 
     // Skip some epoches
-    await skipEpoch(provider, epochDuration, 10);
+    await skipEpoch(epochDuration, 10);
 
     console.log("Stopping matched deal...");
     const dealContract = contractsClient.getDeal(dealId);
@@ -477,7 +477,7 @@ describe("Deal tests", () => {
     );
     expect(dealStopEvent?.args.endedEpoch).toBeDefined();
 
-    await skipEpoch(provider, epochDuration, 3);
+    await skipEpoch(epochDuration, 3);
 
     const dealBalance = await dealContract.getFreeBalance();
     const dealWithdrawTx = await dealContract.withdraw(dealBalance);

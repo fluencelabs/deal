@@ -788,6 +788,11 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, CapacityConst, ICapa
         CommitmentStorage storage s = _getCommitmentStorage();
         uint256 snapshotEpoch = currentEpoch - 1;
 
+        // snapshotEpoch cannot be lower than startEpoch
+        if (snapshotEpoch < cc.info.startEpoch) {
+            snapshotEpoch = cc.info.startEpoch;
+        }
+
         // #region verify args
         // if unit is inactive, then no need to do anything because it's means that unit is in deal
         if (unitInfo.isInactive) {

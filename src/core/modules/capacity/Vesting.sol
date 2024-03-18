@@ -61,7 +61,6 @@ library Vesting {
             cumulativeAmount += rewardPerPeriod;
             if (index >= 0 && index < int256(length)) {
                 Item storage item = self.items[uint256(index)];
-                item.cumulativeAmount += item.cumulativeAmount;
                 item.cumulativeAmount = cumulativeAmount;
                 index++;
             } else {
