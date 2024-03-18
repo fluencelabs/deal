@@ -29,8 +29,6 @@ contract RandomXProxy {
 
         bytes memory se_request = _serializeRandomXParameters(ks, hs);
 
-        // require(false, string(se_request));
-
         (int256 ret_code, bytes memory actor_result) = Actor.callByID(
             ActorID,
             RunRandomXBatched,
@@ -54,36 +52,31 @@ contract RandomXProxy {
         uint256 capacity = Misc.getPrefixSize(2);
 
         capacity += Misc.getPrefixSize(ks.length);
+        bytes[] memory kBytes = new bytes[](ks.length);
         for (uint256 i = 0; i < ks.length; i++) {
-            capacity += Misc.getPrefixSize(32);
-            capacity += 32;
+            kBytes[i] = ks[i].toBytes();
+            capacity += Misc.getBytesSize(kBytes[i]);
         }
 
         capacity += Misc.getPrefixSize(hs.length);
+        bytes[] memory hBytes = new bytes[](hs.length);
         for (uint256 i = 0; i < hs.length; i++) {
-            capacity += Misc.getPrefixSize(32);
-            capacity += 32;
+            hBytes[i] = hs[i].toBytes();
+            capacity += Misc.getBytesSize(hBytes[i]);
         }
 
         CBOR.CBORBuffer memory buf = CBOR.create(capacity);
 
         buf.startFixedArray(2);
 
-        // buf.startFixedArray(uint64(ks.length));
         buf.startFixedArray(uint64(ks.length));
         for (uint256 i = 0; i < ks.length; i++) {
-            buf.startFixedArray(32);
-            for (uint256 j = 0; j < 32; j++) {
-                buf.writeUInt64(uint8(ks[i][j]));
-            }
+            buf.writeBytes(kBytes[i]);
         }
 
         buf.startFixedArray(uint64(hs.length));
         for (uint256 i = 0; i < hs.length; i++) {
-            buf.startFixedArray(32);
-            for (uint256 j = 0; j < 32; j++) {
-                buf.writeUInt64(uint8(hs[i][j]));
-            }
+            buf.writeBytes(hBytes[i]);
         }
 
         return buf.data();
