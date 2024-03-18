@@ -30,4 +30,8 @@ contract BaseModule is Initializable, IBaseModule {
         require(address(core.capacity()) == msg.sender, "BaseModule: caller is not the capacity");
         _;
     }
+
+    function owner() public view returns (address) {
+        return OwnableUpgradableDiamond(address(core)).owner();
+    }
 }

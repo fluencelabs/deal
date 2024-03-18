@@ -80,7 +80,7 @@ contract Rewards is Test {
         StdCheats.skip(deployment.core.epochDuration() * deployment.core.minDealDepositedEpochs());
 
         uint256 amount = deal.getRewardAmount(unitId);
-        assertEq(amount, pricePerWorkerEpoch * (deployment.core.minDealDepositedEpochs() - 1), "reward amount");
+        assertEq(amount, pricePerWorkerEpoch * (deployment.core.minDealDepositedEpochs()), "reward amount");
 
         vm.mockCall(
             address(deployment.market),

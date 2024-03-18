@@ -58,21 +58,15 @@ contract MatcherTest is Test {
 
             deployment.market.setProviderInfo("test", CIDV1({prefixes: 0x12345678, hash: bytes32(0x00)}));
             offerIds[i] = deployment.market.registerMarketOffer(
-                minPricePerWorkerEpoch,
-                paymentToken,
-                effectors,
-                peers,
-                minProtocolVersion,
-                maxProtocolVersion
+                minPricePerWorkerEpoch, paymentToken, effectors, peers, minProtocolVersion, maxProtocolVersion
             );
 
             uint256 amount;
             bytes32[] memory commitmentIds = new bytes32[](peerCountPerOffer);
 
             for (uint256 j = 0; j < peerCountPerOffer; j++) {
-                bytes32 commitmentId = deployment.capacity.createCommitment(
-                    peerIds[i][j], deployment.capacity.minDuration(), address(this), 1
-                );
+                bytes32 commitmentId =
+                    deployment.capacity.createCommitment(peerIds[i][j], deployment.core.minDuration(), address(this), 1);
                 commitmentIds[j] = commitmentId;
 
                 amount += deployment.capacity.getCommitment(commitmentId).collateralPerUnit * unitIds[i][j].length;
@@ -119,7 +113,8 @@ contract MatcherTest is Test {
             effectors,
             appCID,
             creationBlock,
-            protocolVersion
+            protocolVersion,
+            address(this)
         );
 
         (bytes32[] memory offerIds, bytes32[][] memory peerIds, bytes32[][][] memory unitIds) = _registerOffersAndCC(
@@ -208,6 +203,7 @@ contract DealMock {
     uint256 public targetWorkers;
     uint256 public maxWorkersPerProvider;
     uint256 public minWorkers;
+    address public owner;
     uint256 private protocolVersion;
 
     CIDV1[] internal _effectors;
@@ -227,7 +223,8 @@ contract DealMock {
         CIDV1[] memory effectors_,
         CIDV1 memory _appCID,
         uint256 _creationBlock,
-        uint256 protocolVersion_
+        uint256 protocolVersion_,
+        address owner_
     ) {
         pricePerWorkerEpoch = _pricePerWorkerEpoch;
         paymentToken = _paymentToken;
@@ -238,6 +235,7 @@ contract DealMock {
         appCID = _appCID;
         creationBlock = _creationBlock;
         protocolVersion = protocolVersion_;
+        owner = owner_;
     }
 
     function effectors() external view returns (CIDV1[] memory) {

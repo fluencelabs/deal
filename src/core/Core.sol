@@ -11,7 +11,7 @@ import "./GlobalConst.sol";
 import "./interfaces/ICore.sol";
 import "src/utils/Whitelist.sol";
 
-contract Core is UUPSUpgradeable, GlobalConst, Whitelist, ICore {
+contract Core is ICore, UUPSUpgradeable, GlobalConst, Whitelist {
     // ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.core.storage.v1")) - 1);
 
@@ -43,13 +43,47 @@ contract Core is UUPSUpgradeable, GlobalConst, Whitelist, ICore {
         uint256 minProtocolVersion_,
         uint256 maxProtocolVersion_,
         IDeal dealImpl_,
-        bool isWhitelistEnabled_
+        bool isWhitelistEnabled_,
+        uint256 fltPrice_,
+        uint256 usdCollateralPerUnit_,
+        uint256 usdTargetRevenuePerEpoch_,
+        uint256 minDuration_,
+        uint256 minRewardPerEpoch_,
+        uint256 maxRewardPerEpoch_,
+        uint256 vestingPeriodDuration_,
+        uint256 vestingPeriodCount_,
+        uint256 slashingRate_,
+        uint256 minProofsPerEpoch_,
+        uint256 maxProofsPerEpoch_,
+        uint256 withdrawEpochsAfterFailed_,
+        uint256 maxFailedRatio_,
+        bytes32 difficulty_,
+        uint256 initRewardPool_,
+        address randomXProxy_
     ) public initializer {
         __Ownable_init(msg.sender);
         __EpochController_init(epochDuration_);
         __GlobalConst_init(minDepositedEpochs_, minRematchingEpochs_, minProtocolVersion_, maxProtocolVersion_);
         __UUPSUpgradeable_init();
         __Whitelist_init(isWhitelistEnabled_);
+        __CapacityConst_init(
+            fltPrice_,
+            usdCollateralPerUnit_,
+            usdTargetRevenuePerEpoch_,
+            minDuration_,
+            minRewardPerEpoch_,
+            maxRewardPerEpoch_,
+            vestingPeriodDuration_,
+            vestingPeriodCount_,
+            slashingRate_,
+            minProofsPerEpoch_,
+            maxProofsPerEpoch_,
+            withdrawEpochsAfterFailed_,
+            maxFailedRatio_,
+            difficulty_,
+            initRewardPool_,
+            randomXProxy_
+        );
 
         _getCoreStorage().dealImpl = dealImpl_;
         emit DealImplSet(dealImpl_);
@@ -91,6 +125,11 @@ contract Core is UUPSUpgradeable, GlobalConst, Whitelist, ICore {
         _getCoreStorage().dealImpl = dealImpl_;
 
         emit DealImplSet(dealImpl_);
+    }
+
+    function setActiveUnitCount(uint256 activeUnitCount_) external {
+        require(msg.sender == address(_getCoreStorage().capacity), "Core: caller is not capacity");
+        _setActiveUnitCount(activeUnitCount_);
     }
 
     // ------------------ Internal Mutable Functions ------------------

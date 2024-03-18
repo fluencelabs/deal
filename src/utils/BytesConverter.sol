@@ -20,7 +20,7 @@ library BytesConverter {
 
         bytes32 result;
         for (uint256 i = 0; i < 32; i++) {
-            result |= bytes32(_data[i] & 0xFF) >> (i * 8);
+            result |= bytes32(_data[i]) >> (i * 8);
         }
         return result;
     }

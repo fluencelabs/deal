@@ -86,7 +86,7 @@ contract DealFactory is UUPSUpgradeable, BaseModule, IDealFactory {
         require(depositAmount_ >= minAmount, "Deposit amount is less than minimum required");
 
         paymentToken_.safeTransferFrom(msg.sender, address(this), depositAmount_);
-        paymentToken_.approve(address(deal), depositAmount_);
+        paymentToken_.safeApprove(address(deal), depositAmount_);
         deal.deposit(depositAmount_);
 
         OwnableUpgradableDiamond(address(deal)).transferOwnership(msg.sender);

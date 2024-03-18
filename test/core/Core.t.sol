@@ -37,6 +37,7 @@ contract CoreTest is Test {
     }
 
     function test_InitializerIsDisabledForImplementation() external {
+        address randomX = address(new RandomXProxy());
         vm.expectEmit(false, false, false, true);
         emit Initialized(type(uint8).max); // _disableInitializers emits this, @see Initializable.sol
         Core coreImpl = new Core(); // there is _disableInitializers() in the constructor
@@ -49,7 +50,23 @@ contract CoreTest is Test {
             DeployDealSystem.DEFAULT_MIN_PROTOCOL_VERSION,
             DeployDealSystem.DEFAULT_MAX_PROTOCOL_VERSION,
             dealImpl,
-            false
+            false,
+            DeployDealSystem.DEFAULT_FLT_PRICE,
+            DeployDealSystem.DEFAULT_USD_COLLATERAL_PER_UNIT,
+            DeployDealSystem.DEFAULT_USD_TARGET_REVENUE_PER_EPOCH,
+            DeployDealSystem.DEFAULT_MIN_DURATION,
+            DeployDealSystem.DEFAULT_MIN_REWARD_PER_EPOCH,
+            DeployDealSystem.DEFAULT_MAX_REWARD_PER_EPOCH,
+            DeployDealSystem.DEFAULT_VESTING_PERIOD_DURATION,
+            DeployDealSystem.DEFAULT_VESTING_PERIOD_COUNT,
+            DeployDealSystem.DEFAULT_SLASHING_RATE,
+            DeployDealSystem.DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH,
+            DeployDealSystem.DEFAULT_MAX_PROOFS_PER_EPOCH,
+            DeployDealSystem.DEFAULT_WITHDRAW_EPOCHS_AFTER_FAILED,
+            DeployDealSystem.DEFAULT_MAX_FAILED_RATIO,
+            DeployDealSystem.DEFAULT_DIFFICULTY_TARGET,
+            DeployDealSystem.DEFAULT_INIT_REWARD_POOL,
+            randomX
         );
     }
 

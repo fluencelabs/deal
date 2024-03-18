@@ -2,16 +2,15 @@
 
 pragma solidity ^0.8.19;
 
-import "./IGlobalConst.sol";
-import "./IEpochController.sol";
 import "src/core/modules/capacity/interfaces/ICapacity.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
 import "src/core/modules/market/interfaces/IDealFactory.sol";
 import "src/deal/interfaces/IDeal.sol";
+import "src/core/interfaces/IGlobalConst.sol";
 
 /// @title Core contract interface
 /// @dev Core contract is the main contract of the system and it is responsible for navigation between modules
-interface ICore is IEpochController, IGlobalConst {
+interface ICore is IGlobalConst {
     event DealImplSet(IDeal dealImpl);
 
     // ------------------ Initializer ------------------
@@ -28,7 +27,23 @@ interface ICore is IEpochController, IGlobalConst {
         uint256 minProtocolVersion_,
         uint256 maxProtocolVersion_,
         IDeal dealImpl_,
-        bool isWhitelistEnabled_
+        bool isWhitelistEnabled_,
+        uint256 fltPrice_,
+        uint256 usdCollateralPerUnit_,
+        uint256 usdTargetRevenuePerEpoch_,
+        uint256 minDuration_,
+        uint256 minRewardPerEpoch_,
+        uint256 maxRewardPerEpoch_,
+        uint256 vestingPeriodDuration_,
+        uint256 vestingPeriodCount_,
+        uint256 slashingRate_,
+        uint256 minProofsPerEpoch_,
+        uint256 maxProofsPerEpoch_,
+        uint256 withdrawEpochsAfterFailed_,
+        uint256 maxFailedRatio_,
+        bytes32 difficulty_,
+        uint256 initRewardPool_,
+        address randomXProxy_
     ) external;
 
     /// @dev Sets modules
@@ -47,6 +62,7 @@ interface ICore is IEpochController, IGlobalConst {
 
     function dealImpl() external view returns (IDeal);
 
+    function setActiveUnitCount(uint256 activeUnitCount_) external;
     // ------------------ External Mutable Functions ------------------
     function setDealImpl(IDeal dealImpl_) external;
 }
