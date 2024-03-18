@@ -61,19 +61,15 @@ import type {
 import { DealClient } from "../client/client.js";
 import type { ContractsENV } from "../client/config.js";
 import type { BasicPeerFragment } from "./indexerClient/queries/offers-query.generated.js";
-import { DealRpcClient } from "./rpcClients/index.js";
+import { DealRpcClient } from "./rpcClient/index.js";
 import {
   calculateEpoch,
   DEFAULT_ORDER_TYPE,
   FILTER_MULTISELECT_MAX,
-  type SerializationSettings,
-  tokenValueToRounded,
 } from "./utils.js";
 import {
   serializeCUStatus,
-  serializeEffectorDescription,
 } from "./serializers/logics.js";
-import { serializeDealProviderAccessLists } from "../utils/serializers.js";
 import {
   FiltersError,
   serializeCapacityCommitmentsFiltersToIndexer,
@@ -89,7 +85,6 @@ import {
   serializeComputeUnits,
   serializeComputeUnitsWithStatus,
   serializeDealsShort,
-  serializeEffectors,
   serializeOfferShort,
   serializePeers,
   serializeProviderBase,
@@ -104,12 +99,27 @@ import {
 import type { ICapacity } from "../typechain-types/index.js";
 import type { CapacityCommitmentBasicFragment } from "./indexerClient/queries/capacity-commitments-query.generated.js";
 import { FLTToken } from "./constants.js";
+import {
+  serializeDealProviderAccessLists,
+  serializeEffectorDescription,
+  serializeEffectors
+} from "../utils/indexerClient/serializers.js";
+import {
+  type SerializationSettings,
+  tokenValueToRounded
+} from "../utils/serializers.js";
 
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
  * @dev It supports kras, stage, testnet, local by selecting related contractsEnv.
+ * @dev This client is created in the following hypothesis:
+ * @dev  - not more than 1000 Compute Units per Peer exist.
+ * @dev  - not more than 1000 Peers per Offer possible.
+ * @dev Otherwise there should be additional pagination through child fields of some models
  */
 export class DealExplorerClient {
+  // Default page limit supposed by business logic on Network Explorer.
+  //  It does not used for child models.
   DEFAULT_PAGE_LIMIT = 100;
   // For MVM we suppose that everything is in USDC.
   //  Used only with filters - if no token selected.
@@ -144,9 +154,9 @@ export class DealExplorerClient {
       this._serializationSettings = serializationSettings;
     } else {
       this._serializationSettings = {
-        parseNativeTokenToFixedDefault: 18,
-        parseTokenToFixedDefault: 3,
-      };
+          parseNativeTokenToFixedDefault: 18,
+          parseTokenToFixedDefault: 3,
+        };
     }
     this._indexerClient = new IndexerClient(network);
     this._dealContractsClient = new DealClient(this._caller, network);
@@ -558,7 +568,7 @@ export class DealExplorerClient {
               dealStatus: dealStatuses[i],
               freeBalance: freeBalances[i],
             },
-            this._serializationSettings,
+              this._serializationSettings,
           ),
         );
       }
@@ -697,10 +707,11 @@ export class DealExplorerClient {
       res = data.effectors.map((effector) => {
         return {
           cid: effector.id,
-          description: serializeEffectorDescription(
-            effector.id,
-            effector.description,
-          ),
+          description: serializeEffectorDescription({
+            cid: effector.id,
+            description: effector.description
+          }
+      ),
         };
       });
     }
@@ -996,7 +1007,9 @@ export class DealExplorerClient {
     }
     const computeUnit = data.computeUnit;
 
-    const { status } = serializeCUStatus(computeUnit);
+    const { status } = serializeCUStatus(
+      computeUnit,
+    );
     const currentPeerCapacityCommitment =
       computeUnit.peer.currentCapacityCommitment;
 
@@ -1149,7 +1162,7 @@ export class DealExplorerClient {
       );
     }
 
-    const data = await this._indexerClient.getCapacityCommitmentStatsPerEpochs({
+    const data = await this._indexerClient.getCapacityCommitmentStatsPerEpoches({
       filters: {
         capacityCommitment_: { id: capacityCommitmentId },
       },

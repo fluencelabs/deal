@@ -8,7 +8,6 @@ import type {
   ComputeUnitsWithCCStatus,
   DealShort,
   DealStatus,
-  Effector,
   OfferShort,
   Peer,
   ProviderBase,
@@ -20,13 +19,10 @@ import type {
 } from "../indexerClient/queries/offers-query.generated.js";
 import {
   serializeCUStatus,
-  serializeEffectorDescription,
   serializeProviderName
 } from "./logics.js";
 import {
   calculateTimestamp,
-  type SerializationSettings,
-  tokenValueToRounded
 } from "../utils.js";
 import type {
   BasicDealFragment,
@@ -37,30 +33,11 @@ import { FLTToken } from "../constants.js";
 import type {
   ComputeUnitWithCcDataBasicFragment
 } from "../indexerClient/queries/peers-query.generated.js";
-
-// TODO: rename to scheme suffixes not there is a Zoo in naming a little.
-export function serializeEffectors(
-  manyToManyEffectors:
-    | Array<{ effector: { id: string; description: string } }>
-    | null
-    | undefined,
-): Array<Effector> {
-  const composedEffectors: Array<Effector> = [];
-  if (!manyToManyEffectors) {
-    return composedEffectors;
-  }
-  for (const effector of manyToManyEffectors) {
-    composedEffectors.push({
-      cid: effector.effector.id,
-      description: serializeEffectorDescription(
-        effector.effector.id,
-        effector.effector.description,
-      ),
-    });
-  }
-
-  return composedEffectors;
-}
+import {
+  type SerializationSettings,
+  tokenValueToRounded
+} from "../../utils/serializers.js";
+import { serializeEffectors } from "../../utils/indexerClient/serializers.js";
 
 export function serializeOfferShort(offer: BasicOfferFragment, serializationSettings: SerializationSettings,): OfferShort {
   return {
