@@ -6,11 +6,11 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: Core
-    network: dar
+    network: local
     source:
       abi: Core
-      address: "0xC4b5385E2343eD75505FEEEd728FCA6C498372b4"
-      startBlock: 1367974
+      address: "0x575D3d18666B28680255a202fB5d482D1949bB32"
+      startBlock: 9560
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -30,11 +30,11 @@ dataSources:
       file: ./src/mappings/core.ts
   - kind: ethereum/contract
     name: Market
-    network: dar
+    network: local
     source:
       abi: Market
-      address: "0x06BAB3869f71612C129505e0C0e717531b348132"
-      startBlock: 1367974
+      address: "0x9852795dbb01913439f534b4984fBf74aC8AfA12"
+      startBlock: 9560
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -61,6 +61,10 @@ dataSources:
           handler: handleInitialized
         - event: ProviderInfoUpdated(indexed address,string,(bytes4,bytes32))
           handler: handleProviderInfoUpdated
+        - event: EffectorInfoSet((bytes4,bytes32),string,(bytes4,bytes32))
+          handler: handleEffectorInfoSet
+        - event: EffectorInfoRemoved((bytes4,bytes32))
+          handler: handleEffectorInfoRemoved
         - event: MarketOfferRegistered(indexed
             address,bytes32,uint256,address,(bytes4,bytes32)[],uint256,uint256)
           handler: handleMarketOfferRegistered
@@ -83,11 +87,11 @@ dataSources:
       file: ./src/mappings/market.ts
   - kind: ethereum/contract
     name: DealFactory
-    network: dar
+    network: local
     source:
       abi: DealFactory
-      address: "0xEb1B06185B8F9BE4F29aD0b294D0468EADdBB4B5"
-      startBlock: 1367974
+      address: "0xf274De14171Ab928A5Ec19928cE35FaD91a42B64"
+      startBlock: 9560
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -110,11 +114,11 @@ dataSources:
       file: ./src/mappings/deal-factory.ts
   - kind: ethereum/contract
     name: Capacity
-    network: dar
+    network: local
     source:
       abi: Capacity
-      address: "0x6fBA3f1F130e810F5c95Ea4613ec5bd42439fde6"
-      startBlock: 1367974
+      address: "0x889D9A5AF83525a2275e41464FAECcCb3337fF60"
+      startBlock: 9560
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -161,7 +165,7 @@ dataSources:
 templates:
   - name: Deal
     kind: ethereum/contract
-    network: dar
+    network: local
     source:
       abi: Deal
     mapping:

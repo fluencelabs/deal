@@ -10,7 +10,6 @@ import "src/deal/base/Types.sol";
 /// @dev Offer contract is responsible for managing the offers in the market
 interface IOffer {
     // ------------------ Types ------------------
-    /// @param approved If provider address approved by Fluence (Core Owner).
     struct ProviderInfo {
         string name;
         CIDV1 metadata;
@@ -132,11 +131,11 @@ interface IOffer {
     /// @param id The effector cid
     /// @param description The description of the effector
     /// @param metadata The metadata of the effector
-    event EffectorInfoSet(CIDV1 indexed id, string description, CIDV1 metadata);
+    event EffectorInfoSet(CIDV1 id, string description, CIDV1 metadata);
 
     /// @dev Emitted when the effector info is removed
     /// @param id The effector cid
-    event EffectorInfoRemoved(CIDV1 indexed id);
+    event EffectorInfoRemoved(CIDV1 id);
 
     // ----------------- Public View -----------------
     /// @dev Returns the provider info

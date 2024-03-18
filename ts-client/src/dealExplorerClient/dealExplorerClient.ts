@@ -1162,7 +1162,7 @@ export class DealExplorerClient {
     // TODO: generate table with missed epoches as well (there might be filtration by epoches,
     //  thus, logic could be complicated, resolve after discussion with PM.
     let res: Array<ProofStatsByCapacityCommitment> = [];
-    for (const proofStats of data.capacityCommitmentStatsPerEpochs) {
+    for (const proofStats of data.capacityCommitmentStatsPerEpoches) {
       res.push({
         createdAtEpoch: Number(proofStats.epoch),
         createdAtEpochBlockNumberStart: Number(proofStats.blockNumberStart),
