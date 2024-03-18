@@ -21,9 +21,9 @@ import {
   createOrLoadEffector,
   createOrLoadGraphNetwork,
   createOrLoadOfferEffector,
-  createOrLoadToken,
+  createOrLoadToken, REMOVED_EFFECTOR_INFO_DESCRIPTION,
   UNKNOWN_EFFECTOR_DESCRIPTION,
-  UNO_BIG_INT,
+  UNO_BIG_INT
 } from "../models";
 
 import { log, store } from "@graphprotocol/graph-ts";
@@ -48,10 +48,12 @@ export function handleProviderInfoUpdated(event: ProviderInfoUpdated): void {
   if (provider == null) {
     provider = new Provider(addr);
   }
-  // Loaded or created provider - does not meter for this function logic.
   // Note, we do not change approved to false, because possibly provider have
   //  been approved  through whitelist contract already. Thus, no need to
   //  change approved field here.
+  if (provider.approved == null) {
+    provider.approved = false;
+  }
   provider.name = event.params.name;
   provider.registered = true;
   provider.createdAt = event.block.timestamp;
@@ -65,9 +67,6 @@ export function handleProviderInfoUpdated(event: ProviderInfoUpdated): void {
   graphNetwork.save()
 }
 
-// It fails on EffectorInfoSet but does not fail on
-// EffectorInfoSetButNotTuple(indexed uint256,(bytes4,bytes32),string,(bytes4,bytes32)).
-// TODO: enable this handler when https://github.com/graphprotocol/graph-node/issues/5171 resolved.
 export function handleEffectorInfoSet(event: EffectorInfoSet): void {
   const appCID = changetype<AppCID>(event.params.id);
   const cid = getEffectorCID(appCID);
@@ -77,12 +76,12 @@ export function handleEffectorInfoSet(event: EffectorInfoSet): void {
 }
 
 // When it is removed: it does not mean that in other place it is stopped to use the effector.
-//  Effector description and approved info merely deleted.
+//  Effector description and approved info merely deleted only.
 export function handleEffectorInfoRemoved(event: EffectorInfoRemoved): void {
   const appCID = changetype<AppCID>(event.params.id);
   const cid = getEffectorCID(appCID);
   let effector = createOrLoadEffector(cid);
-  effector.description = UNKNOWN_EFFECTOR_DESCRIPTION;
+  effector.description = REMOVED_EFFECTOR_INFO_DESCRIPTION;
   effector.save();
 }
 
