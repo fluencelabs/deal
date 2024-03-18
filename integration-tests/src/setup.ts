@@ -1,5 +1,5 @@
 // Side effect import
-import { provider, coreContract, capacityContract } from "./env.js";
+import { provider, coreContract } from "./env.js";
 import {
   CapacityConstantType,
   CC_MAX_FAILED_RATIO,
@@ -24,10 +24,13 @@ async function moveToStartOfNextEpoch() {
 export default async function setup() {
   await moveToStartOfNextEpoch();
 
-  await capacityContract
-    .setConstant(CapacityConstantType.MinDuration, CC_MIN_DURATION)
+  await coreContract
+    .setCapacityConstant(CapacityConstantType.MinDuration, CC_MIN_DURATION)
     .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
-  await capacityContract
-    .setConstant(CapacityConstantType.MaxFailedRatio, CC_MAX_FAILED_RATIO)
+  await coreContract
+    .setCapacityConstant(
+      CapacityConstantType.MaxFailedRatio,
+      CC_MAX_FAILED_RATIO,
+    )
     .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
 }
