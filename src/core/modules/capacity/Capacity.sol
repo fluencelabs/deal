@@ -679,7 +679,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         // if totalFailCount_ is more than maxFailCount, then CC is failed
         if (totalFailCount >= maxFailCount) {
             totalFailCount = maxFailCount;
-            uint256 restFailCount = prevFailCount - maxFailCount;
+            uint256 restFailCount = maxFailCount - prevFailCount;
             newStatus = CCStatus.Failed;
 
             if (activeUnitCount_ >= restFailCount) {
@@ -692,6 +692,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
                 uint256 numberOfFillFailedEpoch = 1;
                 restFailCount -= activeUnitCount_;
 
+                // TOOD: add currentSuccessCount to calculation
                 numberOfFillFailedEpoch += restFailCount / newActiveUnitCount;
                 uint256 remainingFailedUnitsInLastEpoch = restFailCount % newActiveUnitCount;
 
