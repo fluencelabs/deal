@@ -25,10 +25,10 @@ contract VestingTest is Test {
         vesting.add(reward, startEpoch, vestingPeriodDuration, vestingPeriodCount);
         assertEq(vesting.total(), reward);
 
-        uint256 lastEpoch = startEpoch + vestingPeriodDuration * vestingPeriodCount;
         uint256 periodReward = reward / vestingPeriodCount;
-        for (uint256 i = 0; i < lastEpoch; i++) {
-            assertEq(vesting.unlocked(i), periodReward * (i / vestingPeriodDuration));
+
+        for (uint256 i = 1; i <= vestingPeriodCount; i++) {
+            assertEq(vesting.unlocked(vestingPeriodDuration * i), periodReward);
         }
     }
 
@@ -44,14 +44,35 @@ contract VestingTest is Test {
         uint256 totalReward = reward * 2;
         assertEq(vesting.total(), totalReward);
 
-        uint256 lastEpoch = startEpoch + vestingPeriodDuration * vestingPeriodCount;
         uint256 periodReward = totalReward / vestingPeriodCount;
-        for (uint256 i = 0; i < lastEpoch; i++) {
-            assertEq(vesting.unlocked(i), periodReward * (i / vestingPeriodDuration));
+        for (uint256 i = 1; i <= vestingPeriodCount; i++) {
+            assertEq(vesting.unlocked(vestingPeriodDuration * i), periodReward);
         }
     }
 
-    function test_AddTwoInDifferentEpochs() public {}
+    function test_AddTwoInDifferentEpochs() public {
+        uint256 reward = 100;
+        uint256 startEpoch = 2;
+        uint256 vestingPeriodDuration = 5;
+        uint256 vestingPeriodCount = 5;
+
+        vesting.add(reward, startEpoch, vestingPeriodDuration, vestingPeriodCount);
+
+        uint256 nextReward = 250;
+        uint256 nextEpoch = startEpoch + 1;
+        vesting.add(reward, nextEpoch, vestingPeriodDuration, vestingPeriodCount);
+
+        uint256 totalReward = reward + nextReward;
+        assertEq(vesting.total(), totalReward);
+
+        assertEq(vesting.unlocked(startEpoch + vestingPeriodDuration), reward / vestingPeriodCount);
+
+        assertEq(vesting.unlocked(vestingPeriodDuration), reward / vestingPeriodCount);
+        for (uint256 i = 2; i < vestingPeriodCount; i++) {
+            assertEq(vesting.unlocked(vestingPeriodDuration * i), (reward + nextReward) / vestingPeriodCount);
+        }
+        assertEq(vesting.unlocked(vestingPeriodDuration * vestingPeriodCount), nextReward / vestingPeriodCount);
+    }
 
     function test_AddTwoWithBigGap() public {}
 }
