@@ -112,7 +112,7 @@ contract CapacityConst is ICapacityConst, OwnableUpgradableDiamond, EpochControl
         );
 
         constantsStorage.fltPrice = fltPrice_;
-        constantsStorage.commitment.fltCollateralPerUnit = usdCollateralPerUnit_ / fltPrice_;
+        constantsStorage.commitment.fltCollateralPerUnit = _calcFLTCollateralPerUnit(usdCollateralPerUnit_, fltPrice_);
     }
     // #endregion ------------------ Initializer ------------------
 
@@ -222,7 +222,8 @@ contract CapacityConst is ICapacityConst, OwnableUpgradableDiamond, EpochControl
         constantsStorage.fltPrice = fltPrice_;
 
         _setRewardPool(fltPrice_, constantsStorage.activeUnitCount);
-        constantsStorage.commitment.fltCollateralPerUnit = constantsStorage.commitment.usdCollateralPerUnit / fltPrice_;
+        constantsStorage.commitment.fltCollateralPerUnit =
+            _calcFLTCollateralPerUnit(constantsStorage.commitment.usdCollateralPerUnit, fltPrice_);
 
         emit FLTPriceUpdated(fltPrice_);
     }
@@ -249,7 +250,8 @@ contract CapacityConst is ICapacityConst, OwnableUpgradableDiamond, EpochControl
             constantsStorage.commitment.minDuration = v;
         } else if (constantType == CapacityConstantType.USDCollateralPerUnit) {
             constantsStorage.commitment.usdCollateralPerUnit = v;
-            constantsStorage.commitment.fltCollateralPerUnit = v / constantsStorage.fltPrice;
+            constantsStorage.commitment.usdCollateralPerUnit = v;
+            constantsStorage.commitment.fltCollateralPerUnit = _calcFLTCollateralPerUnit(v, constantsStorage.fltPrice);
         } else if (constantType == CapacityConstantType.SlashingRate) {
             constantsStorage.commitment.slashingRate = v;
         } else if (constantType == CapacityConstantType.WithdrawEpochsAfterFailed) {
@@ -285,6 +287,14 @@ contract CapacityConst is ICapacityConst, OwnableUpgradableDiamond, EpochControl
 
         constantsStorage.activeUnitCount = activeUnitCount_;
         _setRewardPool(constantsStorage.fltPrice, activeUnitCount_);
+    }
+
+    function _calcFLTCollateralPerUnit(uint256 usdCollateralPerUnit_, uint256 fltPrice_)
+        internal
+        pure
+        returns (uint256)
+    {
+        return usdCollateralPerUnit_ * PRECISION / fltPrice_ * 1e18 / PRECISION;
     }
 
     function _setRewardPool(uint256 fltPrice_, uint256 activeUnitCount_) internal {
