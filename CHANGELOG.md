@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.2](https://github.com/fluencelabs/deal/compare/v0.12.1...v0.12.2) (2024-03-19)
+
+
+### Features
+
+* update chain id ([#364](https://github.com/fluencelabs/deal/issues/364)) ([c626176](https://github.com/fluencelabs/deal/commit/c626176f04f1c6400adc7ecaffe52a3f10851a98))
+
 ## [0.12.1](https://github.com/fluencelabs/deal/compare/v0.12.0...v0.12.1) (2024-03-18)
 
 
