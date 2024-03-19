@@ -251,7 +251,12 @@ export function serializeCapacityCommitmentDetail(
     precision,
     serializationSettings,
   )
-
+  const notWithdrawnRewardsSerialized = serializeRewards(
+    _totalRewards,
+    rewardDelegatorRate,
+    precision,
+    serializationSettings,
+  )
   return {
     ...serializeCapacityCommitmentShort(
       capacityCommitmentFromIndexer,
@@ -273,19 +278,12 @@ export function serializeCapacityCommitmentDetail(
     ),
     rewardsUnlockedDelegator: unclockedRewardsSerialized.delegator,
     rewardsUnlockedProvider: unclockedRewardsSerialized.provider,
-    // TODO
     rewardsNotWithdrawn: tokenValueToRounded(
       _totalRewards,
       serializationSettings.parseNativeTokenToFixedDefault,
     ),
-    rewardsNotWithdrawnDelegator: tokenValueToRounded(
-      _totalRewards * BigInt(rewardDelegatorRate),
-      serializationSettings.parseNativeTokenToFixedDefault,
-    ),
-    rewardsNotWithdrawnProvider: tokenValueToRounded(
-      _totalRewards * BigInt(1 - rewardDelegatorRate),
-      serializationSettings.parseNativeTokenToFixedDefault,
-    ),
+    rewardsNotWithdrawnDelegator: notWithdrawnRewardsSerialized.delegator,
+    rewardsNotWithdrawnProvider: notWithdrawnRewardsSerialized.provider,
     rewardsTotal: tokenValueToRounded(
       _totalRewards + rewardWithdrawn,
       serializationSettings.parseNativeTokenToFixedDefault,
