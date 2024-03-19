@@ -354,7 +354,7 @@ contract DeployContracts is Depoyments, Script {
         );
 
         if (needToRedeployCapacity) {
-            payable(address(capacityProxy)).transfer(initCCBallance_);
+            address(capacityProxy).call{value: initCCBallance_}(new bytes(0));
         }
 
         if (isNewCore) {
