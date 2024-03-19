@@ -20,6 +20,7 @@ type GraphNetwork @entity {
   # Add constants from Core contract below.
   coreEpochDuration: Int
   initTimestamp: Int
+  corePrecision: Int
   # Capacity consts are below.
   capacityMaxFailedRatio: Int
   minRequiredProofsPerEpoch: Int
