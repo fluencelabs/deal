@@ -35,7 +35,7 @@ import type {
 import type { Sdk as ContractConstantsSdk } from "./queries/constants-query.generated.js";
 import { getSdk as getContractConstantsSdk } from "./queries/constants-query.generated.js";
 import { getSdk as getCapacityCommitmentsSdk } from "./queries/capacity-commitments-query.generated.js";
-import { IndexerClientABC } from "../../indexerClient/indexerClientABC.js";
+import { IndexerClientABC } from "../../utils/indexerClient/indexerClientABC.js";
 import type { ContractsENV } from "../../client/config.js";
 import type { CapacityCommitmentsQueryQueryVariables } from "./queries/capacity-commitments-query.generated.js";
 import type { PeerQueryQueryVariables } from "./queries/peers-query.generated.js";
@@ -132,7 +132,7 @@ export class IndexerClient extends IndexerClientABC {
     return await this.peersClient.ComputeUnitsQuery(variables);
   }
 
-  async getCapacityCommitmentStatsPerEpochs(
+  async getCapacityCommitmentStatsPerEpoches(
     variables: CapacityCommitmentStatsPerEpochQueryQueryVariables,
   ) {
     return await this.capacityCommitmentsClient.CapacityCommitmentStatsPerEpochQuery(

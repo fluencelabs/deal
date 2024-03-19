@@ -82,6 +82,13 @@ deploy-contracts-dar: ## Deploy to dar (IPC)
 
 	@echo "\033[0;32mSuccess! Contracts deployed to $* chain.\033[0m"
 
+deploy-contracts-kras: ## Deploy to kras (IPC)
+	@make verify-command program=forge
+	@CONTRACTS_ENV_NAME=kras forge script script/Deploy.s.sol --rpc-url kras \
+	--private-key $(PRIVATE_KEY) --broadcast --skip-simulation --slow
+
+	@echo "\033[0;32mSuccess! Contracts deployed to $* chain.\033[0m"
+
 deploy-contracts%: ## Deploy contracts to ...
 	@make verify-command program=forge
 	@CONTRACTS_ENV_NAME=$* forge script script/Deploy.s.sol --rpc-url $* \

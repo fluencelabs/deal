@@ -14,7 +14,7 @@ import type {
   Offer_Filter,
   Provider_Filter,
 } from "../indexerClient/generated.types.js";
-import { valueToTokenValue } from "../utils.js";
+import { valueToTokenValue } from "../../utils/serializers.js";
 
 export class FiltersError extends Error {}
 export class ValidTogetherFiltersError extends FiltersError {}
