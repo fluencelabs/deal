@@ -53,6 +53,8 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
     // #endregion
 
     // #region ------------------ Initializer & Upgradeable ------------------
+    receive() external payable {}
+
     constructor(ICore core_) BaseModule(core_) {}
 
     function initialize(bytes32 initGlobalNonce_) external initializer {
