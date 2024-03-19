@@ -9,7 +9,7 @@ type GraphQLClientRequestHeaders = RequestOptions['requestHeaders'];
 export type ConstantsQueryQueryVariables = Types.Exact<{ [key: string]: never; }>;
 
 
-export type ConstantsQueryQuery = { __typename?: 'Query', graphNetworks: Array<{ __typename?: 'GraphNetwork', coreEpochDuration?: number | null, initTimestamp?: number | null, minRequiredProofsPerEpoch?: number | null }> };
+export type ConstantsQueryQuery = { __typename?: 'Query', graphNetworks: Array<{ __typename?: 'GraphNetwork', coreEpochDuration?: number | null, initTimestamp?: number | null, minRequiredProofsPerEpoch?: number | null, corePrecision?: number | null }> };
 
 
 export const ConstantsQueryDocument = gql`
@@ -18,6 +18,7 @@ export const ConstantsQueryDocument = gql`
     coreEpochDuration
     initTimestamp
     minRequiredProofsPerEpoch
+    corePrecision
   }
 }
     `;

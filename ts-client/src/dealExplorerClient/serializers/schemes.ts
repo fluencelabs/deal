@@ -19,7 +19,8 @@ import type {
 } from "../indexerClient/queries/offers-query.generated.js";
 import {
   serializeCUStatus,
-  serializeProviderName
+  serializeProviderName,
+  serializeRewards,
 } from "./logics.js";
 import {
   calculateTimestamp,
@@ -240,9 +241,17 @@ export function serializeCapacityCommitmentDetail(
   rewardWithdrawn: bigint,
   delegatorAddress: string,
   serializationSettings: SerializationSettings,
+  precision: number,
 ): CapacityCommitmentDetail {
   const _totalRewards = totalRewards ? totalRewards : BigInt(0);
   const _unlockedRewards = unlockedRewards ? unlockedRewards : BigInt(0);
+  const unclockedRewardsSerialized = serializeRewards(
+    _unlockedRewards,
+    rewardDelegatorRate,
+    precision,
+    serializationSettings,
+  )
+
   return {
     ...serializeCapacityCommitmentShort(
       capacityCommitmentFromIndexer,
@@ -262,14 +271,9 @@ export function serializeCapacityCommitmentDetail(
       _unlockedRewards,
       serializationSettings.parseNativeTokenToFixedDefault,
     ),
-    rewardsUnlockedDelegator: tokenValueToRounded(
-      _unlockedRewards * BigInt(rewardDelegatorRate),
-      serializationSettings.parseNativeTokenToFixedDefault,
-    ),
-    rewardsUnlockedProvider: tokenValueToRounded(
-      _unlockedRewards * BigInt(1 - rewardDelegatorRate),
-      serializationSettings.parseNativeTokenToFixedDefault,
-    ),
+    rewardsUnlockedDelegator: unclockedRewardsSerialized.delegator,
+    rewardsUnlockedProvider: unclockedRewardsSerialized.provider,
+    // TODO
     rewardsNotWithdrawn: tokenValueToRounded(
       _totalRewards,
       serializationSettings.parseNativeTokenToFixedDefault,
