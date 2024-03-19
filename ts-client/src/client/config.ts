@@ -32,7 +32,7 @@ export const getDeployment = (env: ContractsENV) => {
       break;
     case "kras":
       deployment = kras;
-      chainId = 3521768853336688;
+      chainId = 2714464006422509;
       break;
     case "local":
       deployment = local;
