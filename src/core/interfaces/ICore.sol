@@ -6,8 +6,8 @@ import "src/core/modules/capacity/interfaces/ICapacity.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
 import "src/core/modules/market/interfaces/IDealFactory.sol";
 import "src/deal/interfaces/IDeal.sol";
-import "./IGlobalConst.sol";
 import "./ICapacityConst.sol";
+import "./IGlobalConst.sol";
 
 /// @title Core contract interface
 /// @dev Core contract is the main contract of the system and it is responsible for navigation between modules

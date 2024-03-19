@@ -59,20 +59,23 @@ contract VestingTest is Test {
         vesting.add(reward, startEpoch, vestingPeriodDuration, vestingPeriodCount);
 
         uint256 nextReward = 250;
-        uint256 nextEpoch = startEpoch + 1;
-        vesting.add(reward, nextEpoch, vestingPeriodDuration, vestingPeriodCount);
+        uint256 nextEpoch = startEpoch + vestingPeriodDuration;
+        vesting.add(nextReward, nextEpoch, vestingPeriodDuration, vestingPeriodCount);
 
         uint256 totalReward = reward + nextReward;
-        assertEq(vesting.total(), totalReward);
+        assertEq(vesting.total(), totalReward, "totalReward mismatch");
 
-        assertEq(vesting.unlocked(startEpoch + vestingPeriodDuration), reward / vestingPeriodCount);
-
-        assertEq(vesting.unlocked(vestingPeriodDuration), reward / vestingPeriodCount);
-        for (uint256 i = 2; i < vestingPeriodCount; i++) {
-            assertEq(vesting.unlocked(vestingPeriodDuration * i), (reward + nextReward) / vestingPeriodCount);
+        uint256 cummulativeReward = reward / vestingPeriodCount;
+        assertEq(vesting.unlocked(vestingPeriodDuration), cummulativeReward, "unlocked 1 mismatch");
+        for (uint256 i = 2; i < (vestingPeriodCount + 1); i++) {
+            cummulativeReward += (reward + nextReward) / vestingPeriodCount;
+            assertEq(vesting.unlocked(vestingPeriodDuration * i), cummulativeReward);
         }
-        assertEq(vesting.unlocked(vestingPeriodDuration * vestingPeriodCount), nextReward / vestingPeriodCount);
+        cummulativeReward += nextReward / vestingPeriodCount;
+        assertEq(
+            vesting.unlocked(vestingPeriodDuration * (vestingPeriodCount + 1)),
+            cummulativeReward,
+            "unlocked last mismatch"
+        );
     }
-
-    function test_AddTwoWithBigGap() public {}
 }

@@ -38,11 +38,11 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
     struct CommitmentStorage {
         mapping(bytes32 => Commitment) commitments;
         mapping(uint256 => RewardInfo) rewardInfoByEpoch;
+        mapping(bytes32 => mapping(bytes32 => bool)) isProofSubmittedByUnit;
         bytes32 globalNonce;
         bytes32 nextGlobalNonce;
         uint256 changedNonceEpoch;
         uint256 rewardBalance;
-        mapping(bytes32 => mapping(bytes32 => bool)) isProofSubmittedByUnit;
     }
 
     function _getCommitmentStorage() private pure returns (CommitmentStorage storage s) {
