@@ -41,6 +41,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         bytes32 globalNonce;
         bytes32 nextGlobalNonce;
         uint256 changedNonceEpoch;
+        uint256 rewardBalance;
         mapping(bytes32 => mapping(bytes32 => bool)) isProofSubmittedByUnit;
     }
 
@@ -53,7 +54,9 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
     // #endregion
 
     // #region ------------------ Initializer & Upgradeable ------------------
-    receive() external payable {}
+    receive() external payable {
+        _getCommitmentStorage().rewardBalance += msg.value;
+    }
 
     constructor(ICore core_) BaseModule(core_) {}
 
@@ -496,6 +499,13 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         // #region withdraw reward
         address provider = market.getOffer(peer.offerId).provider;
         uint256 amount = cc.vesting.withdraw(currentEpoch);
+
+        uint256 rewardBalance = s.rewardBalance;
+        require(
+            amount <= rewardBalance, "Not enough reward balance pool on the contract. Wait when DAO will refill it."
+        );
+        s.rewardBalance = rewardBalance - amount;
+
         uint256 delegatorReward = (amount * cc.info.rewardDelegatorRate) / PRECISION;
         uint256 providerReward = amount - delegatorReward;
 

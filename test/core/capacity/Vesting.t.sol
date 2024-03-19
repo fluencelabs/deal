@@ -28,7 +28,7 @@ contract VestingTest is Test {
         uint256 periodReward = reward / vestingPeriodCount;
 
         for (uint256 i = 1; i <= vestingPeriodCount; i++) {
-            assertEq(vesting.unlocked(vestingPeriodDuration * i), periodReward);
+            assertEq(vesting.unlocked(vestingPeriodDuration * i), periodReward * i);
         }
     }
 
@@ -46,7 +46,7 @@ contract VestingTest is Test {
 
         uint256 periodReward = totalReward / vestingPeriodCount;
         for (uint256 i = 1; i <= vestingPeriodCount; i++) {
-            assertEq(vesting.unlocked(vestingPeriodDuration * i), periodReward);
+            assertEq(vesting.unlocked(vestingPeriodDuration * i), periodReward * i);
         }
     }
 
