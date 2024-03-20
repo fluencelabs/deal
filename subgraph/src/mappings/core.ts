@@ -1,4 +1,7 @@
-import { createOrLoadGraphNetwork } from "../models";
+import {
+  createOrLoadGraphNetwork,
+  createOrLoadUnregisteredProvider
+} from "../models";
 import {
   Initialized,
   WhitelistAccessGranted,
@@ -32,7 +35,7 @@ export function handleInitialized(event: Initialized): void {
 export function handleWhitelistAccessGranted(
   event: WhitelistAccessGranted,
 ): void {
-  let provider = Provider.load(event.params.account.toHexString()) as Provider;
+  let provider = createOrLoadUnregisteredProvider(event.params.account.toHexString()) as Provider;
   provider.approved = true;
   provider.save();
 }
@@ -40,7 +43,7 @@ export function handleWhitelistAccessGranted(
 export function handleWhitelistAccessRevoked(
   event: WhitelistAccessRevoked,
 ): void {
-  let provider = Provider.load(event.params.account.toHexString()) as Provider;
+  let provider = createOrLoadUnregisteredProvider(event.params.account.toHexString()) as Provider;
   provider.approved = false;
   provider.save();
 }

@@ -34,10 +34,11 @@ export const UNREGISTERED_PROVIDER_NAME = "Unregistered";
 export function createOrLoadUnregisteredProvider(
   providerAddress: string,
 ): Provider {
-  let entity = Provider.load(providerAddress);
+  const providerAddressSerialized = providerAddress.toLowerCase()
+  let entity = Provider.load(providerAddressSerialized);
 
   if (entity == null) {
-    entity = new Provider(providerAddress);
+    entity = new Provider(providerAddressSerialized);
     entity.registered = false;
     entity.name = UNREGISTERED_PROVIDER_NAME;
     entity.approved = false;
