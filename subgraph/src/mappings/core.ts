@@ -9,6 +9,7 @@ import {
   getEpochDuration,
   getInitTimestamp,
   getMinRequiredProofsPerEpoch,
+  getPrecision,
 } from "../contracts";
 import { Provider } from "../../generated/schema";
 
@@ -20,6 +21,7 @@ export function handleInitialized(event: Initialized): void {
   graphNetwork.capacityMaxFailedRatio = getCapacityMaxFailedRatio(
     event.address,
   ).toI32();
+  graphNetwork.corePrecision = getPrecision(event.address).toI32();
   graphNetwork.minRequiredProofsPerEpoch = getMinRequiredProofsPerEpoch(
     event.address,
   ).toI32();

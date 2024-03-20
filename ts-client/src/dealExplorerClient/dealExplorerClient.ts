@@ -135,6 +135,7 @@ export class DealExplorerClient {
   private _capacityContractAddress: string | null;
   private _capacityMinRequiredProofsPerEpoch: number | null;
   private _serializationSettings: SerializationSettings;
+  private _corePrecision: number | null;
 
   constructor(
     network: ContractsENV,
@@ -167,6 +168,7 @@ export class DealExplorerClient {
     this._capacityContract = null;
     this._capacityContractAddress = null;
     this._capacityMinRequiredProofsPerEpoch = null;
+    this._corePrecision = null;
   }
 
   // Add init other async attributes here.
@@ -211,6 +213,7 @@ export class DealExplorerClient {
       this._capacityMinRequiredProofsPerEpoch = Number(
         data.graphNetworks[0].minRequiredProofsPerEpoch,
       );
+      this._corePrecision = Number(data.graphNetworks[0].corePrecision);
     }
   }
 
@@ -908,6 +911,7 @@ export class DealExplorerClient {
       capacityCommitment.rewardWithdrawn,
       capacityCommitment.delegator,
       this._serializationSettings,
+      this._corePrecision!,
     );
   }
 
