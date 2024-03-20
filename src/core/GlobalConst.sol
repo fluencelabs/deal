@@ -8,7 +8,7 @@ import "./CapacityConst.sol";
 import "./interfaces/IGlobalConst.sol";
 import "./interfaces/ICapacityConst.sol";
 
-uint256 constant PRECISION = 10000000; // min: 0.0000001
+uint256 constant PRECISION = 1e7; // min: 0.0000001
 
 contract GlobalConst is IGlobalConst, CapacityConst {
     // ------------------ Storage ------------------

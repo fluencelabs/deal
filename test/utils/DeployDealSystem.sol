@@ -106,10 +106,12 @@ library DeployDealSystem {
         );
 
         deployment.capacity = Capacity(
-            address(
-                new ERC1967Proxy(
-                    address(new Capacity(deployment.core)),
-                    abi.encodeWithSelector(Capacity.initialize.selector, DEFAULT_INIT_GLOBAL_NONCE)
+            payable(
+                address(
+                    new ERC1967Proxy(
+                        address(new Capacity(deployment.core)),
+                        abi.encodeWithSelector(Capacity.initialize.selector, DEFAULT_INIT_GLOBAL_NONCE)
+                    )
                 )
             )
         );
