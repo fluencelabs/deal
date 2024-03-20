@@ -68,7 +68,7 @@ export async function registerMarketOffer(
 
 export async function createCommitments(
   capacity: ICapacity,
-  signerAddress: string,
+  delegator: string,
   peerIds: string[],
   _duration: bigint | undefined = undefined,
 ) {
@@ -88,7 +88,7 @@ export async function createCommitments(
     const createCommitmentTx = await capacity.createCommitment(
       peerId,
       duration,
-      signerAddress,
+      delegator,
       1,
     );
     await createCommitmentTx.wait(DEFAULT_CONFIRMATIONS);

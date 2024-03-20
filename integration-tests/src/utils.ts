@@ -5,6 +5,10 @@ export async function skipEpoch(
   epochDuration: bigint,
   epochCount: bigint | number = 1,
 ) {
+  if (epochCount === 0) {
+    return;
+  }
+
   const block = await provider.getBlock("latest");
   assert(block !== null);
   await provider.send("evm_increaseTime", [
