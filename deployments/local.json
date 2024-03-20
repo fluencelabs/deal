@@ -15,7 +15,7 @@
     "addr": "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
     "blockNumber": 8,
     "codeHash": "0xfa4ad89b02563ef0097d7d88d8022d0dfe58f9866edc5a4bb4907899ec1cdcfa",
-    "creationCodeHash": "0x55102e882665ae33c87e2f83d5f12a9a89defd3842a9162950b0305509d35ed7"
+    "creationCodeHash": "0x50ac5c7dac00b133057b9f758b62d30e0d56a34f166492a8540f384d8fd9436b"
   },
   "CoreImpl": {
     "addr": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
