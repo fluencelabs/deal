@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.13.0](https://github.com/fluencelabs/deal/compare/v0.12.2...v0.13.0) (2024-03-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* add deploy script & update kras ([#373](https://github.com/fluencelabs/deal/issues/373))
+* fltCollateral calculation & fix deposit balance to CC contract ([#368](https://github.com/fluencelabs/deal/issues/368))
+
+### Features
+
+* add deploy script & update kras ([#373](https://github.com/fluencelabs/deal/issues/373)) ([8b99e43](https://github.com/fluencelabs/deal/commit/8b99e430d3aaabc977d8ab6484f5c51895423884))
+* deploy kras ([#374](https://github.com/fluencelabs/deal/issues/374)) ([b341d78](https://github.com/fluencelabs/deal/commit/b341d78f19c6938908fc6b57e5ddf7261c2ef60f))
+
+
+### Bug Fixes
+
+* fltCollateral calculation & fix deposit balance to CC contract ([#368](https://github.com/fluencelabs/deal/issues/368)) ([125cdd9](https://github.com/fluencelabs/deal/commit/125cdd9b2c27755781c3f7dadc44baaedda5b9ff))
+* new vesting item added more reward than needed ([#369](https://github.com/fluencelabs/deal/issues/369)) ([5e6bcd0](https://github.com/fluencelabs/deal/commit/5e6bcd0879f6ca117dac9edc77bcb825c97c94df))
+* rewards calculation on network explorer [chain 428] ([#367](https://github.com/fluencelabs/deal/issues/367)) ([cce0b1c](https://github.com/fluencelabs/deal/commit/cce0b1ce92b26d76cc2fad8154f92f2fcc79ec23))
+* Vesting tests ([#371](https://github.com/fluencelabs/deal/issues/371)) ([a4fd2be](https://github.com/fluencelabs/deal/commit/a4fd2be4270d9250ece7a679d71ff23380234598))
+
 ## [0.12.2](https://github.com/fluencelabs/deal/compare/v0.12.1...v0.12.2) (2024-03-19)
 
 
