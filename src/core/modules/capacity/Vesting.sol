@@ -74,8 +74,8 @@ library Vesting {
             // add reward to cumulativeAmount
             if (index >= 0 && index < int256(length)) {
                 Item storage item = self.items[uint256(index)];
-                prevCumulativeAmount = item.cumulativeAmount + rewardPerPeriod * (i + 1);
-                item.cumulativeAmount = prevCumulativeAmount;
+                prevCumulativeAmount = item.cumulativeAmount; // Do NOT add rewardPerPeriod * (i + 1) here, it will break logic
+                item.cumulativeAmount = prevCumulativeAmount + rewardPerPeriod * (i + 1);
                 index++;
             } else {
                 self.items.push(

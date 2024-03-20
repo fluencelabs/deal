@@ -200,11 +200,6 @@ contract Multicall3 {
         coinbase = block.coinbase;
     }
 
-    /// @notice Returns the block difficulty
-    function getPrevrandao() public view returns (uint256 difficulty) {
-        difficulty = block.prevrandao;
-    }
-
     /// @notice Returns the block gas limit
     function getCurrentBlockGasLimit() public view returns (uint256 gaslimit) {
         gaslimit = block.gaslimit;

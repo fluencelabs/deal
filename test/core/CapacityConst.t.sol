@@ -97,7 +97,6 @@ contract CpacityConstTest is Test {
     }
 
     function test_ChangeConst() public {
-        uint256 currentEpoch = 1;
         uint256 fltPrice = 3 * PRECISION; // 1 FLT = 1 USD
         uint256 usdCollateralPerUnit = 100 * PRECISION; // 100 USD
         uint256 usdTargetRevenuePerEpoch = 1000 * PRECISION; // 1000 USD
@@ -265,7 +264,9 @@ contract CpacityConstTest is Test {
 
         assertEq(capacityConst.fltPrice(), newPrice, "fltPrice not changed");
         assertEq(
-            capacityConst.fltCollateralPerUnit(), usdCollateralPerUnit / newPrice, "fltCollateralPerUnit not changed"
+            capacityConst.fltCollateralPerUnit(),
+            usdCollateralPerUnit * PRECISION / newPrice * 1e18 / PRECISION,
+            "fltCollateralPerUnit not changed"
         );
 
         assertEq(capacityConst.getRewardPool(currentEpoch), initRewardPool, "Reward pool should not change");
@@ -282,7 +283,7 @@ contract CpacityConstTest is Test {
         assertEq(capacityConst.fltPrice(), newPrice, "second epoch: fltPrice not changed");
         assertEq(
             capacityConst.fltCollateralPerUnit(),
-            usdCollateralPerUnit / newPrice,
+            usdCollateralPerUnit * PRECISION / newPrice * 1e18 / PRECISION,
             "second epoch: fltCollateralPerUnit not changed"
         );
 
@@ -302,7 +303,7 @@ contract CpacityConstTest is Test {
         assertEq(capacityConst.fltPrice(), newPrice, "second epoch again: fltPrice not changed");
         assertEq(
             capacityConst.fltCollateralPerUnit(),
-            usdCollateralPerUnit / newPrice,
+            usdCollateralPerUnit * PRECISION / newPrice * 1e18 / PRECISION,
             "second epoch again: fltCollateralPerUnit not changed"
         );
 
@@ -384,7 +385,11 @@ contract CpacityConstTest is Test {
     ) internal {
         assertEq(capacityConst.fltPrice(), fltPrice, "fltPrice mismatch");
         assertEq(capacityConst.usdCollateralPerUnit(), usdCollateralPerUnit, "usdCollateralPerUnit mismatch");
-        assertEq(capacityConst.fltCollateralPerUnit(), usdCollateralPerUnit / fltPrice, "fltCollateralPerUnit mismatch");
+        assertEq(
+            capacityConst.fltCollateralPerUnit(),
+            usdCollateralPerUnit * PRECISION / fltPrice * 1e18 / PRECISION,
+            "fltCollateralPerUnit mismatch"
+        );
         assertEq(
             capacityConst.usdTargetRevenuePerEpoch(), usdTargetRevenuePerEpoch, "usdTargetRevenuePerEpoch mismatch"
         );
