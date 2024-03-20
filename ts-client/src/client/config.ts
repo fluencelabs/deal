@@ -25,8 +25,6 @@ export const getDeployment = (env: ContractsENV) => {
     | typeof local
     | undefined = undefined;
 
-  if (deployment === undefined) throw new Error(`Unknown chain env: ${env}`);
-
   switch (env) {
     case "dar":
       deployment = dar;
