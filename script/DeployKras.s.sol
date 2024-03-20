@@ -68,7 +68,7 @@ contract DeployKras is Depoyments, Script {
     function run() external {
         _printENV();
 
-        _setContract("USDC", USDC, bytes32(0x00), bytes32(0x00));
+        _setContract("axlUSDC", USDC, bytes32(0x00), bytes32(0x00));
 
         vm.startBroadcast();
         console.log("\nStart deploying...");

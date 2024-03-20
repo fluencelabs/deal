@@ -240,7 +240,7 @@ contract DeployContracts is Depoyments, Script {
 
     function _deployTestTokens() internal returns (IERC20 tUSD) {
         bytes memory args = abi.encode("USD Token", "tUSD", 6);
-        tUSD = IERC20(_deployContract("USDC", "TestERC20", args));
+        tUSD = IERC20(_deployContract("axlUSDC", "TestERC20", args));
     }
 
     function _deployMulticall3() internal returns (Multicall3 multicall) {
