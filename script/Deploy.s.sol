@@ -27,7 +27,7 @@ contract DeployContracts is Depoyments, Script {
     // ------------------ Local ENV constant ------------------
     uint256 constant LOCAL_CHAIN_ID = 31337;
     string constant DEFAULT_ANVIL_MNEMONIC = "test test test test test test test test test test test junk";
-    uint256 constant LOCAL_tFLT_BALANCE = 1000000 ether;
+    uint256 constant LOCAL_tFLT_BALANCE = 1e10 ether;
     uint256 constant LOCAL_tUSD_BALANCE = 1000000 ether;
 
     // ------------------ Default constant ------------------
