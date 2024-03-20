@@ -1,6 +1,10 @@
 import { getDefaultOfferFixture, randomCID } from "./fixtures.js";
 import { type ICapacity, type IMarket } from "@fluencelabs/deal-ts-clients";
-import { CC_DURATION_DEFAULT, DEFAULT_CONFIRMATIONS } from "./constants.js";
+import {
+  CC_DURATION_DEFAULT,
+  CC_PRECISION,
+  DEFAULT_CONFIRMATIONS,
+} from "./constants.js";
 import { assert, expect } from "vitest";
 import { checkEvents } from "./confirmations.js";
 
@@ -89,7 +93,7 @@ export async function createCommitments(
       peerId,
       duration,
       delegator,
-      1,
+      CC_PRECISION / 2n,
     );
     await createCommitmentTx.wait(DEFAULT_CONFIRMATIONS);
   }

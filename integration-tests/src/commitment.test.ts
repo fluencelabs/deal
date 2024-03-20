@@ -12,6 +12,7 @@ import {
   CapacityConstantType,
   CC_DURATION_DEFAULT,
   CC_MAX_FAILED_RATIO,
+  CC_PRECISION,
   CC_SLASHING_RATE_PERCENT,
   CCStatus,
   DEFAULT_CONFIRMATIONS,
@@ -82,10 +83,7 @@ async function DepositCC(
   _duration: bigint | undefined,
 ) {
   const duration = _duration ?? CC_DURATION_DEFAULT;
-  const fltPrice = await coreContract.fltPrice();
-  const collateralPerUnit = await coreContract.usdCollateralPerUnit();
-  const fltCollateral = await coreContract.fltCollateralPerUnit();
-  console.log(fltPrice, collateralPerUnit, fltCollateral, "fltPrice");
+  const collateralPerUnit = await coreContract.fltCollateralPerUnit();
 
   console.log("Depositing collateral...");
   const depositCollateralReceipt = await capacityContract
@@ -386,13 +384,11 @@ describe("Capacity commitment", () => {
     assert(totalReward > 0, "Should be greater than 0");
   });
 
-  test.only("Long-term CC with full reward withdrawals", async () => {
-    console.log(
-      await provider.getBalance(await capacityContract.getAddress()),
-      "balance wei",
-    );
-    return;
-    const MAX_ERROR_WEI = 1000;
+  // TODO: implement
+  test("Long-term CC with reward withdrawals when CC is failed", async () => {});
+
+  test("Long-term CC with full reward withdrawals", async () => {
+    const MAX_ERROR_WEI = CC_PRECISION;
     const registeredOffer = await registerMarketOffer(
       marketContract,
       signerAddress,
@@ -448,6 +444,7 @@ describe("Capacity commitment", () => {
 
     const ccInfo = await capacityContract.getCommitment(commitmentId);
     console.log(ccInfo);
+    // TODO: Add check for intermediate vesting value, e.g. after 2-3 proof sending epoches
     await sendProof(
       signerAddress,
       cuId,
@@ -475,7 +472,7 @@ describe("Capacity commitment", () => {
 
     {
       const rewardPool = await coreContract.getRewardPool(currentEpoch);
-      console.log(rewardPool, "rewardPool");
+
       const unlockedVesting =
         await capacityContract.unlockedRewards(commitmentId);
       const totalVesting = await capacityContract.totalRewards(commitmentId);
@@ -516,6 +513,7 @@ describe("Capacity commitment", () => {
     await skipEpoch(epochDuration, withdrawEpochs);
 
     let delegatorBalance = await provider.getBalance(delegatorAddress);
+    let providerBalance = await provider.getBalance(signerAddress);
 
     const withdrawRewardReceipt = await capacityContract
       .withdrawReward(commitmentId)
@@ -527,8 +525,19 @@ describe("Capacity commitment", () => {
     expect(withdrawRewardEvent?.args).toEqual([commitmentId, unlockedVesting]);
 
     let newDelegatorBalance = await provider.getBalance(delegatorAddress);
+    let newProviderBalance = await provider.getBalance(signerAddress);
 
-    expect(newDelegatorBalance - delegatorBalance).toEqual(unlockedVesting);
+    console.log(newProviderBalance, providerBalance, unlockedVesting / 2n);
+    expect(
+      bigintAbs(newProviderBalance - providerBalance - unlockedVesting / 2n) <=
+        MAX_ERROR_WEI,
+    ).toBeTruthy();
+    console.log(newDelegatorBalance, delegatorBalance, unlockedVesting / 2n);
+    expect(
+      bigintAbs(
+        newDelegatorBalance - delegatorBalance - unlockedVesting / 2n,
+      ) <= MAX_ERROR_WEI,
+    ).toBeTruthy();
 
     delegatorBalance = await provider.getBalance(delegatorAddress);
 
@@ -546,7 +555,11 @@ describe("Capacity commitment", () => {
     newDelegatorBalance = await provider.getBalance(delegatorAddress);
 
     const collateralPerUnit = await coreContract.fltCollateralPerUnit();
-    expect(newDelegatorBalance - delegatorBalance).toEqual(collateralPerUnit);
+    console.log(newDelegatorBalance, delegatorBalance, collateralPerUnit);
+    expect(
+      bigintAbs(newDelegatorBalance - delegatorBalance - collateralPerUnit) <=
+        MAX_ERROR_WEI,
+    ).toBeTruthy();
   });
 
   test("CC is slashed after missing proofs", async () => {
@@ -683,7 +696,6 @@ describe("Capacity commitment", () => {
 
     console.log("Sending excessive amount of proofs...");
     // await sendProof(signerAddress, cuId, MAX_ALLOWED_PROOFS * 2, 2);
-    // TODO: Real error is tooManyProof, but it's hidden in contract
     await expect(
       sendProof(signerAddress, cuId, MAX_ALLOWED_PROOFS * 2, 2).catch(
         (e: { data: BytesLike }) => {
