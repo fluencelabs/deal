@@ -46,7 +46,7 @@ run-tests:  ## Test for solidity contracts & ts-clients
 
 start-local-chain: ## Start local chain
 	@make verify-command program=anvil
-	@anvil --host 0.0.0.0 --block-time $(LOCAL_CHAIN_BLOCK_MINING_INTERVAL) --state /data/state.db
+	@anvil --host 0.0.0.0 --block-time $(LOCAL_CHAIN_BLOCK_MINING_INTERVAL) --balance "100000000000000" --state /data/state.db
 
 deploy-subgraph-%: ## Deploy subgraph to network {local, kras, dar, stage}
 	@make verify-command program=npm
