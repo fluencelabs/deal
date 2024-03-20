@@ -18,8 +18,10 @@ import kras from "./../deployments/kras.json" assert { type: "json" };
 
 export const getDeployment = (env: ContractsENV) => {
   let chainId = 0;
-  let deployment: typeof stage | typeof dar | typeof local | undefined =
+  let deployment: typeof kras | typeof stage | typeof dar | typeof local | undefined =
     undefined;
+
+  if (deployment === undefined) throw new Error(`Unknown chain env: ${env}`;
 
   switch (env) {
     case "dar":
@@ -47,7 +49,7 @@ export const getDeployment = (env: ContractsENV) => {
     market: deployment.Market.addr,
     capacity: deployment.Capacity.addr,
     dealFactory: deployment.DealFactory.addr,
-    usdc: deployment.tUSD.addr,
+    usdc: deployment.USDC.addr,
     multicall3: deployment.Multicall3.addr,
     chainId: chainId,
   };
