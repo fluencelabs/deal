@@ -40,3 +40,7 @@ export function snapshot(createSnapshot: () => Promise<void>) {
     console.log(block.number, "afterEach");
   });
 }
+
+export function bigintAbs(n: bigint) {
+  return n < 0n ? -n : n;
+}

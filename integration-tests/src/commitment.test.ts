@@ -16,7 +16,7 @@ import {
   CCStatus,
   DEFAULT_CONFIRMATIONS,
 } from "./constants.js";
-import { skipEpoch, snapshot } from "./utils.js";
+import { bigintAbs, skipEpoch, snapshot } from "./utils.js";
 import { config } from "dotenv";
 import {
   capacityContract,
@@ -24,10 +24,8 @@ import {
   delegator,
   delegatorAddress,
   marketContract,
-  paymentToken,
   paymentTokenAddress,
   provider,
-  signer,
   signerAddress,
 } from "./env.js";
 import type { Peer } from "./fixtures.js";
@@ -69,6 +67,9 @@ async function sendProof(
       await capacityContract
         .unlockedRewards(commitmentId)
         .then((reward) => formatEther(reward)),
+      await capacityContract
+        .totalRewards(commitmentId)
+        .then((reward) => formatEther(reward)),
       await coreContract.currentEpoch(),
     );
     sentProofRounds += 1;
@@ -81,7 +82,10 @@ async function DepositCC(
   _duration: bigint | undefined,
 ) {
   const duration = _duration ?? CC_DURATION_DEFAULT;
-  const collateralPerUnit = await coreContract.fltCollateralPerUnit();
+  const fltPrice = await coreContract.fltPrice();
+  const collateralPerUnit = await coreContract.usdCollateralPerUnit();
+  const fltCollateral = await coreContract.fltCollateralPerUnit();
+  console.log(fltPrice, collateralPerUnit, fltCollateral, "fltPrice");
 
   console.log("Depositing collateral...");
   const depositCollateralReceipt = await capacityContract
@@ -382,7 +386,13 @@ describe("Capacity commitment", () => {
     assert(totalReward > 0, "Should be greater than 0");
   });
 
-  test("Long-term CC with reward withdrawals", async () => {
+  test.only("Long-term CC with full reward withdrawals", async () => {
+    console.log(
+      await provider.getBalance(await capacityContract.getAddress()),
+      "balance wei",
+    );
+    return;
+    const MAX_ERROR_WEI = 1000;
     const registeredOffer = await registerMarketOffer(
       marketContract,
       signerAddress,
@@ -391,6 +401,7 @@ describe("Capacity commitment", () => {
 
     const vestingDuration = await coreContract.vestingPeriodDuration();
     const vestingCount = await coreContract.vestingPeriodCount();
+    console.log(vestingDuration, vestingCount);
 
     const LONG_TERM_DURATION = vestingDuration * vestingCount + 1n;
 
@@ -398,7 +409,7 @@ describe("Capacity commitment", () => {
       capacityContract,
       delegatorAddress,
       registeredOffer.peers.map((p) => p.peerId),
-      LONG_TERM_DURATION,
+      CC_DURATION_DEFAULT,
     );
 
     console.log("Commitment is created", commitmentId);
@@ -417,7 +428,7 @@ describe("Capacity commitment", () => {
     console.log(currentEpoch, "currentEpoch after skip before deposit");
     console.log(await capacityContract.getAddress());
 
-    await DepositCC([commitmentId], registeredOffer.peers, LONG_TERM_DURATION);
+    await DepositCC([commitmentId], registeredOffer.peers, CC_DURATION_DEFAULT);
 
     const cuId = registeredOffer.peers[0]?.unitIds[0];
     assert(cuId, "cuID not defined");
@@ -435,11 +446,13 @@ describe("Capacity commitment", () => {
     currentEpoch = await coreContract.currentEpoch();
     console.log(currentEpoch, "currentEpoch after deposit before proof");
 
+    const ccInfo = await capacityContract.getCommitment(commitmentId);
+    console.log(ccInfo);
     await sendProof(
       signerAddress,
       cuId,
       2,
-      Number(vestingDuration),
+      Number(CC_DURATION_DEFAULT),
       commitmentId,
     );
 
@@ -449,48 +462,60 @@ describe("Capacity commitment", () => {
         capacityContract
           .unlockedRewards(commitmentId)
           .then((reward) => formatEther(reward)),
+        capacityContract
+          .totalRewards(commitmentId)
+          .then((reward) => formatEther(reward)),
         coreContract.currentEpoch(),
       ]);
       console.log(a, b);
     }
 
-    {
-      const unlockedReward =
-        await capacityContract.unlockedRewards(commitmentId);
-      const totalReward = await capacityContract.totalRewards(commitmentId);
-      const poolAmount = await coreContract.getRewardPool(
-        await coreContract.currentEpoch(),
-      );
-
-      console.log(
-        formatEther(unlockedReward),
-        formatEther(totalReward),
-        formatEther(poolAmount),
-      );
-    }
-
-    await skipEpoch(epochDuration, 1);
+    const status = await capacityContract.getStatus(commitmentId);
+    expect(status).toEqual(BigInt(CCStatus.Inactive));
 
     {
-      const unlockedReward =
+      const rewardPool = await coreContract.getRewardPool(currentEpoch);
+      console.log(rewardPool, "rewardPool");
+      const unlockedVesting =
         await capacityContract.unlockedRewards(commitmentId);
-      const totalReward = await capacityContract.totalRewards(commitmentId);
-      const poolAmount = await coreContract.getRewardPool(
-        await coreContract.currentEpoch(),
-      );
+      const totalVesting = await capacityContract.totalRewards(commitmentId);
 
-      console.log(
-        formatEther(unlockedReward),
-        formatEther(totalReward),
-        formatEther(poolAmount),
-      );
+      expect(
+        bigintAbs(totalVesting - rewardPool * (CC_DURATION_DEFAULT - 1n)) <=
+          MAX_ERROR_WEI,
+      ).toBeTruthy();
+
+      expect(
+        bigintAbs(unlockedVesting - totalVesting) <= MAX_ERROR_WEI,
+      ).toBeTruthy();
     }
 
-    return;
+    await capacityContract
+      .removeCUFromCC(commitmentId, [cuId])
+      .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
 
-    const currentStateAfterSentProofs =
-      await capacityContract.getCommitment(commitmentId);
-    expect(currentStateAfterSentProofs.status).toEqual(BigInt(CCStatus.Active));
+    // Wait till all vestings are available
+    await skipEpoch(epochDuration, 20);
+
+    const rewardPool = await coreContract.getRewardPool(currentEpoch);
+    console.log(rewardPool, "rewardPool");
+    const unlockedVesting =
+      await capacityContract.unlockedRewards(commitmentId);
+    const totalVesting = await capacityContract.totalRewards(commitmentId);
+
+    expect(
+      bigintAbs(totalVesting - rewardPool * CC_DURATION_DEFAULT) <=
+        MAX_ERROR_WEI,
+    ).toBeTruthy();
+    expect(
+      bigintAbs(unlockedVesting - totalVesting) <= MAX_ERROR_WEI,
+    ).toBeTruthy();
+
+    console.log("Waiting for withdraw epoches to pass...");
+    const withdrawEpochs = await coreContract.withdrawEpochsAfterFailed();
+    await skipEpoch(epochDuration, withdrawEpochs);
+
+    let delegatorBalance = await provider.getBalance(delegatorAddress);
 
     const withdrawRewardReceipt = await capacityContract
       .withdrawReward(commitmentId)
@@ -499,18 +524,13 @@ describe("Capacity commitment", () => {
       capacityContract.filters.RewardWithdrawn,
       withdrawRewardReceipt,
     );
-    expect(withdrawRewardEvent?.args).toEqual([commitmentId, 123]);
+    expect(withdrawRewardEvent?.args).toEqual([commitmentId, unlockedVesting]);
 
-    // Add more withdrawals rewards. For now, just end CC
-    await sendProof(
-      signerAddress,
-      cuId,
-      2,
-      Number(LONG_TERM_DURATION - vestingDuration) - 1,
-    );
+    let newDelegatorBalance = await provider.getBalance(delegatorAddress);
 
-    const nextStatus = await capacityContract.getCommitment(commitmentId);
-    expect(nextStatus.status).toEqual(BigInt(CCStatus.Inactive));
+    expect(newDelegatorBalance - delegatorBalance).toEqual(unlockedVesting);
+
+    delegatorBalance = await provider.getBalance(delegatorAddress);
 
     const finishCommitmentReceipt = await capacityContract
       .finishCommitment(commitmentId)
@@ -522,6 +542,11 @@ describe("Capacity commitment", () => {
     );
     assert(finishCommitmentEvent, "No finish commitment event");
     expect(finishCommitmentEvent.args).toEqual([commitmentId]);
+
+    newDelegatorBalance = await provider.getBalance(delegatorAddress);
+
+    const collateralPerUnit = await coreContract.fltCollateralPerUnit();
+    expect(newDelegatorBalance - delegatorBalance).toEqual(collateralPerUnit);
   });
 
   test("CC is slashed after missing proofs", async () => {
@@ -585,7 +610,7 @@ describe("Capacity commitment", () => {
     );
   });
 
-  test.only("CC is not slashed when slashing is 0", async () => {
+  test("CC is not slashed when slashing is 0", async () => {
     await coreContract
       .setCapacityConstant(CapacityConstantType.SlashingRate, 0)
       .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));

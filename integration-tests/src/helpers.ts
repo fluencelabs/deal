@@ -118,6 +118,7 @@ export async function depositCollateral(
 
   for (const commitmentId of commitmentIds) {
     const commitment = await capacity.getCommitment(commitmentId);
+    console.log(commitment.collateralPerUnit, "collateralPerUnit");
     const collateralToApproveCommitment =
       commitment.collateralPerUnit * commitment.unitCount;
     console.log(
