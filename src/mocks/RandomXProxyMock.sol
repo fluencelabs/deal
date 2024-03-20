@@ -11,7 +11,7 @@ contract RandomXProxyMock {
         difficulty = difficulty_;
     }
 
-    function run(bytes32 k, bytes32 h) public view returns (bytes32) {
+    function run(bytes32, bytes32) public view returns (bytes32) {
         return difficulty;
     }
 }

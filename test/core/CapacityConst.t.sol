@@ -97,7 +97,6 @@ contract CpacityConstTest is Test {
     }
 
     function test_ChangeConst() public {
-        uint256 currentEpoch = 1;
         uint256 fltPrice = 3 * PRECISION; // 1 FLT = 1 USD
         uint256 usdCollateralPerUnit = 100 * PRECISION; // 100 USD
         uint256 usdTargetRevenuePerEpoch = 1000 * PRECISION; // 1000 USD

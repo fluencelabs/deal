@@ -149,7 +149,7 @@ contract DeployContracts is Depoyments, Script {
     }
 
     // ------------------ Internal functions ------------------
-    function _loadENV() internal returns (ENV memory) {
+    function _loadENV() internal view returns (ENV memory) {
         uint256 chainId = block.chainid;
 
         uint256 epochDuration = vm.envOr("EPOCH_DURATION", DEFAULT_EPOCH_DURATION);
@@ -354,7 +354,7 @@ contract DeployContracts is Depoyments, Script {
         );
 
         if (needToRedeployCapacity) {
-            payable(address(capacityProxy)).transfer(initCCBallance_);
+            address(capacityProxy).call{value: initCCBallance_}(new bytes(0));
         }
 
         if (isNewCore) {
