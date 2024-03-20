@@ -53,7 +53,7 @@ export const getDeployment = (env: ContractsENV) => {
     market: deployment.Market.addr,
     capacity: deployment.Capacity.addr,
     dealFactory: deployment.DealFactory.addr,
-    usdc: deployment.USDC.addr,
+    usdc: deployment.axlUSDC.addr,
     multicall3: deployment.Multicall3.addr,
     chainId: chainId,
   };
