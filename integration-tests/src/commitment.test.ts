@@ -638,10 +638,7 @@ describe("Capacity commitment", () => {
     const newDelegatorBalance = await provider.getBalance(delegatorAddress);
 
     const collateralPerUnit = await coreContract.fltCollateralPerUnit();
-    const slashedBalance = 0n;
-    expect(newDelegatorBalance - delegatorBalance).toEqual(
-      collateralPerUnit - slashedBalance,
-    );
+    expect(newDelegatorBalance - delegatorBalance).toEqual(collateralPerUnit);
   });
 
   test("Send too many proofs to CC per epoch", async () => {
