@@ -51,7 +51,7 @@ export function handleProviderInfoUpdated(event: ProviderInfoUpdated): void {
   // Note, we do not change approved to false, because possibly provider have
   //  been approved  through whitelist contract already. Thus, no need to
   //  change approved field here.
-  if (provider.approved == null) {
+  if (!provider.approved) {  // catch null and false without warnings.
     provider.approved = false;
   }
   provider.name = event.params.name;

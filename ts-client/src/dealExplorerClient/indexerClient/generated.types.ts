@@ -1659,6 +1659,7 @@ export type GraphNetwork = {
   capacityMaxFailedRatio?: Maybe<Scalars['Int']['output']>;
   coreContractAddress?: Maybe<Scalars['String']['output']>;
   coreEpochDuration?: Maybe<Scalars['Int']['output']>;
+  corePrecision?: Maybe<Scalars['Int']['output']>;
   dealsTotal: Scalars['BigInt']['output'];
   effectorsTotal: Scalars['BigInt']['output'];
   /** ID is set to 1 */
@@ -1740,6 +1741,14 @@ export type GraphNetwork_Filter = {
   coreEpochDuration_lte?: InputMaybe<Scalars['Int']['input']>;
   coreEpochDuration_not?: InputMaybe<Scalars['Int']['input']>;
   coreEpochDuration_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  corePrecision?: InputMaybe<Scalars['Int']['input']>;
+  corePrecision_gt?: InputMaybe<Scalars['Int']['input']>;
+  corePrecision_gte?: InputMaybe<Scalars['Int']['input']>;
+  corePrecision_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  corePrecision_lt?: InputMaybe<Scalars['Int']['input']>;
+  corePrecision_lte?: InputMaybe<Scalars['Int']['input']>;
+  corePrecision_not?: InputMaybe<Scalars['Int']['input']>;
+  corePrecision_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
   dealsTotal?: InputMaybe<Scalars['BigInt']['input']>;
   dealsTotal_gt?: InputMaybe<Scalars['BigInt']['input']>;
   dealsTotal_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -1841,6 +1850,7 @@ export type GraphNetwork_OrderBy =
   | 'capacityMaxFailedRatio'
   | 'coreContractAddress'
   | 'coreEpochDuration'
+  | 'corePrecision'
   | 'dealsTotal'
   | 'effectorsTotal'
   | 'id'
