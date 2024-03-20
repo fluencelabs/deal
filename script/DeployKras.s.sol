@@ -51,7 +51,7 @@ contract DeployKras is Depoyments, Script {
     bytes32 public constant INIT_GLOBAL_NONCE = keccak256("init_global_nonce");
     bytes32 public constant DIFFICULTY = 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
     uint256 constant INIT_REWARD_POOL = 1 ether;
-    uint256 constant INIT_CC_BALLANCE = INIT_REWARD_POOL * 10;
+    uint256 constant INIT_CC_BALANCE = INIT_REWARD_POOL * 10;
 
     bool constant IS_WHITELIST_ENABLED = true;
 
@@ -134,7 +134,7 @@ contract DeployKras is Depoyments, Script {
             abi.encode(dealFactoryImpl, abi.encodeWithSelector(DealFactory.initialize.selector))
         );
 
-        (bool success,) = address(capacityProxy).call{value: INIT_CC_BALLANCE}(new bytes(0));
+        (bool success,) = address(capacityProxy).call{value: INIT_CC_BALANCE}(new bytes(0));
         require(success, "DeployKrasContracts: failed to transfer initial CC balance");
 
         console.log("\nCore deployed, initializing modules as well...");
@@ -181,7 +181,7 @@ contract DeployKras is Depoyments, Script {
         console.log(StdStyle.blue("DIFFICULTY:"));
         console.logBytes32(DIFFICULTY);
         console.log(StdStyle.blue("INIT_REWARD_POOL:"), INIT_REWARD_POOL);
-        console.log(StdStyle.blue("INIT_CC_BALLANCE:"), INIT_CC_BALLANCE);
+        console.log(StdStyle.blue("INIT_CC_BALANCE:"), INIT_CC_BALANCE);
 
         console.log(StdStyle.blue("IS_WHITELIST_ENABLED:"), IS_WHITELIST_ENABLED);
         console.log("---------------------------------------");
