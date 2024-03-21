@@ -53,7 +53,7 @@ export function handleProviderInfoUpdated(event: ProviderInfoUpdated): void {
     provider.approved = false;
   }
   provider.name = event.params.name;
-  provider.registeredAt = event.block.timestamp;
+  provider.registered = true;
   provider.save();
 
   let graphNetwork = createOrLoadGraphNetwork();

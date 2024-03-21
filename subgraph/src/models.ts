@@ -44,7 +44,7 @@ export function createOrLoadProvider(
 
   if (entity == null) {
     entity = new Provider(providerAddressSerialized);
-    entity.registeredAt = ZERO_BIG_INT;
+    entity.registered = false;
     entity.name = UNREGISTERED_PROVIDER_NAME;
     entity.approved = false;
     entity.createdAt = timestamp;
