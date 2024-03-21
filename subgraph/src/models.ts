@@ -37,7 +37,9 @@ export function createOrLoadProvider(
   providerAddress: string,
   timestamp: BigInt,
 ): Provider {
-  const providerAddressSerialized = providerAddress;
+  // 'I do not repeat, I do not repeat'. One more lowercase in case if someone will
+  //  forget to use it in the future.
+  const providerAddressSerialized = providerAddress.toLowerCase();
   let entity = Provider.load(providerAddressSerialized);
 
   if (entity == null) {
