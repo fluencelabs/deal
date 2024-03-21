@@ -218,6 +218,7 @@ export function handleEffectorRemoved(event: EffectorRemoved): void {
 }
 
 // Note, in Deal we also handle ComputeUnitJoined.
+// Note, in Capacity we also handle handleUnitDeactivated.
 // Note, this event is kinda the main event for match CU with deal.
 export function handleComputeUnitAddedToDeal(
   event: ComputeUnitAddedToDeal,
