@@ -38,7 +38,6 @@ async function sendProof(
   cuId: string,
   proofs: number,
   epoches: number,
-  commitmentId: string,
 ) {
   const epochDuration = await coreContract.epochDuration();
   const difficulty = await coreContract.difficulty();
@@ -64,15 +63,6 @@ async function sendProof(
 
     await Promise.all(txs.map((tx) => tx.wait(DEFAULT_CONFIRMATIONS)));
     await skipEpoch(epochDuration);
-    console.log(
-      await capacityContract
-        .unlockedRewards(commitmentId)
-        .then((reward) => formatEther(reward)),
-      await capacityContract
-        .totalRewards(commitmentId)
-        .then((reward) => formatEther(reward)),
-      await coreContract.currentEpoch(),
-    );
     sentProofRounds += 1;
   }
 }
@@ -445,27 +435,7 @@ describe("Capacity commitment", () => {
     const ccInfo = await capacityContract.getCommitment(commitmentId);
     console.log(ccInfo);
     // TODO: Add check for intermediate vesting value, e.g. after 2-3 proof sending epoches
-    await sendProof(
-      signerAddress,
-      cuId,
-      2,
-      Number(CC_DURATION_DEFAULT),
-      commitmentId,
-    );
-
-    for (let i = 0; i < 20; i++) {
-      await skipEpoch(epochDuration, 1);
-      const [a, b] = await Promise.all([
-        capacityContract
-          .unlockedRewards(commitmentId)
-          .then((reward) => formatEther(reward)),
-        capacityContract
-          .totalRewards(commitmentId)
-          .then((reward) => formatEther(reward)),
-        coreContract.currentEpoch(),
-      ]);
-      console.log(a, b);
-    }
+    await sendProof(signerAddress, cuId, 2, Number(CC_DURATION_DEFAULT));
 
     const status = await capacityContract.getStatus(commitmentId);
     expect(status).toEqual(BigInt(CCStatus.Inactive));
