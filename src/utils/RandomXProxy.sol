@@ -29,20 +29,20 @@ contract RandomXProxy {
 
         bytes memory se_request = _serializeRandomXParameters(ks, hs);
 
-        (int256 ret_code, bytes memory actor_result) = Actor.callByID(
-            ActorID,
-            RunRandomXBatched,
-            Misc.CBOR_CODEC,
-            se_request,
-            0,
-            false
-        );
-        require(ret_code == 0, "Fluence actor failed");
+        // (int256 ret_code, bytes memory actor_result) = Actor.callByID(
+        //     ActorID,
+        //     RunRandomXBatched,
+        //     Misc.CBOR_CODEC,
+        //     se_request,
+        //     0,
+        //     false
+        // );
+        // require(ret_code == 0, "Fluence actor failed");
 
         // bytes32[] memory result = _deserializeActorResult(actor_result);
         // require(result.length == ks.length, "Invalid result length");
 
-        return actor_result;
+        return se_request;
     }
 
     function _serializeRandomXParameters(
