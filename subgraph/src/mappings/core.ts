@@ -37,7 +37,6 @@ export function handleInitialized(event: Initialized): void {
 export function handleWhitelistAccessGranted(
   event: WhitelistAccessGranted,
 ): void {
-  log.info('TODO DEBUG {}', [formatAddress(event.params.account)])
   let provider = createOrLoadProvider(formatAddress(event.params.account), event.block.timestamp);
   provider.approved = true;
   provider.save();

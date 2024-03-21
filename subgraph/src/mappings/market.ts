@@ -44,7 +44,6 @@ export function handleInitialized(event: Initialized): void {
 }
 
 export function handleProviderInfoUpdated(event: ProviderInfoUpdated): void {
-  log.info('TODO DEBUG handleProviderInfoUpdated for provider: {}', [formatAddress(event.params.provider)] )
   let provider = createOrLoadProvider(
     formatAddress(event.params.provider), event.block.timestamp);
   // Note, we do not change approved to false, because possibly provider have
@@ -120,15 +119,12 @@ export function handleMarketOfferRegistered(
 
 // It updates Peer and Offer.
 export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
-  log.info('TODO DEBUG handleComputeUnitCreated', [])
   // Parent events:
   // - emit PeerCreated(offerId, peer.peerId);
   // - emit MarketOfferRegistered
   let peer = Peer.load(event.params.peerId.toHexString()) as Peer;
   const offer = Offer.load(peer.offer) as Offer;
   const provider = createOrLoadProvider(offer.provider, event.block.timestamp);
-
-  log.info('DEBUG handleComputeUnitCreated for provider: {}', [offer.provider])
 
   // Since handlePeerCreated could not work with this handler, this logic moved here.
   const computeUnit = new ComputeUnit(event.params.unitId.toHexString());
