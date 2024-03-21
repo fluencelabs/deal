@@ -32,15 +32,21 @@ export function handleInitialized(event: Initialized): void {
 export function handleWhitelistAccessGranted(
   event: WhitelistAccessGranted,
 ): void {
-  let provider = Provider.load(event.params.account.toHexString()) as Provider;
-  provider.approved = true;
-  provider.save();
+  let provider = Provider.load(event.params.account.toHexString());
+  // TODO: HANDLE PROPERLY
+  if (provider !== null) {
+    provider.approved = true;
+    provider.save();
+  }
 }
 
 export function handleWhitelistAccessRevoked(
   event: WhitelistAccessRevoked,
 ): void {
-  let provider = Provider.load(event.params.account.toHexString()) as Provider;
-  provider.approved = false;
-  provider.save();
+  let provider = Provider.load(event.params.account.toHexString());
+  // TODO: HANDLE PROPERLY
+  if (provider !== null) {
+    provider.approved = false;
+    provider.save();
+  }
 }

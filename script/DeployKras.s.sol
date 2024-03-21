@@ -25,33 +25,33 @@ contract DeployKras is Depoyments, Script {
     using SafeERC20 for IERC20;
 
     // ------------------ Default constant ------------------
-    address constant USDC = address(0);
+    address constant USDC = address(0xE277D4cb6e522769e7962FB239d5342138891bE6);
 
-    uint256 constant EPOCH_DURATION = 4 hours;
+    uint256 constant EPOCH_DURATION = 1 days;
     uint256 constant MIN_DEPOSITED_EPOCHS = 2;
     uint256 constant MIN_REMATCHING_EPOCHS = 2;
     uint256 constant MIN_PROTOCOL_VERSION = 1;
     uint256 constant MAX_PROTOCOL_VERSION = 1;
 
-    uint256 constant FLT_PRICE = 1 * PRECISION; // 1 USD
-    uint256 constant USD_COLLATERAL_PER_UNIT = 1 * PRECISION; // 1 USD
-    uint256 constant USD_TARGET_REVENUE_PER_EPOCH = 28 * 1e4;
+    uint256 constant FLT_PRICE = 0.5e7; // 0.5 USD
+    uint256 constant USD_COLLATERAL_PER_UNIT = 1e7; // 1 USD
+    uint256 constant USD_TARGET_REVENUE_PER_EPOCH = 0.33e7; // 10 USD per month, $0.33 per epoch
     uint256 constant MIN_DURATION = 5;
-    uint256 constant MIN_REWARD_PER_EPOCH = 15 * 1e18;
-    uint256 constant MAX_REWARD_PER_EPOCH = 20 * 1e18;
-    uint256 constant VESTING_PERIOD_DURATION = 5;
+    uint256 constant MIN_REWARD_PER_EPOCH = 100 * 1e18;
+    uint256 constant MAX_REWARD_PER_EPOCH = 1000 * 1e18;
+    uint256 constant VESTING_PERIOD_DURATION = 2;
     uint256 constant VESTING_PERIOD_COUNT = 6;
 
     uint256 constant SLASHING_RATE = 0;
-    uint256 constant MIN_PROOFS_PER_EPOCH = 15;
-    uint256 constant MAX_PROOFS_PER_EPOCH = 500;
+    uint256 constant MIN_PROOFS_PER_EPOCH = 30;
+    uint256 constant MAX_PROOFS_PER_EPOCH = 50;
     uint256 constant WITHDRAW_EPOCHS_AFTER_FAILED = 0;
-    uint256 constant MAX_FAILED_RATIO = 40;
+    uint256 constant MAX_FAILED_RATIO = 4;
 
-    bytes32 public constant INIT_GLOBAL_NONCE = keccak256("init_global_nonce");
-    bytes32 public constant DIFFICULTY = 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
-    uint256 constant INIT_REWARD_POOL = 1 ether;
-    uint256 constant INIT_CC_BALANCE = INIT_REWARD_POOL * 10;
+    bytes32 public constant INIT_GLOBAL_NONCE = keccak256("fluence nonce");
+    bytes32 public constant DIFFICULTY = 0x0000241FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+    uint256 constant INIT_REWARD_POOL = 500e18;
+    uint256 constant INIT_CC_BALANCE = 30000e18;
 
     bool constant IS_WHITELIST_ENABLED = true;
 
