@@ -262,7 +262,7 @@ export function createOrLoadCapacityCommitmentStatsPerEpoch(
     entity.nextAdditionalActiveUnitCount = 0;
     entity.currentCCNextCCFailedEpoch = ZERO_BIG_INT;
     entity.submittedProofsCount = 0;
-    entity.blockNumberStart = ZERO_BIG_INT;
+    entity.blockNumberStart = MAX_UINT_256;
     entity.blockNumberEnd = ZERO_BIG_INT;
     entity.computeUnitsWithMinRequiredProofsSubmittedCounter = 0;
     entity.save();

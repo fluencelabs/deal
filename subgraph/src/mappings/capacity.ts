@@ -259,9 +259,43 @@ export function handleCommitmentStatsUpdated(
   capacityCommitmentStatsPerEpoch.save();
 }
 
-export function handleUnitActivated(event: UnitActivated): void {}
+export function handleUnitActivated(event: UnitActivated): void { }
 
-export function handleUnitDeactivated(event: UnitDeactivated): void {}
+// Handle that Compute Unit moved from CC to Deal with arguments of CC and CU.
+// Currently, it updates only capacityCommitmentStatsPerEpoch.
+export function handleUnitDeactivated(event: UnitDeactivated): void {
+  // Update Stats regards to capacities stats below.
+  const graphNetwork = createOrLoadGraphNetwork();
+  const currentEpoch = calculateEpoch(
+    event.block.timestamp,
+    BigInt.fromI32(graphNetwork.initTimestamp),
+    BigInt.fromI32(graphNetwork.coreEpochDuration),
+  );
+  const capacityCommitment = CapacityCommitment.load(
+    event.params.commitmentId.toHexString(),
+  ) as CapacityCommitment;
+  let capacityCommitmentStatsPerEpoch =
+    createOrLoadCapacityCommitmentStatsPerEpoch(
+      capacityCommitment.id,
+      currentEpoch.toString(),
+    );
+  const computeUnit = ComputeUnit.load(
+    event.params.unitId.toHexString(),
+  ) as ComputeUnit;
+  const computeUnitPerEpochStat = createOrLoadComputeUnitPerEpochStat(
+    computeUnit.id,
+    currentEpoch.toString(),
+  );
+
+  // When compute unit added to Deal we also should calculate if we need to
+  //  decrease counter named computeUnitsWithMinRequiredProofsSubmittedCounter.
+  if (computeUnitPerEpochStat.submittedProofsCount >= graphNetwork.minRequiredProofsPerEpoch) {
+    // Decrease computeUnitsWithMinRequiredProofsSubmittedCounter.
+    capacityCommitmentStatsPerEpoch.computeUnitsWithMinRequiredProofsSubmittedCounter =
+      capacityCommitmentStatsPerEpoch.computeUnitsWithMinRequiredProofsSubmittedCounter - 1;
+    capacityCommitmentStatsPerEpoch.save();
+  }
+}
 
 export function handleProofSubmitted(event: ProofSubmitted): void {
   let proofSubmitted = new SubmittedProof(event.transaction.hash.toHexString());

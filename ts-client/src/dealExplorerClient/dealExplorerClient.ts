@@ -1148,7 +1148,7 @@ export class DealExplorerClient {
     };
   }
 
-  // @notice [Figma] Capacity Commitment. Proofs.
+  // @notice [Figma] Capacity Commitment. Proofs | Epochs History.
   async getProofsByCapacityCommitment(
     capacityCommitmentId: string,
     offset: number = 0,
