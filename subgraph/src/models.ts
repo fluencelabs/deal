@@ -29,20 +29,23 @@ export const REMOVED_EFFECTOR_INFO_DESCRIPTION = "Removed";
 export const UNREGISTERED_PROVIDER_NAME = "Unregistered";
 
 // In contracts flow to register provider exists, but on e.g. deal
-//  creation some unregistered providers could be used.
+//  creation some unregistered providers could be used and we need to store them.
+//  Also, in Deal system some providers could be mentioned when them are Whitelisted
+//  (Global Whitelist).
 // @notice Those unregistered providers does not count in total providers.
-export function createOrLoadUnregisteredProvider(
+export function createOrLoadProvider(
   providerAddress: string,
+  timestamp: BigInt,
 ): Provider {
-  const providerAddressSerialized = providerAddress.toLowerCase()
+  const providerAddressSerialized = providerAddress;
   let entity = Provider.load(providerAddressSerialized);
 
   if (entity == null) {
     entity = new Provider(providerAddressSerialized);
-    entity.registered = false;
+    entity.registeredAt = ZERO_BIG_INT;
     entity.name = UNREGISTERED_PROVIDER_NAME;
     entity.approved = false;
-    entity.createdAt = ZERO_BIG_INT;
+    entity.createdAt = timestamp;
     entity.computeUnitsAvailable = 0;
     entity.computeUnitsTotal = 0;
     entity.peerCount = 0;

@@ -8,7 +8,7 @@ import {
   createOrLoadDealEffector,
   createOrLoadDealToProvidersAccess,
   createOrLoadGraphNetwork, createOrLoadToken,
-  createOrLoadUnregisteredProvider,
+  createOrLoadProvider,
   UNO_BIG_INT,
   ZERO_BIG_INT,
 } from "../models";
@@ -50,7 +50,7 @@ export function handleDealCreated(event: DealCreated): void {
   deal.providersAccessType = event.params.providersAccessType_;
   for (let i=0; i < event.params.providersAccessList_.length; i++) {
     const providerAddress = formatAddress(event.params.providersAccessList_[i]);
-    const provider = createOrLoadUnregisteredProvider(providerAddress);
+    const provider = createOrLoadProvider(providerAddress, event.block.timestamp);
     createOrLoadDealToProvidersAccess(deal.id, provider.id);
   }
   deal.save();

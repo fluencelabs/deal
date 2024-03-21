@@ -1,6 +1,6 @@
 import {
   createOrLoadGraphNetwork,
-  createOrLoadUnregisteredProvider
+  createOrLoadProvider
 } from "../models";
 import {
   Initialized,
@@ -15,11 +15,13 @@ import {
   getPrecision,
 } from "../contracts";
 import { Provider } from "../../generated/schema";
+import { formatAddress } from "./utils";
+import { log } from "@graphprotocol/graph-ts/index";
 
 export function handleInitialized(event: Initialized): void {
   let graphNetwork = createOrLoadGraphNetwork();
   graphNetwork.coreEpochDuration = getEpochDuration(event.address);
-  graphNetwork.coreContractAddress = event.address.toHexString();
+  graphNetwork.coreContractAddress = formatAddress(event.address);
   graphNetwork.initTimestamp = getInitTimestamp(event.address);
   graphNetwork.capacityMaxFailedRatio = getCapacityMaxFailedRatio(
     event.address,
@@ -35,7 +37,8 @@ export function handleInitialized(event: Initialized): void {
 export function handleWhitelistAccessGranted(
   event: WhitelistAccessGranted,
 ): void {
-  let provider = createOrLoadUnregisteredProvider(event.params.account.toHexString()) as Provider;
+  log.info('TODO DEBUG {}', [formatAddress(event.params.account)])
+  let provider = createOrLoadProvider(formatAddress(event.params.account), event.block.timestamp);
   provider.approved = true;
   provider.save();
 }
@@ -43,7 +46,7 @@ export function handleWhitelistAccessGranted(
 export function handleWhitelistAccessRevoked(
   event: WhitelistAccessRevoked,
 ): void {
-  let provider = createOrLoadUnregisteredProvider(event.params.account.toHexString()) as Provider;
+  let provider = createOrLoadProvider(formatAddress(event.params.account), event.block.timestamp);
   provider.approved = false;
   provider.save();
 }

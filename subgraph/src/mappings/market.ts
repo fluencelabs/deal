@@ -22,7 +22,7 @@ import {
   createOrLoadGraphNetwork,
   createOrLoadOfferEffector,
   createOrLoadToken,
-  createOrLoadUnregisteredProvider,
+  createOrLoadProvider,
   REMOVED_EFFECTOR_INFO_DESCRIPTION,
   UNO_BIG_INT,
 } from "../models";
@@ -39,13 +39,14 @@ import {AppCID, formatAddress, getEffectorCID, parseEffectors} from "./utils";
 
 export function handleInitialized(event: Initialized): void {
   let graphNetwork = createOrLoadGraphNetwork();
-  graphNetwork.marketContractAddress = event.address.toHexString();
+  graphNetwork.marketContractAddress = formatAddress(event.address);
   graphNetwork.save()
 }
 
 export function handleProviderInfoUpdated(event: ProviderInfoUpdated): void {
-  const addr = formatAddress(event.params.provider);
-  let provider = createOrLoadUnregisteredProvider(addr);
+  log.info('TODO DEBUG handleProviderInfoUpdated for provider: {}', [formatAddress(event.params.provider)] )
+  let provider = createOrLoadProvider(
+    formatAddress(event.params.provider), event.block.timestamp);
   // Note, we do not change approved to false, because possibly provider have
   //  been approved  through whitelist contract already. Thus, no need to
   //  change approved field here.
@@ -53,11 +54,7 @@ export function handleProviderInfoUpdated(event: ProviderInfoUpdated): void {
     provider.approved = false;
   }
   provider.name = event.params.name;
-  provider.registered = true;
-  provider.createdAt = event.block.timestamp;
-  provider.computeUnitsAvailable = 0;
-  provider.computeUnitsTotal = 0;
-  provider.peerCount = 0;
+  provider.registeredAt = event.block.timestamp;
   provider.save();
 
   let graphNetwork = createOrLoadGraphNetwork();
@@ -91,7 +88,7 @@ export function handleMarketOfferRegistered(
   // - emit PeerCreated(offerId, peer.peerId);
   // - emit ComputeUnitCreated(offerId, peerId, unitId);
 
-  const provider = createOrLoadUnregisteredProvider(event.params.provider.toHexString()) as Provider;
+  const provider = createOrLoadProvider(formatAddress(event.params.provider), event.block.timestamp);
 
   // Create Offer.
   const offer = new Offer(event.params.offerId.toHexString());
@@ -123,12 +120,15 @@ export function handleMarketOfferRegistered(
 
 // It updates Peer and Offer.
 export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
+  log.info('TODO DEBUG handleComputeUnitCreated', [])
   // Parent events:
   // - emit PeerCreated(offerId, peer.peerId);
   // - emit MarketOfferRegistered
   let peer = Peer.load(event.params.peerId.toHexString()) as Peer;
   const offer = Offer.load(peer.offer) as Offer;
-  const provider = createOrLoadUnregisteredProvider(offer.provider);
+  const provider = createOrLoadProvider(offer.provider, event.block.timestamp);
+
+  log.info('DEBUG handleComputeUnitCreated for provider: {}', [offer.provider])
 
   // Since handlePeerCreated could not work with this handler, this logic moved here.
   const computeUnit = new ComputeUnit(event.params.unitId.toHexString());
@@ -155,7 +155,7 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
 export function handlePeerCreated(event: PeerCreated): void {
   const peer = new Peer(event.params.peerId.toHexString());
   const offer = Offer.load(event.params.offerId.toHexString()) as Offer;
-  const provider = createOrLoadUnregisteredProvider(offer.provider);
+  const provider = createOrLoadProvider(offer.provider, event.block.timestamp);
   provider.peerCount = provider.peerCount + 1;
   provider.save();
 
@@ -224,7 +224,7 @@ export function handleComputeUnitAddedToDeal(
   // Call the contract to extract peerId of the computeUnit.
   let peer = Peer.load(event.params.peerId.toHexString()) as Peer;
   const offer = Offer.load(peer.offer) as Offer;
-  const provider = createOrLoadUnregisteredProvider(offer.provider);
+  const provider = createOrLoadProvider(offer.provider, event.block.timestamp);
   let deal = Deal.load(formatAddress(event.params.deal)) as Deal;
 
   const createOrLoadDealToPeerResult = createOrLoadDealToPeer(deal.id, peer.id);
@@ -258,7 +258,7 @@ export function handleComputeUnitRemovedFromDeal(
   // Call the contract to extract peerId of the computeUnit.
   let peer = Peer.load(event.params.peerId.toHexString()) as Peer;
   const offer = Offer.load(peer.offer) as Offer;
-  const provider = createOrLoadUnregisteredProvider(offer.provider);
+  const provider = createOrLoadProvider(offer.provider, event.block.timestamp);
   let computeUnit = ComputeUnit.load(event.params.unitId.toHexString()) as ComputeUnit;
   let deal = Deal.load(formatAddress(event.params.deal)) as Deal;
 

@@ -4,7 +4,7 @@ import {
   createOrLoadCapacityCommitmentToComputeUnit,
   createOrLoadComputeUnitPerEpochStat,
   createOrLoadGraphNetwork,
-  createOrLoadUnregisteredProvider,
+  createOrLoadProvider,
   UNO_BIG_INT,
   ZERO_ADDRESS,
   ZERO_BIG_INT,
@@ -305,7 +305,7 @@ export function handleProofSubmitted(event: ProofSubmitted): void {
   let computeUnit = ComputeUnit.load(
     event.params.unitId.toHexString(),
   ) as ComputeUnit;
-  const provider = createOrLoadUnregisteredProvider(computeUnit.provider);
+  const provider = createOrLoadProvider(computeUnit.provider, event.block.timestamp);
   let graphNetwork = createOrLoadGraphNetwork();
   const currentEpoch = calculateEpoch(
     event.block.timestamp,
