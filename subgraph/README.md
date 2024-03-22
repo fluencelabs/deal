@@ -40,7 +40,7 @@ All examples below according to **dar** stand.
    - set .env for you docker/docker-compose.yml: `GRAPH_NODE_ETHEREUM_PATH=dar:https://ipc-dar.fluence.dev` [TODO: why does not catched?]
 2. Run local infrastructure with `docker compose -f docker/docker-compose.yml up`
 3. Deploy you new version of subgraph:
-   - `graph deploy --node http://localhost:8020 --ipfs http://localhost:5001 --network dar --network-file configs/dar-networks-config.json --version-label 0.0.0 fluence-deal-contracts`
+   - `npm run deploy:local && graph deploy --node http://localhost:8020 --ipfs http://localhost:5001 --network dar --network-file configs/dar-networks-config.json --version-label 0.0.0 fluence-deal-contracts`
 4. Check logs e.g. via `docker logs -f <contrainer name>` [Note, that syncing may take a while... (5 mins+)]
 5. Redeploy subgraph on dar
 
