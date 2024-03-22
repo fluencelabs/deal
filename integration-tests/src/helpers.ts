@@ -25,11 +25,13 @@ export async function registerMarketOffer(
   signerAddress: string,
   paymentTokenAddress: string,
   peers: number = 1,
+  cus: number = 1,
 ): Promise<RegisterMarketOfferReturnValue> {
   const registeredOffer = getDefaultOfferFixture(
     signerAddress,
     paymentTokenAddress,
     peers,
+    cus,
   );
 
   console.log("Register Provider by setProviderInfo...");
