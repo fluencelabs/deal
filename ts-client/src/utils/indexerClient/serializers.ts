@@ -62,3 +62,12 @@ export function serializeEffectorDescription(
   // Add custom serialization logic here.
   return effectorIn.description;
 }
+
+// Serialize contract Rate to Percentage Ratio in accordance with contract precision.
+export function serializeContractRateToPercentage(rate: number, precision: number): number {
+  return rate / precision * 100
+}
+
+export function serializePercentageToContractRate(percentage: number, precision: number): number {
+  return Math.round(percentage / 100 * precision)
+}
