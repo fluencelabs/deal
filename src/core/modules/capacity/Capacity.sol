@@ -367,8 +367,6 @@ contract Capacity is
         require(totalValue == 0, "Excessive value");
     }
 
-    error RandomXResult(bytes);
-
     function submitProofs(UnitProof[] calldata proofs) external {
         // #region load contracts and storage
         IMarket market = core.market();
@@ -524,9 +522,6 @@ contract Capacity is
         );
 
         require(success, "RandomXProxy.run failed");
-
-        revert RandomXResult(result);
-
         require(result.length > 0, "RandomXProxy.run returned empty result");
 
         bytes32[] memory hashes = abi.decode(result, (bytes32[]));

@@ -24,25 +24,25 @@ contract RandomXProxy {
     function run(
         bytes32[] memory ks,
         bytes32[] memory hs
-    ) public returns (bytes memory) {
+    ) public returns (bytes32[] memory) {
         require(ks.length == hs.length, "Invalid input length");
 
         bytes memory se_request = _serializeRandomXParameters(ks, hs);
 
-        // (int256 ret_code, bytes memory actor_result) = Actor.callByID(
-        //     ActorID,
-        //     RunRandomXBatched,
-        //     Misc.CBOR_CODEC,
-        //     se_request,
-        //     0,
-        //     false
-        // );
-        // require(ret_code == 0, "Fluence actor failed");
+        (int256 ret_code, bytes memory actor_result) = Actor.callByID(
+            ActorID,
+            RunRandomXBatched,
+            Misc.CBOR_CODEC,
+            se_request,
+            0,
+            false
+        );
+        require(ret_code == 0, "Fluence actor failed");
 
-        // bytes32[] memory result = _deserializeActorResult(actor_result);
-        // require(result.length == ks.length, "Invalid result length");
+        bytes32[] memory result = _deserializeActorResult(actor_result);
+        require(result.length == ks.length, "Invalid result length");
 
-        return se_request;
+        return result;
     }
 
     function _serializeRandomXParameters(
@@ -89,12 +89,18 @@ contract RandomXProxy {
             actor_result,
             0
         );
+
+        require(len == 1, "Invalid tuple length");
+
+        (len, byteIdx) = CBORDecoder.readFixedArray(actor_result, byteIdx);
+
         bytes32[] memory result = new bytes32[](len);
         for (uint256 i = 0; i < len; i++) {
             (bytes memory item, uint256 idx) = CBORDecoder.readBytes(
                 actor_result,
                 byteIdx
             );
+
             result[i] = item.toBytes32();
             byteIdx = idx;
         }
