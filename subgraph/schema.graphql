@@ -239,6 +239,7 @@ type CapacityCommitment @entity {
   status: CapacityCommitmentStatus
   collateralPerUnit: BigInt!
   duration: BigInt!
+  "This field xhould be represented as Ratio [0, 1] when divided by PRECISION constant."
   rewardDelegatorRate: Int!
   delegator: String!
   "timestamp of creation of CC. It does not mean that CC is started."
