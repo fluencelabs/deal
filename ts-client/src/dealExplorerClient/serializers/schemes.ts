@@ -38,7 +38,10 @@ import {
   type SerializationSettings,
   tokenValueToRounded
 } from "../../utils/serializers.js";
-import { serializeEffectors } from "../../utils/indexerClient/serializers.js";
+import {
+  serializeEffectors,
+  serializeContractRateToPercentage
+} from "../../utils/indexerClient/serializers.js";
 
 export function serializeOfferShort(offer: BasicOfferFragment, serializationSettings: SerializationSettings,): OfferShort {
   return {
@@ -194,6 +197,7 @@ export function serializeCapacityCommitmentShort(
   statusFromRpc: CapacityCommitmentStatus,
   coreInitTimestamp: number,
   coreEpochDuration: number,
+  precision: number,
 ): CapacityCommitmentShort {
   let expiredAt = null;
   let startedAt = null;
@@ -222,8 +226,9 @@ export function serializeCapacityCommitmentShort(
     peerId: capacityCommitmentFromIndexer.peer.id,
     computeUnitsCount: Number(capacityCommitmentFromIndexer.computeUnitsCount),
     status: statusFromRpc,
-    rewardDelegatorRate: Number(
-      capacityCommitmentFromIndexer.rewardDelegatorRate,
+    rewardDelegatorRate: serializeContractRateToPercentage(
+      Number(capacityCommitmentFromIndexer.rewardDelegatorRate),
+      precision,
     ),
     duration: Number(capacityCommitmentFromIndexer.duration),
   };
@@ -245,6 +250,8 @@ export function serializeCapacityCommitmentDetail(
 ): CapacityCommitmentDetail {
   const _totalRewards = totalRewards ? totalRewards : BigInt(0);
   const _unlockedRewards = unlockedRewards ? unlockedRewards : BigInt(0);
+  // First of all convert to [0, 1] with accordance of precision and than to [0, 100] to % format.
+  const rewardDelegatorRatePercentage = serializeContractRateToPercentage(rewardDelegatorRate, precision);
   const unclockedRewardsSerialized = serializeRewards(
     _unlockedRewards,
     rewardDelegatorRate,
@@ -263,6 +270,7 @@ export function serializeCapacityCommitmentDetail(
       statusFromRpc,
       coreInitTimestamp,
       coreEpochDuration,
+      precision,
     ),
     // FLT.
     totalCollateral: tokenValueToRounded(
@@ -270,7 +278,7 @@ export function serializeCapacityCommitmentDetail(
       serializationSettings.parseNativeTokenToFixedDefault,
     ),
     collateralToken: FLTToken,
-    rewardDelegatorRate: rewardDelegatorRate,
+    rewardDelegatorRate: rewardDelegatorRatePercentage,
     // FLT.
     rewardsUnlocked: tokenValueToRounded(
       _unlockedRewards,
