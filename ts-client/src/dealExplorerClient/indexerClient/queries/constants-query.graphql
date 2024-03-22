@@ -3,5 +3,6 @@ query ConstantsQuery {
     coreEpochDuration
     initTimestamp
     minRequiredProofsPerEpoch
+    corePrecision
   }
 }

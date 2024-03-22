@@ -3,6 +3,10 @@
 // If provider does not approved: convert a name.
 import type { ComputeUnitWithCcDataBasicFragment } from "../indexerClient/queries/peers-query.generated.js";
 import type { ComputeUnitStatus } from "../types/schemes.js";
+import {
+  type SerializationSettings,
+  tokenValueToRounded
+} from "../../utils/serializers.js";
 
 export function serializeProviderName(
   name: string,
@@ -37,4 +41,27 @@ export function serializeCUStatus(
   return {
     status,
   };
+}
+
+export function serializeRewards(
+  value: bigint,
+  delegatorRate: number,
+  precision: number,
+  serializationSettings: SerializationSettings,
+): {provider: string, delegator: string} {
+  const delegatorRateBigInt = BigInt(delegatorRate);
+  const precisionBigInt = BigInt(precision);
+  const delegatorReward = (value * delegatorRateBigInt) / precisionBigInt
+  const providerReward = value - delegatorReward
+  return {
+    provider:
+      tokenValueToRounded(
+        providerReward,
+        serializationSettings.parseNativeTokenToFixedDefault,
+        ),
+    delegator: tokenValueToRounded(
+      delegatorReward,
+      serializationSettings.parseNativeTokenToFixedDefault,
+      ),
+  }
 }

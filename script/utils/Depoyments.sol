@@ -185,6 +185,21 @@ contract Depoyments is ScriptBase {
         }
     }
 
+    function _setContract(string memory contractName, address addr, bytes32 codeHash, bytes32 creationCodeHash)
+        internal
+    {
+        if (deployments.contracts[contractName].addr == address(0)) {
+            deployments.contractNames.push(contractName);
+        }
+
+        deployments.contracts[contractName] = DeployedContract({
+            addr: addr,
+            codeHash: codeHash,
+            blockNumber: block.number,
+            creationCodeHash: creationCodeHash
+        });
+    }
+
     // ------------------ Privat functions ------------------
     function _extcodehash(address addr) private view returns (bytes32 hash) {
         assembly {

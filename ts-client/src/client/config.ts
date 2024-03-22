@@ -18,8 +18,12 @@ import kras from "./../deployments/kras.json" assert { type: "json" };
 
 export const getDeployment = (env: ContractsENV) => {
   let chainId = 0;
-  let deployment: typeof stage | typeof dar | typeof local | undefined =
-    undefined;
+  let deployment:
+    | typeof kras
+    | typeof stage
+    | typeof dar
+    | typeof local
+    | undefined = undefined;
 
   switch (env) {
     case "dar":
@@ -32,7 +36,7 @@ export const getDeployment = (env: ContractsENV) => {
       break;
     case "kras":
       deployment = kras;
-      chainId = 2714464006422509;
+      chainId = 1622562509754216;
       break;
     case "local":
       deployment = local;
@@ -47,7 +51,7 @@ export const getDeployment = (env: ContractsENV) => {
     market: deployment.Market.addr,
     capacity: deployment.Capacity.addr,
     dealFactory: deployment.DealFactory.addr,
-    usdc: deployment.tUSD.addr,
+    usdc: deployment.axlUSDC.addr,
     multicall3: deployment.Multicall3.addr,
     chainId: chainId,
   };

@@ -15,7 +15,7 @@
     "addr": "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
     "blockNumber": 8,
     "codeHash": "0xfa4ad89b02563ef0097d7d88d8022d0dfe58f9866edc5a4bb4907899ec1cdcfa",
-    "creationCodeHash": "0x55102e882665ae33c87e2f83d5f12a9a89defd3842a9162950b0305509d35ed7"
+    "creationCodeHash": "0x50ac5c7dac00b133057b9f758b62d30e0d56a34f166492a8540f384d8fd9436b"
   },
   "CoreImpl": {
     "addr": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
@@ -65,7 +65,7 @@
     "codeHash": "0x30cd389c7e2b0b5006aef49ff380d79dd6be2e05c24ad3b8cb0cab0939d229c8",
     "creationCodeHash": "0xea1980e73683babaa52bc7470e8d39851e5c20a581e1e3ad2b32ddb0c0589101"
   },
-  "tUSD": {
+  "axlUSDC": {
     "addr": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
     "blockNumber": 8,
     "codeHash": "0xf4b6f857d51cee3e86fb7f23c3baa108318447e4d23fc8cd591a30dd20f5be6b",

@@ -4,3 +4,7 @@ https://graph-node.kras.fluence.dev/subgraphs/name/fluence-deal-contracts
 https://graph-node.kras.fluence.dev/subgraphs/name/fluence-deal-contracts
 https://graph-node.kras.fluence.dev/subgraphs/name/fluence-deal-contracts
 https://graph-node.kras.fluence.dev/subgraphs/name/fluence-deal-contracts
+https://graph-node.kras.fluence.dev/subgraphs/name/fluence-deal-contracts
+https://graph-node.kras.fluence.dev/subgraphs/name/fluence-deal-contracts
+https://graph-node.kras.fluence.dev/subgraphs/name/fluence-deal-contracts
+https://graph-node.kras.fluence.dev/subgraphs/name/fluence-deal-contracts

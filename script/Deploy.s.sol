@@ -27,7 +27,6 @@ contract DeployContracts is Depoyments, Script {
     // ------------------ Local ENV constant ------------------
     uint256 constant LOCAL_CHAIN_ID = 31337;
     string constant DEFAULT_ANVIL_MNEMONIC = "test test test test test test test test test test test junk";
-    uint256 constant LOCAL_tFLT_BALANCE = 1000000 ether;
     uint256 constant LOCAL_tUSD_BALANCE = 1000000 ether;
 
     // ------------------ Default constant ------------------
@@ -38,8 +37,8 @@ contract DeployContracts is Depoyments, Script {
     uint256 constant DEFAULT_MAX_PROTOCOL_VERSION = 1;
 
     uint256 constant DEFAULT_FLT_PRICE = 1 * PRECISION; // 1 USD
-    uint256 constant DEFAULT_USD_COLLATERAL_PER_UNIT = 100 * PRECISION; // 0.3 USD
-    uint256 constant DEFAULT_USD_TARGET_REVENUE_PER_EPOCH = PRECISION / 10 * 3; // 1 USD
+    uint256 constant DEFAULT_USD_COLLATERAL_PER_UNIT = PRECISION / 10; // 0.1 USD
+    uint256 constant DEFAULT_USD_TARGET_REVENUE_PER_EPOCH = PRECISION / 10 * 3; // 0.3 USD
     uint256 constant DEFAULT_MIN_DURATION = 10;
     uint256 constant DEFAULT_MIN_REWARD_PER_EPOCH = 100 ether;
     uint256 constant DEFAULT_MAX_REWARD_PER_EPOCH = 200 ether;
@@ -54,7 +53,7 @@ contract DeployContracts is Depoyments, Script {
     bytes32 public constant DEFAULT_INIT_GLOBAL_NONCE = keccak256("init_global_nonce");
     bytes32 public constant DEFAULT_DIFFICULTY = 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
     uint256 constant DEFAULT_INIT_REWARD_POOL = 10 ether;
-    uint256 constant DEFAULT_INIT_CC_BALLANCE = DEFAULT_INIT_REWARD_POOL * 100;
+    uint256 constant DEFAULT_INIT_CC_BALANCE = DEFAULT_INIT_REWARD_POOL * 100;
     bool constant IS_MOCKED_RANDOMX = true;
 
     // ------------------ Deploy result ------------------
@@ -86,7 +85,7 @@ contract DeployContracts is Depoyments, Script {
         bytes32 initGlobalNonce;
         bytes32 difficulty;
         uint256 initRewardPool;
-        uint256 initCCBallance;
+        uint256 initCCBalance;
         bool isMockedRandomX;
     }
 
@@ -142,7 +141,7 @@ contract DeployContracts is Depoyments, Script {
             env.initGlobalNonce,
             env.difficulty,
             env.initRewardPool,
-            env.initCCBallance,
+            env.initCCBalance,
             env.isMockedRandomX
         );
         _stopDeploy();
@@ -177,7 +176,7 @@ contract DeployContracts is Depoyments, Script {
         bytes32 initGlobalNonce = vm.envOr("INIT_GLOBAL_NONCE", DEFAULT_INIT_GLOBAL_NONCE);
         bytes32 difficulty = vm.envOr("DIFFICULTY", DEFAULT_DIFFICULTY);
         uint256 initRewardPool = vm.envOr("INIT_REWARD_POOL", DEFAULT_INIT_REWARD_POOL);
-        uint256 initCCBallance = vm.envOr("INIT_CC_BALLANCE", DEFAULT_INIT_CC_BALLANCE);
+        uint256 initCCBalance = vm.envOr("INIT_CC_BALANCE", DEFAULT_INIT_CC_BALANCE);
         bool isMockedRandomX = vm.envOr("IS_MOCKED_RANDOMX", IS_MOCKED_RANDOMX);
 
         console.log("----------------- ENV -----------------");
@@ -234,14 +233,14 @@ contract DeployContracts is Depoyments, Script {
             initGlobalNonce: initGlobalNonce,
             difficulty: difficulty,
             initRewardPool: initRewardPool,
-            initCCBallance: initCCBallance,
+            initCCBalance: initCCBalance,
             isMockedRandomX: isMockedRandomX
         });
     }
 
     function _deployTestTokens() internal returns (IERC20 tUSD) {
         bytes memory args = abi.encode("USD Token", "tUSD", 6);
-        tUSD = IERC20(_deployContract("tUSD", "TestERC20", args));
+        tUSD = IERC20(_deployContract("axlUSDC", "TestERC20", args));
     }
 
     function _deployMulticall3() internal returns (Multicall3 multicall) {
@@ -277,7 +276,7 @@ contract DeployContracts is Depoyments, Script {
         bytes32 initGlobalNonce_,
         bytes32 difficulty_,
         uint256 initRewardPool_,
-        uint256 initCCBallance_,
+        uint256 initCCBalance_,
         bool isMockedRandomX_
     ) internal {
         address coreImpl = _deployContract("CoreImpl", "Core", new bytes(0));
@@ -354,7 +353,8 @@ contract DeployContracts is Depoyments, Script {
         );
 
         if (needToRedeployCapacity) {
-            address(capacityProxy).call{value: initCCBallance_}(new bytes(0));
+            (bool success,) = address(capacityProxy).call{value: initCCBalance_}(new bytes(0));
+            require(success, "Failed to transfer initial CC balance");
         }
 
         if (isNewCore) {
