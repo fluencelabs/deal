@@ -35,12 +35,16 @@ export function getPeerFixture(owner: string, units: number) {
   };
 }
 
-export function getDefaultOfferFixture(owner: string, paymentToken: string) {
+export function getDefaultOfferFixture(
+  owner: string,
+  paymentToken: string,
+  peers: number,
+) {
   return {
     minPricePerWorkerEpoch: ethers.parseEther("0.01"),
     paymentToken: paymentToken,
     effectors: [randomCID()],
-    peers: [getPeerFixture(owner, 1)],
+    peers: new Array(peers).fill(0).map(() => getPeerFixture(owner, 2)),
     minProtocolVersion: 1,
     maxProtocolVersion: 1,
   };
