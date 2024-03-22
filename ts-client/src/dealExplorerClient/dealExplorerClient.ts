@@ -780,25 +780,16 @@ export class DealExplorerClient {
     const orderBySerialized =
       serializeCapacityCommitmentsOrderByToIndexer(orderBy);
 
-    let currentEpoch = undefined;
-    if (
-      filters?.onlyActive ||
-      filters?.status == "active" ||
-      filters?.status == "inactive"
-    ) {
-      if (this._coreInitTimestamp == null || this._coreEpochDuration == null) {
-        throw new Error("Assertion: Class object was not inited correctly.");
-      }
-      currentEpoch = calculateEpoch(
-        Date.now() / 1000,
-        this._coreInitTimestamp,
-        this._coreEpochDuration,
-      ).toString();
-    }
+    const currentEpoch = calculateEpoch(
+      Date.now() / 1000,
+      this._coreInitTimestamp!,
+      this._coreEpochDuration!,
+    ).toString();
 
     const filtersSerialized = serializeCapacityCommitmentsFiltersToIndexer(
-      filters,
+      filters ?? {},
       currentEpoch,
+      this._corePrecision!,
     );
     const data = await this._indexerClient.getCapacityCommitments({
       filters: filtersSerialized,
@@ -841,6 +832,7 @@ export class DealExplorerClient {
             capacityCommitmentsStatuses[i] ?? "undefined",
             this._coreInitTimestamp!,
             this._coreEpochDuration!,
+            this._corePrecision!,
           ),
         );
       }
