@@ -143,7 +143,7 @@ describe("Deal tests", () => {
     expect(dealStopEvent?.args.endedEpoch).toBeDefined();
   });
 
-  test.only("Suspense matched deal when provider removes worker", async () => {
+  test("Suspense matched deal when provider removes worker", async () => {
     const timestamp = (await provider.getBlock("latest"))?.timestamp;
     const epochDuration = await coreContract.epochDuration();
 
