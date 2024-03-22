@@ -1,30 +1,8 @@
-query OffersQuery(
-  $filters: Offer_filter,
-  $offset: Int,
-  $limit: Int,
-  $orderBy: Offer_orderBy,
-  $orderType: OrderDirection,
-) {
-  offers(
-      where: $filters
-      first: $limit
-      skip: $offset
-      orderBy: $orderBy
-      orderDirection: $orderType
-  ) {
-    ...BasicOffer
-  }
-  graphNetworks(first: 1) {
-    offersTotal
-  }
-}
-
 query OfferQuery(
   $id: ID!
 ) {
   offer(id: $id) {
     ...BasicOffer
-    updatedAt
     peers {
         ...BasicPeer
     }
@@ -34,6 +12,7 @@ query OfferQuery(
 fragment BasicOffer on Offer {
     id
     createdAt
+    updatedAt
     pricePerEpoch
     paymentToken {
       id
@@ -81,48 +60,4 @@ fragment ComputeUnitBasic on ComputeUnit {
 fragment EffectorBasic on Effector {
   id
   description
-}
-
-# Query to retrieve all Effectors to filter by them after.
-query EffectorQuery(
-  $offset: Int,
-  $limit: Int,
-  $orderBy: Effector_orderBy,
-  $orderType: OrderDirection,
-) {
-  effectors(
-    first: $limit
-    skip: $offset
-    orderBy: $orderBy
-    orderDirection: $orderType
-  ) {
-    ...EffectorBasic
-  }
-  graphNetworks(first: 1) {
-    effectorsTotal
-  }
-}
-
-# Query to retrieve all Tokens to filter by them after.
-query TokenQuery(
-  $filters: Token_filter,
-  $offset: Int,
-  $limit: Int,
-  $orderBy: Token_orderBy,
-  $orderType: OrderDirection,
-) {
-  tokens(
-    where: $filters
-    first: $limit
-    skip: $offset
-    orderBy: $orderBy
-    orderDirection: $orderType
-  ) {
-    id
-    symbol
-    decimals
-  }
-  graphNetworks(first: 1) {
-    tokensTotal
-  }
 }

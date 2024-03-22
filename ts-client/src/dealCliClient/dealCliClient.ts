@@ -1,9 +1,9 @@
 import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type { ContractsENV } from "../client/config.js";
 import type { DealByProvider, OfferDetail } from "./types/schemes.js";
-import { serializeOfferDetail } from "./serializers/schemes.js";
+import { serializeOfferDetail, serializePeers } from "./serializers/schemes.js";
 import type { SerializationSettings } from "../utils/serializers.js";
-
+import type { BasicPeerFragment } from "./indexerClient/queries/offers-query.generated.js";
 
 /*
  * @dev This client represents endpoints to access desirable indexer data in REST
@@ -33,9 +33,9 @@ export class DealCliClient {
       this._serializationSettings = serializationSettings;
     } else {
       this._serializationSettings = {
-          parseNativeTokenToFixedDefault: 18,
-          parseTokenToFixedDefault: 3,
-        }
+        parseNativeTokenToFixedDefault: 18,
+        parseTokenToFixedDefault: 3,
+      };
     }
   }
 
@@ -48,23 +48,42 @@ export class DealCliClient {
     };
     const data = await this.indexerClient.getOffer(options);
     if (data.offer) {
-      return serializeOfferDetail(data.offer, this._serializationSettings)
+      return serializeOfferDetail(data.offer, this._serializationSettings);
     }
-    return null
+    return null;
+  }
+
+  /*
+   * @notice [Figma] Offer.
+   */
+  async getOfferLikeExplorer(offerId: string): Promise<OfferDetail | null> {
+    const options = {
+      id: offerId,
+    };
+    const data = await this.indexerClient.getOffer(options);
+    let res: OfferDetail | null = null;
+    if (data && data.offer) {
+      res = {
+        ...serializeOfferDetail(data.offer, this._serializationSettings),
+        peers: serializePeers(data.offer.peers as Array<BasicPeerFragment>),
+        updatedAt: Number(data.offer.updatedAt),
+      };
+    }
+    return res;
   }
 
   async getDealsByProvider(providerId: string): Promise<Array<DealByProvider>> {
-    const data = await this.indexerClient.getDeals(
-      {
-        filters: {
-          addedComputeUnits_: { provider: providerId.toLowerCase() }
-        }
-      }
-    )
-    return data.deals.map((deal) => {
-      return {
-        id: deal.id,
-      }
-    }) || []
+    const data = await this.indexerClient.getDeals({
+      filters: {
+        addedComputeUnits_: { provider: providerId.toLowerCase() },
+      },
+    });
+    return (
+      data.deals.map((deal) => {
+        return {
+          id: deal.id,
+        };
+      }) || []
+    );
   }
 }

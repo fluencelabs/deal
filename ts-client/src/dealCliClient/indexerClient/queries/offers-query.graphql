@@ -29,11 +29,21 @@ fragment OfferDetail on Offer {
       name
     }
     peers {
-        id
-        computeUnits {
-            ...ComputeUnitBasic
-        }
+        ...BasicPeer
     }
+}
+
+fragment BasicPeer on Peer {
+  id
+  offer {
+    id
+  }
+  provider {
+    id
+  }
+  computeUnits {
+    ...ComputeUnitBasic
+  }
 }
 
 
