@@ -53,12 +53,10 @@ async function sendProof(
           ethers.hexlify(ethers.randomBytes(32)),
           difficulty,
           {
-            nonce: currentNonce,
+            nonce: currentNonce++,
           },
         ),
       );
-
-      currentNonce += 1;
     }
 
     await Promise.all(txs.map((tx) => tx.wait(DEFAULT_CONFIRMATIONS)));
@@ -241,15 +239,14 @@ describe("Capacity commitment", () => {
 
     console.log("Waiting for withdraw epoches to pass...");
     const withdrawEpochs = await coreContract.withdrawEpochsAfterFailed();
-    // TODO: lesser values aren't working
-    const HACKY_WITHDRAW_EPOCHS = withdrawEpochs * 2n;
-    await skipEpoch(epochDuration, HACKY_WITHDRAW_EPOCHS);
+    await skipEpoch(epochDuration, withdrawEpochs);
 
     await expect(
       capacityContract
         .finishCommitment(commitmentId)
         .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS))
         .catch((e: { data: BytesLike }) => {
+          console.log(e);
           throw new Error(
             capacityContract.interface.parseError(e.data)?.selector,
           );
