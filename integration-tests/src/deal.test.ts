@@ -402,7 +402,8 @@ describe("Deal tests", () => {
       expect(dealStatus === DealStatus.ENDED);
     }
 
-    await skipEpoch(epochDuration, minDealDepositedEpoches);
+    // TODO: plus another epoch to account deal impl
+    await skipEpoch(epochDuration, minDealDepositedEpoches + 1n);
 
     const initialBalance = await paymentToken.balanceOf(signerAddress);
 
