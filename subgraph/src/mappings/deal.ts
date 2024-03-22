@@ -11,7 +11,7 @@ import {
 import { ComputeUnit, Deal } from "../../generated/schema";
 import {
   createOrLoadDealToProvidersAccess,
-  createOrLoadUnregisteredProvider
+  createOrLoadProvider
 } from "../models";
 import {store} from "@graphprotocol/graph-ts";
 
@@ -82,13 +82,13 @@ export function handleWorkerIdUpdated(event: WorkerIdUpdated): void {
 
 export function handleProviderAddedToAccessList(event: ProviderAddedToAccessList): void {
   const deal = Deal.load(formatAddress(event.address)) as Deal;
-  const provider = createOrLoadUnregisteredProvider(formatAddress(event.params.provider));
+  const provider = createOrLoadProvider(formatAddress(event.params.provider), event.block.timestamp);
   createOrLoadDealToProvidersAccess(deal.id, provider.id);
 }
 
 export function handleProviderRemovedFromAccessList(event: ProviderRemovedFromAccessList): void {
   const deal = Deal.load(formatAddress(event.address)) as Deal;
-  const provider = createOrLoadUnregisteredProvider(formatAddress(event.params.provider));
+  const provider = createOrLoadProvider(formatAddress(event.params.provider), event.block.timestamp);
   const entity = createOrLoadDealToProvidersAccess(deal.id, provider.id);
   store.remove("OfferToEffector", entity.id);
 }
