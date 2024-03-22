@@ -842,7 +842,9 @@ export class DealExplorerClient {
     if (
       data.graphNetworks.length == 1 &&
       data.graphNetworks[0] &&
-      data.graphNetworks[0].capacityCommitmentsTotal
+      data.graphNetworks[0].capacityCommitmentsTotal &&
+      // No filters used.
+      Object.keys(filtersSerialized).length == 0
     ) {
       total = data.graphNetworks[0].capacityCommitmentsTotal as string;
     }
