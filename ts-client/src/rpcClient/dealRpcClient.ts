@@ -2,14 +2,14 @@ import type { ethers } from "ethers";
 import {
   Multicall3ContractClientABC,
   type Multicall3ContractCall,
-} from "../../utils/rpcClientABC.js";
-import { Capacity__factory, Deal__factory } from "../../index.js";
+} from "../utils/rpcClientABC.js";
+import { Capacity__factory, Deal__factory } from "../typechain-types/index.js";
 import {
   serializeTxCapacityCommitmentStatus,
   serializeTxDealStatus,
   serializeTxToBigInt,
 } from "./serializers.js";
-import type { CapacityCommitmentStatus } from "../types/schemes.js";
+import type { CapacityCommitmentStatus } from "./schemes.js";
 
 export class DealRpcClient extends Multicall3ContractClientABC {
   constructor(
