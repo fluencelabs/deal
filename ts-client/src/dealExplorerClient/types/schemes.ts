@@ -29,6 +29,8 @@ export interface CapacityCommitmentListView extends ListViewABC {
 
 // @param expiredAt: null if not CC have not been activated yet.
 // @param startedAt: is not null when delegator deposited collateral and CC could be activated.
+// @param rewardDelegatorRate: is not actual rewardDelegatorRate from contract:
+//  it is already represented as percentage Ration (thus, in human-readable manner).
 export interface CapacityCommitmentShort {
   id: string;
   createdAt: number;
