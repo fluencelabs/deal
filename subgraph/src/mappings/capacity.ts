@@ -78,7 +78,18 @@ export function handleCommitmentCreated(event: CommitmentCreated): void {
   commitment.failedEpoch = ZERO_BIG_INT;
   commitment.exitedUnitCount = 0;
   commitment.nextCCFailedEpoch = ZERO_BIG_INT;
-  commitment.computeUnitsCount = 0;
+  // When peer in CC, we can not modify number of CUs of this peer. Thus,
+  //  we could save number of compute units for the commitment when CC created
+  //  instead of waiting for collateral to be deposited
+  //  (i.e. depositCollateral).
+  const loadedComputeUnits = peer.computeUnits.load();
+  const loadedComputeUnitsLength = loadedComputeUnits.length;
+  commitment.computeUnitsCount = loadedComputeUnitsLength;
+  for (let i = 0; i < loadedComputeUnitsLength; i++) {
+    // We rely on contract logic that it is not possible to emit event with not existing CUs.
+    //  Also, we relay that previously we save computeUnits successfully in prev. handler of computeUnitCreated.
+    createOrLoadCapacityCommitmentToComputeUnit(commitment.id, loadedComputeUnits[i].id);
+  }
   commitment.nextAdditionalActiveUnitCount = 0;
   commitment.snapshotEpoch = ZERO_BIG_INT;
   commitment.deleted = false;
@@ -105,15 +116,7 @@ export function handleCommitmentActivated(event: CommitmentActivated): void {
   commitment.startEpoch = event.params.startEpoch;
   commitment.endEpoch = event.params.endEpoch;
   commitment.activeUnitCount = event.params.unitIds.length;
-
-  commitment.computeUnitsCount = event.params.unitIds.length;
-  for (let i = 0; i < event.params.unitIds.length; i++) {
-    const computeUnitId = event.params.unitIds[i].toHexString();
-    // We rely on contract logic that it is not possible to emit event with not existing CUs.
-    //  Also, we relay that previously we save computeUnitId successfully in prev. handler.
-    const computeUnit = ComputeUnit.load(computeUnitId) as ComputeUnit;
-    createOrLoadCapacityCommitmentToComputeUnit(commitment.id, computeUnit.id);
-  }
+  // Note, we add CUs to CC directly on after CommitmentCreated event.
   commitment.nextAdditionalActiveUnitCount = 0;
   const graphNetwork = createOrLoadGraphNetwork();
 
