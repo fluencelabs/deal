@@ -21,15 +21,7 @@ export function tokenValueToRounded(
   const formatted = ethers.formatUnits(value, decimals);
   const parsed = parseFloat(formatted).toFixed(toFixed);
   if (parsed == "0." + "0".repeat(toFixed)) {
-    return "0"
+    return "0";
   }
-  return parsed
-}
-
-// Convert human-readable value to token value with its decimals (e.g. WEI in case of ETH-like tokens).
-export function valueToTokenValue(
-  value: string | bigint | number,
-  decimals: number = 18,
-) {
-  return ethers.parseUnits(value.toString(), decimals).toString();
+  return parsed;
 }
