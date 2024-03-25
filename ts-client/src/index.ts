@@ -7,3 +7,4 @@ export {
   type GetMatchedOffersOut,
   DealNotFoundError,
 } from "./dealMatcherClient/dealMatcherClient.js";
+export { Multicall3ContractClientABC } from "./utils/rpcClientABC.js";

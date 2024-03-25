@@ -47,6 +47,7 @@
     "@typescript-eslint/parser": "^6.9.0",
     "eslint": "^8.52.0",
     "eslint-config-prettier": "^9.0.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-import": "^2.29.0",
     "eslint-plugin-license-header": "^0.6.0",
     "eslint-plugin-node": "^11.1.0",
@@ -67,12 +68,16 @@
     },
     "extends": [
       "eslint:recommended",
-      "plugin:node/recommended",
       "plugin:@typescript-eslint/strict-type-checked",
       "plugin:import/recommended",
       "plugin:import/typescript",
       "prettier"
     ],
+    "settings": {
+      "import/resolver": {
+        "typescript": true
+      }
+    },
     "overrides": [],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
