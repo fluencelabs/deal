@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.13.2](https://github.com/fluencelabs/deal/compare/v0.13.1...v0.13.2) (2024-03-22)
+
+
+### Features
+
+* add statuses to ts-client ([#381](https://github.com/fluencelabs/deal/issues/381)) ([5d29001](https://github.com/fluencelabs/deal/commit/5d2900151cf09b209fc25a4b68294ccaeae2e76f))
+
+## [0.13.1](https://github.com/fluencelabs/deal/compare/v0.13.0...v0.13.1) (2024-03-22)
+
+
+### Bug Fixes
+
+* compute units with min required proofs submitted counter [chain-430] ([#375](https://github.com/fluencelabs/deal/issues/375)) ([11ad638](https://github.com/fluencelabs/deal/commit/11ad6387939a679377f47d7ba2e64729d8394307))
+* reward delegation rate ([#380](https://github.com/fluencelabs/deal/issues/380)) ([5ba5ce3](https://github.com/fluencelabs/deal/commit/5ba5ce3a803e5fc20fded5ddae73ed384bb62c3c))
+* type import ([#378](https://github.com/fluencelabs/deal/issues/378)) ([44c1c76](https://github.com/fluencelabs/deal/commit/44c1c76c38fbb5f2f2a5f9cf8e34c16f4d8bdcc4))
+* use load-or-create-provider instead of manual decide ([#376](https://github.com/fluencelabs/deal/issues/376)) ([93aa719](https://github.com/fluencelabs/deal/commit/93aa71991ef41859a4ae67a4a8ddf1096cb2b2c4))
+
 ## [0.13.0](https://github.com/fluencelabs/deal/compare/v0.12.2...v0.13.0) (2024-03-20)
 
 
