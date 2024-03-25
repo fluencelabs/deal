@@ -87,7 +87,7 @@ export function handleCommitmentCreated(event: CommitmentCreated): void {
   commitment.computeUnitsCount = loadedComputeUnitsLength;
   for (let i = 0; i < loadedComputeUnitsLength; i++) {
     // We rely on contract logic that it is not possible to emit event with not existing CUs.
-    //  Also, we relay that previously we save computeUnits successfully in prev. handler of computeUnitCreated.
+    //  Also, we rely that previously we save computeUnits successfully in prev. handler of computeUnitCreated.
     createOrLoadCapacityCommitmentToComputeUnit(commitment.id, loadedComputeUnits[i].id);
   }
   commitment.nextAdditionalActiveUnitCount = 0;
