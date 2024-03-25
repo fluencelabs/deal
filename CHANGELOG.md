@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.2](https://github.com/fluencelabs/deal/compare/v0.13.1...v0.13.2) (2024-03-22)
+
+
+### Features
+
+* add statuses to ts-client ([#381](https://github.com/fluencelabs/deal/issues/381)) ([5d29001](https://github.com/fluencelabs/deal/commit/5d2900151cf09b209fc25a4b68294ccaeae2e76f))
+
 ## [0.13.1](https://github.com/fluencelabs/deal/compare/v0.13.0...v0.13.1) (2024-03-22)
 
 
