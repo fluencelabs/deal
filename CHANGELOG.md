@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.13.3](https://github.com/fluencelabs/deal/compare/v0.13.2...v0.13.3) (2024-03-26)
+
+
+### Bug Fixes
+
+* bug with Pagination of Providers page [CHAIN-439] ([#387](https://github.com/fluencelabs/deal/issues/387)) ([4d10734](https://github.com/fluencelabs/deal/commit/4d10734c6ec61af22df859a9d5f4e5f6043ea45e))
+* computeUnitsCount for cc in Subgraph ([#385](https://github.com/fluencelabs/deal/issues/385)) ([952e174](https://github.com/fluencelabs/deal/commit/952e17440ce5fa3056cf7f37efc37059d42038bf))
+* do not concatenate strings in rewards calculations ([#388](https://github.com/fluencelabs/deal/issues/388)) ([43ea459](https://github.com/fluencelabs/deal/commit/43ea4593539ae6b80967bf781ee961cc0c0bd4c6))
+
 ## [0.13.2](https://github.com/fluencelabs/deal/compare/v0.13.1...v0.13.2) (2024-03-22)
 
 
