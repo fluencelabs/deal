@@ -137,17 +137,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
     }
 
     function getRewardInfo(uint256 epoch) external view returns (RewardInfo memory) {
-        RewardInfo storage rewardInfo = _getCommitmentStorage().rewardInfoByEpoch[epoch];
-
-        if (rewardInfo.minProofsPerEpoch != 0) {
-            return rewardInfo;
-        }
-
-        return RewardInfo({
-            minProofsPerEpoch: core.minProofsPerEpoch(),
-            maxProofsPerEpoch: core.maxProofsPerEpoch(),
-            totalSuccessProofs: 0
-        });
+        return _getCommitmentStorage().rewardInfoByEpoch[epoch];
     }
 
     function getTotalRewardPool() external view returns (uint256) {
@@ -327,12 +317,18 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
 
         uint256 unitProofCount = unitInfo.proofCountByEpoch[currentEpoch] + 1;
 
-        RewardInfo storage rewardInfo = _getOrSaveRewardPool(currentEpoch);
+        uint256 minProofsPerEpoch_;
+        uint256 maxProofsPerEpoch_;
+
+        RewardInfo storage rewardInfo = s.rewardInfoByEpoch[currentEpoch];
+        if (rewardInfo.minProofsPerEpoch == 0) {
+            rewardInfo.minProofsPerEpoch = core.minProofsPerEpoch();
+            rewardInfo.maxProofsPerEpoch = core.maxProofsPerEpoch();
+        }
+
         if (unitProofCount > rewardInfo.maxProofsPerEpoch) {
             revert TooManyProofs();
         }
-
-        uint256 minProofsPerEpoch_ = rewardInfo.minProofsPerEpoch;
 
         // #region save localUnitNonce
         bytes32 globalUnitNonce_ = keccak256(abi.encodePacked(s.globalNonce, unitId));
@@ -343,12 +339,12 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         // #region save info about proof
 
         // load unitProofCount and add one because we submit new proof
-        if (unitProofCount == minProofsPerEpoch_) {
+        if (unitProofCount == rewardInfo.minProofsPerEpoch) {
             // if proofCount is equal to minRequiredCCProofs, then we have one success for the current epoch
             cc.progress.currentSuccessCount += 1;
             cc.progress.successCountByEpoch[currentEpoch] += 1;
             rewardInfo.totalSuccessProofs += unitProofCount;
-        } else if (unitProofCount > minProofsPerEpoch_) {
+        } else if (unitProofCount > rewardInfo.minProofsPerEpoch) {
             rewardInfo.totalSuccessProofs++;
         }
 
@@ -907,17 +903,5 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         // #endregion
     }
 
-    function _getOrSaveRewardPool(uint256 epoch) internal returns (RewardInfo storage rewardInfo) {
-        CommitmentStorage storage s = _getCommitmentStorage();
-        rewardInfo = s.rewardInfoByEpoch[epoch];
-
-        if (rewardInfo.minProofsPerEpoch != 0) {
-            return rewardInfo;
-        }
-
-        rewardInfo.minProofsPerEpoch = core.minProofsPerEpoch();
-        rewardInfo.maxProofsPerEpoch = core.maxProofsPerEpoch();
-        rewardInfo.totalSuccessProofs = 0;
-    }
     // #endregion
 }
