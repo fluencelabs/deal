@@ -35,7 +35,10 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         bytes32 globalNonce;
         bytes32 nextGlobalNonce;
         uint256 changedNonceEpoch;
-        uint256 rewardBalance;
+        uint256 totalRewardPool;
+        //new storage values
+        mapping(address => uint256) collateralBalance;
+        mapping(address => uint256) rewardBalance;
     }
 
     function _getCommitmentStorage() private pure returns (CommitmentStorage storage s) {
@@ -48,7 +51,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
 
     // #region ------------------ Initializer & Upgradeable ------------------
     receive() external payable {
-        _getCommitmentStorage().rewardBalance += msg.value;
+        _getCommitmentStorage().totalRewardPool += msg.value;
     }
 
     constructor(ICore core_) BaseModule(core_) {}
@@ -145,6 +148,10 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
             maxProofsPerEpoch: core.maxProofsPerEpoch(),
             totalSuccessProofs: 0
         });
+    }
+
+    function getTotalRewardPool() external view returns (uint256) {
+        return _getCommitmentStorage().totalRewardPool;
     }
     // #endregion
 
@@ -384,7 +391,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         IMarket.ComputePeer memory peer = market.getComputePeer(peerId);
         // #endregion
 
-        // #region pre commit commitment snapshot for the previous epoch
+        // #region check status
         CCStatus status = cc.info.status;
         if (status != CCStatus.Inactive && status != CCStatus.Failed) {
             revert CapacityCommitmentIsActive(status);
@@ -411,11 +418,22 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         uint256 collateralPerUnit_ = cc.info.collateralPerUnit;
         uint256 totalCollateral = collateralPerUnit_ * unitCount;
 
-        delegator.sendValue(totalCollateral - cc.finish.totalSlashedCollateral);
+        s.collateralBalance[delegator] += totalCollateral - cc.finish.totalSlashedCollateral;
+
+        // send to DAO
         payable(owner()).sendValue(cc.finish.totalSlashedCollateral);
         // #endregion
 
         emit CommitmentFinished(commitmentId);
+    }
+
+    function withdrawCollateral() external {
+        CommitmentStorage storage s = _getCommitmentStorage();
+        uint256 amount = s.collateralBalance[msg.sender];
+        require(amount > 0, "No collateral balance");
+
+        s.collateralBalance[msg.sender] = 0;
+        payable(msg.sender).sendValue(amount);
     }
 
     function removeCUFromCC(bytes32 commitmentId, bytes32[] calldata unitIds) external {
@@ -434,8 +452,6 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
 
         IMarket.ComputePeer memory peer = market.getComputePeer(peerId);
         IMarket.Offer memory offer = market.getOffer(peer.offerId);
-
-        require(offer.provider == msg.sender, "Only provider can remove capacity commitment");
 
         Snapshot.Cache memory snapshotCache = Snapshot.init(cc);
         CCStatus status = _preCommitCommitmentSnapshot(cc, snapshotCache, peer, currentEpoch_, expiredEpoch);
@@ -474,7 +490,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         );
     }
 
-    function withdrawReward(bytes32 commitmentId) external {
+    function fixReward(bytes32 commitmentId) external {
         // #region load contracts and storage
         IMarket market = core.market();
         CommitmentStorage storage s = _getCommitmentStorage();
@@ -505,17 +521,11 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         address provider = market.getOffer(peer.offerId).provider;
         uint256 amount = cc.vesting.withdraw(currentEpoch);
 
-        uint256 rewardBalance = s.rewardBalance;
-        require(
-            amount <= rewardBalance, "Not enough reward balance pool on the contract. Wait when DAO will refill it."
-        );
-        s.rewardBalance = rewardBalance - amount;
-
         uint256 delegatorReward = (amount * cc.info.rewardDelegatorRate) / PRECISION;
         uint256 providerReward = amount - delegatorReward;
 
-        payable(cc.info.delegator).sendValue(delegatorReward);
-        payable(provider).sendValue(providerReward);
+        s.rewardBalance[cc.info.delegator] += delegatorReward;
+        s.rewardBalance[provider] += providerReward;
         // #endregion
 
         emit CommitmentStatsUpdated(
@@ -528,6 +538,22 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         );
         emit RewardWithdrawn(commitmentId, amount);
     }
+
+    // TODO: remove the argument if we decide to support withdraw only in new CLI version
+    function withdrawReward(bytes32) external {
+        CommitmentStorage storage s = _getCommitmentStorage();
+        uint256 amount = s.rewardBalance[msg.sender];
+        require(amount > 0, "No reward balance");
+
+        uint256 totalRewardPool = s.totalRewardPool;
+        require(amount <= totalRewardPool, "Not enough reward pool on the contract. Wait when DAO will refill it.");
+
+        s.totalRewardPool = totalRewardPool - amount;
+        s.rewardBalance[msg.sender] = 0;
+
+        payable(msg.sender).sendValue(amount);
+    }
+
     // #endregion
 
     // region ----------------- Deal Callbacks -----------------
