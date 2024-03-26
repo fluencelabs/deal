@@ -270,8 +270,10 @@ contract CapacityConst is ICapacityConst, OwnableUpgradableDiamond, EpochControl
         }
         // proof section
         else if (constantType == CapacityConstantType.MinProofsPerEpoch) {
+            require(v > 0, "GlobalConst: minProofsPerEpoch must be greater than 0");
             constantsStorage.proof.minProofsPerEpoch = v;
         } else if (constantType == CapacityConstantType.MaxProofsPerEpoch) {
+            require(v > 0, "GlobalConst: maxProofsPerEpoch must be greater than 0");
             constantsStorage.proof.maxProofsPerEpoch = v;
         } else {
             revert("GlobalConst: unknown constant type");
