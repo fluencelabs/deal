@@ -66,10 +66,9 @@ import {
   calculateEpoch,
   DEFAULT_ORDER_TYPE,
   FILTER_MULTISELECT_MAX,
+  getTotalCounter,
 } from "./utils.js";
-import {
-  serializeCUStatus,
-} from "./serializers/logics.js";
+import { serializeCUStatus } from "./serializers/logics.js";
 import {
   FiltersError,
   serializeCapacityCommitmentsFiltersToIndexer,
@@ -102,11 +101,11 @@ import { FLTToken } from "./constants.js";
 import {
   serializeDealProviderAccessLists,
   serializeEffectorDescription,
-  serializeEffectors
+  serializeEffectors,
 } from "../utils/indexerClient/serializers.js";
 import {
   type SerializationSettings,
-  tokenValueToRounded
+  tokenValueToRounded,
 } from "../utils/serializers.js";
 
 /*
@@ -254,15 +253,14 @@ export class DealExplorerClient {
    * @dev Note, deprecation:
    */
   async getProviders(
-    providersFilters?: ProvidersFilters,
+    filters?: ProvidersFilters,
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: ProviderShortOrderBy = "createdAt",
     orderType: OrderType = DEFAULT_ORDER_TYPE,
   ): Promise<ProviderShortListView> {
     await this._init();
-    const composedFilters =
-      await serializeProviderFiltersToIndexer(providersFilters);
+    const composedFilters = await serializeProviderFiltersToIndexer(filters);
     const data = await this._indexerClient.getProviders({
       filters: composedFilters,
       offset,
@@ -276,18 +274,12 @@ export class DealExplorerClient {
         res.push(serializeProviderShort(provider, this._serializationSettings));
       }
     }
-    let total = null;
-    if (
-      !providersFilters &&
-      data.graphNetworks.length == 1 &&
-      data.graphNetworks[0] &&
-      data.graphNetworks[0].providersTotal
-    ) {
-      total = data.graphNetworks[0].providersTotal as string;
-    }
     return {
       data: res,
-      total,
+      total: getTotalCounter(
+        filters,
+        data.graphNetworks[0]?.providersTotal ?? 0,
+      ),
     };
   }
 
@@ -433,7 +425,7 @@ export class DealExplorerClient {
   }
 
   async _getOffersImpl(
-    offerFilters?: OffersFilters,
+    filters?: OffersFilters,
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: OfferShortOrderBy = "createdAt",
@@ -442,19 +434,19 @@ export class DealExplorerClient {
     const orderByConverted = serializeOfferShortOrderByToIndexer(orderBy);
 
     const _cond =
-      (offerFilters?.minPricePerWorkerEpoch ||
-        offerFilters?.maxPricePerWorkerEpoch) !== undefined;
+      (filters?.minPricePerWorkerEpoch || filters?.maxPricePerWorkerEpoch) !==
+      undefined;
     const commonTokenDecimals = await this._calculateTokenDecimalsForFilters(
-      offerFilters?.paymentTokens,
+      filters?.paymentTokens,
       _cond,
     );
 
-    const filtersConverted = await serializeOffersFiltersToIndexerType(
-      offerFilters,
+    const filtersSerialized = await serializeOffersFiltersToIndexerType(
+      filters,
       commonTokenDecimals,
     );
     const data = await this._indexerClient.getOffers({
-      filters: filtersConverted,
+      filters: filtersSerialized,
       offset,
       limit,
       orderBy: orderByConverted,
@@ -466,18 +458,10 @@ export class DealExplorerClient {
         res.push(serializeOfferShort(offer, this._serializationSettings));
       }
     }
-    let total = null;
-    if (
-      !offerFilters &&
-      data.graphNetworks.length == 1 &&
-      data.graphNetworks[0] &&
-      data.graphNetworks[0].offersTotal
-    ) {
-      total = data.graphNetworks[0].offersTotal as string;
-    }
+    console.log(filtersSerialized, filtersSerialized);
     return {
       data: res,
-      total,
+      total: getTotalCounter(filters, data.graphNetworks[0]?.offersTotal ?? 0),
     };
   }
 
@@ -522,7 +506,7 @@ export class DealExplorerClient {
   }
 
   async _getDealsImpl(
-    dealsFilters?: DealsFilters,
+    filters?: DealsFilters,
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: DealsShortOrderBy = "createdAt",
@@ -533,19 +517,19 @@ export class DealExplorerClient {
     const orderByConverted = serializeDealShortOrderByToIndexer(orderBy);
 
     const _cond =
-      (dealsFilters?.minPricePerWorkerEpoch ||
-        dealsFilters?.maxPricePerWorkerEpoch) !== undefined;
+      (filters?.minPricePerWorkerEpoch || filters?.maxPricePerWorkerEpoch) !==
+      undefined;
     const commonTokenDecimals = await this._calculateTokenDecimalsForFilters(
-      dealsFilters?.paymentTokens,
+      filters?.paymentTokens,
       _cond,
     );
 
-    const filtersConverted = await serializeDealsFiltersToIndexer(
-      dealsFilters,
+    const filtersSerialized = await serializeDealsFiltersToIndexer(
+      filters,
       commonTokenDecimals,
     );
     const data = await this._indexerClient.getDeals({
-      filters: filtersConverted,
+      filters: filtersSerialized,
       offset,
       limit,
       orderBy: orderByConverted,
@@ -571,23 +555,14 @@ export class DealExplorerClient {
               dealStatus: dealStatuses[i],
               freeBalance: freeBalances[i],
             },
-              this._serializationSettings,
+            this._serializationSettings,
           ),
         );
       }
     }
-    let total = null;
-    if (
-      !dealsFilters &&
-      data.graphNetworks.length == 1 &&
-      data.graphNetworks[0] &&
-      data.graphNetworks[0].dealsTotal
-    ) {
-      total = data.graphNetworks[0].dealsTotal as string;
-    }
     return {
       data: res,
-      total,
+      total: getTotalCounter(filters, data.graphNetworks[0]?.dealsTotal ?? 0),
     };
   }
 
@@ -712,23 +687,14 @@ export class DealExplorerClient {
           cid: effector.id,
           description: serializeEffectorDescription({
             cid: effector.id,
-            description: effector.description
-          }
-      ),
+            description: effector.description,
+          }),
         };
       });
     }
-    let total = null;
-    if (
-      data.graphNetworks.length == 1 &&
-      data.graphNetworks[0] &&
-      data.graphNetworks[0].effectorsTotal
-    ) {
-      total = data.graphNetworks[0].effectorsTotal as string;
-    }
     return {
       data: res,
-      total,
+      total: getTotalCounter(null, data.graphNetworks[0]?.effectorsTotal ?? 0),
     };
   }
 
@@ -756,17 +722,9 @@ export class DealExplorerClient {
         };
       });
     }
-    let total = null;
-    if (
-      data.graphNetworks.length == 1 &&
-      data.graphNetworks[0] &&
-      data.graphNetworks[0].tokensTotal
-    ) {
-      total = data.graphNetworks[0].tokensTotal as string;
-    }
     return {
       data: res,
-      total,
+      total: getTotalCounter(null, data.graphNetworks[0]?.tokensTotal ?? 0),
     };
   }
 
@@ -837,20 +795,12 @@ export class DealExplorerClient {
         );
       }
     }
-    // TODO: generalize code below.
-    let total = null;
-    if (
-      data.graphNetworks.length == 1 &&
-      data.graphNetworks[0] &&
-      data.graphNetworks[0].capacityCommitmentsTotal &&
-      // No filters used.
-      Object.keys(filtersSerialized).length == 0
-    ) {
-      total = data.graphNetworks[0].capacityCommitmentsTotal as string;
-    }
     return {
       data: res,
-      total,
+      total: getTotalCounter(
+        filters,
+        data.graphNetworks[0]?.capacityCommitmentsTotal ?? 0,
+      ),
     };
   }
 
@@ -1005,9 +955,7 @@ export class DealExplorerClient {
     }
     const computeUnit = data.computeUnit;
 
-    const { status } = serializeCUStatus(
-      computeUnit,
-    );
+    const { status } = serializeCUStatus(computeUnit);
     const currentPeerCapacityCommitment =
       computeUnit.peer.currentCapacityCommitment;
 
@@ -1063,19 +1011,9 @@ export class DealExplorerClient {
         createdAtEpoch: Number(proof.createdEpoch),
       };
     });
-
-    // TODO: generalize code below.
-    let total = null;
-    if (
-      data.graphNetworks.length == 1 &&
-      data.graphNetworks[0] &&
-      data.graphNetworks[0].proofsTotal
-    ) {
-      total = data.graphNetworks[0].proofsTotal as string;
-    }
     return {
       data: res,
-      total,
+      total: getTotalCounter(filters, data.graphNetworks[0]?.proofsTotal ?? 0),
     };
   }
 
@@ -1160,15 +1098,17 @@ export class DealExplorerClient {
       );
     }
 
-    const data = await this._indexerClient.getCapacityCommitmentStatsPerEpoches({
-      filters: {
-        capacityCommitment_: { id: capacityCommitmentId },
+    const data = await this._indexerClient.getCapacityCommitmentStatsPerEpoches(
+      {
+        filters: {
+          capacityCommitment_: { id: capacityCommitmentId },
+        },
+        offset,
+        limit,
+        orderBy,
+        orderType,
       },
-      offset,
-      limit,
-      orderBy,
-      orderType,
-    });
+    );
 
     // TODO: generate table with missed epoches as well (there might be filtration by epoches,
     //  thus, logic could be complicated, resolve after discussion with PM.
