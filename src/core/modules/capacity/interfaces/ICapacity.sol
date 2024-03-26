@@ -145,6 +145,7 @@ interface ICapacity {
         uint256 snapshotEpoch;
         uint256 activeUnitCount;
         uint256 nextAdditionalActiveUnitCount;
+        mapping(uint256 => uint256) successCountByEpoch;
     }
 
     struct CommitmentView {

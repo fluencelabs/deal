@@ -336,6 +336,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         if (unitProofCount == minProofsPerEpoch_) {
             // if proofCount is equal to minRequiredCCProofs, then we have one success for the current epoch
             cc.progress.currentSuccessCount += 1;
+            cc.progress.successCountByEpoch[currentEpoch] += 1;
             rewardInfo.totalSuccessProofs += unitProofCount;
         } else if (unitProofCount > minProofsPerEpoch_) {
             rewardInfo.totalSuccessProofs++;
@@ -696,9 +697,11 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
             uint256 restFailCount = maxFailCount - prevFailCount;
             newStatus = CCStatus.Failed;
 
-            uint256 failsInFirstEpoch = activeUnitCount_ - currentSuccessCount;
+            uint256 firstPeriodEpoch = lastSnapshotEpoch + 1;
+            uint256 failsInFirstEpoch = activeUnitCount_ - cc.progress.successCountByEpoch[firstPeriodEpoch];
+
             if (failsInFirstEpoch >= restFailCount) {
-                snapshotCache.current.failedEpoch = lastSnapshotEpoch + 1;
+                snapshotCache.current.failedEpoch = firstPeriodEpoch;
                 snapshotCache.current.remainingFailedUnitsInLastEpoch = restFailCount % failsInFirstEpoch;
             } else {
                 // numberOfFillFailedEpoch is a number of epochs when units not send proofs
