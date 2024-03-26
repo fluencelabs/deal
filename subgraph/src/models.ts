@@ -52,6 +52,11 @@ export function createOrLoadProvider(
     entity.computeUnitsTotal = 0;
     entity.peerCount = 0;
     entity.save();
+
+    // Upd stats below.
+    let graphNetwork = createOrLoadGraphNetwork();
+    graphNetwork.providersTotal = graphNetwork.providersTotal.plus(UNO_BIG_INT);
+    graphNetwork.save()
   }
   return entity as Provider;
 }
