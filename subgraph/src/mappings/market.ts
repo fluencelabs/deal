@@ -55,10 +55,6 @@ export function handleProviderInfoUpdated(event: ProviderInfoUpdated): void {
   provider.name = event.params.name;
   provider.registered = true;
   provider.save();
-
-  let graphNetwork = createOrLoadGraphNetwork();
-  graphNetwork.providersTotal = graphNetwork.providersTotal.plus(UNO_BIG_INT);
-  graphNetwork.save()
 }
 
 export function handleEffectorInfoSet(event: EffectorInfoSet): void {
