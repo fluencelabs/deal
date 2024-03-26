@@ -464,7 +464,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
 
             require(unit.peerId == peerId, "Compute unit doesn't belong to capacity commitment");
             require(unit.deal == address(0x00), "Compute unit is in deal");
-            require(cc.finish.isUnitExited[unitId], "Compute unit is not exited");
+            require(!cc.finish.isUnitExited[unitId], "Compute unit is exited");
 
             UnitInfo storage unitInfo = cc.unitInfoById[unitId];
             _commitUnitSnapshot(cc, unitInfo, currentEpoch_, expiredEpoch, snapshotCache.current.failedEpoch);
