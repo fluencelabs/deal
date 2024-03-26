@@ -7,7 +7,7 @@ export const DEFAULT_ORDER_TYPE: OrderType = "desc";
 // Returns total counter according to provided total and filters.
 // Note, now it returns null when filters are not empty because for subgraph it
 //  is impossible to get counter with filtration.
-// ref to https://github.com/graphprotocol/graph-node/issues/1309.
+// Ref to https://github.com/graphprotocol/graph-node/issues/1309.
 export function getTotalCounter(
   // @ts-ignore
   filters: any,
