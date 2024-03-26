@@ -43,6 +43,8 @@ import {
   serializeContractRateToPercentage
 } from "../../utils/indexerClient/serializers.js";
 
+const BIG_INT_ZERO = BigInt(0)
+
 export function serializeOfferShort(offer: BasicOfferFragment, serializationSettings: SerializationSettings,): OfferShort {
   return {
     id: offer.id,
@@ -248,8 +250,8 @@ export function serializeCapacityCommitmentDetail(
   serializationSettings: SerializationSettings,
   precision: number,
 ): CapacityCommitmentDetail {
-  const _totalRewards = totalRewards ? totalRewards : BigInt(0);
-  const _unlockedRewards = unlockedRewards ? unlockedRewards : BigInt(0);
+  const _totalRewards = totalRewards ? BigInt(totalRewards) : BIG_INT_ZERO;
+  const _unlockedRewards = unlockedRewards ? BigInt(unlockedRewards) : BIG_INT_ZERO;
   // First of all convert to [0, 1] with accordance of precision and than to [0, 100] to % format.
   const rewardDelegatorRatePercentage = serializeContractRateToPercentage(rewardDelegatorRate, precision);
   const unclockedRewardsSerialized = serializeRewards(
@@ -293,7 +295,7 @@ export function serializeCapacityCommitmentDetail(
     rewardsNotWithdrawnDelegator: notWithdrawnRewardsSerialized.delegator,
     rewardsNotWithdrawnProvider: notWithdrawnRewardsSerialized.provider,
     rewardsTotal: tokenValueToRounded(
-      _totalRewards + rewardWithdrawn,
+      _totalRewards + BigInt(rewardWithdrawn),
       serializationSettings.parseNativeTokenToFixedDefault,
     ),
     delegatorAddress:
