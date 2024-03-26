@@ -466,10 +466,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
             IMarket.ComputeUnit memory unit = market.getComputeUnit(unitId);
 
             require(unit.peerId == peerId, "Compute unit doesn't belong to capacity commitment");
-
-            if (unit.deal != address(0x00)) {
-                market.returnComputeUnitFromDeal(unitId);
-            }
+            require(unit.deal == address(0x00), "Compute unit is in deal");
 
             UnitInfo storage unitInfo = cc.unitInfoById[unitId];
             bool success =
