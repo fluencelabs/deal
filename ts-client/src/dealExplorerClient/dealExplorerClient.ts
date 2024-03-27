@@ -458,7 +458,6 @@ export class DealExplorerClient {
         res.push(serializeOfferShort(offer, this._serializationSettings));
       }
     }
-    console.log(filtersSerialized, filtersSerialized);
     return {
       data: res,
       total: getTotalCounter(filters, data.graphNetworks[0]?.offersTotal ?? 0),
