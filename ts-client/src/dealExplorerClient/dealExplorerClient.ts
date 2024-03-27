@@ -278,7 +278,7 @@ export class DealExplorerClient {
       data: res,
       total: getTotalCounter(
         filters,
-        data.graphNetworks[0]?.providersTotal ?? 0,
+        data.graphNetworks[0]?.providersRegisteredTotal ?? 0,
       ),
     };
   }
