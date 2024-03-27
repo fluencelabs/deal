@@ -1,18 +1,29 @@
 import { assert, describe, expect, test } from "vitest";
 import { createCommitments, registerMarketOffer } from "./helpers.js";
-import { type ContractTransactionResponse, ethers, zeroPadBytes } from "ethers";
+import {
+  type BytesLike,
+  type ContractTransactionResponse,
+  ethers,
+  formatEther,
+  zeroPadBytes,
+} from "ethers";
 import { checkEvent } from "./confirmations.js";
 import {
+  CapacityConstantType,
   CC_DURATION_DEFAULT,
   CC_MAX_FAILED_RATIO,
+  CC_PRECISION,
+  CC_SLASHING_RATE_PERCENT,
   CCStatus,
   DEFAULT_CONFIRMATIONS,
 } from "./constants.js";
-import { skipEpoch } from "./utils.js";
+import { bigintAbs, skipEpoch, snapshot } from "./utils.js";
 import { config } from "dotenv";
 import {
   capacityContract,
   coreContract,
+  delegator,
+  delegatorAddress,
   marketContract,
   paymentTokenAddress,
   provider,
@@ -42,16 +53,14 @@ async function sendProof(
           ethers.hexlify(ethers.randomBytes(32)),
           difficulty,
           {
-            nonce: currentNonce,
+            nonce: currentNonce++,
           },
         ),
       );
-
-      currentNonce += 1;
     }
 
     await Promise.all(txs.map((tx) => tx.wait(DEFAULT_CONFIRMATIONS)));
-    await skipEpoch(provider, epochDuration);
+    await skipEpoch(epochDuration);
     sentProofRounds += 1;
   }
 }
@@ -66,6 +75,7 @@ async function DepositCC(
 
   console.log("Depositing collateral...");
   const depositCollateralReceipt = await capacityContract
+    .connect(delegator)
     .depositCollateral(commitmentIds, {
       value: collateralPerUnit,
     })
@@ -102,13 +112,39 @@ async function DepositCC(
     BigInt(CCStatus.WaitStart),
   );
 
-  await skipEpoch(provider, epochDuration, 1);
+  await skipEpoch(epochDuration, 1);
 
   const currentState = await capacityContract.getCommitment(cuID);
   expect(currentState.status).toEqual(BigInt(CCStatus.Active));
 }
 
 describe("Capacity commitment", () => {
+  let commitmentIdSnapshot: string;
+  let registeredOfferSnapshot: Awaited<ReturnType<typeof registerMarketOffer>>;
+
+  snapshot(async () => {
+    const registeredOffer = await registerMarketOffer(
+      marketContract,
+      signerAddress,
+      paymentTokenAddress,
+    );
+
+    const [commitmentId] = await createCommitments(
+      capacityContract,
+      delegatorAddress,
+      registeredOffer.peers.map((p) => p.peerId),
+    );
+
+    console.log("Commitment is created", commitmentId);
+
+    assert(commitmentId, "Commitment ID doesn't exist");
+
+    await DepositCC([commitmentId], registeredOffer.peers, CC_DURATION_DEFAULT);
+
+    commitmentIdSnapshot = commitmentId;
+    registeredOfferSnapshot = registeredOffer;
+  });
+
   test("CC can be removed before deposit", async () => {
     const registeredOffer = await registerMarketOffer(
       marketContract,
@@ -145,28 +181,12 @@ describe("Capacity commitment", () => {
   });
 
   test("CC fails if proofs haven't been sent", async () => {
-    const registeredOffer = await registerMarketOffer(
-      marketContract,
-      signerAddress,
-      paymentTokenAddress,
-    );
-
-    const [commitmentId] = await createCommitments(
-      capacityContract,
-      signerAddress,
-      registeredOffer.peers.map((p) => p.peerId),
-    );
-
-    console.log("Commitment is created", commitmentId);
-
-    assert(commitmentId, "Commitment ID doesn't exist");
-
-    await DepositCC([commitmentId], registeredOffer.peers, CC_DURATION_DEFAULT);
-
+    const registeredOffer = registeredOfferSnapshot;
+    const commitmentId = commitmentIdSnapshot;
     const epochDuration = await coreContract.epochDuration();
 
     console.log("Waiting for CC to fail without proofs...");
-    await skipEpoch(provider, epochDuration, CC_MAX_FAILED_RATIO);
+    await skipEpoch(epochDuration, CC_MAX_FAILED_RATIO);
     const currentStateAfterSomeEpoches =
       await capacityContract.getCommitment(commitmentId);
     expect(currentStateAfterSomeEpoches.status).toEqual(
@@ -191,7 +211,7 @@ describe("Capacity commitment", () => {
 
     console.log("Waiting for withdraw epoches to pass...");
     const withdrawEpochs = await coreContract.withdrawEpochsAfterFailed();
-    await skipEpoch(provider, epochDuration, withdrawEpochs);
+    await skipEpoch(epochDuration, withdrawEpochs);
 
     console.log("Finishing commitment...");
     const finishCommitmentReceipt = await capacityContract
@@ -207,27 +227,10 @@ describe("Capacity commitment", () => {
   });
 
   test("Cannot finish CC without removing CUs", async () => {
-    const registeredOffer = await registerMarketOffer(
-      marketContract,
-      signerAddress,
-      paymentTokenAddress,
-    );
-
-    const [commitmentId] = await createCommitments(
-      capacityContract,
-      signerAddress,
-      registeredOffer.peers.map((p) => p.peerId),
-    );
-
-    console.log("Commitment is created", commitmentId);
-
-    assert(commitmentId, "Commitment ID doesn't exist");
-
-    await DepositCC([commitmentId], registeredOffer.peers, CC_DURATION_DEFAULT);
-
+    const commitmentId = commitmentIdSnapshot;
     console.log("Waiting for CC to fail without proofs...");
     const epochDuration = await coreContract.epochDuration();
-    await skipEpoch(provider, epochDuration, CC_MAX_FAILED_RATIO);
+    await skipEpoch(epochDuration, CC_MAX_FAILED_RATIO);
     const currentStateAfterSomeEpoches =
       await capacityContract.getCommitment(commitmentId);
     expect(currentStateAfterSomeEpoches.status).toEqual(
@@ -236,38 +239,27 @@ describe("Capacity commitment", () => {
 
     console.log("Waiting for withdraw epoches to pass...");
     const withdrawEpochs = await coreContract.withdrawEpochsAfterFailed();
-    // TODO: lesser values aren't working
-    const HACKY_WITHDRAW_EPOCHS = withdrawEpochs * 2n;
-    await skipEpoch(provider, epochDuration, HACKY_WITHDRAW_EPOCHS);
+    await skipEpoch(epochDuration, withdrawEpochs);
 
-    // TODO: Add error class
     await expect(
       capacityContract
         .finishCommitment(commitmentId)
-        .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS)),
-    ).rejects.toThrow("(unknown custom error)");
+        .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS))
+        .catch((e: { data: BytesLike }) => {
+          console.log(e);
+          throw new Error(
+            capacityContract.interface.parseError(e.data)?.selector,
+          );
+        }),
+    ).rejects.toThrow(
+      capacityContract.interface.getError("CapacityCommitmentIsActive(uint8)")
+        ?.selector,
+    );
   });
 
   test("CC ends after duration", async () => {
-    console.log(await capacityContract.getAddress());
-    const registeredOffer = await registerMarketOffer(
-      marketContract,
-      signerAddress,
-      paymentTokenAddress,
-    );
-
-    const [commitmentId] = await createCommitments(
-      capacityContract,
-      signerAddress,
-      registeredOffer.peers.map((p) => p.peerId),
-    );
-
-    console.log("Commitment is created", commitmentId);
-
-    assert(commitmentId, "Commitment ID doesn't exist");
-
-    await DepositCC([commitmentId], registeredOffer.peers, CC_DURATION_DEFAULT);
-
+    const registeredOffer = registeredOfferSnapshot;
+    const commitmentId = commitmentIdSnapshot;
     const cuId = registeredOffer.peers[0]?.unitIds[0];
     assert(cuId, "cuID not defined");
 
@@ -283,7 +275,7 @@ describe("Capacity commitment", () => {
 
     // TODO: need to wait additional epoch, otherwise CC doesn't end
     const epochDuration = await coreContract.epochDuration();
-    await skipEpoch(provider, epochDuration, 1);
+    await skipEpoch(epochDuration, 1);
 
     const nextStatus = await capacityContract.getCommitment(commitmentId);
     expect(nextStatus.status).toEqual(BigInt(CCStatus.Inactive));
@@ -306,7 +298,7 @@ describe("Capacity commitment", () => {
 
     console.log("Waiting for withdraw epoches to pass...");
     const withdrawEpochs = await coreContract.withdrawEpochsAfterFailed();
-    await skipEpoch(provider, epochDuration, withdrawEpochs);
+    await skipEpoch(epochDuration, withdrawEpochs);
 
     console.log("Finishing commitment...");
     const finishCommitmentReceipt = await capacityContract
@@ -321,7 +313,8 @@ describe("Capacity commitment", () => {
     expect(finishCommitmentEvent.args).toEqual([commitmentId]);
   });
 
-  test.skip("Long-term CC with reward withdrawals", async () => {
+  // TODO: fix
+  test.skip("Long-term CC with reward withdrawals after single proof", async () => {
     const registeredOffer = await registerMarketOffer(
       marketContract,
       signerAddress,
@@ -330,6 +323,7 @@ describe("Capacity commitment", () => {
 
     const vestingDuration = await coreContract.vestingPeriodDuration();
     const vestingCount = await coreContract.vestingPeriodCount();
+    console.log(vestingDuration, vestingCount);
 
     const LONG_TERM_DURATION = vestingDuration * vestingCount + 1n;
 
@@ -344,17 +338,156 @@ describe("Capacity commitment", () => {
 
     assert(commitmentId, "Commitment ID doesn't exist");
 
+    await DepositCC([commitmentId], registeredOffer.peers, LONG_TERM_DURATION);
+
     const cuId = registeredOffer.peers[0]?.unitIds[0];
     assert(cuId, "cuID not defined");
 
     console.log(
       "Sending proofs regularly for vesting period of CC duration...",
     );
-    await sendProof(signerAddress, cuId, 2, Number(vestingDuration));
 
-    const currentStateAfterSentProofs =
-      await capacityContract.getCommitment(commitmentId);
-    expect(currentStateAfterSentProofs.status).toEqual(BigInt(CCStatus.Active));
+    const block = await provider.getBlock("latest");
+    assert(block, "No block");
+    const deltaTillNextEpoch =
+      vestingDuration - (BigInt(block.number) % vestingDuration);
+    console.log("deltaTillNextEpoch", deltaTillNextEpoch);
+
+    await sendProof(signerAddress, cuId, 2, 1);
+    const status = await capacityContract.getStatus(commitmentId);
+    console.log(status);
+    const epochDuration = await coreContract.epochDuration();
+    await skipEpoch(epochDuration, 1);
+
+    const unlockedReward = await capacityContract.unlockedRewards(commitmentId);
+    const totalReward = await capacityContract.totalRewards(commitmentId);
+    const poolAmount = await coreContract.getRewardPool(
+      await coreContract.currentEpoch(),
+    );
+    const status1 = await capacityContract.getStatus(commitmentId);
+    console.log(await capacityContract.getAddress());
+    console.log(status1);
+    console.log(unlockedReward, totalReward, poolAmount);
+    assert(totalReward > 0, "Should be greater than 0");
+  });
+
+  // TODO: implement
+  test("Long-term CC with reward withdrawals when CC is failed", async () => {});
+
+  test("Long-term CC with full reward withdrawals", async () => {
+    const MAX_ERROR_WEI = CC_PRECISION;
+    const registeredOffer = await registerMarketOffer(
+      marketContract,
+      signerAddress,
+      paymentTokenAddress,
+    );
+
+    const vestingDuration = await coreContract.vestingPeriodDuration();
+    const vestingCount = await coreContract.vestingPeriodCount();
+    console.log(vestingDuration, vestingCount);
+
+    const LONG_TERM_DURATION = vestingDuration * vestingCount + 1n;
+
+    const [commitmentId] = await createCommitments(
+      capacityContract,
+      delegatorAddress,
+      registeredOffer.peers.map((p) => p.peerId),
+      CC_DURATION_DEFAULT,
+    );
+
+    console.log("Commitment is created", commitmentId);
+
+    assert(commitmentId, "Commitment ID doesn't exist");
+
+    const epochDuration = await coreContract.epochDuration();
+    let currentEpoch = await coreContract.currentEpoch();
+
+    await skipEpoch(
+      epochDuration,
+      vestingDuration - (currentEpoch % vestingDuration) + 1n,
+    );
+
+    currentEpoch = await coreContract.currentEpoch();
+    console.log(currentEpoch, "currentEpoch after skip before deposit");
+    console.log(await capacityContract.getAddress());
+
+    await DepositCC([commitmentId], registeredOffer.peers, CC_DURATION_DEFAULT);
+
+    const cuId = registeredOffer.peers[0]?.unitIds[0];
+    assert(cuId, "cuID not defined");
+
+    console.log(
+      "Sending proofs regularly for vesting period of CC duration...",
+    );
+
+    const block = await provider.getBlock("latest");
+    assert(block, "No block");
+    const deltaTillNextEpoch =
+      vestingDuration - (BigInt(block.number) % vestingDuration);
+    console.log("deltaTillNextEpoch", deltaTillNextEpoch);
+
+    currentEpoch = await coreContract.currentEpoch();
+    console.log(currentEpoch, "currentEpoch after deposit before proof");
+
+    const ccInfo = await capacityContract.getCommitment(commitmentId);
+    console.log(ccInfo);
+    // TODO: Add check for intermediate vesting value, e.g. after 2-3 proof sending epoches
+    await sendProof(signerAddress, cuId, 2, Number(CC_DURATION_DEFAULT));
+
+    const status = await capacityContract.getStatus(commitmentId);
+    expect(status).toEqual(BigInt(CCStatus.Inactive));
+
+    {
+      const rewardPool = await coreContract.getRewardPool(currentEpoch);
+
+      const unlockedVesting =
+        await capacityContract.unlockedRewards(commitmentId);
+      const totalVesting = await capacityContract.totalRewards(commitmentId);
+
+      expect(
+        bigintAbs(totalVesting - rewardPool * (CC_DURATION_DEFAULT - 1n)) <=
+          MAX_ERROR_WEI,
+      ).toBeTruthy();
+
+      // TODO: Figure out how is it work
+      // vestingRewards 0n 27n
+      // vestingRewards 16666666666666666666n 28n
+      // vestingRewards 16666666666666666666n 29n
+      // vestingRewards 66666666666666666664n 30n
+      // vestingRewards 83333333333333333330n 31n
+
+      // expect(
+      //   bigintAbs(unlockedVesting - totalVesting) <= MAX_ERROR_WEI,
+      // ).toBeTruthy();
+    }
+
+    await capacityContract
+      .removeCUFromCC(commitmentId, [cuId])
+      .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
+
+    // Wait till all vestings are available
+    await skipEpoch(epochDuration, 20);
+
+    const rewardPool = await coreContract.getRewardPool(currentEpoch);
+    console.log(rewardPool, "rewardPool");
+    const unlockedVesting =
+      await capacityContract.unlockedRewards(commitmentId);
+    const totalVesting = await capacityContract.totalRewards(commitmentId);
+
+    expect(
+      bigintAbs(totalVesting - rewardPool * CC_DURATION_DEFAULT) <=
+        MAX_ERROR_WEI,
+    ).toBeTruthy();
+    expect(
+      bigintAbs(unlockedVesting - totalVesting) <= MAX_ERROR_WEI,
+    ).toBeTruthy();
+
+    console.log("Waiting for withdraw epoches to pass...");
+    const withdrawEpochs = await coreContract.withdrawEpochsAfterFailed();
+    await skipEpoch(epochDuration, withdrawEpochs);
+
+    let delegatorBalance = await provider.getBalance(delegatorAddress);
+    let providerBalance = await provider.getBalance(signerAddress);
 
     const withdrawRewardReceipt = await capacityContract
       .withdrawReward(commitmentId)
@@ -363,18 +496,24 @@ describe("Capacity commitment", () => {
       capacityContract.filters.RewardWithdrawn,
       withdrawRewardReceipt,
     );
-    expect(withdrawRewardEvent?.args).toEqual([commitmentId, 123]);
+    expect(withdrawRewardEvent?.args).toEqual([commitmentId, unlockedVesting]);
 
-    // Add more withdrawals rewards. For now, just end CC
-    await sendProof(
-      signerAddress,
-      cuId,
-      2,
-      Number(LONG_TERM_DURATION - vestingDuration) - 1,
-    );
+    let newDelegatorBalance = await provider.getBalance(delegatorAddress);
+    let newProviderBalance = await provider.getBalance(signerAddress);
 
-    const nextStatus = await capacityContract.getCommitment(commitmentId);
-    expect(nextStatus.status).toEqual(BigInt(CCStatus.Inactive));
+    console.log(newProviderBalance, providerBalance, unlockedVesting / 2n);
+    expect(
+      bigintAbs(newProviderBalance - providerBalance - unlockedVesting / 2n) <=
+        MAX_ERROR_WEI,
+    ).toBeTruthy();
+    console.log(newDelegatorBalance, delegatorBalance, unlockedVesting / 2n);
+    expect(
+      bigintAbs(
+        newDelegatorBalance - delegatorBalance - unlockedVesting / 2n,
+      ) <= MAX_ERROR_WEI,
+    ).toBeTruthy();
+
+    delegatorBalance = await provider.getBalance(delegatorAddress);
 
     const finishCommitmentReceipt = await capacityContract
       .finishCommitment(commitmentId)
@@ -386,68 +525,137 @@ describe("Capacity commitment", () => {
     );
     assert(finishCommitmentEvent, "No finish commitment event");
     expect(finishCommitmentEvent.args).toEqual([commitmentId]);
-  });
 
-  test("Send too many proofs to CC per epoch", async () => {
-    const registeredOffer = await registerMarketOffer(
-      marketContract,
-      signerAddress,
-      paymentTokenAddress,
-    );
-
-    const [commitmentId] = await createCommitments(
-      capacityContract,
-      signerAddress,
-      registeredOffer.peers.map((p) => p.peerId),
-    );
-
-    console.log("Commitment is created", commitmentId);
-
-    assert(commitmentId, "Commitment ID doesn't exist");
+    newDelegatorBalance = await provider.getBalance(delegatorAddress);
 
     const collateralPerUnit = await coreContract.fltCollateralPerUnit();
+    console.log(newDelegatorBalance, delegatorBalance, collateralPerUnit);
+    expect(
+      bigintAbs(newDelegatorBalance - delegatorBalance - collateralPerUnit) <=
+        MAX_ERROR_WEI,
+    ).toBeTruthy();
+  });
 
-    console.log("Depositing collateral...");
-    const depositCollateralReceipt = await capacityContract
-      .depositCollateral([commitmentId], {
-        value: collateralPerUnit,
-      })
-      .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
-
-    const [collateralDepositedEvent] = checkEvent(
-      capacityContract.filters.CollateralDeposited,
-      depositCollateralReceipt,
-    );
-    assert(collateralDepositedEvent);
-    expect(collateralDepositedEvent.args).toEqual([
-      commitmentId,
-      collateralPerUnit,
-    ]);
-
-    const [capacityActivatedEvent] = checkEvent(
-      capacityContract.filters.CommitmentActivated,
-      depositCollateralReceipt,
-    );
-    assert(capacityActivatedEvent);
-
-    expect([
-      capacityActivatedEvent.args.peerId,
-      capacityActivatedEvent.args.commitmentId,
-      capacityActivatedEvent.args.endEpoch -
-        capacityActivatedEvent.args.startEpoch,
-    ]).toEqual([
-      registeredOffer.peers[0]?.peerId,
-      commitmentId,
-      CC_DURATION_DEFAULT,
-    ]);
+  test("CC is slashed after missing proofs", async () => {
+    const registeredOffer = registeredOfferSnapshot;
+    const commitmentId = commitmentIdSnapshot;
+    const cuId = registeredOffer.peers[0]?.unitIds[0];
+    assert(cuId, "cuID not defined");
 
     const epochDuration = await coreContract.epochDuration();
 
-    await skipEpoch(provider, epochDuration, 1);
+    const peer = registeredOffer.peers[0];
+    assert(peer, "At least a single peer should be present in fixture");
 
-    const currentState = await capacityContract.getCommitment(commitmentId);
-    expect(currentState.status).toEqual(BigInt(CCStatus.Active));
+    const cuIDs = peer.unitIds;
 
+    // Skip to the end of CC
+    await skipEpoch(epochDuration, CC_DURATION_DEFAULT);
+
+    console.log("Remove CU from CC...");
+    const removeCUFromCCReceipt = await capacityContract
+      .removeCUFromCC(commitmentId, cuIDs)
+      .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
+
+    const [commitmentStatsUpdatedEvent] = checkEvent(
+      capacityContract.filters.CommitmentStatsUpdated,
+      removeCUFromCCReceipt,
+    );
+    expect(commitmentStatsUpdatedEvent?.args.commitmentId).toMatch(
+      commitmentId,
+    );
+
+    console.log("Waiting for withdraw epoches to pass...");
+    const withdrawEpochs = await coreContract.withdrawEpochsAfterFailed();
+    await skipEpoch(epochDuration, withdrawEpochs);
+
+    const delegatorBalance = await provider.getBalance(delegatorAddress);
+
+    console.log("Finishing commitment...");
+    const finishCommitmentReceipt = await capacityContract
+      .finishCommitment(commitmentId)
+      .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
+
+    const [finishCommitmentEvent] = checkEvent(
+      capacityContract.filters.CommitmentFinished,
+      finishCommitmentReceipt,
+    );
+    assert(finishCommitmentEvent, "No finish commitment event");
+    expect(finishCommitmentEvent.args).toEqual([commitmentId]);
+
+    const newDelegatorBalance = await provider.getBalance(delegatorAddress);
+
+    const collateralPerUnit = await coreContract.fltCollateralPerUnit();
+    const slashedBalance =
+      (collateralPerUnit / 100n) *
+      CC_SLASHING_RATE_PERCENT *
+      CC_MAX_FAILED_RATIO;
+
+    console.log(slashedBalance);
+    expect(newDelegatorBalance - delegatorBalance).toEqual(
+      collateralPerUnit - slashedBalance,
+    );
+  });
+
+  test("CC is not slashed when slashing is 0", async () => {
+    await coreContract
+      .setCapacityConstant(CapacityConstantType.SlashingRate, 0)
+      .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
+    const registeredOffer = registeredOfferSnapshot;
+    const commitmentId = commitmentIdSnapshot;
+    const cuId = registeredOffer.peers[0]?.unitIds[0];
+    assert(cuId, "cuID not defined");
+
+    const epochDuration = await coreContract.epochDuration();
+
+    const peer = registeredOffer.peers[0];
+    assert(peer, "At least a single peer should be present in fixture");
+
+    const cuIDs = peer.unitIds;
+
+    // Skip to the end of CC
+    await skipEpoch(epochDuration, CC_DURATION_DEFAULT);
+
+    console.log("Remove CU from CC...");
+    const removeCUFromCCReceipt = await capacityContract
+      .removeCUFromCC(commitmentId, cuIDs)
+      .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
+
+    const [commitmentStatsUpdatedEvent] = checkEvent(
+      capacityContract.filters.CommitmentStatsUpdated,
+      removeCUFromCCReceipt,
+    );
+    expect(commitmentStatsUpdatedEvent?.args.commitmentId).toMatch(
+      commitmentId,
+    );
+
+    console.log("Waiting for withdraw epoches to pass...");
+    const withdrawEpochs = await coreContract.withdrawEpochsAfterFailed();
+    await skipEpoch(epochDuration, withdrawEpochs);
+
+    const delegatorBalance = await provider.getBalance(delegatorAddress);
+
+    console.log("Finishing commitment...");
+    const finishCommitmentReceipt = await capacityContract
+      .finishCommitment(commitmentId)
+      .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
+
+    const [finishCommitmentEvent] = checkEvent(
+      capacityContract.filters.CommitmentFinished,
+      finishCommitmentReceipt,
+    );
+    assert(finishCommitmentEvent, "No finish commitment event");
+    expect(finishCommitmentEvent.args).toEqual([commitmentId]);
+
+    const newDelegatorBalance = await provider.getBalance(delegatorAddress);
+
+    const collateralPerUnit = await coreContract.fltCollateralPerUnit();
+    expect(newDelegatorBalance - delegatorBalance).toEqual(collateralPerUnit);
+  });
+
+  test("Send too many proofs to CC per epoch", async () => {
+    const registeredOffer = registeredOfferSnapshot;
+    const commitmentId = commitmentIdSnapshot;
     const cuId = registeredOffer.peers[0]?.unitIds[0];
     assert(cuId, "cuID not defined");
 
@@ -462,71 +670,22 @@ describe("Capacity commitment", () => {
 
     console.log("Sending excessive amount of proofs...");
     // await sendProof(signerAddress, cuId, MAX_ALLOWED_PROOFS * 2, 2);
-    // TODO: Real error is tooManyProof, but it's hidden in contract
     await expect(
-      sendProof(signerAddress, cuId, MAX_ALLOWED_PROOFS * 2, 2),
-    ).rejects.toThrow("(unknown custom error)");
+      sendProof(signerAddress, cuId, MAX_ALLOWED_PROOFS * 2, 2).catch(
+        (e: { data: BytesLike }) => {
+          throw new Error(
+            capacityContract.interface.parseError(e.data)?.selector,
+          );
+        },
+      ),
+    ).rejects.toThrow(
+      capacityContract.interface.getError("TooManyProofs()")?.selector,
+    );
   });
 
   test("Send too little proofs to CC per epoch", async () => {
-    const registeredOffer = await registerMarketOffer(
-      marketContract,
-      signerAddress,
-      paymentTokenAddress,
-    );
-
-    const [commitmentId] = await createCommitments(
-      capacityContract,
-      signerAddress,
-      registeredOffer.peers.map((p) => p.peerId),
-    );
-
-    console.log("Commitment is created", commitmentId);
-
-    assert(commitmentId, "Commitment ID doesn't exist");
-
-    const collateralPerUnit = await coreContract.fltCollateralPerUnit();
-
-    console.log("Depositing collateral...");
-    const depositCollateralReceipt = await capacityContract
-      .depositCollateral([commitmentId], {
-        value: collateralPerUnit,
-      })
-      .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
-
-    const [collateralDepositedEvent] = checkEvent(
-      capacityContract.filters.CollateralDeposited,
-      depositCollateralReceipt,
-    );
-    assert(collateralDepositedEvent);
-    expect(collateralDepositedEvent.args).toEqual([
-      commitmentId,
-      collateralPerUnit,
-    ]);
-
-    const [capacityActivatedEvent] = checkEvent(
-      capacityContract.filters.CommitmentActivated,
-      depositCollateralReceipt,
-    );
-    assert(capacityActivatedEvent);
-
-    expect([
-      capacityActivatedEvent.args.peerId,
-      capacityActivatedEvent.args.commitmentId,
-      capacityActivatedEvent.args.endEpoch -
-        capacityActivatedEvent.args.startEpoch,
-    ]).toEqual([
-      registeredOffer.peers[0]?.peerId,
-      commitmentId,
-      CC_DURATION_DEFAULT,
-    ]);
-
-    const epochDuration = await coreContract.epochDuration();
-
-    await skipEpoch(provider, epochDuration, 1);
-
-    const currentState = await capacityContract.getCommitment(commitmentId);
-    expect(currentState.status).toEqual(BigInt(CCStatus.Active));
+    const registeredOffer = registeredOfferSnapshot;
+    const commitmentId = commitmentIdSnapshot;
 
     const cuId = registeredOffer.peers[0]?.unitIds[0];
     assert(cuId, "cuID not defined");
@@ -546,64 +705,8 @@ describe("Capacity commitment", () => {
   });
 
   test("Mix valid proofs with invalid", async () => {
-    const registeredOffer = await registerMarketOffer(
-      marketContract,
-      signerAddress,
-      paymentTokenAddress,
-    );
-
-    const [commitmentId] = await createCommitments(
-      capacityContract,
-      signerAddress,
-      registeredOffer.peers.map((p) => p.peerId),
-    );
-
-    console.log("Commitment is created", commitmentId);
-
-    assert(commitmentId, "Commitment ID doesn't exist");
-
-    const collateralPerUnit = await coreContract.fltCollateralPerUnit();
-
-    console.log("Depositing collateral...");
-    const depositCollateralReceipt = await capacityContract
-      .depositCollateral([commitmentId], {
-        value: collateralPerUnit,
-      })
-      .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
-
-    const [collateralDepositedEvent] = checkEvent(
-      capacityContract.filters.CollateralDeposited,
-      depositCollateralReceipt,
-    );
-    assert(collateralDepositedEvent);
-    expect(collateralDepositedEvent.args).toEqual([
-      commitmentId,
-      collateralPerUnit,
-    ]);
-
-    const [capacityActivatedEvent] = checkEvent(
-      capacityContract.filters.CommitmentActivated,
-      depositCollateralReceipt,
-    );
-    assert(capacityActivatedEvent);
-
-    expect([
-      capacityActivatedEvent.args.peerId,
-      capacityActivatedEvent.args.commitmentId,
-      capacityActivatedEvent.args.endEpoch -
-        capacityActivatedEvent.args.startEpoch,
-    ]).toEqual([
-      registeredOffer.peers[0]?.peerId,
-      commitmentId,
-      CC_DURATION_DEFAULT,
-    ]);
-
-    const epochDuration = await coreContract.epochDuration();
-
-    await skipEpoch(provider, epochDuration, 1);
-
-    const currentState = await capacityContract.getCommitment(commitmentId);
-    expect(currentState.status).toEqual(BigInt(CCStatus.Active));
+    const registeredOffer = registeredOfferSnapshot;
+    const commitmentId = commitmentIdSnapshot;
 
     const cuId = registeredOffer.peers[0]?.unitIds[0];
     assert(cuId, "cuID not defined");

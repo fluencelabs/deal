@@ -151,6 +151,7 @@ describe("Deal tests", () => {
       marketContract,
       signerAddress,
       paymentTokenAddress,
+      2,
     );
 
     console.log("---- CC Creation ----");
@@ -162,7 +163,7 @@ describe("Deal tests", () => {
 
     console.info("Deposit collateral for all sent CC...");
     await depositCollateral(capacityContract, commitmentIds);
-    await skipEpoch(provider, epochDuration, 1);
+    await skipEpoch(epochDuration, 1);
 
     for (const ccId of commitmentIds) {
       const status: CCStatus = Number(await capacityContract.getStatus(ccId));
@@ -170,29 +171,25 @@ describe("Deal tests", () => {
     }
 
     console.log("---- Deal Creation ----");
-    // TODO: Testcase with different values for these vars
     const minWorkersDeal = 1;
-    const targetWorkersDeal = 1;
-    const maxWorkerPerProviderDeal = 1;
+    const targetWorkersDeal = 2;
+    const maxWorkerPerProviderDeal = 2;
     const pricePerWorkerEpochDeal = registeredOffer.minPricePerWorkerEpoch;
 
     const minDealDepositedEpoches = await coreContract.minDealDepositedEpochs();
-    const toApproveFromDeployer =
+    const depositForDeal =
       BigInt(targetWorkersDeal) *
       pricePerWorkerEpochDeal *
       minDealDepositedEpoches;
 
     console.info(
       "Send approve of payment token for amount = ",
-      toApproveFromDeployer.toString(),
+      depositForDeal.toString(),
     );
-    expect(await paymentToken.balanceOf(signerAddress)).toBeGreaterThan(
-      toApproveFromDeployer,
-    );
-    await paymentToken.approve(
-      await dealFactoryContract.getAddress(),
-      toApproveFromDeployer,
-    );
+
+    await paymentToken
+      .approve(await dealFactoryContract.getAddress(), depositForDeal)
+      .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
 
     console.info("Create deal that match default offer...");
     const protocolVersion = 1;
@@ -200,26 +197,25 @@ describe("Deal tests", () => {
       prefixes: "0x12345678",
       hash: ethers.encodeBytes32String(`appCID:${timestamp}`),
     };
-    const deployDealTx = await dealFactoryContract.deployDeal(
-      dealAppCID,
-      registeredOffer.paymentToken,
-      toApproveFromDeployer,
-      minWorkersDeal,
-      targetWorkersDeal,
-      maxWorkerPerProviderDeal,
-      pricePerWorkerEpochDeal,
-      registeredOffer.effectors,
-      0,
-      [],
-      protocolVersion,
-    );
-    await deployDealTx.wait(DEFAULT_CONFIRMATIONS);
+    const deployDealReceipt = await dealFactoryContract
+      .deployDeal(
+        dealAppCID,
+        registeredOffer.paymentToken,
+        depositForDeal,
+        minWorkersDeal,
+        targetWorkersDeal,
+        maxWorkerPerProviderDeal,
+        pricePerWorkerEpochDeal,
+        registeredOffer.effectors,
+        0,
+        [],
+        protocolVersion,
+      )
+      .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
 
-    const [lastDealCreated] = await checkEvents(
-      dealFactoryContract,
+    const [lastDealCreated] = checkEvent(
       dealFactoryContract.filters.DealCreated,
-      1,
-      deployDealTx,
+      deployDealReceipt,
     );
 
     assert(lastDealCreated, "Deal is not created");
@@ -236,264 +232,193 @@ describe("Deal tests", () => {
     const dealId = lastDealCreated.args.deal;
     assert(dealId, "Deal ID is not defined");
 
-    await skipEpoch(provider, epochDuration, 1);
-
-    const peer = registeredOffer.peers[0];
-    assert(peer, "At least 1 peer should be defined");
-    const cuIds = [...(await marketContract.getComputeUnitIds(peer.peerId))];
+    const peers = registeredOffer.peers;
+    const cuIDs = peers.map((peer) => {
+      const cuID = peer.unitIds[0];
+      assert(cuID, "cuID not defined");
+      return cuID;
+    });
 
     console.info(`Match deal with offers structure`);
-    const matchDealTx = await marketContract.matchDeal(
-      dealId,
-      [registeredOffer.offerId],
-      [cuIds],
-    );
+    const matchDealReceipt = await marketContract
+      .matchDeal(dealId, [registeredOffer.offerId], [cuIDs])
+      .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
 
-    await matchDealTx.wait(DEFAULT_CONFIRMATIONS);
-    //   TODO: check further.
-
-    const [CUMatchedEvent] = await checkEvents(
-      marketContract,
+    const CUMatchedEvents = checkEvent(
       marketContract.filters.ComputeUnitMatched,
-      1,
-      matchDealTx,
+      matchDealReceipt,
     );
 
-    assert(CUMatchedEvent, "No CU matched event");
-
-    expect([
-      CUMatchedEvent.args.peerId,
-      CUMatchedEvent.args.deal,
-      CUMatchedEvent.args.unitId,
-      CUMatchedEvent.args.appCID,
-    ]).toEqual([
-      peer.peerId,
-      dealId,
-      registeredOffer.peers[0]?.unitIds[0],
-      [dealAppCID.prefixes, dealAppCID.hash],
+    expect(
+      CUMatchedEvents.map((event) => [
+        event.args.peerId,
+        event.args.deal,
+        event.args.unitId,
+        event.args.appCID,
+      ]),
+    ).toEqual([
+      [
+        peers[0]?.peerId,
+        dealId,
+        peers[0]?.unitIds[0],
+        [dealAppCID.prefixes, dealAppCID.hash],
+      ],
+      [
+        peers[1]?.peerId,
+        dealId,
+        peers[1]?.unitIds[0],
+        [dealAppCID.prefixes, dealAppCID.hash],
+      ],
     ]);
 
     const dealContract = contractsClient.getDeal(dealId);
-    const cuID = registeredOffer.peers[0]?.unitIds[0];
-    assert(cuID, "At least one cuID should be specified");
 
     let dealStatus: DealStatus = Number(await dealContract.getStatus());
     expect(dealStatus).toEqual(DealStatus.NOT_ENOUGH_WORKERS);
 
-    const workerId = randomWorkerId();
-    const setWorkerReceipt = await dealContract
-      .setWorker(cuID, workerId)
-      .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
-    const [setWorkerEvent] = checkEvent(
-      dealContract.filters.WorkerIdUpdated,
-      setWorkerReceipt,
-    );
-    expect(setWorkerEvent?.args).toEqual([cuID, workerId]);
+    console.log("Setting up workers...");
+    for (const cuID of cuIDs) {
+      const workerId = randomWorkerId();
+      const receipt = await dealContract
+        .setWorker(cuID, workerId)
+        .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
+      const [setWorkerEvent] = checkEvent(
+        dealContract.filters.WorkerIdUpdated,
+        receipt,
+      );
+      expect(setWorkerEvent?.args).toEqual([cuID, workerId]);
+    }
 
     dealStatus = Number(await dealContract.getStatus());
     expect(dealStatus).toEqual(DealStatus.ACTIVE);
 
-    console.log("Remove compute unit participating in deal...");
-
-    const removeComputeUnitTx =
-      await marketContract.returnComputeUnitFromDeal(cuID);
-    // const removeComputeUnitTx = await dealContract.removeComputeUnit(cuID);
-    await removeComputeUnitTx.wait(DEFAULT_CONFIRMATIONS);
-    const [removeComputeUnitEvent] = await checkEvents(
-      marketContract,
-      marketContract.filters.ComputeUnitRemovedFromDeal,
-      1,
-      removeComputeUnitTx,
-    );
-    assert(removeComputeUnitEvent, "No remove compute unit event");
-    expect(removeComputeUnitEvent.args).toEqual([
-      CUMatchedEvent.args.unitId,
-      dealId,
-      CUMatchedEvent.args.peerId,
-    ]);
-
-    dealStatus = Number(await dealContract.getStatus());
-    expect(dealStatus === DealStatus.NOT_ENOUGH_WORKERS);
-
-    console.log("Stopping matched deal...");
-    const dealStopTx = await dealContract.stop();
-    await dealStopTx.wait(DEFAULT_CONFIRMATIONS);
-    const [dealStopEvent] = await checkEvents(
-      dealContract,
-      dealContract.filters.DealEnded,
-      1,
-      dealStopTx,
-    );
-    expect(dealStopEvent?.args.endedEpoch).toBeDefined();
-
-    dealStatus = Number(await dealContract.getStatus());
-    expect(dealStatus === DealStatus.ENDED);
-  });
-
-  test("End deal after it was created", async () => {
-    const epochDuration = await coreContract.epochDuration();
-    const timestamp = (await provider.getBlock("latest"))?.timestamp;
-    assert(timestamp, "Timestamp is defined");
-
-    const registeredOffer = await registerMarketOffer(
-      marketContract,
-      signerAddress,
-      paymentTokenAddress,
-    );
-
-    console.log("---- CC Creation ----");
-    const commitmentIds = await createCommitments(
-      capacityContract,
-      signerAddress,
-      registeredOffer.peers.map((p) => p.peerId),
-    );
-
-    console.info("Deposit collateral for all sent CC...");
-    await depositCollateral(capacityContract, commitmentIds);
-    await skipEpoch(provider, epochDuration, 1);
-
-    for (const ccId of commitmentIds) {
-      const status: CCStatus = Number(await capacityContract.getStatus(ccId));
-      assert(status === CCStatus.Active, "CC is not active");
+    {
+      const remainingDeposit = await dealContract.getFreeBalance();
+      console.log(remainingDeposit, "remainingDeposit");
     }
 
-    console.log("---- Deal Creation ----");
-    // TODO: Testcase with different values for these vars
-    const minWorkersDeal = 1;
-    const targetWorkersDeal = 1;
-    const maxWorkerPerProviderDeal = 1;
-    const pricePerWorkerEpochDeal = registeredOffer.minPricePerWorkerEpoch;
+    expect(await dealContract.getFreeBalance()).toEqual(depositForDeal);
 
-    const minDealDepositedEpoches = await coreContract.minDealDepositedEpochs();
-    const toApproveFromDeployer =
-      BigInt(targetWorkersDeal) *
-      pricePerWorkerEpochDeal *
-      minDealDepositedEpoches;
+    console.log("Checking rewards...");
+    const rewardPerEpoch = await dealContract.pricePerWorkerEpoch();
+    for (let i = 0; i < minDealDepositedEpoches; i++) {
+      const rewards = await Promise.all(
+        cuIDs.map((cuID) => dealContract.getRewardAmount(cuID)),
+      );
 
-    console.info(
-      "Send approve of payment token for amount = ",
-      toApproveFromDeployer.toString(),
+      console.log("available reward", rewards);
+      expect(rewards).toEqual(cuIDs.map(() => rewardPerEpoch * BigInt(i)));
+      await skipEpoch(epochDuration, 1);
+    }
+
+    {
+      const remainingDeposit = await dealContract.getFreeBalance();
+      console.log(remainingDeposit, "remainingDeposit");
+      expect(remainingDeposit).toEqual(0n);
+    }
+
+    {
+      const dealStatus = Number(await dealContract.getStatus());
+      expect(dealStatus).toEqual(DealStatus.INSUFFICIENT_FUNDS);
+    }
+
+    console.log("Refilling deal balance...");
+
+    await paymentToken
+      .approve(await dealContract.getAddress(), depositForDeal)
+      .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
+
+    const refillReceipt = await dealContract
+      .deposit(depositForDeal)
+      .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
+    const [refillEvent] = checkEvent(
+      dealContract.filters.Deposited,
+      refillReceipt,
     );
-    const initialBalance = await paymentToken.balanceOf(signerAddress);
-    expect(initialBalance).toBeGreaterThan(toApproveFromDeployer);
-    await paymentToken.approve(
-      await dealFactoryContract.getAddress(),
-      toApproveFromDeployer,
+    expect(refillEvent?.args).toEqual([depositForDeal]);
+
+    {
+      const dealStatus = Number(await dealContract.getStatus());
+      expect(dealStatus).toEqual(DealStatus.ACTIVE);
+    }
+
+    for (const cuID of cuIDs) {
+      const receipt = await dealContract
+        .withdrawRewards(cuID)
+        .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
+      const [withdrawRewardEvent] = checkEvent(
+        dealContract.filters.RewardWithdrawn,
+        receipt,
+      );
+      expect(withdrawRewardEvent?.args).toEqual([
+        cuID,
+        rewardPerEpoch * minDealDepositedEpoches,
+      ]);
+    }
+
+    console.log("Remove compute unit participating in deal...");
+
+    const lastPeer = peers[1];
+    assert(lastPeer, "Not last peer");
+
+    const lastCuID = cuIDs[1];
+    assert(lastCuID, "Not last CuID");
+
+    const removeComputeUnitReceipt = await marketContract
+      .returnComputeUnitFromDeal(lastCuID)
+      .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
+
+    const [removeComputeUnitEvent] = checkEvent(
+      marketContract.filters.ComputeUnitRemovedFromDeal,
+      removeComputeUnitReceipt,
     );
 
-    console.info("Create deal that match default offer...");
-    const protocolVersion = 1;
-    const dealAppCID = {
-      prefixes: "0x12345678",
-      hash: ethers.encodeBytes32String(`appCID:${timestamp}`),
-    };
-    const deployDealTx = await dealFactoryContract.deployDeal(
-      dealAppCID,
-      registeredOffer.paymentToken,
-      toApproveFromDeployer,
-      minWorkersDeal,
-      targetWorkersDeal,
-      maxWorkerPerProviderDeal,
-      pricePerWorkerEpochDeal,
-      registeredOffer.effectors,
-      0,
-      [],
-      protocolVersion,
-    );
-    await deployDealTx.wait(DEFAULT_CONFIRMATIONS);
-
-    const [lastDealCreated] = await checkEvents(
-      dealFactoryContract,
-      dealFactoryContract.filters.DealCreated,
-      1,
-      deployDealTx,
-    );
-
-    assert(lastDealCreated, "Deal is not created");
-
-    expect({
-      owner: lastDealCreated.args.owner,
-      minWorkers: lastDealCreated.args.minWorkers,
-      targetWorkers: lastDealCreated.args.targetWorkers,
-    }).toEqual({
-      owner: signerAddress,
-      minWorkers: BigInt(minWorkersDeal),
-      targetWorkers: BigInt(targetWorkersDeal),
-    });
-    const dealId = lastDealCreated.args.deal;
-    assert(dealId, "Deal ID is not defined");
-
-    await skipEpoch(provider, epochDuration, 1);
-
-    const peer = registeredOffer.peers[0];
-    assert(peer, "At least 1 peer should be defined");
-    const cuIds = [...(await marketContract.getComputeUnitIds(peer.peerId))];
-
-    console.info(`Match deal with offers structure`);
-    const matchDealTx = await marketContract.matchDeal(
+    assert(removeComputeUnitEvent, "No remove compute unit event");
+    expect(removeComputeUnitEvent.args).toEqual([
+      lastCuID,
       dealId,
-      [registeredOffer.offerId],
-      [cuIds],
-    );
-
-    await matchDealTx.wait(DEFAULT_CONFIRMATIONS);
-    //   TODO: check further.
-
-    // TODO: Check thoroughly. See https://github.com/fluencelabs/deal/pull/340#discussion_r1523644398
-
-    const [CUMatchedEvent] = await checkEvents(
-      marketContract,
-      marketContract.filters.ComputeUnitMatched,
-      1,
-      matchDealTx,
-    );
-
-    assert(CUMatchedEvent, "No CU matched event");
-
-    expect([
-      CUMatchedEvent.args.peerId,
-      CUMatchedEvent.args.deal,
-      CUMatchedEvent.args.unitId,
-      CUMatchedEvent.args.appCID,
-    ]).toEqual([
-      peer.peerId,
-      dealId,
-      registeredOffer.peers[0]?.unitIds[0],
-      [dealAppCID.prefixes, dealAppCID.hash],
+      lastPeer.peerId,
     ]);
 
-    // Skip some epoches
-    await skipEpoch(provider, epochDuration, 10);
+    {
+      // We still have 1 worker left
+      const dealStatus: DealStatus = Number(await dealContract.getStatus());
+      expect(dealStatus === DealStatus.ACTIVE);
+    }
 
-    console.log("Stopping matched deal...");
-    const dealContract = contractsClient.getDeal(dealId);
-    const dealStopTx = await dealContract.stop();
-    await dealStopTx.wait(DEFAULT_CONFIRMATIONS);
-    const [dealStopEvent] = await checkEvents(
-      dealContract,
+    const dealStopReceipt = await dealContract
+      .stop()
+      .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
+    const [dealStopEvent] = checkEvent(
       dealContract.filters.DealEnded,
-      1,
-      dealStopTx,
+      dealStopReceipt,
     );
-    expect(dealStopEvent?.args.endedEpoch).toBeDefined();
 
-    await skipEpoch(provider, epochDuration, 3);
+    const currentEpoch = await coreContract.currentEpoch();
+    expect(dealStopEvent?.args.endedEpoch).toEqual(currentEpoch);
+
+    {
+      const dealStatus: DealStatus = Number(await dealContract.getStatus());
+      expect(dealStatus === DealStatus.ENDED);
+    }
+
+    // TODO: plus another epoch to account deal impl
+    await skipEpoch(epochDuration, minDealDepositedEpoches + 1n);
+
+    const initialBalance = await paymentToken.balanceOf(signerAddress);
 
     const dealBalance = await dealContract.getFreeBalance();
-    const dealWithdrawTx = await dealContract.withdraw(dealBalance);
-    await dealWithdrawTx.wait(DEFAULT_CONFIRMATIONS);
-    const [dealWithdrawEvent] = await checkEvents(
-      dealContract,
+    const dealWithdrawReceipt = await dealContract
+      .withdraw(dealBalance)
+      .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
+    const [dealWithdrawEvent] = checkEvent(
       dealContract.filters.Withdrawn,
-      1,
-      dealWithdrawTx,
+      dealWithdrawReceipt,
     );
     expect(dealWithdrawEvent?.args).toEqual([dealBalance]);
 
     const afterWithdrawBalance = await paymentToken.balanceOf(signerAddress);
 
-    expect(initialBalance).toEqual(afterWithdrawBalance);
+    expect(afterWithdrawBalance - initialBalance).toEqual(dealBalance);
   });
-
-  // TODO: Tests for deal withdraw
 });

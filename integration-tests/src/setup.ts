@@ -22,6 +22,7 @@ async function moveToStartOfNextEpoch() {
 }
 
 export default async function setup() {
+  await provider.send("evm_setAutomine", [true]);
   await moveToStartOfNextEpoch();
 
   await coreContract
