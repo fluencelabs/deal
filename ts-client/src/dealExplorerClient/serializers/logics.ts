@@ -7,6 +7,7 @@ import {
   type SerializationSettings,
   tokenValueToRounded
 } from "../../utils/serializers.js";
+import { FLTToken } from "../constants.js";
 
 export function serializeProviderName(
   name: string,
@@ -57,11 +58,13 @@ export function serializeRewards(
     provider:
       tokenValueToRounded(
         providerReward,
-        serializationSettings.parseNativeTokenToFixedDefault,
+        Number(FLTToken.decimals),
+        serializationSettings.nativeTokenValueAdditionalFormatter,
         ),
     delegator: tokenValueToRounded(
       delegatorReward,
-      serializationSettings.parseNativeTokenToFixedDefault,
+      Number(FLTToken.decimals),
+      serializationSettings.nativeTokenValueAdditionalFormatter,
       ),
   }
 }

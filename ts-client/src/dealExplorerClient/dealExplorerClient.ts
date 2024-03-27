@@ -153,10 +153,7 @@ export class DealExplorerClient {
     if (serializationSettings) {
       this._serializationSettings = serializationSettings;
     } else {
-      this._serializationSettings = {
-          parseNativeTokenToFixedDefault: 18,
-          parseTokenToFixedDefault: 3,
-        };
+      this._serializationSettings = {};
     }
     this._indexerClient = new IndexerClient(network);
     this._dealContractsClient = new DealClient(this._caller, network);
@@ -650,8 +647,8 @@ export class DealExplorerClient {
         // USDC.
         pricePerWorkerEpoch: tokenValueToRounded(
           deal.pricePerWorkerEpoch,
-          this._serializationSettings.parseTokenToFixedDefault,
           deal.paymentToken.decimals,
+          this._serializationSettings.paymentTokenValueAdditionalFormatter,
         ),
         maxWorkersPerProvider: deal.maxWorkersPerProvider,
         computeUnits: serializeComputeUnits(
@@ -968,7 +965,8 @@ export class DealExplorerClient {
       collateral: currentPeerCapacityCommitment
         ? tokenValueToRounded(
             currentPeerCapacityCommitment.collateralPerUnit,
-            this._serializationSettings.parseNativeTokenToFixedDefault,
+            Number(FLTToken.decimals),
+            this._serializationSettings.nativeTokenValueAdditionalFormatter,
           )
         : "0",
       successProofs: currentPeerCapacityCommitment

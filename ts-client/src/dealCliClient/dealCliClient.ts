@@ -20,8 +20,10 @@ export class DealCliClient {
 
   // @param indexerUrl: is optional - you force to replace indexer
   //  URL setting (by default it uses URL from network config mapping).
-  // @param serializationSettings: you can control how many fixed values after
-  //  floating point you want client to display.
+  // @param serializationSettings: you can control via additional formatters what
+  //  to do with token value after under-the-hood serialization:
+  //  after serialization of 1e+18 token value with 18 decimals to 1.0..0 ETH.
+  // E.g.: transform all 12.00000 -> to 12.0 (v) => v.replace(/\.0+$/, ".0").
   private _serializationSettings: SerializationSettings;
   constructor(
     network: ContractsENV,
@@ -32,10 +34,7 @@ export class DealCliClient {
     if (serializationSettings) {
       this._serializationSettings = serializationSettings;
     } else {
-      this._serializationSettings = {
-          parseNativeTokenToFixedDefault: 18,
-          parseTokenToFixedDefault: 3,
-        }
+      this._serializationSettings = {}
     }
   }
 
