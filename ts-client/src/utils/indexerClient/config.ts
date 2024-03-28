@@ -13,7 +13,7 @@ export const getIndexerUrl = (env: ContractsENV) => {
       break;
     case "dar":
       indexerUrl =
-        "https://graph-node-dar.fluence.dev/subgraphs/name/fluence-deal-contracts";
+        "https://graph-node.dar.fluence.dev/subgraphs/name/fluence-deal-contracts";
       break;
     case "stage":
       indexerUrl =

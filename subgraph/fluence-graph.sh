@@ -51,7 +51,7 @@ case "$network" in
     GRAPHNODE_URL="${GRAPHNODE_URL:-http://localhost:8020}"
     IPFS_URL="${IPFS_URL:-http://localhost:5001}"
     ;;
-  stage|dar)
+  stage)
     if [[ -z $BASIC_AUTH_SUBGRAPH ]]; then
       echo "Please provide credentials with 'BASIC_AUTH_SUBGRAPH' variable."
       exit 1
@@ -64,7 +64,7 @@ case "$network" in
     # TODO: IPFS why does not work with auth (before deploy request Tolay to open ports)
     IPFS_URL="https://graph-node-ipfs-${network}.fluence.dev"
     ;;
-  kras)
+  kras|dar)
     if [[ -z $BASIC_AUTH_SUBGRAPH ]]; then
       echo "Please provide credentials with 'BASIC_AUTH_SUBGRAPH' variable."
       exit 1
