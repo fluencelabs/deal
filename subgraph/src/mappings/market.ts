@@ -53,7 +53,14 @@ export function handleProviderInfoUpdated(event: ProviderInfoUpdated): void {
     provider.approved = false;
   }
   provider.name = event.params.name;
-  provider.registered = true;
+
+  if (provider.registered == false) {
+    provider.registered = true;
+
+    let graphNetwork = createOrLoadGraphNetwork();
+    graphNetwork.providersRegisteredTotal = graphNetwork.providersRegisteredTotal.plus(UNO_BIG_INT);
+    graphNetwork.save()
+  }
   provider.save();
 }
 

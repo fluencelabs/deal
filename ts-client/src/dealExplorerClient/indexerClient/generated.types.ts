@@ -55,6 +55,7 @@ export type CapacityCommitment = {
   nextCCFailedEpoch: Scalars['BigInt']['output'];
   peer: Peer;
   provider: Provider;
+  /** This field represents Ratio [0, 1] only when it is divided by PRECISION constant of Core contract. */
   rewardDelegatorRate: Scalars['Int']['output'];
   rewardWithdrawn: Scalars['BigInt']['output'];
   snapshotEpoch: Scalars['BigInt']['output'];
@@ -1669,6 +1670,9 @@ export type GraphNetwork = {
   minRequiredProofsPerEpoch?: Maybe<Scalars['Int']['output']>;
   offersTotal: Scalars['BigInt']['output'];
   proofsTotal: Scalars['BigInt']['output'];
+  /** Providers that register themselves in the network with setInfo() method. */
+  providersRegisteredTotal: Scalars['BigInt']['output'];
+  /** @deprecated TODO: deprecate. */
   providersTotal: Scalars['BigInt']['output'];
   tokensTotal: Scalars['BigInt']['output'];
 };
@@ -1826,6 +1830,14 @@ export type GraphNetwork_Filter = {
   proofsTotal_lte?: InputMaybe<Scalars['BigInt']['input']>;
   proofsTotal_not?: InputMaybe<Scalars['BigInt']['input']>;
   proofsTotal_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  providersRegisteredTotal?: InputMaybe<Scalars['BigInt']['input']>;
+  providersRegisteredTotal_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  providersRegisteredTotal_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  providersRegisteredTotal_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  providersRegisteredTotal_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  providersRegisteredTotal_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  providersRegisteredTotal_not?: InputMaybe<Scalars['BigInt']['input']>;
+  providersRegisteredTotal_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   providersTotal?: InputMaybe<Scalars['BigInt']['input']>;
   providersTotal_gt?: InputMaybe<Scalars['BigInt']['input']>;
   providersTotal_gte?: InputMaybe<Scalars['BigInt']['input']>;
@@ -1859,6 +1871,7 @@ export type GraphNetwork_OrderBy =
   | 'minRequiredProofsPerEpoch'
   | 'offersTotal'
   | 'proofsTotal'
+  | 'providersRegisteredTotal'
   | 'providersTotal'
   | 'tokensTotal';
 
@@ -2364,7 +2377,7 @@ export type Provider = {
   name: Scalars['String']['output'];
   offers?: Maybe<Array<Offer>>;
   peerCount: Scalars['Int']['output'];
-  /** Is provider registered in the network (if false - possible just mentioned). */
+  /** Is provider registered in the network (if false possibly it is only mentioned or global-whitelisted). */
   registered: Scalars['Boolean']['output'];
 };
 
