@@ -3,7 +3,7 @@ import {
   createOrLoadCapacityCommitmentStatsPerEpoch,
   createOrLoadCapacityCommitmentToComputeUnit,
   createOrLoadComputeUnitPerEpochStat,
-  createOrLoadEpochStats,
+  createOrLoadEpochStatistic,
   createOrLoadGraphNetwork,
   createOrLoadProvider,
   UNO_BIG_INT,
@@ -233,7 +233,7 @@ export function handleCommitmentStatsUpdated(
     BigInt.fromI32(graphNetwork.initTimestamp),
     BigInt.fromI32(graphNetwork.coreEpochDuration),
   );
-  const EpochStats = createOrLoadEpochStats(event.block.timestamp, currentEpoch)
+  const epochStatistic = createOrLoadEpochStatistic(event.block.timestamp, currentEpoch)
 
   let peer = Peer.load(commitment.peer) as Peer;
   peer.currentCCNextCCFailedEpoch = commitment.nextCCFailedEpoch;
@@ -243,7 +243,7 @@ export function handleCommitmentStatsUpdated(
   let capacityCommitmentStatsPerEpoch =
     createOrLoadCapacityCommitmentStatsPerEpoch(
       commitment.id,
-      EpochStats.id,
+      epochStatistic.id,
     );
 
   // totalFailCount is calculated by prevEpoch
@@ -279,18 +279,18 @@ export function handleUnitDeactivated(event: UnitDeactivated): void {
   const capacityCommitment = CapacityCommitment.load(
     event.params.commitmentId.toHexString(),
   ) as CapacityCommitment;
-  const EpochStats = createOrLoadEpochStats(event.block.timestamp, currentEpoch);
+  const epochStatistic = createOrLoadEpochStatistic(event.block.timestamp, currentEpoch);
   let capacityCommitmentStatsPerEpoch =
     createOrLoadCapacityCommitmentStatsPerEpoch(
       capacityCommitment.id,
-      EpochStats.id,
+      epochStatistic.id,
     );
   const computeUnit = ComputeUnit.load(
     event.params.unitId.toHexString(),
   ) as ComputeUnit;
   const computeUnitPerEpochStat = createOrLoadComputeUnitPerEpochStat(
     computeUnit.id,
-    EpochStats.id,
+    epochStatistic.id,
   );
 
   // When compute unit added to Deal we also should calculate if we need to
@@ -319,11 +319,11 @@ export function handleProofSubmitted(event: ProofSubmitted): void {
     BigInt.fromI32(graphNetwork.initTimestamp),
     BigInt.fromI32(graphNetwork.coreEpochDuration),
   );
-  const EpochStats = createOrLoadEpochStats(blockTimestamp, currentEpoch)
+  const epochStatistic = createOrLoadEpochStatistic(blockTimestamp, currentEpoch)
   let capacityCommitmentStatsPerEpoch =
     createOrLoadCapacityCommitmentStatsPerEpoch(
       capacityCommitment.id,
-      EpochStats.id,
+      epochStatistic.id,
     );
 
   proofSubmitted.capacityCommitmentStatsPerEpoch =
@@ -351,7 +351,7 @@ export function handleProofSubmitted(event: ProofSubmitted): void {
 
   let computeUnitPerEpochStat = createOrLoadComputeUnitPerEpochStat(
     computeUnit.id,
-    EpochStats.id,
+    epochStatistic.id,
   );
   computeUnitPerEpochStat.submittedProofsCount =
     computeUnitPerEpochStat.submittedProofsCount + 1;

@@ -12,7 +12,7 @@ import {
   CapacityCommitmentStatsPerEpoch,
   ComputeUnitPerEpochStats,
   ComputeUnit,
-  EpochStats,
+  EpochStatistic,
 } from "../generated/schema";
 import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts";
 import { calculateEpoch, getTokenDecimals, getTokenSymbol } from "./contracts";
@@ -259,15 +259,15 @@ export function createOrLoadCapacityCommitmentToComputeUnit(
 
 export function createOrLoadCapacityCommitmentStatsPerEpoch(
   capacityCommitmentId: string,
-  EpochStatId: string,
+  epochStatisticId: string,
 ): CapacityCommitmentStatsPerEpoch {
-  const concattedIds = capacityCommitmentId.concat(EpochStatId);
+  const concattedIds = capacityCommitmentId.concat(epochStatisticId);
   let entity = CapacityCommitmentStatsPerEpoch.load(concattedIds);
 
   if (entity == null) {
     entity = new CapacityCommitmentStatsPerEpoch(concattedIds);
     entity.capacityCommitment = capacityCommitmentId;
-    entity.epoch = EpochStatId;
+    entity.epochStatistic = epochStatisticId;
     entity.totalFailCount = 0;
     entity.exitedUnitCount = 0;
     entity.activeUnitCount = 0;
@@ -284,33 +284,33 @@ export function createOrLoadCapacityCommitmentStatsPerEpoch(
 
 export function createOrLoadComputeUnitPerEpochStat(
   computeUnitId: string,
-  EpochStatId: string,
+  epochStatisticId: string,
 ): ComputeUnitPerEpochStats {
-  const concattedIds = computeUnitId.concat(EpochStatId);
+  const concattedIds = computeUnitId.concat(epochStatisticId);
   let entity = ComputeUnitPerEpochStats.load(concattedIds);
 
   if (entity == null) {
     let computeUnit = ComputeUnit.load(computeUnitId) as ComputeUnit;
     entity = new ComputeUnitPerEpochStats(concattedIds);
     entity.submittedProofsCount = 0;
-    entity.epoch = EpochStatId;
+    entity.epochStatistic = epochStatisticId;
     entity.computeUnit = computeUnit.id;
     entity.save();
   }
   return entity as ComputeUnitPerEpochStats;
 }
 
-export function createOrLoadEpochStats(timestamp: BigInt, currentEpoch: BigInt): EpochStats {
+export function createOrLoadEpochStatistic(timestamp: BigInt, currentEpoch: BigInt): EpochStatistic {
   const currentEpochId = currentEpoch.toString()
-  let entity = EpochStats.load(currentEpochId);
+  let entity = EpochStatistic.load(currentEpochId);
 
   if (entity == null) {
-    entity = new EpochStats(currentEpochId);
+    entity = new EpochStatistic(currentEpochId);
     entity.startBlock = currentEpoch;
     entity.endBlock = currentEpoch;
     entity.startTimestamp = timestamp;
     entity.endTimestamp = timestamp;
     entity.save();
   }
-  return entity as EpochStats;
+  return entity as EpochStatistic;
 }
