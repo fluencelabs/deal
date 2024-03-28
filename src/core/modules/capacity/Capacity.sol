@@ -264,106 +264,129 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         require(totalValue == 0, "Excessive value");
     }
 
-    function submitProof(bytes32 unitId, bytes32 localUnitNonce, bytes32 resultHash) external {
+    function submitProofs(UnitProof[] calldata proofs) external {
         // #region load contracts and storage
         IMarket market = core.market();
         CommitmentStorage storage s = _getCommitmentStorage();
         // #endregion
 
-        // #region init and verify variables
         uint256 currentEpoch = core.currentEpoch();
-
-        IMarket.ComputeUnit memory unit = market.getComputeUnit(unitId);
-        IMarket.ComputePeer memory peer = market.getComputePeer(unit.peerId);
-        require(peer.owner == msg.sender, "Only compute peer owner can submit proof");
-
-        bytes32 commitmentId = peer.commitmentId;
-        require(commitmentId != bytes32(0x00), "Compute unit doesn't have commitment");
-
-        Commitment storage cc = s.commitments[commitmentId];
-        require(currentEpoch >= cc.info.startEpoch, "Capacity commitment is not started");
-
-        UnitInfo storage unitInfo = cc.unitInfoById[unitId];
-        require(!unitInfo.isInactive, "Compute unit is in deal");
-
-        uint256 expiredEpoch = _expiredEpoch(cc);
-        // #endregion
-
-        // #region commit snapshots
-        Snapshot.Cache memory snapshotCache = Snapshot.init(cc);
-        CCStatus status = _preCommitCommitmentSnapshot(cc, snapshotCache, peer, currentEpoch, expiredEpoch);
-        if (status != CCStatus.Active) {
-            revert CapacityCommitmentIsNotActive(status);
-        }
-        _postCommitCommitmentSnapshot(commitmentId, cc, snapshotCache);
-
-        _commitUnitSnapshot(cc, unitInfo, currentEpoch, expiredEpoch, snapshotCache.current.failedEpoch);
-        // #endregion
 
         // #region update global nonce
         if (s.changedNonceEpoch != currentEpoch) {
             s.changedNonceEpoch = currentEpoch;
             s.globalNonce = s.nextGlobalNonce;
         }
-
-        // pseudo-random next global nonce
-        s.nextGlobalNonce =
-            keccak256(abi.encodePacked(s.globalNonce, blockhash(block.number - 1), unitId, localUnitNonce, resultHash));
         // #endregion
 
-        uint256 unitProofCount = unitInfo.proofCountByEpoch[currentEpoch] + 1;
-        if (unitProofCount > core.maxProofsPerEpoch()) {
-            revert TooManyProofs();
+        bytes32[] memory localUnitNonces = new bytes32[](proofs.length);
+        bytes32[] memory globalUnitNonces = new bytes32[](proofs.length);
+
+        for (uint256 i = 0; i < proofs.length; i++) {
+            // #region init and verify variables
+            bytes32 unitId = proofs[i].unitId;
+            bytes32 localUnitNonce = proofs[i].localUnitNonce;
+            bytes32 resultHash = proofs[i].resultHash;
+
+            localUnitNonces[i] = localUnitNonce;
+
+            IMarket.ComputeUnit memory unit = market.getComputeUnit(unitId);
+            IMarket.ComputePeer memory peer = market.getComputePeer(unit.peerId);
+            require(peer.owner == msg.sender, "Only compute peer owner can submit proof");
+
+            bytes32 commitmentId = peer.commitmentId;
+            require(commitmentId != bytes32(0x00), "Compute unit doesn't have commitment");
+
+            Commitment storage cc = s.commitments[commitmentId];
+            require(currentEpoch >= cc.info.startEpoch, "Capacity commitment is not started");
+
+            UnitInfo storage unitInfo = cc.unitInfoById[unitId];
+            require(!unitInfo.isInactive, "Compute unit is in deal");
+
+            uint256 expiredEpoch = _expiredEpoch(cc);
+            // #endregion
+
+            // #region commit snapshots
+            Snapshot.Cache memory snapshotCache = Snapshot.init(cc);
+            CCStatus status = _preCommitCommitmentSnapshot(cc, snapshotCache, peer, currentEpoch, expiredEpoch);
+            if (status != CCStatus.Active) {
+                revert CapacityCommitmentIsNotActive(status);
+            }
+            _postCommitCommitmentSnapshot(commitmentId, cc, snapshotCache);
+
+            _commitUnitSnapshot(cc, unitInfo, currentEpoch, expiredEpoch, snapshotCache.current.failedEpoch);
+            // #endregion
+
+            // pseudo-random next global nonce
+            s.nextGlobalNonce = keccak256(
+                abi.encodePacked(s.globalNonce, blockhash(block.number - 1), unitId, localUnitNonce, resultHash)
+            );
+
+            uint256 unitProofCount = unitInfo.proofCountByEpoch[currentEpoch] + 1;
+            if (unitProofCount > core.maxProofsPerEpoch()) {
+                revert TooManyProofs();
+            }
+
+            // #region save localUnitNonce
+            bytes32 globalUnitNonce_ = keccak256(abi.encodePacked(s.globalNonce, unitId));
+            require(
+                !s.isProofSubmittedByUnit[globalUnitNonce_][localUnitNonce], "Proof is already submitted for this unit"
+            );
+            s.isProofSubmittedByUnit[globalUnitNonce_][localUnitNonce] = true;
+
+            globalUnitNonces[i] = globalUnitNonce_;
+            // #endregion
+
+            // #region save info about proof
+
+            // load unitProofCount and add one because we submit new proof
+            RewardInfo storage rewardInfo = s.rewardInfoByEpoch[currentEpoch];
+            uint256 minProofsPerEpoch_ = rewardInfo.minProofsPerEpoch;
+            if (minProofsPerEpoch_ == 0) {
+                minProofsPerEpoch_ = core.minProofsPerEpoch();
+                rewardInfo.minProofsPerEpoch = minProofsPerEpoch_;
+            }
+
+            if (unitProofCount == minProofsPerEpoch_) {
+                // if proofCount is equal to minRequierdCCProofs, then we have one success for the current epoch
+                cc.progress.currentSuccessCount += 1;
+                rewardInfo.totalSuccessProofs += unitProofCount;
+            } else if (unitProofCount > minProofsPerEpoch_) {
+                rewardInfo.totalSuccessProofs++;
+            }
+
+            unitInfo.proofCountByEpoch[currentEpoch] = unitProofCount;
+            // #endregion
+
+            emit CommitmentStatsUpdated(
+                commitmentId,
+                cc.progress.totalFailCount,
+                cc.finish.exitedUnitCount,
+                cc.progress.activeUnitCount,
+                cc.progress.nextAdditionalActiveUnitCount,
+                currentEpoch - 1
+            );
+
+            emit ProofSubmitted(commitmentId, unitId, localUnitNonce);
         }
-
-        // #region save localUnitNonce
-        bytes32 globalUnitNonce_ = keccak256(abi.encodePacked(s.globalNonce, unitId));
-        require(!s.isProofSubmittedByUnit[globalUnitNonce_][localUnitNonce], "Proof is already submitted for this unit");
-        s.isProofSubmittedByUnit[globalUnitNonce_][localUnitNonce] = true;
-        // #endregion
-
-        // #region save info about proof
-
-        // load unitProofCount and add one because we submit new proof
-
-        RewardInfo storage rewardInfo = s.rewardInfoByEpoch[currentEpoch];
-        uint256 minProofsPerEpoch_ = rewardInfo.minProofsPerEpoch;
-        if (minProofsPerEpoch_ == 0) {
-            minProofsPerEpoch_ = core.minProofsPerEpoch();
-            rewardInfo.minProofsPerEpoch = minProofsPerEpoch_;
-        }
-
-        if (unitProofCount == minProofsPerEpoch_) {
-            // if proofCount is equal to minRequierdCCProofs, then we have one success for the current epoch
-            cc.progress.currentSuccessCount += 1;
-            rewardInfo.totalSuccessProofs += unitProofCount;
-        } else if (unitProofCount > minProofsPerEpoch_) {
-            rewardInfo.totalSuccessProofs++;
-        }
-
-        unitInfo.proofCountByEpoch[currentEpoch] = unitProofCount;
-        // #endregion
 
         // #region check proof
-        (bool success, bytes memory randomXResultHash) = core.randomXProxy().delegatecall(
-            abi.encodeWithSelector(RandomXProxy.run.selector, globalUnitNonce_, localUnitNonce)
+        (bool success, bytes memory result) = core.randomXProxy().delegatecall(
+            abi.encodeWithSelector(RandomXProxy.run.selector, globalUnitNonces, localUnitNonces)
         );
 
         require(success, "RandomXProxy.run failed");
-        require(randomXResultHash.toBytes32() == resultHash, "Proof is not valid");
-        require(resultHash <= core.difficulty(), "Proof is bigger than difficulty");
+        require(result.length > 0, "RandomXProxy.run returned empty result");
+
+        bytes32[] memory hashes = abi.decode(result, (bytes32[]));
+
+        require(hashes.length == proofs.length, "Invalid result length");
+
+        for (uint256 i = 0; i < proofs.length; i++) {
+            require(hashes[i] == proofs[i].resultHash, "Proof is not valid");
+            require(hashes[i] <= core.difficulty(), "Proof is bigger than difficulty");
+        }
         // #endregion
-
-        emit CommitmentStatsUpdated(
-            commitmentId,
-            cc.progress.totalFailCount,
-            cc.finish.exitedUnitCount,
-            cc.progress.activeUnitCount,
-            cc.progress.nextAdditionalActiveUnitCount,
-            currentEpoch - 1
-        );
-
-        emit ProofSubmitted(commitmentId, unitId, localUnitNonce);
     }
 
     function finishCommitment(bytes32 commitmentId) external {

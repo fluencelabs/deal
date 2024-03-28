@@ -217,7 +217,7 @@ contract CapacityCommitmentTest is Test {
         }
     }
 
-    function test_SubmitProof() public {
+    function test_SubmitProofs() public {
         bytes32 peerId = registerPeers[0].peerId;
         uint256 unitCount = registerPeers[0].unitIds.length;
         address peerOwner = registerPeers[0].owner;
@@ -238,7 +238,9 @@ contract CapacityCommitmentTest is Test {
         //TODO: vm mock not working here :(
         vm.etch(address(Actor.CALL_ACTOR_ID), address(new MockActorCallActorPrecompile(targetHash)).code);
 
-        deployment.capacity.submitProof(unitId, localUnitNonce, targetHash);
+        ICapacity.UnitProof[] memory proofs = new ICapacity.UnitProof[](1);
+        proofs[0] = ICapacity.UnitProof({unitId: unitId, localUnitNonce: localUnitNonce, resultHash: targetHash});
+        deployment.capacity.submitProofs(proofs);
 
         vm.stopPrank();
     }
@@ -269,16 +271,21 @@ contract CapacityCommitmentTest is Test {
             vm.expectEmit(true, true, true, false, address(deployment.capacity));
             emit ProofSubmitted(commitmentId, unitId, localUnitNonce_);
 
-            deployment.capacity.submitProof(unitId, localUnitNonce_, targetHash);
+            ICapacity.UnitProof[] memory proofs = new ICapacity.UnitProof[](1);
+            proofs[0] = ICapacity.UnitProof({unitId: unitId, localUnitNonce: localUnitNonce_, resultHash: targetHash});
+            deployment.capacity.submitProofs(proofs);
         }
 
-        uint256 reward = deployment.core.getRewardPool(deployment.core.currentEpoch())
-            / deployment.core.vestingPeriodCount() * deployment.core.vestingPeriodCount();
+        uint256 reward = (
+            deployment.core.getRewardPool(deployment.core.currentEpoch()) / deployment.core.vestingPeriodCount()
+        ) * deployment.core.vestingPeriodCount();
         StdCheats.skip(deployment.core.epochDuration());
 
         console.log("curr epoch #3", deployment.core.currentEpoch());
         bytes32 localUnitNonce = keccak256(abi.encodePacked("localUnitNonce"));
-        deployment.capacity.submitProof(unitId, localUnitNonce, targetHash);
+        ICapacity.UnitProof[] memory proofs = new ICapacity.UnitProof[](1);
+        proofs[0] = ICapacity.UnitProof({unitId: unitId, localUnitNonce: localUnitNonce, resultHash: targetHash});
+        deployment.capacity.submitProofs(proofs);
 
         assertEq(deployment.capacity.totalRewards(commitmentId), reward, "TotalRewards mismatch");
         assertEq(deployment.capacity.unlockedRewards(commitmentId), 0, "UnlockedRewards mismatch");
