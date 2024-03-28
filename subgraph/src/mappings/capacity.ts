@@ -277,17 +277,18 @@ export function handleUnitDeactivated(event: UnitDeactivated): void {
   const capacityCommitment = CapacityCommitment.load(
     event.params.commitmentId.toHexString(),
   ) as CapacityCommitment;
+  const EpochStats = createOrLoadEpochStats(event.block.timestamp, currentEpoch);
   let capacityCommitmentStatsPerEpoch =
     createOrLoadCapacityCommitmentStatsPerEpoch(
       capacityCommitment.id,
-      currentEpoch.toString(),
+      EpochStats.id,
     );
   const computeUnit = ComputeUnit.load(
     event.params.unitId.toHexString(),
   ) as ComputeUnit;
   const computeUnitPerEpochStat = createOrLoadComputeUnitPerEpochStat(
     computeUnit.id,
-    currentEpoch.toString(),
+    EpochStats.id,
   );
 
   // When compute unit added to Deal we also should calculate if we need to

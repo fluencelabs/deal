@@ -1,5 +1,5 @@
 import {
-  createOrLoadEpoch,
+  createOrLoadEpochStats,
   createOrLoadGraphNetwork,
   createOrLoadProvider
 } from "../models";
@@ -73,10 +73,10 @@ export function handleNewBlock(block: ethereum.Block): void {
     BigInt.fromI32(coreEpochDuration),
   );
 
-  let epoch = createOrLoadEpoch(blockTimestamp, currentEpoch);
-  if (epoch.endBlock < blockNumber) {
-    epoch.endBlock = blockNumber;
-    epoch.endTimestamp = blockTimestamp;
-    epoch.save();
+  let EpochStats = createOrLoadEpochStats(blockTimestamp, currentEpoch);
+  if (EpochStats.endBlock < blockNumber) {
+    EpochStats.endBlock = blockNumber;
+    EpochStats.endTimestamp = blockTimestamp;
+    EpochStats.save();
   }
 }
