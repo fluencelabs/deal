@@ -52,12 +52,3 @@ export function serializeProofsOrderByToIndexer(
   }
   throw new Error(`Assertion: unknown ProofsOrderBy value: ${v}`);
 }
-
-// export function serializeProofStatsByCapacityCommitmentOrderByToIndexer(
-//   v: ProofStatsByCapacityCommitmentOrderBy,
-// ): CapacityCommitmentStatsPerEpoch_OrderBy {
-//   if (v == "epoch") {
-//     return 'id';
-//   }
-//   throw new Error(`Assertion: unknown ProofStatsByCapacityCommitmentOrderBy value: ${v}`);
-// }

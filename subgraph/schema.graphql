@@ -329,7 +329,7 @@ type ComputeUnitPerEpochStat @entity {
   submittedProofsCount: Int!
 }
 
-"This model is designed to store epoch related information. Note, that in other models it is more efficient to use epoch as bigint rather than with relation to that model (with relation you could complicate your queries and need to store additional epoch field)."
+"This model is designed to store epoch related information. Note, that in other models it is more efficient to store epoch as bigint rather than relation to that model (with relation you could complicate your queries by epoch, or you will need to store additional epoch field anyway)."
 type EpochStatistic @entity {
   "Epoch number. Note, that for current epoch right boarder is approximate."
   id: ID!

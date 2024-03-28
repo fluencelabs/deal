@@ -52,7 +52,7 @@ export function handleWhitelistAccessRevoked(
   provider.save();
 }
 
-// This handler should be called after core contract inited! Because it relies on core contract data after core is inited.
+// In situ, This handler should be called after core contract inited! Because it relies on core contract data after core is inited.
 // If it detects that Core is not inited, it will return.
 export function handleNewBlock(block: ethereum.Block): void {
   const graphNetwork = createOrLoadGraphNetwork();
