@@ -17,7 +17,7 @@
   "license": "ISC",
   "dependencies": {
     "@fluencelabs/deal-ts-clients": "file:../ts-client",
-    "ethers": "6.7.1",
+    "ethers": "6.11.1",
     "vitest": "^1.2.0"
   },
   "devDependencies": {
