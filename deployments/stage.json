@@ -71,7 +71,7 @@
     "codeHash": "0x87f239843d2e77bd7c51e6e08c01e0ba04968ed7cd54dc1200a6afd9164c3359",
     "creationCodeHash": "0xd45ad28b746b9985009e06193503727a795f699e6e3736686419b2550d65aee3"
   },
-  "tUSD": {
+  "axlUSDC": {
     "addr": "0xef1F039b662Aea0A8E5e56F079205Ba02F03b375",
     "blockNumber": 511,
     "codeHash": "0x1a2b3449e8ba885d4a6b236dad324fac2db667f04823f0dadf410ed83af022a4",

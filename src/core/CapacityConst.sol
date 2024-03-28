@@ -2,12 +2,13 @@
 
 pragma solidity ^0.8.19;
 
+import "src/utils/OwnableUpgradableDiamond.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "src/core/modules/BaseModule.sol";
 import {PRECISION, GlobalConst} from "src/core/GlobalConst.sol";
 import "./interfaces/ICapacityConst.sol";
+import "./EpochController.sol";
 
-contract CapacityConst is BaseModule, ICapacityConst {
+contract CapacityConst is ICapacityConst, OwnableUpgradableDiamond, EpochController {
     // #region ------------------ Constants ------------------
     uint256 internal constant _REWARD_POOL_SHRINK_RATE = PRECISION / 10 * 9; // 0.9 = 90%
     uint256 internal constant _REWARD_POOL_GROWTH_RATE = PRECISION + PRECISION / 10; // 1.1 = 110%
@@ -67,8 +68,6 @@ contract CapacityConst is BaseModule, ICapacityConst {
     // #endregion ------------------ Storage ------------------
 
     // #region ------------------ Initializer ------------------
-    constructor(ICore core_) BaseModule(core_) {}
-
     function __CapacityConst_init(
         uint256 fltPrice_,
         uint256 usdCollateralPerUnit_,
@@ -109,11 +108,11 @@ contract CapacityConst is BaseModule, ICapacityConst {
         constantsStorage.randomXProxy = randomXProxy_;
 
         constantsStorage.reward.rewardPoolPerEpochs.push(
-            RewardPoolPerEpoch({epoch: core.currentEpoch(), value: initRewardPool_})
+            RewardPoolPerEpoch({epoch: currentEpoch(), value: initRewardPool_})
         );
 
         constantsStorage.fltPrice = fltPrice_;
-        constantsStorage.commitment.fltCollateralPerUnit = usdCollateralPerUnit_ / fltPrice_;
+        constantsStorage.commitment.fltCollateralPerUnit = _calcFLTCollateralPerUnit(usdCollateralPerUnit_, fltPrice_);
     }
     // #endregion ------------------ Initializer ------------------
 
@@ -180,7 +179,7 @@ contract CapacityConst is BaseModule, ICapacityConst {
 
     function difficulty() public view returns (bytes32) {
         ConstStorage storage constantsStorage = _getConstStorage();
-        if (core.currentEpoch() >= constantsStorage.proof.difficultyChangeEpoch) {
+        if (currentEpoch() >= constantsStorage.proof.difficultyChangeEpoch) {
             return constantsStorage.proof.nextDifficulty;
         }
 
@@ -218,59 +217,67 @@ contract CapacityConst is BaseModule, ICapacityConst {
     // #endregion ------------------ External View Functions ------------------
 
     // #region ------------------ External Mutable Functions ------------------
-    function setFLTPrice(uint256 fltPrice_) public onlyCoreOwner {
+    function setFLTPrice(uint256 fltPrice_) public onlyOwner {
         ConstStorage storage constantsStorage = _getConstStorage();
         constantsStorage.fltPrice = fltPrice_;
 
         _setRewardPool(fltPrice_, constantsStorage.activeUnitCount);
-        constantsStorage.commitment.fltCollateralPerUnit = constantsStorage.commitment.usdCollateralPerUnit / fltPrice_;
+        constantsStorage.commitment.fltCollateralPerUnit =
+            _calcFLTCollateralPerUnit(constantsStorage.commitment.usdCollateralPerUnit, fltPrice_);
 
         emit FLTPriceUpdated(fltPrice_);
     }
 
-    function setDifficulty(bytes32 difficulty_) external onlyCoreOwner {
+    function calculateRewardPool() external {
+        ConstStorage storage constantsStorage = _getConstStorage();
+        _setRewardPool(constantsStorage.fltPrice, constantsStorage.activeUnitCount);
+    }
+
+    function setDifficulty(bytes32 difficulty_) external onlyOwner {
         ConstStorage storage constantsStorage = _getConstStorage();
         constantsStorage.proof.difficulty = constantsStorage.proof.nextDifficulty;
         constantsStorage.proof.nextDifficulty = difficulty_;
-        constantsStorage.proof.difficultyChangeEpoch = core.currentEpoch() + 1;
+        constantsStorage.proof.difficultyChangeEpoch = currentEpoch() + 1;
 
         emit DifficultyUpdated(difficulty_);
     }
 
-    function setConstant(ConstantType constantType, uint256 v) external onlyCoreOwner {
+    function setCapacityConstant(CapacityConstantType constantType, uint256 v) external onlyOwner {
         ConstStorage storage constantsStorage = _getConstStorage();
 
         // capacity section
-        if (constantType == ConstantType.MinDuration) {
+        if (constantType == CapacityConstantType.MinDuration) {
             constantsStorage.commitment.minDuration = v;
-        } else if (constantType == ConstantType.USDCollateralPerUnit) {
+        } else if (constantType == CapacityConstantType.USDCollateralPerUnit) {
             constantsStorage.commitment.usdCollateralPerUnit = v;
-            constantsStorage.commitment.fltCollateralPerUnit = v / constantsStorage.fltPrice;
-        } else if (constantType == ConstantType.SlashingRate) {
+            constantsStorage.commitment.usdCollateralPerUnit = v;
+            constantsStorage.commitment.fltCollateralPerUnit = _calcFLTCollateralPerUnit(v, constantsStorage.fltPrice);
+        } else if (constantType == CapacityConstantType.SlashingRate) {
             constantsStorage.commitment.slashingRate = v;
-        } else if (constantType == ConstantType.WithdrawEpochsAfterFailed) {
+        } else if (constantType == CapacityConstantType.WithdrawEpochsAfterFailed) {
             constantsStorage.commitment.withdrawEpochsAfterFailed = v;
-        } else if (constantType == ConstantType.MaxFailedRatio) {
+        } else if (constantType == CapacityConstantType.MaxFailedRatio) {
             constantsStorage.commitment.maxFailedRatio = v;
         }
         // reward section
-        else if (constantType == ConstantType.USDTargetRevenuePerEpoch) {
+        else if (constantType == CapacityConstantType.USDTargetRevenuePerEpoch) {
             constantsStorage.reward.usdTargetRevenuePerEpoch = v;
-        } else if (constantType == ConstantType.MinRewardPerEpoch) {
+            _setRewardPool(constantsStorage.fltPrice, constantsStorage.activeUnitCount);
+        } else if (constantType == CapacityConstantType.MinRewardPerEpoch) {
             constantsStorage.reward.minRewardPerEpoch = v;
-        } else if (constantType == ConstantType.MaxRewardPerEpoch) {
+        } else if (constantType == CapacityConstantType.MaxRewardPerEpoch) {
             constantsStorage.reward.maxRewardPerEpoch = v;
         }
         // proof section
-        else if (constantType == ConstantType.MinProofsPerEpoch) {
+        else if (constantType == CapacityConstantType.MinProofsPerEpoch) {
             constantsStorage.proof.minProofsPerEpoch = v;
-        } else if (constantType == ConstantType.MaxProofsPerEpoch) {
+        } else if (constantType == CapacityConstantType.MaxProofsPerEpoch) {
             constantsStorage.proof.maxProofsPerEpoch = v;
         } else {
             revert("GlobalConst: unknown constant type");
         }
 
-        emit ConstantUpdated(constantType, v);
+        emit CapacityConstantUpdated(constantType, v);
     }
     // #endregion ------------------ External Mutable Functions ------------------
 
@@ -282,9 +289,17 @@ contract CapacityConst is BaseModule, ICapacityConst {
         _setRewardPool(constantsStorage.fltPrice, activeUnitCount_);
     }
 
+    function _calcFLTCollateralPerUnit(uint256 usdCollateralPerUnit_, uint256 fltPrice_)
+        internal
+        pure
+        returns (uint256)
+    {
+        return usdCollateralPerUnit_ * PRECISION / fltPrice_ * 1e18 / PRECISION;
+    }
+
     function _setRewardPool(uint256 fltPrice_, uint256 activeUnitCount_) internal {
         ConstStorage storage constantsStorage = _getConstStorage();
-        uint256 currentEpoch_ = core.currentEpoch();
+        uint256 currentEpoch_ = currentEpoch();
 
         // load last reward pool
         uint256 length = constantsStorage.reward.rewardPoolPerEpochs.length;
@@ -293,7 +308,6 @@ contract CapacityConst is BaseModule, ICapacityConst {
             return;
         }
 
-        uint256 currentTarget = fltPrice_ / activeUnitCount_;
         uint256 lastRewardPoolValue;
         uint256 lastRewardPoolEpoch;
 
@@ -309,6 +323,8 @@ contract CapacityConst is BaseModule, ICapacityConst {
         } else {
             lastRewardPoolValue = lastRewardPool.value;
         }
+
+        uint256 currentTarget = lastRewardPoolValue * fltPrice_ / activeUnitCount_;
 
         // calculate new reward pool
         uint256 newRewardPool;

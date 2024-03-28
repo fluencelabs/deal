@@ -25,26 +25,38 @@ export const MAX_UINT_256 = BigInt.fromString(
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 export const UNKNOWN_EFFECTOR_DESCRIPTION = "Unknown";
+export const REMOVED_EFFECTOR_INFO_DESCRIPTION = "Removed";
 export const UNREGISTERED_PROVIDER_NAME = "Unregistered";
 
 // In contracts flow to register provider exists, but on e.g. deal
-//  creation some unregistered providers could be used.
+//  creation some unregistered providers could be used and we need to store them.
+//  Also, in Deal system some providers could be mentioned when them are Whitelisted
+//  (Global Whitelist).
 // @notice Those unregistered providers does not count in total providers.
-export function createOrLoadUnregisteredProvider(
+export function createOrLoadProvider(
   providerAddress: string,
+  timestamp: BigInt,
 ): Provider {
-  let entity = Provider.load(providerAddress);
+  // 'I do not repeat, I do not repeat'. One more lowercase in case if someone will
+  //  forget to use it in the future.
+  const providerAddressSerialized = providerAddress.toLowerCase();
+  let entity = Provider.load(providerAddressSerialized);
 
   if (entity == null) {
-    entity = new Provider(providerAddress);
+    entity = new Provider(providerAddressSerialized);
     entity.registered = false;
     entity.name = UNREGISTERED_PROVIDER_NAME;
     entity.approved = false;
-    entity.createdAt = ZERO_BIG_INT;
+    entity.createdAt = timestamp;
     entity.computeUnitsAvailable = 0;
     entity.computeUnitsTotal = 0;
     entity.peerCount = 0;
     entity.save();
+
+    // Upd stats below.
+    let graphNetwork = createOrLoadGraphNetwork();
+    graphNetwork.providersTotal = graphNetwork.providersTotal.plus(UNO_BIG_INT);
+    graphNetwork.save()
   }
   return entity as Provider;
 }
@@ -184,6 +196,7 @@ export function createOrLoadGraphNetwork(): GraphNetwork {
     graphNetwork = new GraphNetwork("1");
     graphNetwork.dealsTotal = ZERO_BIG_INT;
     graphNetwork.providersTotal = ZERO_BIG_INT;
+    graphNetwork.providersRegisteredTotal = ZERO_BIG_INT;
     graphNetwork.offersTotal = ZERO_BIG_INT;
     graphNetwork.tokensTotal = ZERO_BIG_INT;
     graphNetwork.effectorsTotal = ZERO_BIG_INT;
@@ -260,7 +273,7 @@ export function createOrLoadCapacityCommitmentStatsPerEpoch(
     entity.nextAdditionalActiveUnitCount = 0;
     entity.currentCCNextCCFailedEpoch = ZERO_BIG_INT;
     entity.submittedProofsCount = 0;
-    entity.blockNumberStart = ZERO_BIG_INT;
+    entity.blockNumberStart = MAX_UINT_256;
     entity.blockNumberEnd = ZERO_BIG_INT;
     entity.computeUnitsWithMinRequiredProofsSubmittedCounter = 0;
     entity.save();

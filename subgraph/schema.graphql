@@ -8,8 +8,11 @@ type GraphNetwork @entity {
   coreContractAddress: String
   capacityContractAddress: String
   marketContractAddress: String
-  # TODO: remove when total field wil be added by developers.
+  # TODO: remove total counters when total counter field wil be added by developers.
   # https://github.com/graphprotocol/graph-node/issues/613
+  "Providers that register themselves in the network with setInfo() method."
+  providersRegisteredTotal: BigInt!
+  "@deprecated TODO: deprecate."
   providersTotal: BigInt!
   dealsTotal: BigInt!
   offersTotal: BigInt!
@@ -20,6 +23,7 @@ type GraphNetwork @entity {
   # Add constants from Core contract below.
   coreEpochDuration: Int
   initTimestamp: Int
+  corePrecision: Int
   # Capacity consts are below.
   capacityMaxFailedRatio: Int
   minRequiredProofsPerEpoch: Int
@@ -36,7 +40,7 @@ type Provider @entity {
   name: String!
   createdAt: BigInt!
   approved: Boolean!
-  "Is provider registered in the network (if false - possible just mentioned)."
+  "Is provider registered in the network (if false possibly it is only mentioned or global-whitelisted)."
   registered: Boolean!
 
   offers: [Offer!] @derivedFrom(field: "provider")
@@ -238,6 +242,7 @@ type CapacityCommitment @entity {
   status: CapacityCommitmentStatus
   collateralPerUnit: BigInt!
   duration: BigInt!
+  "This field represents Ratio [0, 1] only when it is divided by PRECISION constant of Core contract."
   rewardDelegatorRate: Int!
   delegator: String!
   "timestamp of creation of CC. It does not mean that CC is started."

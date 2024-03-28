@@ -5,8 +5,16 @@ import {
   type IDealFactory,
   type IMarket,
 } from "@fluencelabs/deal-ts-clients";
-import type { TypedEventLog } from "@fluencelabs/deal-ts-clients/dist/typechain-types/common.js";
-import { type ContractTransactionResponse } from "ethers";
+import type {
+  TypedContractEvent,
+  TypedEventLog,
+} from "@fluencelabs/deal-ts-clients/dist/typechain-types/common.js";
+import {
+  ContractTransactionReceipt,
+  type ContractTransactionResponse,
+  EventLog,
+  Log,
+} from "ethers";
 
 export async function checkEvents<
   R extends ICapacity | IMarket | IDeal | IDealFactory,
@@ -32,4 +40,30 @@ export async function checkEvents<
   const events = await contract.queryFilter(event, blockNumber);
   expect(events.length).toBe(expectedEventCount);
   return events;
+}
+
+const isEventLog = (log: Log): log is EventLog => {
+  return "args" in log;
+};
+
+export function checkEvent<E extends TypedContractEvent>(
+  event: E,
+  tx: ContractTransactionReceipt | null,
+): E extends TypedContractEvent<infer I, infer O, infer R>
+  ? Array<TypedEventLog<TypedContractEvent<I, O, R>>>
+  : never;
+
+export function checkEvent<E extends TypedContractEvent>(
+  event: E,
+  tx: ContractTransactionReceipt | null,
+): Array<TypedEventLog<TypedContractEvent>> {
+  assert(tx, "TX is null");
+
+  return tx.logs.filter((log): log is EventLog => {
+    if (!isEventLog(log)) {
+      throw new Error("Log doesn't contain args");
+    }
+
+    return log.topics[0] === event.fragment.topicHash;
+  });
 }

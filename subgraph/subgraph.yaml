@@ -6,11 +6,11 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: Core
-    network: local
+    network: kras
     source:
       abi: Core
-      address: "0x52173b6ac069619c206b9A0e75609fC92860AB2A"
-      startBlock: 5410
+      address: "0xd5439DF0723Ab1ee7Ded6a3EBEf6BF23e8087958"
+      startBlock: 3935
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -30,11 +30,11 @@ dataSources:
       file: ./src/mappings/core.ts
   - kind: ethereum/contract
     name: Market
-    network: local
+    network: kras
     source:
       abi: Market
-      address: "0xd977422c9eE9B646f64A4C4389a6C98ad356d8C4"
-      startBlock: 5410
+      address: "0x4CCE76Ef4e044622d7727f6A95688D3fC27Ea6b7"
+      startBlock: 3935
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -61,6 +61,10 @@ dataSources:
           handler: handleInitialized
         - event: ProviderInfoUpdated(indexed address,string,(bytes4,bytes32))
           handler: handleProviderInfoUpdated
+        - event: EffectorInfoSet((bytes4,bytes32),string,(bytes4,bytes32))
+          handler: handleEffectorInfoSet
+        - event: EffectorInfoRemoved((bytes4,bytes32))
+          handler: handleEffectorInfoRemoved
         - event: MarketOfferRegistered(indexed
             address,bytes32,uint256,address,(bytes4,bytes32)[],uint256,uint256)
           handler: handleMarketOfferRegistered
@@ -83,11 +87,11 @@ dataSources:
       file: ./src/mappings/market.ts
   - kind: ethereum/contract
     name: DealFactory
-    network: local
+    network: kras
     source:
       abi: DealFactory
-      address: "0x6e0a5725dD4071e46356bD974E13F35DbF9ef367"
-      startBlock: 5410
+      address: "0x711Edd2d19dF1cE480120F377898A3dE46A08200"
+      startBlock: 3935
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -110,11 +114,11 @@ dataSources:
       file: ./src/mappings/deal-factory.ts
   - kind: ethereum/contract
     name: Capacity
-    network: local
+    network: kras
     source:
       abi: Capacity
-      address: "0x1eB5C49630E08e95Ba7f139BcF4B9BA171C9a8C7"
-      startBlock: 5410
+      address: "0xb0f7AceA17aE7892B0432e89E467f55f57B76Cef"
+      startBlock: 3935
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -161,7 +165,7 @@ dataSources:
 templates:
   - name: Deal
     kind: ethereum/contract
-    network: local
+    network: kras
     source:
       abi: Deal
     mapping:

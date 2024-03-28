@@ -3,6 +3,11 @@
 // If provider does not approved: convert a name.
 import type { ComputeUnitWithCcDataBasicFragment } from "../indexerClient/queries/peers-query.generated.js";
 import type { ComputeUnitStatus } from "../types/schemes.js";
+import {
+  type SerializationSettings,
+  tokenValueToRounded
+} from "../../utils/serializers.js";
+import { FLTToken } from "../constants.js";
 
 export function serializeProviderName(
   name: string,
@@ -16,22 +21,6 @@ export function serializeProviderName(
     return "Provider 0x0000000";
   }
   return "Provider " + providerAddress.slice(0, 8);
-}
-
-// TODO: rm when https://github.com/graphprotocol/graph-node/issues/5171 is fixed.
-// Currently this method is synced with scripts/CreateMarket.s.sol script data.
-// It is used for dev purpose as scripts/CreateMarket.s.sol itself as well.
-export function serializeEffectorDescription(
-  cid: string,
-  descriptionFromIndexer: string,
-): string {
-  if (cid == "\u00124VxDoge") {
-    return "IPFS";
-  }
-  if (cid == "\u00124VxDogu") {
-    return "cURL";
-  }
-  return descriptionFromIndexer;
 }
 
 export function serializeCUStatus(
@@ -53,4 +42,29 @@ export function serializeCUStatus(
   return {
     status,
   };
+}
+
+export function serializeRewards(
+  value: bigint,
+  delegatorRate: number,
+  precision: number,
+  serializationSettings: SerializationSettings,
+): {provider: string, delegator: string} {
+  const delegatorRateBigInt = BigInt(delegatorRate);
+  const precisionBigInt = BigInt(precision);
+  const delegatorReward = (value * delegatorRateBigInt) / precisionBigInt
+  const providerReward = value - delegatorReward
+  return {
+    provider:
+      tokenValueToRounded(
+        providerReward,
+        Number(FLTToken.decimals),
+        serializationSettings.nativeTokenValueAdditionalFormatter,
+        ),
+    delegator: tokenValueToRounded(
+      delegatorReward,
+      Number(FLTToken.decimals),
+      serializationSettings.nativeTokenValueAdditionalFormatter,
+      ),
+  }
 }

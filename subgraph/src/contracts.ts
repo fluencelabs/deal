@@ -7,7 +7,6 @@ import { Deal } from "../generated/Market/Deal";
 import { Address, Bytes, BigInt } from "@graphprotocol/graph-ts";
 import { ERC20 } from "../generated/Market/ERC20";
 import { Core } from "../generated/Core/Core";
-import { Capacity } from "../generated/Capacity/Capacity";
 import { MAX_UINT_256, UNO_BIG_INT, ZERO_BIG_INT } from "./models";
 import { log } from "@graphprotocol/graph-ts/index";
 
@@ -73,11 +72,15 @@ export function getInitTimestamp(contractAddress: Address): i32 {
 }
 
 export function getCapacityMaxFailedRatio(contractAddress: Address): BigInt {
-  return Capacity.bind(contractAddress).maxFailedRatio();
+  return Core.bind(contractAddress).maxFailedRatio();
 }
 
 export function getMinRequiredProofsPerEpoch(contractAddress: Address): BigInt {
-  return Capacity.bind(contractAddress).minProofsPerEpoch();
+  return Core.bind(contractAddress).minProofsPerEpoch();
+}
+
+export function getPrecision(contractAddress: Address): BigInt {
+  return Core.bind(contractAddress).precision();
 }
 
 export function calculateNextFailedCCEpoch(

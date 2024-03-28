@@ -5,6 +5,8 @@
     "outDir": "dist",
     "rootDir": "src",
     "moduleResolution": "NodeNext",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "module": "ESNext",
     "target": "ESNext",
     "resolveJsonModule": true,

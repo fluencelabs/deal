@@ -1,44 +1,36 @@
-import { ethers } from "ethers";
 import type { OrderType } from "./types/filters.js";
 
-// @deprecated
-export const DEFAULT_TOKEN_VALUE_ROUNDING = 3;
 // Max to select per 1 multiselect filter.
 export const FILTER_MULTISELECT_MAX = 100;
 export const DEFAULT_ORDER_TYPE: OrderType = "desc";
 
-// Note, suffix Default because in the future we could check for minimal delta
-//  in contracts and parse by this dynamic value.
-export interface SerializationSettings {
-  parseNativeTokenToFixedDefault: number;
-  parseTokenToFixedDefault: number;
-}
-
-// Parse token value with its decimals to more human-readable format.
-// Note, first of all it parses value according to its decimals from contracts,
-//  after it parsed to supplied fixed format (in case it is 0.0000 it parsed to 0).
-// Note, toFixed should be equal to the minimal delta value in contracts that should be added (e.g. ).
-//  With this precision we sure that showed values are representative for the user.
-//  For stable coins with smth like 6 digits it seemed to use toFixed=2.
-export function tokenValueToRounded(
-  value: string | bigint,
-  toFixed: number = 3,
-  decimals: number = 18,
-) {
-  const formatted = ethers.formatUnits(value, decimals);
-  const parsed = parseFloat(formatted).toFixed(toFixed);
-  if (parsed == "0." + "0".repeat(toFixed)) {
-    return "0"
+// Returns total counter according to provided total and filters.
+// Note, now it returns null when filters are not empty because for subgraph it
+//  is impossible to get counter with filtration.
+// Ref to https://github.com/graphprotocol/graph-node/issues/1309.
+// @param filters: filters that used to be sent to subgraph directly
+//  (thus, after serialization).
+export function getTotalCounter(
+  // @ts-ignore
+  filters: any,
+  total: number,
+): string | null {
+  // onlyApproved == false filter should not be counted as actual filter for schemes:
+  // - OffersFilters,
+  // - ProvidersFilters,
+  //  because this false value is a default one. And default filter value should not be counted when we decide:
+  //  if we actually use filtration and, thus, we can not count total for the query.
+  // Note, this, behavior will be ignored when
+  //  counters will be implemented: https://github.com/graphprotocol/graph-node/issues/1309.
+  const filtersCopy = { ...filters };
+  if (filtersCopy.onlyApproved === false) {
+    delete filtersCopy.onlyApproved;
   }
-  return parsed
-}
 
-// Convert human-readable value to token value with its decimals (e.g. WEI in case of ETH-like tokens).
-export function valueToTokenValue(
-  value: string | bigint | number,
-  decimals: number = 18,
-) {
-  return ethers.parseUnits(value.toString(), decimals).toString();
+  if (Object.keys(filtersCopy).length) {
+    return null;
+  }
+  return total.toString();
 }
 
 // It mirrors core.currentEpoch in EpochController.sol.
@@ -48,9 +40,11 @@ export function calculateEpoch(
   epochControllerStorageEpochDuration: number,
 ): number {
   return parseInt(
-    (1 +
-    (timestamp - epochControllerStorageInitTimestamp) /
-      epochControllerStorageEpochDuration).toString()
+    (
+      1 +
+      (timestamp - epochControllerStorageInitTimestamp) /
+        epochControllerStorageEpochDuration
+    ).toString(),
   );
 }
 

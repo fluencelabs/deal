@@ -37,7 +37,7 @@ library DeployDealSystem {
     uint256 public constant DEFAULT_MIN_PROTOCOL_VERSION = 1;
     uint256 public constant DEFAULT_MAX_PROTOCOL_VERSION = 1;
     uint256 public constant DEFAULT_USD_COLLATERAL_PER_UNIT = 100 * PRECISION; // 100 USD
-    uint256 public constant DEFAULT_USD_TARGET_REVENUE_PER_EPOCH = 10 * PRECISION; // 10 USD
+    uint256 public constant DEFAULT_USD_TARGET_REVENUE_PER_EPOCH = 2000 * PRECISION; // 2000 USD
     uint256 public constant DEFAULT_MIN_DURATION = 1 days;
     uint256 public constant DEFAULT_MIN_REWARD_PER_EPOCH = 10000;
     uint256 public constant DEFAULT_MAX_REWARD_PER_EPOCH = 1;
@@ -75,7 +75,23 @@ library DeployDealSystem {
                         DEFAULT_MIN_PROTOCOL_VERSION,
                         DEFAULT_MAX_PROTOCOL_VERSION,
                         dealImpl,
-                        DEFAULT_IS_WHITELIST_ENABLED
+                        DEFAULT_IS_WHITELIST_ENABLED,
+                        DEFAULT_FLT_PRICE,
+                        DEFAULT_USD_COLLATERAL_PER_UNIT,
+                        DEFAULT_USD_TARGET_REVENUE_PER_EPOCH,
+                        DEFAULT_MIN_DURATION,
+                        DEFAULT_MIN_REWARD_PER_EPOCH,
+                        DEFAULT_MAX_REWARD_PER_EPOCH,
+                        DEFAULT_VESTING_PERIOD_DURATION,
+                        DEFAULT_VESTING_PERIOD_COUNT,
+                        DEFAULT_SLASHING_RATE,
+                        DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH,
+                        DEFAULT_MAX_PROOFS_PER_EPOCH,
+                        DEFAULT_WITHDRAW_EPOCHS_AFTER_FAILED,
+                        DEFAULT_MAX_FAILED_RATIO,
+                        DEFAULT_DIFFICULTY_TARGET,
+                        DEFAULT_INIT_REWARD_POOL,
+                        new RandomXProxy()
                     )
                 )
             )
@@ -90,28 +106,11 @@ library DeployDealSystem {
         );
 
         deployment.capacity = Capacity(
-            address(
-                new ERC1967Proxy(
-                    address(new Capacity(deployment.core)),
-                    abi.encodeWithSelector(
-                        Capacity.initialize.selector,
-                        DEFAULT_FLT_PRICE,
-                        DEFAULT_USD_COLLATERAL_PER_UNIT,
-                        DEFAULT_USD_TARGET_REVENUE_PER_EPOCH,
-                        DEFAULT_MIN_DURATION,
-                        DEFAULT_MIN_REWARD_PER_EPOCH,
-                        DEFAULT_MAX_REWARD_PER_EPOCH,
-                        DEFAULT_VESTING_PERIOD_DURATION,
-                        DEFAULT_VESTING_PERIOD_COUNT,
-                        DEFAULT_SLASHING_RATE,
-                        DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH,
-                        DEFAULT_MAX_PROOFS_PER_EPOCH,
-                        DEFAULT_WITHDRAW_EPOCHS_AFTER_FAILED,
-                        DEFAULT_MAX_FAILED_RATIO,
-                        DEFAULT_INIT_GLOBAL_NONCE,
-                        DEFAULT_DIFFICULTY_TARGET,
-                        DEFAULT_INIT_REWARD_POOL,
-                        new RandomXProxy()
+            payable(
+                address(
+                    new ERC1967Proxy(
+                        address(new Capacity(deployment.core)),
+                        abi.encodeWithSelector(Capacity.initialize.selector, DEFAULT_INIT_GLOBAL_NONCE)
                     )
                 )
             )

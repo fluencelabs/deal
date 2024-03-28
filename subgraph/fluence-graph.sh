@@ -51,7 +51,7 @@ case "$network" in
     GRAPHNODE_URL="${GRAPHNODE_URL:-http://localhost:8020}"
     IPFS_URL="${IPFS_URL:-http://localhost:5001}"
     ;;
-  stage|kras|dar)
+  stage|dar)
     if [[ -z $BASIC_AUTH_SUBGRAPH ]]; then
       echo "Please provide credentials with 'BASIC_AUTH_SUBGRAPH' variable."
       exit 1
@@ -63,6 +63,19 @@ case "$network" in
     GRAPH_NODE_QUERY_URL="https://graph-node-${network}.fluence.dev/subgraphs/name/"
     # TODO: IPFS why does not work with auth (before deploy request Tolay to open ports)
     IPFS_URL="https://graph-node-ipfs-${network}.fluence.dev"
+    ;;
+  kras)
+    if [[ -z $BASIC_AUTH_SUBGRAPH ]]; then
+      echo "Please provide credentials with 'BASIC_AUTH_SUBGRAPH' variable."
+      exit 1
+    else
+      basic_auth="${BASIC_AUTH_SUBGRAPH}@"
+    fi
+    GRAPHNODE_URL="https://${basic_auth}graph-node-admin.${network}.fluence.dev"
+    # To save logs of created subgraphs on Fluence stands.
+    GRAPH_NODE_QUERY_URL="https://graph-node.${network}.fluence.dev/subgraphs/name/"
+    # TODO: IPFS why does not work with auth (before deploy request Tolay to open ports)
+    IPFS_URL="https://graph-node-ipfs.${network}.fluence.dev"
 esac
 
 # Prepare subgraph version label.
@@ -103,7 +116,7 @@ case "$network" in
     SUBGRAPH_NETWORK="dar"
     ;;
   kras)
-    SUBGRAPH_NETWORK="mumbai"
+    SUBGRAPH_NETWORK="kras"
     ;;
 esac
 
@@ -121,7 +134,8 @@ esac
 case "$action" in
   deploy)
     echo "Deploying subgraph on ${network} stand with subgraph name: $SUBGRAPH_NAME and version label $SUBGRAPH_VERSION_LABEL..."
-    graph deploy --node ${GRAPHNODE_URL} --ipfs ${IPFS_URL} --network ${SUBGRAPH_NETWORK} --network-file configs/${network}-networks-config.json --version-label ${SUBGRAPH_VERSION_LABEL} ${SUBGRAPH_NAME}
+    auth_header=$(echo -n ${BASIC_AUTH_SUBGRAPH} | base64)
+    graph deploy --node ${GRAPHNODE_URL} --headers "{\"Authorization\": \"Basic ${auth_header}\"}" --ipfs ${IPFS_URL} --network ${SUBGRAPH_NETWORK} --network-file configs/${network}-networks-config.json --version-label ${SUBGRAPH_VERSION_LABEL} ${SUBGRAPH_NAME} \
     ;;
   create)
     echo "Creating subgraph on Fluence with name: $SUBGRAPH_NAME..."

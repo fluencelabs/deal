@@ -1,5 +1,114 @@
 # Changelog
 
+## [0.13.3](https://github.com/fluencelabs/deal/compare/v0.13.2...v0.13.3) (2024-03-26)
+
+
+### Bug Fixes
+
+* bug with Pagination of Providers page [CHAIN-439] ([#387](https://github.com/fluencelabs/deal/issues/387)) ([4d10734](https://github.com/fluencelabs/deal/commit/4d10734c6ec61af22df859a9d5f4e5f6043ea45e))
+* computeUnitsCount for cc in Subgraph ([#385](https://github.com/fluencelabs/deal/issues/385)) ([952e174](https://github.com/fluencelabs/deal/commit/952e17440ce5fa3056cf7f37efc37059d42038bf))
+* do not concatenate strings in rewards calculations ([#388](https://github.com/fluencelabs/deal/issues/388)) ([43ea459](https://github.com/fluencelabs/deal/commit/43ea4593539ae6b80967bf781ee961cc0c0bd4c6))
+
+## [0.13.2](https://github.com/fluencelabs/deal/compare/v0.13.1...v0.13.2) (2024-03-22)
+
+
+### Features
+
+* add statuses to ts-client ([#381](https://github.com/fluencelabs/deal/issues/381)) ([5d29001](https://github.com/fluencelabs/deal/commit/5d2900151cf09b209fc25a4b68294ccaeae2e76f))
+
+## [0.13.1](https://github.com/fluencelabs/deal/compare/v0.13.0...v0.13.1) (2024-03-22)
+
+
+### Bug Fixes
+
+* compute units with min required proofs submitted counter [chain-430] ([#375](https://github.com/fluencelabs/deal/issues/375)) ([11ad638](https://github.com/fluencelabs/deal/commit/11ad6387939a679377f47d7ba2e64729d8394307))
+* reward delegation rate ([#380](https://github.com/fluencelabs/deal/issues/380)) ([5ba5ce3](https://github.com/fluencelabs/deal/commit/5ba5ce3a803e5fc20fded5ddae73ed384bb62c3c))
+* type import ([#378](https://github.com/fluencelabs/deal/issues/378)) ([44c1c76](https://github.com/fluencelabs/deal/commit/44c1c76c38fbb5f2f2a5f9cf8e34c16f4d8bdcc4))
+* use load-or-create-provider instead of manual decide ([#376](https://github.com/fluencelabs/deal/issues/376)) ([93aa719](https://github.com/fluencelabs/deal/commit/93aa71991ef41859a4ae67a4a8ddf1096cb2b2c4))
+
+## [0.13.0](https://github.com/fluencelabs/deal/compare/v0.12.2...v0.13.0) (2024-03-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* add deploy script & update kras ([#373](https://github.com/fluencelabs/deal/issues/373))
+* fltCollateral calculation & fix deposit balance to CC contract ([#368](https://github.com/fluencelabs/deal/issues/368))
+
+### Features
+
+* add deploy script & update kras ([#373](https://github.com/fluencelabs/deal/issues/373)) ([8b99e43](https://github.com/fluencelabs/deal/commit/8b99e430d3aaabc977d8ab6484f5c51895423884))
+* deploy kras ([#374](https://github.com/fluencelabs/deal/issues/374)) ([b341d78](https://github.com/fluencelabs/deal/commit/b341d78f19c6938908fc6b57e5ddf7261c2ef60f))
+
+
+### Bug Fixes
+
+* fltCollateral calculation & fix deposit balance to CC contract ([#368](https://github.com/fluencelabs/deal/issues/368)) ([125cdd9](https://github.com/fluencelabs/deal/commit/125cdd9b2c27755781c3f7dadc44baaedda5b9ff))
+* new vesting item added more reward than needed ([#369](https://github.com/fluencelabs/deal/issues/369)) ([5e6bcd0](https://github.com/fluencelabs/deal/commit/5e6bcd0879f6ca117dac9edc77bcb825c97c94df))
+* rewards calculation on network explorer [chain 428] ([#367](https://github.com/fluencelabs/deal/issues/367)) ([cce0b1c](https://github.com/fluencelabs/deal/commit/cce0b1ce92b26d76cc2fad8154f92f2fcc79ec23))
+* Vesting tests ([#371](https://github.com/fluencelabs/deal/issues/371)) ([a4fd2be](https://github.com/fluencelabs/deal/commit/a4fd2be4270d9250ece7a679d71ff23380234598))
+
+## [0.12.2](https://github.com/fluencelabs/deal/compare/v0.12.1...v0.12.2) (2024-03-19)
+
+
+### Features
+
+* update chain id ([#364](https://github.com/fluencelabs/deal/issues/364)) ([c626176](https://github.com/fluencelabs/deal/commit/c626176f04f1c6400adc7ecaffe52a3f10851a98))
+
+## [0.12.1](https://github.com/fluencelabs/deal/compare/v0.12.0...v0.12.1) (2024-03-18)
+
+
+### Features
+
+* add kras contracts env ([#362](https://github.com/fluencelabs/deal/issues/362)) ([78a28e9](https://github.com/fluencelabs/deal/commit/78a28e91a200be5eed87573844306f5cff003b68))
+
+## [0.12.0](https://github.com/fluencelabs/deal/compare/v0.11.4...v0.12.0) (2024-03-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* deal rewards ([#349](https://github.com/fluencelabs/deal/issues/349))
+* provider whitelist - persist logic in Whitelist Contract only and support effectorInfoSet ([#346](https://github.com/fluencelabs/deal/issues/346))
+
+### Features
+
+* deal cli client with more methods [chain-412] ([#342](https://github.com/fluencelabs/deal/issues/342)) ([a6e5d7f](https://github.com/fluencelabs/deal/commit/a6e5d7f069be1c5f3020c685725ac80d2057bd0c))
+* deploy kras ([#360](https://github.com/fluencelabs/deal/issues/360)) ([77942c7](https://github.com/fluencelabs/deal/commit/77942c7e05655f329037c9296f47796a504a07c3))
+
+
+### Bug Fixes
+
+* deal rewards ([#349](https://github.com/fluencelabs/deal/issues/349)) ([a502073](https://github.com/fluencelabs/deal/commit/a50207396364770694fc0313fa6ba2295625a940))
+* provider whitelist - persist logic in Whitelist Contract only and support effectorInfoSet ([#346](https://github.com/fluencelabs/deal/issues/346)) ([f175797](https://github.com/fluencelabs/deal/commit/f17579735981aee4d25dcf9c7f094d7f0d6565cd))
+
+## [0.11.4](https://github.com/fluencelabs/deal/compare/v0.11.3...v0.11.4) (2024-03-16)
+
+
+### Bug Fixes
+
+* **indexer:** fix typos in indexer query names ([#357](https://github.com/fluencelabs/deal/issues/357)) ([0345d67](https://github.com/fluencelabs/deal/commit/0345d67ddad96894ee3db8a6610481f59b3d816e))
+
+## [0.11.3](https://github.com/fluencelabs/deal/compare/v0.11.2...v0.11.3) (2024-03-15)
+
+
+### Bug Fixes
+
+* **indexer-client:** fix typo in filter functon name ([#355](https://github.com/fluencelabs/deal/issues/355)) ([6fddcd3](https://github.com/fluencelabs/deal/commit/6fddcd306aa225db8f32bd70ebb11859f92642e8))
+
+## [0.11.2](https://github.com/fluencelabs/deal/compare/v0.11.1...v0.11.2) (2024-03-15)
+
+
+### Features
+
+* redeploy dar ([#352](https://github.com/fluencelabs/deal/issues/352)) ([adf4667](https://github.com/fluencelabs/deal/commit/adf46678283e0d4ee0448982be1c94841d5dc37e))
+
+## [0.11.1](https://github.com/fluencelabs/deal/compare/v0.11.0...v0.11.1) (2024-03-15)
+
+
+### Features
+
+* deploy dar ([#351](https://github.com/fluencelabs/deal/issues/351)) ([fc36c6f](https://github.com/fluencelabs/deal/commit/fc36c6fcf6743036025c8ecde543d2cc455bcb31))
+* **integration-tests:** Provider cleanup scenarios ([#340](https://github.com/fluencelabs/deal/issues/340)) ([616a830](https://github.com/fluencelabs/deal/commit/616a83066a1302720480d135f37748ed7827efc6))
+
 ## [0.11.0](https://github.com/fluencelabs/deal/compare/v0.10.1...v0.11.0) (2024-03-14)
 
 

@@ -8,7 +8,6 @@ import type {
   ComputeUnitsWithCCStatus,
   DealShort,
   DealStatus,
-  Effector,
   OfferShort,
   Peer,
   ProviderBase,
@@ -20,13 +19,11 @@ import type {
 } from "../indexerClient/queries/offers-query.generated.js";
 import {
   serializeCUStatus,
-  serializeEffectorDescription,
-  serializeProviderName
+  serializeProviderName,
+  serializeRewards,
 } from "./logics.js";
 import {
   calculateTimestamp,
-  type SerializationSettings,
-  tokenValueToRounded
 } from "../utils.js";
 import type {
   BasicDealFragment,
@@ -37,30 +34,16 @@ import { FLTToken } from "../constants.js";
 import type {
   ComputeUnitWithCcDataBasicFragment
 } from "../indexerClient/queries/peers-query.generated.js";
+import {
+  type SerializationSettings,
+  tokenValueToRounded
+} from "../../utils/serializers.js";
+import {
+  serializeEffectors,
+  serializeContractRateToPercentage
+} from "../../utils/indexerClient/serializers.js";
 
-// TODO: rename to scheme suffixes not there is a Zoo in naming a little.
-export function serializeEffectors(
-  manyToManyEffectors:
-    | Array<{ effector: { id: string; description: string } }>
-    | null
-    | undefined,
-): Array<Effector> {
-  const composedEffectors: Array<Effector> = [];
-  if (!manyToManyEffectors) {
-    return composedEffectors;
-  }
-  for (const effector of manyToManyEffectors) {
-    composedEffectors.push({
-      cid: effector.effector.id,
-      description: serializeEffectorDescription(
-        effector.effector.id,
-        effector.effector.description,
-      ),
-    });
-  }
-
-  return composedEffectors;
-}
+const BIG_INT_ZERO = BigInt(0)
 
 export function serializeOfferShort(offer: BasicOfferFragment, serializationSettings: SerializationSettings,): OfferShort {
   return {
@@ -76,8 +59,8 @@ export function serializeOfferShort(offer: BasicOfferFragment, serializationSett
     // USDC.
     pricePerEpoch: tokenValueToRounded(
       offer.pricePerEpoch,
-      serializationSettings.parseTokenToFixedDefault,
       offer.paymentToken.decimals,
+      serializationSettings.paymentTokenValueAdditionalFormatter,
     ),
     effectors: serializeEffectors(offer.effectors),
     providerId: offer.provider.id,
@@ -194,8 +177,8 @@ export function serializeDealsShort(
     // USDC.
     balance: tokenValueToRounded(
       freeBalance,
-      serializationSettings.parseTokenToFixedDefault,
       deal.paymentToken.decimals,
+      serializationSettings.paymentTokenValueAdditionalFormatter,
     ),
     status: fromRpcForDealShort.dealStatus
       ? fromRpcForDealShort.dealStatus
@@ -203,8 +186,8 @@ export function serializeDealsShort(
     // USDC.
     totalEarnings: tokenValueToRounded(
       totalEarnings,
-      serializationSettings.parseTokenToFixedDefault,
       deal.paymentToken.decimals,
+      serializationSettings.paymentTokenValueAdditionalFormatter,
     ),
     registeredWorkers: deal.registeredWorkersCurrentCount,
     matchedWorkers: deal.matchedWorkersCurrentCount,
@@ -216,6 +199,7 @@ export function serializeCapacityCommitmentShort(
   statusFromRpc: CapacityCommitmentStatus,
   coreInitTimestamp: number,
   coreEpochDuration: number,
+  precision: number,
 ): CapacityCommitmentShort {
   let expiredAt = null;
   let startedAt = null;
@@ -244,8 +228,9 @@ export function serializeCapacityCommitmentShort(
     peerId: capacityCommitmentFromIndexer.peer.id,
     computeUnitsCount: Number(capacityCommitmentFromIndexer.computeUnitsCount),
     status: statusFromRpc,
-    rewardDelegatorRate: Number(
-      capacityCommitmentFromIndexer.rewardDelegatorRate,
+    rewardDelegatorRate: serializeContractRateToPercentage(
+      Number(capacityCommitmentFromIndexer.rewardDelegatorRate),
+      precision,
     ),
     duration: Number(capacityCommitmentFromIndexer.duration),
   };
@@ -263,51 +248,59 @@ export function serializeCapacityCommitmentDetail(
   rewardWithdrawn: bigint,
   delegatorAddress: string,
   serializationSettings: SerializationSettings,
+  precision: number,
 ): CapacityCommitmentDetail {
-  const _totalRewards = totalRewards ? totalRewards : BigInt(0);
-  const _unlockedRewards = unlockedRewards ? unlockedRewards : BigInt(0);
+  const _totalRewards = totalRewards ? BigInt(totalRewards) : BIG_INT_ZERO;
+  const _unlockedRewards = unlockedRewards ? BigInt(unlockedRewards) : BIG_INT_ZERO;
+  // First of all convert to [0, 1] with accordance of precision and than to [0, 100] to % format.
+  const rewardDelegatorRatePercentage = serializeContractRateToPercentage(rewardDelegatorRate, precision);
+  const unclockedRewardsSerialized = serializeRewards(
+    _unlockedRewards,
+    rewardDelegatorRate,
+    precision,
+    serializationSettings,
+  )
+  const notWithdrawnRewardsSerialized = serializeRewards(
+    _totalRewards,
+    rewardDelegatorRate,
+    precision,
+    serializationSettings,
+  )
   return {
     ...serializeCapacityCommitmentShort(
       capacityCommitmentFromIndexer,
       statusFromRpc,
       coreInitTimestamp,
       coreEpochDuration,
+      precision,
     ),
     // FLT.
     totalCollateral: tokenValueToRounded(
       totalCollateral,
-      serializationSettings.parseNativeTokenToFixedDefault,
+      Number(FLTToken.decimals),
+      serializationSettings.nativeTokenValueAdditionalFormatter,
     ),
     collateralToken: FLTToken,
-    rewardDelegatorRate: rewardDelegatorRate,
+    rewardDelegatorRate: rewardDelegatorRatePercentage,
     // FLT.
     rewardsUnlocked: tokenValueToRounded(
       _unlockedRewards,
-      serializationSettings.parseNativeTokenToFixedDefault,
+      Number(FLTToken.decimals),
+      serializationSettings.nativeTokenValueAdditionalFormatter,
     ),
-    rewardsUnlockedDelegator: tokenValueToRounded(
-      _unlockedRewards * BigInt(rewardDelegatorRate),
-      serializationSettings.parseNativeTokenToFixedDefault,
-    ),
-    rewardsUnlockedProvider: tokenValueToRounded(
-      _unlockedRewards * BigInt(1 - rewardDelegatorRate),
-      serializationSettings.parseNativeTokenToFixedDefault,
-    ),
+    rewardsUnlockedDelegator: unclockedRewardsSerialized.delegator,
+    rewardsUnlockedProvider: unclockedRewardsSerialized.provider,
     rewardsNotWithdrawn: tokenValueToRounded(
       _totalRewards,
-      serializationSettings.parseNativeTokenToFixedDefault,
+      Number(FLTToken.decimals),
+      serializationSettings.nativeTokenValueAdditionalFormatter,
     ),
-    rewardsNotWithdrawnDelegator: tokenValueToRounded(
-      _totalRewards * BigInt(rewardDelegatorRate),
-      serializationSettings.parseNativeTokenToFixedDefault,
-    ),
-    rewardsNotWithdrawnProvider: tokenValueToRounded(
-      _totalRewards * BigInt(1 - rewardDelegatorRate),
-      serializationSettings.parseNativeTokenToFixedDefault,
-    ),
+    rewardsNotWithdrawnDelegator: notWithdrawnRewardsSerialized.delegator,
+    rewardsNotWithdrawnProvider: notWithdrawnRewardsSerialized.provider,
     rewardsTotal: tokenValueToRounded(
-      _totalRewards + rewardWithdrawn,
-      serializationSettings.parseNativeTokenToFixedDefault,
+      _totalRewards + BigInt(rewardWithdrawn),
+      Number(FLTToken.decimals),
+      serializationSettings.nativeTokenValueAdditionalFormatter,
     ),
     delegatorAddress:
       delegatorAddress == "0x0000000000000000000000000000000000000000"
