@@ -296,7 +296,7 @@ type CapacityCommitmentStatsPerEpoch @entity {
   # Set to `capacityCommitment.id.concat(epoch)`
   id: ID!
   capacityCommitment: CapacityCommitment!
-  epoch: BigInt!
+  epochStatistic: EpochStatistic!
   # To track period of block numbers with submitted proofs for the concrete epoch.
   blockNumberStart: BigInt!
   blockNumberEnd: BigInt!
@@ -319,8 +319,8 @@ type CapacityCommitmentStatsPerEpoch @entity {
 
 "Helper stat model to count success proofs per epoch for a CU."
 type ComputeUnitPerEpochStat @entity {
-  id: ID! # Set to `computeUnit.id.concat(epoch)`
-  epoch: BigInt!
+  id: ID! # Set to `computeUnit.id.concat(epoch.id)`
+  epochStatistic: EpochStatistic!
   computeUnit: ComputeUnit!
 
   # To allow query for all CU by the Capacity Commitment.
@@ -328,4 +328,14 @@ type ComputeUnitPerEpochStat @entity {
 
   # Add per epoch stats below.
   submittedProofsCount: Int!
+}
+
+"This model is designed to store epoch related information. Note, that in other models it is more efficient to use epoch as bigint rather than with relation to that model (with relation you could complicate your queries and need to store additional epoch field)."
+type EpochStatistic @entity {
+  "Epoch number. Note, that for current epoch right boarder is approximate."
+  id: ID!
+  startBlock: BigInt!
+  endBlock: BigInt!
+  startTimestamp: BigInt!
+  endTimestamp: BigInt!
 }
