@@ -9,7 +9,7 @@ import type {
   CapacityCommitment_OrderBy,
   Deal_OrderBy,
   Offer_OrderBy,
-  SubmittedProof_OrderBy,
+  SubmittedProof_OrderBy
 } from "../indexerClient/generated.types.js";
 
 export function serializeOfferShortOrderByToIndexer(
@@ -52,3 +52,12 @@ export function serializeProofsOrderByToIndexer(
   }
   throw new Error(`Assertion: unknown ProofsOrderBy value: ${v}`);
 }
+
+// export function serializeProofStatsByCapacityCommitmentOrderByToIndexer(
+//   v: ProofStatsByCapacityCommitmentOrderBy,
+// ): CapacityCommitmentStatsPerEpoch_OrderBy {
+//   if (v == "epoch") {
+//     return 'id';
+//   }
+//   throw new Error(`Assertion: unknown ProofStatsByCapacityCommitmentOrderBy value: ${v}`);
+// }

@@ -1112,9 +1112,9 @@ export class DealExplorerClient {
     let res: Array<ProofStatsByCapacityCommitment> = [];
     for (const proofStats of data.capacityCommitmentStatsPerEpoches) {
       res.push({
-        createdAtEpoch: Number(proofStats.epoch),
-        createdAtEpochBlockNumberStart: Number(proofStats.blockNumberStart),
-        createdAtEpochBlockNumberEnd: Number(proofStats.blockNumberEnd),
+        createdAtEpoch: Number(proofStats.epochStatistic.id),
+        createdAtEpochBlockNumberStart: Number(proofStats.epochStatistic.startBlock),
+        createdAtEpochBlockNumberEnd: Number(proofStats.epochStatistic.endBlock),
         computeUnitsExpected: proofStats.activeUnitCount,
         submittedProofs: proofStats.submittedProofsCount,
         computeUnitsFailed:
@@ -1161,7 +1161,7 @@ export class DealExplorerClient {
       await this._indexerClient.getComputeUnitPerEpochStats({
         filters: {
           capacityCommitment_: { id: capacityCommitmentId },
-          epoch: epoch.toString(),
+          epochStatistic: epoch.toString(),
         },
         offset,
         limit,

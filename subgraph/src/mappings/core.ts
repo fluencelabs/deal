@@ -73,10 +73,10 @@ export function handleNewBlock(block: ethereum.Block): void {
     BigInt.fromI32(coreEpochDuration),
   );
 
-  let EpochStatistic = createOrLoadEpochStatistic(blockTimestamp, currentEpoch);
-  if (EpochStatistic.endBlock < blockNumber) {
-    EpochStatistic.endBlock = blockNumber;
-    EpochStatistic.endTimestamp = blockTimestamp;
-    EpochStatistic.save();
+  let epochStatistic = createOrLoadEpochStatistic(blockTimestamp, currentEpoch, blockNumber);
+  if (epochStatistic.endBlock < blockNumber) {
+    epochStatistic.endBlock = blockNumber;
+    epochStatistic.endTimestamp = blockTimestamp;
+    epochStatistic.save();
   }
 }

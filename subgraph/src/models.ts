@@ -268,14 +268,13 @@ export function createOrLoadCapacityCommitmentStatsPerEpoch(
     entity = new CapacityCommitmentStatsPerEpoch(concattedIds);
     entity.capacityCommitment = capacityCommitmentId;
     entity.epochStatistic = epochStatisticId;
+    entity.epoch = BigInt.fromString(epochStatisticId);
     entity.totalFailCount = 0;
     entity.exitedUnitCount = 0;
     entity.activeUnitCount = 0;
     entity.nextAdditionalActiveUnitCount = 0;
     entity.currentCCNextCCFailedEpoch = ZERO_BIG_INT;
     entity.submittedProofsCount = 0;
-    entity.blockNumberStart = MAX_UINT_256;
-    entity.blockNumberEnd = ZERO_BIG_INT;
     entity.computeUnitsWithMinRequiredProofsSubmittedCounter = 0;
     entity.save();
   }
@@ -300,14 +299,14 @@ export function createOrLoadComputeUnitPerEpochStat(
   return entity as ComputeUnitPerEpochStat;
 }
 
-export function createOrLoadEpochStatistic(timestamp: BigInt, currentEpoch: BigInt): EpochStatistic {
+export function createOrLoadEpochStatistic(timestamp: BigInt, currentEpoch: BigInt, currentBlock: BigInt): EpochStatistic {
   const currentEpochId = currentEpoch.toString()
   let entity = EpochStatistic.load(currentEpochId);
 
   if (entity == null) {
     entity = new EpochStatistic(currentEpochId);
-    entity.startBlock = currentEpoch;
-    entity.endBlock = currentEpoch;
+    entity.startBlock = currentBlock;
+    entity.endBlock = currentBlock;
     entity.startTimestamp = timestamp;
     entity.endTimestamp = timestamp;
     entity.save();

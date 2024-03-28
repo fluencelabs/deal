@@ -297,9 +297,8 @@ type CapacityCommitmentStatsPerEpoch @entity {
   id: ID!
   capacityCommitment: CapacityCommitment!
   epochStatistic: EpochStatistic!
-  # To track period of block numbers with submitted proofs for the concrete epoch.
-  blockNumberStart: BigInt!
-  blockNumberEnd: BigInt!
+  "Additional field to support ordering by epoch."
+  epoch: BigInt!
 
   totalFailCount: Int!
   exitedUnitCount: Int!

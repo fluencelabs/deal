@@ -233,7 +233,7 @@ export function handleCommitmentStatsUpdated(
     BigInt.fromI32(graphNetwork.initTimestamp),
     BigInt.fromI32(graphNetwork.coreEpochDuration),
   );
-  const epochStatistic = createOrLoadEpochStatistic(event.block.timestamp, currentEpoch)
+  const epochStatistic = createOrLoadEpochStatistic(event.block.timestamp, currentEpoch, event.block.number)
 
   let peer = Peer.load(commitment.peer) as Peer;
   peer.currentCCNextCCFailedEpoch = commitment.nextCCFailedEpoch;
@@ -255,12 +255,6 @@ export function handleCommitmentStatsUpdated(
     commitment.nextAdditionalActiveUnitCount;
   capacityCommitmentStatsPerEpoch.currentCCNextCCFailedEpoch =
     commitment.nextCCFailedEpoch;
-  if (capacityCommitmentStatsPerEpoch.blockNumberStart > event.block.number) {
-    capacityCommitmentStatsPerEpoch.blockNumberStart = event.block.number;
-  }
-  if (capacityCommitmentStatsPerEpoch.blockNumberEnd < event.block.number) {
-    capacityCommitmentStatsPerEpoch.blockNumberEnd = event.block.number;
-  }
   capacityCommitmentStatsPerEpoch.save();
 }
 
@@ -279,7 +273,7 @@ export function handleUnitDeactivated(event: UnitDeactivated): void {
   const capacityCommitment = CapacityCommitment.load(
     event.params.commitmentId.toHexString(),
   ) as CapacityCommitment;
-  const epochStatistic = createOrLoadEpochStatistic(event.block.timestamp, currentEpoch);
+  const epochStatistic = createOrLoadEpochStatistic(event.block.timestamp, currentEpoch, event.block.number);
   let capacityCommitmentStatsPerEpoch =
     createOrLoadCapacityCommitmentStatsPerEpoch(
       capacityCommitment.id,
@@ -319,7 +313,7 @@ export function handleProofSubmitted(event: ProofSubmitted): void {
     BigInt.fromI32(graphNetwork.initTimestamp),
     BigInt.fromI32(graphNetwork.coreEpochDuration),
   );
-  const epochStatistic = createOrLoadEpochStatistic(blockTimestamp, currentEpoch)
+  const epochStatistic = createOrLoadEpochStatistic(blockTimestamp, currentEpoch, event.block.number)
   let capacityCommitmentStatsPerEpoch =
     createOrLoadCapacityCommitmentStatsPerEpoch(
       capacityCommitment.id,
