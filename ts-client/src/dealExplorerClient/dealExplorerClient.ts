@@ -1220,6 +1220,15 @@ export class DealExplorerClient {
       data: res,
     };
   }
+
+  async getCurrentEpoch(): Promise<number> {
+    await this._init();
+    return calculateEpoch(
+      Date.now() / 1000,
+      this._coreInitTimestamp!,
+      this._coreEpochDuration!,
+    );
+  }
 }
 
 /*
