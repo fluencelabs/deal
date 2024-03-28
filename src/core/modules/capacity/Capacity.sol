@@ -367,6 +367,8 @@ contract Capacity is
             bytes32 localUnitNonce = proofs[i].localUnitNonce;
             bytes32 resultHash = proofs[i].resultHash;
 
+            localUnitNonces[i] = localUnitNonce;
+
             IMarket.ComputeUnit memory unit = market.getComputeUnit(unitId);
             IMarket.ComputePeer memory peer = market.getComputePeer(
                 unit.peerId
@@ -417,8 +419,39 @@ contract Capacity is
             );
             // #endregion
 
-            // load unitProofCount and add one because we submit new proof
+            // pseudo-random next global nonce
+            s.nextGlobalNonce = keccak256(
+                abi.encodePacked(
+                    s.globalNonce,
+                    blockhash(block.number - 1),
+                    unitId,
+                    localUnitNonce,
+                    resultHash
+                )
+            );
 
+            uint256 unitProofCount = unitInfo.proofCountByEpoch[currentEpoch] +
+                1;
+            if (unitProofCount > core.maxProofsPerEpoch()) {
+                revert TooManyProofs();
+            }
+
+            // #region save localUnitNonce
+            bytes32 globalUnitNonce_ = keccak256(
+                abi.encodePacked(s.globalNonce, unitId)
+            );
+            require(
+                !s.isProofSubmittedByUnit[globalUnitNonce_][localUnitNonce],
+                "Proof is already submitted for this unit"
+            );
+            s.isProofSubmittedByUnit[globalUnitNonce_][localUnitNonce] = true;
+
+            globalUnitNonces[i] = globalUnitNonce_;
+            // #endregion
+
+            // #region save info about proof
+
+            // load unitProofCount and add one because we submit new proof
             RewardInfo storage rewardInfo = s.rewardInfoByEpoch[currentEpoch];
             uint256 minProofsPerEpoch_ = rewardInfo.minProofsPerEpoch;
             if (minProofsPerEpoch_ == 0) {
@@ -433,6 +466,20 @@ contract Capacity is
             } else if (unitProofCount > minProofsPerEpoch_) {
                 rewardInfo.totalSuccessProofs++;
             }
+
+            unitInfo.proofCountByEpoch[currentEpoch] = unitProofCount;
+            // #endregion
+
+            emit CommitmentStatsUpdated(
+                commitmentId,
+                cc.progress.totalFailCount,
+                cc.finish.exitedUnitCount,
+                cc.progress.activeUnitCount,
+                cc.progress.nextAdditionalActiveUnitCount,
+                currentEpoch - 1
+            );
+
+            emit ProofSubmitted(commitmentId, unitId, localUnitNonce);
         }
 
         // #region check proof
