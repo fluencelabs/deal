@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.6](https://github.com/fluencelabs/deal/compare/v0.13.5...v0.13.6) (2024-03-28)
+
+
+### Features
+
+* redeploy dar ([#395](https://github.com/fluencelabs/deal/issues/395)) ([b2a97c3](https://github.com/fluencelabs/deal/commit/b2a97c31cfd2547bd2fc028bdecc05a7a0d6876e))
+
 ## [0.13.5](https://github.com/fluencelabs/deal/compare/v0.13.4...v0.13.5) (2024-03-28)
 
 
