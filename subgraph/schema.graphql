@@ -8,8 +8,11 @@ type GraphNetwork @entity {
   coreContractAddress: String
   capacityContractAddress: String
   marketContractAddress: String
-  # TODO: remove when total field wil be added by developers.
+  # TODO: remove total counters when total counter field wil be added by developers.
   # https://github.com/graphprotocol/graph-node/issues/613
+  "Providers that register themselves in the network with setInfo() method."
+  providersRegisteredTotal: BigInt!
+  "@deprecated TODO: deprecate."
   providersTotal: BigInt!
   dealsTotal: BigInt!
   offersTotal: BigInt!

@@ -196,6 +196,7 @@ export function createOrLoadGraphNetwork(): GraphNetwork {
     graphNetwork = new GraphNetwork("1");
     graphNetwork.dealsTotal = ZERO_BIG_INT;
     graphNetwork.providersTotal = ZERO_BIG_INT;
+    graphNetwork.providersRegisteredTotal = ZERO_BIG_INT;
     graphNetwork.offersTotal = ZERO_BIG_INT;
     graphNetwork.tokensTotal = ZERO_BIG_INT;
     graphNetwork.effectorsTotal = ZERO_BIG_INT;

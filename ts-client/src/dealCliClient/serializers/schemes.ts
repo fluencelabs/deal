@@ -31,8 +31,8 @@ export function serializeOfferDetail(offer: OfferDetailFragment, serializationSe
     // USDC.
     pricePerEpoch: tokenValueToRounded(
       offer.pricePerEpoch,
-      serializationSettings.parseTokenToFixedDefault,
       offer.paymentToken.decimals,
+      serializationSettings.paymentTokenValueAdditionalFormatter,
     ),
     effectors: serializeEffectors(offer.effectors),
     providerId: offer.provider.id,

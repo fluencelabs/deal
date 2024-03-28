@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.4](https://github.com/fluencelabs/deal/compare/v0.13.3...v0.13.4) (2024-03-28)
+
+
+### Bug Fixes
+
+* ux issue with providers and offers spam chain 441 ([#390](https://github.com/fluencelabs/deal/issues/390)) ([ab0c0b9](https://github.com/fluencelabs/deal/commit/ab0c0b974b6a393142b6c11ad3d358df730b6a31))
+
 ## [0.13.3](https://github.com/fluencelabs/deal/compare/v0.13.2...v0.13.3) (2024-03-26)
 
 

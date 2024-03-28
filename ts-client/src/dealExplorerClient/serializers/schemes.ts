@@ -59,8 +59,8 @@ export function serializeOfferShort(offer: BasicOfferFragment, serializationSett
     // USDC.
     pricePerEpoch: tokenValueToRounded(
       offer.pricePerEpoch,
-      serializationSettings.parseTokenToFixedDefault,
       offer.paymentToken.decimals,
+      serializationSettings.paymentTokenValueAdditionalFormatter,
     ),
     effectors: serializeEffectors(offer.effectors),
     providerId: offer.provider.id,
@@ -177,8 +177,8 @@ export function serializeDealsShort(
     // USDC.
     balance: tokenValueToRounded(
       freeBalance,
-      serializationSettings.parseTokenToFixedDefault,
       deal.paymentToken.decimals,
+      serializationSettings.paymentTokenValueAdditionalFormatter,
     ),
     status: fromRpcForDealShort.dealStatus
       ? fromRpcForDealShort.dealStatus
@@ -186,8 +186,8 @@ export function serializeDealsShort(
     // USDC.
     totalEarnings: tokenValueToRounded(
       totalEarnings,
-      serializationSettings.parseTokenToFixedDefault,
       deal.paymentToken.decimals,
+      serializationSettings.paymentTokenValueAdditionalFormatter,
     ),
     registeredWorkers: deal.registeredWorkersCurrentCount,
     matchedWorkers: deal.matchedWorkersCurrentCount,
@@ -277,26 +277,30 @@ export function serializeCapacityCommitmentDetail(
     // FLT.
     totalCollateral: tokenValueToRounded(
       totalCollateral,
-      serializationSettings.parseNativeTokenToFixedDefault,
+      Number(FLTToken.decimals),
+      serializationSettings.nativeTokenValueAdditionalFormatter,
     ),
     collateralToken: FLTToken,
     rewardDelegatorRate: rewardDelegatorRatePercentage,
     // FLT.
     rewardsUnlocked: tokenValueToRounded(
       _unlockedRewards,
-      serializationSettings.parseNativeTokenToFixedDefault,
+      Number(FLTToken.decimals),
+      serializationSettings.nativeTokenValueAdditionalFormatter,
     ),
     rewardsUnlockedDelegator: unclockedRewardsSerialized.delegator,
     rewardsUnlockedProvider: unclockedRewardsSerialized.provider,
     rewardsNotWithdrawn: tokenValueToRounded(
       _totalRewards,
-      serializationSettings.parseNativeTokenToFixedDefault,
+      Number(FLTToken.decimals),
+      serializationSettings.nativeTokenValueAdditionalFormatter,
     ),
     rewardsNotWithdrawnDelegator: notWithdrawnRewardsSerialized.delegator,
     rewardsNotWithdrawnProvider: notWithdrawnRewardsSerialized.provider,
     rewardsTotal: tokenValueToRounded(
       _totalRewards + BigInt(rewardWithdrawn),
-      serializationSettings.parseNativeTokenToFixedDefault,
+      Number(FLTToken.decimals),
+      serializationSettings.nativeTokenValueAdditionalFormatter,
     ),
     delegatorAddress:
       delegatorAddress == "0x0000000000000000000000000000000000000000"
