@@ -11,10 +11,10 @@ import {
   CapacityCommitmentToComputeUnit,
   CapacityCommitmentStatsPerEpoch,
   ComputeUnitPerEpochStat,
-  ComputeUnit,
+  ComputeUnit, Epoch
 } from "../generated/schema";
 import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts";
-import { getTokenDecimals, getTokenSymbol } from "./contracts";
+import { calculateEpoch, getTokenDecimals, getTokenSymbol } from "./contracts";
 import { formatAddress } from "./mappings/utils";
 
 export const ZERO_BIG_INT = BigInt.fromI32(0);
@@ -297,4 +297,19 @@ export function createOrLoadComputeUnitPerEpochStat(
     entity.save();
   }
   return entity as ComputeUnitPerEpochStat;
+}
+
+export function createOrLoadEpoch(timestamp: BigInt, currentEpoch: BigInt): Epoch {
+  const currentEpochId = currentEpoch.toString()
+  let entity = Epoch.load(currentEpochId);
+
+  if (entity == null) {
+    entity = new Epoch(currentEpochId);
+    entity.startBlock = currentEpoch;
+    entity.endBlock = currentEpoch;
+    entity.startTimestamp = timestamp;
+    entity.endTimestamp = timestamp;
+    entity.save();
+  }
+  return entity as Epoch;
 }

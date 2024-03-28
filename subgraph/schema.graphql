@@ -329,3 +329,12 @@ type ComputeUnitPerEpochStat @entity {
   # Add per epoch stats below.
   submittedProofsCount: Int!
 }
+
+type Epoch @entity {
+  "Epoch number. Note, that for current epoch right boarder is approximate."
+  id: ID!
+  startBlock: BigInt!
+  endBlock: BigInt!
+  startTimestamp: BigInt!
+  endTimestamp: BigInt!
+}

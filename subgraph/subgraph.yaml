@@ -17,6 +17,7 @@ dataSources:
       language: wasm/assemblyscript
       entities:
         - GraphNetwork
+        - Epoch
       abis:
         - name: Core
           file: ../out/Core.sol/Core.json
@@ -27,6 +28,8 @@ dataSources:
           handler: handleWhitelistAccessGranted
         - event: WhitelistAccessRevoked(address)
           handler: handleWhitelistAccessRevoked
+      blockHandlers:
+        - handler: handleNewBlock
       file: ./src/mappings/core.ts
   - kind: ethereum/contract
     name: Market
@@ -129,6 +132,7 @@ dataSources:
         - SubmittedProof
         - CapacityCommitmentStatsPerEpoch
         - ComputeUnitPerEpochStats
+        - Epoch
       abis:
         - name: Capacity
           file: ../out/Capacity.sol/Capacity.json
