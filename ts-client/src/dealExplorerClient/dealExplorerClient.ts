@@ -1113,8 +1113,8 @@ export class DealExplorerClient {
     for (const proofStats of data.capacityCommitmentStatsPerEpoches) {
       res.push({
         createdAtEpoch: Number(proofStats.epochStatistic.id),
-        createdAtEpochBlockNumberStart: Number(proofStats.epochStatistic.startBlock),
-        createdAtEpochBlockNumberEnd: Number(proofStats.epochStatistic.endBlock),
+        epochBlockStart: Number(proofStats.epochStatistic.startBlock),
+        epochBlockEnd: Number(proofStats.epochStatistic.endBlock),
         computeUnitsExpected: proofStats.activeUnitCount,
         submittedProofs: proofStats.submittedProofsCount,
         computeUnitsFailed:
