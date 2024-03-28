@@ -17,7 +17,7 @@ dataSources:
       language: wasm/assemblyscript
       entities:
         - GraphNetwork
-        - EpochStats
+        - EpochStatistic
       abis:
         - name: Core
           file: ../out/Core.sol/Core.json
@@ -131,8 +131,8 @@ dataSources:
         - Peer
         - SubmittedProof
         - CapacityCommitmentStatsPerEpoch
-        - ComputeUnitPerEpochStats
-        - EpochStats
+        - ComputeUnitPerEpochStat
+        - EpochStatistic
       abis:
         - name: Capacity
           file: ../out/Capacity.sol/Capacity.json

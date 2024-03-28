@@ -10,7 +10,7 @@ import {
   DealToProvidersAccess,
   CapacityCommitmentToComputeUnit,
   CapacityCommitmentStatsPerEpoch,
-  ComputeUnitPerEpochStats,
+  ComputeUnitPerEpochStat,
   ComputeUnit,
   EpochStatistic,
 } from "../generated/schema";
@@ -285,19 +285,19 @@ export function createOrLoadCapacityCommitmentStatsPerEpoch(
 export function createOrLoadComputeUnitPerEpochStat(
   computeUnitId: string,
   epochStatisticId: string,
-): ComputeUnitPerEpochStats {
+): ComputeUnitPerEpochStat {
   const concattedIds = computeUnitId.concat(epochStatisticId);
-  let entity = ComputeUnitPerEpochStats.load(concattedIds);
+  let entity = ComputeUnitPerEpochStat.load(concattedIds);
 
   if (entity == null) {
     let computeUnit = ComputeUnit.load(computeUnitId) as ComputeUnit;
-    entity = new ComputeUnitPerEpochStats(concattedIds);
+    entity = new ComputeUnitPerEpochStat(concattedIds);
     entity.submittedProofsCount = 0;
     entity.epochStatistic = epochStatisticId;
     entity.computeUnit = computeUnit.id;
     entity.save();
   }
-  return entity as ComputeUnitPerEpochStats;
+  return entity as ComputeUnitPerEpochStat;
 }
 
 export function createOrLoadEpochStatistic(timestamp: BigInt, currentEpoch: BigInt): EpochStatistic {

@@ -313,12 +313,12 @@ type CapacityCommitmentStatsPerEpoch @entity {
 
   # Add additional seconds stats (that relate from others) below.
   # Relates means that related should be updated first, and stats below strictly after.
-  "Should be update after ComputeUnitPerEpochStats.submittedProofsCount reached min proofs border."
+  "Should be update after ComputeUnitPerEpochStat.submittedProofsCount reached min proofs border."
   computeUnitsWithMinRequiredProofsSubmittedCounter: Int!
 }
 
 "Helper stat model to count success proofs per epoch for a CU."
-type ComputeUnitPerEpochStats @entity {
+type ComputeUnitPerEpochStat @entity {
   id: ID! # Set to `computeUnit.id.concat(epoch.id)`
   epochStatistic: EpochStatistic!
   computeUnit: ComputeUnit!
