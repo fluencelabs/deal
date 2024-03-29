@@ -317,9 +317,6 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
 
         uint256 unitProofCount = unitInfo.proofCountByEpoch[currentEpoch] + 1;
 
-        uint256 minProofsPerEpoch_;
-        uint256 maxProofsPerEpoch_;
-
         RewardInfo storage rewardInfo = s.rewardInfoByEpoch[currentEpoch];
         if (rewardInfo.minProofsPerEpoch == 0) {
             rewardInfo.minProofsPerEpoch = core.minProofsPerEpoch();
@@ -448,7 +445,6 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         bytes32 peerId = cc.info.peerId;
 
         IMarket.ComputePeer memory peer = market.getComputePeer(peerId);
-        IMarket.Offer memory offer = market.getOffer(peer.offerId);
 
         Snapshot.Cache memory snapshotCache = Snapshot.init(cc);
         CCStatus status = _preCommitCommitmentSnapshot(cc, snapshotCache, peer, currentEpoch_, expiredEpoch);
