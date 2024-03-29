@@ -375,6 +375,7 @@ contract CpacityConstTest is Test {
             randomXProxy,
             oracle
         );
+        capacityConst.setOracle(oracle);
     }
 
     function _verifyCapacityConst(
@@ -466,9 +467,9 @@ contract TestCapacityConst is CapacityConst {
             maxFailedRatio_,
             difficulty_,
             initRewardPool_,
-            randomXProxy_,
-            oracle_
+            randomXProxy_
         );
+        setOracle(oracle_);
     }
 
     function setActiveUnitCount(uint256 activeUnitCount_) public {

@@ -85,8 +85,7 @@ contract CapacityConst is ICapacityConst, OwnableUpgradableDiamond, EpochControl
         uint256 maxFailedRatio_,
         bytes32 difficulty_,
         uint256 initRewardPool_,
-        address randomXProxy_,
-        address oracle_
+        address randomXProxy_
     ) internal onlyInitializing {
         ConstStorage storage constantsStorage = _getConstStorage();
 
@@ -108,9 +107,6 @@ contract CapacityConst is ICapacityConst, OwnableUpgradableDiamond, EpochControl
         constantsStorage.proof.nextDifficulty = difficulty_;
 
         constantsStorage.randomXProxy = randomXProxy_;
-
-        constantsStorage.oracle = oracle_;
-        emit OracleSet(oracle_);
 
         constantsStorage.reward.rewardPoolPerEpochs.push(
             RewardPoolPerEpoch({epoch: currentEpoch(), value: initRewardPool_})
@@ -290,7 +286,7 @@ contract CapacityConst is ICapacityConst, OwnableUpgradableDiamond, EpochControl
         emit CapacityConstantUpdated(constantType, v);
     }
 
-    function setOracle(address oracle_) external onlyOwner {
+    function setOracle(address oracle_) public onlyOwner {
         require(oracle_ != address(0), "Oracle shouldn't be zero address");
         ConstStorage storage constantsStorage = _getConstStorage();
         constantsStorage.oracle = oracle_;

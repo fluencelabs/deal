@@ -67,9 +67,9 @@ contract CoreTest is Test {
             DeployDealSystem.DEFAULT_MAX_FAILED_RATIO,
             DeployDealSystem.DEFAULT_DIFFICULTY_TARGET,
             DeployDealSystem.DEFAULT_INIT_REWARD_POOL,
-            randomX,
-            oracle
+            randomX
         );
+        // coreImpl.setOracle(oracle);
     }
 
     function test_InitializeModules() external {

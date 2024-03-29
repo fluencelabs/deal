@@ -91,8 +91,7 @@ library DeployDealSystem {
                         DEFAULT_MAX_FAILED_RATIO,
                         DEFAULT_DIFFICULTY_TARGET,
                         DEFAULT_INIT_REWARD_POOL,
-                        new RandomXProxy(),
-                        address(0)
+                        new RandomXProxy()
                     )
                 )
             )
