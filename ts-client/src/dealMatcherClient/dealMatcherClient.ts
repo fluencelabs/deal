@@ -92,7 +92,7 @@ export class DealMatcherClient {
       peersFilters: {
         and: [
           {
-            computeUnits_: { deal: null },
+            computeUnits_: { deal: null, deleted: false },
             // Check for CC Active status below and depends on provider whitlist filter.
           },
           {
@@ -110,7 +110,7 @@ export class DealMatcherClient {
           },
         ],
       },
-      computeUnitsFilters: { deal: null },
+      computeUnitsFilters: { deal: null, deleted: false },
       peersLimit: peersPerPageLimit,
       // We do not need more than 1 CU per peer. Apply restriction to already fetched and filtered data.
       computeUnitsLimit: 1,
