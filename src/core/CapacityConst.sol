@@ -241,7 +241,6 @@ contract CapacityConst is ICapacityConst, OwnableUpgradableDiamond, EpochControl
             constantsStorage.commitment.minDuration = v;
         } else if (constantType == CapacityConstantType.USDCollateralPerUnit) {
             constantsStorage.commitment.usdCollateralPerUnit = v;
-            constantsStorage.commitment.usdCollateralPerUnit = v;
             constantsStorage.commitment.fltCollateralPerUnit = _calcFLTCollateralPerUnit(v, constantsStorage.fltPrice);
         } else if (constantType == CapacityConstantType.SlashingRate) {
             constantsStorage.commitment.slashingRate = v;
