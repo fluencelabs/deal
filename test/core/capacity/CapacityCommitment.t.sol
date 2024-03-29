@@ -1,20 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.19;
 
-import {Test, console2} from "forge-std/Test.sol";
-import "forge-std/console.sol";
-import "forge-std/Vm.sol";
+import {Test} from "forge-std/Test.sol";
 import "forge-std/StdCheats.sol";
+
 import "filecoin-solidity/v0.8/utils/Actor.sol";
-import "src/core/Core.sol";
-import "src/core/modules/capacity/Capacity.sol";
-import "src/core/modules/capacity/interfaces/ICapacity.sol";
-import "src/utils/BytesConverter.sol";
-import "test/utils/DeployDealSystem.sol";
+
 import "src/core/modules/market/Market.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
+import "src/core/modules/capacity/interfaces/ICapacity.sol";
+
+import "src/utils/BytesConverter.sol";
+import "test/utils/DeployDealSystem.sol";
 import "test/utils/TestHelper.sol";
-import "forge-std/StdCheats.sol";
 
 contract CapacityCommitmentTest is Test {
     using SafeERC20 for IERC20;
@@ -250,12 +248,9 @@ contract CapacityCommitmentTest is Test {
         bytes32 unitId = registerPeers[0].unitIds[0];
 
         (bytes32 commitmentId,) = _createAndDepositCapacityCommitment(peerId, unitCount);
-        console.log("curr epoch #1", deployment.core.currentEpoch());
 
         // warp to next epoch
         StdCheats.skip(deployment.core.epochDuration());
-
-        console.log("curr epoch #2", deployment.core.currentEpoch());
 
         bytes32 targetHash = bytes32(uint256(deployment.core.difficulty()) - 1);
         //TODO: vm mock not working here :(
@@ -276,7 +271,6 @@ contract CapacityCommitmentTest is Test {
             / deployment.core.vestingPeriodCount() * deployment.core.vestingPeriodCount();
         StdCheats.skip(deployment.core.epochDuration());
 
-        console.log("curr epoch #3", deployment.core.currentEpoch());
         bytes32 localUnitNonce = keccak256(abi.encodePacked("localUnitNonce"));
         deployment.capacity.submitProof(unitId, localUnitNonce, targetHash);
 

@@ -1,28 +1,23 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.19;
 
-import {Test, console2} from "forge-std/Test.sol";
-import "forge-std/console.sol";
-import "forge-std/Vm.sol";
+import {Test} from "forge-std/Test.sol";
 import "forge-std/StdCheats.sol";
+
 import "filecoin-solidity/v0.8/utils/Actor.sol";
-import "src/core/Core.sol";
+
 import "src/core/CapacityConst.sol";
 import "src/core/interfaces/ICapacityConst.sol";
-import "src/utils/OwnableUpgradableDiamond.sol";
-import "src/core/interfaces/IEpochController.sol";
 import "src/utils/BytesConverter.sol";
+
 import "test/utils/DeployDealSystem.sol";
-import "src/core/modules/market/Market.sol";
-import "src/core/modules/market/interfaces/IMarket.sol";
 import "test/utils/TestHelper.sol";
-import "forge-std/StdCheats.sol";
 
 interface ISetConstant {
     function setCapacityConstant(uint8 constantType, uint256 newValue) external;
 }
 
-contract CpacityConstTest is Test {
+contract CapacityConstTest is Test {
     using SafeERC20 for IERC20;
     using BytesConverter for bytes32;
 

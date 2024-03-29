@@ -1,18 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.19;
 
-import {Test, console2} from "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
+import "forge-std/StdCheats.sol";
+
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import "forge-std/console.sol";
-import "src/deal/Deal.sol";
+
 import "src/deal/interfaces/IDeal.sol";
-import "src/deal/interfaces/IConfig.sol";
 import "src/core/modules/market/Offer.sol";
+
 import "test/utils/DeployDealSystem.sol";
 import "test/utils/TestHelper.sol";
 import "test/utils/DealHelper.sol";
-import "forge-std/StdCheats.sol";
 
 contract Rewards is Test {
     using SafeERC20 for IERC20;
