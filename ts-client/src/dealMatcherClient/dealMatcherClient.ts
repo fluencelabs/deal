@@ -92,6 +92,7 @@ export class DealMatcherClient {
       peersFilters: {
         and: [
           {
+            deleted: false,
             computeUnits_: { deal: null, deleted: false },
             // Check for CC Active status below and depends on provider whitlist filter.
           },
@@ -139,6 +140,7 @@ export class DealMatcherClient {
       // No whitelist, thus, check for active cc status is required.
       // For Peers.
       indexerGetOffersParams.filters!["peers_"] = {
+        deleted: false,
         // Do not fetch peers with no any of compute units in "active" status at all.
         // Check if CU status is Active - if it has current capacity commitment and
         //  cc.info.startEpoch <= currentEpoch_.

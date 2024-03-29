@@ -81,7 +81,7 @@ export const BasicOfferFragmentDoc = gql`
     approved
     name
   }
-  peers {
+  peers(where: {deleted: false}) {
     id
   }
 }
@@ -130,7 +130,7 @@ export const OfferQueryDocument = gql`
   offer(id: $id) {
     ...BasicOffer
     updatedAt
-    peers {
+    peers(where: {deleted: false}) {
       ...BasicPeer
     }
   }

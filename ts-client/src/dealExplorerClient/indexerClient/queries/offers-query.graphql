@@ -1,4 +1,5 @@
 # Exclude deleted CUs.
+# Exclude deleted Peers.
 
 query OffersQuery(
   $filters: Offer_filter,
@@ -27,7 +28,8 @@ query OfferQuery(
   offer(id: $id) {
     ...BasicOffer
     updatedAt
-    peers {
+    # Exclude deleted Peers.
+    peers(where: {deleted: false}) {
         ...BasicPeer
     }
   }
@@ -54,7 +56,7 @@ fragment BasicOffer on Offer {
       approved
       name
     }
-    peers {
+    peers(where: {deleted: false}) {
       id
     }
 }

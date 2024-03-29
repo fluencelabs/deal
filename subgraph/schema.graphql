@@ -112,6 +112,7 @@ type Peer @entity {
   id: ID!
   offer: Offer!
   provider: Provider!
+  deleted: Boolean!
   computeUnits: [ComputeUnit!] @derivedFrom(field: "peer")
 
   currentCapacityCommitment: CapacityCommitment

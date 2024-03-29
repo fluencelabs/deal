@@ -633,6 +633,7 @@ export type CapacityCommitment_OrderBy =
   | 'peer__currentCCCollateralDepositedAt'
   | 'peer__currentCCEndEpoch'
   | 'peer__currentCCNextCCFailedEpoch'
+  | 'peer__deleted'
   | 'peer__id'
   | 'peer__isAnyJoinedDeals'
   | 'provider'
@@ -955,6 +956,7 @@ export type ComputeUnit_OrderBy =
   | 'peer__currentCCCollateralDepositedAt'
   | 'peer__currentCCEndEpoch'
   | 'peer__currentCCNextCCFailedEpoch'
+  | 'peer__deleted'
   | 'peer__id'
   | 'peer__isAnyJoinedDeals'
   | 'provider'
@@ -1240,6 +1242,7 @@ export type DealToJoinedOfferPeer_OrderBy =
   | 'peer__currentCCCollateralDepositedAt'
   | 'peer__currentCCEndEpoch'
   | 'peer__currentCCNextCCFailedEpoch'
+  | 'peer__deleted'
   | 'peer__id'
   | 'peer__isAnyJoinedDeals';
 
@@ -1341,6 +1344,7 @@ export type DealToPeer_OrderBy =
   | 'peer__currentCCCollateralDepositedAt'
   | 'peer__currentCCEndEpoch'
   | 'peer__currentCCNextCCFailedEpoch'
+  | 'peer__deleted'
   | 'peer__id'
   | 'peer__isAnyJoinedDeals';
 
@@ -2258,6 +2262,7 @@ export type Peer = {
   currentCCEndEpoch?: Maybe<Scalars['BigInt']['output']>;
   currentCCNextCCFailedEpoch?: Maybe<Scalars['BigInt']['output']>;
   currentCapacityCommitment?: Maybe<CapacityCommitment>;
+  deleted: Scalars['Boolean']['output'];
   /** ref to peerId in contract. */
   id: Scalars['ID']['output'];
   isAnyJoinedDeals: Scalars['Boolean']['output'];
@@ -2360,6 +2365,10 @@ export type Peer_Filter = {
   currentCapacityCommitment_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
   currentCapacityCommitment_starts_with?: InputMaybe<Scalars['String']['input']>;
   currentCapacityCommitment_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  deleted?: InputMaybe<Scalars['Boolean']['input']>;
+  deleted_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+  deleted_not?: InputMaybe<Scalars['Boolean']['input']>;
+  deleted_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
   id?: InputMaybe<Scalars['ID']['input']>;
   id_gt?: InputMaybe<Scalars['ID']['input']>;
   id_gte?: InputMaybe<Scalars['ID']['input']>;
@@ -2448,6 +2457,7 @@ export type Peer_OrderBy =
   | 'currentCapacityCommitment__submittedProofsCount'
   | 'currentCapacityCommitment__totalCollateral'
   | 'currentCapacityCommitment__totalFailCount'
+  | 'deleted'
   | 'id'
   | 'isAnyJoinedDeals'
   | 'joinedDeals'
@@ -3179,6 +3189,7 @@ export type SubmittedProof_OrderBy =
   | 'peer__currentCCCollateralDepositedAt'
   | 'peer__currentCCEndEpoch'
   | 'peer__currentCCNextCCFailedEpoch'
+  | 'peer__deleted'
   | 'peer__id'
   | 'peer__isAnyJoinedDeals'
   | 'provider'

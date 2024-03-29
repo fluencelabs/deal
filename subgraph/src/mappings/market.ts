@@ -144,21 +144,21 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
 }
 
 export function handlePeerCreated(event: PeerCreated): void {
-  const peer = new Peer(event.params.peerId.toHexString());
+  let peer = new Peer(event.params.peerId.toHexString());
   const offer = Offer.load(event.params.offerId.toHexString()) as Offer;
-  const provider = createOrLoadProvider(offer.provider, event.block.timestamp);
-  provider.peerCount = provider.peerCount + 1;
-  provider.save();
+  let provider = createOrLoadProvider(offer.provider, event.block.timestamp);
 
-  // const provider = Provider.load(offer.provider) as Provider
-  // log.info('offer.provider {}', offer.provider.toString())
   peer.provider = offer.provider;
   peer.offer = offer.id;
   peer.isAnyJoinedDeals = false;
   // Init stats below.
   peer.computeUnitsTotal = 0;
   peer.computeUnitsInDeal = 0;
+  peer.deleted = false;
   peer.save();
+
+  // Upd stats below.
+  _updatePeerStats(1, provider);
 }
 
 // ---- Update Methods ----
@@ -301,6 +301,21 @@ export function handleComputeUnitRemoved(
   _updateComputeUnitStats(-1, peer, offer, provider, event.block.timestamp);
 }
 
+export function handlePeerRemoved(
+  event: PeerRemoved,
+): void {
+  let peer = Peer.load(event.params.peerId.toHexString()) as Peer;
+  const offer = Offer.load(event.params.offerId.toHexString()) as Offer;
+  let provider = createOrLoadProvider(offer.provider, event.block.timestamp);
+
+  peer.deleted = true;
+  peer.save();
+
+  // Upd stats below.
+  _updatePeerStats(-1, provider);
+}
+
+// Additional helper functions.
 // @param increaseSign: use +1 or -1 to decrease.
 function _updateComputeUnitStats(
   increaseSign: i32,
@@ -324,6 +339,8 @@ function _updateComputeUnitStats(
   offer.save();
 }
 
-export function handlePeerRemoved(
-  event: PeerRemoved,
-): void {}
+// @param increaseSign: use +1 or -1 to decrease.
+function _updatePeerStats(increaseSign: i32, provider: Provider): void {
+  provider.peerCount = provider.peerCount + increaseSign;
+  provider.save();
+}

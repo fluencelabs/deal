@@ -68,7 +68,7 @@ export const ProvidersBasicOfferFragmentDoc = gql`
   provider {
     id
   }
-  peers {
+  peers(where: {deleted: false}) {
     id
   }
 }

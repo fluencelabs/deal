@@ -87,6 +87,10 @@ dataSources:
           handler: handleComputeUnitAddedToDeal
         - event: ComputeUnitRemovedFromDeal(indexed bytes32,address,bytes32)
           handler: handleComputeUnitRemovedFromDeal
+        - event: ComputeUnitRemoved(indexed bytes32,indexed bytes32)
+          handler: handleComputeUnitRemoved
+        - event: PeerRemoved(indexed bytes32,indexed bytes32)
+          handler: handlePeerRemoved
       file: ./src/mappings/market.ts
   - kind: ethereum/contract
     name: DealFactory
