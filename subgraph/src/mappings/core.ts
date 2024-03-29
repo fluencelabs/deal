@@ -1,7 +1,7 @@
 import {
   createOrLoadEpochStatistic,
   createOrLoadGraphNetwork,
-  createOrLoadProvider
+  createOrLoadProvider,
 } from "../models";
 import {
   Initialized,
@@ -14,7 +14,7 @@ import {
   getEpochDuration,
   getInitTimestamp,
   getMinRequiredProofsPerEpoch,
-  getPrecision
+  getPrecision,
 } from "../contracts";
 import { formatAddress } from "./utils";
 import { log, BigInt } from "@graphprotocol/graph-ts/index";
@@ -39,7 +39,10 @@ export function handleInitialized(event: Initialized): void {
 export function handleWhitelistAccessGranted(
   event: WhitelistAccessGranted,
 ): void {
-  let provider = createOrLoadProvider(formatAddress(event.params.account), event.block.timestamp);
+  let provider = createOrLoadProvider(
+    formatAddress(event.params.account),
+    event.block.timestamp,
+  );
   provider.approved = true;
   provider.save();
 }
@@ -47,7 +50,10 @@ export function handleWhitelistAccessGranted(
 export function handleWhitelistAccessRevoked(
   event: WhitelistAccessRevoked,
 ): void {
-  let provider = createOrLoadProvider(formatAddress(event.params.account), event.block.timestamp);
+  let provider = createOrLoadProvider(
+    formatAddress(event.params.account),
+    event.block.timestamp,
+  );
   provider.approved = false;
   provider.save();
 }
@@ -59,10 +65,11 @@ export function handleNewBlock(block: ethereum.Block): void {
   let initTimestamp = graphNetwork.initTimestamp;
   let coreEpochDuration = graphNetwork.coreEpochDuration;
   const blockNumber = block.number;
-  if (!initTimestamp || !coreEpochDuration)  {
+  if (!initTimestamp || !coreEpochDuration) {
     log.warning(
-      `[handleNewBlock] This handler should be called after core contract inited! Otherwise it will have wrong data. Core is not inited on block number ${blockNumber}, thus, pass.`
-    , [])
+      `[handleNewBlock] This handler should be called after core contract inited! Otherwise it will have wrong data. Core is not inited on block number ${blockNumber}, thus, pass.`,
+      [],
+    );
     return;
   }
 
@@ -73,7 +80,11 @@ export function handleNewBlock(block: ethereum.Block): void {
     BigInt.fromI32(coreEpochDuration),
   );
 
-  let epochStatistic = createOrLoadEpochStatistic(blockTimestamp, currentEpoch, blockNumber);
+  let epochStatistic = createOrLoadEpochStatistic(
+    blockTimestamp,
+    currentEpoch,
+    blockNumber,
+  );
   if (epochStatistic.endBlock < blockNumber) {
     epochStatistic.endBlock = blockNumber;
     epochStatistic.endTimestamp = blockTimestamp;
