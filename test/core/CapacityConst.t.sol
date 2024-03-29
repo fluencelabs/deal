@@ -268,6 +268,7 @@ contract CpacityConstTest is Test {
         uint256 newPrice = 4 * PRECISION;
 
         // #region set price in first epoch
+        vm.prank(oracle);
         capacityConst.setFLTPrice(newPrice);
 
         assertEq(capacityConst.fltPrice(), newPrice, "fltPrice not changed");
@@ -286,6 +287,7 @@ contract CpacityConstTest is Test {
         uint256 nextEpoch = currentEpoch + 1;
 
         _skipEpochs(1);
+        vm.prank(oracle);
         capacityConst.setFLTPrice(newPrice);
 
         assertEq(capacityConst.fltPrice(), newPrice, "second epoch: fltPrice not changed");
@@ -306,6 +308,7 @@ contract CpacityConstTest is Test {
 
         // #region set price in second epoch again
         newPrice = PRECISION / 20;
+        vm.prank(oracle);
         capacityConst.setFLTPrice(newPrice);
 
         assertEq(capacityConst.fltPrice(), newPrice, "second epoch again: fltPrice not changed");
