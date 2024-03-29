@@ -1,12 +1,10 @@
 import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type { ContractsENV } from "../client/config.js";
 import type { OffersQueryQueryVariables } from "./indexerClient/queries/offers-query.generated.js";
-import {
-  serializeDealProviderAccessLists
-} from "../utils/indexerClient/serializers.js";
+import { serializeDealProviderAccessLists } from "../utils/indexerClient/serializers.js";
 import { getLogger } from "../utils/logger.js";
 
-const logger = getLogger("deal-ts-clients:dealMatcherClient")
+const logger = getLogger("deal-ts-clients:dealMatcherClient");
 
 // Structure match matchDeal() arguments.
 // Currently: bytes32[] calldata offers, bytes32[][] calldata computeUnits.

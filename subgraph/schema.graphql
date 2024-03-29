@@ -1,5 +1,7 @@
-# In the scheme below used behaviour where deleted entity marked as deleted=True instead of actual deletion (in contrast as in contract).
-# Thus, please refer to the field when querying the data.
+"""
+In the scheme below used behaviour where deleted entity marked as deleted=True instead of actual deletion (in contrast as in contract).
+Thus, please refer to the field when querying the data.
+"""
 
 type GraphNetwork @entity {
   "ID is set to 1"
