@@ -293,7 +293,7 @@ export function handleComputeUnitRemoved(
   const offer = Offer.load(peer.offer) as Offer;
   const provider = createOrLoadProvider(offer.provider, event.block.timestamp);
 
-  const computeUnit = ComputeUnit.load(event.params.unitId.toHexString());
+  const computeUnit = ComputeUnit.load(event.params.unitId.toHexString()) as ComputeUnit;
   computeUnit.deleted = true;
   computeUnit.save();
 
@@ -303,7 +303,7 @@ export function handleComputeUnitRemoved(
 
 // @param increaseSign: use +1 or -1 to decrease.
 function _updateComputeUnitStats(
-  increaseSign: number,
+  increaseSign: i32,
   peer: Peer,
   offer: Offer,
   provider: Provider,
