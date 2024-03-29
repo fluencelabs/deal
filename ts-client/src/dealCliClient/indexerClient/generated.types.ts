@@ -1757,6 +1757,11 @@ export type EpochStatistic_OrderBy =
   | 'startBlock'
   | 'startTimestamp';
 
+/**
+ * In the scheme below used behaviour where deleted entity marked as deleted=True instead of actual deletion (in contrast as in contract).
+ * Thus, please refer to the field when querying the data.
+ *
+ */
 export type GraphNetwork = {
   __typename?: 'GraphNetwork';
   capacityCommitmentsTotal: Scalars['BigInt']['output'];
