@@ -1,6 +1,6 @@
 specVersion: 0.0.5
-description: TODO
-repository: https://TODO
+description: FluenceLabs Deal System Subgraph Scheme
+repository: https://github.com/fluencelabs/deal
 schema:
   file: ./schema.graphql
 dataSources:
