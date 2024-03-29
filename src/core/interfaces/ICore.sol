@@ -28,22 +28,7 @@ interface ICore is IGlobalConst {
         uint256 maxProtocolVersion_,
         IDeal dealImpl_,
         bool isWhitelistEnabled_,
-        uint256 fltPrice_,
-        uint256 usdCollateralPerUnit_,
-        uint256 usdTargetRevenuePerEpoch_,
-        uint256 minDuration_,
-        uint256 minRewardPerEpoch_,
-        uint256 maxRewardPerEpoch_,
-        uint256 vestingPeriodDuration_,
-        uint256 vestingPeriodCount_,
-        uint256 slashingRate_,
-        uint256 minProofsPerEpoch_,
-        uint256 maxProofsPerEpoch_,
-        uint256 withdrawEpochsAfterFailed_,
-        uint256 maxFailedRatio_,
-        bytes32 difficulty_,
-        uint256 initRewardPool_,
-        address randomXProxy_
+        CapacityConstInitArgs memory capacityConstInitArgs_
     ) external;
 
     /// @dev Sets modules
@@ -59,6 +44,8 @@ interface ICore is IGlobalConst {
     /// @dev Returns market module
     /// @return market module address
     function market() external view returns (IMarket);
+
+    function dealFactory() external view returns (IDealFactory);
 
     function dealImpl() external view returns (IDeal);
 

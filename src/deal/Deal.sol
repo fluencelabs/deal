@@ -16,25 +16,8 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
     using SafeERC20 for IERC20;
     using DealSnapshot for DealSnapshot.Cache;
 
-    // ------------------ Types ------------------
-    struct ComputeUnitPaymentInfo {
-        uint256 snapshotEpoch;
-        uint256 gapsDelta;
-    }
-
     // ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.deal.storage.v1")) - 1);
-
-    struct DealStorage {
-        uint256 totalBalance;
-        uint256 lockedBalance;
-        uint256 gapsEpochCount;
-        uint256 maxPaidEpoch;
-        uint256 lastCommitedEpoch;
-        mapping(bytes32 => ComputeUnitPaymentInfo) cUnitPaymentInfo;
-        uint256 endedEpoch;
-        uint256 protocolVersion;
-    }
 
     function _getDealStorage() private pure returns (DealStorage storage s) {
         bytes32 storageSlot = _STORAGE_SLOT;

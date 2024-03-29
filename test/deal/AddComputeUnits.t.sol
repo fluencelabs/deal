@@ -4,27 +4,22 @@ pragma solidity ^0.8.19;
 import {Test} from "forge-std/Test.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import "src/deal/Deal.sol";
 import "src/deal/interfaces/IDeal.sol";
 
-import "test/utils/DeployDealSystem.sol";
+import "test/utils/TestWithDeployment.sol";
 import "test/utils/TestHelper.sol";
 
-contract AddComputeUnits is Test {
+contract AddComputeUnits is TestWithDeployment {
     using SafeERC20 for IERC20;
-    using TestHelper for DeployDealSystem.Deployment;
-
-    DeployDealSystem.Deployment deployment;
-    Deal dealImpl;
+    using TestHelper for TestWithDeployment.Deployment;
 
     // ------------------ Test ------------------
     function setUp() public {
-        deployment = DeployDealSystem.deployDealSystem();
-        dealImpl = new Deal();
+        _deploySystem();
     }
 
     function test_AddOneUnit() public {
-        Deal deal = deployment.deployDealWithoutFactory(10, 10, 1, 1 ether);
+        IDeal deal = deployment.deployDealWithoutFactory(10, 10, 1, 1 ether);
 
         assertEq(
             uint256(deal.getStatus()), uint256(IDeal.Status.NOT_ENOUGH_WORKERS), "status should be NOT_ENOUGH_WORKERS"
@@ -47,7 +42,7 @@ contract AddComputeUnits is Test {
 
     function test_AddMinUnits() public {
         uint256 minWorkers = 10;
-        Deal deal = deployment.deployDealWithoutFactory(minWorkers, 100, 1, 1 ether);
+        IDeal deal = deployment.deployDealWithoutFactory(minWorkers, 100, 1, 1 ether);
 
         assertEq(
             uint256(deal.getStatus()), uint256(IDeal.Status.NOT_ENOUGH_WORKERS), "status should be NOT_ENOUGH_WORKERS"
@@ -72,7 +67,7 @@ contract AddComputeUnits is Test {
 
     function test_AddTargetUnits() public {
         uint256 targetWorkers = 10;
-        Deal deal = deployment.deployDealWithoutFactory(2, targetWorkers, 1, 1 ether);
+        IDeal deal = deployment.deployDealWithoutFactory(2, targetWorkers, 1, 1 ether);
 
         assertEq(
             uint256(deal.getStatus()), uint256(IDeal.Status.NOT_ENOUGH_WORKERS), "status should be NOT_ENOUGH_WORKERS"

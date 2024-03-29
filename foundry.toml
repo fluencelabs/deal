@@ -3,17 +3,21 @@
 [profile.default]
 src = "src"
 out = "out"
+test = "src"
+script = "src"
 libs = ["lib"]
-via_ir = true
+
 solc = "0.8.24"
 evm_version = "london"
+via_ir = true
+optimizer = true
+optimizer_runs = 0
+
 fs_permissions = [
     { access = "read-write", path = "./deployments" },
     { access = "read", path = "./out" },
 ]
 gas_reports = ["*"]
-optimizer = true
-optimizer_runs = 0 # TODO: add 
 extra_output = ["devdoc"]
 
 [rpc_endpoints]
@@ -23,3 +27,11 @@ stage = "https://ipc-stage.fluence.dev"
 dar = "https://ipc.dar.fluence.dev"
 kras = "https://ipc.kras.fluence.dev"
 mumbai = "https://rpc.ankr.com/polygon_mumbai"
+
+[profile.test]
+src = "test"
+out = "test-out"
+test = "test"
+script = "test"
+via_ir = false
+optimizer = false
