@@ -24,16 +24,15 @@ import {
   createOrLoadToken,
   createOrLoadProvider,
   REMOVED_EFFECTOR_INFO_DESCRIPTION,
-  UNO_BIG_INT,
+  UNO_BIG_INT
 } from "../models";
 
-import { log, store } from "@graphprotocol/graph-ts";
+import { store } from "@graphprotocol/graph-ts";
 import {
   ComputeUnit,
   Deal,
   Offer,
   Peer,
-  Provider,
 } from "../../generated/schema";
 import {AppCID, formatAddress, getEffectorCID, parseEffectors} from "./utils";
 

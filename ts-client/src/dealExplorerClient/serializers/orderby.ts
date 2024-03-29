@@ -9,7 +9,7 @@ import type {
   CapacityCommitment_OrderBy,
   Deal_OrderBy,
   Offer_OrderBy,
-  SubmittedProof_OrderBy,
+  SubmittedProof_OrderBy
 } from "../indexerClient/generated.types.js";
 
 export function serializeOfferShortOrderByToIndexer(
