@@ -3,13 +3,16 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "src/deal/Deal.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
+
 import "src/core/modules/capacity/interfaces/ICapacity.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
 import "src/core/modules/market/interfaces/IDealFactory.sol";
+
+import "src/utils/Whitelist.sol";
+
 import "./GlobalConst.sol";
 import "./interfaces/ICore.sol";
-import "src/utils/Whitelist.sol";
 
 contract Core is ICore, UUPSUpgradeable, GlobalConst, Whitelist {
     // ------------------ Storage ------------------

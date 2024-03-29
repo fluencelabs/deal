@@ -2,17 +2,15 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/MulticallUpgradeable.sol";
-import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
+
 import "src/core/interfaces/ICore.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
 import "src/utils/OwnableUpgradableDiamond.sol";
+
 import "./DealSnapshot.sol";
 import "./WorkerManager.sol";
 import "./interfaces/IDeal.sol";
-import "./interfaces/IConfig.sol";
-import "forge-std/console.sol";
 
 contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
     using SafeERC20 for IERC20;

@@ -3,8 +3,8 @@
 pragma solidity ^0.8.19;
 
 import "src/utils/OwnableUpgradableDiamond.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {PRECISION, GlobalConst} from "src/core/GlobalConst.sol";
+import {PRECISION} from "src/utils/Common.sol";
+
 import "./interfaces/ICapacityConst.sol";
 import "./EpochController.sol";
 

@@ -3,8 +3,6 @@
 pragma solidity ^0.8.19;
 
 import "./IEpochController.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "src/core/interfaces/ICore.sol";
 
 /// @title Capacity constants contract interface
 /// @dev The constants contract is responsible for managing the constants for the capacity commitment

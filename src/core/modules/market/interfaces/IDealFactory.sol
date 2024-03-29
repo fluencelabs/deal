@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.19;
 
-import "src/deal/base/Types.sol";
+import {CIDV1} from "src/utils/Common.sol";
 import "src/deal/interfaces/IDeal.sol";
 
 /// @title Deal factory contract interface

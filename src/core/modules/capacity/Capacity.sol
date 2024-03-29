@@ -2,21 +2,22 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "src/core/modules/BaseModule.sol";
 import "@openzeppelin/contracts-upgradeable/utils/MulticallUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+
+import "src/core/modules/BaseModule.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
-import "src/deal/base/Types.sol";
+
 import "src/utils/RandomXProxy.sol";
 import "src/utils/BytesConverter.sol";
 import "src/utils/Whitelist.sol";
-import "./interfaces/ICapacity.sol";
+import {PRECISION, CIDV1} from "src/utils/Common.sol";
+
 import "./Vesting.sol";
 import "./Snapshot.sol";
-import "forge-std/console.sol";
-import {PRECISION} from "src/core/GlobalConst.sol";
+import "./interfaces/ICapacity.sol";
 
 contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacity {
     using SafeERC20 for IERC20;
