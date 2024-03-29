@@ -15,6 +15,10 @@ interface ICapacityConst is IEpochController {
     /// @param newValue The new value of the constant
     event CapacityConstantUpdated(CapacityConstantType constantType, uint256 newValue);
 
+    /// @dev Emitted then new oracle address is set
+    /// @param oracle The oracle address
+    event OracleSet(address oracle);
+
     /// @dev Emitted when the FLT price is updated
     /// @param newValue The new value of the FLT price
     event FLTPriceUpdated(uint256 newValue);

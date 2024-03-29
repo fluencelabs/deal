@@ -59,7 +59,8 @@ contract Core is ICore, UUPSUpgradeable, GlobalConst, Whitelist {
         uint256 maxFailedRatio_,
         bytes32 difficulty_,
         uint256 initRewardPool_,
-        address randomXProxy_
+        address randomXProxy_,
+        address oracle_
     ) public initializer {
         __Ownable_init(msg.sender);
         __EpochController_init(epochDuration_);
@@ -82,7 +83,8 @@ contract Core is ICore, UUPSUpgradeable, GlobalConst, Whitelist {
             maxFailedRatio_,
             difficulty_,
             initRewardPool_,
-            randomXProxy_
+            randomXProxy_,
+            oracle_
         );
 
         _getCoreStorage().dealImpl = dealImpl_;

@@ -56,6 +56,7 @@ contract CpacityConstTest is Test {
         bytes32 difficulty = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
         uint256 initRewardPool = 1500 ether;
         address randomXProxy = address(0x123);
+        address oracle = address(0x456);
 
         _initCapacityConst(
             fltPrice,
@@ -73,7 +74,8 @@ contract CpacityConstTest is Test {
             maxFailedRatio,
             difficulty,
             initRewardPool,
-            randomXProxy
+            randomXProxy,
+            oracle
         );
         _verifyCapacityConst(
             currentEpoch,
@@ -92,7 +94,8 @@ contract CpacityConstTest is Test {
             maxFailedRatio,
             difficulty,
             initRewardPool,
-            randomXProxy
+            randomXProxy,
+            oracle
         );
     }
 
@@ -113,6 +116,7 @@ contract CpacityConstTest is Test {
         bytes32 difficulty = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
         uint256 initRewardPool = 1500 ether;
         address randomXProxy = address(0x123);
+        address oracle = address(0x456);
 
         _initCapacityConst(
             fltPrice,
@@ -130,7 +134,8 @@ contract CpacityConstTest is Test {
             maxFailedRatio,
             difficulty,
             initRewardPool,
-            randomXProxy
+            randomXProxy,
+            oracle
         );
 
         uint256 newMinDuration = minDuration + 5;
@@ -206,7 +211,8 @@ contract CpacityConstTest is Test {
             100,
             0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF,
             1500 ether,
-            address(0x123)
+            address(0x123),
+            address(0x456)
         );
 
         address sender = address(0x1234567890123456789012345678901234567890);
@@ -234,6 +240,7 @@ contract CpacityConstTest is Test {
         bytes32 difficulty = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
         uint256 initRewardPool = 1500 ether;
         address randomXProxy = address(0x123);
+        address oracle = address(0x456);
 
         _initCapacityConst(
             fltPrice,
@@ -251,7 +258,8 @@ contract CpacityConstTest is Test {
             maxFailedRatio,
             difficulty,
             initRewardPool,
-            randomXProxy
+            randomXProxy,
+            oracle
         );
 
         uint256 activeUnitCount = 10;
@@ -342,7 +350,8 @@ contract CpacityConstTest is Test {
         uint256 maxFailedRatio,
         bytes32 difficulty,
         uint256 initRewardPool,
-        address randomXProxy
+        address randomXProxy,
+        address oracle
     ) internal {
         capacityConst.init(
             fltPrice,
@@ -360,7 +369,8 @@ contract CpacityConstTest is Test {
             maxFailedRatio,
             difficulty,
             initRewardPool,
-            randomXProxy
+            randomXProxy,
+            oracle
         );
     }
 
@@ -381,7 +391,8 @@ contract CpacityConstTest is Test {
         uint256 maxFailedRatio,
         bytes32 difficulty,
         uint256 initRewardPool,
-        address randomXProxy
+        address randomXProxy,
+        address oracle
     ) internal {
         assertEq(capacityConst.fltPrice(), fltPrice, "fltPrice mismatch");
         assertEq(capacityConst.usdCollateralPerUnit(), usdCollateralPerUnit, "usdCollateralPerUnit mismatch");
@@ -407,6 +418,7 @@ contract CpacityConstTest is Test {
         assertEq(capacityConst.maxFailedRatio(), maxFailedRatio, "maxFailedRatio mismatch");
         assertEq(capacityConst.difficulty(), difficulty, "difficulty mismatch");
         assertEq(capacityConst.randomXProxy(), randomXProxy, "randomXProxy mismatch");
+        assertEq(capacityConst.oracle(), oracle, "oracle mismatch");
         assertEq(capacityConst.getRewardPool(currentEpoch), initRewardPool, "initRewardPool mismatch");
     }
 }
@@ -430,7 +442,8 @@ contract TestCapacityConst is CapacityConst {
         uint256 maxFailedRatio_,
         bytes32 difficulty_,
         uint256 initRewardPool_,
-        address randomXProxy_
+        address randomXProxy_,
+        address oracle_
     ) public initializer {
         __EpochController_init(EPOCH_DURATION);
         __Ownable_init(msg.sender);
@@ -450,7 +463,8 @@ contract TestCapacityConst is CapacityConst {
             maxFailedRatio_,
             difficulty_,
             initRewardPool_,
-            randomXProxy_
+            randomXProxy_,
+            oracle_
         );
     }
 

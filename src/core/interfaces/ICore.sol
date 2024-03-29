@@ -44,7 +44,8 @@ interface ICore is IGlobalConst, ICapacityConst {
         uint256 maxFailedRatio_,
         bytes32 difficulty_,
         uint256 initRewardPool_,
-        address randomXProxy_
+        address randomXProxy_,
+        address oracle_
     ) external;
 
     /// @dev Sets modules
