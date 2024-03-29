@@ -119,7 +119,7 @@ export const CapacityCommitmentQueryDocument = gql`
   capacityCommitment(id: $id) {
     ...CapacityCommitmentBasic
     delegator
-    computeUnits {
+    computeUnits(where: {computeUnit_: {deleted: false}}) {
       computeUnit {
         id
         deal {

@@ -1,3 +1,5 @@
+# Exclude deleted CUs.
+
 query CapacityCommitmentsQuery(
   $filters: CapacityCommitment_filter
   $offset: Int
@@ -23,7 +25,8 @@ query CapacityCommitmentQuery($id: ID!) {
   capacityCommitment(id: $id) {
     ...CapacityCommitmentBasic
     delegator
-    computeUnits {
+    # Exclude deleted CUs.
+    computeUnits(where: {computeUnit_: {deleted: false}}) {
       computeUnit {
         id
         deal {

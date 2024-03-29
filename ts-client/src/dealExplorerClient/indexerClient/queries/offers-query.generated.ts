@@ -104,7 +104,7 @@ export const BasicPeerFragmentDoc = gql`
   provider {
     id
   }
-  computeUnits {
+  computeUnits(where: {deleted: false}) {
     ...ComputeUnitBasic
   }
 }

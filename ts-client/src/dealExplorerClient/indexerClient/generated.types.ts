@@ -383,6 +383,7 @@ export type CapacityCommitmentToComputeUnit_OrderBy =
   | 'capacityCommitment__totalFailCount'
   | 'computeUnit'
   | 'computeUnit__createdAt'
+  | 'computeUnit__deleted'
   | 'computeUnit__id'
   | 'computeUnit__submittedProofsCount'
   | 'computeUnit__workerId'
@@ -657,6 +658,7 @@ export type ComputeUnit = {
   __typename?: 'ComputeUnit';
   createdAt: Scalars['BigInt']['output'];
   deal?: Maybe<Deal>;
+  deleted: Scalars['Boolean']['output'];
   id: Scalars['ID']['output'];
   peer: Peer;
   /** In order to simplify relation for query. */
@@ -796,6 +798,7 @@ export type ComputeUnitPerEpochStat_OrderBy =
   | 'capacityCommitment__totalFailCount'
   | 'computeUnit'
   | 'computeUnit__createdAt'
+  | 'computeUnit__deleted'
   | 'computeUnit__id'
   | 'computeUnit__submittedProofsCount'
   | 'computeUnit__workerId'
@@ -841,6 +844,10 @@ export type ComputeUnit_Filter = {
   deal_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
   deal_starts_with?: InputMaybe<Scalars['String']['input']>;
   deal_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  deleted?: InputMaybe<Scalars['Boolean']['input']>;
+  deleted_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+  deleted_not?: InputMaybe<Scalars['Boolean']['input']>;
+  deleted_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
   id?: InputMaybe<Scalars['ID']['input']>;
   id_gt?: InputMaybe<Scalars['ID']['input']>;
   id_gte?: InputMaybe<Scalars['ID']['input']>;
@@ -940,6 +947,7 @@ export type ComputeUnit_OrderBy =
   | 'deal__registeredWorkersCurrentCount'
   | 'deal__targetWorkers'
   | 'deal__withdrawalSum'
+  | 'deleted'
   | 'id'
   | 'peer'
   | 'peer__computeUnitsInDeal'
@@ -1680,7 +1688,7 @@ export type Effector_OrderBy =
   | 'id'
   | 'offers';
 
-/** This model is designed to store epoch related information. Note, that in other models it is more efficient to use epoch as bigint rather than with relation to that model (with relation you could complicate your queries and need to store additional epoch field). */
+/** This model is designed to store epoch related information. Note, that in other models it is more efficient to store epoch as bigint rather than relation to that model (with relation you could complicate your queries by epoch, or you will need to store additional epoch field anyway). */
 export type EpochStatistic = {
   __typename?: 'EpochStatistic';
   endBlock: Scalars['BigInt']['output'];
@@ -1764,7 +1772,7 @@ export type GraphNetwork = {
   proofsTotal: Scalars['BigInt']['output'];
   /** Providers that register themselves in the network with setInfo() method. */
   providersRegisteredTotal: Scalars['BigInt']['output'];
-  /** @deprecated TODO: deprecate. */
+  /** @deprecated TODO: deprecate because it is not used. changed to providersRegisteredTotal used. */
   providersTotal: Scalars['BigInt']['output'];
   tokensTotal: Scalars['BigInt']['output'];
 };
@@ -1969,6 +1977,7 @@ export type GraphNetwork_OrderBy =
 
 export type Offer = {
   __typename?: 'Offer';
+  /** It depends on if CU in deal or not. */
   computeUnitsAvailable?: Maybe<Scalars['Int']['output']>;
   computeUnitsTotal?: Maybe<Scalars['Int']['output']>;
   createdAt: Scalars['BigInt']['output'];
@@ -2462,6 +2471,7 @@ export type Peer_OrderBy =
 export type Provider = {
   __typename?: 'Provider';
   approved: Scalars['Boolean']['output'];
+  /** It depends on if CU in deal or not. */
   computeUnitsAvailable: Scalars['Int']['output'];
   computeUnitsTotal: Scalars['Int']['output'];
   createdAt: Scalars['BigInt']['output'];
@@ -3155,6 +3165,7 @@ export type SubmittedProof_OrderBy =
   | 'capacityCommitment__totalFailCount'
   | 'computeUnit'
   | 'computeUnit__createdAt'
+  | 'computeUnit__deleted'
   | 'computeUnit__id'
   | 'computeUnit__submittedProofsCount'
   | 'computeUnit__workerId'
