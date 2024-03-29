@@ -1,5 +1,5 @@
-# Comments relates to Figma screen names.
-# Names according to Figma. Suffix according to api list, details
+# In the scheme below used behaviour where deleted entity marked as deleted=True instead of actual deletion (in contrast as in contract).
+# Thus, please refer to the field when querying the data.
 
 type GraphNetwork @entity {
   "ID is set to 1"
@@ -10,9 +10,10 @@ type GraphNetwork @entity {
   marketContractAddress: String
   # TODO: remove total counters when total counter field wil be added by developers.
   # https://github.com/graphprotocol/graph-node/issues/613
+  # Note that total counter for not deleted entities.
   "Providers that register themselves in the network with setInfo() method."
   providersRegisteredTotal: BigInt!
-  "@deprecated TODO: deprecate."
+  "@deprecated TODO: deprecate because it is not used. changed to providersRegisteredTotal used."
   providersTotal: BigInt!
   dealsTotal: BigInt!
   offersTotal: BigInt!
@@ -46,6 +47,7 @@ type Provider @entity {
   offers: [Offer!] @derivedFrom(field: "provider")
 
   # Add Statistics below.
+  "It depends on if CU in deal or not."
   computeUnitsAvailable: Int! # Sum of all available compute units in the offer (not in the deals).
   computeUnitsTotal: Int! # Sum of all compute units registered in the offer. TODO: when CU deleted?
   peerCount: Int!
@@ -70,6 +72,7 @@ type Offer @entity {
   effectors: [OfferToEffector!] @derivedFrom(field: "offer")
 
   # Add Statistics below.
+  "It depends on if CU in deal or not."
   computeUnitsAvailable: Int # Sum of all available compute units in the offer (not in the deals).
   computeUnitsTotal: Int # Sum of all compute units registered in the offer. TODO: when CU deleted?
   # Add helpers fields to support some queries below.
@@ -138,6 +141,7 @@ type ComputeUnit @entity {
   peer: Peer!
   "In order to simplify relation for query."
   provider: Provider!
+  deleted: Boolean!
 
   deal: Deal
   workerId: String

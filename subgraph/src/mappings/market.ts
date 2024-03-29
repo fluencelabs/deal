@@ -1,9 +1,11 @@
 // File should be writen after `npm run compile` is run or you will encounter syntax and import errors.
 // Note: handlers named as in the contract methods
 
+import {BigInt} from "@graphprotocol/graph-ts";
+
 import {
   ComputeUnitAddedToDeal,
-  ComputeUnitCreated,
+  ComputeUnitCreated, ComputeUnitRemoved,
   ComputeUnitRemovedFromDeal,
   EffectorAdded,
   EffectorInfoRemoved, EffectorInfoSet,
@@ -12,8 +14,8 @@ import {
   MarketOfferRegistered,
   MinPricePerEpochUpdated,
   PaymentTokenUpdated,
-  PeerCreated,
-  ProviderInfoUpdated,
+  PeerCreated, PeerRemoved,
+  ProviderInfoUpdated
 } from "../../generated/Market/Market";
 import {
   createOrLoadDealToJoinedOfferPeer,
@@ -32,7 +34,7 @@ import {
   ComputeUnit,
   Deal,
   Offer,
-  Peer,
+  Peer, Provider
 } from "../../generated/schema";
 import {AppCID, formatAddress, getEffectorCID, parseEffectors} from "./utils";
 
@@ -134,20 +136,11 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
   computeUnit.peer = peer.id;
   computeUnit.submittedProofsCount = 0;
   computeUnit.createdAt = event.block.timestamp;
+  computeUnit.deleted = false;
   computeUnit.save();
 
   // Upd stats.
-  peer.computeUnitsTotal = peer.computeUnitsTotal + 1;
-  peer.save()
-
-  provider.computeUnitsAvailable = provider.computeUnitsAvailable + 1;
-  provider.computeUnitsTotal = provider.computeUnitsTotal + 1;
-  provider.save();
-
-  offer.computeUnitsAvailable = offer.computeUnitsAvailable + 1;
-  offer.computeUnitsTotal = offer.computeUnitsTotal + 1;
-  offer.updatedAt = event.block.timestamp;
-  offer.save();
+  _updateComputeUnitStats(1, peer, offer, provider, event.block.timestamp);
 }
 
 export function handlePeerCreated(event: PeerCreated): void {
@@ -291,3 +284,46 @@ export function handleComputeUnitRemovedFromDeal(
   offer.updatedAt = event.block.timestamp;
   offer.save();
 }
+
+// First of all CUs should be removed from a peer.
+export function handleComputeUnitRemoved(
+  event: ComputeUnitRemoved,
+): void {
+  let peer = Peer.load(event.params.peerId.toHexString()) as Peer;
+  const offer = Offer.load(peer.offer) as Offer;
+  const provider = createOrLoadProvider(offer.provider, event.block.timestamp);
+
+  const computeUnit = ComputeUnit.load(event.params.unitId.toHexString());
+  computeUnit.deleted = true;
+  computeUnit.save();
+
+  // Upd stats below.
+  _updateComputeUnitStats(-1, peer, offer, provider, event.block.timestamp);
+}
+
+// @param increaseSign: use +1 or -1 to decrease.
+function _updateComputeUnitStats(
+  increaseSign: number,
+  peer: Peer,
+  offer: Offer,
+  provider: Provider,
+  timestamp: BigInt,
+): void {
+  peer.computeUnitsTotal = peer.computeUnitsTotal + increaseSign;
+  peer.save()
+
+  // No need to check if in deal coz contract does not allow it.
+  provider.computeUnitsAvailable = provider.computeUnitsAvailable + increaseSign;
+  provider.computeUnitsTotal = provider.computeUnitsTotal + increaseSign;
+  provider.save();
+
+  // No need to check if in deal coz contract does not allow it.
+  offer.computeUnitsAvailable = offer.computeUnitsAvailable + increaseSign;
+  offer.computeUnitsTotal = offer.computeUnitsTotal + increaseSign;
+  offer.updatedAt = timestamp;
+  offer.save();
+}
+
+export function handlePeerRemoved(
+  event: PeerRemoved,
+): void {}
