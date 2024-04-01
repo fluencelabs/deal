@@ -1233,6 +1233,7 @@ export type DealToJoinedOfferPeer_OrderBy =
   | 'offer__computeUnitsAvailable'
   | 'offer__computeUnitsTotal'
   | 'offer__createdAt'
+  | 'offer__deleted'
   | 'offer__id'
   | 'offer__pricePerEpoch'
   | 'offer__updatedAt'
@@ -1757,6 +1758,12 @@ export type EpochStatistic_OrderBy =
   | 'startBlock'
   | 'startTimestamp';
 
+/**
+ * In the scheme below we used behaviour where deleted entity marked as deleted=True instead of actual deletion (in contrast as in contract).
+ * Thus, please refer to the deleted field when querying the data.
+ * Note, all deleted entities are out of scope for presented counters in all models.
+ *
+ */
 export type GraphNetwork = {
   __typename?: 'GraphNetwork';
   capacityCommitmentsTotal: Scalars['BigInt']['output'];
@@ -1985,6 +1992,7 @@ export type Offer = {
   computeUnitsAvailable?: Maybe<Scalars['Int']['output']>;
   computeUnitsTotal?: Maybe<Scalars['Int']['output']>;
   createdAt: Scalars['BigInt']['output'];
+  deleted: Scalars['Boolean']['output'];
   effectors?: Maybe<Array<OfferToEffector>>;
   /**
    * Used in the next figma views:
@@ -2116,6 +2124,7 @@ export type OfferToEffector_OrderBy =
   | 'offer__computeUnitsAvailable'
   | 'offer__computeUnitsTotal'
   | 'offer__createdAt'
+  | 'offer__deleted'
   | 'offer__id'
   | 'offer__pricePerEpoch'
   | 'offer__updatedAt';
@@ -2148,6 +2157,10 @@ export type Offer_Filter = {
   createdAt_lte?: InputMaybe<Scalars['BigInt']['input']>;
   createdAt_not?: InputMaybe<Scalars['BigInt']['input']>;
   createdAt_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  deleted?: InputMaybe<Scalars['Boolean']['input']>;
+  deleted_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+  deleted_not?: InputMaybe<Scalars['Boolean']['input']>;
+  deleted_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
   effectors_?: InputMaybe<OfferToEffector_Filter>;
   id?: InputMaybe<Scalars['ID']['input']>;
   id_gt?: InputMaybe<Scalars['ID']['input']>;
@@ -2224,6 +2237,7 @@ export type Offer_OrderBy =
   | 'computeUnitsAvailable'
   | 'computeUnitsTotal'
   | 'createdAt'
+  | 'deleted'
   | 'effectors'
   | 'id'
   | 'joinedOfferPeers'
@@ -2465,6 +2479,7 @@ export type Peer_OrderBy =
   | 'offer__computeUnitsAvailable'
   | 'offer__computeUnitsTotal'
   | 'offer__createdAt'
+  | 'offer__deleted'
   | 'offer__id'
   | 'offer__pricePerEpoch'
   | 'offer__updatedAt'

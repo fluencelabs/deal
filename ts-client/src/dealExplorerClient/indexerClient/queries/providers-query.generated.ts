@@ -76,7 +76,7 @@ export const ProvidersBasicOfferFragmentDoc = gql`
 export const ProviderOfProvidersQueryFragmentDoc = gql`
     fragment ProviderOfProvidersQuery on Provider {
   ...ProviderABC
-  offers {
+  offers(where: {deleted: false}) {
     ...ProvidersBasicOffer
   }
 }
