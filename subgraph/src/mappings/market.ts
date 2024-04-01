@@ -15,10 +15,11 @@ import {
   Initialized,
   MarketOfferRegistered,
   MinPricePerEpochUpdated,
+  OfferRemoved,
   PaymentTokenUpdated,
   PeerCreated,
   PeerRemoved,
-  ProviderInfoUpdated,
+  ProviderInfoUpdated
 } from "../../generated/Market/Market";
 import {
   createOrLoadDealToJoinedOfferPeer,
