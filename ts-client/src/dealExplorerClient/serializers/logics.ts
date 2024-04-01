@@ -5,7 +5,7 @@ import type { ComputeUnitWithCcDataBasicFragment } from "../indexerClient/querie
 import type { ComputeUnitStatus } from "../types/schemes.js";
 import {
   type SerializationSettings,
-  tokenValueToRounded
+  tokenValueToRounded,
 } from "../../utils/serializers.js";
 import { FLTToken } from "../constants.js";
 
@@ -49,22 +49,21 @@ export function serializeRewards(
   delegatorRate: number,
   precision: number,
   serializationSettings: SerializationSettings,
-): {provider: string, delegator: string} {
+): { provider: string; delegator: string } {
   const delegatorRateBigInt = BigInt(delegatorRate);
   const precisionBigInt = BigInt(precision);
-  const delegatorReward = (value * delegatorRateBigInt) / precisionBigInt
-  const providerReward = value - delegatorReward
+  const delegatorReward = (value * delegatorRateBigInt) / precisionBigInt;
+  const providerReward = value - delegatorReward;
   return {
-    provider:
-      tokenValueToRounded(
-        providerReward,
-        Number(FLTToken.decimals),
-        serializationSettings.nativeTokenValueAdditionalFormatter,
-        ),
+    provider: tokenValueToRounded(
+      providerReward,
+      Number(FLTToken.decimals),
+      serializationSettings.nativeTokenValueAdditionalFormatter,
+    ),
     delegator: tokenValueToRounded(
       delegatorReward,
       Number(FLTToken.decimals),
       serializationSettings.nativeTokenValueAdditionalFormatter,
-      ),
-  }
+    ),
+  };
 }
