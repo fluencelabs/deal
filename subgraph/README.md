@@ -37,10 +37,10 @@ To start local development with TheGraph and Hardhat:
 All examples below according to **dar** stand.
 
 1. Copy pre prod context to your local graph node that you previously created:
-   - set .env for you docker/docker-compose.yml: `GRAPH_NODE_ETHEREUM_PATH=dar:https://ipc-dar.fluence.dev` [TODO: why does not catched?]
+   - set .env for you docker/docker-compose.yml: `GRAPH_NODE_ETHEREUM_PATH=dar:https://ipc.dar.fluence.dev` [TODO: why does not catched?]
 2. Run local infrastructure with `docker compose -f docker/docker-compose.yml up`
 3. Deploy you new version of subgraph:
-   - `npm run deploy:local && export GRAPH_NETWORK_TMP=kras && graph deploy --node http://localhost:8020 --ipfs http://localhost:5001 --network ${GRAPH_NETWORK_TMP} --network-file configs/${GRAPH_NETWORK_TMP}-networks-config.json --version-label 0.0.0 fluence-deal-contracts`
+   - `npm run create:local && export GRAPH_NETWORK_TMP=kras && graph deploy --node http://localhost:8020 --ipfs http://localhost:5001 --network ${GRAPH_NETWORK_TMP} --network-file configs/${GRAPH_NETWORK_TMP}-networks-config.json --version-label 0.0.0 fluence-deal-contracts`
 4. Check logs e.g. via `docker logs -f <contrainer name>` [Note, that syncing may take a while... (5 mins+)]
 5. Redeploy subgraph on dar
 

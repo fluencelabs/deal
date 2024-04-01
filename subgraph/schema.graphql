@@ -1,5 +1,8 @@
-# Comments relates to Figma screen names.
-# Names according to Figma. Suffix according to api list, details
+"""
+In the scheme below we used behaviour where deleted entity marked as deleted=True instead of actual deletion (in contrast as in contract).
+Thus, please refer to the deleted field when querying the data.
+Note, all deleted entities are out of scope for presented counters in all models.
+"""
 
 type GraphNetwork @entity {
   "ID is set to 1"
@@ -8,8 +11,12 @@ type GraphNetwork @entity {
   coreContractAddress: String
   capacityContractAddress: String
   marketContractAddress: String
-  # TODO: remove when total field wil be added by developers.
+  # TODO: remove total counters when total counter field wil be added by developers.
   # https://github.com/graphprotocol/graph-node/issues/613
+  # Note that total counter for not deleted entities.
+  "Providers that register themselves in the network with setInfo() method."
+  providersRegisteredTotal: BigInt!
+  "@deprecated TODO: deprecate because it is not used. changed to providersRegisteredTotal used."
   providersTotal: BigInt!
   dealsTotal: BigInt!
   offersTotal: BigInt!
@@ -43,6 +50,7 @@ type Provider @entity {
   offers: [Offer!] @derivedFrom(field: "provider")
 
   # Add Statistics below.
+  "It depends on if CU in deal or not."
   computeUnitsAvailable: Int! # Sum of all available compute units in the offer (not in the deals).
   computeUnitsTotal: Int! # Sum of all compute units registered in the offer. TODO: when CU deleted?
   peerCount: Int!
@@ -67,6 +75,7 @@ type Offer @entity {
   effectors: [OfferToEffector!] @derivedFrom(field: "offer")
 
   # Add Statistics below.
+  "It depends on if CU in deal or not."
   computeUnitsAvailable: Int # Sum of all available compute units in the offer (not in the deals).
   computeUnitsTotal: Int # Sum of all compute units registered in the offer. TODO: when CU deleted?
   # Add helpers fields to support some queries below.
@@ -106,6 +115,7 @@ type Peer @entity {
   id: ID!
   offer: Offer!
   provider: Provider!
+  deleted: Boolean!
   computeUnits: [ComputeUnit!] @derivedFrom(field: "peer")
 
   currentCapacityCommitment: CapacityCommitment
@@ -135,6 +145,7 @@ type ComputeUnit @entity {
   peer: Peer!
   "In order to simplify relation for query."
   provider: Provider!
+  deleted: Boolean!
 
   deal: Deal
   workerId: String
@@ -293,10 +304,9 @@ type CapacityCommitmentStatsPerEpoch @entity {
   # Set to `capacityCommitment.id.concat(epoch)`
   id: ID!
   capacityCommitment: CapacityCommitment!
+  epochStatistic: EpochStatistic!
+  "Additional field to support ordering by epoch."
   epoch: BigInt!
-  # To track period of block numbers with submitted proofs for the concrete epoch.
-  blockNumberStart: BigInt!
-  blockNumberEnd: BigInt!
 
   totalFailCount: Int!
   exitedUnitCount: Int!
@@ -316,8 +326,8 @@ type CapacityCommitmentStatsPerEpoch @entity {
 
 "Helper stat model to count success proofs per epoch for a CU."
 type ComputeUnitPerEpochStat @entity {
-  id: ID! # Set to `computeUnit.id.concat(epoch)`
-  epoch: BigInt!
+  id: ID! # Set to `computeUnit.id.concat(epoch.id)`
+  epochStatistic: EpochStatistic!
   computeUnit: ComputeUnit!
 
   # To allow query for all CU by the Capacity Commitment.
@@ -325,4 +335,14 @@ type ComputeUnitPerEpochStat @entity {
 
   # Add per epoch stats below.
   submittedProofsCount: Int!
+}
+
+"This model is designed to store epoch related information. Note, that in other models it is more efficient to store epoch as bigint rather than relation to that model (with relation you could complicate your queries by epoch, or you will need to store additional epoch field anyway)."
+type EpochStatistic @entity {
+  "Epoch number. Note, that for current epoch right boarder is approximate."
+  id: ID!
+  startBlock: BigInt!
+  endBlock: BigInt!
+  startTimestamp: BigInt!
+  endTimestamp: BigInt!
 }

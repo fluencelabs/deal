@@ -1,22 +1,28 @@
 import type { OfferDetail, Peer } from "../types/schemes.js";
-import type {
-  OfferDetailFragment
-} from "../indexerClient/queries/offers-query.generated.js";
-import { type SerializationSettings, tokenValueToRounded } from "../../utils/serializers.js";
+import type { OfferDetailFragment } from "../indexerClient/queries/offers-query.generated.js";
+import {
+  type SerializationSettings,
+  tokenValueToRounded,
+} from "../../utils/serializers.js";
 import { serializeEffectors } from "../../utils/indexerClient/serializers.js";
 
-export function serializeOfferDetail(offer: OfferDetailFragment, serializationSettings: SerializationSettings): OfferDetail {
-  const serializedPeers: Array<Peer> = offer.peers?.map((peer) => {
-    return {
-      id: peer.id,
-      computeUnits: peer.computeUnits?.map(
-        (computeUnit) => {return {
-          id: computeUnit.id,
-          workerId: computeUnit.workerId ?? undefined,
-        }}
-      ) ?? []
-    }
-  }) ?? []
+export function serializeOfferDetail(
+  offer: OfferDetailFragment,
+  serializationSettings: SerializationSettings,
+): OfferDetail {
+  const serializedPeers: Array<Peer> =
+    offer.peers?.map((peer) => {
+      return {
+        id: peer.id,
+        computeUnits:
+          peer.computeUnits?.map((computeUnit) => {
+            return {
+              id: computeUnit.id,
+              workerId: computeUnit.workerId ?? undefined,
+            };
+          }) ?? [],
+      };
+    }) ?? [];
   return {
     id: offer.id,
     createdAt: Number(offer.createdAt),
@@ -31,8 +37,8 @@ export function serializeOfferDetail(offer: OfferDetailFragment, serializationSe
     // USDC.
     pricePerEpoch: tokenValueToRounded(
       offer.pricePerEpoch,
-      serializationSettings.parseTokenToFixedDefault,
       offer.paymentToken.decimals,
+      serializationSettings.paymentTokenValueAdditionalFormatter,
     ),
     effectors: serializeEffectors(offer.effectors),
     providerId: offer.provider.id,
