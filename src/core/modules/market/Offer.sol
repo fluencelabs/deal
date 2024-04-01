@@ -173,6 +173,8 @@ abstract contract Offer is BaseModule, IOffer {
         require(offer.peerCount == 0, "Offer has compute peers");
 
         delete offerStorage.offers[offerId];
+
+        emit OfferRemoved(offerId);
     }
 
     function addComputePeers(bytes32 offerId, RegisterComputePeer[] calldata peers) external {

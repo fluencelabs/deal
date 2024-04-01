@@ -77,6 +77,10 @@ interface IOffer {
         uint256 maxProtocolVersion
     );
 
+    /// @dev Emitted when a offer removed by its owner.
+    /// @param offerId The offer id
+    event OfferRemoved(bytes32 indexed offerId);
+
     /// @dev Emitted when a peer created for an offer
     event PeerCreated(bytes32 indexed offerId, bytes32 peerId, address owner);
 
@@ -185,19 +189,22 @@ interface IOffer {
         uint256 maxProtocolVersion
     ) external returns (bytes32);
 
-    /// @dev Remove an offer
+    /// @dev Remove an offer.
+    /// @dev Only owner can change offer after all Peers removed (and CUs before).
     function removeOffer(bytes32 offerId) external;
 
     /// @dev Add compute peers to an offer
     function addComputePeers(bytes32 offerId, RegisterComputePeer[] calldata peers) external;
 
-    /// @dev Remove compute peers from an offer
+    /// @dev Remove compute peers from an offer after all CUs removed.
+    /// @dev Only owner can remove Peer.
     function removeComputePeer(bytes32 peerId) external;
 
     /// @dev Add compute units to a peer
     function addComputeUnits(bytes32 peerId, bytes32[] calldata unitIds) external;
 
-    /// @dev Remove compute units from a peer
+    /// @dev Remove compute units from a peer.
+    /// @dev Only owner can remove Compute Unit that not in Deal and in CC.
     function removeComputeUnit(bytes32 unitId) external;
 
     // Change offer
