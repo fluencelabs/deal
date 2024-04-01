@@ -1112,9 +1112,9 @@ export class DealExplorerClient {
     let res: Array<ProofStatsByCapacityCommitment> = [];
     for (const proofStats of data.capacityCommitmentStatsPerEpoches) {
       res.push({
-        createdAtEpoch: Number(proofStats.epoch),
-        createdAtEpochBlockNumberStart: Number(proofStats.blockNumberStart),
-        createdAtEpochBlockNumberEnd: Number(proofStats.blockNumberEnd),
+        createdAtEpoch: Number(proofStats.epochStatistic.id),
+        epochBlockStart: Number(proofStats.epochStatistic.startBlock),
+        epochBlockEnd: Number(proofStats.epochStatistic.endBlock),
         computeUnitsExpected: proofStats.activeUnitCount,
         submittedProofs: proofStats.submittedProofsCount,
         computeUnitsFailed:
@@ -1161,7 +1161,7 @@ export class DealExplorerClient {
       await this._indexerClient.getComputeUnitPerEpochStats({
         filters: {
           capacityCommitment_: { id: capacityCommitmentId },
-          epoch: epoch.toString(),
+          epochStatistic: epoch.toString(),
         },
         offset,
         limit,
@@ -1219,6 +1219,15 @@ export class DealExplorerClient {
       total: null,
       data: res,
     };
+  }
+
+  async getCurrentEpoch(): Promise<number> {
+    await this._init();
+    return calculateEpoch(
+      Date.now() / 1000,
+      this._coreInitTimestamp!,
+      this._coreEpochDuration!,
+    );
   }
 }
 

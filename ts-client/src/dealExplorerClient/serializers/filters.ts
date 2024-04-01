@@ -15,9 +15,7 @@ import type {
   Provider_Filter,
 } from "../indexerClient/generated.types.js";
 import { valueToTokenValue } from "../../utils/serializers.js";
-import {
-  serializePercentageToContractRate
-} from "../../utils/indexerClient/serializers.js";
+import { serializePercentageToContractRate } from "../../utils/indexerClient/serializers.js";
 
 export class FiltersError extends Error {}
 export class ValidTogetherFiltersError extends FiltersError {}
@@ -233,12 +231,18 @@ export function serializeCapacityCommitmentsFiltersToIndexer(
   }
   if (v.rewardDelegatorRateFrom) {
     convertedFilters.and?.push({
-      rewardDelegatorRate_gte: serializePercentageToContractRate(v.rewardDelegatorRateFrom, precision),
+      rewardDelegatorRate_gte: serializePercentageToContractRate(
+        v.rewardDelegatorRateFrom,
+        precision,
+      ),
     });
   }
   if (v.rewardDelegatorRateTo) {
     convertedFilters.and?.push({
-      rewardDelegatorRate_lte: serializePercentageToContractRate(v.rewardDelegatorRateTo, precision),
+      rewardDelegatorRate_lte: serializePercentageToContractRate(
+        v.rewardDelegatorRateTo,
+        precision,
+      ),
     });
   }
   // TODO: deprecate onlyActive.

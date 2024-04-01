@@ -4,7 +4,6 @@ import type { DealByProvider, OfferDetail } from "./types/schemes.js";
 import { serializeOfferDetail } from "./serializers/schemes.js";
 import type { SerializationSettings } from "../utils/serializers.js";
 
-
 /*
  * @dev This client represents endpoints to access desirable indexer data in REST
  * @dev  manner from POV of Fluence CLI.
@@ -34,7 +33,7 @@ export class DealCliClient {
     if (serializationSettings) {
       this._serializationSettings = serializationSettings;
     } else {
-      this._serializationSettings = {}
+      this._serializationSettings = {};
     }
   }
 
@@ -47,23 +46,23 @@ export class DealCliClient {
     };
     const data = await this.indexerClient.getOffer(options);
     if (data.offer) {
-      return serializeOfferDetail(data.offer, this._serializationSettings)
+      return serializeOfferDetail(data.offer, this._serializationSettings);
     }
-    return null
+    return null;
   }
 
   async getDealsByProvider(providerId: string): Promise<Array<DealByProvider>> {
-    const data = await this.indexerClient.getDeals(
-      {
-        filters: {
-          addedComputeUnits_: { provider: providerId.toLowerCase() }
-        }
-      }
-    )
-    return data.deals.map((deal) => {
-      return {
-        id: deal.id,
-      }
-    }) || []
+    const data = await this.indexerClient.getDeals({
+      filters: {
+        addedComputeUnits_: { provider: providerId.toLowerCase() },
+      },
+    });
+    return (
+      data.deals.map((deal) => {
+        return {
+          id: deal.id,
+        };
+      }) || []
+    );
   }
 }

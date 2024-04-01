@@ -11,7 +11,7 @@ import type {
   OfferShort,
   Peer,
   ProviderBase,
-  ProviderShort
+  ProviderShort,
 } from "../types/schemes.js";
 import type {
   BasicOfferFragment,
@@ -22,30 +22,29 @@ import {
   serializeProviderName,
   serializeRewards,
 } from "./logics.js";
-import {
-  calculateTimestamp,
-} from "../utils.js";
+import { calculateTimestamp } from "../utils.js";
 import type {
   BasicDealFragment,
   ComputeUnitBasicFragment,
 } from "../indexerClient/queries/deals-query.generated.js";
 import type { CapacityCommitmentBasicFragment } from "../indexerClient/queries/capacity-commitments-query.generated.js";
 import { FLTToken } from "../constants.js";
-import type {
-  ComputeUnitWithCcDataBasicFragment
-} from "../indexerClient/queries/peers-query.generated.js";
+import type { ComputeUnitWithCcDataBasicFragment } from "../indexerClient/queries/peers-query.generated.js";
 import {
   type SerializationSettings,
-  tokenValueToRounded
+  tokenValueToRounded,
 } from "../../utils/serializers.js";
 import {
   serializeEffectors,
-  serializeContractRateToPercentage
+  serializeContractRateToPercentage,
 } from "../../utils/indexerClient/serializers.js";
 
-const BIG_INT_ZERO = BigInt(0)
+const BIG_INT_ZERO = BigInt(0);
 
-export function serializeOfferShort(offer: BasicOfferFragment, serializationSettings: SerializationSettings,): OfferShort {
+export function serializeOfferShort(
+  offer: BasicOfferFragment,
+  serializationSettings: SerializationSettings,
+): OfferShort {
   return {
     id: offer.id,
     createdAt: Number(offer.createdAt),
@@ -89,7 +88,9 @@ export function serializeProviderShort(
   const composedOffers = [];
   if (provider.offers) {
     for (const offer of provider.offers) {
-      composedOffers.push(serializeOfferShort(offer as BasicOfferFragment, serializationSettings));
+      composedOffers.push(
+        serializeOfferShort(offer as BasicOfferFragment, serializationSettings),
+      );
     }
   }
   return {
@@ -112,14 +113,11 @@ export function serializeComputeUnits(
 }
 
 export function serializeComputeUnitsWithStatus(
-  computeUnitsWithCcDataBasicFragment: Array<ComputeUnitWithCcDataBasicFragment>
+  computeUnitsWithCcDataBasicFragment: Array<ComputeUnitWithCcDataBasicFragment>,
 ): Array<ComputeUnitsWithCCStatus> {
   let res: Array<ComputeUnitsWithCCStatus> = [];
   for (const computeUnit of computeUnitsWithCcDataBasicFragment) {
-    const { status } =
-      serializeCUStatus(
-        computeUnit,
-      );
+    const { status } = serializeCUStatus(computeUnit);
 
     res.push({
       id: computeUnit.id,
@@ -128,7 +126,7 @@ export function serializeComputeUnitsWithStatus(
       successProofs: computeUnit.submittedProofsCount,
     });
   }
-  return res
+  return res;
 }
 
 export function serializePeers(peers: Array<BasicPeerFragment>): Array<Peer> {
@@ -251,21 +249,26 @@ export function serializeCapacityCommitmentDetail(
   precision: number,
 ): CapacityCommitmentDetail {
   const _totalRewards = totalRewards ? BigInt(totalRewards) : BIG_INT_ZERO;
-  const _unlockedRewards = unlockedRewards ? BigInt(unlockedRewards) : BIG_INT_ZERO;
+  const _unlockedRewards = unlockedRewards
+    ? BigInt(unlockedRewards)
+    : BIG_INT_ZERO;
   // First of all convert to [0, 1] with accordance of precision and than to [0, 100] to % format.
-  const rewardDelegatorRatePercentage = serializeContractRateToPercentage(rewardDelegatorRate, precision);
+  const rewardDelegatorRatePercentage = serializeContractRateToPercentage(
+    rewardDelegatorRate,
+    precision,
+  );
   const unclockedRewardsSerialized = serializeRewards(
     _unlockedRewards,
     rewardDelegatorRate,
     precision,
     serializationSettings,
-  )
+  );
   const notWithdrawnRewardsSerialized = serializeRewards(
     _totalRewards,
     rewardDelegatorRate,
     precision,
     serializationSettings,
-  )
+  );
   return {
     ...serializeCapacityCommitmentShort(
       capacityCommitmentFromIndexer,
