@@ -67,6 +67,7 @@ type Offer @entity {
   createdAt: BigInt!
   updatedAt: BigInt!
   provider: Provider!
+  deleted: Boolean!
   #   TODO: price per epoch and price per worker epoch are the same essentials?
   pricePerEpoch: BigInt!
   paymentToken: Token!
