@@ -12,11 +12,11 @@ verify-command: ## Verify command
 
 fmt:
 	@forge fmt
-	@FORGE_PROFILE=test forge fmt
+	@FOUNDRY_PROFILE=test forge fmt
 
 clean:
 	@forge clean
-	@FORGE_PROFILE=test forge clean
+	@FOUNDRY_PROFILE=test forge clean
 	
 install-npms: ## Install and deal-ts-clients and subgraph
 	@make verify-command program=npm
@@ -54,7 +54,7 @@ run-contract-tests:  ## Test for solidity contracts & ts-clients
 
 run-tests:  ## Test for solidity contracts & ts-clients
 	@make verify-command program=forge
-	@forge test
+	@make run-contract-tests
 	@cd ts-client && npm run test
 	@echo "\033[0;32mSuccess! Tests passed.\033[0m"
 

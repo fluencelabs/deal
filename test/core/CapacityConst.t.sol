@@ -292,9 +292,7 @@ contract CapacityConstTest is TestWithDeployment {
         assertEq(capacityConst.vestingPeriodDuration(), args.vestingPeriodDuration, "vestingPeriodDuration mismatch");
         assertEq(capacityConst.vestingPeriodCount(), args.vestingPeriodCount, "vestingPeriodCount mismatch");
         assertEq(capacityConst.slashingRate(), args.slashingRate, "slashingRate mismatch");
-        assertEq(
-            capacityConst.minProofsPerEpoch(), args.minProofsPerEpoch, "minRequiredProofsPerEpoch mismatch"
-        );
+        assertEq(capacityConst.minProofsPerEpoch(), args.minProofsPerEpoch, "minRequiredProofsPerEpoch mismatch");
         assertEq(capacityConst.maxProofsPerEpoch(), args.maxProofsPerEpoch, "maxProofsPerEpoch mismatch");
         assertEq(
             capacityConst.withdrawEpochsAfterFailed(),

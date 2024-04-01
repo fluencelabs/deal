@@ -39,30 +39,37 @@ contract ConfigContract is TestWithDeployment {
         configParams.targetWorkers = 2;
         configParams.maxWorkersPerProvider = 3;
         configParams.pricePerWorkerEpoch = 4;
-        
-        for (uint256 i = 0; i < 10; i++) {
-            configParams.effectors.push(CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("effector", i))}));
-        }
-        
-        IConfigWithPublicInternals configImpl = IConfigWithPublicInternals(deployCode("out/ConfigWithPublicInternals.sol/ConfigWithPublicInternals.json"));
 
-        config = IConfigWithPublicInternals(address(new ERC1967Proxy(
-            address(configImpl),
-            abi.encodeWithSelector(
-                configImpl.Config_init.selector,
-                configParams.globalCore,
-                configParams.appCID,
-                configParams.paymentToken,
-                configParams.minWorkers,
-                configParams.targetWorkers,
-                configParams.maxWorkersPerProvider,
-                configParams.pricePerWorkerEpoch,
-                configParams.effectors,
-                address(this),
-                IConfig.AccessType.NONE,
-                new address[](0)
+        for (uint256 i = 0; i < 10; i++) {
+            configParams.effectors.push(
+                CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("effector", i))})
+            );
+        }
+
+        IConfigWithPublicInternals configImpl =
+            IConfigWithPublicInternals(deployCode("out/ConfigWithPublicInternals.sol/ConfigWithPublicInternals.json"));
+
+        config = IConfigWithPublicInternals(
+            address(
+                new ERC1967Proxy(
+                    address(configImpl),
+                    abi.encodeWithSelector(
+                        configImpl.Config_init.selector,
+                        configParams.globalCore,
+                        configParams.appCID,
+                        configParams.paymentToken,
+                        configParams.minWorkers,
+                        configParams.targetWorkers,
+                        configParams.maxWorkersPerProvider,
+                        configParams.pricePerWorkerEpoch,
+                        configParams.effectors,
+                        address(this),
+                        IConfig.AccessType.NONE,
+                        new address[](0)
+                    )
+                )
             )
-        )));
+        );
     }
 
     function test_InitContract() public {

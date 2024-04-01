@@ -37,14 +37,14 @@ contract CoreTest is TestWithDeployment {
             "Min deal rematching Epochs not set"
         );
     }
-    
+
     function test_InitializerIsDisabledForImplementation() external {
         vm.expectEmit(false, false, false, true);
         emit Initialized(type(uint8).max); // _disableInitializers emits this, @see Initializable.sol
-        
+
         ICore coreImpl = ICore(deployCode("out/Core.sol/Core.json")); // there is _disableInitializers() in the constructor
         IDeal dealImpl = deployment.core.dealImpl();
-        
+
         try coreImpl.initialize(
             TestWithDeployment.DEFAULT_EPOCH_DURATION,
             TestWithDeployment.DEFAULT_MIN_DEPOSITED_EPOCHS,
@@ -74,7 +74,7 @@ contract CoreTest is TestWithDeployment {
         ) {
             assertEq(true, false, "Expected revert");
         } catch Error(string memory reason) {
-           assertEq(reason, "Initializable: contract is already initialized");
+            assertEq(reason, "Initializable: contract is already initialized");
         }
     }
 

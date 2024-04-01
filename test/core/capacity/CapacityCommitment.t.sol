@@ -6,15 +6,14 @@ import "forge-std/StdCheats.sol";
 
 import "filecoin-solidity/v0.8/utils/Actor.sol";
 
-import "src/core/modules/market/Market.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
 import "src/core/modules/capacity/interfaces/ICapacity.sol";
 
 import "src/utils/BytesConverter.sol";
-import "test/utils/DeployDealSystem.sol";
+import "test/utils/TestWithDeployment.sol";
 import "test/utils/TestHelper.sol";
 
-contract CapacityCommitmentTest is Test {
+contract CapacityCommitmentTest is TestWithDeployment {
     using SafeERC20 for IERC20;
     using BytesConverter for bytes32;
 
@@ -39,10 +38,8 @@ contract CapacityCommitmentTest is Test {
     event RewardWithdrawn(bytes32 indexed commitmentId, uint256 amount);
 
     // ------------------ Variables ------------------
-    DeployDealSystem.Deployment deployment;
-
     // Init variables
-    Market.RegisterComputePeer[] registerPeers;
+    IMarket.RegisterComputePeer[] registerPeers;
     uint256 minPricePerWorkerEpoch;
     CIDV1[] effectors;
     address paymentToken;
@@ -52,7 +49,7 @@ contract CapacityCommitmentTest is Test {
 
     // ------------------ Test ------------------
     function setUp() public {
-        deployment = DeployDealSystem.deployDealSystem();
+        _deploySystem();
 
         paymentToken = address(deployment.tUSD);
         minPricePerWorkerEpoch = 1000;
@@ -132,7 +129,7 @@ contract CapacityCommitmentTest is Test {
 
         (bytes32 commitmentId,) = _createCapacityCommitment(peerId);
 
-        Capacity.CommitmentView memory commitment = deployment.capacity.getCommitment(commitmentId);
+        ICapacity.CommitmentView memory commitment = deployment.capacity.getCommitment(commitmentId);
 
         assertEq(uint256(commitment.status), uint256(ICapacity.CCStatus.WaitDelegation), "Status mismatch");
         assertEq(commitment.peerId, peerId, "PeerId mismatch");
@@ -202,7 +199,7 @@ contract CapacityCommitmentTest is Test {
 
         // Verify commitments info.
         for (uint256 i = 0; i < registerPeers.length; ++i) {
-            Capacity.CommitmentView memory commitment = deployment.capacity.getCommitment(createdCCIds[i]);
+            ICapacity.CommitmentView memory commitment = deployment.capacity.getCommitment(createdCCIds[i]);
             assertEq(uint256(commitment.status), uint256(ICapacity.CCStatus.Active), "Status mismatch");
             assertEq(commitment.peerId, registerPeers[i].peerId, "PeerId mismatch");
             assertEq(commitment.collateralPerUnit, deployment.core.fltCollateralPerUnit(), "CollateralPerUnit mismatch");
