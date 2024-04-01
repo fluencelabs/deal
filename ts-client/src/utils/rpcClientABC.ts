@@ -2,7 +2,7 @@ import type { Interface, Result, ethers } from "ethers";
 import { IMulticall3__factory, type IMulticall3 } from "../index.js";
 import { getLogger } from "./logger.js";
 
-const logger = getLogger("deal-ts-clients:rpcClientABC")
+const logger = getLogger("deal-ts-clients:rpcClientABC");
 
 export type Multicall3ContractCall = {
   target: string;
@@ -61,7 +61,9 @@ export abstract class Multicall3ContractClientABC {
     );
     const multicallContractCallResults: Aggregate3Response[] =
       await this._multicall3Contract.aggregate3.staticCall(callsEncoded);
-    logger.debug(`[_callBatch] Got: ${JSON.stringify(multicallContractCallResults)}`);
+    logger.debug(
+      `[_callBatch] Got: ${JSON.stringify(multicallContractCallResults)}`,
+    );
 
     let decodedResults: Array<any> = [];
     for (let i = 0; i < multicallContractCallResults.length; i++) {

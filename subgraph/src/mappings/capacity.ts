@@ -8,7 +8,7 @@ import {
   createOrLoadProvider,
   UNO_BIG_INT,
   ZERO_ADDRESS,
-  ZERO_BIG_INT
+  ZERO_BIG_INT,
 } from "../models";
 import {
   CapacityCommitment,
@@ -89,7 +89,10 @@ export function handleCommitmentCreated(event: CommitmentCreated): void {
   for (let i = 0; i < loadedComputeUnitsLength; i++) {
     // We rely on contract logic that it is not possible to emit event with not existing CUs.
     //  Also, we rely that previously we save computeUnits successfully in prev. handler of computeUnitCreated.
-    createOrLoadCapacityCommitmentToComputeUnit(commitment.id, loadedComputeUnits[i].id);
+    createOrLoadCapacityCommitmentToComputeUnit(
+      commitment.id,
+      loadedComputeUnits[i].id,
+    );
   }
   commitment.nextAdditionalActiveUnitCount = 0;
   commitment.snapshotEpoch = ZERO_BIG_INT;
@@ -233,7 +236,11 @@ export function handleCommitmentStatsUpdated(
     BigInt.fromI32(graphNetwork.initTimestamp),
     BigInt.fromI32(graphNetwork.coreEpochDuration),
   );
-  const epochStatistic = createOrLoadEpochStatistic(event.block.timestamp, currentEpoch, event.block.number)
+  const epochStatistic = createOrLoadEpochStatistic(
+    event.block.timestamp,
+    currentEpoch,
+    event.block.number,
+  );
 
   let peer = Peer.load(commitment.peer) as Peer;
   peer.currentCCNextCCFailedEpoch = commitment.nextCCFailedEpoch;
@@ -258,7 +265,7 @@ export function handleCommitmentStatsUpdated(
   capacityCommitmentStatsPerEpoch.save();
 }
 
-export function handleUnitActivated(event: UnitActivated): void { }
+export function handleUnitActivated(event: UnitActivated): void {}
 
 // Handle that Compute Unit moved from CC to Deal with arguments of CC and CU.
 // Currently, it updates only capacityCommitmentStatsPerEpoch.
@@ -273,7 +280,11 @@ export function handleUnitDeactivated(event: UnitDeactivated): void {
   const capacityCommitment = CapacityCommitment.load(
     event.params.commitmentId.toHexString(),
   ) as CapacityCommitment;
-  const epochStatistic = createOrLoadEpochStatistic(event.block.timestamp, currentEpoch, event.block.number);
+  const epochStatistic = createOrLoadEpochStatistic(
+    event.block.timestamp,
+    currentEpoch,
+    event.block.number,
+  );
   let capacityCommitmentStatsPerEpoch =
     createOrLoadCapacityCommitmentStatsPerEpoch(
       capacityCommitment.id,
@@ -289,17 +300,21 @@ export function handleUnitDeactivated(event: UnitDeactivated): void {
 
   // When compute unit added to Deal we also should calculate if we need to
   //  decrease counter named computeUnitsWithMinRequiredProofsSubmittedCounter.
-  if (computeUnitPerEpochStat.submittedProofsCount >= graphNetwork.minRequiredProofsPerEpoch) {
+  if (
+    computeUnitPerEpochStat.submittedProofsCount >=
+    graphNetwork.minRequiredProofsPerEpoch
+  ) {
     // Decrease computeUnitsWithMinRequiredProofsSubmittedCounter.
     capacityCommitmentStatsPerEpoch.computeUnitsWithMinRequiredProofsSubmittedCounter =
-      capacityCommitmentStatsPerEpoch.computeUnitsWithMinRequiredProofsSubmittedCounter - 1;
+      capacityCommitmentStatsPerEpoch.computeUnitsWithMinRequiredProofsSubmittedCounter -
+      1;
     capacityCommitmentStatsPerEpoch.save();
   }
 }
 
 export function handleProofSubmitted(event: ProofSubmitted): void {
   let proofSubmitted = new SubmittedProof(event.transaction.hash.toHexString());
-  const blockTimestamp = event.block.timestamp
+  const blockTimestamp = event.block.timestamp;
   let capacityCommitment = CapacityCommitment.load(
     event.params.commitmentId.toHexString(),
   ) as CapacityCommitment;
@@ -313,7 +328,11 @@ export function handleProofSubmitted(event: ProofSubmitted): void {
     BigInt.fromI32(graphNetwork.initTimestamp),
     BigInt.fromI32(graphNetwork.coreEpochDuration),
   );
-  const epochStatistic = createOrLoadEpochStatistic(blockTimestamp, currentEpoch, event.block.number)
+  const epochStatistic = createOrLoadEpochStatistic(
+    blockTimestamp,
+    currentEpoch,
+    event.block.number,
+  );
   let capacityCommitmentStatsPerEpoch =
     createOrLoadCapacityCommitmentStatsPerEpoch(
       capacityCommitment.id,

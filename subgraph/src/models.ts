@@ -57,7 +57,7 @@ export function createOrLoadProvider(
     // Upd stats below.
     let graphNetwork = createOrLoadGraphNetwork();
     graphNetwork.providersTotal = graphNetwork.providersTotal.plus(UNO_BIG_INT);
-    graphNetwork.save()
+    graphNetwork.save();
   }
   return entity as Provider;
 }
@@ -299,8 +299,12 @@ export function createOrLoadComputeUnitPerEpochStat(
   return entity as ComputeUnitPerEpochStat;
 }
 
-export function createOrLoadEpochStatistic(timestamp: BigInt, currentEpoch: BigInt, currentBlock: BigInt): EpochStatistic {
-  const currentEpochId = currentEpoch.toString()
+export function createOrLoadEpochStatistic(
+  timestamp: BigInt,
+  currentEpoch: BigInt,
+  currentBlock: BigInt,
+): EpochStatistic {
+  const currentEpochId = currentEpoch.toString();
   let entity = EpochStatistic.load(currentEpochId);
 
   if (entity == null) {
