@@ -153,10 +153,7 @@ export class DealExplorerClient {
     if (serializationSettings) {
       this._serializationSettings = serializationSettings;
     } else {
-      this._serializationSettings = {
-          parseNativeTokenToFixedDefault: 18,
-          parseTokenToFixedDefault: 3,
-        };
+      this._serializationSettings = {};
     }
     this._indexerClient = new IndexerClient(network);
     this._dealContractsClient = new DealClient(this._caller, network);
@@ -278,7 +275,7 @@ export class DealExplorerClient {
       data: res,
       total: getTotalCounter(
         filters,
-        data.graphNetworks[0]?.providersTotal ?? 0,
+        data.graphNetworks[0]?.providersRegisteredTotal ?? 0,
       ),
     };
   }
@@ -458,7 +455,6 @@ export class DealExplorerClient {
         res.push(serializeOfferShort(offer, this._serializationSettings));
       }
     }
-    console.log(filtersSerialized, filtersSerialized);
     return {
       data: res,
       total: getTotalCounter(filters, data.graphNetworks[0]?.offersTotal ?? 0),
@@ -651,8 +647,8 @@ export class DealExplorerClient {
         // USDC.
         pricePerWorkerEpoch: tokenValueToRounded(
           deal.pricePerWorkerEpoch,
-          this._serializationSettings.parseTokenToFixedDefault,
           deal.paymentToken.decimals,
+          this._serializationSettings.paymentTokenValueAdditionalFormatter,
         ),
         maxWorkersPerProvider: deal.maxWorkersPerProvider,
         computeUnits: serializeComputeUnits(
@@ -969,7 +965,8 @@ export class DealExplorerClient {
       collateral: currentPeerCapacityCommitment
         ? tokenValueToRounded(
             currentPeerCapacityCommitment.collateralPerUnit,
-            this._serializationSettings.parseNativeTokenToFixedDefault,
+            Number(FLTToken.decimals),
+            this._serializationSettings.nativeTokenValueAdditionalFormatter,
           )
         : "0",
       successProofs: currentPeerCapacityCommitment
@@ -1115,9 +1112,9 @@ export class DealExplorerClient {
     let res: Array<ProofStatsByCapacityCommitment> = [];
     for (const proofStats of data.capacityCommitmentStatsPerEpoches) {
       res.push({
-        createdAtEpoch: Number(proofStats.epoch),
-        createdAtEpochBlockNumberStart: Number(proofStats.blockNumberStart),
-        createdAtEpochBlockNumberEnd: Number(proofStats.blockNumberEnd),
+        createdAtEpoch: Number(proofStats.epochStatistic.id),
+        epochBlockStart: Number(proofStats.epochStatistic.startBlock),
+        epochBlockEnd: Number(proofStats.epochStatistic.endBlock),
         computeUnitsExpected: proofStats.activeUnitCount,
         submittedProofs: proofStats.submittedProofsCount,
         computeUnitsFailed:
@@ -1164,7 +1161,7 @@ export class DealExplorerClient {
       await this._indexerClient.getComputeUnitPerEpochStats({
         filters: {
           capacityCommitment_: { id: capacityCommitmentId },
-          epoch: epoch.toString(),
+          epochStatistic: epoch.toString(),
         },
         offset,
         limit,
@@ -1222,6 +1219,15 @@ export class DealExplorerClient {
       total: null,
       data: res,
     };
+  }
+
+  async getCurrentEpoch(): Promise<number> {
+    await this._init();
+    return calculateEpoch(
+      Date.now() / 1000,
+      this._coreInitTimestamp!,
+      this._coreEpochDuration!,
+    );
   }
 }
 

@@ -1,3 +1,6 @@
+# Exclude deleted CUs.
+# Exclude deleted Peers.
+
 query OfferQuery(
   $id: ID!
 ) {
@@ -28,9 +31,9 @@ fragment OfferDetail on Offer {
       approved
       name
     }
-    peers {
+    peers(where: {deleted: false}) {
         id
-        computeUnits {
+        computeUnits(where: {deleted: false}) {
             ...ComputeUnitBasic
         }
     }
