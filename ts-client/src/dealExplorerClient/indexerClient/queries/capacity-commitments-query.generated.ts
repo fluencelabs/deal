@@ -50,7 +50,7 @@ export type CapacityCommitmentStatsPerEpochQueryQueryVariables = Types.Exact<{
 }>;
 
 
-export type CapacityCommitmentStatsPerEpochQueryQuery = { __typename?: 'Query', capacityCommitmentStatsPerEpoches: Array<{ __typename?: 'CapacityCommitmentStatsPerEpoch', id: string, epoch: any, blockNumberEnd: any, blockNumberStart: any, totalFailCount: number, exitedUnitCount: number, activeUnitCount: number, nextAdditionalActiveUnitCount: number, currentCCNextCCFailedEpoch: any, submittedProofsCount: number, computeUnitsWithMinRequiredProofsSubmittedCounter: number, capacityCommitment: { __typename?: 'CapacityCommitment', id: string }, submittedProofs?: Array<{ __typename?: 'SubmittedProof', id: string, computeUnit: { __typename?: 'ComputeUnit', id: string } }> | null }> };
+export type CapacityCommitmentStatsPerEpochQueryQuery = { __typename?: 'Query', capacityCommitmentStatsPerEpoches: Array<{ __typename?: 'CapacityCommitmentStatsPerEpoch', id: string, totalFailCount: number, exitedUnitCount: number, activeUnitCount: number, nextAdditionalActiveUnitCount: number, currentCCNextCCFailedEpoch: any, submittedProofsCount: number, computeUnitsWithMinRequiredProofsSubmittedCounter: number, epochStatistic: { __typename?: 'EpochStatistic', id: string, startBlock: any, endBlock: any }, capacityCommitment: { __typename?: 'CapacityCommitment', id: string }, submittedProofs?: Array<{ __typename?: 'SubmittedProof', id: string, computeUnit: { __typename?: 'ComputeUnit', id: string } }> | null }> };
 
 export type ComputeUnitPerEpochStatsQueryQueryVariables = Types.Exact<{
   filters?: Types.InputMaybe<Types.ComputeUnitPerEpochStat_Filter>;
@@ -61,7 +61,7 @@ export type ComputeUnitPerEpochStatsQueryQueryVariables = Types.Exact<{
 }>;
 
 
-export type ComputeUnitPerEpochStatsQueryQuery = { __typename?: 'Query', computeUnitPerEpochStats: Array<{ __typename?: 'ComputeUnitPerEpochStat', id: string, epoch: any, submittedProofsCount: number, computeUnit: { __typename?: 'ComputeUnit', id: string } }> };
+export type ComputeUnitPerEpochStatsQueryQuery = { __typename?: 'Query', computeUnitPerEpochStats: Array<{ __typename?: 'ComputeUnitPerEpochStat', id: string, submittedProofsCount: number, computeUnit: { __typename?: 'ComputeUnit', id: string }, epochStatistic: { __typename?: 'EpochStatistic', id: string, startBlock: any, endBlock: any } }> };
 
 export const CapacityCommitmentBasicFragmentDoc = gql`
     fragment CapacityCommitmentBasic on CapacityCommitment {
@@ -119,7 +119,7 @@ export const CapacityCommitmentQueryDocument = gql`
   capacityCommitment(id: $id) {
     ...CapacityCommitmentBasic
     delegator
-    computeUnits {
+    computeUnits(where: {computeUnit_: {deleted: false}}) {
       computeUnit {
         id
         deal {
@@ -172,9 +172,11 @@ export const CapacityCommitmentStatsPerEpochQueryDocument = gql`
     orderDirection: $orderType
   ) {
     id
-    epoch
-    blockNumberEnd
-    blockNumberStart
+    epochStatistic {
+      id
+      startBlock
+      endBlock
+    }
     capacityCommitment {
       id
     }
@@ -207,7 +209,11 @@ export const ComputeUnitPerEpochStatsQueryDocument = gql`
     computeUnit {
       id
     }
-    epoch
+    epochStatistic {
+      id
+      startBlock
+      endBlock
+    }
     submittedProofsCount
   }
 }

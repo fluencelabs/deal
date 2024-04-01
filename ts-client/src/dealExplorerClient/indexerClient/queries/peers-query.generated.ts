@@ -88,7 +88,7 @@ export const ComputeUnitQueryDocument = gql`
 export const ComputeUnitsQueryDocument = gql`
     query ComputeUnitsQuery($filters: ComputeUnit_filter, $offset: Int, $limit: Int, $orderBy: ComputeUnit_orderBy, $orderType: OrderDirection) {
   computeUnits(
-    where: $filters
+    where: {and: [$filters, {deleted: false}]}
     first: $limit
     skip: $offset
     orderBy: $orderBy

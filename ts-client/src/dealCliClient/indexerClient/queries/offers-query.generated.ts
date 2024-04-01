@@ -57,9 +57,9 @@ export const OfferDetailFragmentDoc = gql`
     approved
     name
   }
-  peers {
+  peers(where: {deleted: false}) {
     id
-    computeUnits {
+    computeUnits(where: {deleted: false}) {
       ...ComputeUnitBasic
     }
   }

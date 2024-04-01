@@ -1,6 +1,6 @@
 import { Bytes, ethereum, log } from "@graphprotocol/graph-ts/index";
 import { createOrLoadEffector } from "../models";
-import {Address} from "@graphprotocol/graph-ts";
+import { Address } from "@graphprotocol/graph-ts";
 
 export class AppCID extends ethereum.Tuple {
   get prefixes(): Bytes {
@@ -36,7 +36,9 @@ export function parseEffectors(effectors: Array<AppCID>): Array<string> {
  */
 export function getEffectorCID(effectorTuple: AppCID): string {
   // Also rm Ox prefix.
-  const cid = effectorTuple.prefixes.toHexString().slice(2) + effectorTuple.hash.toHexString().slice(2);
+  const cid =
+    effectorTuple.prefixes.toHexString().slice(2) +
+    effectorTuple.hash.toHexString().slice(2);
   log.info("[getEffectorCID] Extract CID from effector: {}", [cid]);
   return cid;
 }
