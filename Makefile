@@ -4,7 +4,7 @@ export
 .DEFAULT_GOAL := help
 .PHONY: help
 
-IPC_URL ?= http://ipc-eth:8545
+IPC_URL ?= http://eth-api:8545
 
 verify-command: ## Verify command
 	@command -v $(program) > /dev/null || (echo "\033[0;31m$(program) is not installed. Please install $(program) and try again.\033[0m" && exit 1)
