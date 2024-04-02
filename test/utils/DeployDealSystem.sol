@@ -11,7 +11,9 @@ import "src/dev/TestERC20.sol";
 import "src/core/Core.sol";
 import "src/deal/Deal.sol";
 import "src/core/modules/market/Market.sol";
+import "src/core/modules/market/DealFactory.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
+import "src/core/modules/market/interfaces/IDealFactory.sol";
 import "src/core/modules/capacity/Capacity.sol";
 import "src/core/modules/capacity/interfaces/ICapacity.sol";
 
@@ -24,24 +26,29 @@ library DeployDealSystem {
         Core core;
         Market market;
         Capacity capacity;
+        DealFactory dealFactory;
     }
 
     // ------------------ Constants ------------------
     uint256 public constant DEFAULT_EPOCH_DURATION = 1 days;
     uint256 public constant DEFAULT_FLT_PRICE = 10 * PRECISION; // 10 USD
-    uint256 public constant DEFAULT_MIN_DEPOSITED_EPOCHES = 2;
-    uint256 public constant DEFAULT_MIN_REMATCHING_EPOCHES = 2;
+    uint256 public constant DEFAULT_MIN_DEPOSITED_EPOCHS = 2;
+    uint256 public constant DEFAULT_MIN_REMATCHING_EPOCHS = 2;
+    uint256 public constant DEFAULT_MIN_PROTOCOL_VERSION = 1;
+    uint256 public constant DEFAULT_MAX_PROTOCOL_VERSION = 1;
     uint256 public constant DEFAULT_USD_COLLATERAL_PER_UNIT = 100 * PRECISION; // 100 USD
-    uint256 public constant DEFAULT_USD_TARGET_REVENUE_PER_EPOCH = 10 * PRECISION; // 10 USD
+    uint256 public constant DEFAULT_USD_TARGET_REVENUE_PER_EPOCH = 2000 * PRECISION; // 2000 USD
     uint256 public constant DEFAULT_MIN_DURATION = 1 days;
     uint256 public constant DEFAULT_MIN_REWARD_PER_EPOCH = 10000;
     uint256 public constant DEFAULT_MAX_REWARD_PER_EPOCH = 1;
-    uint256 public constant DEFAULT_VESTING_DURATION = 2 days;
+    uint256 public constant DEFAULT_VESTING_PERIOD_DURATION = 10;
+    uint256 public constant DEFAULT_VESTING_PERIOD_COUNT = 6;
     uint256 public constant DEFAULT_SLASHING_RATE = 100000; // 0.01 = 1% = 100000
     uint256 public constant DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH = 3;
     uint256 public constant DEFAULT_MAX_PROOFS_PER_EPOCH = 5;
-    uint256 public constant DEFAULT_WITHDRAW_EPOCHES_AFTER_FAILED = 2;
+    uint256 public constant DEFAULT_WITHDRAW_EPOCHS_AFTER_FAILED = 2;
     uint256 public constant DEFAULT_MAX_FAILED_RATIO = 10;
+    uint256 public constant DEFAULT_INIT_REWARD_POOL = 1000 ether;
     bool public constant DEFAULT_IS_WHITELIST_ENABLED = false;
     bytes32 public constant DEFAULT_DIFFICULTY_TARGET =
         0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
@@ -63,9 +70,28 @@ library DeployDealSystem {
                     abi.encodeWithSelector(
                         Core.initialize.selector,
                         DEFAULT_EPOCH_DURATION,
-                        DEFAULT_MIN_DEPOSITED_EPOCHES,
-                        DEFAULT_MIN_REMATCHING_EPOCHES,
-                        dealImpl
+                        DEFAULT_MIN_DEPOSITED_EPOCHS,
+                        DEFAULT_MIN_REMATCHING_EPOCHS,
+                        DEFAULT_MIN_PROTOCOL_VERSION,
+                        DEFAULT_MAX_PROTOCOL_VERSION,
+                        dealImpl,
+                        DEFAULT_IS_WHITELIST_ENABLED,
+                        DEFAULT_FLT_PRICE,
+                        DEFAULT_USD_COLLATERAL_PER_UNIT,
+                        DEFAULT_USD_TARGET_REVENUE_PER_EPOCH,
+                        DEFAULT_MIN_DURATION,
+                        DEFAULT_MIN_REWARD_PER_EPOCH,
+                        DEFAULT_MAX_REWARD_PER_EPOCH,
+                        DEFAULT_VESTING_PERIOD_DURATION,
+                        DEFAULT_VESTING_PERIOD_COUNT,
+                        DEFAULT_SLASHING_RATE,
+                        DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH,
+                        DEFAULT_MAX_PROOFS_PER_EPOCH,
+                        DEFAULT_WITHDRAW_EPOCHS_AFTER_FAILED,
+                        DEFAULT_MAX_FAILED_RATIO,
+                        DEFAULT_DIFFICULTY_TARGET,
+                        DEFAULT_INIT_REWARD_POOL,
+                        new RandomXProxy()
                     )
                 )
             )
@@ -80,33 +106,25 @@ library DeployDealSystem {
         );
 
         deployment.capacity = Capacity(
-            address(
-                new ERC1967Proxy(
-                    address(new Capacity(deployment.core)),
-                    abi.encodeWithSelector(
-                        Capacity.initialize.selector,
-                        DEFAULT_FLT_PRICE,
-                        DEFAULT_USD_COLLATERAL_PER_UNIT,
-                        DEFAULT_USD_TARGET_REVENUE_PER_EPOCH,
-                        DEFAULT_MIN_DURATION,
-                        DEFAULT_MIN_REWARD_PER_EPOCH,
-                        DEFAULT_MAX_REWARD_PER_EPOCH,
-                        DEFAULT_VESTING_DURATION,
-                        DEFAULT_SLASHING_RATE,
-                        DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH,
-                        DEFAULT_MAX_PROOFS_PER_EPOCH,
-                        DEFAULT_WITHDRAW_EPOCHES_AFTER_FAILED,
-                        DEFAULT_MAX_FAILED_RATIO,
-                        DEFAULT_IS_WHITELIST_ENABLED,
-                        DEFAULT_INIT_GLOBAL_NONCE,
-                        DEFAULT_DIFFICULTY_TARGET,
-                        new RandomXProxy()
+            payable(
+                address(
+                    new ERC1967Proxy(
+                        address(new Capacity(deployment.core)),
+                        abi.encodeWithSelector(Capacity.initialize.selector, DEFAULT_INIT_GLOBAL_NONCE)
                     )
                 )
             )
         );
 
-        deployment.core.initializeModules(deployment.capacity, deployment.market);
+        deployment.dealFactory = DealFactory(
+            address(
+                new ERC1967Proxy(
+                    address(new DealFactory(deployment.core)), abi.encodeWithSelector(DealFactory.initialize.selector)
+                )
+            )
+        );
+
+        deployment.core.initializeModules(deployment.capacity, deployment.market, deployment.dealFactory);
 
         deployment.initialized = true;
     }

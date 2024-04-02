@@ -10,16 +10,15 @@ import "src/deal/interfaces/IConfig.sol";
 import "src/core/modules/market/Offer.sol";
 import "test/utils/DeployDealSystem.sol";
 import "test/utils/TestHelper.sol";
-import "src/deal/DealStorageUtils.sol";
+import "src/deal/DealSnapshot.sol";
 
 contract CommitPeriod is Test {
     using SafeERC20 for IERC20;
     using TestHelper for DeployDealSystem.Deployment;
-    using DealStorageUtils for DealStorageUtils.Balance;
+    using DealSnapshot for DealSnapshot.Cache;
 
     DeployDealSystem.Deployment deployment;
     TestDealContract dealContract;
-    Deal.DealStorage dealStorage;
 
     // ------------------ Test ------------------
     function setUp() public {
@@ -28,103 +27,174 @@ contract CommitPeriod is Test {
     }
 
     function test_RecordGaps() public {
-        dealStorage.totalBalance = 100 ether;
-        dealStorage.lockedBalance = 0 ether;
-        dealStorage.gapsEpochCount = 50;
+        dealContract.setTotalBalance(100 ether);
+        dealContract.setLockedBalance(0);
 
-        uint256 prevEpoch = 100;
-        uint256 maxPaidEpoch = 50;
+        uint256 gapsEpochCount = 50;
+        dealContract.setGapsEpochCount(gapsEpochCount);
+
         uint256 lastCommitedEpoch = 50;
-        uint256 pricePerWorkerEpoch = 1 ether;
-        uint256 currentWorkerCount = 1;
+        dealContract.setMaxPaidEpoch(lastCommitedEpoch);
+        dealContract.setLastCommitedEpoch(lastCommitedEpoch);
 
-        DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
-        balance = dealContract.preCommitPeriod(
-            balance, prevEpoch, maxPaidEpoch, lastCommitedEpoch, currentWorkerCount, pricePerWorkerEpoch
-        );
+        dealContract.setPricePerWorkerEpoch(1 ether);
+        dealContract.setWorkerCount(1);
 
-        assertEq(balance.getTotalBalance(), 100 ether, "totalBalance mismatch");
-        assertEq(balance.getLockedBalance(), 0, "lockedBalance mismatch");
+        uint256 currentEpoch = 101;
+        _mockCurrentEpoch(currentEpoch);
+
+        DealSnapshot.Cache memory snapshot = dealContract.preCommitPeriod();
+
+        assertEq(snapshot.getTotalBalance(), 100 ether, "totalBalance mismatch");
+        assertEq(snapshot.getLockedBalance(), 0, "lockedBalance mismatch");
         assertEq(
-            balance.getGapsEpochCount(),
-            dealStorage.gapsEpochCount + prevEpoch - lastCommitedEpoch,
+            snapshot.getGapsEpochCount(),
+            gapsEpochCount + (currentEpoch - 1) - lastCommitedEpoch,
             "gapsEpochCount mismatch"
         );
     }
 
     function test_WrtieOffBalanceAndRecordGaps() public {
-        dealStorage.lockedBalance = 0 ether;
-        dealStorage.gapsEpochCount = 100;
+        dealContract.setLockedBalance(0);
 
-        uint256 lastCommitedEpoch = dealStorage.gapsEpochCount;
-        uint256 prevEpoch = 200;
+        uint256 gapsEpochCount = 100;
+        dealContract.setGapsEpochCount(gapsEpochCount);
+
+        uint256 lastCommitedEpoch = gapsEpochCount;
+        dealContract.setLastCommitedEpoch(lastCommitedEpoch);
+
         uint256 maxPaidEpoch = 150;
-        uint256 pricePerWorkerEpoch = 200 ether;
-        uint256 currentWorkerCount = 5;
+        dealContract.setMaxPaidEpoch(maxPaidEpoch);
 
-        dealStorage.totalBalance = (maxPaidEpoch - lastCommitedEpoch) * pricePerWorkerEpoch * currentWorkerCount;
+        dealContract.setPricePerWorkerEpoch(200 ether);
+        dealContract.setWorkerCount(5);
 
-        DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
-        balance = dealContract.preCommitPeriod(
-            balance, prevEpoch, maxPaidEpoch, lastCommitedEpoch, currentWorkerCount, pricePerWorkerEpoch
-        );
+        uint256 totalBalance = (dealContract.getMaxPaidEpoch() - lastCommitedEpoch) * dealContract.pricePerWorkerEpoch()
+            * dealContract.getWorkerCount();
+        dealContract.setTotalBalance(totalBalance);
 
-        assertEq(balance.getTotalBalance(), 0, "totalBalance mismatch");
-        assertEq(balance.getLockedBalance(), dealStorage.totalBalance, "lockedBalance mismatch");
+        uint256 currentEpoch = 201;
+        _mockCurrentEpoch(currentEpoch);
+
+        DealSnapshot.Cache memory snapshot = dealContract.preCommitPeriod();
+
+        assertEq(snapshot.getTotalBalance(), 0, "totalBalance mismatch");
+        assertEq(snapshot.getLockedBalance(), totalBalance, "lockedBalance mismatch");
         assertEq(
-            balance.getGapsEpochCount(),
-            dealStorage.gapsEpochCount + prevEpoch - maxPaidEpoch,
-            "gapsEpochCount mismatch"
+            snapshot.getGapsEpochCount(), gapsEpochCount + (currentEpoch - 1) - maxPaidEpoch, "gapsEpochCount mismatch"
         );
     }
 
     function test_WrtieOffBalanceWithoutGaps() public {
-        dealStorage.lockedBalance = 0 ether;
-        dealStorage.gapsEpochCount = 100;
+        dealContract.setLockedBalance(0);
 
-        uint256 lastCommitedEpoch = dealStorage.gapsEpochCount;
-        uint256 prevEpoch = 200;
-        uint256 maxPaidEpoch = prevEpoch;
-        uint256 pricePerWorkerEpoch = 200 ether;
-        uint256 currentWorkerCount = 5;
+        uint256 gapsEpochCount = 100;
+        dealContract.setGapsEpochCount(gapsEpochCount);
 
-        dealStorage.totalBalance = (prevEpoch - lastCommitedEpoch) * pricePerWorkerEpoch * currentWorkerCount;
+        uint256 lastCommitedEpoch = gapsEpochCount;
+        dealContract.setLastCommitedEpoch(lastCommitedEpoch);
 
-        DealStorageUtils.Balance memory balance = DealStorageUtils.initCache(dealStorage);
-        balance = dealContract.preCommitPeriod(
-            balance, prevEpoch, maxPaidEpoch, lastCommitedEpoch, currentWorkerCount, pricePerWorkerEpoch
+        uint256 currentEpoch = 201;
+        uint256 maxPaidEpoch = currentEpoch - 1;
+        dealContract.setMaxPaidEpoch(maxPaidEpoch);
+
+        dealContract.setPricePerWorkerEpoch(200 ether);
+        dealContract.setWorkerCount(5);
+
+        uint256 totalBalance =
+            (currentEpoch - 1 - lastCommitedEpoch) * dealContract.pricePerWorkerEpoch() * dealContract.getWorkerCount();
+        dealContract.setTotalBalance(totalBalance);
+
+        _mockCurrentEpoch(currentEpoch);
+
+        DealSnapshot.Cache memory snapshot = dealContract.preCommitPeriod();
+
+        assertEq(snapshot.getTotalBalance(), 0, "totalBalance mismatch");
+        assertEq(snapshot.getLockedBalance(), totalBalance, "lockedBalance mismatch");
+        assertEq(snapshot.getGapsEpochCount(), gapsEpochCount, "gapsEpochCount mismatch");
+    }
+
+    // ------------------ Internal ------------------
+    function _mockCurrentEpoch(uint256 currentEpoch) internal {
+        vm.mockCall(
+            address(0x00), abi.encodeWithSelector(IEpochController.currentEpoch.selector), abi.encode(currentEpoch)
         );
-
-        assertEq(balance.getTotalBalance(), 0, "totalBalance mismatch");
-        assertEq(balance.getLockedBalance(), dealStorage.totalBalance, "lockedBalance mismatch");
-        assertEq(balance.getGapsEpochCount(), dealStorage.gapsEpochCount, "gapsEpochCount mismatch");
     }
 }
 
 contract TestDealContract is Deal {
-    function preCommitPeriod(
-        DealStorageUtils.Balance memory balance,
-        uint256 currentEpoch,
-        uint256 maxPaidEpoch,
-        uint256 lastCommitedEpoch,
-        uint256 currentWorkerCount,
-        uint256 pricePerWorkerEpoch_
-    ) public pure returns (DealStorageUtils.Balance memory) {
-        _preCommitPeriod(
-            balance, currentEpoch, maxPaidEpoch, lastCommitedEpoch, currentWorkerCount, pricePerWorkerEpoch_
-        );
+    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.deal.storage.v1")) - 1);
+    bytes32 private constant _WORKER_STORAGE_SLOT =
+        bytes32(uint256(keccak256("fluence.deal.storage.v1.workerManager")) - 1);
+    bytes32 private constant _CONFIG_STORAGE_SLOT = bytes32(uint256(keccak256("fluence.deal.storage.v1.config")) - 1);
 
-        return balance;
+    function _getConfigStorageTest() private pure returns (ConfigStorage storage s) {
+        bytes32 storageSlot = _CONFIG_STORAGE_SLOT;
+        assembly {
+            s.slot := storageSlot
+        }
     }
 
-    function postCommitPeriod(
-        DealStorageUtils.Balance memory balance,
-        uint256 currentEpoch,
-        uint256 prevWorkerCount,
-        uint256 newWorkerCount,
-        uint256 minWorkerCount,
-        uint256 pricePerWorkerEpoch_
-    ) public {
-        _postCommitPeriod(balance, currentEpoch, prevWorkerCount, newWorkerCount, minWorkerCount, pricePerWorkerEpoch_);
+    function _getWorkerManagerStorageTest() private pure returns (WorkerManagerStorage storage s) {
+        bytes32 storageSlot = _WORKER_STORAGE_SLOT;
+
+        assembly {
+            s.slot := storageSlot
+        }
+    }
+
+    function _getStorage() private pure returns (DealStorage storage s) {
+        bytes32 storageSlot = _STORAGE_SLOT;
+        assembly {
+            s.slot := storageSlot
+        }
+    }
+
+    function setTotalBalance(uint256 totalBalance) public {
+        _getStorage().totalBalance = totalBalance;
+    }
+
+    function setLockedBalance(uint256 lockedBalance) public {
+        _getStorage().lockedBalance = lockedBalance;
+    }
+
+    function setGapsEpochCount(uint256 gapsEpochCount) public {
+        _getStorage().gapsEpochCount = gapsEpochCount;
+    }
+
+    function setEndedEpoch(uint256 endedEpoch) public {
+        _getStorage().endedEpoch = endedEpoch;
+    }
+
+    function setMaxPaidEpoch(uint256 maxPaidEpoch) public {
+        _getStorage().maxPaidEpoch = maxPaidEpoch;
+    }
+
+    function setLastCommitedEpoch(uint256 lastCommitedEpoch) public {
+        _getStorage().lastCommitedEpoch = lastCommitedEpoch;
+    }
+
+    function setPricePerWorkerEpoch(uint256 pricePerWorkerEpoch_) public {
+        _getConfigStorageTest().pricePerWorkerEpoch = pricePerWorkerEpoch_;
+    }
+
+    function setWorkerCount(uint256 workerCount_) public {
+        _getWorkerManagerStorageTest().workerCount = workerCount_;
+    }
+
+    function setMinWorkers(uint256 minWorkers_) public {
+        _getConfigStorageTest().minWorkers = minWorkers_;
+    }
+
+    function setTargetWorkers(uint256 targetWorkers_) public {
+        _getConfigStorageTest().targetWorkers = targetWorkers_;
+    }
+
+    function preCommitPeriod() public view returns (DealSnapshot.Cache memory) {
+        return _preCommitPeriod();
+    }
+
+    function postCommitPeriod(DealSnapshot.Cache memory snapshot, uint256 newWorkerCount) public {
+        _postCommitPeriod(snapshot, newWorkerCount);
     }
 }

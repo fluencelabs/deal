@@ -3,14 +3,11 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "src/utils/LinkedListWithUniqueKeys.sol";
 import "src/utils/OwnableUpgradableDiamond.sol";
 import "src/core/interfaces/ICore.sol";
 import "./interfaces/IConfig.sol";
 
 contract Config is OwnableUpgradableDiamond, IConfig {
-    using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
-
     // ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.deal.storage.v1.config")) - 1);
 
@@ -79,6 +76,9 @@ contract Config is OwnableUpgradableDiamond, IConfig {
         AccessType providersAccessType_,
         address[] calldata providersAccessList_
     ) internal onlyInitializing {
+        require(minWorkers_ > 0, "Config: minWorkers should be greater than 0");
+        require(minWorkers_ <= targetWorkers_, "Config: minWorkers should be less or equal to targetWorkers");
+
         ConfigStorage storage configStorage = _getConfigStorage();
 
         configStorage.creationBlock = block.number;

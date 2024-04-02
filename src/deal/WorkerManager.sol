@@ -3,12 +3,13 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "./Config.sol";
 import "./interfaces/IDeal.sol";
 import "./interfaces/IWorkerManager.sol";
 
 contract WorkerManager is Config, IWorkerManager {
-    using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
+    using EnumerableSet for EnumerableSet.Bytes32Set;
     using SafeERC20 for IERC20;
 
     // ------------------ Types ------------------
@@ -27,7 +28,7 @@ contract WorkerManager is Config, IWorkerManager {
         // compute units area
         mapping(bytes32 => ComputeUnit) computeUnitById;
         mapping(bytes32 => bool) isComputePeerExist;
-        LinkedListWithUniqueKeys.Bytes32List computeUnitsIdsList;
+        EnumerableSet.Bytes32Set computeUnitsIdsList;
     }
 
     function _getWorkerManagerStorage() private pure returns (WorkerManagerStorage storage s) {
@@ -124,7 +125,7 @@ contract WorkerManager is Config, IWorkerManager {
         });
 
         // add ComputeUnit to list
-        workerStorage.computeUnitsIdsList.push(id);
+        require(workerStorage.computeUnitsIdsList.add(id), "Failed to add compute unit to list");
 
         emit ComputeUnitJoined(peerId, id);
     }
@@ -153,7 +154,7 @@ contract WorkerManager is Config, IWorkerManager {
 
         // remove ComputeUnit
         delete workerStorage.computeUnitById[computeUnitId];
-        workerStorage.computeUnitsIdsList.remove(computeUnitId);
+        require(workerStorage.computeUnitsIdsList.remove(computeUnitId), "Failed to remove compute unit from list");
 
         emit ComputeUnitRemoved(peerId, computeUnitId);
 
@@ -162,7 +163,10 @@ contract WorkerManager is Config, IWorkerManager {
 
     // ------------------ Public View Functions ---------------------
     function getComputeUnit(bytes32 id) public view returns (ComputeUnit memory) {
-        return _getWorkerManagerStorage().computeUnitById[id];
+        ComputeUnit memory computeUnit = _getWorkerManagerStorage().computeUnitById[id];
+        require(computeUnit.provider != address(0x00), "ComputeUnit not found");
+
+        return computeUnit;
     }
 
     function getComputeUnitCount() public view returns (uint256) {
@@ -176,15 +180,11 @@ contract WorkerManager is Config, IWorkerManager {
     function getComputeUnits() public view returns (ComputeUnit[] memory) {
         WorkerManagerStorage storage workerStorage = _getWorkerManagerStorage();
 
-        ComputeUnit[] memory computeUnits = new ComputeUnit[](workerStorage.computeUnitCount);
+        bytes32[] memory computeUnitsIds = workerStorage.computeUnitsIdsList.values();
+        ComputeUnit[] memory computeUnits = new ComputeUnit[](computeUnitsIds.length);
 
-        uint256 index = 0;
-        bytes32 computeUnitId = workerStorage.computeUnitsIdsList.first();
-        while (computeUnitId != bytes32(0)) {
-            computeUnits[index] = workerStorage.computeUnitById[computeUnitId];
-            index++;
-
-            computeUnitId = workerStorage.computeUnitsIdsList.next(computeUnitId);
+        for (uint256 i = 0; i < computeUnitsIds.length; i++) {
+            computeUnits[i] = workerStorage.computeUnitById[computeUnitsIds[i]];
         }
 
         return computeUnits;

@@ -3,9 +3,9 @@ import * as fs from "fs";
 
 
 const DEPLOYMENTS_DIR = '../../deployments'
-const CONFIGS_DIR =  "../configs"
-const REQUIRED_DEPLOYED_CONTRACT_NAMES = ["Market", "Capacity", "Core"]
-const STANDS = ["kras", "testnet", "stage", "local", "dar"]
+const CONFIGS_DIR = "../configs"
+const REQUIRED_DEPLOYED_CONTRACT_NAMES = ["Market", "Capacity", "Core", "DealFactory"]
+const STANDS = ["kras", "stage", "local", "dar"]
 // Subgraph repo pattern used to have config dir with networks.json to support
 //  deploy on different networks: {mainnet, mumbai, etc}.
 //  In our case when we can deploy different stands on the same network, e.g. mumbai we have
@@ -13,14 +13,12 @@ const STANDS = ["kras", "testnet", "stage", "local", "dar"]
 //  through flags: --config-file and --network name in that file.
 const STAND_TO_SUBGRAPH_CONFIG = {
   "kras": "kras-networks-config.json",
-  "testnet": "testnet-networks-config.json",
   "stage": "stage-networks-config.json",
   "dar": "dar-networks-config.json",
   "local": "local-networks-config.json",
 }
 const STAND_TO_SUBGRAPH_NETWORK = {
-  "kras": "mumbai",
-  "testnet": "testnet",
+  "kras": "kras",
   "stage": "stage",
   "dar": "dar",
   "local": "local",
@@ -86,8 +84,8 @@ const asyncRuntimeDecorator: asyncRuntimeDecoratorType = (func) => {
   func()
     .then(() => process.exit(0))
     .catch((error: unknown) => {
-        console.error(error);
-        process.exit(1);
+      console.error(error);
+      process.exit(1);
     });
 };
 

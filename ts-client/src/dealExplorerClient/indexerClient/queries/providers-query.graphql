@@ -1,3 +1,5 @@
+# Exclude deleted Peers.
+
 query ProvidersQuery(
   $filters: Provider_filter,
   $offset: Int,
@@ -15,7 +17,7 @@ query ProvidersQuery(
     ...ProviderOfProvidersQuery
   }
   graphNetworks(first: 1) {
-    providersTotal
+    providersRegisteredTotal
   }
 }
 
@@ -64,6 +66,9 @@ fragment ProvidersBasicOffer on Offer {
       }
     }
     provider {
+      id
+    }
+    peers(where: {deleted: false}) {
       id
     }
 }

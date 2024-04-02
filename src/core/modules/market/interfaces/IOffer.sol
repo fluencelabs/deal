@@ -10,11 +10,9 @@ import "src/deal/base/Types.sol";
 /// @dev Offer contract is responsible for managing the offers in the market
 interface IOffer {
     // ------------------ Types ------------------
-    /// @param approved If provider address approved by Fluence (Core Owner).
     struct ProviderInfo {
         string name;
         CIDV1 metadata;
-        bool approved;
     }
 
     struct RegisterComputePeer {
@@ -28,6 +26,8 @@ interface IOffer {
         uint256 minPricePerWorkerEpoch;
         address paymentToken;
         uint256 peerCount;
+        uint256 minProtocolVersion;
+        uint256 maxProtocolVersion;
     }
 
     struct ComputePeer {
@@ -72,7 +72,9 @@ interface IOffer {
         bytes32 offerId,
         uint256 minPricePerWorkerEpoch,
         address paymentToken,
-        CIDV1[] effectors
+        CIDV1[] effectors,
+        uint256 minProtocolVersion,
+        uint256 maxProtocolVersion
     );
 
     /// @dev Emitted when a peer created for an offer
@@ -129,11 +131,11 @@ interface IOffer {
     /// @param id The effector cid
     /// @param description The description of the effector
     /// @param metadata The metadata of the effector
-    event EffectorInfoSet(CIDV1 indexed id, string description, CIDV1 metadata);
+    event EffectorInfoSet(CIDV1 id, string description, CIDV1 metadata);
 
     /// @dev Emitted when the effector info is removed
     /// @param id The effector cid
-    event EffectorInfoRemoved(CIDV1 indexed id);
+    event EffectorInfoRemoved(CIDV1 id);
 
     // ----------------- Public View -----------------
     /// @dev Returns the provider info
@@ -178,7 +180,9 @@ interface IOffer {
         uint256 minPricePerWorkerEpoch,
         address paymentToken,
         CIDV1[] calldata effectors,
-        RegisterComputePeer[] calldata peers
+        RegisterComputePeer[] calldata peers,
+        uint256 minProtocolVersion,
+        uint256 maxProtocolVersion
     ) external returns (bytes32);
 
     /// @dev Remove an offer

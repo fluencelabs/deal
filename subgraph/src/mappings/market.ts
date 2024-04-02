@@ -1,35 +1,38 @@
 // File should be writen after `npm run compile` is run or you will encounter syntax and import errors.
 // Note: handlers named as in the contract methods
 
+import { BigInt } from "@graphprotocol/graph-ts";
+
 import {
   ComputeUnitAddedToDeal,
   ComputeUnitCreated,
+  ComputeUnitRemoved,
   ComputeUnitRemovedFromDeal,
-  DealCreated,
   EffectorAdded,
-  EffectorInfoRemoved, EffectorInfoSet,
+  EffectorInfoRemoved,
+  EffectorInfoSet,
   EffectorRemoved,
+  Initialized,
   MarketOfferRegistered,
   MinPricePerEpochUpdated,
   PaymentTokenUpdated,
   PeerCreated,
+  PeerRemoved,
   ProviderInfoUpdated,
 } from "../../generated/Market/Market";
 import {
-  createOrLoadDealEffector,
   createOrLoadDealToJoinedOfferPeer,
-  createOrLoadDealToPeer, createOrLoadDealToProvidersAccess,
+  createOrLoadDealToPeer,
   createOrLoadEffector,
   createOrLoadGraphNetwork,
   createOrLoadOfferEffector,
   createOrLoadToken,
-  createOrLoadUnregisteredProvider,
-  UNKNOWN_EFFECTOR_DESCRIPTION,
+  createOrLoadProvider,
+  REMOVED_EFFECTOR_INFO_DESCRIPTION,
   UNO_BIG_INT,
-  ZERO_BIG_INT,
 } from "../models";
 
-import { log, store } from "@graphprotocol/graph-ts";
+import { store } from "@graphprotocol/graph-ts";
 import {
   ComputeUnit,
   Deal,
@@ -37,33 +40,39 @@ import {
   Peer,
   Provider,
 } from "../../generated/schema";
-import { Deal as DealTemplate } from "../../generated/templates";
-import {AppCID, formatAddress, getEffectorCID, parseEffectors} from "./utils";
+import { AppCID, formatAddress, getEffectorCID, parseEffectors } from "./utils";
 
-export function handleProviderInfoUpdated(event: ProviderInfoUpdated): void {
-  const addr = formatAddress(event.params.provider);
-  let provider = Provider.load(addr);
-  if (provider == null) {
-    provider = new Provider(addr);
-  }
-  // Loaded or created provider - does not meter for this function logic.
-  provider.name = event.params.name;
-  provider.registered = true;
-  provider.approved = false;
-  provider.createdAt = event.block.timestamp;
-  provider.computeUnitsAvailable = 0;
-  provider.computeUnitsTotal = 0;
-  provider.peerCount = 0;
-  provider.save();
-
+export function handleInitialized(event: Initialized): void {
   let graphNetwork = createOrLoadGraphNetwork();
-  graphNetwork.providersTotal = graphNetwork.providersTotal.plus(UNO_BIG_INT);
-  graphNetwork.save()
+  graphNetwork.marketContractAddress = formatAddress(event.address);
+  graphNetwork.save();
 }
 
-// It fails on EffectorInfoSet but does not fail on
-// EffectorInfoSetButNotTuple(indexed uint256,(bytes4,bytes32),string,(bytes4,bytes32)).
-// TODO: enable this handler when https://github.com/graphprotocol/graph-node/issues/5171 resolved.
+export function handleProviderInfoUpdated(event: ProviderInfoUpdated): void {
+  let provider = createOrLoadProvider(
+    formatAddress(event.params.provider),
+    event.block.timestamp,
+  );
+  // Note, we do not change approved to false, because possibly provider have
+  //  been approved  through whitelist contract already. Thus, no need to
+  //  change approved field here.
+  if (!provider.approved) {
+    // catch null and false without warnings.
+    provider.approved = false;
+  }
+  provider.name = event.params.name;
+
+  if (provider.registered == false) {
+    provider.registered = true;
+
+    let graphNetwork = createOrLoadGraphNetwork();
+    graphNetwork.providersRegisteredTotal =
+      graphNetwork.providersRegisteredTotal.plus(UNO_BIG_INT);
+    graphNetwork.save();
+  }
+  provider.save();
+}
+
 export function handleEffectorInfoSet(event: EffectorInfoSet): void {
   const appCID = changetype<AppCID>(event.params.id);
   const cid = getEffectorCID(appCID);
@@ -73,12 +82,12 @@ export function handleEffectorInfoSet(event: EffectorInfoSet): void {
 }
 
 // When it is removed: it does not mean that in other place it is stopped to use the effector.
-//  Effector description and approved info merely deleted.
+//  Effector description and approved info merely deleted only.
 export function handleEffectorInfoRemoved(event: EffectorInfoRemoved): void {
   const appCID = changetype<AppCID>(event.params.id);
   const cid = getEffectorCID(appCID);
   let effector = createOrLoadEffector(cid);
-  effector.description = UNKNOWN_EFFECTOR_DESCRIPTION;
+  effector.description = REMOVED_EFFECTOR_INFO_DESCRIPTION;
   effector.save();
 }
 
@@ -90,12 +99,15 @@ export function handleMarketOfferRegistered(
   // - emit PeerCreated(offerId, peer.peerId);
   // - emit ComputeUnitCreated(offerId, peerId, unitId);
 
-  const provider = Provider.load(event.params.provider.toHex()) as Provider;
+  const provider = createOrLoadProvider(
+    formatAddress(event.params.provider),
+    event.block.timestamp,
+  );
 
   // Create Offer.
-  const offer = new Offer(event.params.offerId.toHex());
+  const offer = new Offer(event.params.offerId.toHexString());
   offer.provider = provider.id;
-  offer.paymentToken = createOrLoadToken(formatAddress(event.params.paymentToken)).id;
+  offer.paymentToken = createOrLoadToken(event.params.paymentToken).id;
   offer.pricePerEpoch = event.params.minPricePerWorkerEpoch;
   offer.createdAt = event.block.timestamp;
   offer.updatedAt = event.block.timestamp;
@@ -111,10 +123,7 @@ export function handleMarketOfferRegistered(
   for (let i = 0; i < effectorEntities.length; i++) {
     const effectorId = effectorEntities[i];
     // Automatically create link or ensure that exists.
-    createOrLoadOfferEffector(
-      offer.id,
-      effectorId,
-    );
+    createOrLoadOfferEffector(offer.id, effectorId);
   }
 
   provider.save();
@@ -125,69 +134,58 @@ export function handleComputeUnitCreated(event: ComputeUnitCreated): void {
   // Parent events:
   // - emit PeerCreated(offerId, peer.peerId);
   // - emit MarketOfferRegistered
-  let peer = Peer.load(event.params.peerId.toHex()) as Peer;
+  let peer = Peer.load(event.params.peerId.toHexString()) as Peer;
   const offer = Offer.load(peer.offer) as Offer;
-  const provider = Provider.load(offer.provider) as Provider;
+  const provider = createOrLoadProvider(offer.provider, event.block.timestamp);
 
   // Since handlePeerCreated could not work with this handler, this logic moved here.
-  const computeUnit = new ComputeUnit(event.params.unitId.toHex());
+  const computeUnit = new ComputeUnit(event.params.unitId.toHexString());
   computeUnit.provider = peer.provider;
   computeUnit.peer = peer.id;
   computeUnit.submittedProofsCount = 0;
   computeUnit.createdAt = event.block.timestamp;
+  computeUnit.deleted = false;
   computeUnit.save();
 
   // Upd stats.
-  peer.computeUnitsTotal = peer.computeUnitsTotal + 1;
-  peer.save()
-
-  provider.computeUnitsAvailable = provider.computeUnitsAvailable + 1;
-  provider.computeUnitsTotal = provider.computeUnitsTotal + 1;
-  provider.save();
-
-  offer.computeUnitsAvailable = offer.computeUnitsAvailable + 1;
-  offer.computeUnitsTotal = offer.computeUnitsTotal + 1;
-  offer.updatedAt = event.block.timestamp;
-  offer.save();
+  _updateComputeUnitStats(1, peer, offer, provider, event.block.timestamp);
 }
 
-// It updates Peer and Offer.
 export function handlePeerCreated(event: PeerCreated): void {
-  const peer = new Peer(event.params.peerId.toHex());
-  const offer = Offer.load(event.params.offerId.toHex()) as Offer;
-  const provider = Provider.load(offer.provider) as Provider;
-  provider.peerCount = provider.peerCount + 1;
-  provider.save();
+  let peer = new Peer(event.params.peerId.toHexString());
+  const offer = Offer.load(event.params.offerId.toHexString()) as Offer;
+  let provider = createOrLoadProvider(offer.provider, event.block.timestamp);
 
-  // const provider = Provider.load(offer.provider) as Provider
-  // log.info('offer.provider {}', offer.provider.toString())
   peer.provider = offer.provider;
   peer.offer = offer.id;
   peer.isAnyJoinedDeals = false;
   // Init stats below.
   peer.computeUnitsTotal = 0;
   peer.computeUnitsInDeal = 0;
-  peer.computeUnitsInCapacityCommitment = 0;
+  peer.deleted = false;
   peer.save();
+
+  // Upd stats below.
+  _updatePeerStats(1, provider);
 }
 
 // ---- Update Methods ----
 export function handleMinPricePerEpochUpdated(
   event: MinPricePerEpochUpdated,
 ): void {
-  const offer = Offer.load(event.params.offerId.toHex()) as Offer;
+  const offer = Offer.load(event.params.offerId.toHexString()) as Offer;
   offer.pricePerEpoch = event.params.minPricePerWorkerEpoch;
   offer.save();
 }
 
 export function handlePaymentTokenUpdated(event: PaymentTokenUpdated): void {
-  const offer = Offer.load(event.params.offerId.toHex()) as Offer;
-  offer.paymentToken = createOrLoadToken(formatAddress(event.params.paymentToken)).id;
+  const offer = Offer.load(event.params.offerId.toHexString()) as Offer;
+  offer.paymentToken = createOrLoadToken(event.params.paymentToken).id;
   offer.save();
 }
 
 export function handleEffectorAdded(event: EffectorAdded): void {
-  const offer = Offer.load(event.params.offerId.toHex()) as Offer;
+  const offer = Offer.load(event.params.offerId.toHexString()) as Offer;
   const appCID = changetype<AppCID>(event.params.effector);
   const cid = getEffectorCID(appCID);
   const effector = createOrLoadEffector(cid);
@@ -202,7 +200,7 @@ export function handleEffectorAdded(event: EffectorAdded): void {
 }
 
 export function handleEffectorRemoved(event: EffectorRemoved): void {
-  const offer = Offer.load(event.params.offerId.toHex()) as Offer;
+  const offer = Offer.load(event.params.offerId.toHexString()) as Offer;
   const appCID = changetype<AppCID>(event.params.effector);
   const cidToRemove = getEffectorCID(appCID);
   const effector = createOrLoadEffector(cidToRemove);
@@ -217,21 +215,33 @@ export function handleEffectorRemoved(event: EffectorRemoved): void {
 }
 
 // Note, in Deal we also handle ComputeUnitJoined.
+// Note, in Capacity we also handle handleUnitDeactivated.
+// Note, this event is kinda the main event for match CU with deal.
 export function handleComputeUnitAddedToDeal(
   event: ComputeUnitAddedToDeal,
 ): void {
   // Call the contract to extract peerId of the computeUnit.
-  let peer = Peer.load(event.params.peerId.toHex()) as Peer;
+  let peer = Peer.load(event.params.peerId.toHexString()) as Peer;
   const offer = Offer.load(peer.offer) as Offer;
-  const provider = Provider.load(offer.provider) as Provider;
+  const provider = createOrLoadProvider(offer.provider, event.block.timestamp);
+  let deal = Deal.load(formatAddress(event.params.deal)) as Deal;
 
-  createOrLoadDealToPeer(event.address.toHex(), peer.id);
-  createOrLoadDealToJoinedOfferPeer(event.address.toHex(), offer.id, peer.id);
+  const createOrLoadDealToPeerResult = createOrLoadDealToPeer(deal.id, peer.id);
+  // Check if we need to incr counter if mapping was merely loaded before.
+  if (!createOrLoadDealToPeerResult.created) {
+    const createOrLoadDealToPeer = createOrLoadDealToPeerResult.entity;
+    createOrLoadDealToPeer.connections = createOrLoadDealToPeer.connections + 1;
+    createOrLoadDealToPeer.save();
+  }
+  createOrLoadDealToJoinedOfferPeer(deal.id, offer.id, peer.id);
   peer.isAnyJoinedDeals = true;
 
   // Upd stats.
+  deal.matchedWorkersCurrentCount = deal.matchedWorkersCurrentCount + 1;
+  deal.save();
+
   peer.computeUnitsInDeal = peer.computeUnitsInDeal + 1;
-  peer.save()
+  peer.save();
 
   provider.computeUnitsAvailable = provider.computeUnitsAvailable - 1;
   provider.save();
@@ -245,21 +255,41 @@ export function handleComputeUnitRemovedFromDeal(
   event: ComputeUnitRemovedFromDeal,
 ): void {
   // Call the contract to extract peerId of the computeUnit.
-  let peer = Peer.load(event.params.peerId.toHex()) as Peer;
+  let peer = Peer.load(event.params.peerId.toHexString()) as Peer;
   const offer = Offer.load(peer.offer) as Offer;
-  const provider = Provider.load(offer.provider) as Provider;
+  const provider = createOrLoadProvider(offer.provider, event.block.timestamp);
+  let computeUnit = ComputeUnit.load(
+    event.params.unitId.toHexString(),
+  ) as ComputeUnit;
+  let deal = Deal.load(formatAddress(event.params.deal)) as Deal;
 
-  const dealToPeer = createOrLoadDealToPeer(event.address.toHex(), peer.id);
-  const dealToJoinedOfferPeer = createOrLoadDealToJoinedOfferPeer(event.address.toHex(), offer.id, peer.id);
-  store.remove("DealToPeer", dealToPeer.id);
-  store.remove("DealToJoinedOfferPeer", dealToJoinedOfferPeer.id);
+  const dealToPeerReturn = createOrLoadDealToPeer(deal.id, peer.id);
+  const dealToPeer = dealToPeerReturn.entity;
+  // Check that deal has other CUs from the same peer before rm connection: Deal Vs Peer.
+  if (dealToPeer.connections == 1) {
+    const dealToJoinedOfferPeer = createOrLoadDealToJoinedOfferPeer(
+      deal.id,
+      offer.id,
+      peer.id,
+    );
+    store.remove("DealToPeer", dealToPeer.id);
+    store.remove("DealToJoinedOfferPeer", dealToJoinedOfferPeer.id);
+  }
   if (peer.joinedDeals.load().length == 0) {
     peer.isAnyJoinedDeals = false;
   }
 
   // Upd stats.
+  deal.matchedWorkersCurrentCount = deal.matchedWorkersCurrentCount - 1;
+  if (computeUnit.workerId != null) {
+    computeUnit.workerId = null;
+    computeUnit.save();
+    deal.registeredWorkersCurrentCount = deal.registeredWorkersCurrentCount - 1;
+  }
+  deal.save();
+
   peer.computeUnitsInDeal = peer.computeUnitsInDeal - 1;
-  peer.save()
+  peer.save();
 
   provider.computeUnitsAvailable = provider.computeUnitsAvailable + 1;
   provider.save();
@@ -269,52 +299,61 @@ export function handleComputeUnitRemovedFromDeal(
   offer.save();
 }
 
-// ---- Factory Events ----
-export function handleDealCreated(event: DealCreated): void {
-  const dealAddress = formatAddress(event.params.deal);
-  log.info("[handleDealCreated] New deal created: {} by: {}", [
-    event.params.owner.toString(),
-    dealAddress.toString(),
-  ]);
+// First of all CUs should be removed from a peer.
+export function handleComputeUnitRemoved(event: ComputeUnitRemoved): void {
+  let peer = Peer.load(event.params.peerId.toHexString()) as Peer;
+  const offer = Offer.load(peer.offer) as Offer;
+  const provider = createOrLoadProvider(offer.provider, event.block.timestamp);
 
-  const deal = new Deal(dealAddress);
-  let graphNetwork = createOrLoadGraphNetwork();
-  deal.createdAt = event.block.timestamp;
-  deal.owner = formatAddress(event.params.owner);
+  const computeUnit = ComputeUnit.load(
+    event.params.unitId.toHexString(),
+  ) as ComputeUnit;
+  computeUnit.deleted = true;
+  computeUnit.save();
 
-  deal.paymentToken = formatAddress(event.params.paymentToken);
-  deal.minWorkers = event.params.minWorkers.toI32();
-  deal.targetWorkers = event.params.targetWorkers.toI32();
-  deal.maxWorkersPerProvider = event.params.maxWorkersPerProvider.toI32();
-  deal.pricePerWorkerEpoch = event.params.pricePerWorkerEpoch;
-  const appCID = changetype<AppCID>(event.params.appCID);
-  deal.appCID = getEffectorCID(appCID);
-  deal.withdrawalSum = ZERO_BIG_INT;
-  deal.depositedSum = ZERO_BIG_INT;
+  // Upd stats below.
+  _updateComputeUnitStats(-1, peer, offer, provider, event.block.timestamp);
+}
 
-  // Perform provider access lists (whitelist, blacklist or non).
-  deal.providersAccessType = event.params.providersAccessType_;
-  for (let i=0; i < event.params.providersAccessList_.length; i++) {
-    const providerAddress = formatAddress(event.params.providersAccessList_[i]);
-    const provider = createOrLoadUnregisteredProvider(providerAddress);
-    createOrLoadDealToProvidersAccess(deal.id, provider.id);
-  }
-  deal.save();
+export function handlePeerRemoved(event: PeerRemoved): void {
+  let peer = Peer.load(event.params.peerId.toHexString()) as Peer;
+  const offer = Offer.load(event.params.offerId.toHexString()) as Offer;
+  let provider = createOrLoadProvider(offer.provider, event.block.timestamp);
 
-  // Get effectors.
-  const appCIDS = changetype<Array<AppCID>>(event.params.effectors);
-  const effectorEntities = parseEffectors(appCIDS);
-  // Link effectors and deals:
-  for (let i = 0; i < effectorEntities.length; i++) {
-    const effectorId = effectorEntities[i];
-    // Automatically create link or ensure that exists.
-    createOrLoadDealEffector(deal.id, effectorId);
-  }
+  peer.deleted = true;
+  peer.save();
 
-  // Upd stats.
-  graphNetwork.dealsTotal = graphNetwork.dealsTotal.plus(UNO_BIG_INT);
-  graphNetwork.save();
+  // Upd stats below.
+  _updatePeerStats(-1, provider);
+}
 
-  // Start indexing this deployed contract too
-  DealTemplate.create(event.params.deal);
+// Additional helper functions.
+// @param increaseSign: use +1 or -1 to decrease.
+function _updateComputeUnitStats(
+  increaseSign: i32,
+  peer: Peer,
+  offer: Offer,
+  provider: Provider,
+  timestamp: BigInt,
+): void {
+  peer.computeUnitsTotal = peer.computeUnitsTotal + increaseSign;
+  peer.save();
+
+  // No need to check if in deal coz contract does not allow it.
+  provider.computeUnitsAvailable =
+    provider.computeUnitsAvailable + increaseSign;
+  provider.computeUnitsTotal = provider.computeUnitsTotal + increaseSign;
+  provider.save();
+
+  // No need to check if in deal coz contract does not allow it.
+  offer.computeUnitsAvailable = offer.computeUnitsAvailable + increaseSign;
+  offer.computeUnitsTotal = offer.computeUnitsTotal + increaseSign;
+  offer.updatedAt = timestamp;
+  offer.save();
+}
+
+// @param increaseSign: use +1 or -1 to decrease.
+function _updatePeerStats(increaseSign: i32, provider: Provider): void {
+  provider.peerCount = provider.peerCount + increaseSign;
+  provider.save();
 }

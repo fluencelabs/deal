@@ -632,7 +632,7 @@ jobs:
           ${{ needs.ipc.outputs.cometbft-image }}
           ```
 
-          ## subgraph-seploy-script
+          ## subgraph-deploy-script
           ```
           ${{ needs.subgraph.outputs.subgraph-deploy-script-image }}
           ```

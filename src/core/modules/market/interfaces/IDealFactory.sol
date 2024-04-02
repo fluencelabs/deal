@@ -12,7 +12,7 @@ interface IDealFactory {
     /// @dev Emitted when a new deal is created
     /// @param owner The owner of the deal
     /// @param deal The deal address
-    /// @param createdAtEpoch The creation time of the deal in epoches
+    /// @param createdAtEpoch The creation time of the deal in Epochs
     /// @param paymentToken The payment token of the deal. User can choose any ERC20 token for payment
     /// @param minWorkers The min workers of the deal. Deel will be activated only if the number of workers is greater
     /// @param targetWorkers The target workers of the deal. It's the max number of workers for the deal
@@ -22,6 +22,7 @@ interface IDealFactory {
     /// @param appCID The app cid of the deal
     /// @param providersAccessType_ The providers access type of the deal (None, Whitelist, Blacklist)
     /// @param providersAccessList_ The providers access list of the deal
+    /// @param protocolVersion_ Protocol version
     event DealCreated(
         address indexed owner,
         IDeal deal,
@@ -34,7 +35,8 @@ interface IDealFactory {
         CIDV1[] effectors,
         CIDV1 appCID,
         IConfig.AccessType providersAccessType_,
-        address[] providersAccessList_
+        address[] providersAccessList_,
+        uint256 protocolVersion_
     );
 
     // ----------------- View -----------------
@@ -46,6 +48,7 @@ interface IDealFactory {
     /// @dev Creates a new deal
     /// @param appCID_ The app cid of the deal
     /// @param paymentToken_ The payment token of the deal. User can choose any ERC20 token for payment
+    /// @param depositAmount_ The deposit amount of the deal
     /// @param minWorkers_ The min workers of the deal. Deel will be activated only if the number of workers is greater
     /// @param targetWorkers_ The target workers of the deal. It's the max number of workers for the deal
     /// @param maxWorkersPerProvider_ The max workers per provider of the deal
@@ -53,16 +56,19 @@ interface IDealFactory {
     /// @param effectors_ The effectors of the deal
     /// @param providersAccessType_ The providers access type of the deal (None, Whitelist, Blacklist)
     /// @param providersAccessList_ The providers access list of the deal
+    /// @param protocolVersion_ Protocol version
     /// @return The deal address
     function deployDeal(
         CIDV1 calldata appCID_,
         IERC20 paymentToken_,
+        uint256 depositAmount_,
         uint256 minWorkers_,
         uint256 targetWorkers_,
         uint256 maxWorkersPerProvider_,
         uint256 pricePerWorkerEpoch_,
         CIDV1[] calldata effectors_,
         IConfig.AccessType providersAccessType_,
-        address[] calldata providersAccessList_
+        address[] calldata providersAccessList_,
+        uint256 protocolVersion_
     ) external returns (IDeal);
 }

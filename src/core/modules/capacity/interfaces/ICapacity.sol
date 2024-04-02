@@ -3,17 +3,17 @@
 pragma solidity ^0.8.19;
 
 import "src/core/interfaces/ICore.sol";
-import "./ICapacityConst.sol";
+import "../Vesting.sol";
 
 /// @title Capacity contract interface
 /// @dev Capacity contract is responsible for managing the commitments
-interface ICapacity is ICapacityConst {
+interface ICapacity {
     // ------------------ Events ------------------
 
     /// @dev Emitted when a new commitment is created
     /// @param peerId Peer id which linked to the commitment
     /// @param commitmentId Commitment id
-    /// @param duration The duration of the commitment in epoches
+    /// @param duration The duration of the commitment in Epochs
     /// @param delegator The delegator address. If address is zero, the commitment has no delegator
     /// @param rewardDelegationRate The reward delegation rate in precision
     /// @param fltCollateralPerUnit The flt collateral per compute unit
@@ -49,6 +49,8 @@ interface ICapacity is ICapacityConst {
     /// @param totalCollateral The total collateral deposited to commitment
     event CollateralDeposited(bytes32 indexed commitmentId, uint256 totalCollateral);
 
+    event CommitmentFailed(bytes32 indexed commitmentId, uint256 failedEpoch);
+
     /// @dev Emitted when a proof is submitted
     /// @param commitmentId Commitment id
     /// @param unitId Compute unit id which linked to the proof
@@ -73,7 +75,7 @@ interface ICapacity is ICapacityConst {
     // To fetch updates on changes in CC stats (currently only in stats related to CUs).
     event CommitmentStatsUpdated(
         bytes32 commitmentId,
-        uint256 totalCUFailCount,
+        uint256 totalFailCount,
         uint256 exitedUnitCount,
         uint256 activeUnitCount,
         uint256 nextAdditionalActiveUnitCount,
@@ -85,16 +87,37 @@ interface ICapacity is ICapacityConst {
     /// @dev Throws if peer sent too many proofs for the commitment by unit per epoch
     error TooManyProofs();
 
+    /// @dev Capacity commitment is not active
+    error CapacityCommitmentIsNotActive(CCStatus status);
+
+    /// @dev Capacity commitment is active
+    error CapacityCommitmentIsActive(CCStatus status);
+
     // ------------------ Types ------------------
     enum CCStatus {
+        Inactive,
         Active,
         // WaitDelegation - before collateral is deposited.
         WaitDelegation,
         // Status is WaitStart - means collateral deposited, and epoch should be proceed before Active.
         WaitStart,
-        Inactive,
         Failed,
         Removed
+    }
+
+    struct UnitInfo {
+        bool isInactive;
+        uint256 lastSnapshotEpoch;
+        uint256 slashedCollateral;
+        mapping(uint256 => uint256) proofCountByEpoch;
+    }
+
+    struct Commitment {
+        CommitmentInfo info;
+        CommitmentProgress progress;
+        CommitmentFinish finish;
+        Vesting.Info vesting;
+        mapping(bytes32 => UnitInfo) unitInfoById;
     }
 
     struct CommitmentInfo {
@@ -104,15 +127,21 @@ interface ICapacity is ICapacityConst {
         uint256 duration;
         uint256 rewardDelegatorRate;
         address delegator;
-        uint256 currentCUSuccessCount;
-        uint256 totalCUFailCount;
-        uint256 snapshotEpoch;
         uint256 startEpoch;
+    }
+
+    struct CommitmentFinish {
         uint256 failedEpoch;
-        uint256 withdrawCCEpochAfterFailed;
-        uint256 remainingFailsForLastEpoch;
+        uint256 remainingFailedUnitsInLastEpoch;
+        uint256 filledRemainingFailedUnitsInLastEpoch;
         uint256 exitedUnitCount;
-        uint256 totalWithdrawnReward;
+        uint256 totalSlashedCollateral;
+    }
+
+    struct CommitmentProgress {
+        uint256 currentSuccessCount;
+        uint256 totalFailCount;
+        uint256 snapshotEpoch;
         uint256 activeUnitCount;
         uint256 nextAdditionalActiveUnitCount;
     }
@@ -126,30 +155,13 @@ interface ICapacity is ICapacityConst {
         uint256 endEpoch;
         uint256 rewardDelegatorRate;
         address delegator;
-        uint256 totalCUFailCount;
+        uint256 totalFailCount;
         uint256 failedEpoch;
         uint256 exitedUnitCount;
     }
 
     // ------------------ Initializer ------------------
-    function initialize(
-        uint256 fltPrice_,
-        uint256 usdCollateralPerUnit_,
-        uint256 usdTargetRevenuePerEpoch_,
-        uint256 minDuration_,
-        uint256 minRewardPerEpoch_,
-        uint256 maxRewardPerEpoch_,
-        uint256 vestingDuration_,
-        uint256 slashingRate_,
-        uint256 minRequierdProofsPerEpoch_,
-        uint256 maxProofsPerEpoch_,
-        uint256 withdrawEpochesAfterFailed_,
-        uint256 maxFailedRatio_,
-        bool isWhitelistEnabled_,
-        bytes32 initGlobalNonce_,
-        bytes32 difficulty_,
-        address randomXProxy_
-    ) external;
+    function initialize(bytes32 initGlobalNonce_) external;
 
     // ------------------ Views ------------------
     /// @dev Returns the commitment status
@@ -180,7 +192,7 @@ interface ICapacity is ICapacityConst {
     // ----------------- Mutables -----------------
     /// @dev Creates a new commitment
     /// @param peerId Peer id which linked to the commitment
-    /// @param duration The duration of the commitment in epoches
+    /// @param duration The duration of the commitment in Epochs
     /// @param delegator The delegator address. If address is zero, the commitment has no delegator
     /// @param rewardDelegationRate The reward delegation rate in precision
     function createCommitment(bytes32 peerId, uint256 duration, address delegator, uint256 rewardDelegationRate)
@@ -196,14 +208,16 @@ interface ICapacity is ICapacityConst {
     function finishCommitment(bytes32 commitmentId) external;
 
     /// @dev Deposits collateral for commitments. It makes commitments active
+    /// @dev Note: this method consists of indirect potential delegator address update
+    /// @dev  (set delegator to msg.sender if 0x0 before).
     /// @param commitmentIds Commitment ids
     function depositCollateral(bytes32[] calldata commitmentIds) external payable;
 
     /// @dev Submits a proof for the commitment
     /// @param unitId Compute unit id which provied the proof
     /// @param localUnitNonce The local nonce of the unit for calculating the target hash. It's the proof
-    /// @param targetHash The target hash of this proof
-    function submitProof(bytes32 unitId, bytes32 localUnitNonce, bytes32 targetHash) external;
+    /// @param resultHash The target hash of this proof
+    function submitProof(bytes32 unitId, bytes32 localUnitNonce, bytes32 resultHash) external;
 
     /// @dev Remove CU from Ended or Failed CC. Need to call this function before finish the commitment
     /// @param commitmentId Commitment id

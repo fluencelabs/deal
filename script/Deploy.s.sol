@@ -12,13 +12,14 @@ import "src/core/Core.sol";
 import "src/dev/OwnableFaucet.sol";
 import "src/dev/TestERC20.sol";
 import "./utils/Depoyments.sol";
-import "src/utils/Multicall3.sol";
 import "src/core/Core.sol";
 import "src/core/interfaces/ICore.sol";
 import "src/core/modules/market/Market.sol";
+import "src/core/modules/market/DealFactory.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
 import "src/core/modules/capacity/Capacity.sol";
 import "src/core/modules/capacity/interfaces/ICapacity.sol";
+import "src/utils/Multicall3.sol";
 
 contract DeployContracts is Depoyments, Script {
     using SafeERC20 for IERC20;
@@ -26,28 +27,33 @@ contract DeployContracts is Depoyments, Script {
     // ------------------ Local ENV constant ------------------
     uint256 constant LOCAL_CHAIN_ID = 31337;
     string constant DEFAULT_ANVIL_MNEMONIC = "test test test test test test test test test test test junk";
-    uint256 constant LOCAL_tFLT_BALANCE = 1000000 ether;
     uint256 constant LOCAL_tUSD_BALANCE = 1000000 ether;
 
     // ------------------ Default constant ------------------
     uint256 constant DEFAULT_EPOCH_DURATION = 15 seconds;
+    uint256 constant DEFAULT_MIN_DEPOSITED_EPOCHS = 2;
+    uint256 constant DEFAULT_MIN_REMATCHING_EPOCHS = 2;
+    uint256 constant DEFAULT_MIN_PROTOCOL_VERSION = 1;
+    uint256 constant DEFAULT_MAX_PROTOCOL_VERSION = 1;
+
     uint256 constant DEFAULT_FLT_PRICE = 1 * PRECISION; // 1 USD
-    uint256 constant DEFAULT_MIN_DEPOSITED_EPOCHES = 2;
-    uint256 constant DEFAULT_MIN_REMATCHING_EPOCHES = 2;
-    uint256 constant DEFAULT_USD_COLLATERAL_PER_UNIT = 1 * PRECISION; // 1 USD
-    uint256 constant DEFAULT_USD_TARGET_REVENUE_PER_EPOCH = 1_000 * PRECISION; // 1 USD
-    uint256 constant DEFAULT_MIN_DURATION = 5 minutes;
-    uint256 constant DEFAULT_MIN_REWARD_PER_EPOCH = 1 ether;
-    uint256 constant DEFAULT_MAX_REWARD_PER_EPOCH = 1 ether;
-    uint256 constant DEFAULT_VESTING_DURATION = 1 minutes;
-    uint256 constant DEFAULT_SLASHING_RATE = 1_000_000; // 0.1 = 10% = 1000000
-    uint256 constant DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH = 2;
+    uint256 constant DEFAULT_USD_COLLATERAL_PER_UNIT = PRECISION / 10; // 0.1 USD
+    uint256 constant DEFAULT_USD_TARGET_REVENUE_PER_EPOCH = PRECISION / 10 * 3; // 0.3 USD
+    uint256 constant DEFAULT_MIN_DURATION = 10;
+    uint256 constant DEFAULT_MIN_REWARD_PER_EPOCH = 100 ether;
+    uint256 constant DEFAULT_MAX_REWARD_PER_EPOCH = 200 ether;
+    uint256 constant DEFAULT_VESTING_PERIOD_DURATION = 3;
+    uint256 constant DEFAULT_VESTING_PERIOD_COUNT = 6;
+    uint256 constant DEFAULT_SLASHING_RATE = PRECISION / 100; // 1%
+    uint256 constant DEFAULT_MIN_PROOFS_PER_EPOCH = 2;
     uint256 constant DEFAULT_MAX_PROOFS_PER_EPOCH = 5;
-    uint256 constant DEFAULT_WITHDRAW_EPOCHES_AFTER_FAILED = 2;
-    uint256 constant DEFAULT_MAX_FAILED_RATIO = 40;
+    uint256 constant DEFAULT_WITHDRAW_EPOCHS_AFTER_FAILED = 2;
+    uint256 constant DEFAULT_MAX_FAILED_RATIO = 10;
     bool constant DEFAULT_IS_WHITELIST_ENABLED = false;
-    bytes32 public constant DEFAULT_DIFFICULTY = 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
     bytes32 public constant DEFAULT_INIT_GLOBAL_NONCE = keccak256("init_global_nonce");
+    bytes32 public constant DEFAULT_DIFFICULTY = 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+    uint256 constant DEFAULT_INIT_REWARD_POOL = 10 ether;
+    uint256 constant DEFAULT_INIT_CC_BALANCE = DEFAULT_INIT_REWARD_POOL * 100;
     bool constant IS_MOCKED_RANDOMX = true;
 
     // ------------------ Deploy result ------------------
@@ -58,23 +64,28 @@ contract DeployContracts is Depoyments, Script {
     struct ENV {
         uint256 chainId;
         uint256 epochDuration;
+        uint256 minDepositedEpochs;
+        uint256 minRematchingEpochs;
+        uint256 minProtocolVersion;
+        uint256 maxProtocolVersion;
         uint256 fltPrice;
-        uint256 minDepositedEpoches;
-        uint256 minRematchingEpoches;
         uint256 usdCollateralPerUnit;
         uint256 usdTargetRevenuePerEpoch;
         uint256 minDuration;
         uint256 minRewardPerEpoch;
         uint256 maxRewardPerEpoch;
-        uint256 vestingDuration;
+        uint256 vestingPeriodDuration;
+        uint256 vestingPeriodCount;
         uint256 slashingRate;
-        uint256 minRequierdProofsPerEpoch;
+        uint256 minProofsPerEpoch;
         uint256 maxProofsPerEpoch;
-        uint256 withdrawEpochesAfterFailed;
+        uint256 withdrawEpochsAfterFailed;
         uint256 maxFailedRatio;
         bool isWhitelistEnabled;
-        bytes32 difficulty;
         bytes32 initGlobalNonce;
+        bytes32 difficulty;
+        uint256 initRewardPool;
+        uint256 initCCBalance;
         bool isMockedRandomX;
     }
 
@@ -109,23 +120,28 @@ contract DeployContracts is Depoyments, Script {
 
         _deployCore(
             env.epochDuration,
+            env.minDepositedEpochs,
+            env.minRematchingEpochs,
+            env.minProtocolVersion,
+            env.maxProtocolVersion,
             env.fltPrice,
-            env.minDepositedEpoches,
-            env.minRematchingEpoches,
             env.usdCollateralPerUnit,
             env.usdTargetRevenuePerEpoch,
             env.minDuration,
             env.minRewardPerEpoch,
             env.maxRewardPerEpoch,
-            env.vestingDuration,
+            env.vestingPeriodDuration,
+            env.vestingPeriodCount,
             env.slashingRate,
-            env.minRequierdProofsPerEpoch,
+            env.minProofsPerEpoch,
             env.maxProofsPerEpoch,
-            env.withdrawEpochesAfterFailed,
+            env.withdrawEpochsAfterFailed,
             env.maxFailedRatio,
             env.isWhitelistEnabled,
-            env.difficulty,
             env.initGlobalNonce,
+            env.difficulty,
+            env.initRewardPool,
+            env.initCCBalance,
             env.isMockedRandomX
         );
         _stopDeploy();
@@ -134,80 +150,97 @@ contract DeployContracts is Depoyments, Script {
     // ------------------ Internal functions ------------------
     function _loadENV() internal view returns (ENV memory) {
         uint256 chainId = block.chainid;
+
         uint256 epochDuration = vm.envOr("EPOCH_DURATION", DEFAULT_EPOCH_DURATION);
+        uint256 minDepositedEpochs = vm.envOr("MIN_DEPOSITED_EPOCHS", DEFAULT_MIN_DEPOSITED_EPOCHS);
+        uint256 minRematchingEpochs = vm.envOr("MIN_REMATCHING_EPOCHS", DEFAULT_MIN_REMATCHING_EPOCHS);
+        uint256 minProtocolVersion = vm.envOr("MIN_PROTOCOL_VERSION", DEFAULT_MIN_PROTOCOL_VERSION);
+        uint256 maxProtocolVersion = vm.envOr("MAX_PROTOCOL_VERSION", DEFAULT_MAX_PROTOCOL_VERSION);
+
         uint256 fltPice = vm.envOr("FLT_PRICE", DEFAULT_FLT_PRICE);
-        uint256 minDepositedEpoches = vm.envOr("MIN_DEPOSITED_EPOCHES", DEFAULT_MIN_DEPOSITED_EPOCHES);
-        uint256 minRematchingEpoches = vm.envOr("MIN_REMATCHING_EPOCHES", DEFAULT_MIN_REMATCHING_EPOCHES);
         uint256 usdCollateralPerUnit = vm.envOr("USD_COLLATERAL_PER_UNIT", DEFAULT_USD_COLLATERAL_PER_UNIT);
         uint256 usdTargetRevenuePerEpoch =
             vm.envOr("USD_TARGET_REVENUE_PER_EPOCH", DEFAULT_USD_TARGET_REVENUE_PER_EPOCH);
         uint256 minDuration = vm.envOr("MIN_DURATION", DEFAULT_MIN_DURATION);
         uint256 minRewardPerEpoch = vm.envOr("MIN_REWARD_PER_EPOCH", DEFAULT_MIN_REWARD_PER_EPOCH);
         uint256 maxRewardPerEpoch = vm.envOr("MAX_REWARD_PER_EPOCH", DEFAULT_MAX_REWARD_PER_EPOCH);
-        uint256 vestingDuration = vm.envOr("VESTING_DURATION", DEFAULT_VESTING_DURATION);
+        uint256 vestingPeriodDuration = vm.envOr("VESTING_PERIOD_DURATION", DEFAULT_VESTING_PERIOD_DURATION);
+        uint256 vestingPeriodCount = vm.envOr("VESTING_PERIOD_COUNT", DEFAULT_VESTING_PERIOD_COUNT);
         uint256 slashingRate = vm.envOr("SLASHING_RATE", DEFAULT_SLASHING_RATE);
-        uint256 minRequierdProofsPerEpoch =
-            vm.envOr("MIN_REQUIERD_PROOFS_PER_EPOCH", DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH);
+        uint256 minProofsPerEpoch = vm.envOr("MIN_PROOFS_PER_EPOCH", DEFAULT_MIN_PROOFS_PER_EPOCH);
         uint256 maxProofsPerEpoch = vm.envOr("MAX_PROOFS_PER_EPOCH", DEFAULT_MAX_PROOFS_PER_EPOCH);
-        uint256 withdrawEpochesAfterFailed =
-            vm.envOr("WITHDRAW_EPOCHES_AFTER_FAILED", DEFAULT_WITHDRAW_EPOCHES_AFTER_FAILED);
+        uint256 withdrawEpochsAfterFailed =
+            vm.envOr("WITHDRAW_EPOCHS_AFTER_FAILED", DEFAULT_WITHDRAW_EPOCHS_AFTER_FAILED);
         uint256 maxFailedRatio = vm.envOr("MAX_FAILED_RATIO", DEFAULT_MAX_FAILED_RATIO);
         bool isWhitelistEnabled = vm.envOr("IS_WHITELIST_ENABLED", DEFAULT_IS_WHITELIST_ENABLED);
-        bytes32 difficulty = vm.envOr("DIFFICULTY", DEFAULT_DIFFICULTY);
         bytes32 initGlobalNonce = vm.envOr("INIT_GLOBAL_NONCE", DEFAULT_INIT_GLOBAL_NONCE);
+        bytes32 difficulty = vm.envOr("DIFFICULTY", DEFAULT_DIFFICULTY);
+        uint256 initRewardPool = vm.envOr("INIT_REWARD_POOL", DEFAULT_INIT_REWARD_POOL);
+        uint256 initCCBalance = vm.envOr("INIT_CC_BALANCE", DEFAULT_INIT_CC_BALANCE);
         bool isMockedRandomX = vm.envOr("IS_MOCKED_RANDOMX", IS_MOCKED_RANDOMX);
 
         console.log("----------------- ENV -----------------");
         console.log(StdStyle.blue("CHAIN_ID:"), block.chainid);
         console.log(StdStyle.blue("EPOCH_DURATION:"), epochDuration);
-        console.log(StdStyle.blue("MIN_DEPOSITED_EPOCHES:"), minDepositedEpoches);
-        console.log(StdStyle.blue("MIN_REMATCHING_EPOCHES:"), minRematchingEpoches);
+        console.log(StdStyle.blue("MIN_DEPOSITED_EPOCHS:"), minDepositedEpochs);
+        console.log(StdStyle.blue("MIN_REMATCHING_EPOCHS:"), minRematchingEpochs);
+        console.log(StdStyle.blue("MIN_PROTOCOL_VERSION:"), minProtocolVersion);
+        console.log(StdStyle.blue("MAX_PROTOCOL_VERSION:"), maxProtocolVersion);
+
+        console.log(StdStyle.blue("FLT_PRICE:"), fltPice);
         console.log(StdStyle.blue("USD_COLLATERAL_PER_UNIT:"), usdCollateralPerUnit);
         console.log(StdStyle.blue("USD_TARGET_REVENUE_PER_EPOCH:"), usdTargetRevenuePerEpoch);
         console.log(StdStyle.blue("MIN_DURATION:"), minDuration);
         console.log(StdStyle.blue("MIN_REWARD_PER_EPOCH:"), minRewardPerEpoch);
         console.log(StdStyle.blue("MAX_REWARD_PER_EPOCH:"), maxRewardPerEpoch);
-        console.log(StdStyle.blue("VESTING_DURATION:"), vestingDuration);
+        console.log(StdStyle.blue("VESTING_PERIOD_DURATION:"), vestingPeriodDuration);
+        console.log(StdStyle.blue("VESTING_PERIOD_COUNT:"), vestingPeriodCount);
         console.log(StdStyle.blue("SLASHING_RATE:"), slashingRate);
-        console.log(StdStyle.blue("MIN_REQUIERD_PROOFS_PER_EPOCH:"), minRequierdProofsPerEpoch);
+        console.log(StdStyle.blue("MIN_PROOFS_PER_EPOCH:"), minProofsPerEpoch);
         console.log(StdStyle.blue("MAX_PROOFS_PER_EPOCH:"), maxProofsPerEpoch);
-        console.log(StdStyle.blue("WITHDRAW_EPOCHES_AFTER_FAILED:"), withdrawEpochesAfterFailed);
+        console.log(StdStyle.blue("WITHDRAW_EPOCHS_AFTER_FAILED:"), withdrawEpochsAfterFailed);
         console.log(StdStyle.blue("MAX_FAILED_RATIO:"), maxFailedRatio);
         console.log(StdStyle.blue("IS_WHITELIST_ENABLED:"), isWhitelistEnabled);
-        console.log(StdStyle.blue("DIFFICULTY:"));
-        console.logBytes32(difficulty);
         console.log(StdStyle.blue("INIT_GLOBAL_NONCE:"));
         console.logBytes32(initGlobalNonce);
+        console.log(StdStyle.blue("DIFFICULTY:"));
+        console.logBytes32(difficulty);
+        console.log(StdStyle.blue("INIT_REWARD_POOL:"), initRewardPool);
         console.log(StdStyle.blue("IS_MOCKED_RANDOMX:"), isMockedRandomX);
         console.log("---------------------------------------");
 
         return ENV({
             chainId: chainId,
             epochDuration: epochDuration,
+            minDepositedEpochs: minDepositedEpochs,
+            minRematchingEpochs: minRematchingEpochs,
+            minProtocolVersion: minProtocolVersion,
+            maxProtocolVersion: maxProtocolVersion,
             fltPrice: fltPice,
-            minDepositedEpoches: minDepositedEpoches,
-            minRematchingEpoches: minRematchingEpoches,
             usdCollateralPerUnit: usdCollateralPerUnit,
             usdTargetRevenuePerEpoch: usdTargetRevenuePerEpoch,
             minDuration: minDuration,
             minRewardPerEpoch: minRewardPerEpoch,
             maxRewardPerEpoch: maxRewardPerEpoch,
-            vestingDuration: vestingDuration,
+            vestingPeriodDuration: vestingPeriodDuration,
+            vestingPeriodCount: vestingPeriodCount,
             slashingRate: slashingRate,
-            minRequierdProofsPerEpoch: minRequierdProofsPerEpoch,
+            minProofsPerEpoch: minProofsPerEpoch,
             maxProofsPerEpoch: maxProofsPerEpoch,
-            withdrawEpochesAfterFailed: withdrawEpochesAfterFailed,
+            withdrawEpochsAfterFailed: withdrawEpochsAfterFailed,
             maxFailedRatio: maxFailedRatio,
             isWhitelistEnabled: isWhitelistEnabled,
-            difficulty: difficulty,
             initGlobalNonce: initGlobalNonce,
+            difficulty: difficulty,
+            initRewardPool: initRewardPool,
+            initCCBalance: initCCBalance,
             isMockedRandomX: isMockedRandomX
         });
     }
 
     function _deployTestTokens() internal returns (IERC20 tUSD) {
         bytes memory args = abi.encode("USD Token", "tUSD", 6);
-        tUSD = IERC20(_deployContract("tUSD", "TestERC20", args));
+        tUSD = IERC20(_deployContract("axlUSDC", "TestERC20", args));
     }
 
     function _deployMulticall3() internal returns (Multicall3 multicall) {
@@ -222,23 +255,28 @@ contract DeployContracts is Depoyments, Script {
 
     function _deployCore(
         uint256 epochDuration_,
+        uint256 minDepositedEpochs_,
+        uint256 minRematchingEpochs_,
+        uint256 minProtocolVersion_,
+        uint256 maxProtocolVersion_,
         uint256 fltPrice_,
-        uint256 minDepositedEpoches_,
-        uint256 minRematchingEpoches_,
         uint256 usdCollateralPerUnit_,
         uint256 usdTargetRevenuePerEpoch_,
         uint256 minDuration_,
         uint256 minRewardPerEpoch_,
         uint256 maxRewardPerEpoch_,
-        uint256 vestingDuration_,
+        uint256 vestingPeriodDuration_,
+        uint256 vestingPeriodCount_,
         uint256 slashingRate_,
-        uint256 minRequierdProofsPerEpoch_,
+        uint256 minProofsPerEpoch_,
         uint256 maxProofsPerEpoch_,
-        uint256 withdrawEpochesAfterFailed_,
+        uint256 withdrawEpochsAfterFailed_,
         uint256 maxFailedRatio_,
         bool isWhitelistEnabled_,
-        bytes32 difficulty_,
         bytes32 initGlobalNonce_,
+        bytes32 difficulty_,
+        uint256 initRewardPool_,
+        uint256 initCCBalance_,
         bool isMockedRandomX_
     ) internal {
         address coreImpl = _deployContract("CoreImpl", "Core", new bytes(0));
@@ -254,20 +292,47 @@ contract DeployContracts is Depoyments, Script {
         bool needToRedeployMarket = _doNeedToRedeploy("MarketImpl", "Market");
         bool needToRedeployCapacity = _doNeedToRedeploy("CapacityImpl", "Capacity");
 
+        bool needToRedeployDealFactory = _doNeedToRedeploy("DealFactoryImpl", "DealFactory");
+
         (address coreAddr, bool isNewCore) = _tryDeployContract(
             "Core",
             "ERC1967Proxy",
             abi.encode(
                 coreImpl,
                 abi.encodeWithSelector(
-                    Core.initialize.selector, epochDuration_, minDepositedEpoches_, minRematchingEpoches_, dealImpl
+                    Core.initialize.selector,
+                    epochDuration_,
+                    minDepositedEpochs_,
+                    minRematchingEpochs_,
+                    minProtocolVersion_,
+                    maxProtocolVersion_,
+                    dealImpl,
+                    isWhitelistEnabled_,
+                    fltPrice_,
+                    usdCollateralPerUnit_,
+                    usdTargetRevenuePerEpoch_,
+                    minDuration_,
+                    minRewardPerEpoch_,
+                    maxRewardPerEpoch_,
+                    vestingPeriodDuration_,
+                    vestingPeriodCount_,
+                    slashingRate_,
+                    minProofsPerEpoch_,
+                    maxProofsPerEpoch_,
+                    withdrawEpochsAfterFailed_,
+                    maxFailedRatio_,
+                    difficulty_,
+                    initRewardPool_,
+                    randomXProxy
                 )
             ),
-            needToRedeployMarket || needToRedeployCapacity
+            needToRedeployMarket || needToRedeployCapacity || needToRedeployDealFactory
         );
 
         address marketImpl = _deployContract("MarketImpl", "Market", abi.encode(coreAddr), isNewCore);
         address capacityImpl = _deployContract("CapacityImpl", "Capacity", abi.encode(coreAddr), isNewCore);
+
+        address dealFactoryImpl = _deployContract("DealFactoryImpl", "DealFactory", abi.encode(coreAddr), isNewCore);
 
         address marketProxy = _deployContract(
             "Market", "ERC1967Proxy", abi.encode(marketImpl, abi.encodeWithSelector(Market.initialize.selector))
@@ -277,36 +342,31 @@ contract DeployContracts is Depoyments, Script {
             "Capacity",
             "ERC1967Proxy",
             abi.encode(
-                capacityImpl,
-                abi.encodeWithSelector(
-                    Capacity.initialize.selector,
-                    fltPrice_,
-                    usdCollateralPerUnit_,
-                    usdTargetRevenuePerEpoch_,
-                    minDuration_,
-                    minRewardPerEpoch_,
-                    maxRewardPerEpoch_,
-                    vestingDuration_,
-                    slashingRate_,
-                    minRequierdProofsPerEpoch_,
-                    maxProofsPerEpoch_,
-                    withdrawEpochesAfterFailed_,
-                    maxFailedRatio_,
-                    isWhitelistEnabled_,
-                    initGlobalNonce_,
-                    difficulty_,
-                    randomXProxy
-                )
+                capacityImpl, abi.encodeWithSelector(Capacity.initialize.selector, initGlobalNonce_, randomXProxy)
             )
         );
 
-        if (isNewCore) {
-            console.log("\nCore deployed, initializing modules as well...");
-            ICore(coreAddr).initializeModules(ICapacity(capacityProxy), IMarket(marketProxy));
+        address dealFactoryProxy = _deployContract(
+            "DealFactory",
+            "ERC1967Proxy",
+            abi.encode(dealFactoryImpl, abi.encodeWithSelector(DealFactory.initialize.selector))
+        );
+
+        if (needToRedeployCapacity) {
+            (bool success,) = address(capacityProxy).call{value: initCCBalance_}(new bytes(0));
+            require(success, "Failed to transfer initial CC balance");
         }
 
-        // TODO: if needToRedeployMarket or needToRedeployCapacity - impl proxy should be update with impl.
-        if (!isNewCore && (needToRedeployMarket || needToRedeployCapacity)) {
+        if (isNewCore) {
+            console.log("\nCore deployed, initializing modules as well...");
+            ICore(coreAddr).initializeModules(
+                ICapacity(capacityProxy), IMarket(marketProxy), IDealFactory(dealFactoryProxy)
+            );
+        }
+
+        // TODO: if needToRedeployMarket, needToRedeployCapacity or needToRedeployDealFactory
+        //   - impl proxy should be update with impl.
+        if (!isNewCore && (needToRedeployMarket || needToRedeployCapacity || needToRedeployDealFactory)) {
             revert("Update not implemented yet.");
         }
     }

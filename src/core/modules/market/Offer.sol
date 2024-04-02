@@ -6,7 +6,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "src/utils/OwnableUpgradableDiamond.sol";
-import "src/utils/LinkedListWithUniqueKeys.sol";
 import "src/deal/base/Types.sol";
 import "src/deal/interfaces/IDeal.sol";
 import "src/core/modules/BaseModule.sol";
@@ -83,13 +82,18 @@ abstract contract Offer is BaseModule, IOffer {
         ComputePeer storage computePeer = offerStorage.peers[peerId];
         bytes32 commitmentId = computePeer.commitmentId;
 
+        uint256 capacityStartEpoch;
+        if (commitmentId != bytes32(0x00)) {
+            capacityStartEpoch = core.capacity().getCommitment(commitmentId).startEpoch;
+        }
+
         for (uint256 i = 0; i < unitIds.length; i++) {
             bytes32 unitId = unitIds[i];
             ComputeUnit storage computeUnit = offerStorage.computeUnits[unitId];
             uint256 startEpoch = computeUnit.startEpoch;
 
-            if (commitmentId != bytes32(0x00) && startEpoch == 0) {
-                startEpoch = core.capacity().getCommitment(commitmentId).startEpoch;
+            if (startEpoch == 0) {
+                startEpoch = capacityStartEpoch;
             }
 
             units[i] = ComputeUnitView({id: unitId, deal: computeUnit.deal, startEpoch: startEpoch});
@@ -107,7 +111,7 @@ abstract contract Offer is BaseModule, IOffer {
     function setProviderInfo(string calldata name, CIDV1 calldata metadata) external {
         require(bytes(name).length > 0, "Name should be not empty");
 
-        _getOfferStorage().providers[msg.sender] = ProviderInfo({name: name, metadata: metadata, approved: false});
+        _getOfferStorage().providers[msg.sender] = ProviderInfo({name: name, metadata: metadata});
 
         emit ProviderInfoUpdated(msg.sender, name, metadata);
     }
@@ -116,7 +120,9 @@ abstract contract Offer is BaseModule, IOffer {
         uint256 minPricePerWorkerEpoch,
         address paymentToken,
         CIDV1[] calldata effectors,
-        RegisterComputePeer[] calldata peers
+        RegisterComputePeer[] calldata peers,
+        uint256 minProtocolVersion,
+        uint256 maxProtocolVersion
     ) external returns (bytes32) {
         OfferStorage storage offerStorage = _getOfferStorage();
 
@@ -127,13 +133,18 @@ abstract contract Offer is BaseModule, IOffer {
         require(offerStorage.offers[offerId].paymentToken == address(0x00), "Offer already exists");
         require(minPricePerWorkerEpoch > 0, "Min price per epoch should be greater than 0");
         require(address(paymentToken) != address(0x00), "Payment token should be not zero address");
+        require(minProtocolVersion >= core.minProtocolVersion(), "Min protocol version too small");
+        require(maxProtocolVersion <= core.maxProtocolVersion(), "Max protocol version too big");
+        require(minProtocolVersion <= maxProtocolVersion, "Wrong protocol versions");
 
         // create market offer
         offerStorage.offers[offerId] = Offer({
             provider: provider,
             minPricePerWorkerEpoch: minPricePerWorkerEpoch,
             paymentToken: paymentToken,
-            peerCount: 0
+            peerCount: 0,
+            minProtocolVersion: minProtocolVersion,
+            maxProtocolVersion: maxProtocolVersion
         });
 
         // add effectors to offer
@@ -142,7 +153,9 @@ abstract contract Offer is BaseModule, IOffer {
             offerStorage.effectorsByOfferId[offerId].hasEffector[effector] = true;
         }
 
-        emit MarketOfferRegistered(provider, offerId, minPricePerWorkerEpoch, paymentToken, effectors);
+        emit MarketOfferRegistered(
+            provider, offerId, minPricePerWorkerEpoch, paymentToken, effectors, minProtocolVersion, maxProtocolVersion
+        );
 
         uint256 peerLength = peers.length;
         for (uint256 i = 0; i < peerLength; i++) {
@@ -194,6 +207,8 @@ abstract contract Offer is BaseModule, IOffer {
     }
 
     function addComputeUnits(bytes32 peerId, bytes32[] calldata unitIds) external {
+        require(peerId != bytes32(0x00), "Peer id should be not empty");
+
         OfferStorage storage offerStorage = _getOfferStorage();
         ComputePeer storage computePeer = offerStorage.peers[peerId];
 
@@ -223,7 +238,7 @@ abstract contract Offer is BaseModule, IOffer {
 
         computePeer.unitCount--;
 
-        offerStorage.computeUnitIdsByPeerId[peerId].remove(unitId);
+        require(offerStorage.computeUnitIdsByPeerId[peerId].remove(unitId), "Invalid remove from enumerable set");
 
         delete offerStorage.computeUnits[unitId];
 
@@ -308,14 +323,18 @@ abstract contract Offer is BaseModule, IOffer {
         Offer storage offer = offerStorage.offers[offerId];
 
         require(
-            OwnableUpgradableDiamond(address(deal)).owner() == msg.sender || offer.provider == msg.sender,
-            "Only deal or offer owner can remove compute unit from deal"
+            OwnableUpgradableDiamond(address(deal)).owner() == msg.sender || offer.provider == msg.sender
+                || computePeer.owner == msg.sender,
+            "Only deal owner, peer owner and provider can remove compute unit from deal"
         );
 
         computeUnit.deal = address(0x00);
 
         deal.removeComputeUnit(unitId);
-        core.capacity().onUnitReturnedFromDeal(computePeer.commitmentId, unitId);
+
+        if (computePeer.commitmentId != bytes32(0x00)) {
+            core.capacity().onUnitReturnedFromDeal(computePeer.commitmentId, unitId);
+        }
 
         emit ComputeUnitRemovedFromDeal(unitId, deal, peerId);
     }
@@ -403,6 +422,7 @@ abstract contract Offer is BaseModule, IOffer {
         Offer storage offer = offerStorage.offers[offerId];
 
         require(computePeer.offerId == bytes32(0x00), "Peer already exists in another offer");
+        require(peer.peerId != bytes32(0x00), "Peer id should be not empty");
 
         computePeer.offerId = offerId;
         computePeer.owner = peer.owner;
@@ -411,11 +431,9 @@ abstract contract Offer is BaseModule, IOffer {
         offer.peerCount++;
 
         _addComputeUnitsToPeer(peer.peerId, peer.unitIds);
-
-        computePeer.unitCount = peer.unitIds.length;
     }
 
-    function _addComputeUnitsToPeer(bytes32 peerId, bytes32[] memory unitIds) internal {
+    function _addComputeUnitsToPeer(bytes32 peerId, bytes32[] calldata unitIds) internal {
         OfferStorage storage offerStorage = _getOfferStorage();
         ComputePeer storage computePeer = offerStorage.peers[peerId];
 
@@ -427,11 +445,12 @@ abstract contract Offer is BaseModule, IOffer {
         for (uint256 i = 0; i < unitCount; i++) {
             bytes32 unitId = unitIds[i];
 
+            require(unitId != bytes32(0x00), "Unit id should be not empty");
             require(offerStorage.computeUnits[unitId].peerId == bytes32(0x00), "Compute unit already exists");
 
             // create compute unit
             offerStorage.computeUnits[unitId] = ComputeUnit({deal: address(0x00), peerId: peerId, startEpoch: 0});
-            offerStorage.computeUnitIdsByPeerId[peerId].add(unitId);
+            require(offerStorage.computeUnitIdsByPeerId[peerId].add(unitId), "Invalid add to enumerable set");
 
             emit ComputeUnitCreated(peerId, unitId);
         }
@@ -456,7 +475,11 @@ abstract contract Offer is BaseModule, IOffer {
 
         deal.addComputeUnit(offer.provider, unitId, peerId);
 
-        core.capacity().onUnitMovedToDeal(computePeer.commitmentId, unitId);
+        // We may have CU not in any CC but this CU still could be matched (through whitelist).
+        //  Thus, we ought to check if we need to mv CU from capacity.
+        if (computePeer.commitmentId != bytes32(0x00)) {
+            core.capacity().onUnitMovedToDeal(computePeer.commitmentId, unitId);
+        }
 
         emit ComputeUnitAddedToDeal(unitId, deal, computeUnit.peerId);
     }

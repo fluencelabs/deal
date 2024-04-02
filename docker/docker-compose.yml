@@ -121,6 +121,8 @@ services:
     depends_on:
       ipc-eth:
         condition: service_healthy
+    environment:
+      - EPOCH_DURATION
 
   # Blockscout services
   blockscout:
@@ -168,7 +170,7 @@ services:
       postgres_pass: ""
       postgres_db: postgres
       ipfs: 'ipfs:5001'
-      ethereum: 'local:http://ipc-eth:8545'
+      ethereum: ${GRAPH_NODE_ETHEREUM_PATH:-local:http://ipc-eth:8545}
       GRAPH_LOG: info
       # https://github.com/graphprotocol/graph-node/issues/3159#issuecomment-1062827725
       ETHEREUM_REORG_THRESHOLD: 1

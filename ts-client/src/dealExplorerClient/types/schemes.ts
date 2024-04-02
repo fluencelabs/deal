@@ -29,6 +29,8 @@ export interface CapacityCommitmentListView extends ListViewABC {
 
 // @param expiredAt: null if not CC have not been activated yet.
 // @param startedAt: is not null when delegator deposited collateral and CC could be activated.
+// @param rewardDelegatorRate: is not actual rewardDelegatorRate from contract:
+//  it is already represented as percentage Ration (thus, in human-readable manner).
 export interface CapacityCommitmentShort {
   id: string;
   createdAt: number;
@@ -49,6 +51,7 @@ export interface CapacityCommitmentShort {
 // @param rewardsUnlocked: reward for CC that unlocked now to withdraw (claim).
 // @param rewardsNotWithdrawn: accumulated for now, not yet withdrawn rewards.
 // @param rewardsTotal: total accumulated rewards over time: withdrawn + still not withdrawn.
+// @param delegatorAddress: it returns address if delegator exists otherwise null.
 export interface CapacityCommitmentDetail extends CapacityCommitmentShort {
   totalCollateral: string;
   collateralToken: NativeToken;
@@ -59,6 +62,7 @@ export interface CapacityCommitmentDetail extends CapacityCommitmentShort {
   rewardsNotWithdrawnProvider: string;
   rewardsNotWithdrawnDelegator: string;
   rewardsTotal: string;
+  delegatorAddress: string | null;
 }
 
 // TODO: check that free compute units - just means not in deal!
@@ -139,7 +143,6 @@ export interface ComputeUnit {
   workerId: string | undefined;
 }
 
-
 export interface ComputeUnitWorkerDetail extends ComputeUnit {
   providerId: string;
   workerStatus: "registered" | "waitingRegistration";
@@ -156,7 +159,6 @@ export interface ComputeUnitDetail extends ComputeUnit {
   peerId: string;
   collateral: string;
   status: ComputeUnitStatus;
-  expectedProofsDueNow: number;
   successProofs: number;
   collateralToken: NativeToken;
 }
@@ -213,21 +215,22 @@ export interface ProofBasic {
   computeUnitId: string;
   peerId: string;
   createdAt: number;
+  createdAtEpoch: number;
+  providerId: string;
 }
 
 export interface ProofBasicListView extends ListViewABC {
   data: Array<ProofBasic>;
 }
 
-export interface ComputeUnitsByCapacityCommitment extends ComputeUnit {
+export interface ComputeUnitsWithCCStatus extends ComputeUnit {
   status: ComputeUnitStatus;
-  expectedProofsDueNow: number;
+  // deprecated.
   successProofs: number;
-  collateral: string;
 }
 
-export interface ComputeUnitsByCapacityCommitmentListView extends ListViewABC {
-  data: Array<ComputeUnitsByCapacityCommitment>;
+export interface ComputeUnitsWithCCStatusListView extends ListViewABC {
+  data: Array<ComputeUnitsWithCCStatus>;
 }
 
 // @deprecated.
@@ -246,11 +249,11 @@ export interface ProofByComputeUnit {
 // @param createdAtEpochStartBlockNumber: undefined when no transaction submitted for the epoch with proofs.
 export interface ProofStatsByCapacityCommitment {
   createdAtEpoch: number;
-  createdAtEpochBlockNumberStart: number | undefined
-  createdAtEpochBlockNumberEnd: number | undefined;
+  epochBlockStart: number | undefined;
+  epochBlockEnd: number | undefined;
   computeUnitsExpected: number;
-  computeUnitsSuccess: number
-  computeUnitsFailed: number,
+  computeUnitsSuccess: number;
+  computeUnitsFailed: number;
   submittedProofs: number;
   submittedProofsPerCU: number;
 }
@@ -263,7 +266,8 @@ export interface ComputeUnitStatsPerCapacityCommitmentEpoch {
   computeUnitProofStatus: "success" | "failed";
 }
 
-export interface ComputeUnitStatsPerCapacityCommitmentEpochListView extends ListViewABC {
+export interface ComputeUnitStatsPerCapacityCommitmentEpochListView
+  extends ListViewABC {
   data: Array<ComputeUnitStatsPerCapacityCommitmentEpoch>;
 }
 
@@ -277,7 +281,13 @@ export interface ProofByComputeUnitListView extends ListViewABC {
 }
 
 // Status undefined == problem with networks, etc.
-export type DealStatus = "inactive" | "active" | "ended" | "undefined";
+export type DealStatus =
+  | "insufficientFunds"
+  | "active"
+  | "ended"
+  | "notEnoughWorkers"
+  | "smallBalance"
+  | "undefined";
 export type CapacityCommitmentStatus =
   | "active"
   | "waitDelegation"

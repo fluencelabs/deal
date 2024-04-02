@@ -1,3 +1,5 @@
+# Exclude deleted CUs.
+
 query PeerQuery(
   $id: ID!
 ) {
@@ -12,7 +14,9 @@ query PeerQuery(
     }
     computeUnitsTotal
     computeUnitsInDeal
-    computeUnitsInCapacityCommitment
+    currentCapacityCommitment {
+      activeUnitCount
+    }
   }
 }
 
@@ -34,6 +38,7 @@ fragment ComputeUnitWithCCDataBasic on ComputeUnit {
       id
     }
   }
+  submittedProofsCount
 }
 
 query ComputeUnitQuery(
@@ -56,13 +61,17 @@ query ComputeUnitsQuery(
   $orderType: OrderDirection,
 ) {
   computeUnits(
-    where: $filters
+    where: {
+      and: [
+        $filters,
+        # Exclude deleted CUs.
+        {deleted: false}
+      ]}
     first: $limit
     skip: $offset
     orderBy: $orderBy
     orderDirection: $orderType
   ) {
     ...ComputeUnitWithCCDataBasic
-    submittedProofsCount
   }
 }

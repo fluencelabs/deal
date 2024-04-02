@@ -1,3 +1,5 @@
+# Exclude deleted CUs.
+
 query DealsQuery(
   $filters: Deal_filter,
   $offset: Int,
@@ -36,6 +38,8 @@ fragment BasicDeal on Deal {
     minWorkers
     targetWorkers
     owner
+    registeredWorkersCurrentCount
+    matchedWorkersCurrentCount
     paymentToken {
       id
       symbol
@@ -46,12 +50,17 @@ fragment BasicDeal on Deal {
         ...EffectorBasic
       }
     }
-    addedComputeUnits {
+    addedComputeUnits(
+      # Exclude deleted CUs.
+      where: {deleted: false}
+    ) {
         ...ComputeUnitBasic
     }
     providersAccessType
     providersAccessList {
-      id
+      provider {
+        id
+      }
     }
     maxPaidEpoch
     depositedSum
@@ -88,7 +97,13 @@ query DealsByPeerQuery(
     ) {
       deal {
         id
-        addedComputeUnits {
+        addedComputeUnits(
+          where: {
+            peer_: {id: $peerId}
+            # Exclude deleted CUs.
+            deleted: false
+          }
+        ) {
           id
           workerId
         }

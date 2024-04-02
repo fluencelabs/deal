@@ -30,6 +30,9 @@ contract EpochController is Initializable, IEpochController {
     }
 
     // ------------------ View ------------------
+    /// @dev This function mirrored in:
+    /// @dev - ts-client/src/dealMatcherClient/dealMatcherClient.ts
+    /// @dev - subgraph/src/contracts.ts
     function currentEpoch() public view returns (uint256) {
         EpochControllerStorage storage epochControllerStorage = _getEpochControllerStorage();
 

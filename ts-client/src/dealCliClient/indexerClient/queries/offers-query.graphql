@@ -1,16 +1,54 @@
+# Exclude deleted CUs.
+# Exclude deleted Peers.
+
 query OfferQuery(
   $id: ID!
 ) {
   offer(id: $id) {
+    ...OfferDetail
+  }
+}
+
+fragment OfferDetail on Offer {
     id
+    createdAt
+    updatedAt
+    pricePerEpoch
+    paymentToken {
+      id
+      symbol
+      decimals
+    }
+    computeUnitsTotal
+    computeUnitsAvailable
     effectors {
       effector {
-        id
-        description
+        ...EffectorBasic
       }
     }
-    peers {
+    provider {
       id
+      approved
+      name
     }
-  }
+    peers(where: {deleted: false}) {
+        id
+        computeUnits(where: {deleted: false}) {
+            ...ComputeUnitBasic
+        }
+    }
+}
+
+
+fragment ComputeUnitBasic on ComputeUnit {
+    id
+    workerId
+    provider {
+        id
+    }
+}
+
+fragment EffectorBasic on Effector {
+  id
+  description
 }

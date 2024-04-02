@@ -3,6 +3,7 @@ import type { ethers } from "ethers";
 import {
   Core__factory,
   Deal__factory,
+  DealFactory__factory,
   ERC20__factory,
   Market__factory,
   Capacity__factory,
@@ -14,16 +15,40 @@ import type {
   Deal,
   ICapacity,
   ICore,
+  IDealFactory,
   IERC20,
   IMarket,
   Multicall3,
 } from "../typechain-types/index.js";
 import type { Deployment, ContractsENV } from "./config.js";
 
-export class DealClient {
-  private deployment: Promise<Deployment>;
+export enum CommitmentStatus {
+  Inactive,
+  Active,
+  // WaitDelegation - before collateral is deposited.
+  WaitDelegation,
+  // Status is WaitStart - means collateral deposited, and epoch should be proceed before Active.
+  WaitStart,
+  Failed,
+  Removed,
+}
 
-  static async getContractAddresses(env: ContractsENV): Promise<Deployment> {
+export enum DealStatus {
+  // the deal does have enough funds to pay for the workers
+  INSUFFICIENT_FUNDS,
+  ACTIVE,
+  // the deal is stopped
+  ENDED,
+  // the deal has a balance and waiting for workers
+  NOT_ENOUGH_WORKERS,
+  // the deal has balance less than the minimal balance. Min balance: 2 * targetWorkers * pricePerWorkerEpoch
+  SMALL_BALANCE,
+}
+
+export class DealClient {
+  private deployment: Deployment;
+
+  static getContractAddresses(env: ContractsENV): Deployment {
     return getDeployment(env);
   }
 
@@ -38,37 +63,38 @@ export class DealClient {
     return Deal__factory.connect(address, this.signerOrProvider);
   }
 
-  async getCore(): Promise<ICore> {
-    return Core__factory.connect(
-      (await this.deployment).core,
-      this.signerOrProvider,
-    );
+  getCore(): ICore {
+    return Core__factory.connect(this.deployment.core, this.signerOrProvider);
   }
 
-  async getMarket(): Promise<IMarket> {
+  getMarket(): IMarket {
     return Market__factory.connect(
-      (await this.deployment).market,
+      this.deployment.market,
       this.signerOrProvider,
     );
   }
 
-  async getCapacity(): Promise<ICapacity> {
+  getDealFactory(): IDealFactory {
+    return DealFactory__factory.connect(
+      this.deployment.dealFactory,
+      this.signerOrProvider,
+    );
+  }
+
+  getCapacity(): ICapacity {
     return Capacity__factory.connect(
-      (await this.deployment).capacity,
+      this.deployment.capacity,
       this.signerOrProvider,
     );
   }
 
-  async getUSDC(): Promise<IERC20> {
-    return ERC20__factory.connect(
-      (await this.deployment).usdc,
-      this.signerOrProvider,
-    );
+  getUSDC(): IERC20 {
+    return ERC20__factory.connect(this.deployment.usdc, this.signerOrProvider);
   }
 
-  async getMulticall3(): Promise<Multicall3> {
+  getMulticall3(): Multicall3 {
     return Multicall3__factory.connect(
-      (await this.deployment).multicall3,
+      this.deployment.multicall3,
       this.signerOrProvider,
     );
   }

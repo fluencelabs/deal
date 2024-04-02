@@ -4,17 +4,21 @@ pragma solidity ^0.8.19;
 
 import "src/utils/OwnableUpgradableDiamond.sol";
 import "src/core/EpochController.sol";
+import "./CapacityConst.sol";
 import "./interfaces/IGlobalConst.sol";
+import "./interfaces/ICapacityConst.sol";
 
-uint256 constant PRECISION = 10000000; // min: 0.0000001
+uint256 constant PRECISION = 1e7; // min: 0.0000001
 
-contract GlobalConst is OwnableUpgradableDiamond, EpochController, IGlobalConst {
+contract GlobalConst is IGlobalConst, CapacityConst {
     // ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.core.storage.v1.globalConst")) - 1);
 
     struct GlobalConstStorage {
-        uint256 minDealDepositedEpoches;
-        uint256 minDealRematchingEpoches;
+        uint256 minDealDepositedEpochs;
+        uint256 minDealRematchingEpochs;
+        uint256 minProtocolVersion;
+        uint256 maxProtocolVersion;
     }
 
     function _getGlobalConstStorage() private pure returns (GlobalConstStorage storage s) {
@@ -25,14 +29,18 @@ contract GlobalConst is OwnableUpgradableDiamond, EpochController, IGlobalConst 
     }
 
     // ------------------ Initializer ------------------
-    function __GlobalConst_init(uint256 minDealDepositedEpoches_, uint256 minDealRematchingEpoches_)
-        internal
-        onlyInitializing
-    {
+    function __GlobalConst_init(
+        uint256 minDealDepositedEpochs_,
+        uint256 minDealRematchingEpochs_,
+        uint256 minProtocolVersion_,
+        uint256 maxProtocolVersion_
+    ) internal onlyInitializing {
         GlobalConstStorage storage globalConstantsStorage = _getGlobalConstStorage();
 
-        globalConstantsStorage.minDealDepositedEpoches = minDealDepositedEpoches_;
-        globalConstantsStorage.minDealRematchingEpoches = minDealRematchingEpoches_;
+        globalConstantsStorage.minDealDepositedEpochs = minDealDepositedEpochs_;
+        globalConstantsStorage.minDealRematchingEpochs = minDealRematchingEpochs_;
+        globalConstantsStorage.minProtocolVersion = minProtocolVersion_;
+        globalConstantsStorage.maxProtocolVersion = maxProtocolVersion_;
     }
 
     // ------------------ External View Functions ------------------
@@ -40,22 +48,30 @@ contract GlobalConst is OwnableUpgradableDiamond, EpochController, IGlobalConst 
         return PRECISION;
     }
 
-    function minDealDepositedEpoches() public view override returns (uint256) {
-        return _getGlobalConstStorage().minDealDepositedEpoches;
+    function minDealDepositedEpochs() public view override returns (uint256) {
+        return _getGlobalConstStorage().minDealDepositedEpochs;
     }
 
-    function minDealRematchingEpoches() public view override returns (uint256) {
-        return _getGlobalConstStorage().minDealRematchingEpoches;
+    function minDealRematchingEpochs() public view override returns (uint256) {
+        return _getGlobalConstStorage().minDealRematchingEpochs;
+    }
+
+    function minProtocolVersion() public view override returns (uint256) {
+        return _getGlobalConstStorage().minProtocolVersion;
+    }
+
+    function maxProtocolVersion() public view override returns (uint256) {
+        return _getGlobalConstStorage().maxProtocolVersion;
     }
 
     // ------------------ External Mutable Functions ------------------
     function setConstant(ConstantType constantType, uint256 v) external onlyOwner {
         GlobalConstStorage storage globalConstantsStorage = _getGlobalConstStorage();
 
-        if (constantType == ConstantType.MinDealDepositedEpoches) {
-            globalConstantsStorage.minDealDepositedEpoches = v;
-        } else if (constantType == ConstantType.MinDealRematchingEpoches) {
-            globalConstantsStorage.minDealRematchingEpoches = v;
+        if (constantType == ConstantType.MinDealDepositedEpochs) {
+            globalConstantsStorage.minDealDepositedEpochs = v;
+        } else if (constantType == ConstantType.MinDealRematchingEpochs) {
+            globalConstantsStorage.minDealRematchingEpochs = v;
         } else {
             revert("GlobalConst: unknown constant type");
         }

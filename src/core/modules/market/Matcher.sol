@@ -8,13 +8,12 @@ import "./interfaces/IMatcher.sol";
 import "./interfaces/IMatcher.sol";
 import "src/deal/interfaces/IDeal.sol";
 import "src/deal/interfaces/IConfig.sol";
-import "src/utils/LinkedListWithUniqueKeys.sol";
 import "src/core/modules/BaseModule.sol";
+import "src/utils/OwnableUpgradableDiamond.sol";
 import "./Offer.sol";
 
 abstract contract Matcher is Offer, IMatcher {
     using SafeERC20 for IERC20;
-    using LinkedListWithUniqueKeys for LinkedListWithUniqueKeys.Bytes32List;
 
     // ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.market.storage.v1.matcher")) - 1);
@@ -38,11 +37,13 @@ abstract contract Matcher is Offer, IMatcher {
      * @notice - deal.maxWorkersPerProvider and silently ignore other CUs out of this limit.
      * @notice - Offer, or Peer not allowed to match (deal.isProviderAllowed, allowed prices, paymentToken, effectors)
      * @notice - Compute Unit (CU): Active CC status, also note, protocol does not allow more than one CU per peer
-     * @notice    for the same Deal.
+     * @notice    for the same Deal. But, when deal consists of whitelisted provider - CUs of this Provider
+     * @notice    could be matched without even CC.
      * @notice TODO: consolidate workaround: when it comes to check CC status, on wrong status the whole transaction
      * @notice  will be failed instead of to be silenced.
      * @dev There should be `bytes32[][] calldata peers` as well, but it is not supported by subgraph codegen.
      * @dev  Ref to https://github.com/graphprotocol/graph-tooling/issues/342.
+     * @notice This method is mirrored in ts-client/src/dealMatcherClient/dealMatcherClient.ts.
      * @param deal: Deal to match.
      * @param offers: Offers array that represents offers  in computeUnits 2D array.
      * @param computeUnits: Compute Units per offer id (2D array) to match with.
@@ -51,12 +52,18 @@ abstract contract Matcher is Offer, IMatcher {
         ICapacity capacity = core.capacity();
         MatcherStorage storage matcherStorage = _getMatcherStorage();
 
-        require(deal.getStatus() != IDeal.Status.ENDED, "Matcher: deal is ended");
+        require(OwnableUpgradableDiamond(address(deal)).owner() == msg.sender, "Matcher: sender is not deal owner");
+
+        IDeal.Status dealStatus = deal.getStatus();
+        require(
+            dealStatus == IDeal.Status.ACTIVE || dealStatus == IDeal.Status.NOT_ENOUGH_WORKERS,
+            "Matcher: deal is not active"
+        );
 
         uint256 lastMatchedEpoch = matcherStorage.lastMatchedEpoch[address(deal)];
         uint256 currentEpoch = core.currentEpoch();
         require(
-            lastMatchedEpoch == 0 || currentEpoch > lastMatchedEpoch + core.minDealRematchingEpoches(),
+            lastMatchedEpoch == 0 || currentEpoch > lastMatchedEpoch + core.minDealRematchingEpochs(),
             "Matcher: too early to rematch"
         );
 
@@ -66,6 +73,7 @@ abstract contract Matcher is Offer, IMatcher {
         uint256 freeWorkerSlots = deal.targetWorkers() - dealComputeUnitCount;
         uint256 freeWorkerSlotsCurrent = freeWorkerSlots;
         uint256 maxWorkersPerProvider = deal.maxWorkersPerProvider();
+        uint256 protocolVersion = deal.getProtocolVersion();
         CIDV1[] memory effectors = deal.effectors();
 
         CIDV1 memory appCID = deal.appCID();
@@ -80,8 +88,10 @@ abstract contract Matcher is Offer, IMatcher {
             Offer memory offer = getOffer(offerId);
 
             if (
+                // Check for blacklisted provider and others.
                 !deal.isProviderAllowed(offer.provider) || pricePerWorkerEpoch < offer.minPricePerWorkerEpoch
                     || paymentToken != offer.paymentToken || !_hasOfferEffectors(offerId, effectors)
+                    || offer.minProtocolVersion > protocolVersion || offer.maxProtocolVersion < protocolVersion
             ) {
                 continue;
             }
@@ -110,6 +120,7 @@ abstract contract Matcher is Offer, IMatcher {
 
                 // Check if CU available.
                 if (
+                    // Blacklisted provider we filtered out above via: !deal.isProviderAllowed(offer.provider).
                     providersAccessType != IConfig.AccessType.WHITELIST
                         && (
                             computeUnit.deal != address(0) || peer.commitmentId == bytes32(0x000000000)
@@ -126,7 +137,6 @@ abstract contract Matcher is Offer, IMatcher {
 
                 _mvComputeUnitToDeal(computeUnitId, deal);
 
-                // TODO: only for NOX -- remove in future
                 emit ComputeUnitMatched(peerId, deal, computeUnitId, creationBlock, appCID);
 
                 computeUnitCountInDealByProvider++;

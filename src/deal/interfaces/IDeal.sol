@@ -10,9 +10,15 @@ import "src/core/interfaces/ICore.sol";
 interface IDeal is IConfig, IWorkerManager {
     // ------------------ Types ------------------
     enum Status {
-        INACTIVE,
+        // the deal does have enough funds to pay for the workers
+        INSUFFICIENT_FUNDS,
         ACTIVE,
-        ENDED
+        // the deal is stopped
+        ENDED,
+        // the deal has a balance and waiting for workers
+        NOT_ENOUGH_WORKERS,
+        // the deal has balance less than the minimal balance. Min balance: 2 * targetWorkers * pricePerWorkerEpoch
+        SMALL_BALANCE
     }
 
     // ----------------- Events -----------------
@@ -42,7 +48,8 @@ interface IDeal is IConfig, IWorkerManager {
         uint256 pricePerWorkerEpoch_,
         CIDV1[] calldata effectors_,
         AccessType providersAccessType_,
-        address[] calldata providersAccessList_
+        address[] calldata providersAccessList_,
+        uint256 protocolVersion_
     ) external;
 
     // ------------------ Public Ownable Functions ------------------
@@ -65,6 +72,9 @@ interface IDeal is IConfig, IWorkerManager {
     /// @dev Returns the max paid epoch
     function getMaxPaidEpoch() external view returns (uint256);
 
+    /// @dev Returns the protocol version
+    function getProtocolVersion() external view returns (uint256);
+
     // ------------------ Public Mutable Functions ------------------
     /// @dev Adds a compute unit to the deal
     /// @param computeProvider The compute provider address
@@ -80,4 +90,7 @@ interface IDeal is IConfig, IWorkerManager {
 
     /// @dev Set worker ID for a compute unit. Compute unit can have only one worker ID
     function setWorker(bytes32 computeUnitId, bytes32 workerId) external;
+
+    /// @dev Stop the deal
+    function stop() external;
 }

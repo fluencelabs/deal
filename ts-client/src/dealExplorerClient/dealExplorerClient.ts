@@ -1,3 +1,5 @@
+// All main view methods consist of notice docstring to refer to Figma screen
+//  e.g. // @notice [Figma] Deal.
 // @dev There is a lot of "total: null," in the code - we await subgraph feature:
 //  return counter of filtration (currently 14.02.24 it is impossible).
 import { ethers } from "ethers";
@@ -23,14 +25,13 @@ import type {
   ComputeUnitDetail,
   ProofBasicListView,
   ProofBasic,
-  ComputeUnitsByCapacityCommitment,
   ProofStatsByCapacityCommitmentListView,
-  ComputeUnitsByCapacityCommitmentListView,
   ProofStatsByCapacityCommitment,
   ComputeUnitStatsPerCapacityCommitmentEpoch,
   ComputeUnitStatsPerCapacityCommitmentEpochListView,
   ComputeUnitWorkerDetail,
   ComputeUnitWorkerDetailListView,
+  ComputeUnitsWithCCStatusListView,
 } from "./types/schemes.js";
 import type {
   ChildEntitiesByProviderFilter,
@@ -60,19 +61,14 @@ import type {
 import { DealClient } from "../client/client.js";
 import type { ContractsENV } from "../client/config.js";
 import type { BasicPeerFragment } from "./indexerClient/queries/offers-query.generated.js";
-import { DealRpcClient } from "./rpcClients/index.js";
+import { DealRpcClient } from "./rpcClient/index.js";
 import {
   calculateEpoch,
   DEFAULT_ORDER_TYPE,
-  DEFAULT_TOKEN_VALUE_ROUNDING,
   FILTER_MULTISELECT_MAX,
-  tokenValueToRounded,
+  getTotalCounter,
 } from "./utils.js";
-import {
-  serializeEffectorDescription,
-  serializeExpectedProofsAndCUStatus,
-} from "./serializers/logics.js";
-import { serializeDealProviderAccessLists } from "../utils/serializers.js";
+import { serializeCUStatus } from "./serializers/logics.js";
 import {
   FiltersError,
   serializeCapacityCommitmentsFiltersToIndexer,
@@ -86,8 +82,8 @@ import {
   serializeCapacityCommitmentDetail,
   serializeCapacityCommitmentShort,
   serializeComputeUnits,
+  serializeComputeUnitsWithStatus,
   serializeDealsShort,
-  serializeEffectors,
   serializeOfferShort,
   serializePeers,
   serializeProviderBase,
@@ -102,12 +98,27 @@ import {
 import type { ICapacity } from "../typechain-types/index.js";
 import type { CapacityCommitmentBasicFragment } from "./indexerClient/queries/capacity-commitments-query.generated.js";
 import { FLTToken } from "./constants.js";
+import {
+  serializeDealProviderAccessLists,
+  serializeEffectorDescription,
+  serializeEffectors,
+} from "../utils/indexerClient/serializers.js";
+import {
+  type SerializationSettings,
+  tokenValueToRounded,
+} from "../utils/serializers.js";
 
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
  * @dev It supports kras, stage, testnet, local by selecting related contractsEnv.
+ * @dev This client is created in the following hypothesis:
+ * @dev  - not more than 1000 Compute Units per Peer exist.
+ * @dev  - not more than 1000 Peers per Offer possible.
+ * @dev Otherwise there should be additional pagination through child fields of some models
  */
 export class DealExplorerClient {
+  // Default page limit supposed by business logic on Network Explorer.
+  //  It does not used for child models.
   DEFAULT_PAGE_LIMIT = 100;
   // For MVM we suppose that everything is in USDC.
   //  Used only with filters - if no token selected.
@@ -122,11 +133,14 @@ export class DealExplorerClient {
   private _capacityContract: ICapacity | null;
   private _capacityContractAddress: string | null;
   private _capacityMinRequiredProofsPerEpoch: number | null;
+  private _serializationSettings: SerializationSettings;
+  private _corePrecision: number | null;
 
   constructor(
     network: ContractsENV,
     chainRpcUrl?: string,
     caller?: ethers.Provider | ethers.Signer,
+    serializationSettings?: SerializationSettings,
   ) {
     if (chainRpcUrl) {
       console.warn("Do not use chainRPCUrl, use provider instead.");
@@ -135,6 +149,11 @@ export class DealExplorerClient {
       this._caller = caller;
     } else {
       throw Error("One of chainRPCUrl or provider should be delclared.");
+    }
+    if (serializationSettings) {
+      this._serializationSettings = serializationSettings;
+    } else {
+      this._serializationSettings = {};
     }
     this._indexerClient = new IndexerClient(network);
     this._dealContractsClient = new DealClient(this._caller, network);
@@ -145,6 +164,7 @@ export class DealExplorerClient {
     this._capacityContract = null;
     this._capacityContractAddress = null;
     this._capacityMinRequiredProofsPerEpoch = null;
+    this._corePrecision = null;
   }
 
   // Add init other async attributes here.
@@ -158,18 +178,22 @@ export class DealExplorerClient {
       return;
     }
     console.info(`[DealExplorerClient] Init client...`);
-    const multicall3Contract = await this._dealContractsClient.getMulticall3();
+    const multicall3Contract = this._dealContractsClient.getMulticall3();
     const multicall3ContractAddress = await multicall3Contract.getAddress();
     this._dealRpcClient = new DealRpcClient(
       this._caller,
       multicall3ContractAddress,
     );
-    this._capacityContract = await this._dealContractsClient.getCapacity();
+    this._capacityContract = this._dealContractsClient.getCapacity();
     this._capacityContractAddress = await this._capacityContract.getAddress();
 
     // Init constants from indexer.
     // TODO: add cache.
-    if (this._coreEpochDuration == null || this._coreInitTimestamp == null || this._capacityMinRequiredProofsPerEpoch == null) {
+    if (
+      this._coreEpochDuration == null ||
+      this._coreInitTimestamp == null ||
+      this._capacityMinRequiredProofsPerEpoch == null
+    ) {
       console.info("Fetch contract constants from indexer.");
       const data = await this._indexerClient.getContractConstants();
       if (
@@ -182,7 +206,10 @@ export class DealExplorerClient {
       }
       this._coreInitTimestamp = Number(data.graphNetworks[0].initTimestamp);
       this._coreEpochDuration = Number(data.graphNetworks[0].coreEpochDuration);
-      this._capacityMinRequiredProofsPerEpoch = Number(data.graphNetworks[0].minRequiredProofsPerEpoch);
+      this._capacityMinRequiredProofsPerEpoch = Number(
+        data.graphNetworks[0].minRequiredProofsPerEpoch,
+      );
+      this._corePrecision = Number(data.graphNetworks[0].corePrecision);
     }
   }
 
@@ -223,15 +250,14 @@ export class DealExplorerClient {
    * @dev Note, deprecation:
    */
   async getProviders(
-    providersFilters?: ProvidersFilters,
+    filters?: ProvidersFilters,
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: ProviderShortOrderBy = "createdAt",
     orderType: OrderType = DEFAULT_ORDER_TYPE,
   ): Promise<ProviderShortListView> {
     await this._init();
-    const composedFilters =
-      await serializeProviderFiltersToIndexer(providersFilters);
+    const composedFilters = await serializeProviderFiltersToIndexer(filters);
     const data = await this._indexerClient.getProviders({
       filters: composedFilters,
       offset,
@@ -242,21 +268,15 @@ export class DealExplorerClient {
     const res = [];
     if (data) {
       for (const provider of data.providers) {
-        res.push(serializeProviderShort(provider));
+        res.push(serializeProviderShort(provider, this._serializationSettings));
       }
-    }
-    let total = null;
-    if (
-      !providersFilters &&
-      data.graphNetworks.length == 1 &&
-      data.graphNetworks[0] &&
-      data.graphNetworks[0].providersTotal
-    ) {
-      total = data.graphNetworks[0].providersTotal as string;
     }
     return {
       data: res,
-      total,
+      total: getTotalCounter(
+        filters,
+        data.graphNetworks[0]?.providersRegisteredTotal ?? 0,
+      ),
     };
   }
 
@@ -321,7 +341,7 @@ export class DealExplorerClient {
       console.warn("Filter deals by status if not implemented.");
     }
     return await this._getDealsImpl(
-      { providerId: dealsByProviderFilter.providerId?.toLowerCase() },
+      { providerId: dealsByProviderFilter.providerId.toLowerCase() },
       offset,
       limit,
       orderBy,
@@ -402,7 +422,7 @@ export class DealExplorerClient {
   }
 
   async _getOffersImpl(
-    offerFilters?: OffersFilters,
+    filters?: OffersFilters,
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: OfferShortOrderBy = "createdAt",
@@ -411,19 +431,19 @@ export class DealExplorerClient {
     const orderByConverted = serializeOfferShortOrderByToIndexer(orderBy);
 
     const _cond =
-      (offerFilters?.minPricePerWorkerEpoch ||
-        offerFilters?.maxPricePerWorkerEpoch) !== undefined;
+      (filters?.minPricePerWorkerEpoch || filters?.maxPricePerWorkerEpoch) !==
+      undefined;
     const commonTokenDecimals = await this._calculateTokenDecimalsForFilters(
-      offerFilters?.paymentTokens,
+      filters?.paymentTokens,
       _cond,
     );
 
-    const filtersConverted = await serializeOffersFiltersToIndexerType(
-      offerFilters,
+    const filtersSerialized = await serializeOffersFiltersToIndexerType(
+      filters,
       commonTokenDecimals,
     );
     const data = await this._indexerClient.getOffers({
-      filters: filtersConverted,
+      filters: filtersSerialized,
       offset,
       limit,
       orderBy: orderByConverted,
@@ -432,21 +452,12 @@ export class DealExplorerClient {
     const res = [];
     if (data) {
       for (const offer of data.offers) {
-        res.push(serializeOfferShort(offer));
+        res.push(serializeOfferShort(offer, this._serializationSettings));
       }
-    }
-    let total = null;
-    if (
-      !offerFilters &&
-      data.graphNetworks.length == 1 &&
-      data.graphNetworks[0] &&
-      data.graphNetworks[0].offersTotal
-    ) {
-      total = data.graphNetworks[0].offersTotal as string;
     }
     return {
       data: res,
-      total,
+      total: getTotalCounter(filters, data.graphNetworks[0]?.offersTotal ?? 0),
     };
   }
 
@@ -482,7 +493,7 @@ export class DealExplorerClient {
     let res: OfferDetail | null = null;
     if (data && data.offer) {
       res = {
-        ...serializeOfferShort(data.offer),
+        ...serializeOfferShort(data.offer, this._serializationSettings),
         peers: serializePeers(data.offer.peers as Array<BasicPeerFragment>),
         updatedAt: Number(data.offer.updatedAt),
       };
@@ -491,7 +502,7 @@ export class DealExplorerClient {
   }
 
   async _getDealsImpl(
-    dealsFilters?: DealsFilters,
+    filters?: DealsFilters,
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: DealsShortOrderBy = "createdAt",
@@ -502,19 +513,19 @@ export class DealExplorerClient {
     const orderByConverted = serializeDealShortOrderByToIndexer(orderBy);
 
     const _cond =
-      (dealsFilters?.minPricePerWorkerEpoch ||
-        dealsFilters?.maxPricePerWorkerEpoch) !== undefined;
+      (filters?.minPricePerWorkerEpoch || filters?.maxPricePerWorkerEpoch) !==
+      undefined;
     const commonTokenDecimals = await this._calculateTokenDecimalsForFilters(
-      dealsFilters?.paymentTokens,
+      filters?.paymentTokens,
       _cond,
     );
 
-    const filtersConverted = await serializeDealsFiltersToIndexer(
-      dealsFilters,
+    const filtersSerialized = await serializeDealsFiltersToIndexer(
+      filters,
       commonTokenDecimals,
     );
     const data = await this._indexerClient.getDeals({
-      filters: filtersConverted,
+      filters: filtersSerialized,
       offset,
       limit,
       orderBy: orderByConverted,
@@ -534,25 +545,20 @@ export class DealExplorerClient {
       for (let i = 0; i < data.deals.length; i++) {
         const deal = data.deals[i] as BasicDealFragment;
         res.push(
-          serializeDealsShort(deal, {
-            dealStatus: dealStatuses[i],
-            freeBalance: freeBalances[i],
-          }),
+          serializeDealsShort(
+            deal,
+            {
+              dealStatus: dealStatuses[i],
+              freeBalance: freeBalances[i],
+            },
+            this._serializationSettings,
+          ),
         );
       }
     }
-    let total = null;
-    if (
-      !dealsFilters &&
-      data.graphNetworks.length == 1 &&
-      data.graphNetworks[0] &&
-      data.graphNetworks[0].dealsTotal
-    ) {
-      total = data.graphNetworks[0].dealsTotal as string;
-    }
     return {
       data: res,
-      total,
+      total: getTotalCounter(filters, data.graphNetworks[0]?.dealsTotal ?? 0),
     };
   }
 
@@ -593,22 +599,22 @@ export class DealExplorerClient {
       orderType,
     });
 
-    let res: Array<ComputeUnitWorkerDetail> = []
+    let res: Array<ComputeUnitWorkerDetail> = [];
     for (const computeUnit of data.computeUnits) {
-      res.push(
-        {
-          id: computeUnit.id,
-          providerId: computeUnit.peer.provider.id,
-          workerId: computeUnit.workerId ?? undefined,
-          workerStatus: computeUnit.workerId ? "registered" : "waitingRegistration",
-        }
-      )
+      res.push({
+        id: computeUnit.id,
+        providerId: computeUnit.peer.provider.id,
+        workerId: computeUnit.workerId ?? undefined,
+        workerStatus: computeUnit.workerId
+          ? "registered"
+          : "waitingRegistration",
+      });
     }
 
     return {
       total: null,
       data: res,
-    }
+    };
   }
 
   // @notice [Figma] Deal.
@@ -633,11 +639,16 @@ export class DealExplorerClient {
         deal.providersAccessList,
       );
       res = {
-        ...serializeDealsShort(deal, { dealStatus, freeBalance }),
+        ...serializeDealsShort(
+          deal,
+          { dealStatus, freeBalance },
+          this._serializationSettings,
+        ),
+        // USDC.
         pricePerWorkerEpoch: tokenValueToRounded(
           deal.pricePerWorkerEpoch,
-          DEFAULT_TOKEN_VALUE_ROUNDING,
           deal.paymentToken.decimals,
+          this._serializationSettings.paymentTokenValueAdditionalFormatter,
         ),
         maxWorkersPerProvider: deal.maxWorkersPerProvider,
         computeUnits: serializeComputeUnits(
@@ -670,24 +681,16 @@ export class DealExplorerClient {
       res = data.effectors.map((effector) => {
         return {
           cid: effector.id,
-          description: serializeEffectorDescription(
-            effector.id,
-            effector.description,
-          ),
+          description: serializeEffectorDescription({
+            cid: effector.id,
+            description: effector.description,
+          }),
         };
       });
     }
-    let total = null;
-    if (
-      data.graphNetworks.length == 1 &&
-      data.graphNetworks[0] &&
-      data.graphNetworks[0].effectorsTotal
-    ) {
-      total = data.graphNetworks[0].effectorsTotal as string;
-    }
     return {
       data: res,
-      total,
+      total: getTotalCounter(null, data.graphNetworks[0]?.effectorsTotal ?? 0),
     };
   }
 
@@ -715,17 +718,9 @@ export class DealExplorerClient {
         };
       });
     }
-    let total = null;
-    if (
-      data.graphNetworks.length == 1 &&
-      data.graphNetworks[0] &&
-      data.graphNetworks[0].tokensTotal
-    ) {
-      total = data.graphNetworks[0].tokensTotal as string;
-    }
     return {
       data: res,
-      total,
+      total: getTotalCounter(null, data.graphNetworks[0]?.tokensTotal ?? 0),
     };
   }
 
@@ -739,25 +734,16 @@ export class DealExplorerClient {
     const orderBySerialized =
       serializeCapacityCommitmentsOrderByToIndexer(orderBy);
 
-    let currentEpoch = undefined;
-    if (
-      filters?.onlyActive ||
-      filters?.status == "active" ||
-      filters?.status == "inactive"
-    ) {
-      if (this._coreInitTimestamp == null || this._coreEpochDuration == null) {
-        throw new Error("Assertion: Class object was not inited correctly.");
-      }
-      currentEpoch = calculateEpoch(
-        Date.now() / 1000,
-        this._coreInitTimestamp,
-        this._coreEpochDuration,
-      ).toString();
-    }
+    const currentEpoch = calculateEpoch(
+      Date.now() / 1000,
+      this._coreInitTimestamp!,
+      this._coreEpochDuration!,
+    ).toString();
 
     const filtersSerialized = serializeCapacityCommitmentsFiltersToIndexer(
-      filters,
+      filters ?? {},
       currentEpoch,
+      this._corePrecision!,
     );
     const data = await this._indexerClient.getCapacityCommitments({
       filters: filtersSerialized,
@@ -800,22 +786,17 @@ export class DealExplorerClient {
             capacityCommitmentsStatuses[i] ?? "undefined",
             this._coreInitTimestamp!,
             this._coreEpochDuration!,
+            this._corePrecision!,
           ),
         );
       }
     }
-    // TODO: generalize code below.
-    let total = null;
-    if (
-      data.graphNetworks.length == 1 &&
-      data.graphNetworks[0] &&
-      data.graphNetworks[0].capacityCommitmentsTotal
-    ) {
-      total = data.graphNetworks[0].capacityCommitmentsTotal as string;
-    }
     return {
       data: res,
-      total,
+      total: getTotalCounter(
+        filters,
+        data.graphNetworks[0]?.capacityCommitmentsTotal ?? 0,
+      ),
     };
   }
 
@@ -868,7 +849,10 @@ export class DealExplorerClient {
       capacityCommitmentRpcDetails.unlockedRewards,
       capacityCommitmentRpcDetails.totalRewards,
       capacityCommitment.rewardWithdrawn,
-    )
+      capacityCommitment.delegator,
+      this._serializationSettings,
+      this._corePrecision!,
+    );
   }
 
   // @notice [Figma] Peer ID.
@@ -885,7 +869,9 @@ export class DealExplorerClient {
       providerId: peer.provider.id,
       offerId: peer.offer.id,
       computeUnitsInDeal: peer.computeUnitsInDeal,
-      computeUnitsInCapacityCommitment: peer.computeUnitsInCapacityCommitment,
+      computeUnitsInCapacityCommitment: peer.currentCapacityCommitment
+        ? peer.currentCapacityCommitment?.activeUnitCount
+        : 0,
       computeUnitsTotal: peer.computeUnitsTotal,
     };
   }
@@ -914,7 +900,7 @@ export class DealExplorerClient {
     if (
       data.peer == undefined ||
       data.peer.joinedDeals == undefined ||
-      data.peer.joinedDeals?.length == 0
+      data.peer.joinedDeals.length == 0
     ) {
       return {
         data: [],
@@ -965,12 +951,7 @@ export class DealExplorerClient {
     }
     const computeUnit = data.computeUnit;
 
-    const { expectedProofsDueNow, status } = serializeExpectedProofsAndCUStatus(
-      computeUnit,
-      this._capacityMinRequiredProofsPerEpoch!,
-      this._coreInitTimestamp!,
-      this._coreEpochDuration!,
-    );
+    const { status } = serializeCUStatus(computeUnit);
     const currentPeerCapacityCommitment =
       computeUnit.peer.currentCapacityCommitment;
 
@@ -980,10 +961,14 @@ export class DealExplorerClient {
       providerId: computeUnit.provider.id,
       currentCommitmentId: currentPeerCapacityCommitment?.id,
       peerId: computeUnit.peer.id,
+      // FLT.
       collateral: currentPeerCapacityCommitment
-        ? tokenValueToRounded(currentPeerCapacityCommitment.collateralPerUnit)
+        ? tokenValueToRounded(
+            currentPeerCapacityCommitment.collateralPerUnit,
+            Number(FLTToken.decimals),
+            this._serializationSettings.nativeTokenValueAdditionalFormatter,
+          )
         : "0",
-      expectedProofsDueNow,
       successProofs: currentPeerCapacityCommitment
         ? currentPeerCapacityCommitment.submittedProofsCount
         : 0,
@@ -1019,21 +1004,13 @@ export class DealExplorerClient {
         computeUnitId: proof.computeUnit.id,
         peerId: proof.peer.id,
         createdAt: Number(proof.createdAt),
+        providerId: proof.peer.provider.id,
+        createdAtEpoch: Number(proof.createdEpoch),
       };
     });
-
-    // TODO: generalize code below.
-    let total = null;
-    if (
-      data.graphNetworks.length == 1 &&
-      data.graphNetworks[0] &&
-      data.graphNetworks[0].proofsTotal
-    ) {
-      total = data.graphNetworks[0].proofsTotal as string;
-    }
     return {
       data: res,
-      total,
+      total: getTotalCounter(filters, data.graphNetworks[0]?.proofsTotal ?? 0),
     };
   }
 
@@ -1045,7 +1022,7 @@ export class DealExplorerClient {
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: ComputeUnitsOrderBy = "createdAt",
     orderType: OrderType = DEFAULT_ORDER_TYPE,
-  ): Promise<ComputeUnitsByCapacityCommitmentListView> {
+  ): Promise<ComputeUnitsWithCCStatusListView> {
     await this._init();
 
     const capacityCommitment =
@@ -1067,33 +1044,40 @@ export class DealExplorerClient {
       orderType,
     });
 
-    let res: Array<ComputeUnitsByCapacityCommitment> = [];
-    for (const computeUnit of data.computeUnits) {
-      const { expectedProofsDueNow, status } =
-        serializeExpectedProofsAndCUStatus(
-          computeUnit,
-          this._capacityMinRequiredProofsPerEpoch!,
-          this._coreInitTimestamp!,
-          this._coreEpochDuration!,
-        );
-
-      res.push({
-        id: computeUnit.id,
-        workerId: computeUnit.workerId ?? undefined,
-        status,
-        expectedProofsDueNow,
-        successProofs: computeUnit.submittedProofsCount,
-        collateral: capacityCommitment.totalCollateral,
-      });
-    }
-
     return {
       total: null,
-      data: res,
+      data: serializeComputeUnitsWithStatus(data.computeUnits),
     };
   }
 
-  // @notice [Figma] Capacity Commitment. Proofs.
+  // @notice [Figma] Peer Id. List of compute units (currently not in Figma).
+  async getComputeUnitsByPeer(
+    peerId: string,
+    offset: number = 0,
+    limit: number = this.DEFAULT_PAGE_LIMIT,
+    orderBy: ComputeUnitsOrderBy = "createdAt",
+    orderType: OrderType = DEFAULT_ORDER_TYPE,
+  ): Promise<ComputeUnitsWithCCStatusListView> {
+    await this._init();
+
+    // To get data of CUs by capacity commitment we filter CUs by peer id of the CC.
+    const data = await this._indexerClient.getComputeUnits({
+      filters: {
+        peer_: { id: peerId },
+      },
+      offset,
+      limit,
+      orderBy,
+      orderType,
+    });
+
+    return {
+      total: null,
+      data: serializeComputeUnitsWithStatus(data.computeUnits),
+    };
+  }
+
+  // @notice [Figma] Capacity Commitment. Proofs | Epochs History.
   async getProofsByCapacityCommitment(
     capacityCommitmentId: string,
     offset: number = 0,
@@ -1125,20 +1109,22 @@ export class DealExplorerClient {
 
     // TODO: generate table with missed epoches as well (there might be filtration by epoches,
     //  thus, logic could be complicated, resolve after discussion with PM.
-    let res: Array<ProofStatsByCapacityCommitment> = []
-    for (const proofStats of data.capacityCommitmentStatsPerEpoches)  {
-      res.push(
-        {
-          createdAtEpoch: Number(proofStats.epoch),
-          createdAtEpochBlockNumberStart: Number(proofStats.blockNumberStart),
-          createdAtEpochBlockNumberEnd: Number(proofStats.blockNumberEnd),
-          computeUnitsExpected: proofStats.activeUnitCount,
-          submittedProofs: proofStats.submittedProofsCount,
-          computeUnitsFailed: proofStats.activeUnitCount - proofStats.computeUnitsWithMinRequiredProofsSubmittedCounter,
-          computeUnitsSuccess: proofStats.computeUnitsWithMinRequiredProofsSubmittedCounter,
-          submittedProofsPerCU: proofStats.submittedProofsCount / proofStats.activeUnitCount,
-        }
-      )
+    let res: Array<ProofStatsByCapacityCommitment> = [];
+    for (const proofStats of data.capacityCommitmentStatsPerEpoches) {
+      res.push({
+        createdAtEpoch: Number(proofStats.epochStatistic.id),
+        epochBlockStart: Number(proofStats.epochStatistic.startBlock),
+        epochBlockEnd: Number(proofStats.epochStatistic.endBlock),
+        computeUnitsExpected: proofStats.activeUnitCount,
+        submittedProofs: proofStats.submittedProofsCount,
+        computeUnitsFailed:
+          proofStats.activeUnitCount -
+          proofStats.computeUnitsWithMinRequiredProofsSubmittedCounter,
+        computeUnitsSuccess:
+          proofStats.computeUnitsWithMinRequiredProofsSubmittedCounter,
+        submittedProofsPerCU:
+          proofStats.submittedProofsCount / proofStats.activeUnitCount,
+      });
     }
 
     return {
@@ -1158,75 +1144,90 @@ export class DealExplorerClient {
     orderBy: ComputeUnitStatsPerCapacityCommitmentEpochOrderBy = "id",
     orderType: OrderType = DEFAULT_ORDER_TYPE,
   ): Promise<ComputeUnitStatsPerCapacityCommitmentEpochListView> {
-    await this._init()
+    await this._init();
     // Get all CU linked to CC.
-    const capacityCommitmentFetched = await this._indexerClient.getCapacityCommitment({
-      id: capacityCommitmentId
-    })
+    const capacityCommitmentFetched =
+      await this._indexerClient.getCapacityCommitment({
+        id: capacityCommitmentId,
+      });
     if (!capacityCommitmentFetched.capacityCommitment) {
-      throw new Error(`Capacity commitment with id ${capacityCommitmentId} not found.`)
+      throw new Error(
+        `Capacity commitment with id ${capacityCommitmentId} not found.`,
+      );
     }
 
     // Get stats for all Compute Units of the CC for the epoch.
-    const computeUnitPerEpochStatsFetched = await this._indexerClient.getComputeUnitPerEpochStats({
-      filters: {
-        capacityCommitment_: { id: capacityCommitmentId },
-        epoch: epoch.toString(),
-      },
-      offset,
-      limit,
-      orderBy,
-      orderType,
-    })
+    const computeUnitPerEpochStatsFetched =
+      await this._indexerClient.getComputeUnitPerEpochStats({
+        filters: {
+          capacityCommitment_: { id: capacityCommitmentId },
+          epochStatistic: epoch.toString(),
+        },
+        offset,
+        limit,
+        orderBy,
+        orderType,
+      });
 
     // Extract desirable stats for compute unit if stats have been stored for the CUs.
     // Also extract info if CU in Deal.
-    let computeUnitToSubmittedProofsPerEpoch: Record<string, number> = {}
+    let computeUnitToSubmittedProofsPerEpoch: Record<string, number> = {};
     computeUnitPerEpochStatsFetched.computeUnitPerEpochStats.map((stats) => {
-      computeUnitToSubmittedProofsPerEpoch[stats.computeUnit.id] = stats.submittedProofsCount
-    })
-    let allCUsOfCC: Array<string> = []
-    let computeUnitsInDeal = new Set()
-    const capacityCommitmentComputeUnits = capacityCommitmentFetched.capacityCommitment.computeUnits ?? []
+      computeUnitToSubmittedProofsPerEpoch[stats.computeUnit.id] =
+        stats.submittedProofsCount;
+    });
+    let allCUsOfCC: Array<string> = [];
+    let computeUnitsInDeal = new Set();
+    const capacityCommitmentComputeUnits =
+      capacityCommitmentFetched.capacityCommitment.computeUnits ?? [];
     for (const capacityCommitmentToComputeUnit of capacityCommitmentComputeUnits) {
-      const _computeUnit = capacityCommitmentToComputeUnit.computeUnit
-      allCUsOfCC.push(_computeUnit.id)
+      const _computeUnit = capacityCommitmentToComputeUnit.computeUnit;
+      allCUsOfCC.push(_computeUnit.id);
       if (_computeUnit.deal && _computeUnit.deal.id) {
-        computeUnitsInDeal.add(_computeUnit.id)
+        computeUnitsInDeal.add(_computeUnit.id);
       }
     }
 
     // Merge queries to serialize data.
-    let res: Array<ComputeUnitStatsPerCapacityCommitmentEpoch> = []
+    let res: Array<ComputeUnitStatsPerCapacityCommitmentEpoch> = [];
     for (const computeUnitId of allCUsOfCC) {
-      let submittedProofs = 0
+      let submittedProofs = 0;
       if (computeUnitId in computeUnitToSubmittedProofsPerEpoch) {
-        submittedProofs = Number(computeUnitToSubmittedProofsPerEpoch[computeUnitId])
+        submittedProofs = Number(
+          computeUnitToSubmittedProofsPerEpoch[computeUnitId],
+        );
       }
-      let computeUnitProofStatus: 'failed' | 'success' = 'failed'
+      let computeUnitProofStatus: "failed" | "success" = "failed";
       if (submittedProofs >= this._capacityMinRequiredProofsPerEpoch!) {
-        computeUnitProofStatus = 'success'
+        computeUnitProofStatus = "success";
       } else if (computeUnitId in computeUnitsInDeal) {
         // Compute unit is not failed if it is not in deal right now.
-        computeUnitProofStatus = 'success'
+        computeUnitProofStatus = "success";
       } else {
-        computeUnitProofStatus = 'failed'
+        computeUnitProofStatus = "failed";
       }
 
-      res.push(
-        {
-            capacityCommitmentId: capacityCommitmentId,
-            computeUnitId: computeUnitId,
-            submittedProofs,
-            computeUnitProofStatus,
-        }
-      )
+      res.push({
+        capacityCommitmentId: capacityCommitmentId,
+        computeUnitId: computeUnitId,
+        submittedProofs,
+        computeUnitProofStatus,
+      });
     }
 
     return {
       total: null,
-      data: res
-    }
+      data: res,
+    };
+  }
+
+  async getCurrentEpoch(): Promise<number> {
+    await this._init();
+    return calculateEpoch(
+      Date.now() / 1000,
+      this._coreInitTimestamp!,
+      this._coreEpochDuration!,
+    );
   }
 }
 

@@ -9,9 +9,8 @@
     "create:local": "./fluence-graph.sh create local",
     "remove:local": "./fluence-graph.sh remove local",
     "deploy:local": "./fluence-graph.sh deploy local",
-    "create:testnet": "./fluence-graph.sh create testnet",
-    "deploy:testnet": "./fluence-graph.sh deploy testnet",
-    "deploy:kras": "graph deploy --product hosted-service --network-file configs/testnet-networks-config.json --network mumbai alcibiadescleinias/fluence-deal-contracts",
+    "create:kras": "./fluence-graph.sh create kras",
+    "deploy:kras": "./fluence-graph.sh deploy kras",
     "create:stage": "./fluence-graph.sh create stage",
     "deploy:stage": "./fluence-graph.sh deploy stage",
     "create:dar": "./fluence-graph.sh create dar",
@@ -39,5 +38,5 @@
     "matchstick-as": "0.5.0",
     "prettier": "^3.0.2"
   },
-  "version": "0.6.4"
+  "version": "0.13.6"
 }

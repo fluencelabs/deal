@@ -1,11 +1,22 @@
-# Comments relates to Figma screen names.
-# Names according to Figma. Suffix according to api list, details
+"""
+In the scheme below we used behaviour where deleted entity marked as deleted=True instead of actual deletion (in contrast as in contract).
+Thus, please refer to the deleted field when querying the data.
+Note, all deleted entities are out of scope for presented counters in all models.
+"""
 
 type GraphNetwork @entity {
   "ID is set to 1"
-  id: ID!  # for example trick thanks to https://github.com/graphprotocol/graph-network-analytics-subgraph/blob/00d32f153f7b6bcef4344b934e3c9a9286304658/schema.graphql#L4.
-  # TODO: remove when total field wil be added by developers.
+  id: ID! # for example trick thanks to https://github.com/graphprotocol/graph-network-analytics-subgraph/blob/00d32f153f7b6bcef4344b934e3c9a9286304658/schema.graphql#L4.
+  # Contract addresses add below.
+  coreContractAddress: String
+  capacityContractAddress: String
+  marketContractAddress: String
+  # TODO: remove total counters when total counter field wil be added by developers.
   # https://github.com/graphprotocol/graph-node/issues/613
+  # Note that total counter for not deleted entities.
+  "Providers that register themselves in the network with setInfo() method."
+  providersRegisteredTotal: BigInt!
+  "@deprecated TODO: deprecate because it is not used. changed to providersRegisteredTotal used."
   providersTotal: BigInt!
   dealsTotal: BigInt!
   offersTotal: BigInt!
@@ -16,13 +27,14 @@ type GraphNetwork @entity {
   # Add constants from Core contract below.
   coreEpochDuration: Int
   initTimestamp: Int
+  corePrecision: Int
   # Capacity consts are below.
   capacityMaxFailedRatio: Int
   minRequiredProofsPerEpoch: Int
 }
 
-type Token @entity(immutable: true) {
-  id: ID!  # Token Address
+type Token @entity {
+  id: ID! # Token Address
   symbol: String!
   decimals: Int!
 }
@@ -32,28 +44,30 @@ type Provider @entity {
   name: String!
   createdAt: BigInt!
   approved: Boolean!
-  "Is provider registered in the network (if false - possible just mentioned)."
+  "Is provider registered in the network (if false possibly it is only mentioned or global-whitelisted)."
   registered: Boolean!
 
   offers: [Offer!] @derivedFrom(field: "provider")
 
   # Add Statistics below.
-  computeUnitsAvailable: Int!  # Sum of all available compute units in the offer (not in the deals).
-  computeUnitsTotal: Int!  # Sum of all compute units registered in the offer. TODO: when CU deleted?
+  "It depends on if CU in deal or not."
+  computeUnitsAvailable: Int! # Sum of all available compute units in the offer (not in the deals).
+  computeUnitsTotal: Int! # Sum of all compute units registered in the offer. TODO: when CU deleted?
   peerCount: Int!
 }
 
 # ---- Core Contract ----
 type Offer @entity {
-  """Used in the next figma views:
-    - Offer from List Of offers 1.2.
-    - Offer 1.2
   """
-  id: ID!  # Ref to offerId in contract.
+  Used in the next figma views:
+  - Offer from List Of offers 1.2.
+  - Offer 1.2
+  """
+  id: ID! # Ref to offerId in contract.
   createdAt: BigInt!
   updatedAt: BigInt!
   provider: Provider!
-#   TODO: price per epoch and price per worker epoch are the same essentials?
+  #   TODO: price per epoch and price per worker epoch are the same essentials?
   pricePerEpoch: BigInt!
   paymentToken: Token!
 
@@ -61,16 +75,16 @@ type Offer @entity {
   effectors: [OfferToEffector!] @derivedFrom(field: "offer")
 
   # Add Statistics below.
-  computeUnitsAvailable: Int  # Sum of all available compute units in the offer (not in the deals).
-  computeUnitsTotal: Int  # Sum of all compute units registered in the offer. TODO: when CU deleted?
-
+  "It depends on if CU in deal or not."
+  computeUnitsAvailable: Int # Sum of all available compute units in the offer (not in the deals).
+  computeUnitsTotal: Int # Sum of all compute units registered in the offer. TODO: when CU deleted?
   # Add helpers fields to support some queries below.
   "To support check that a peer already in a deal."
   joinedOfferPeers: [DealToJoinedOfferPeer!] @derivedFrom(field: "offer")
 }
 
-
-"""To support many2many b/w offer and effector.
+"""
+To support many2many b/w offer and effector.
 E.g. to use
 {
   offers {
@@ -83,16 +97,15 @@ E.g. to use
 }
 """
 type OfferToEffector @entity {
-    id: ID! # Set to `user.id.concat(organization.id)`
-    offer: Offer!
-    effector: Effector!
+  id: ID! # Set to `user.id.concat(organization.id)`
+  offer: Offer!
+  effector: Effector!
 }
-
 
 "Effector table is obsolete table since it is a simple mapping."
 type Effector @entity {
   "id and CID are the same."
-  id: ID!  # Currently effector id is merged(prefix + hash) aka 1 CID.
+  id: ID! # Currently effector id is merged(prefix + hash) aka 1 CID.
   description: String!
   offers: [OfferToEffector!] @derivedFrom(field: "effector")
 }
@@ -102,6 +115,7 @@ type Peer @entity {
   id: ID!
   offer: Offer!
   provider: Provider!
+  deleted: Boolean!
   computeUnits: [ComputeUnit!] @derivedFrom(field: "peer")
 
   currentCapacityCommitment: CapacityCommitment
@@ -124,8 +138,6 @@ type Peer @entity {
   computeUnitsTotal: Int!
   "Compute units in any deals: update only when moved to deal or out."
   computeUnitsInDeal: Int!
-  "Compute units in any cc: update only when moved to CC or out: {UnitActivated, UnitDeactivated}."
-  computeUnitsInCapacityCommitment: Int!
 }
 
 type ComputeUnit @entity {
@@ -133,6 +145,7 @@ type ComputeUnit @entity {
   peer: Peer!
   "In order to simplify relation for query."
   provider: Provider!
+  deleted: Boolean!
 
   deal: Deal
   workerId: String
@@ -146,16 +159,18 @@ type ComputeUnit @entity {
 }
 
 # ---- Deal Contract ----
-type DealToEffector @entity(immutable: true) {
-    id: ID! # Set to `deal.id.concat(effector.id)`
-    deal: Deal!
-    effector: Effector!
+type DealToEffector @entity {
+  id: ID! # Set to `deal.id.concat(effector.id)`
+  deal: Deal!
+  effector: Effector!
 }
 
-type DealToPeer @entity(immutable: true) {
-    id: ID! # Set to `deal.id.concat(peer.id)`
-    deal: Deal!
-    peer: Peer!
+type DealToPeer @entity {
+  id: ID! # Set to `deal.id.concat(peer.id)`
+  deal: Deal!
+  peer: Peer!
+  "Helper field to understand number of connections."
+  connections: Int!
 }
 
 """
@@ -163,22 +178,22 @@ TODO: deprecate.
 To add possibility to filter already joined peers into a Deal from perspective of an Offer
 (protocol does not allow more than one CU per peer for the same Deal).
 """
-type DealToJoinedOfferPeer @entity(immutable: true) {
-    id: ID! # Set to `deal.id.concat(offer.id.concat(peer.id))`
-    deal: Deal!
-    offer: Offer!  # search offers initially using this fk relation.
-    peer: Peer!
+type DealToJoinedOfferPeer @entity {
+  id: ID! # Set to `deal.id.concat(offer.id.concat(peer.id))`
+  deal: Deal!
+  offer: Offer! # search offers initially using this fk relation.
+  peer: Peer!
 }
 
 "It represents m2m b/w deal and provider in context of access list."
-type DealToProvidersAccess @entity(immutable: true) {
+type DealToProvidersAccess @entity {
   id: ID! # Set to `deal.id.concat(provider.id)`
   deal: Deal!
   provider: Provider!
 }
 
 type Deal @entity {
-  id: ID!  # Ref to offerId in contract.
+  id: ID! # Ref to offerId in contract.
   appCID: String!
   createdAt: BigInt!
   owner: String!
@@ -199,8 +214,11 @@ type Deal @entity {
 
   # Add Statistics below.
   withdrawalSum: BigInt!
-  depositedSum: BigInt!  # calculated from the withdraw() [no rewards withdraw].
+  depositedSum: BigInt! # calculated from the withdraw() [no rewards withdraw].
   maxPaidEpoch: BigInt
+  registeredWorkersCurrentCount: Int!
+  "Currently matched workers == matched compute units."
+  matchedWorkersCurrentCount: Int!
 
   "I.e. Matching Result (Figma)."
   addedComputeUnits: [ComputeUnit!] @derivedFrom(field: "deal")
@@ -216,13 +234,15 @@ enum CapacityCommitmentStatus {
   Removed
 }
 
-type CapacityCommitmentToComputeUnit @entity(immutable: true) {
+type CapacityCommitmentToComputeUnit @entity {
   id: ID! # Set to `capacityCommitment.id.concat(computeUnit.id)`
   capacityCommitment: CapacityCommitment!
   computeUnit: ComputeUnit!
 }
 
-"""To represent that Peer has capacity commitment for some time."""
+"""
+To represent that Peer has capacity commitment for some time.
+"""
 type CapacityCommitment @entity {
   id: ID!
   peer: Peer!
@@ -230,13 +250,14 @@ type CapacityCommitment @entity {
   status: CapacityCommitmentStatus
   collateralPerUnit: BigInt!
   duration: BigInt!
+  "This field represents Ratio [0, 1] only when it is divided by PRECISION constant of Core contract."
   rewardDelegatorRate: Int!
   delegator: String!
   "timestamp of creation of CC. It does not mean that CC is started."
   createdAt: BigInt!
   startEpoch: BigInt!
   endEpoch: BigInt!
-  totalCUFailCount: Int!
+  totalFailCount: Int!
   failedEpoch: BigInt!
   exitedUnitCount: Int!
   activeUnitCount: Int!
@@ -248,7 +269,8 @@ type CapacityCommitment @entity {
   submittedProofs: [SubmittedProof!] @derivedFrom(field: "capacityCommitment")
   submittedProofsCount: Int!
 
-  computeUnits: [CapacityCommitmentToComputeUnit!] @derivedFrom(field: "capacityCommitment")
+  computeUnits: [CapacityCommitmentToComputeUnit!]
+    @derivedFrom(field: "capacityCommitment")
   computeUnitsCount: Int!
 
   snapshotEpoch: BigInt!
@@ -261,7 +283,7 @@ type CapacityCommitment @entity {
   provider: Provider!
 }
 
-type SubmittedProof @entity(immutable: true) {
+type SubmittedProof @entity {
   "Id here is a transaction hash."
   id: ID!
   capacityCommitment: CapacityCommitment!
@@ -282,19 +304,19 @@ type CapacityCommitmentStatsPerEpoch @entity {
   # Set to `capacityCommitment.id.concat(epoch)`
   id: ID!
   capacityCommitment: CapacityCommitment!
+  epochStatistic: EpochStatistic!
+  "Additional field to support ordering by epoch."
   epoch: BigInt!
-  # To track period of block numbers with submitted proofs for the concrete epoch.
-  blockNumberStart: BigInt!
-  blockNumberEnd: BigInt!
 
-  totalCUFailCount: Int!
+  totalFailCount: Int!
   exitedUnitCount: Int!
   activeUnitCount: Int!
   nextAdditionalActiveUnitCount: Int!
   currentCCNextCCFailedEpoch: BigInt!
   submittedProofsCount: Int!
 
-  submittedProofs: [SubmittedProof!] @derivedFrom(field: "capacityCommitmentStatsPerEpoch")
+  submittedProofs: [SubmittedProof!]
+    @derivedFrom(field: "capacityCommitmentStatsPerEpoch")
 
   # Add additional seconds stats (that relate from others) below.
   # Relates means that related should be updated first, and stats below strictly after.
@@ -304,8 +326,8 @@ type CapacityCommitmentStatsPerEpoch @entity {
 
 "Helper stat model to count success proofs per epoch for a CU."
 type ComputeUnitPerEpochStat @entity {
-  id: ID! # Set to `computeUnit.id.concat(epoch)`
-  epoch: BigInt!
+  id: ID! # Set to `computeUnit.id.concat(epoch.id)`
+  epochStatistic: EpochStatistic!
   computeUnit: ComputeUnit!
 
   # To allow query for all CU by the Capacity Commitment.
@@ -313,4 +335,14 @@ type ComputeUnitPerEpochStat @entity {
 
   # Add per epoch stats below.
   submittedProofsCount: Int!
+}
+
+"This model is designed to store epoch related information. Note, that in other models it is more efficient to store epoch as bigint rather than relation to that model (with relation you could complicate your queries by epoch, or you will need to store additional epoch field anyway)."
+type EpochStatistic @entity {
+  "Epoch number. Note, that for current epoch right boarder is approximate."
+  id: ID!
+  startBlock: BigInt!
+  endBlock: BigInt!
+  startTimestamp: BigInt!
+  endTimestamp: BigInt!
 }

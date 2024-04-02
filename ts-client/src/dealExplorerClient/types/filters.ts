@@ -58,6 +58,8 @@ export interface DealsFilters {
 // @param search: search by provider id, commitment id, peer id, delegator address.
 //  (strict search only).
 // @param onlyActive: deprecated - use status filter instead.
+// @param rewardDelegatorRateTo: the included max percentage ratio of rewardDelegatorRate.
+// @param rewardDelegatorRateFrom: the included min percentage ratio of rewardDelegatorRate.
 export interface CapacityCommitmentsFilters {
   search?: string | undefined;
   computeUnitsCountFrom?: number | undefined;
@@ -95,6 +97,8 @@ export type CapacityCommitmentsOrderBy =
 export type ProofsOrderBy = "createdAt" | "epoch";
 export type ComputeUnitsOrderBy = "createdAt";
 export type ProofStatsByCapacityCommitmentOrderBy = "epoch";
-export type ComputeUnitStatsPerCapacityCommitmentEpochOrderBy = "id" | "submittedProofsCount";
+export type ComputeUnitStatsPerCapacityCommitmentEpochOrderBy =
+  | "id"
+  | "submittedProofsCount";
 
 export type OrderType = "asc" | "desc";

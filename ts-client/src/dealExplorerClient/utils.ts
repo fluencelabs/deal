@@ -1,25 +1,36 @@
-import { ethers } from "ethers";
 import type { OrderType } from "./types/filters.js";
 
-export const DEFAULT_TOKEN_VALUE_ROUNDING = 3;
 // Max to select per 1 multiselect filter.
 export const FILTER_MULTISELECT_MAX = 100;
 export const DEFAULT_ORDER_TYPE: OrderType = "desc";
 
-export function tokenValueToRounded(
-  value: string | bigint,
-  toFixed: number = 3,
-  decimals: number = 18,
-) {
-  const formatted = ethers.formatUnits(value, decimals);
-  return parseFloat(formatted).toFixed(toFixed);
-}
+// Returns total counter according to provided total and filters.
+// Note, now it returns null when filters are not empty because for subgraph it
+//  is impossible to get counter with filtration.
+// Ref to https://github.com/graphprotocol/graph-node/issues/1309.
+// @param filters: filters that used to be sent to subgraph directly
+//  (thus, after serialization).
+export function getTotalCounter(
+  // @ts-ignore
+  filters: any,
+  total: number,
+): string | null {
+  // onlyApproved == false filter should not be counted as actual filter for schemes:
+  // - OffersFilters,
+  // - ProvidersFilters,
+  //  because this false value is a default one. And default filter value should not be counted when we decide:
+  //  if we actually use filtration and, thus, we can not count total for the query.
+  // Note, this, behavior will be ignored when
+  //  counters will be implemented: https://github.com/graphprotocol/graph-node/issues/1309.
+  const filtersCopy = { ...filters };
+  if (filtersCopy.onlyApproved === false) {
+    delete filtersCopy.onlyApproved;
+  }
 
-export function valueToTokenValue(
-  value: string | bigint | number,
-  decimals: number = 18,
-) {
-  return ethers.parseUnits(value.toString(), decimals).toString();
+  if (Object.keys(filtersCopy).length) {
+    return null;
+  }
+  return total.toString();
 }
 
 // It mirrors core.currentEpoch in EpochController.sol.
@@ -28,10 +39,12 @@ export function calculateEpoch(
   epochControllerStorageInitTimestamp: number,
   epochControllerStorageEpochDuration: number,
 ): number {
-  return (
-    1 +
-    (timestamp - epochControllerStorageInitTimestamp) /
-      epochControllerStorageEpochDuration
+  return parseInt(
+    (
+      1 +
+      (timestamp - epochControllerStorageInitTimestamp) /
+        epochControllerStorageEpochDuration
+    ).toString(),
   );
 }
 

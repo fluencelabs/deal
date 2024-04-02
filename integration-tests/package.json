@@ -9,13 +9,14 @@
   "description": "Integration tests for contracts",
   "main": "index.js",
   "scripts": {
-    "test": "vitest run",
-    "lint": "prettier src --check && eslint --cache \"./src/**/*.ts\""
+    "test": "vitest run --no-file-parallelism",
+    "lint": "prettier src --check && eslint --cache \"./src/**/*.ts\"",
+    "set-local-env": "EPOCH_DURATION=86400 docker compose -f ../docker/docker-compose.yml up -d --build chain-deploy-script"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@fluencelabs/deal-ts-clients": "https://npm.fluence.dev/@fluencelabs/deal-ts-clients/-/deal-ts-clients-0.3.1-feat-CHAIN-316-d453d94-1359-1.0.tgz",
+    "@fluencelabs/deal-ts-clients": "file:../ts-client",
     "ethers": "6.7.1",
     "vitest": "^1.2.0"
   },
@@ -25,6 +26,7 @@
     "@types/node": "^20.11.5",
     "@typescript-eslint/eslint-plugin": "^6.19.0",
     "@typescript-eslint/parser": "^6.19.0",
+    "dotenv": "^16.4.5",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.29.1",
@@ -34,19 +36,18 @@
     "prettier": "^3.2.4",
     "typescript": "^5.3.3"
   },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.12.0"
+  },
   "eslintConfig": {
     "extends": [
       "eslint:recommended",
-      "plugin:node/recommended",
       "plugin:@typescript-eslint/strict-type-checked",
-      "plugin:import/recommended",
       "plugin:import/typescript",
       "prettier"
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-      "ecmaVersion": "latest",
-      "sourceType": "module",
       "project": [
         "tsconfig.json"
       ]

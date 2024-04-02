@@ -1,7 +1,10 @@
 import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type { ContractsENV } from "../client/config.js";
 import type { OffersQueryQueryVariables } from "./indexerClient/queries/offers-query.generated.js";
-import { serializeDealProviderAccessLists } from "../utils/serializers.js";
+import { serializeDealProviderAccessLists } from "../utils/indexerClient/serializers.js";
+import { getLogger } from "../utils/logger.js";
+
+const logger = getLogger("deal-ts-clients:dealMatcherClient");
 
 // Structure match matchDeal() arguments.
 // Currently: bytes32[] calldata offers, bytes32[][] calldata computeUnits.
@@ -32,6 +35,17 @@ export class DealNotFoundError extends Error {
   }
 }
 
+export class DealAlreadyMatchedError extends Error {
+  public static ERROR_PREFIX =
+    "Deal already has target number of compute units (workers) matched.";
+  constructor(dealId: string, targetWorkers: number) {
+    super(
+      `${DealAlreadyMatchedError.ERROR_PREFIX}. Deal Id: ${dealId} Target workers: ${targetWorkers}.`,
+    );
+    Object.setPrototypeOf(this, DealAlreadyMatchedError.prototype);
+  }
+}
+
 export class DealMatcherClient {
   private _indexerClient: IndexerClient;
   public MAX_PER_PAGE: number;
@@ -44,9 +58,10 @@ export class DealMatcherClient {
     this.MAX_PER_PAGE = this._indexerClient.INDEXER_MAX_FIRST;
   }
 
-  // Represents the way to query indexer for available compute units (subgraph).
-  // CU are available if CU are allowed for the matchDeal
+  // Represents the way to query indexer for available compute units (query through subgraph API).
+  // CU are available if CU are allowed for the market.matchDeal
   //  (ref to https://github.com/fluencelabs/deal/blob/main/src/core/modules/market/Matcher.sol#L48).
+  //  Thus, this method mirrors logic of checks in the market.matchDeal.
   async _getMatchedOffersPage(
     getMatchedOffersIn: GetMatchedOffersIn,
     offersPerPageLimit: number, // Possibility to optimise query size.
@@ -69,36 +84,15 @@ export class DealMatcherClient {
         paymentToken: getMatchedOffersIn.paymentToken.toLowerCase(),
         // Check if any of compute units are available in the offer and do not even fetch unrelated offers.
         computeUnitsAvailable_gt: 0,
-        // Do not fetch peers with no any of compute units in "active" status at all.
-        // Check if CU status is Active - if it has current capacity commitment and
-        //  cc.info.startEpoch <= currentEpoch_.
-        peers_: {
-          currentCapacityCommitment_not: null,
-          // Since it is not possible to filter by currentCapacityCommitment_.startEpoch_lt
-          //  we use this help field.
-          currentCCCollateralDepositedAt_lte: currentEpochString,
-          currentCCEndEpoch_gt: currentEpochString,
-          currentCCNextCCFailedEpoch_gt: currentEpochString,
-        },
+
+        // Check if provider whitelisted/blacklisted below, and if CC Active below in case without whitelist below.
       },
       peersFilters: {
         and: [
           {
-            computeUnits_: { deal: null },
-            // Check if CU status is Active - if it has current capacity commitment and
-            //  cc.info.startEpoch <= currentEpoch_.
-            currentCapacityCommitment_not: null,
-            currentCapacityCommitment_: {
-              // Duplication as it is in DealExplorerClient: serializeCapacityCommitmentsFiltersToIndexer.
-              startEpoch_lte: currentEpochString,
-              endEpoch_gt: currentEpochString,
-              // On each submitProof indexer should save nextCCFailedEpoch, and
-              //  in query we relay on that field to filter Failed CC.
-              nextCCFailedEpoch_gt: currentEpochString,
-              deleted: false,
-              // Wait delegation is duplicating startEpoch_lte check, though.
-              status_not_in: ["WaitDelegation", "Removed", "Failed"],
-            },
+            deleted: false,
+            computeUnits_: { deal: null, deleted: false },
+            // Check for CC Active status below and depends on provider whitlist filter.
           },
           {
             // We do not need peers that already linked to the Deal (protocol restriction).
@@ -115,7 +109,7 @@ export class DealMatcherClient {
           },
         ],
       },
-      computeUnitsFilters: { deal: null },
+      computeUnitsFilters: { deal: null, deleted: false },
       peersLimit: peersPerPageLimit,
       // We do not need more than 1 CU per peer. Apply restriction to already fetched and filtered data.
       computeUnitsLimit: 1,
@@ -128,23 +122,55 @@ export class DealMatcherClient {
         effector_in: getMatchedOffersIn.effectors,
       };
     }
-    if (
-      getMatchedOffersIn.providersWhiteList &&
-      getMatchedOffersIn.providersWhiteList.length > 0
-    ) {
+    // Check for blacklisted Providers.
+    if (getMatchedOffersIn.providersBlackList.length > 0) {
+      indexerGetOffersParams.filters!["provider_"] = {
+        id_not_in: getMatchedOffersIn.providersBlackList,
+      };
+    }
+    // We requre rather CU to be in Active CC (and not in blacklist if blacklist exists)
+    //  or CU from Deal whitelist of Providers.
+    if (getMatchedOffersIn.providersWhiteList.length > 0) {
       indexerGetOffersParams.filters!["provider_"] = {
         id_in: getMatchedOffersIn.providersWhiteList,
       };
-    }
-    if (
-      getMatchedOffersIn.providersBlackList &&
-      getMatchedOffersIn.providersBlackList.length > 0
-    ) {
-      indexerGetOffersParams.filters!["provider_"] = {
-        id_in: getMatchedOffersIn.providersBlackList,
+    } else {
+      // No whitelist, thus, check for active cc status is required.
+      // For Peers.
+      indexerGetOffersParams.filters!["peers_"] = {
+        deleted: false,
+        // Do not fetch peers with no any of compute units in "active" status at all.
+        // Check if CU status is Active - if it has current capacity commitment and
+        //  cc.info.startEpoch <= currentEpoch_.
+        currentCapacityCommitment_not: null,
+        // Since it is not possible to filter by currentCapacityCommitment_.startEpoch_lt
+        //  we use this help field.
+        currentCCCollateralDepositedAt_lte: currentEpochString,
+        currentCCEndEpoch_gt: currentEpochString,
+        currentCCNextCCFailedEpoch_gt: currentEpochString,
+      };
+      // For CUs.
+      indexerGetOffersParams.peersFilters!.and![0] = {
+        ...indexerGetOffersParams.peersFilters!.and![0],
+        ...{
+          // Check if CU status is Active - if it has current capacity commitment and
+          //  cc.info.startEpoch <= currentEpoch_.
+          currentCapacityCommitment_not: null,
+          currentCapacityCommitment_: {
+            // Duplication as it is in DealExplorerClient: serializeCapacityCommitmentsFiltersToIndexer.
+            startEpoch_lte: currentEpochString,
+            endEpoch_gt: currentEpochString,
+            // On each submitProof indexer should save nextCCFailedEpoch, and
+            //  in query we relay on that field to filter Failed CC.
+            nextCCFailedEpoch_gt: currentEpochString,
+            deleted: false,
+            // Wait delegation is duplicating startEpoch_lte check, though.
+            status_not_in: ["WaitDelegation", "Removed", "Failed"],
+          },
+        },
       };
     }
-    console.info(
+    logger.info(
       `[_getMatchedOffersPage] Requesting indexer for page with page params: ${JSON.stringify(
         indexerGetOffersParams,
         null,
@@ -152,8 +178,8 @@ export class DealMatcherClient {
       )}...`,
     );
     const fetched = await this._indexerClient.getOffers(indexerGetOffersParams);
-    console.info(`[_getMatchedOffersPage] Got response from indexer.`);
-    console.debug(
+    logger.info(`[_getMatchedOffersPage] Got response from indexer.`);
+    logger.debug(
       `[_getMatchedOffersPage] Fetched data: ${JSON.stringify(
         fetched,
         null,
@@ -173,15 +199,25 @@ export class DealMatcherClient {
       minWorkersToMatch,
       maxWorkersPerProvider,
     } = getMatchedOffersIn;
-    console.group(
+    logger.info(
       "[getMatchedOffers] Try to find matched offers with the next deal configuration:",
     );
-    console.info(JSON.stringify(getMatchedOffersIn, null, 2));
+    logger.info(JSON.stringify(getMatchedOffersIn, null, 2));
 
     if (targetWorkerSlotToMatch > this.MAX_PER_PAGE) {
-      console.warn(
+      logger.warn(
         `targetWorkerSlotToMatch param is too high, it is better to reduce large query to ${this.MAX_PER_PAGE} per batch.`,
       );
+    }
+    if (targetWorkerSlotToMatch == 0) {
+      logger.warn(
+        "No need to match any compute units. Return empty result in early return.",
+      );
+      return {
+        offers: [],
+        computeUnitsPerOffers: [],
+        fulfilled: false,
+      };
     }
     const matchedComputeUnitsData: GetMatchedOffersOut = {
       offers: [],
@@ -228,7 +264,7 @@ export class DealMatcherClient {
       );
 
       if (offers.length == 0) {
-        console.debug("Got empty data from indexer, break search.");
+        logger.debug("Got empty data from indexer, break search.");
         break;
       }
 
@@ -246,7 +282,6 @@ export class DealMatcherClient {
           matchedComputeUnitsData.offers.push(offerId);
         }
         const peers = offer.peers;
-        console.log("TODO: peers", peers);
         // Check if peers are empty and need to fetch next offer page.
         //  It could happen because we have after fetch filter: not more than 1 CU per peer
         //  that filters
@@ -341,23 +376,24 @@ export class DealMatcherClient {
     }
 
     if (minWorkersToMatch > computeUnitsMatchedTotal) {
-      console.warn(
+      logger.warn(
         "Transaction will be failed because minWorkersToMatch > matchedComputeUnits. Return [].",
       );
       matchedComputeUnitsData.offers = [];
       matchedComputeUnitsData.computeUnitsPerOffers = [];
     }
-    console.groupEnd();
     return matchedComputeUnitsData;
   }
 
-  // TODO: mb relocate to Deal contract class (utils extention)?
   // It mirrors `function currentEpoch() public view returns (uint256)`.
   calculateEpoch(
     timestamp: number,
     epochControllerStorageInitTimestamp: number,
     epochControllerStorageEpochDuration: number,
   ) {
+    logger.info(
+      `timestamp: ${timestamp} epochControllerStorageInitTimestamp: ${epochControllerStorageInitTimestamp} epochControllerStorageEpochDuration: ${epochControllerStorageEpochDuration}`,
+    );
     return Math.floor(
       1 +
         (timestamp - epochControllerStorageInitTimestamp) /
@@ -372,7 +408,7 @@ export class DealMatcherClient {
    *
    * 1. Fetches the deal and its configuration from the Indexer backend
    * 2. Scraps compute units (page by page) until one of the conditions:
-   * - the end of matched offers/peers/compute units
+   * - the end of matched offers/peers/compute units reached,
    * - all target compute units found.
    */
   async getMatchedOffersByDealId(dealId: string): Promise<GetMatchedOffersOut> {
@@ -392,7 +428,11 @@ export class DealMatcherClient {
       );
     }
     const alreadyMatchedComputeUnits = deal.addedComputeUnits?.length ?? 0;
-    const targetWorkerToMath = deal.targetWorkers - alreadyMatchedComputeUnits;
+    const targetWorkerSlotsToMatch =
+      deal.targetWorkers - alreadyMatchedComputeUnits;
+    if (targetWorkerSlotsToMatch == 0) {
+      throw new DealAlreadyMatchedError(dealId, alreadyMatchedComputeUnits);
+    }
     const minWorkersToMatch = Math.max(
       deal.minWorkers - alreadyMatchedComputeUnits,
       0,
@@ -412,7 +452,7 @@ export class DealMatcherClient {
         return effector.effector.id;
       }),
       paymentToken: deal.paymentToken.id,
-      targetWorkerSlotToMatch: targetWorkerToMath,
+      targetWorkerSlotToMatch: targetWorkerSlotsToMatch,
       minWorkersToMatch: minWorkersToMatch,
       maxWorkersPerProvider: deal.maxWorkersPerProvider,
       currentEpoch: this.calculateEpoch(

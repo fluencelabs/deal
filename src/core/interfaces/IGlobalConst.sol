@@ -17,8 +17,10 @@ interface IGlobalConst {
 
     // ------------------ Types ------------------
     enum ConstantType {
-        MinDealDepositedEpoches,
-        MinDealRematchingEpoches
+        MinDealDepositedEpochs,
+        MinDealRematchingEpochs,
+        MinProtocolVersion,
+        MaxProtocolVersion
     }
 
     // ------------------ External Constants ------------------
@@ -27,13 +29,21 @@ interface IGlobalConst {
 
     // ------------------ External View Functions ------------------
 
-    /// @dev Returns min deposited epoches constant for new deals
-    /// @return min deposited epoches for new deals
-    function minDealDepositedEpoches() external view returns (uint256);
+    /// @dev Returns min deposited Epochs constant for new deals
+    /// @return min deposited Epochs for new deals
+    function minDealDepositedEpochs() external view returns (uint256);
 
-    /// @dev Returns min rematching epoches constant for all deals
-    /// @return min rematching epoches for all deals
-    function minDealRematchingEpoches() external view returns (uint256);
+    /// @dev Returns min rematching Epochs constant for all deals
+    /// @return min rematching Epochs for all deals
+    function minDealRematchingEpochs() external view returns (uint256);
+
+    /// @dev Returns min protocol version which can be specified in offers and deals
+    /// @return min protocol version
+    function minProtocolVersion() external view returns (uint256);
+
+    /// @dev Returns max protocol version which can be specified in offers and deals
+    /// @return max protocol version
+    function maxProtocolVersion() external view returns (uint256);
 
     // ------------------ External Mutable Functions ------------------
     /// @dev Sets constant with uint256 value

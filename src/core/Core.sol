@@ -3,15 +3,15 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "src/utils/OwnableUpgradableDiamond.sol";
 import "src/deal/Deal.sol";
 import "src/core/modules/capacity/interfaces/ICapacity.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
-
+import "src/core/modules/market/interfaces/IDealFactory.sol";
 import "./GlobalConst.sol";
 import "./interfaces/ICore.sol";
+import "src/utils/Whitelist.sol";
 
-contract Core is UUPSUpgradeable, GlobalConst, ICore {
+contract Core is ICore, UUPSUpgradeable, GlobalConst, Whitelist {
     // ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.core.storage.v1")) - 1);
 
@@ -19,6 +19,7 @@ contract Core is UUPSUpgradeable, GlobalConst, ICore {
         ICapacity capacity;
         IMarket market;
         IDeal dealImpl;
+        IDealFactory dealFactory;
     }
 
     function _getCoreStorage() private pure returns (CoreStorage storage s) {
@@ -37,28 +38,68 @@ contract Core is UUPSUpgradeable, GlobalConst, ICore {
     // ------------------ Initializer ------------------
     function initialize(
         uint256 epochDuration_,
-        uint256 minDepositedEpoches_,
-        uint256 minRematchingEpoches_,
-        IDeal dealImpl_
+        uint256 minDepositedEpochs_,
+        uint256 minRematchingEpochs_,
+        uint256 minProtocolVersion_,
+        uint256 maxProtocolVersion_,
+        IDeal dealImpl_,
+        bool isWhitelistEnabled_,
+        uint256 fltPrice_,
+        uint256 usdCollateralPerUnit_,
+        uint256 usdTargetRevenuePerEpoch_,
+        uint256 minDuration_,
+        uint256 minRewardPerEpoch_,
+        uint256 maxRewardPerEpoch_,
+        uint256 vestingPeriodDuration_,
+        uint256 vestingPeriodCount_,
+        uint256 slashingRate_,
+        uint256 minProofsPerEpoch_,
+        uint256 maxProofsPerEpoch_,
+        uint256 withdrawEpochsAfterFailed_,
+        uint256 maxFailedRatio_,
+        bytes32 difficulty_,
+        uint256 initRewardPool_,
+        address randomXProxy_
     ) public initializer {
         __Ownable_init(msg.sender);
         __EpochController_init(epochDuration_);
-        __GlobalConst_init(minDepositedEpoches_, minRematchingEpoches_);
+        __GlobalConst_init(minDepositedEpochs_, minRematchingEpochs_, minProtocolVersion_, maxProtocolVersion_);
         __UUPSUpgradeable_init();
+        __Whitelist_init(isWhitelistEnabled_);
+        __CapacityConst_init(
+            fltPrice_,
+            usdCollateralPerUnit_,
+            usdTargetRevenuePerEpoch_,
+            minDuration_,
+            minRewardPerEpoch_,
+            maxRewardPerEpoch_,
+            vestingPeriodDuration_,
+            vestingPeriodCount_,
+            slashingRate_,
+            minProofsPerEpoch_,
+            maxProofsPerEpoch_,
+            withdrawEpochsAfterFailed_,
+            maxFailedRatio_,
+            difficulty_,
+            initRewardPool_,
+            randomXProxy_
+        );
 
         _getCoreStorage().dealImpl = dealImpl_;
         emit DealImplSet(dealImpl_);
     }
 
-    function initializeModules(ICapacity capacity_, IMarket market_) external onlyOwner {
+    function initializeModules(ICapacity capacity_, IMarket market_, IDealFactory dealFactory_) external onlyOwner {
         CoreStorage storage coreStorage = _getCoreStorage();
 
-        require(address(coreStorage.capacity) == address(0), "Core: capacity and market already initialized");
+        require(address(coreStorage.capacity) == address(0), "Core: modules already initialized");
         require(address(capacity_) != address(0), "Core: capacity is zero address");
         require(address(market_) != address(0), "Core: market is zero address");
+        require(address(dealFactory_) != address(0), "Core: deal factory is zero address");
 
         coreStorage.capacity = capacity_;
         coreStorage.market = market_;
+        coreStorage.dealFactory = dealFactory_;
     }
 
     // ------------------ External View Functions ------------------
@@ -68,6 +109,10 @@ contract Core is UUPSUpgradeable, GlobalConst, ICore {
 
     function market() external view returns (IMarket) {
         return _getCoreStorage().market;
+    }
+
+    function dealFactory() external view returns (IDealFactory) {
+        return _getCoreStorage().dealFactory;
     }
 
     function dealImpl() external view returns (IDeal) {
@@ -80,6 +125,11 @@ contract Core is UUPSUpgradeable, GlobalConst, ICore {
         _getCoreStorage().dealImpl = dealImpl_;
 
         emit DealImplSet(dealImpl_);
+    }
+
+    function setActiveUnitCount(uint256 activeUnitCount_) external {
+        require(msg.sender == address(_getCoreStorage().capacity), "Core: caller is not capacity");
+        _setActiveUnitCount(activeUnitCount_);
     }
 
     // ------------------ Internal Mutable Functions ------------------

@@ -5,9 +5,9 @@ import type {
   CapacityCommitmentShort,
   CapacityCommitmentStatus,
   ComputeUnit,
+  ComputeUnitsWithCCStatus,
   DealShort,
   DealStatus,
-  Effector,
   OfferShort,
   Peer,
   ProviderBase,
@@ -18,46 +18,33 @@ import type {
   BasicPeerFragment,
 } from "../indexerClient/queries/offers-query.generated.js";
 import {
-  serializeEffectorDescription,
+  serializeCUStatus,
   serializeProviderName,
+  serializeRewards,
 } from "./logics.js";
-import {
-  calculateTimestamp,
-  DEFAULT_TOKEN_VALUE_ROUNDING,
-  tokenValueToRounded,
-} from "../utils.js";
+import { calculateTimestamp } from "../utils.js";
 import type {
   BasicDealFragment,
   ComputeUnitBasicFragment,
 } from "../indexerClient/queries/deals-query.generated.js";
 import type { CapacityCommitmentBasicFragment } from "../indexerClient/queries/capacity-commitments-query.generated.js";
-import {FLTToken} from "../constants.js";
+import { FLTToken } from "../constants.js";
+import type { ComputeUnitWithCcDataBasicFragment } from "../indexerClient/queries/peers-query.generated.js";
+import {
+  type SerializationSettings,
+  tokenValueToRounded,
+} from "../../utils/serializers.js";
+import {
+  serializeEffectors,
+  serializeContractRateToPercentage,
+} from "../../utils/indexerClient/serializers.js";
 
-// TODO: rename to scheme suffixes not there is a Zoo in naming a little.
-export function serializeEffectors(
-  manyToManyEffectors:
-    | Array<{ effector: { id: string; description: string } }>
-    | null
-    | undefined,
-): Array<Effector> {
-  const composedEffectors: Array<Effector> = [];
-  if (!manyToManyEffectors) {
-    return composedEffectors;
-  }
-  for (const effector of manyToManyEffectors) {
-    composedEffectors.push({
-      cid: effector.effector.id,
-      description: serializeEffectorDescription(
-        effector.effector.id,
-        effector.effector.description,
-      ),
-    });
-  }
+const BIG_INT_ZERO = BigInt(0);
 
-  return composedEffectors;
-}
-
-export function serializeOfferShort(offer: BasicOfferFragment): OfferShort {
+export function serializeOfferShort(
+  offer: BasicOfferFragment,
+  serializationSettings: SerializationSettings,
+): OfferShort {
   return {
     id: offer.id,
     createdAt: Number(offer.createdAt),
@@ -68,10 +55,11 @@ export function serializeOfferShort(offer: BasicOfferFragment): OfferShort {
       symbol: offer.paymentToken.symbol,
       decimals: offer.paymentToken.decimals.toString(),
     },
+    // USDC.
     pricePerEpoch: tokenValueToRounded(
       offer.pricePerEpoch,
-      DEFAULT_TOKEN_VALUE_ROUNDING,
       offer.paymentToken.decimals,
+      serializationSettings.paymentTokenValueAdditionalFormatter,
     ),
     effectors: serializeEffectors(offer.effectors),
     providerId: offer.provider.id,
@@ -94,12 +82,15 @@ export function serializeProviderBase(
 
 export function serializeProviderShort(
   provider: ProviderOfProvidersQueryFragment,
+  serializationSettings: SerializationSettings,
 ): ProviderShort {
   const providerBase = serializeProviderBase(provider);
   const composedOffers = [];
   if (provider.offers) {
     for (const offer of provider.offers) {
-      composedOffers.push(serializeOfferShort(offer as BasicOfferFragment));
+      composedOffers.push(
+        serializeOfferShort(offer as BasicOfferFragment, serializationSettings),
+      );
     }
   }
   return {
@@ -108,18 +99,32 @@ export function serializeProviderShort(
   } as ProviderShort;
 }
 
-// It composes only compute units with linked workerIds.
 export function serializeComputeUnits(
   fetchedComputeUnits: Array<ComputeUnitBasicFragment>,
 ): Array<ComputeUnit> {
   const res: Array<ComputeUnit> = [];
   for (const fetched of fetchedComputeUnits) {
-    if (fetched.workerId) {
-      res.push({
-        id: fetched.id,
-        workerId: fetched.workerId,
-      });
-    }
+    res.push({
+      id: fetched.id,
+      workerId: fetched.workerId ?? undefined,
+    });
+  }
+  return res;
+}
+
+export function serializeComputeUnitsWithStatus(
+  computeUnitsWithCcDataBasicFragment: Array<ComputeUnitWithCcDataBasicFragment>,
+): Array<ComputeUnitsWithCCStatus> {
+  let res: Array<ComputeUnitsWithCCStatus> = [];
+  for (const computeUnit of computeUnitsWithCcDataBasicFragment) {
+    const { status } = serializeCUStatus(computeUnit);
+
+    res.push({
+      id: computeUnit.id,
+      workerId: computeUnit.workerId ?? undefined,
+      status,
+      successProofs: computeUnit.submittedProofsCount,
+    });
   }
   return res;
 }
@@ -148,6 +153,7 @@ export function serializeDealsShort(
     dealStatus: DealStatus | undefined;
     freeBalance: bigint | null | undefined;
   },
+  serializationSettings: SerializationSettings,
 ): DealShort {
   const freeBalance = fromRpcForDealShort.freeBalance
     ? fromRpcForDealShort.freeBalance
@@ -166,22 +172,23 @@ export function serializeDealsShort(
       symbol: deal.paymentToken.symbol,
       decimals: deal.paymentToken.decimals.toString(),
     },
+    // USDC.
     balance: tokenValueToRounded(
       freeBalance,
-      DEFAULT_TOKEN_VALUE_ROUNDING,
       deal.paymentToken.decimals,
+      serializationSettings.paymentTokenValueAdditionalFormatter,
     ),
     status: fromRpcForDealShort.dealStatus
       ? fromRpcForDealShort.dealStatus
       : "active",
+    // USDC.
     totalEarnings: tokenValueToRounded(
       totalEarnings,
-      DEFAULT_TOKEN_VALUE_ROUNDING,
       deal.paymentToken.decimals,
+      serializationSettings.paymentTokenValueAdditionalFormatter,
     ),
-    // TODO: add missed implementations.
-    registeredWorkers: 0,
-    matchedWorkers: 0,
+    registeredWorkers: deal.registeredWorkersCurrentCount,
+    matchedWorkers: deal.matchedWorkersCurrentCount,
   };
 }
 
@@ -190,6 +197,7 @@ export function serializeCapacityCommitmentShort(
   statusFromRpc: CapacityCommitmentStatus,
   coreInitTimestamp: number,
   coreEpochDuration: number,
+  precision: number,
 ): CapacityCommitmentShort {
   let expiredAt = null;
   let startedAt = null;
@@ -218,7 +226,10 @@ export function serializeCapacityCommitmentShort(
     peerId: capacityCommitmentFromIndexer.peer.id,
     computeUnitsCount: Number(capacityCommitmentFromIndexer.computeUnitsCount),
     status: statusFromRpc,
-    rewardDelegatorRate: Number(capacityCommitmentFromIndexer.rewardDelegatorRate),
+    rewardDelegatorRate: serializeContractRateToPercentage(
+      Number(capacityCommitmentFromIndexer.rewardDelegatorRate),
+      precision,
+    ),
     duration: Number(capacityCommitmentFromIndexer.duration),
   };
 }
@@ -233,25 +244,70 @@ export function serializeCapacityCommitmentDetail(
   unlockedRewards: bigint | null,
   totalRewards: bigint | null,
   rewardWithdrawn: bigint,
+  delegatorAddress: string,
+  serializationSettings: SerializationSettings,
+  precision: number,
 ): CapacityCommitmentDetail {
-  const _totalRewards = totalRewards ? totalRewards : BigInt(0);
-  const _unlockedRewards = unlockedRewards ? unlockedRewards : BigInt(0);
+  const _totalRewards = totalRewards ? BigInt(totalRewards) : BIG_INT_ZERO;
+  const _unlockedRewards = unlockedRewards
+    ? BigInt(unlockedRewards)
+    : BIG_INT_ZERO;
+  // First of all convert to [0, 1] with accordance of precision and than to [0, 100] to % format.
+  const rewardDelegatorRatePercentage = serializeContractRateToPercentage(
+    rewardDelegatorRate,
+    precision,
+  );
+  const unclockedRewardsSerialized = serializeRewards(
+    _unlockedRewards,
+    rewardDelegatorRate,
+    precision,
+    serializationSettings,
+  );
+  const notWithdrawnRewardsSerialized = serializeRewards(
+    _totalRewards,
+    rewardDelegatorRate,
+    precision,
+    serializationSettings,
+  );
   return {
     ...serializeCapacityCommitmentShort(
       capacityCommitmentFromIndexer,
       statusFromRpc,
       coreInitTimestamp,
       coreEpochDuration,
+      precision,
     ),
-    totalCollateral: tokenValueToRounded(totalCollateral),
+    // FLT.
+    totalCollateral: tokenValueToRounded(
+      totalCollateral,
+      Number(FLTToken.decimals),
+      serializationSettings.nativeTokenValueAdditionalFormatter,
+    ),
     collateralToken: FLTToken,
-    rewardDelegatorRate: rewardDelegatorRate,
-    rewardsUnlocked: tokenValueToRounded(_unlockedRewards),
-    rewardsUnlockedDelegator: tokenValueToRounded(_unlockedRewards * BigInt(rewardDelegatorRate)),
-    rewardsUnlockedProvider: tokenValueToRounded(_unlockedRewards * BigInt(1 - rewardDelegatorRate)),
-    rewardsNotWithdrawn: tokenValueToRounded(_totalRewards),
-    rewardsNotWithdrawnDelegator: tokenValueToRounded(_totalRewards * BigInt(rewardDelegatorRate)),
-    rewardsNotWithdrawnProvider: tokenValueToRounded(_totalRewards * BigInt(1 - rewardDelegatorRate)),
-    rewardsTotal: tokenValueToRounded(_totalRewards + rewardWithdrawn),
-  }
+    rewardDelegatorRate: rewardDelegatorRatePercentage,
+    // FLT.
+    rewardsUnlocked: tokenValueToRounded(
+      _unlockedRewards,
+      Number(FLTToken.decimals),
+      serializationSettings.nativeTokenValueAdditionalFormatter,
+    ),
+    rewardsUnlockedDelegator: unclockedRewardsSerialized.delegator,
+    rewardsUnlockedProvider: unclockedRewardsSerialized.provider,
+    rewardsNotWithdrawn: tokenValueToRounded(
+      _totalRewards,
+      Number(FLTToken.decimals),
+      serializationSettings.nativeTokenValueAdditionalFormatter,
+    ),
+    rewardsNotWithdrawnDelegator: notWithdrawnRewardsSerialized.delegator,
+    rewardsNotWithdrawnProvider: notWithdrawnRewardsSerialized.provider,
+    rewardsTotal: tokenValueToRounded(
+      _totalRewards + BigInt(rewardWithdrawn),
+      Number(FLTToken.decimals),
+      serializationSettings.nativeTokenValueAdditionalFormatter,
+    ),
+    delegatorAddress:
+      delegatorAddress == "0x0000000000000000000000000000000000000000"
+        ? null
+        : delegatorAddress,
+  };
 }
