@@ -28,9 +28,7 @@ contract AddComputeUnits is Test {
     function test_AddOneUnit() public {
         Deal deal = deployment.deployDealWithoutFactory(10, 10, 1, 1 ether);
 
-        assertEq(
-            uint256(deal.getStatus()), uint256(IDeal.Status.NOT_ENOUGH_WORKERS), "status should be NOT_ENOUGH_WORKERS"
-        );
+        assertEq(uint256(deal.getStatus()), uint256(IDeal.Status.NOT_ENOUGH_WORKERS), "status should be NOT_ENOUGH_WORKERS");
         assertEq(deal.getMaxPaidEpoch(), 0, "maxPaidEpoch should be 0");
 
         (address[] memory computeProviders, bytes32[] memory peerIds, bytes32[] memory unitIds) =
@@ -42,18 +40,14 @@ contract AddComputeUnits is Test {
         assertEq(deal.getWorkerCount(), 0, "workerCount should be 0");
         assertEq(deal.getComputeUnitCount(), 1, "unitCount should be 1");
         assertEq(deal.getMaxPaidEpoch(), 0, "maxPaidEpoch should be 0");
-        assertEq(
-            uint256(deal.getStatus()), uint256(IDeal.Status.NOT_ENOUGH_WORKERS), "status should be NOT_ENOUGH_WORKERS"
-        );
+        assertEq(uint256(deal.getStatus()), uint256(IDeal.Status.NOT_ENOUGH_WORKERS), "status should be NOT_ENOUGH_WORKERS");
     }
 
     function test_AddMinUnits() public {
         uint256 minWorkers = 10;
         Deal deal = deployment.deployDealWithoutFactory(minWorkers, 100, 1, 1 ether);
 
-        assertEq(
-            uint256(deal.getStatus()), uint256(IDeal.Status.NOT_ENOUGH_WORKERS), "status should be NOT_ENOUGH_WORKERS"
-        );
+        assertEq(uint256(deal.getStatus()), uint256(IDeal.Status.NOT_ENOUGH_WORKERS), "status should be NOT_ENOUGH_WORKERS");
         assertEq(deal.getMaxPaidEpoch(), 0, "maxPaidEpoch should be 0");
 
         (address[] memory computeProviders, bytes32[] memory peerIds, bytes32[] memory unitIds) =
@@ -67,18 +61,14 @@ contract AddComputeUnits is Test {
         assertEq(deal.getWorkerCount(), 0, "workerCount should be 0");
         assertEq(deal.getComputeUnitCount(), minWorkers, "unitCount should be minWorkers");
         assertEq(deal.getMaxPaidEpoch(), 0, "maxPaidEpoch should be 0");
-        assertEq(
-            uint256(deal.getStatus()), uint256(IDeal.Status.NOT_ENOUGH_WORKERS), "status should be NOT_ENOUGH_WORKERS"
-        );
+        assertEq(uint256(deal.getStatus()), uint256(IDeal.Status.NOT_ENOUGH_WORKERS), "status should be NOT_ENOUGH_WORKERS");
     }
 
     function test_AddTargetUnits() public {
         uint256 targetWorkers = 10;
         Deal deal = deployment.deployDealWithoutFactory(2, targetWorkers, 1, 1 ether);
 
-        assertEq(
-            uint256(deal.getStatus()), uint256(IDeal.Status.NOT_ENOUGH_WORKERS), "status should be NOT_ENOUGH_WORKERS"
-        );
+        assertEq(uint256(deal.getStatus()), uint256(IDeal.Status.NOT_ENOUGH_WORKERS), "status should be NOT_ENOUGH_WORKERS");
         assertEq(deal.getMaxPaidEpoch(), 0, "maxPaidEpoch should be 0");
 
         (address[] memory computeProviders, bytes32[] memory peerIds, bytes32[] memory unitIds) =
@@ -92,8 +82,6 @@ contract AddComputeUnits is Test {
         assertEq(deal.getWorkerCount(), 0, "workerCount should be 0");
         assertEq(deal.getComputeUnitCount(), targetWorkers, "unitCount should be minWorkers");
         assertEq(deal.getMaxPaidEpoch(), 0, "maxPaidEpoch should be 0");
-        assertEq(
-            uint256(deal.getStatus()), uint256(IDeal.Status.NOT_ENOUGH_WORKERS), "status should be NOT_ENOUGH_WORKERS"
-        );
+        assertEq(uint256(deal.getStatus()), uint256(IDeal.Status.NOT_ENOUGH_WORKERS), "status should be NOT_ENOUGH_WORKERS");
     }
 }

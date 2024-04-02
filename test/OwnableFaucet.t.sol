@@ -4,7 +4,7 @@ pragma solidity ^0.8.19;
 import {Test, console2} from "forge-std/Test.sol";
 import "src/dev/OwnableFaucet.sol";
 
-contract ContractWhichCantReceiveEther {}
+contract ContractWhichCantReceiveEther { }
 
 contract OwnableFaucetTest is Test {
     // TODO test with mock tUSD
