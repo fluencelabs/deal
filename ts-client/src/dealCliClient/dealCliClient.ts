@@ -3,6 +3,10 @@ import type { ContractsENV } from "../client/config.js";
 import type { DealByProvider, OfferDetail } from "./types/schemes.js";
 import { serializeOfferDetail } from "./serializers/schemes.js";
 import type { SerializationSettings } from "../utils/serializers.js";
+import type { OffersFilterIn } from "./types/filters.js";
+import type { IndexerPaginatorIn } from "./types/paginators.js";
+import { serializeOffersFilterIn } from "./serializers/filters.js";
+import type { OffersOrderByIn } from "./types/orders.js";
 
 /*
  * @dev This client represents endpoints to access desirable indexer data in REST
@@ -16,6 +20,7 @@ import type { SerializationSettings } from "../utils/serializers.js";
  */
 export class DealCliClient {
   public indexerClient: IndexerClient;
+  DEFAULT_PAGE_LIMIT = 1000;
 
   // @param indexerUrl: is optional - you force to replace indexer
   //  URL setting (by default it uses URL from network config mapping).
@@ -37,18 +42,30 @@ export class DealCliClient {
     }
   }
 
-  // Get Offer detail, i.e. with its peers and compute units.
-  // Note, that it can not return more than 1000 peers per offer,
-  //  and can not return more than 1000 compute units per each peer.
-  async getOffer(offerId: string): Promise<OfferDetail | null> {
-    const options = {
-      id: offerId,
-    };
-    const data = await this.indexerClient.getOffer(options);
-    if (data.offer) {
-      return serializeOfferDetail(data.offer, this._serializationSettings);
-    }
-    return null;
+  // Get Offers details, i.e. with its peers and compute units.
+  // Note, that if offer with id does not exist, it silently ignores that fact.
+  // Limitations
+  // - it can not return more than 1000 offers,
+  // - it can not return more than 1000 peers per offer,
+  // - it can not return more than 1000 compute units per each peer.
+  async getOffers(
+    filter: OffersFilterIn,
+    paginator: IndexerPaginatorIn = {
+      offset: 0,
+      limit: this.DEFAULT_PAGE_LIMIT,
+    },
+    order: OffersOrderByIn = { orderBy: "createdAt", orderType: "desc" },
+  ): Promise<OfferDetail[]> {
+    const data = await this.indexerClient.getOffers({
+      filters: serializeOffersFilterIn(filter),
+      offset: paginator.offset,
+      limit: paginator.limit,
+      orderBy: order.orderBy,
+      orderType: order.orderType,
+    });
+    return data.offers.map((offerIn) => {
+      return serializeOfferDetail(offerIn, this._serializationSettings);
+    });
   }
 
   async getDealsByProvider(providerId: string): Promise<Array<DealByProvider>> {
