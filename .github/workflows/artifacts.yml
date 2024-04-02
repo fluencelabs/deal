@@ -23,9 +23,9 @@ on:
       ipc-deploy-script-image:
         description: "ipc-deploy-script container image"
         value: ${{ jobs.ipc.outputs.ipc-deploy-script-image }}
-      ipc-image:
-        description: "ipc container image"
-        value: ${{ jobs.ipc.outputs.ipc-image }}
+      fendermint-image:
+        description: "fendermint container image"
+        value: ${{ jobs.ipc.outputs.fendermint-image }}
       cometbft-image:
         description: "cometbft container image"
         value: ${{ jobs.ipc.outputs.cometbft-image }}
@@ -113,7 +113,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
 
     outputs:
-      ipc-image: "${{ steps.artifacts.outputs.ipc-image }}"
+      fendermint-image: "${{ steps.artifacts.outputs.fendermint-image }}"
       ipc-deploy-script-image: "${{ steps.artifacts.outputs.ipc-deploy-script-image }}"
       cometbft-image: "${{ steps.artifacts.outputs.cometbft-image }}"
 
@@ -155,12 +155,12 @@ jobs:
           release: ${{ inputs.release }}
         run: |
           if [[ ${release} == "false" ]]; then
-            echo "ipc-image=docker.fluence.dev/ipc:${{ steps.version.outputs.id }}" >> "$GITHUB_OUTPUT"
+            echo "fendermint-image=docker.fluence.dev/fendermint-local:${{ steps.version.outputs.id }}" >> "$GITHUB_OUTPUT"
             echo "ipc-deploy-script-image=docker.fluence.dev/ipc-deploy-script:${{ steps.version.outputs.id }}" >> "$GITHUB_OUTPUT"
             echo "cometbft-image=docker.fluence.dev/cometbft:${{ steps.version.outputs.id }}" >> "$GITHUB_OUTPUT"
           else
             version="$(jq -r .[] .github/release-please/manifest.json)"
-            echo "ipc-rpc-image=fluencelabs/ipc:${version}" >> "$GITHUB_OUTPUT"
+            echo "fendermint-image=fluencelabs/fendermint-local:${version}" >> "$GITHUB_OUTPUT"
             echo "ipc-deploy-script-image=fluencelabs/ipc-deploy-script:${version}" >> "$GITHUB_OUTPUT"
             echo "cometbft-image=fluencelabs/cometbft:${version}" >> "$GITHUB_OUTPUT"
           fi
@@ -197,7 +197,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and push ipc image
+      - name: Build and push fendermint image
         id: ipc
         uses: docker/build-push-action@v5
         with:
@@ -208,7 +208,7 @@ jobs:
           target: ipc
           platforms: linux/${{ matrix.arch }}
           tags: |
-            ${{ steps.artifacts.outputs.ipc-image }}-${{ matrix.arch }}
+            ${{ steps.artifacts.outputs.fendermint-image }}-${{ matrix.arch }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -301,7 +301,7 @@ jobs:
 
       - name: Run deployment script
         env:
-          IPC_IMAGE: "${{ needs.ipc.outputs.ipc-image }}-amd64"
+          FENDERMINT_IMAGE: "${{ needs.ipc.outputs.fendermint-image }}-amd64"
           COMETBFT_IMAGE: "${{ needs.ipc.outputs.cometbft-image }}-amd64"
           IPC_DEPLOY_SCRIPT_IMAGE: "${{ needs.ipc.outputs.ipc-deploy-script-image }}-amd64"
         working-directory: docker
@@ -581,11 +581,11 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
 
-      - name: Merge ipc images
+      - name: Merge fendermint images
         uses: Noelware/docker-manifest-action@0.4.0
         with:
-          inputs: ${{ needs.ipc.outputs.ipc-image }}
-          images: ${{ needs.ipc.outputs.ipc-image }}-amd64,${{ needs.ipc.outputs.ipc-image }}-arm64
+          inputs: ${{ needs.ipc.outputs.fendermint-image }}
+          images: ${{ needs.ipc.outputs.fendermint-image }}-amd64,${{ needs.ipc.outputs.ipc-image }}-arm64
           push: true
           amend: true
 
@@ -617,9 +617,9 @@ jobs:
         if: always()
         run: |
           cat <<'SNAPSHOT' >> $GITHUB_STEP_SUMMARY
-          ## ipc
+          ## fendermint
           ```
-          ${{ needs.ipc.outputs.ipc-image }}
+          ${{ needs.ipc.outputs.fendermint-image }}
           ```
 
           ## ipc-deploy-script
