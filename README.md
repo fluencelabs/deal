@@ -79,7 +79,9 @@ Below is the list of env. For description we aim you to [.example.env](.example.
 
 ## Makefile
 
-Below is some of useful **makefile** commands with their descriptions. To check out all commands run `make help`.
+Below is some of useful **makefile** commands with their descriptions. 
+
+To check out all commands and their descriptions run `make help`.
 
 ### Install NPM packages
 
