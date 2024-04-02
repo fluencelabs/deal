@@ -2,6 +2,12 @@
 import type { CodegenConfig } from "@graphql-codegen/cli";
 import { exec } from "child_process";
 
+function test() {
+
+
+}
+
+
 const config: CodegenConfig = {
     overwrite: true,
     schema: "http://localhost:8000/subgraphs/name/fluence-deal-contracts",

@@ -16,7 +16,16 @@
     "codegen:dealCliClient": "graphql-codegen --config codegen-deal-cli-indexer.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "create-pure-market-script": "vitest run create-pure-market.test"
+    "create-pure-market-script": "vitest run create-pure-market.test",
+    "lint:staged": "lint-staged"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,json}": [
+      "prettier --write"
+    ],
+    "tests/**/*.ts": [
+      "prettier --write"
+    ]
   },
   "files": [
     "dist"
@@ -52,6 +61,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-unused-imports": "^3.0.0",
     "husky": "^9.0.0",
+    "lint-staged": "^15.2.2",
     "prettier": "^3.0.2",
     "shx": "^0.3.4",
     "ts-node": "^10.9.1",

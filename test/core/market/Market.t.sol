@@ -123,12 +123,7 @@ contract MarketTest is Test {
         }
 
         bytes32 retOfferId = deployment.market.registerMarketOffer(
-            minPricePerWorkerEpoch,
-            paymentToken,
-            effectors,
-            registerPeers,
-            minProtocolVersion,
-            maxProtocolVersion
+            minPricePerWorkerEpoch, paymentToken, effectors, registerPeers, minProtocolVersion, maxProtocolVersion
         );
 
         assertEq(retOfferId, offerId, "OfferId mismatch");
@@ -137,12 +132,7 @@ contract MarketTest is Test {
     function test_GetOfferPeersUnits() public {
         deployment.market.setProviderInfo("test", CIDV1({prefixes: 0x12345678, hash: bytes32(0x00)}));
         bytes32 offerId = deployment.market.registerMarketOffer(
-            minPricePerWorkerEpoch,
-            paymentToken,
-            effectors,
-            registerPeers,
-            minProtocolVersion,
-            maxProtocolVersion
+            minPricePerWorkerEpoch, paymentToken, effectors, registerPeers, minProtocolVersion, maxProtocolVersion
         );
 
         Market.Offer memory offer = deployment.market.getOffer(offerId);

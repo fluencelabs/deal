@@ -209,15 +209,22 @@ Thus, TS files with `generated` key word you **should not rewrite manually**.
 > [dealExplorerClient.ts](client/dealExplorerClient/dealIndexerClient.ts) & [indexerClient.ts](client/dealExplorerClient/indexerClient/indexerClient.ts).
 
 # ToDo
-- [x] rename to deal-explorer-client
-- [ ] use deal package instead of import from `../src`
-- [ ] commit to the special repo
-- [ ] after merge with foundry -> to different npm packages [refactor work with several packages]
-- [x] add ulr links to fetch filters...
-- [x] TODO: search fields: by client or dealId?
-- [ ] resolve registered workers! (separate class?)
-- [ ] page counter (thanks to graphQL for no paginators)?
-- [x] optional filtering in `.graphql` schemes (discord solution processing...) [currently unsolved]
-- [x] convert values: timestamps, eths
-- [x] move to simple client
-- [ ] codegen - get url from env
+-   [x] rename to deal-explorer-client
+-   [ ] use deal package instead of import from `../src`
+-   [ ] commit to the special repo
+-   [ ] after merge with foundry -> to different npm packages [refactor work with several packages]
+-   [x] add ulr links to fetch filters...
+-   [x] TODO: search fields: by client or dealId?
+-   [ ] resolve registered workers! (separate class?)
+-   [x] page counter (thanks to graphQL for no paginators)?
+-   [x] optional filtering in `.graphql` schemes (discord solution processing...) [currently unsolved]
+-   [x] convert values: timestamps, eths
+-   [x] move to simple client
+-   [x] codegen - get url from env
+-   [ ] add to lint-staged after resolve of node/no-missing-import
+
+```json
+"src/**/*.+(ts)": [
+      "eslint --fix"
+    ],
+```

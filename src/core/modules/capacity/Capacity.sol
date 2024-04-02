@@ -18,7 +18,12 @@ import "./Snapshot.sol";
 import "forge-std/console.sol";
 import {PRECISION} from "src/core/GlobalConst.sol";
 
-contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacity {
+contract Capacity is
+    UUPSUpgradeable,
+    MulticallUpgradeable,
+    BaseModule,
+    ICapacity
+{
     using SafeERC20 for IERC20;
     using BytesConverter for bytes;
     using Address for address payable;
@@ -33,7 +38,8 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
     // #endregion
 
     // #region ------------------ Storage ------------------
-    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.capacity.storage.v1")) - 1);
+    bytes32 private constant _STORAGE_SLOT =
+        bytes32(uint256(keccak256("fluence.capacity.storage.v1")) - 1);
 
     struct CommitmentStorage {
         mapping(bytes32 => Commitment) commitments;
@@ -45,7 +51,11 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         uint256 rewardBalance;
     }
 
-    function _getCommitmentStorage() private pure returns (CommitmentStorage storage s) {
+    function _getCommitmentStorage()
+        private
+        pure
+        returns (CommitmentStorage storage s)
+    {
         bytes32 storageSlot = _STORAGE_SLOT;
         assembly {
             s.slot := storageSlot
@@ -69,12 +79,17 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         s.changedNonceEpoch = core.currentEpoch();
     }
 
-    function _authorizeUpgrade(address newImplementation) internal override onlyCoreOwner {}
+    function _authorizeUpgrade(
+        address newImplementation
+    ) internal override onlyCoreOwner {}
     // #endregion
 
     // #region ------------------ Modifiers ------------------
     modifier onlyApproved() {
-        require(Whitelist(address(core)).isApproved(msg.sender), "Whitelist: provider is not approved");
+        require(
+            Whitelist(address(core)).isApproved(msg.sender),
+            "Whitelist: provider is not approved"
+        );
         _;
     }
     // #endregion
@@ -91,40 +106,59 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         IMarket.ComputePeer memory peer = market.getComputePeer(peerId);
 
         Snapshot.Cache memory snapshotCache = Snapshot.init(cc);
-        CCStatus status = _preCommitCommitmentSnapshot(cc, snapshotCache, peer, core.currentEpoch(), _expiredEpoch(cc));
+        CCStatus status = _preCommitCommitmentSnapshot(
+            cc,
+            snapshotCache,
+            peer,
+            core.currentEpoch(),
+            _expiredEpoch(cc)
+        );
 
         return status;
     }
 
-    function getCommitment(bytes32 commitmentId) external view returns (CommitmentView memory) {
+    function getCommitment(
+        bytes32 commitmentId
+    ) external view returns (CommitmentView memory) {
         CommitmentStorage storage s = _getCommitmentStorage();
         Commitment storage cc = s.commitments[commitmentId];
 
-        require(cc.info.peerId != bytes32(0x00), "Capacity commitment doesn't exist");
+        require(
+            cc.info.peerId != bytes32(0x00),
+            "Capacity commitment doesn't exist"
+        );
 
-        return CommitmentView({
-            status: getStatus(commitmentId),
-            peerId: cc.info.peerId,
-            collateralPerUnit: cc.info.collateralPerUnit,
-            unitCount: core.market().getComputePeer(cc.info.peerId).unitCount,
-            startEpoch: cc.info.startEpoch,
-            endEpoch: cc.info.startEpoch + cc.info.duration,
-            rewardDelegatorRate: cc.info.rewardDelegatorRate,
-            delegator: cc.info.delegator,
-            totalFailCount: cc.progress.totalFailCount,
-            failedEpoch: cc.finish.failedEpoch,
-            exitedUnitCount: cc.finish.exitedUnitCount
-        });
+        return
+            CommitmentView({
+                status: getStatus(commitmentId),
+                peerId: cc.info.peerId,
+                collateralPerUnit: cc.info.collateralPerUnit,
+                unitCount: core
+                    .market()
+                    .getComputePeer(cc.info.peerId)
+                    .unitCount,
+                startEpoch: cc.info.startEpoch,
+                endEpoch: cc.info.startEpoch + cc.info.duration,
+                rewardDelegatorRate: cc.info.rewardDelegatorRate,
+                delegator: cc.info.delegator,
+                totalFailCount: cc.progress.totalFailCount,
+                failedEpoch: cc.finish.failedEpoch,
+                exitedUnitCount: cc.finish.exitedUnitCount
+            });
     }
 
-    function totalRewards(bytes32 commitmentId) external view returns (uint256) {
+    function totalRewards(
+        bytes32 commitmentId
+    ) external view returns (uint256) {
         CommitmentStorage storage s = _getCommitmentStorage();
         Commitment storage cc = s.commitments[commitmentId];
 
         return cc.vesting.total();
     }
 
-    function unlockedRewards(bytes32 commitmentId) external view returns (uint256) {
+    function unlockedRewards(
+        bytes32 commitmentId
+    ) external view returns (uint256) {
         CommitmentStorage storage s = _getCommitmentStorage();
         Commitment storage cc = s.commitments[commitmentId];
 
@@ -142,11 +176,12 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
     // #endregion
 
     // #region ----------------- Public Mutable -----------------
-    function createCommitment(bytes32 peerId, uint256 duration, address delegator, uint256 rewardDelegationRate)
-        external
-        onlyApproved
-        returns (bytes32)
-    {
+    function createCommitment(
+        bytes32 peerId,
+        uint256 duration,
+        address delegator,
+        uint256 rewardDelegationRate
+    ) external onlyApproved returns (bytes32) {
         // #region load contracts and storage
         IMarket market = core.market();
         CommitmentStorage storage s = _getCommitmentStorage();
@@ -154,21 +189,43 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
 
         // #region init and verify variables
         IMarket.ComputePeer memory peer = market.getComputePeer(peerId);
-        require(peer.commitmentId == bytes32(0x00), "Peer already has commitment");
+        require(
+            peer.commitmentId == bytes32(0x00),
+            "Peer already has commitment"
+        );
 
         IMarket.Offer memory offer = market.getOffer(peer.offerId);
         address provider = offer.provider;
-        require(msg.sender == provider, "Only provider can create capacity commitment");
+        require(
+            msg.sender == provider,
+            "Only provider can create capacity commitment"
+        );
 
-        require(duration >= core.minDuration(), "Duration should be greater than min capacity commitment duration");
-        require(rewardDelegationRate > 0, "Reward delegation rate should be greater than 0");
-        require(rewardDelegationRate <= PRECISION, "Reward delegation rate should be less or equal 1");
+        require(
+            duration >= core.minDuration(),
+            "Duration should be greater than min capacity commitment duration"
+        );
+        require(
+            rewardDelegationRate > 0,
+            "Reward delegation rate should be greater than 0"
+        );
+        require(
+            rewardDelegationRate <= PRECISION,
+            "Reward delegation rate should be less or equal 1"
+        );
         // #endregion
 
         // #region create commitment
         uint256 collateralPerUnit = core.fltCollateralPerUnit();
-        bytes32 commitmentId =
-            keccak256(abi.encodePacked(block.number, peerId, duration, delegator, rewardDelegationRate));
+        bytes32 commitmentId = keccak256(
+            abi.encodePacked(
+                block.number,
+                peerId,
+                duration,
+                delegator,
+                rewardDelegationRate
+            )
+        );
 
         Commitment storage cc = s.commitments[commitmentId];
         cc.info = CommitmentInfo({
@@ -182,7 +239,14 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         });
         market.setCommitmentId(peerId, commitmentId);
 
-        emit CommitmentCreated(peerId, commitmentId, duration, delegator, rewardDelegationRate, collateralPerUnit);
+        emit CommitmentCreated(
+            peerId,
+            commitmentId,
+            duration,
+            delegator,
+            rewardDelegationRate,
+            collateralPerUnit
+        );
         // #endregion
 
         return commitmentId;
@@ -194,11 +258,17 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         Commitment storage cc = s.commitments[commitmentId];
 
         bytes32 peerId = cc.info.peerId;
-        IMarket.Offer memory offer = market.getOffer(market.getComputePeer(peerId).offerId);
+        IMarket.Offer memory offer = market.getOffer(
+            market.getComputePeer(peerId).offerId
+        );
 
-        require(offer.provider == msg.sender, "Only provider can remove capacity commitment");
         require(
-            getStatus(commitmentId) == CCStatus.WaitDelegation, "Capacity commitment is not in WaitDelegation status"
+            offer.provider == msg.sender,
+            "Only provider can remove capacity commitment"
+        );
+        require(
+            getStatus(commitmentId) == CCStatus.WaitDelegation,
+            "Capacity commitment is not in WaitDelegation status"
         );
 
         market.setCommitmentId(peerId, bytes32(0x00));
@@ -207,7 +277,9 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         emit CommitmentRemoved(commitmentId);
     }
 
-    function depositCollateral(bytes32[] calldata commitmentIds) external payable {
+    function depositCollateral(
+        bytes32[] calldata commitmentIds
+    ) external payable {
         // #region load contracts and storage
         IMarket market = core.market();
         CommitmentStorage storage s = _getCommitmentStorage();
@@ -242,7 +314,10 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
             if (delegator == address(0x00)) {
                 cc.info.delegator = msg.sender;
             } else {
-                require(delegator == msg.sender, "Only delegator can lock collateral");
+                require(
+                    delegator == msg.sender,
+                    "Only delegator can lock collateral"
+                );
             }
 
             uint256 startEpoch = currentEpoch_ + 1;
@@ -256,7 +331,11 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
 
             emit CollateralDeposited(commitmentId, collateral);
             emit CommitmentActivated(
-                peerId, commitmentId, startEpoch, startEpoch + cc.info.duration, market.getComputeUnitIds(peerId)
+                peerId,
+                commitmentId,
+                startEpoch,
+                startEpoch + cc.info.duration,
+                market.getComputeUnitIds(peerId)
             );
             // #endregion
         }
@@ -264,7 +343,11 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         require(totalValue == 0, "Excessive value");
     }
 
-    function submitProof(bytes32 unitId, bytes32 localUnitNonce, bytes32 resultHash) external {
+    function submitProof(
+        bytes32 unitId,
+        bytes32 localUnitNonce,
+        bytes32 resultHash
+    ) external {
         // #region load contracts and storage
         IMarket market = core.market();
         CommitmentStorage storage s = _getCommitmentStorage();
@@ -275,13 +358,22 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
 
         IMarket.ComputeUnit memory unit = market.getComputeUnit(unitId);
         IMarket.ComputePeer memory peer = market.getComputePeer(unit.peerId);
-        require(peer.owner == msg.sender, "Only compute peer owner can submit proof");
+        require(
+            peer.owner == msg.sender,
+            "Only compute peer owner can submit proof"
+        );
 
         bytes32 commitmentId = peer.commitmentId;
-        require(commitmentId != bytes32(0x00), "Compute unit doesn't have commitment");
+        require(
+            commitmentId != bytes32(0x00),
+            "Compute unit doesn't have commitment"
+        );
 
         Commitment storage cc = s.commitments[commitmentId];
-        require(currentEpoch >= cc.info.startEpoch, "Capacity commitment is not started");
+        require(
+            currentEpoch >= cc.info.startEpoch,
+            "Capacity commitment is not started"
+        );
 
         UnitInfo storage unitInfo = cc.unitInfoById[unitId];
         require(!unitInfo.isInactive, "Compute unit is in deal");
@@ -291,13 +383,25 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
 
         // #region commit snapshots
         Snapshot.Cache memory snapshotCache = Snapshot.init(cc);
-        CCStatus status = _preCommitCommitmentSnapshot(cc, snapshotCache, peer, currentEpoch, expiredEpoch);
+        CCStatus status = _preCommitCommitmentSnapshot(
+            cc,
+            snapshotCache,
+            peer,
+            currentEpoch,
+            expiredEpoch
+        );
         if (status != CCStatus.Active) {
             revert CapacityCommitmentIsNotActive(status);
         }
         _postCommitCommitmentSnapshot(commitmentId, cc, snapshotCache);
 
-        _commitUnitSnapshot(cc, unitInfo, currentEpoch, expiredEpoch, snapshotCache.current.failedEpoch);
+        _commitUnitSnapshot(
+            cc,
+            unitInfo,
+            currentEpoch,
+            expiredEpoch,
+            snapshotCache.current.failedEpoch
+        );
         // #endregion
 
         // #region update global nonce
@@ -307,8 +411,15 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         }
 
         // pseudo-random next global nonce
-        s.nextGlobalNonce =
-            keccak256(abi.encodePacked(s.globalNonce, blockhash(block.number - 1), unitId, localUnitNonce, resultHash));
+        s.nextGlobalNonce = keccak256(
+            abi.encodePacked(
+                s.globalNonce,
+                blockhash(block.number - 1),
+                unitId,
+                localUnitNonce,
+                resultHash
+            )
+        );
         // #endregion
 
         uint256 unitProofCount = unitInfo.proofCountByEpoch[currentEpoch] + 1;
@@ -317,8 +428,13 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         }
 
         // #region save localUnitNonce
-        bytes32 globalUnitNonce_ = keccak256(abi.encodePacked(s.globalNonce, unitId));
-        require(!s.isProofSubmittedByUnit[globalUnitNonce_][localUnitNonce], "Proof is already submitted for this unit");
+        bytes32 globalUnitNonce_ = keccak256(
+            abi.encodePacked(s.globalNonce, unitId)
+        );
+        require(
+            !s.isProofSubmittedByUnit[globalUnitNonce_][localUnitNonce],
+            "Proof is already submitted for this unit"
+        );
         s.isProofSubmittedByUnit[globalUnitNonce_][localUnitNonce] = true;
         // #endregion
 
@@ -345,13 +461,25 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         // #endregion
 
         // #region check proof
-        (bool success, bytes memory randomXResultHash) = core.randomXProxy().delegatecall(
-            abi.encodeWithSelector(RandomXProxy.run.selector, globalUnitNonce_, localUnitNonce)
-        );
+        (bool success, bytes memory randomXResultHash) = core
+            .randomXProxy()
+            .delegatecall(
+                abi.encodeWithSelector(
+                    RandomXProxy.run.selector,
+                    globalUnitNonce_,
+                    localUnitNonce
+                )
+            );
 
         require(success, "RandomXProxy.run failed");
-        require(randomXResultHash.toBytes32() == resultHash, "Proof is not valid");
-        require(resultHash <= core.difficulty(), "Proof is bigger than difficulty");
+        require(
+            randomXResultHash.toBytes32() == resultHash,
+            "Proof is not valid"
+        );
+        require(
+            resultHash <= core.difficulty(),
+            "Proof is bigger than difficulty"
+        );
         // #endregion
 
         emit CommitmentStatsUpdated(
@@ -389,12 +517,17 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         // #endregion
 
         require(
-            status != CCStatus.Failed || currentEpoch_ >= cc.finish.failedEpoch + core.withdrawEpochsAfterFailed(),
+            status != CCStatus.Failed ||
+                currentEpoch_ >=
+                cc.finish.failedEpoch + core.withdrawEpochsAfterFailed(),
             "Capacity commitment is failed and not enough epochs passed"
         );
 
         uint256 unitCount = peer.unitCount;
-        require(cc.finish.exitedUnitCount == unitCount, "For finish commitment all units should be exited");
+        require(
+            cc.finish.exitedUnitCount == unitCount,
+            "For finish commitment all units should be exited"
+        );
 
         // #region post commit commitment snapshot
 
@@ -415,7 +548,10 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         emit CommitmentFinished(commitmentId);
     }
 
-    function removeCUFromCC(bytes32 commitmentId, bytes32[] calldata unitIds) external {
+    function removeCUFromCC(
+        bytes32 commitmentId,
+        bytes32[] calldata unitIds
+    ) external {
         // #region load contracts and storage
         IMarket market = core.market();
         CommitmentStorage storage s = _getCommitmentStorage();
@@ -432,10 +568,19 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         IMarket.ComputePeer memory peer = market.getComputePeer(peerId);
         IMarket.Offer memory offer = market.getOffer(peer.offerId);
 
-        require(offer.provider == msg.sender, "Only provider can remove capacity commitment");
+        require(
+            offer.provider == msg.sender,
+            "Only provider can remove capacity commitment"
+        );
 
         Snapshot.Cache memory snapshotCache = Snapshot.init(cc);
-        CCStatus status = _preCommitCommitmentSnapshot(cc, snapshotCache, peer, currentEpoch_, expiredEpoch);
+        CCStatus status = _preCommitCommitmentSnapshot(
+            cc,
+            snapshotCache,
+            peer,
+            currentEpoch_,
+            expiredEpoch
+        );
         _postCommitCommitmentSnapshot(commitmentId, cc, snapshotCache);
         if (status != CCStatus.Inactive && status != CCStatus.Failed) {
             revert CapacityCommitmentIsActive(status);
@@ -446,15 +591,23 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
             bytes32 unitId = unitIds[i];
             IMarket.ComputeUnit memory unit = market.getComputeUnit(unitId);
 
-            require(unit.peerId == peerId, "Compute unit doesn't belong to capacity commitment");
+            require(
+                unit.peerId == peerId,
+                "Compute unit doesn't belong to capacity commitment"
+            );
 
             if (unit.deal != address(0x00)) {
                 market.returnComputeUnitFromDeal(unitId);
             }
 
             UnitInfo storage unitInfo = cc.unitInfoById[unitId];
-            bool success =
-                _commitUnitSnapshot(cc, unitInfo, currentEpoch_, expiredEpoch, snapshotCache.current.failedEpoch);
+            bool success = _commitUnitSnapshot(
+                cc,
+                unitInfo,
+                currentEpoch_,
+                expiredEpoch,
+                snapshotCache.current.failedEpoch
+            );
             if (success) {
                 cc.finish.exitedUnitCount += 1;
                 cc.finish.totalSlashedCollateral += unitInfo.slashedCollateral;
@@ -491,7 +644,13 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
 
         // #region commit commitment snapshot for the previous epoch
         Snapshot.Cache memory snapshotCache = Snapshot.init(cc);
-        _preCommitCommitmentSnapshot(cc, snapshotCache, peer, currentEpoch, _expiredEpoch(cc));
+        _preCommitCommitmentSnapshot(
+            cc,
+            snapshotCache,
+            peer,
+            currentEpoch,
+            _expiredEpoch(cc)
+        );
         _postCommitCommitmentSnapshot(commitmentId, cc, snapshotCache);
         if (snapshotCache.current.failedEpoch != 0) {
             currentEpoch = snapshotCache.current.failedEpoch;
@@ -504,11 +663,13 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
 
         uint256 rewardBalance = s.rewardBalance;
         require(
-            amount <= rewardBalance, "Not enough reward balance pool on the contract. Wait when DAO will refill it."
+            amount <= rewardBalance,
+            "Not enough reward balance pool on the contract. Wait when DAO will refill it."
         );
         s.rewardBalance = rewardBalance - amount;
 
-        uint256 delegatorReward = (amount * cc.info.rewardDelegatorRate) / PRECISION;
+        uint256 delegatorReward = (amount * cc.info.rewardDelegatorRate) /
+            PRECISION;
         uint256 providerReward = amount - delegatorReward;
 
         payable(cc.info.delegator).sendValue(delegatorReward);
@@ -528,7 +689,10 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
     // #endregion
 
     // region ----------------- Deal Callbacks -----------------
-    function onUnitMovedToDeal(bytes32 commitmentId, bytes32 unitId) external onlyMarket {
+    function onUnitMovedToDeal(
+        bytes32 commitmentId,
+        bytes32 unitId
+    ) external onlyMarket {
         // #region load contracts and storage
         IMarket market = core.market();
         CommitmentStorage storage s = _getCommitmentStorage();
@@ -546,13 +710,25 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
 
         // #region commit snapshot for unit and commitment
         Snapshot.Cache memory snapshotCache = Snapshot.init(cc);
-        CCStatus status = _preCommitCommitmentSnapshot(cc, snapshotCache, peer, currentEpoch_, expiredEpoch);
+        CCStatus status = _preCommitCommitmentSnapshot(
+            cc,
+            snapshotCache,
+            peer,
+            currentEpoch_,
+            expiredEpoch
+        );
         _postCommitCommitmentSnapshot(commitmentId, cc, snapshotCache);
         if (status != CCStatus.Active) {
             revert CapacityCommitmentIsNotActive(status);
         }
 
-        _commitUnitSnapshot(cc, unitInfo, currentEpoch_, expiredEpoch, snapshotCache.current.failedEpoch);
+        _commitUnitSnapshot(
+            cc,
+            unitInfo,
+            currentEpoch_,
+            expiredEpoch,
+            snapshotCache.current.failedEpoch
+        );
         // #endregion
 
         unitInfo.isInactive = true;
@@ -570,7 +746,10 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         emit UnitDeactivated(commitmentId, unitId);
     }
 
-    function onUnitReturnedFromDeal(bytes32 commitmentId, bytes32 unitId) external onlyMarket {
+    function onUnitReturnedFromDeal(
+        bytes32 commitmentId,
+        bytes32 unitId
+    ) external onlyMarket {
         // #region load contracts and storage
         IMarket market = core.market();
         CommitmentStorage storage s = _getCommitmentStorage();
@@ -590,7 +769,13 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
 
         // #region commit snapshot for commitment
         Snapshot.Cache memory snapshotCache = Snapshot.init(cc);
-        CCStatus status = _preCommitCommitmentSnapshot(cc, snapshotCache, peer, currentEpoch, expiredEpoch);
+        CCStatus status = _preCommitCommitmentSnapshot(
+            cc,
+            snapshotCache,
+            peer,
+            currentEpoch,
+            expiredEpoch
+        );
         _postCommitCommitmentSnapshot(commitmentId, cc, snapshotCache);
         // #endregion
 
@@ -625,7 +810,9 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
     // #endregion
 
     // #region ----------------- Internal View -----------------
-    function _expiredEpoch(Commitment storage cc) private view returns (uint256) {
+    function _expiredEpoch(
+        Commitment storage cc
+    ) private view returns (uint256) {
         return cc.info.startEpoch + cc.info.duration;
     }
     // #endregion
@@ -651,7 +838,10 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
 
         // only active status can have a snapshot and be changed because with other statuses CC can't work
         // also if snapshotEpoch is less or equal to lastSnapshotEpoch, then we have snapshot for this epoch
-        if (storageStatus != CCStatus.Active || snapshotEpoch <= lastSnapshotEpoch) {
+        if (
+            storageStatus != CCStatus.Active ||
+            snapshotEpoch <= lastSnapshotEpoch
+        ) {
             return storageStatus;
         }
 
@@ -666,7 +856,9 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         // #region init variables
         uint256 maxFailedRatio_ = core.maxFailedRatio();
         uint256 activeUnitCount_ = snapshotCache.current.activeUnitCount;
-        uint256 nextAdditionalActiveUnitCount_ = snapshotCache.current.nextAdditionalActiveUnitCount;
+        uint256 nextAdditionalActiveUnitCount_ = snapshotCache
+            .current
+            .nextAdditionalActiveUnitCount;
         uint256 totalFailCount = snapshotCache.current.totalFailCount;
         uint256 prevFailCount = totalFailCount;
         uint256 currentSuccessCount = snapshotCache.current.currentSuccessCount;
@@ -698,9 +890,12 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
 
             if (activeUnitCount_ >= restFailCount) {
                 snapshotCache.current.failedEpoch = lastSnapshotEpoch + 1;
-                snapshotCache.current.remainingFailedUnitsInLastEpoch = restFailCount % activeUnitCount_;
+                snapshotCache.current.remainingFailedUnitsInLastEpoch =
+                    restFailCount %
+                    activeUnitCount_;
             } else {
-                uint256 newActiveUnitCount = activeUnitCount_ + nextAdditionalActiveUnitCount_;
+                uint256 newActiveUnitCount = activeUnitCount_ +
+                    nextAdditionalActiveUnitCount_;
 
                 // numberOfFillFailedEpoch is a number of epochs when units not send proofs
                 uint256 numberOfFillFailedEpoch = 1;
@@ -708,7 +903,8 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
 
                 // TOOD: add currentSuccessCount to calculation
                 numberOfFillFailedEpoch += restFailCount / newActiveUnitCount;
-                uint256 remainingFailedUnitsInLastEpoch = restFailCount % newActiveUnitCount;
+                uint256 remainingFailedUnitsInLastEpoch = restFailCount %
+                    newActiveUnitCount;
 
                 // Math.ceil(numberOfFillFailedEpoch)
                 // if remainingFailedUnitsInLastEpoch is not zero, then we should add one to numberOfFillFailedEpoch becouse the last epoch is not full
@@ -716,8 +912,12 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
                     numberOfFillFailedEpoch += 1;
                 }
 
-                snapshotCache.current.failedEpoch = lastSnapshotEpoch + numberOfFillFailedEpoch;
-                snapshotCache.current.remainingFailedUnitsInLastEpoch = remainingFailedUnitsInLastEpoch;
+                snapshotCache.current.failedEpoch =
+                    lastSnapshotEpoch +
+                    numberOfFillFailedEpoch;
+                snapshotCache
+                    .current
+                    .remainingFailedUnitsInLastEpoch = remainingFailedUnitsInLastEpoch;
             }
         }
 
@@ -727,11 +927,15 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         // #region update activeUnitCount
         // when unit return from deal, unit need to wait one epoch before it will be active
         // nextAdditionalActiveUnitCount is a number of units that will be active in the next epoch
-        uint256 nextAdditionalActiveUnitCount = snapshotCache.current.nextAdditionalActiveUnitCount;
+        uint256 nextAdditionalActiveUnitCount = snapshotCache
+            .current
+            .nextAdditionalActiveUnitCount;
 
         // update activeUnitCount if it's needed
         if (nextAdditionalActiveUnitCount > 0) {
-            snapshotCache.current.activeUnitCount += nextAdditionalActiveUnitCount;
+            snapshotCache
+                .current
+                .activeUnitCount += nextAdditionalActiveUnitCount;
             snapshotCache.current.nextAdditionalActiveUnitCount = 0;
         }
 
@@ -758,15 +962,24 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         Snapshot.Cache memory snapshotCache
     ) internal {
         if (snapshotCache.initial.status != snapshotCache.current.status) {
-            uint256 initialActiveUnitCount_ =
-                snapshotCache.initial.activeUnitCount + snapshotCache.initial.nextAdditionalActiveUnitCount;
+            uint256 initialActiveUnitCount_ = snapshotCache
+                .initial
+                .activeUnitCount +
+                snapshotCache.initial.nextAdditionalActiveUnitCount;
 
             if (snapshotCache.current.status == CCStatus.Failed) {
-                emit CommitmentFailed(commitmentId, snapshotCache.current.failedEpoch);
+                emit CommitmentFailed(
+                    commitmentId,
+                    snapshotCache.current.failedEpoch
+                );
 
-                core.setActiveUnitCount(core.activeUnitCount() - initialActiveUnitCount_);
+                core.setActiveUnitCount(
+                    core.activeUnitCount() - initialActiveUnitCount_
+                );
             } else if (snapshotCache.current.status == CCStatus.Inactive) {
-                core.setActiveUnitCount(core.activeUnitCount() - initialActiveUnitCount_);
+                core.setActiveUnitCount(
+                    core.activeUnitCount() - initialActiveUnitCount_
+                );
             }
         }
 
@@ -828,24 +1041,41 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
 
         RewardInfo storage rewardInfo = s.rewardInfoByEpoch[snapshotEpoch];
         uint256 minProofsPerEpoch_ = rewardInfo.minProofsPerEpoch;
-        if (minProofsPerEpoch_ != 0 && unitInfo.proofCountByEpoch[snapshotEpoch] >= minProofsPerEpoch_) {
+        if (
+            minProofsPerEpoch_ != 0 &&
+            unitInfo.proofCountByEpoch[snapshotEpoch] >= minProofsPerEpoch_
+        ) {
             gapsCount--;
         }
 
         // if currentCollateral is more than 0, then we should slash
         if (currentCollateral > 0 && gapsCount > 0) {
-            uint256 remainingFailedUnitsInLastEpoch = cc.finish.remainingFailedUnitsInLastEpoch;
+            uint256 remainingFailedUnitsInLastEpoch = cc
+                .finish
+                .remainingFailedUnitsInLastEpoch;
 
-            if (snapshotEpoch == faildEpoch && remainingFailedUnitsInLastEpoch != 0) {
-                uint256 filledRemainingFailedUnitsInLastEpoch = cc.finish.filledRemainingFailedUnitsInLastEpoch;
-                if (filledRemainingFailedUnitsInLastEpoch >= remainingFailedUnitsInLastEpoch) {
+            if (
+                snapshotEpoch == faildEpoch &&
+                remainingFailedUnitsInLastEpoch != 0
+            ) {
+                uint256 filledRemainingFailedUnitsInLastEpoch = cc
+                    .finish
+                    .filledRemainingFailedUnitsInLastEpoch;
+                if (
+                    filledRemainingFailedUnitsInLastEpoch >=
+                    remainingFailedUnitsInLastEpoch
+                ) {
                     gapsCount -= 1;
                 } else {
-                    cc.finish.filledRemainingFailedUnitsInLastEpoch = filledRemainingFailedUnitsInLastEpoch + 1;
+                    cc.finish.filledRemainingFailedUnitsInLastEpoch =
+                        filledRemainingFailedUnitsInLastEpoch +
+                        1;
                 }
             }
 
-            slashedCollateral += (gapsCount * collateralPerUnit_ * slashingRate_) / PRECISION;
+            slashedCollateral +=
+                (gapsCount * collateralPerUnit_ * slashingRate_) /
+                PRECISION;
             if (slashedCollateral > currentCollateral) {
                 slashedCollateral = currentCollateral;
             }
@@ -855,7 +1085,9 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
 
         // #region calculate reward for the last snapshoted epoch
         uint256 nextEpochAfterLastSnapshot = lastSnapshotEpoch + 1;
-        uint256 lastProofCount = unitInfo.proofCountByEpoch[nextEpochAfterLastSnapshot];
+        uint256 lastProofCount = unitInfo.proofCountByEpoch[
+            nextEpochAfterLastSnapshot
+        ];
         rewardInfo = s.rewardInfoByEpoch[nextEpochAfterLastSnapshot];
         if (lastProofCount < rewardInfo.minProofsPerEpoch) {
             return true;
@@ -866,11 +1098,16 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
             return true;
         }
 
-        uint256 reward =
-            (core.getRewardPool(nextEpochAfterLastSnapshot) * lastProofCount) / rewardInfo.totalSuccessProofs;
+        uint256 reward = (core.getRewardPool(nextEpochAfterLastSnapshot) *
+            lastProofCount) / rewardInfo.totalSuccessProofs;
 
         if (reward > 0) {
-            cc.vesting.add(reward, nextEpochAfterLastSnapshot, core.vestingPeriodDuration(), core.vestingPeriodCount());
+            cc.vesting.add(
+                reward,
+                nextEpochAfterLastSnapshot,
+                core.vestingPeriodDuration(),
+                core.vestingPeriodCount()
+            );
         }
 
         delete unitInfo.proofCountByEpoch[nextEpochAfterLastSnapshot];

@@ -14,101 +14,111 @@ import "./interfaces/IDealFactory.sol";
  * @dev On init mas.sender becomes owner.
  */
 contract DealFactory is UUPSUpgradeable, BaseModule, IDealFactory {
-    using SafeERC20 for IERC20;
+  using SafeERC20 for IERC20;
 
-    // ------------------ Storage ------------------
-    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.market.storage.v1.dealFactory")) - 1);
+  // ------------------ Storage ------------------
+  bytes32 private constant _STORAGE_SLOT =
+    bytes32(uint256(keccak256("fluence.market.storage.v1.dealFactory")) - 1);
 
-    struct DealFactoryStorage {
-        mapping(IDeal => bool) hasDeal;
+  struct DealFactoryStorage {
+    mapping(IDeal => bool) hasDeal;
+  }
+
+  constructor(ICore core_) BaseModule(core_) {} // disables initializer, immutable set
+
+  function initialize() public initializer {
+    __UUPSUpgradeable_init();
+  }
+
+  function _getDealFactoryStorage()
+    private
+    pure
+    returns (DealFactoryStorage storage s)
+  {
+    bytes32 storageSlot = _STORAGE_SLOT;
+    assembly {
+      s.slot := storageSlot
     }
+  }
 
-    constructor(ICore core_) BaseModule(core_) {} // disables initializer, immutable set
+  // ----------------- View -----------------
+  function hasDeal(IDeal deal) external view returns (bool) {
+    return _getDealFactoryStorage().hasDeal[deal];
+  }
 
-    function initialize() public initializer {
-        __UUPSUpgradeable_init();
-    }
+  // ----------------- Mutable -----------------
+  function deployDeal(
+    CIDV1 calldata appCID_,
+    IERC20 paymentToken_,
+    uint256 depositAmount_,
+    uint256 minWorkers_,
+    uint256 targetWorkers_,
+    uint256 maxWorkersPerProvider_,
+    uint256 pricePerWorkerEpoch_,
+    CIDV1[] calldata effectors_,
+    IConfig.AccessType providersAccessType_,
+    address[] calldata providersAccessList_,
+    uint256 protocolVersion_
+  ) external returns (IDeal) {
+    DealFactoryStorage storage dealFactoryStorage = _getDealFactoryStorage();
 
-    function _getDealFactoryStorage() private pure returns (DealFactoryStorage storage s) {
-        bytes32 storageSlot = _STORAGE_SLOT;
-        assembly {
-            s.slot := storageSlot
-        }
-    }
-
-    // ----------------- View -----------------
-    function hasDeal(IDeal deal) external view returns (bool) {
-        return _getDealFactoryStorage().hasDeal[deal];
-    }
-
-    // ----------------- Mutable -----------------
-    function deployDeal(
-        CIDV1 calldata appCID_,
-        IERC20 paymentToken_,
-        uint256 depositAmount_,
-        uint256 minWorkers_,
-        uint256 targetWorkers_,
-        uint256 maxWorkersPerProvider_,
-        uint256 pricePerWorkerEpoch_,
-        CIDV1[] calldata effectors_,
-        IConfig.AccessType providersAccessType_,
-        address[] calldata providersAccessList_,
-        uint256 protocolVersion_
-    ) external returns (IDeal) {
-        DealFactoryStorage storage dealFactoryStorage = _getDealFactoryStorage();
-
-        IDeal deal = IDeal(
-            address(
-                new DealProxy(
-                    core,
-                    abi.encodeWithSelector(
-                        IDeal.initialize.selector,
-                        core,
-                        appCID_,
-                        paymentToken_,
-                        minWorkers_,
-                        targetWorkers_,
-                        maxWorkersPerProvider_,
-                        pricePerWorkerEpoch_,
-                        effectors_,
-                        providersAccessType_,
-                        providersAccessList_,
-                        protocolVersion_
-                    )
-                )
-            )
-        );
-
-        dealFactoryStorage.hasDeal[deal] = true;
-
-        uint256 minAmount = pricePerWorkerEpoch_ * targetWorkers_ * core.minDealDepositedEpochs();
-
-        require(depositAmount_ >= minAmount, "Deposit amount is less than minimum required");
-
-        paymentToken_.safeTransferFrom(msg.sender, address(this), depositAmount_);
-        paymentToken_.safeApprove(address(deal), depositAmount_);
-        deal.deposit(depositAmount_);
-
-        OwnableUpgradableDiamond(address(deal)).transferOwnership(msg.sender);
-
-        emit DealCreated(
-            msg.sender,
-            deal,
-            core.currentEpoch(),
+    IDeal deal = IDeal(
+      address(
+        new DealProxy(
+          core,
+          abi.encodeWithSelector(
+            IDeal.initialize.selector,
+            core,
+            appCID_,
             paymentToken_,
             minWorkers_,
             targetWorkers_,
             maxWorkersPerProvider_,
             pricePerWorkerEpoch_,
             effectors_,
-            appCID_,
             providersAccessType_,
             providersAccessList_,
             protocolVersion_
-        );
+          )
+        )
+      )
+    );
 
-        return deal;
-    }
+    dealFactoryStorage.hasDeal[deal] = true;
 
-    function _authorizeUpgrade(address) internal override onlyCoreOwner {}
+    uint256 minAmount = pricePerWorkerEpoch_ *
+      targetWorkers_ *
+      core.minDealDepositedEpochs();
+
+    require(
+      depositAmount_ >= minAmount,
+      "Deposit amount is less than minimum required"
+    );
+
+    paymentToken_.safeTransferFrom(msg.sender, address(this), depositAmount_);
+    paymentToken_.safeApprove(address(deal), depositAmount_);
+    deal.deposit(depositAmount_);
+
+    OwnableUpgradableDiamond(address(deal)).transferOwnership(msg.sender);
+
+    emit DealCreated(
+      msg.sender,
+      deal,
+      core.currentEpoch(),
+      paymentToken_,
+      minWorkers_,
+      targetWorkers_,
+      maxWorkersPerProvider_,
+      pricePerWorkerEpoch_,
+      effectors_,
+      appCID_,
+      providersAccessType_,
+      providersAccessList_,
+      protocolVersion_
+    );
+
+    return deal;
+  }
+
+  function _authorizeUpgrade(address) internal override onlyCoreOwner {}
 }
