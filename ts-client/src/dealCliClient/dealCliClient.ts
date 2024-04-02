@@ -47,7 +47,7 @@ export class DealCliClient {
   }
 
   // Get Offers details, i.e. with its peers and compute units.
-  // Note, that if offer with id does not exist, it silently ignores that fact.
+  // Note, that if offer for desired id in provided filter does not exist, it silently ignores that fact.
   // Limitations
   // - it can not return more than 1000 offers,
   // - it can not return more than 1000 peers per offer,
