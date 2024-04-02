@@ -1,1 +1,1 @@
-https://graph-node.dar.fluence.dev/subgraphs/name/fluence-deal-contracts
+https://graph-node.dar.fluence.dev/subgraphs/name/fluence-deal-contracts 3be161bd4645f538ae5757a45a1d576af0da7f58
