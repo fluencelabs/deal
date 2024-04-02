@@ -1,7 +1,7 @@
 # Exclude deleted CUs.
 # Exclude deleted Peers.
 
-query OffersQuery(
+query OfferDetailsQuery(
   $filters: Offer_filter,
   $offset: Int,
   $limit: Int,
@@ -49,7 +49,6 @@ fragment OfferDetail on Offer {
     }
 }
 
-
 fragment ComputeUnitBasic on ComputeUnit {
     id
     workerId
@@ -61,4 +60,22 @@ fragment ComputeUnitBasic on ComputeUnit {
 fragment EffectorBasic on Effector {
   id
   description
+}
+
+query OfferIdsQuery(
+  $filters: Offer_filter,
+  $offset: Int,
+  $limit: Int,
+  $orderBy: Offer_orderBy,
+  $orderType: OrderDirection,
+) {
+  offers(
+      where: $filters
+      first: $limit
+      skip: $offset
+      orderBy: $orderBy
+      orderDirection: $orderType
+  ) {
+    id
+  }
 }

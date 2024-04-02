@@ -1,12 +1,16 @@
 import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type { ContractsENV } from "../client/config.js";
-import type { DealByProvider, OfferDetail } from "./types/schemes.js";
+import type {
+  DealByProvider,
+  OfferByProvider,
+  OfferDetail
+} from "./types/schemes.js";
 import { serializeOfferDetail } from "./serializers/schemes.js";
 import type { SerializationSettings } from "../utils/serializers.js";
 import type { OffersFilterIn } from "./types/filters.js";
 import type { IndexerPaginatorIn } from "./types/paginators.js";
 import { serializeOffersFilterIn } from "./serializers/filters.js";
-import type { OffersOrderByIn } from "./types/orders.js";
+import type { DealsOrderByIn, OffersOrderByIn } from "./types/orders.js";
 
 /*
  * @dev This client represents endpoints to access desirable indexer data in REST
@@ -56,7 +60,7 @@ export class DealCliClient {
     },
     order: OffersOrderByIn = { orderBy: "createdAt", orderType: "desc" },
   ): Promise<OfferDetail[]> {
-    const data = await this.indexerClient.getOffers({
+    const data = await this.indexerClient.getOfferDetails({
       filters: serializeOffersFilterIn(filter),
       offset: paginator.offset,
       limit: paginator.limit,
@@ -68,11 +72,22 @@ export class DealCliClient {
     });
   }
 
-  async getDealsByProvider(providerId: string): Promise<Array<DealByProvider>> {
+  async getDealsByProvider(
+    providerId: string,
+    paginator: IndexerPaginatorIn = {
+      offset: 0,
+      limit: this.DEFAULT_PAGE_LIMIT,
+    },
+    order: DealsOrderByIn = { orderBy: "createdAt", orderType: "desc" },
+  ): Promise<Array<DealByProvider>> {
     const data = await this.indexerClient.getDeals({
       filters: {
         addedComputeUnits_: { provider: providerId.toLowerCase() },
       },
+      offset: paginator.offset,
+      limit: paginator.limit,
+      orderBy: order.orderBy,
+      orderType: order.orderType,
     });
     return (
       data.deals.map((deal) => {
@@ -81,5 +96,31 @@ export class DealCliClient {
         };
       }) || []
     );
+  }
+
+  async getOffersByProvider(
+    providerId: string,
+    paginator: IndexerPaginatorIn = {
+      offset: 0,
+      limit: this.DEFAULT_PAGE_LIMIT,
+    },
+    order: OffersOrderByIn = { orderBy: "createdAt", orderType: "desc" },
+  ): Promise<Array<OfferByProvider>> {
+  const data = await this.indexerClient.getOfferIds(
+    {
+        filters: {provider_in: [providerId.toLowerCase()]},
+        offset: paginator.offset,
+        limit: paginator.limit,
+        orderBy: order.orderBy,
+        orderType: order.orderType,
+      }
+      )
+      return (
+        data.offers.map((offer) => {
+          return {
+            id: offer.id,
+          };
+        }) || []
+      );
   }
 }
