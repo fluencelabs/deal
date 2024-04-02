@@ -1,6 +1,7 @@
 import type {
-  OfferDetailsQueryQueryVariables, OfferIdsQueryQueryVariables,
-  Sdk as OffersSdk
+  OfferDetailsQueryQueryVariables,
+  OfferIdsQueryQueryVariables,
+  Sdk as OffersSdk,
 } from "./queries/offers-query.generated.js";
 import type {
   DealsQueryQueryVariables,

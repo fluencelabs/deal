@@ -3,7 +3,7 @@ import type { ContractsENV } from "../client/config.js";
 import type {
   DealByProvider,
   OfferByProvider,
-  OfferDetail
+  OfferDetail,
 } from "./types/schemes.js";
 import { serializeOfferDetail } from "./serializers/schemes.js";
 import type { SerializationSettings } from "../utils/serializers.js";
@@ -106,21 +106,19 @@ export class DealCliClient {
     },
     order: OffersOrderByIn = { orderBy: "createdAt", orderType: "desc" },
   ): Promise<Array<OfferByProvider>> {
-  const data = await this.indexerClient.getOfferIds(
-    {
-        filters: {provider_in: [providerId.toLowerCase()]},
-        offset: paginator.offset,
-        limit: paginator.limit,
-        orderBy: order.orderBy,
-        orderType: order.orderType,
-      }
-      )
-      return (
-        data.offers.map((offer) => {
-          return {
-            id: offer.id,
-          };
-        }) || []
-      );
+    const data = await this.indexerClient.getOfferIds({
+      filters: { provider_in: [providerId.toLowerCase()] },
+      offset: paginator.offset,
+      limit: paginator.limit,
+      orderBy: order.orderBy,
+      orderType: order.orderType,
+    });
+    return (
+      data.offers.map((offer) => {
+        return {
+          id: offer.id,
+        };
+      }) || []
+    );
   }
 }
