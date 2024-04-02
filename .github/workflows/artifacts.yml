@@ -198,14 +198,14 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Build and push fendermint image
-        id: ipc
+        id: fendermint
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           provenance: false
           file: docker/Dockerfile
-          target: ipc
+          target: fendermint
           platforms: linux/${{ matrix.arch }}
           tags: |
             ${{ steps.artifacts.outputs.fendermint-image }}-${{ matrix.arch }}
@@ -585,7 +585,7 @@ jobs:
         uses: Noelware/docker-manifest-action@0.4.0
         with:
           inputs: ${{ needs.ipc.outputs.fendermint-image }}
-          images: ${{ needs.ipc.outputs.fendermint-image }}-amd64,${{ needs.ipc.outputs.ipc-image }}-arm64
+          images: ${{ needs.ipc.outputs.fendermint-image }}-amd64,${{ needs.ipc.outputs.fendermint-image }}-arm64
           push: true
           amend: true
 
