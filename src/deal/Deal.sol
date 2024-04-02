@@ -190,8 +190,6 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
     }
 
     function setWorker(bytes32 computeUnitId, bytes32 workerId) public {
-        Status status = getStatus();
-        require(status != Status.ENDED, "Deal is ended");
         require(workerId != bytes32(0), "WorkerId can't be empty");
 
         DealStorage storage dealStorage = _getDealStorage();
@@ -207,15 +205,13 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         uint256 prevWorkerCount = snapshot.getCurrentWorkerCount();
         uint256 newWorkerCounts = _setWorker(computeUnitId, workerId);
 
-        if (prevWorkerCount == newWorkerCounts) {
-            return;
-        }
-
         _postCommitPeriod(snapshot, newWorkerCounts);
 
-        if (status == Status.SMALL_BALANCE) {
-            uint prevEpoch = core.currentEpoch() - 1;
-            require(dealStorage.maxPaidEpoch > prevEpoch, "Deal doesn't have enough funds for additional workers");
+        Status status = getStatus();
+        require(status != Status.ENDED && status != Status.INSUFFICIENT_FUNDS, "Deal is not active");
+
+        if (prevWorkerCount == newWorkerCounts) {
+            return;
         }
 
         ComputeUnitPaymentInfo storage computeUnitPaymentInfo = dealStorage.cUnitPaymentInfo[computeUnitId];
