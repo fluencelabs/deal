@@ -20,12 +20,6 @@ RUN \
 ENV FOUNDRY_DIR /opt/foundry
 RUN curl -sS https://raw.githubusercontent.com/foundry-rs/foundry/master/foundryup/install | bash && /opt/foundry/bin/foundryup
 
-# Image with compiled actors
-FROM rust:buster as actors
-RUN git clone --branch fluence https://github.com/fluencelabs/ipc.git
-WORKDIR ipc/fendermint
-RUN make actor-bundle
-
 # Base image with compiled contracts
 FROM ubuntu:22.04 as contracts
 
@@ -54,13 +48,10 @@ WORKDIR /app
 RUN make build-contracts
 COPY docker/entrypoint.sh /entrypoint.sh
 
-# IPC
-FROM fluencelabs/fendermint:latest as ipc
+FROM fluencelabs/fendermint:latest as fendermint
 COPY docker/keys /testnet/keys
 ENV FM_NETWORK testnet
 RUN --mount=type=bind,source=docker/scripts/fendermint-bootstrap.sh,target=/bootstrap.sh /bootstrap.sh
-COPY --from=actors /ipc/fendermint/builtin-actors/output/bundle.car /fendermint/bundle.car
-COPY --from=actors /ipc/fendermint/actors/output/custom_actors_bundle.car /fendermint/custom_actors_bundle.car
 
 # install packages that are required for healthcheck
 RUN \
@@ -74,10 +65,9 @@ RUN \
   	/var/lib/apt/lists/* \
   	/var/tmp/*
 
-# Blockchain
 FROM cometbft/cometbft:v0.37.x as cometbft
 USER root
-COPY --from=ipc /cometbft /cometbft-config
+COPY --from=fendermint /cometbft /cometbft-config
 COPY docker/scripts/cometbft-entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["start"]

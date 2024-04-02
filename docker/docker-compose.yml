@@ -16,7 +16,7 @@ volumes:
   postgres:
   ipfs:
   cometbft:
-  ipc:
+  fendermint:
 
 services:
   ipfs:
@@ -44,20 +44,19 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
 
-  # IPC
-  ipc:
-    image: ${IPC_IMAGE:-ipc}
+  fendermint:
+    image: ${FENDERMINT_IMAGE:-fendermint}
     build:
       context: ../
       dockerfile: ./docker/Dockerfile
-      target: ipc
+      target: fendermint
     environment:
       FM_NETWORK: testnet
       TENDERMINT_RPC_URL: http://cometbft:26657
     ports:
       - "26658:26658"
     volumes:
-      - ipc:/fendermint/data
+      - fendermint:/fendermint/data
 
   # Blockchain backend
   cometbft:
@@ -67,9 +66,9 @@ services:
       dockerfile: ./docker/Dockerfile
       target: cometbft
     environment:
-      CMT_LOG_LEVEL: "main:info,abci-client:debug,*:error"
+      CMT_LOG_LEVEL: "info"
       CMT_LOG_FORMAT: "plain"
-      CMT_PROXY_APP: "tcp://ipc:26658"
+      CMT_PROXY_APP: "tcp://fendermint:26658"
     ports:
       - "26657:26657"
     volumes:
@@ -80,14 +79,14 @@ services:
       timeout: 10s
       retries: 20
     depends_on:
-      - ipc
+      - fendermint
 
-  ipc-eth:
-    image: ${IPC_IMAGE:-ipc}
+  eth-api:
+    image: ${FEDNERMINT_IMAGE:-fendermint}
     build:
       context: ../
       dockerfile: ./docker/Dockerfile
-      target: ipc
+      target: fendermint
     environment:
       FM_NETWORK: testnet
       TENDERMINT_RPC_URL: "http://cometbft:26657"
@@ -119,7 +118,7 @@ services:
       - ../out/:/app/out/
       - ../cache/:/app/cache/
     depends_on:
-      ipc-eth:
+      eth-api:
         condition: service_healthy
     environment:
       - EPOCH_DURATION
@@ -139,19 +138,17 @@ services:
         bin/blockscout start
     environment:
       ETHEREUM_JSONRPC_VARIANT: "geth"
-      ETHEREUM_JSONRPC_HTTP_URL: http://ipc-eth:8545/
-      ETHEREUM_JSONRPC_TRACE_URL: http://ipc-eth:8545/
+      ETHEREUM_JSONRPC_HTTP_URL: http://eth-api:8545/
+      ETHEREUM_JSONRPC_TRACE_URL: http://eth-api:8545/
       INDEXER_DISABLE_PENDING_TRANSACTIONS_FETCHER: "true"
       DATABASE_URL: postgresql://postgres:@postgres:5432/blockscout
       ECTO_USE_SSL: "false"
-      NETWORK: ""
-      SUBNETWORK: "Fluence Local Network"
-      BLOCKSCOUT_VERSION: "Fluence Local Network 0.0.1"
+      NETWORK: "local"
       PORT: 4000
     ports:
       - "127.0.0.1:4000:4000"
     depends_on:
-      ipc-eth:
+      eth-api:
         condition: service_healthy
       postgres:
         condition: service_healthy
@@ -170,7 +167,7 @@ services:
       postgres_pass: ""
       postgres_db: postgres
       ipfs: 'ipfs:5001'
-      ethereum: ${GRAPH_NODE_ETHEREUM_PATH:-local:http://ipc-eth:8545}
+      ethereum: ${GRAPH_NODE_ETHEREUM_PATH:-local:http://eth-api:8545}
       GRAPH_LOG: info
       # https://github.com/graphprotocol/graph-node/issues/3159#issuecomment-1062827725
       ETHEREUM_REORG_THRESHOLD: 1
@@ -178,7 +175,7 @@ services:
     depends_on:
       ipfs:
         condition: service_healthy
-      ipc-eth:
+      eth-api:
         condition: service_healthy
       postgres:
         condition: service_healthy
