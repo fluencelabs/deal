@@ -20,8 +20,8 @@
   "CoreImpl": {
     "addr": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
     "blockNumber": 8,
-    "codeHash": "0x287fa1fd240a6e84ae378ef89049c513f029c93f27895012c1f3e914066b26f5",
-    "creationCodeHash": "0x33bfd4c719dd4a03d34c1ebbc4f76b77b17a22f89c50814810a9be071d2da24e"
+    "codeHash": "0xd984a746a38ac4ded6b3e1d77289a71d2502661e3012997ea1677bba9af8f98d",
+    "creationCodeHash": "0x093b8b6a8d4677f25b43371b1d73599da062953ae4ea74bb6181db0626ce336c"
   },
   "DealFactory": {
     "addr": "0x59b670e9fA9D0A427751Af201D676719a970857b",
@@ -38,8 +38,8 @@
   "DealImpl": {
     "addr": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
     "blockNumber": 8,
-    "codeHash": "0x1061d5c7899dbaf9849d02794a12eb161087d0d09dbaec41f5eead07da0ff539",
-    "creationCodeHash": "0xdf305028370148720df689f2860969aaadd4ad143c81b964593b7d83b093ee6b"
+    "codeHash": "0xadc3c1828b750ce1e7106c48b0c7dcc5e76fe14bd5fc420b60e46d7a742d9940",
+    "creationCodeHash": "0x729ae3b8085da072f6c890f2bfccb7f3afc3a74aaa69661e7dbf217f90420ab1"
   },
   "Market": {
     "addr": "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c",
