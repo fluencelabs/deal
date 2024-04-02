@@ -1,14 +1,1 @@
-{
-  "arrowParens": "avoid",
-  "overrides": [
-    {
-      "files": "*.sol",
-      "options": {
-        "parser": "solidity-parse",
-        "singleQuote": false,
-        "tabWidth": 4
-      }
-    }
-  ],
-  "plugins": ["prettier-plugin-solidity"]
-}
+{}
