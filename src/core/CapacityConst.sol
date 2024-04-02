@@ -8,15 +8,10 @@ import {PRECISION, GlobalConst} from "src/core/GlobalConst.sol";
 import "./interfaces/ICapacityConst.sol";
 import "./EpochController.sol";
 
-contract CapacityConst is
-    ICapacityConst,
-    OwnableUpgradableDiamond,
-    EpochController
-{
+contract CapacityConst is ICapacityConst, OwnableUpgradableDiamond, EpochController {
     // #region ------------------ Constants ------------------
-    uint256 internal constant _REWARD_POOL_SHRINK_RATE = (PRECISION / 10) * 9; // 0.9 = 90%
-    uint256 internal constant _REWARD_POOL_GROWTH_RATE =
-        PRECISION + PRECISION / 10; // 1.1 = 110%
+    uint256 internal constant _REWARD_POOL_SHRINK_RATE = PRECISION / 10 * 9; // 0.9 = 90%
+    uint256 internal constant _REWARD_POOL_GROWTH_RATE = PRECISION + PRECISION / 10; // 1.1 = 110%
     // #endregion ------------------ Constants ------------------
 
     // #region ------------------ Types ------------------
@@ -27,8 +22,7 @@ contract CapacityConst is
     // #endregion ------------------ Types ------------------
 
     // #region ------------------ Storage ------------------
-    bytes32 private constant _STORAGE_SLOT =
-        bytes32(uint256(keccak256("fluence.capacity.storage.v1.const")) - 1);
+    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.capacity.storage.v1.const")) - 1);
 
     struct CommitmentConst {
         uint256 minDuration;
@@ -95,18 +89,12 @@ contract CapacityConst is
         ConstStorage storage constantsStorage = _getConstStorage();
 
         constantsStorage.commitment.minDuration = minDuration_;
-        constantsStorage
-            .commitment
-            .usdCollateralPerUnit = usdCollateralPerUnit_;
+        constantsStorage.commitment.usdCollateralPerUnit = usdCollateralPerUnit_;
         constantsStorage.commitment.slashingRate = slashingRate_;
-        constantsStorage
-            .commitment
-            .withdrawEpochsAfterFailed = withdrawEpochsAfterFailed_;
+        constantsStorage.commitment.withdrawEpochsAfterFailed = withdrawEpochsAfterFailed_;
         constantsStorage.commitment.maxFailedRatio = maxFailedRatio_;
 
-        constantsStorage
-            .reward
-            .usdTargetRevenuePerEpoch = usdTargetRevenuePerEpoch_;
+        constantsStorage.reward.usdTargetRevenuePerEpoch = usdTargetRevenuePerEpoch_;
         constantsStorage.reward.minRewardPerEpoch = minRewardPerEpoch_;
         constantsStorage.reward.maxRewardPerEpoch = maxRewardPerEpoch_;
         constantsStorage.reward.vestingPeriodDuration = vestingPeriodDuration_;
@@ -124,12 +112,7 @@ contract CapacityConst is
         );
 
         constantsStorage.fltPrice = fltPrice_;
-        constantsStorage
-            .commitment
-            .fltCollateralPerUnit = _calcFLTCollateralPerUnit(
-            usdCollateralPerUnit_,
-            fltPrice_
-        );
+        constantsStorage.commitment.fltCollateralPerUnit = _calcFLTCollateralPerUnit(usdCollateralPerUnit_, fltPrice_);
     }
     // #endregion ------------------ Initializer ------------------
 
@@ -217,9 +200,7 @@ contract CapacityConst is
         uint256 value = 0;
         while (low <= high) {
             uint256 mid = (low + high) / 2;
-            RewardPoolPerEpoch storage rewardPool = constantsStorage
-                .reward
-                .rewardPoolPerEpochs[mid];
+            RewardPoolPerEpoch storage rewardPool = constantsStorage.reward.rewardPoolPerEpochs[mid];
             uint256 rewardPoolEpoch = rewardPool.epoch;
             if (epoch > rewardPoolEpoch) {
                 value = rewardPool.value;
@@ -241,39 +222,27 @@ contract CapacityConst is
         constantsStorage.fltPrice = fltPrice_;
 
         _setRewardPool(fltPrice_, constantsStorage.activeUnitCount);
-        constantsStorage
-            .commitment
-            .fltCollateralPerUnit = _calcFLTCollateralPerUnit(
-            constantsStorage.commitment.usdCollateralPerUnit,
-            fltPrice_
-        );
+        constantsStorage.commitment.fltCollateralPerUnit =
+            _calcFLTCollateralPerUnit(constantsStorage.commitment.usdCollateralPerUnit, fltPrice_);
 
         emit FLTPriceUpdated(fltPrice_);
     }
 
     function calculateRewardPool() external {
         ConstStorage storage constantsStorage = _getConstStorage();
-        _setRewardPool(
-            constantsStorage.fltPrice,
-            constantsStorage.activeUnitCount
-        );
+        _setRewardPool(constantsStorage.fltPrice, constantsStorage.activeUnitCount);
     }
 
     function setDifficulty(bytes32 difficulty_) external onlyOwner {
         ConstStorage storage constantsStorage = _getConstStorage();
-        constantsStorage.proof.difficulty = constantsStorage
-            .proof
-            .nextDifficulty;
+        constantsStorage.proof.difficulty = constantsStorage.proof.nextDifficulty;
         constantsStorage.proof.nextDifficulty = difficulty_;
         constantsStorage.proof.difficultyChangeEpoch = currentEpoch() + 1;
 
         emit DifficultyUpdated(difficulty_);
     }
 
-    function setCapacityConstant(
-        CapacityConstantType constantType,
-        uint256 v
-    ) external onlyOwner {
+    function setCapacityConstant(CapacityConstantType constantType, uint256 v) external onlyOwner {
         ConstStorage storage constantsStorage = _getConstStorage();
 
         // capacity section
@@ -282,30 +251,18 @@ contract CapacityConst is
         } else if (constantType == CapacityConstantType.USDCollateralPerUnit) {
             constantsStorage.commitment.usdCollateralPerUnit = v;
             constantsStorage.commitment.usdCollateralPerUnit = v;
-            constantsStorage
-                .commitment
-                .fltCollateralPerUnit = _calcFLTCollateralPerUnit(
-                v,
-                constantsStorage.fltPrice
-            );
+            constantsStorage.commitment.fltCollateralPerUnit = _calcFLTCollateralPerUnit(v, constantsStorage.fltPrice);
         } else if (constantType == CapacityConstantType.SlashingRate) {
             constantsStorage.commitment.slashingRate = v;
-        } else if (
-            constantType == CapacityConstantType.WithdrawEpochsAfterFailed
-        ) {
+        } else if (constantType == CapacityConstantType.WithdrawEpochsAfterFailed) {
             constantsStorage.commitment.withdrawEpochsAfterFailed = v;
         } else if (constantType == CapacityConstantType.MaxFailedRatio) {
             constantsStorage.commitment.maxFailedRatio = v;
         }
         // reward section
-        else if (
-            constantType == CapacityConstantType.USDTargetRevenuePerEpoch
-        ) {
+        else if (constantType == CapacityConstantType.USDTargetRevenuePerEpoch) {
             constantsStorage.reward.usdTargetRevenuePerEpoch = v;
-            _setRewardPool(
-                constantsStorage.fltPrice,
-                constantsStorage.activeUnitCount
-            );
+            _setRewardPool(constantsStorage.fltPrice, constantsStorage.activeUnitCount);
         } else if (constantType == CapacityConstantType.MinRewardPerEpoch) {
             constantsStorage.reward.minRewardPerEpoch = v;
         } else if (constantType == CapacityConstantType.MaxRewardPerEpoch) {
@@ -332,19 +289,15 @@ contract CapacityConst is
         _setRewardPool(constantsStorage.fltPrice, activeUnitCount_);
     }
 
-    function _calcFLTCollateralPerUnit(
-        uint256 usdCollateralPerUnit_,
-        uint256 fltPrice_
-    ) internal pure returns (uint256) {
-        return
-            (((usdCollateralPerUnit_ * PRECISION) / fltPrice_) * 1e18) /
-            PRECISION;
+    function _calcFLTCollateralPerUnit(uint256 usdCollateralPerUnit_, uint256 fltPrice_)
+        internal
+        pure
+        returns (uint256)
+    {
+        return usdCollateralPerUnit_ * PRECISION / fltPrice_ * 1e18 / PRECISION;
     }
 
-    function _setRewardPool(
-        uint256 fltPrice_,
-        uint256 activeUnitCount_
-    ) internal {
+    function _setRewardPool(uint256 fltPrice_, uint256 activeUnitCount_) internal {
         ConstStorage storage constantsStorage = _getConstStorage();
         uint256 currentEpoch_ = currentEpoch();
 
@@ -358,9 +311,7 @@ contract CapacityConst is
         uint256 lastRewardPoolValue;
         uint256 lastRewardPoolEpoch;
 
-        RewardPoolPerEpoch storage lastRewardPool = constantsStorage
-            .reward
-            .rewardPoolPerEpochs[length - 1];
+        RewardPoolPerEpoch storage lastRewardPool = constantsStorage.reward.rewardPoolPerEpochs[length - 1];
         lastRewardPoolEpoch = lastRewardPool.epoch;
 
         if (currentEpoch_ == lastRewardPool.epoch) {
@@ -368,36 +319,24 @@ contract CapacityConst is
                 return;
             }
 
-            lastRewardPoolValue = constantsStorage
-                .reward
-                .rewardPoolPerEpochs[length - 2]
-                .value;
+            lastRewardPoolValue = constantsStorage.reward.rewardPoolPerEpochs[length - 2].value;
         } else {
             lastRewardPoolValue = lastRewardPool.value;
         }
 
-        uint256 currentTarget = (lastRewardPoolValue * fltPrice_) /
-            activeUnitCount_;
+        uint256 currentTarget = lastRewardPoolValue * fltPrice_ / activeUnitCount_;
 
         // calculate new reward pool
         uint256 newRewardPool;
         if (currentTarget > constantsStorage.reward.usdTargetRevenuePerEpoch) {
-            uint256 minRewardPerEpoch_ = constantsStorage
-                .reward
-                .minRewardPerEpoch;
-            newRewardPool =
-                (lastRewardPoolValue * _REWARD_POOL_SHRINK_RATE) /
-                PRECISION;
+            uint256 minRewardPerEpoch_ = constantsStorage.reward.minRewardPerEpoch;
+            newRewardPool = lastRewardPoolValue * _REWARD_POOL_SHRINK_RATE / PRECISION;
             if (newRewardPool < minRewardPerEpoch_) {
                 newRewardPool = minRewardPerEpoch_;
             }
         } else {
-            uint256 maxRewardPerEpoch_ = constantsStorage
-                .reward
-                .maxRewardPerEpoch;
-            newRewardPool =
-                (lastRewardPoolValue * _REWARD_POOL_GROWTH_RATE) /
-                PRECISION;
+            uint256 maxRewardPerEpoch_ = constantsStorage.reward.maxRewardPerEpoch;
+            newRewardPool = lastRewardPoolValue * _REWARD_POOL_GROWTH_RATE / PRECISION;
             if (newRewardPool > maxRewardPerEpoch_) {
                 newRewardPool = maxRewardPerEpoch_;
             }
@@ -405,10 +344,7 @@ contract CapacityConst is
 
         // save new reward pool
         if (currentEpoch_ == lastRewardPoolEpoch) {
-            constantsStorage
-                .reward
-                .rewardPoolPerEpochs[length - 1]
-                .value = newRewardPool;
+            constantsStorage.reward.rewardPoolPerEpochs[length - 1].value = newRewardPool;
         } else {
             constantsStorage.reward.rewardPoolPerEpochs.push(
                 RewardPoolPerEpoch({epoch: currentEpoch_, value: newRewardPool})

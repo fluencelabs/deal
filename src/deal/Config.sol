@@ -9,8 +9,7 @@ import "./interfaces/IConfig.sol";
 
 contract Config is OwnableUpgradableDiamond, IConfig {
     // ------------------ Storage ------------------
-    bytes32 private constant _STORAGE_SLOT =
-        bytes32(uint256(keccak256("fluence.deal.storage.v1.config")) - 1);
+    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.deal.storage.v1.config")) - 1);
 
     struct ConfigStorage {
         ICore globalCore;
@@ -28,11 +27,7 @@ contract Config is OwnableUpgradableDiamond, IConfig {
         mapping(address => bool) providersAccessMap;
     }
 
-    function _getConfigStorage()
-        private
-        pure
-        returns (ConfigStorage storage s)
-    {
+    function _getConfigStorage() private pure returns (ConfigStorage storage s) {
         bytes32 storageSlot = _STORAGE_SLOT;
         assembly {
             s.slot := storageSlot
@@ -82,10 +77,7 @@ contract Config is OwnableUpgradableDiamond, IConfig {
         address[] calldata providersAccessList_
     ) internal onlyInitializing {
         require(minWorkers_ > 0, "Config: minWorkers should be greater than 0");
-        require(
-            minWorkers_ <= targetWorkers_,
-            "Config: minWorkers should be less or equal to targetWorkers"
-        );
+        require(minWorkers_ <= targetWorkers_, "Config: minWorkers should be less or equal to targetWorkers");
 
         ConfigStorage storage configStorage = _getConfigStorage();
 
@@ -111,18 +103,12 @@ contract Config is OwnableUpgradableDiamond, IConfig {
 
     // ------------------ Modifiers ------------------
     modifier onlyCore() {
-        require(
-            msg.sender == address(_getConfigStorage().globalCore),
-            "Config: caller is not the Core"
-        );
+        require(msg.sender == address(_getConfigStorage().globalCore), "Config: caller is not the Core");
         _;
     }
 
     modifier onlyMarket() {
-        require(
-            msg.sender == address(_getConfigStorage().globalCore.market()),
-            "Config: caller is not the Market"
-        );
+        require(msg.sender == address(_getConfigStorage().globalCore.market()), "Config: caller is not the Market");
         _;
     }
 
@@ -202,10 +188,7 @@ contract Config is OwnableUpgradableDiamond, IConfig {
     function changeProvidersAccessType(AccessType accessType) public onlyOwner {
         ConfigStorage storage configStorage = _getConfigStorage();
 
-        require(
-            configStorage.providersAccessType != accessType,
-            "Config: access type is already set"
-        );
+        require(configStorage.providersAccessType != accessType, "Config: access type is already set");
 
         configStorage.providersAccessType = accessType;
 
@@ -215,10 +198,7 @@ contract Config is OwnableUpgradableDiamond, IConfig {
     function addProviderToAccessList(address provider) public onlyOwner {
         ConfigStorage storage configStorage = _getConfigStorage();
 
-        require(
-            configStorage.providersAccessType != AccessType.NONE,
-            "Config: access type is NONE"
-        );
+        require(configStorage.providersAccessType != AccessType.NONE, "Config: access type is NONE");
 
         configStorage.providersAccessMap[provider] = true;
 

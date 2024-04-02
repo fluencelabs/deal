@@ -13,15 +13,7 @@ import "src/utils/Whitelist.sol";
 
 contract Core is ICore, UUPSUpgradeable, GlobalConst, Whitelist {
     // ------------------ Storage ------------------
-    bytes32 private constant _STORAGE_SLOT =
-        bytes32(uint256(keccak256("fluence.core.storage.v1")) - 1);
-
-    function _getCoreStorage1() public view returns (CoreStorage storage s) {
-        bytes32 storageSlot = _STORAGE_SLOT;
-        assembly {
-            s.slot := storageSlot
-        }
-    }
+    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.core.storage.v1")) - 1);
 
     struct CoreStorage {
         ICapacity capacity;
@@ -71,12 +63,7 @@ contract Core is ICore, UUPSUpgradeable, GlobalConst, Whitelist {
     ) public initializer {
         __Ownable_init(msg.sender);
         __EpochController_init(epochDuration_);
-        __GlobalConst_init(
-            minDepositedEpochs_,
-            minRematchingEpochs_,
-            minProtocolVersion_,
-            maxProtocolVersion_
-        );
+        __GlobalConst_init(minDepositedEpochs_, minRematchingEpochs_, minProtocolVersion_, maxProtocolVersion_);
         __UUPSUpgradeable_init();
         __Whitelist_init(isWhitelistEnabled_);
         __CapacityConst_init(
@@ -102,26 +89,13 @@ contract Core is ICore, UUPSUpgradeable, GlobalConst, Whitelist {
         emit DealImplSet(dealImpl_);
     }
 
-    function initializeModules(
-        ICapacity capacity_,
-        IMarket market_,
-        IDealFactory dealFactory_
-    ) external onlyOwner {
+    function initializeModules(ICapacity capacity_, IMarket market_, IDealFactory dealFactory_) external onlyOwner {
         CoreStorage storage coreStorage = _getCoreStorage();
 
-        require(
-            address(coreStorage.capacity) == address(0),
-            "Core: modules already initialized"
-        );
-        require(
-            address(capacity_) != address(0),
-            "Core: capacity is zero address"
-        );
+        require(address(coreStorage.capacity) == address(0), "Core: modules already initialized");
+        require(address(capacity_) != address(0), "Core: capacity is zero address");
         require(address(market_) != address(0), "Core: market is zero address");
-        require(
-            address(dealFactory_) != address(0),
-            "Core: deal factory is zero address"
-        );
+        require(address(dealFactory_) != address(0), "Core: deal factory is zero address");
 
         coreStorage.capacity = capacity_;
         coreStorage.market = market_;
@@ -146,10 +120,7 @@ contract Core is ICore, UUPSUpgradeable, GlobalConst, Whitelist {
     }
 
     function setDealImpl(IDeal dealImpl_) external onlyOwner {
-        require(
-            Address.isContract(address(dealImpl_)),
-            "New deal implementation is not a contract"
-        );
+        require(Address.isContract(address(dealImpl_)), "New deal implementation is not a contract");
 
         _getCoreStorage().dealImpl = dealImpl_;
 
@@ -157,10 +128,7 @@ contract Core is ICore, UUPSUpgradeable, GlobalConst, Whitelist {
     }
 
     function setActiveUnitCount(uint256 activeUnitCount_) external {
-        require(
-            msg.sender == address(_getCoreStorage().capacity),
-            "Core: caller is not capacity"
-        );
+        require(msg.sender == address(_getCoreStorage().capacity), "Core: caller is not capacity");
         _setActiveUnitCount(activeUnitCount_);
     }
 
