@@ -41,3 +41,7 @@ export interface OfferDetail {
 export interface DealByProvider {
   id: string;
 }
+
+export interface OfferByProvider {
+  id: string;
+}
