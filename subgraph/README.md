@@ -9,7 +9,7 @@
   - [Query through GUI](#query-through-gui)
   - [Tricks & Tips](#tricks--tips)
 - [Deploy](#deploy)
-  - [Fluence Stands Versioning](#fluence-stands-versioning)
+  - [deprecated Fluence Stands Versioning](#fluence-stands-versioning)
   - [To Localhost](#to-localhost)
   - [To TheGraph Studio [not for subnets]](#to-thegraph-studio-not-for-subnets)
   - [To Hosted Service [not for subnets]](#to-hosted-service-not-for-subnets)
@@ -108,8 +108,9 @@ npm run compile && npm run create:local && npm run deploy:local
 ```
 
 # Deploy 
+For deploy it uses [fluence-graph.sh](fluence-graph.sh) script. Check its help for more info. Tl;dr: it is gateway to deploy manage subgraph deploy on Fluence stands and store artifacts of those deployments.
 
-## Fluence Stands Versioning
+## [deprecated] Fluence Stands Versioning
 Logic is inside [fluence-graph.sh](fluence-graph.sh) and it is used in package.json and accessed via makefile commands finally as well. Generally, the deploy flow is the next:
 
 1. It creates subgraph for fluence network (stage, dar, etc) via `npm run create:stage` with subgraph named like `fluence-deal-contracts-<commit hash>` (for local hash commit is ignored).
