@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.19;
 
-import "./Deal.sol";
+import "./interfaces/IDeal.sol";
 
 library DealSnapshot {
     // ------------------ TYPES ------------------
@@ -55,7 +55,7 @@ library DealSnapshot {
 
     // ------------------ MUTABLES ------------------
     function init(
-        Deal.DealStorage storage dealStorage,
+        IDeal.DealStorage storage dealStorage,
         uint256 currentEpoch,
         uint256 snapshotEpoch,
         bool isEnded_,
@@ -93,7 +93,7 @@ library DealSnapshot {
         self._gapsEpochCount = gapsEpochCount;
     }
 
-    function commitToStorage(Cache memory self, Deal.DealStorage storage dealStorage) internal {
+    function commitToStorage(Cache memory self, IDeal.DealStorage storage dealStorage) internal {
         if (self._initTotalBalance != self._totalBalance) {
             dealStorage.totalBalance = self._totalBalance;
         }

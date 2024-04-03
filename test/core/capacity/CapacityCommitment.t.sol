@@ -1,22 +1,19 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.19;
 
-import {Test, console2} from "forge-std/Test.sol";
-import "forge-std/console.sol";
-import "forge-std/Vm.sol";
-import "forge-std/StdCheats.sol";
-import "filecoin-solidity/v0.8/utils/Actor.sol";
-import "src/core/Core.sol";
-import "src/core/modules/capacity/Capacity.sol";
-import "src/core/modules/capacity/interfaces/ICapacity.sol";
-import "src/utils/BytesConverter.sol";
-import "test/utils/DeployDealSystem.sol";
-import "src/core/modules/market/Market.sol";
-import "src/core/modules/market/interfaces/IMarket.sol";
-import "test/utils/TestHelper.sol";
+import {Test} from "forge-std/Test.sol";
 import "forge-std/StdCheats.sol";
 
-contract CapacityCommitmentTest is Test {
+import "filecoin-solidity/v0.8/utils/Actor.sol";
+
+import "src/core/modules/market/interfaces/IMarket.sol";
+import "src/core/modules/capacity/interfaces/ICapacity.sol";
+
+import "src/utils/BytesConverter.sol";
+import "test/utils/TestWithDeployment.sol";
+import "test/utils/TestHelper.sol";
+
+contract CapacityCommitmentTest is TestWithDeployment {
     using SafeERC20 for IERC20;
     using BytesConverter for bytes32;
 
@@ -41,10 +38,8 @@ contract CapacityCommitmentTest is Test {
     event RewardWithdrawn(bytes32 indexed commitmentId, uint256 amount);
 
     // ------------------ Variables ------------------
-    DeployDealSystem.Deployment deployment;
-
     // Init variables
-    Market.RegisterComputePeer[] registerPeers;
+    IMarket.RegisterComputePeer[] registerPeers;
     uint256 minPricePerWorkerEpoch;
     CIDV1[] effectors;
     address paymentToken;
@@ -54,7 +49,7 @@ contract CapacityCommitmentTest is Test {
 
     // ------------------ Test ------------------
     function setUp() public {
-        deployment = DeployDealSystem.deployDealSystem();
+        _deploySystem();
 
         paymentToken = address(deployment.tUSD);
         minPricePerWorkerEpoch = 1000;
@@ -134,7 +129,7 @@ contract CapacityCommitmentTest is Test {
 
         (bytes32 commitmentId,) = _createCapacityCommitment(peerId);
 
-        Capacity.CommitmentView memory commitment = deployment.capacity.getCommitment(commitmentId);
+        ICapacity.CommitmentView memory commitment = deployment.capacity.getCommitment(commitmentId);
 
         assertEq(uint256(commitment.status), uint256(ICapacity.CCStatus.WaitDelegation), "Status mismatch");
         assertEq(commitment.peerId, peerId, "PeerId mismatch");
@@ -204,7 +199,7 @@ contract CapacityCommitmentTest is Test {
 
         // Verify commitments info.
         for (uint256 i = 0; i < registerPeers.length; ++i) {
-            Capacity.CommitmentView memory commitment = deployment.capacity.getCommitment(createdCCIds[i]);
+            ICapacity.CommitmentView memory commitment = deployment.capacity.getCommitment(createdCCIds[i]);
             assertEq(uint256(commitment.status), uint256(ICapacity.CCStatus.Active), "Status mismatch");
             assertEq(commitment.peerId, registerPeers[i].peerId, "PeerId mismatch");
             assertEq(commitment.collateralPerUnit, deployment.core.fltCollateralPerUnit(), "CollateralPerUnit mismatch");
@@ -250,12 +245,9 @@ contract CapacityCommitmentTest is Test {
         bytes32 unitId = registerPeers[0].unitIds[0];
 
         (bytes32 commitmentId,) = _createAndDepositCapacityCommitment(peerId, unitCount);
-        console.log("curr epoch #1", deployment.core.currentEpoch());
 
         // warp to next epoch
         StdCheats.skip(deployment.core.epochDuration());
-
-        console.log("curr epoch #2", deployment.core.currentEpoch());
 
         bytes32 targetHash = bytes32(uint256(deployment.core.difficulty()) - 1);
         //TODO: vm mock not working here :(
@@ -276,7 +268,6 @@ contract CapacityCommitmentTest is Test {
             / deployment.core.vestingPeriodCount() * deployment.core.vestingPeriodCount();
         StdCheats.skip(deployment.core.epochDuration());
 
-        console.log("curr epoch #3", deployment.core.currentEpoch());
         bytes32 localUnitNonce = keccak256(abi.encodePacked("localUnitNonce"));
         deployment.capacity.submitProof(unitId, localUnitNonce, targetHash);
 

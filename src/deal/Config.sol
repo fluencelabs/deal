@@ -2,7 +2,6 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "src/utils/OwnableUpgradableDiamond.sol";
 import "src/core/interfaces/ICore.sol";
 import "./interfaces/IConfig.sol";

@@ -2,9 +2,8 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "src/deal/interfaces/IDeal.sol";
-import "src/deal/base/Types.sol";
+import {CIDV1} from "src/utils/Common.sol";
 
 /// @title Offer contract interface
 /// @dev Offer contract is responsible for managing the offers in the market

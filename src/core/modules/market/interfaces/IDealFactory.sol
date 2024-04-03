@@ -2,8 +2,11 @@
 
 pragma solidity ^0.8.19;
 
-import "src/deal/base/Types.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+import {CIDV1} from "src/utils/Common.sol";
 import "src/deal/interfaces/IDeal.sol";
+import "src/deal/interfaces/IConfig.sol";
 
 /// @title Deal factory contract interface
 /// @dev Deal factory contract is responsible for creating deals
@@ -38,6 +41,8 @@ interface IDealFactory {
         address[] providersAccessList_,
         uint256 protocolVersion_
     );
+
+    function initialize() external;
 
     // ----------------- View -----------------
     /// @dev Returns true if the deal exists

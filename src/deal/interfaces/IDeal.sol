@@ -21,6 +21,22 @@ interface IDeal is IConfig, IWorkerManager {
         SMALL_BALANCE
     }
 
+    struct ComputeUnitPaymentInfo {
+        uint256 snapshotEpoch;
+        uint256 gapsDelta;
+    }
+
+    struct DealStorage {
+        uint256 totalBalance;
+        uint256 lockedBalance;
+        uint256 gapsEpochCount;
+        uint256 maxPaidEpoch;
+        uint256 lastCommitedEpoch;
+        mapping(bytes32 => ComputeUnitPaymentInfo) cUnitPaymentInfo;
+        uint256 endedEpoch;
+        uint256 protocolVersion;
+    }
+
     // ----------------- Events -----------------
     /// @dev Emitted when a owner deposits payment token to the deal
     event Deposited(uint256 amount);

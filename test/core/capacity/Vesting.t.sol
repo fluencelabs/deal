@@ -1,13 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.19;
 
-import {Test, console2} from "forge-std/Test.sol";
-import "forge-std/console.sol";
-import "forge-std/Vm.sol";
-import "forge-std/StdCheats.sol";
+import {Test} from "forge-std/Test.sol";
 import "src/core/modules/capacity/Vesting.sol";
-import "test/utils/TestHelper.sol";
-import "forge-std/StdCheats.sol";
 
 contract VestingTest is Test {
     using Vesting for Vesting.Info;
