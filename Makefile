@@ -10,7 +10,7 @@ LOCAL_CHAIN_BLOCK_MINING_INTERVAL ?= 1
 verify-command: ## Verify command
 	@command -v $(program) > /dev/null || (echo "\033[0;31m$(program) is not installed. Please install $(program) and try again.\033[0m" && exit 1)
 
-fmt:
+fmt-contracts:
 	@forge fmt
 	@FOUNDRY_PROFILE=test forge fmt
 
@@ -46,13 +46,18 @@ build-npms: ## Build all npms: subgraph and ts-clients
 
 build-all: build-contracts build-npms ## Build contracts and npms
 
-run-contract-tests:  ## Test for solidity contracts & ts-clients
+test-contracts:
 	@make verify-command program=forge
 	@forge build
 	@FOUNDRY_PROFILE=test forge test 
 	@echo "\033[0;32mSuccess! Contract tests passed.\033[0m"
 
-run-tests:  ## Test for solidity contracts & ts-clients
+test-ts-client:
+	@make verify-command program=test
+	@cd ts-client && npm run test
+	@echo "\033[0;32mSuccess! Tests passed.\033[0m"
+
+test:  ## Test for solidity contracts & ts-clients
 	@make verify-command program=forge
 	@make run-contract-tests
 	@cd ts-client && npm run test
