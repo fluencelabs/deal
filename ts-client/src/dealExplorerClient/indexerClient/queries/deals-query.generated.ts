@@ -75,7 +75,7 @@ export const BasicDealFragmentDoc = gql`
       ...EffectorBasic
     }
   }
-  addedComputeUnits {
+  addedComputeUnits(where: {deleted: false}) {
     ...ComputeUnitBasic
   }
   providersAccessType
@@ -128,7 +128,7 @@ export const DealsByPeerQueryDocument = gql`
     ) {
       deal {
         id
-        addedComputeUnits(where: {peer_: {id: $peerId}}) {
+        addedComputeUnits(where: {peer_: {id: $peerId}, deleted: false}) {
           id
           workerId
         }

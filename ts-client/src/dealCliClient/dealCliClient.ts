@@ -4,7 +4,6 @@ import type { DealByProvider, OfferDetail } from "./types/schemes.js";
 import { serializeOfferDetail } from "./serializers/schemes.js";
 import type { SerializationSettings } from "../utils/serializers.js";
 
-
 /*
  * @dev This client represents endpoints to access desirable indexer data in REST
  * @dev  manner from POV of Fluence CLI.
@@ -20,8 +19,10 @@ export class DealCliClient {
 
   // @param indexerUrl: is optional - you force to replace indexer
   //  URL setting (by default it uses URL from network config mapping).
-  // @param serializationSettings: you can control how many fixed values after
-  //  floating point you want client to display.
+  // @param serializationSettings: you can control via additional formatters what
+  //  to do with token value after under-the-hood serialization:
+  //  after serialization of 1e+18 token value with 18 decimals to 1.0..0 ETH.
+  // E.g.: transform all 12.00000 -> to 12.0 (v) => v.replace(/\.0+$/, ".0").
   private _serializationSettings: SerializationSettings;
   constructor(
     network: ContractsENV,
@@ -32,10 +33,7 @@ export class DealCliClient {
     if (serializationSettings) {
       this._serializationSettings = serializationSettings;
     } else {
-      this._serializationSettings = {
-          parseNativeTokenToFixedDefault: 18,
-          parseTokenToFixedDefault: 3,
-        }
+      this._serializationSettings = {};
     }
   }
 
@@ -48,23 +46,23 @@ export class DealCliClient {
     };
     const data = await this.indexerClient.getOffer(options);
     if (data.offer) {
-      return serializeOfferDetail(data.offer, this._serializationSettings)
+      return serializeOfferDetail(data.offer, this._serializationSettings);
     }
-    return null
+    return null;
   }
 
   async getDealsByProvider(providerId: string): Promise<Array<DealByProvider>> {
-    const data = await this.indexerClient.getDeals(
-      {
-        filters: {
-          addedComputeUnits_: { provider: providerId.toLowerCase() }
-        }
-      }
-    )
-    return data.deals.map((deal) => {
-      return {
-        id: deal.id,
-      }
-    }) || []
+    const data = await this.indexerClient.getDeals({
+      filters: {
+        addedComputeUnits_: { provider: providerId.toLowerCase() },
+      },
+    });
+    return (
+      data.deals.map((deal) => {
+        return {
+          id: deal.id,
+        };
+      }) || []
+    );
   }
 }

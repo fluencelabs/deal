@@ -2,7 +2,6 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "src/deal/interfaces/IDeal.sol";
 
 /// @title Matcher contract interface
@@ -24,7 +23,7 @@ interface IMatcher {
         bytes32 indexed peerId, IDeal deal, bytes32 unitId, uint256 dealCreationBlock, CIDV1 appCID
     );
 
-    // ----------------- Mutables -----------------
+    // ----------------- Mutable -----------------
     /// @dev Matches a deal with compute units
     /// @param deal The deal address
     /// @param offers The offers with the deal witch has the compute units for matching

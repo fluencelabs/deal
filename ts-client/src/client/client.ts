@@ -22,6 +22,29 @@ import type {
 } from "../typechain-types/index.js";
 import type { Deployment, ContractsENV } from "./config.js";
 
+export enum CommitmentStatus {
+  Inactive,
+  Active,
+  // WaitDelegation - before collateral is deposited.
+  WaitDelegation,
+  // Status is WaitStart - means collateral deposited, and epoch should be proceed before Active.
+  WaitStart,
+  Failed,
+  Removed,
+}
+
+export enum DealStatus {
+  // the deal does have enough funds to pay for the workers
+  INSUFFICIENT_FUNDS,
+  ACTIVE,
+  // the deal is stopped
+  ENDED,
+  // the deal has a balance and waiting for workers
+  NOT_ENOUGH_WORKERS,
+  // the deal has balance less than the minimal balance. Min balance: 2 * targetWorkers * pricePerWorkerEpoch
+  SMALL_BALANCE,
+}
+
 export class DealClient {
   private deployment: Deployment;
 

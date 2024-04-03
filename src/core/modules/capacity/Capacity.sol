@@ -2,21 +2,22 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "src/core/modules/BaseModule.sol";
 import "@openzeppelin/contracts-upgradeable/utils/MulticallUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+
+import "src/core/modules/BaseModule.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
-import "src/deal/base/Types.sol";
+
 import "src/utils/RandomXProxy.sol";
 import "src/utils/BytesConverter.sol";
 import "src/utils/Whitelist.sol";
-import "./interfaces/ICapacity.sol";
+import {PRECISION, CIDV1} from "src/utils/Common.sol";
+
 import "./Vesting.sol";
 import "./Snapshot.sol";
-import "forge-std/console.sol";
-import {PRECISION} from "src/core/GlobalConst.sol";
+import "./interfaces/ICapacity.sol";
 
 contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacity {
     using SafeERC20 for IERC20;
@@ -291,6 +292,8 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         require(currentEpoch >= cc.info.startEpoch, "Capacity commitment is not started");
 
         UnitInfo storage unitInfo = cc.unitInfoById[unitId];
+        require(!unitInfo.isInactive, "Compute unit is in deal");
+
         uint256 expiredEpoch = _expiredEpoch(cc);
         // #endregion
 
@@ -337,6 +340,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         if (unitProofCount == minProofsPerEpoch_) {
             // if proofCount is equal to minRequiredCCProofs, then we have one success for the current epoch
             cc.progress.currentSuccessCount += 1;
+            cc.progress.successCountByEpoch[currentEpoch] += 1;
             rewardInfo.totalSuccessProofs += unitProofCount;
         } else if (unitProofCount > minProofsPerEpoch_) {
             rewardInfo.totalSuccessProofs++;
@@ -448,18 +452,15 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
             IMarket.ComputeUnit memory unit = market.getComputeUnit(unitId);
 
             require(unit.peerId == peerId, "Compute unit doesn't belong to capacity commitment");
-
-            if (unit.deal != address(0x00)) {
-                market.returnComputeUnitFromDeal(unitId);
-            }
+            require(unit.deal == address(0x00), "Compute unit is in deal");
+            require(!cc.finish.isUnitExited[unitId], "Compute unit is exited");
 
             UnitInfo storage unitInfo = cc.unitInfoById[unitId];
-            bool success =
-                _commitUnitSnapshot(cc, unitInfo, currentEpoch_, expiredEpoch, snapshotCache.current.failedEpoch);
-            if (success) {
-                cc.finish.exitedUnitCount += 1;
-                cc.finish.totalSlashedCollateral += unitInfo.slashedCollateral;
-            }
+            _commitUnitSnapshot(cc, unitInfo, currentEpoch_, expiredEpoch, snapshotCache.current.failedEpoch);
+
+            cc.finish.exitedUnitCount += 1;
+            cc.finish.totalSlashedCollateral += unitInfo.slashedCollateral;
+            cc.finish.isUnitExited[unitId] = true;
         }
 
         emit CommitmentStatsUpdated(
@@ -697,15 +698,18 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
             uint256 restFailCount = maxFailCount - prevFailCount;
             newStatus = CCStatus.Failed;
 
-            if (activeUnitCount_ >= restFailCount) {
-                snapshotCache.current.failedEpoch = lastSnapshotEpoch + 1;
-                snapshotCache.current.remainingFailedUnitsInLastEpoch = restFailCount % activeUnitCount_;
-            } else {
-                uint256 newActiveUnitCount = activeUnitCount_ + nextAdditionalActiveUnitCount_;
+            uint256 firstPeriodEpoch = lastSnapshotEpoch + 1;
+            uint256 failsInFirstEpoch = activeUnitCount_ - cc.progress.successCountByEpoch[firstPeriodEpoch];
 
+            if (failsInFirstEpoch >= restFailCount) {
+                snapshotCache.current.failedEpoch = firstPeriodEpoch;
+                snapshotCache.current.remainingFailedUnitsInLastEpoch = restFailCount % failsInFirstEpoch;
+            } else {
                 // numberOfFillFailedEpoch is a number of epochs when units not send proofs
                 uint256 numberOfFillFailedEpoch = 1;
-                restFailCount -= activeUnitCount_;
+                restFailCount -= failsInFirstEpoch;
+
+                uint256 newActiveUnitCount = activeUnitCount_ + nextAdditionalActiveUnitCount_;
 
                 // TOOD: add currentSuccessCount to calculation
                 numberOfFillFailedEpoch += restFailCount / newActiveUnitCount;
@@ -780,14 +784,14 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         uint256 currentEpoch,
         uint256 expiredEpoch,
         uint256 failedEpoch
-    ) internal returns (bool) {
+    ) internal {
         CommitmentStorage storage s = _getCommitmentStorage();
         uint256 snapshotEpoch = currentEpoch - 1;
 
         // #region verify args
         // if unit is inactive, then no need to do anything because it's means that unit is in deal
         if (unitInfo.isInactive) {
-            return false;
+            return;
         }
 
         // if snapshotEpoch is more than expiredEpoch, then we should use expiredEpoch because it means that the commitment is expired before we start making a snapshot
@@ -801,6 +805,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
             snapshotEpoch = failedEpoch;
         }
 
+
         // if lastMinProofsEpoch is zero then we should use startEpoch - 1 because (startEpoch - 1) is the first 'snapshot' epoch
         uint256 lastSnapshotEpoch = unitInfo.lastSnapshotEpoch;
         if (lastSnapshotEpoch == 0) {
@@ -809,7 +814,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
 
         // if snapshotEpoch is less or equal to lastSnapshotEpoch, then we should return false because it means that we already made a snapshot for this epoch
         if (snapshotEpoch <= lastSnapshotEpoch) {
-            return false;
+            return;
         }
         // #endregion
 
@@ -859,12 +864,12 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         uint256 lastProofCount = unitInfo.proofCountByEpoch[nextEpochAfterLastSnapshot];
         rewardInfo = s.rewardInfoByEpoch[nextEpochAfterLastSnapshot];
         if (lastProofCount < rewardInfo.minProofsPerEpoch) {
-            return true;
+            return;
         }
 
         uint256 totalSuccessProofs = rewardInfo.totalSuccessProofs;
         if (totalSuccessProofs == 0) {
-            return true;
+            return;
         }
 
         uint256 reward =
@@ -876,8 +881,6 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
 
         delete unitInfo.proofCountByEpoch[nextEpochAfterLastSnapshot];
         // #endregion
-
-        return true;
     }
 
     function _getOrSaveRewardPool(uint256 epoch) internal returns (RewardInfo storage rewardInfo) {

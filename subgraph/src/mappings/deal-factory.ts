@@ -1,32 +1,28 @@
 // File should be writen after `npm run compile` is run or you will encounter syntax and import errors.
 // Note: handlers named as in the contract methods
 
-import {
-  DealCreated,
-} from "../../generated/DealFactory/DealFactory";
+import { DealCreated } from "../../generated/DealFactory/DealFactory";
 import {
   createOrLoadDealEffector,
   createOrLoadDealToProvidersAccess,
-  createOrLoadGraphNetwork, createOrLoadToken,
+  createOrLoadGraphNetwork,
+  createOrLoadToken,
   createOrLoadProvider,
   UNO_BIG_INT,
   ZERO_BIG_INT,
 } from "../models";
 
 import { log } from "@graphprotocol/graph-ts";
-import {
-  Deal,
-} from "../../generated/schema";
+import { Deal } from "../../generated/schema";
 import { Deal as DealTemplate } from "../../generated/templates";
 import { AppCID, formatAddress, getEffectorCID, parseEffectors } from "./utils";
 
-
 // ---- Factory Events ----
 export function handleDealCreated(event: DealCreated): void {
-  log.info("[handleDealCreated] Create new Deal with address: {} with owner: {}", [
-    event.params.deal.toHexString(),
-    event.params.owner.toHexString()
-  ]);
+  log.info(
+    "[handleDealCreated] Create new Deal with address: {} with owner: {}",
+    [event.params.deal.toHexString(), event.params.owner.toHexString()],
+  );
   const dealAddress = formatAddress(event.params.deal);
 
   const deal = new Deal(dealAddress);
@@ -48,9 +44,12 @@ export function handleDealCreated(event: DealCreated): void {
 
   // Perform provider access lists (whitelist, blacklist or non).
   deal.providersAccessType = event.params.providersAccessType_;
-  for (let i=0; i < event.params.providersAccessList_.length; i++) {
+  for (let i = 0; i < event.params.providersAccessList_.length; i++) {
     const providerAddress = formatAddress(event.params.providersAccessList_[i]);
-    const provider = createOrLoadProvider(providerAddress, event.block.timestamp);
+    const provider = createOrLoadProvider(
+      providerAddress,
+      event.block.timestamp,
+    );
     createOrLoadDealToProvidersAccess(deal.id, provider.id);
   }
   deal.save();

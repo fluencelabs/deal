@@ -4,13 +4,12 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./interfaces/IMatcher.sol";
-import "./interfaces/IMatcher.sol";
+
 import "src/deal/interfaces/IDeal.sol";
 import "src/deal/interfaces/IConfig.sol";
-import "src/core/modules/BaseModule.sol";
-import "src/utils/OwnableUpgradableDiamond.sol";
+
 import "./Offer.sol";
+import "./interfaces/IMatcher.sol";
 
 abstract contract Matcher is Offer, IMatcher {
     using SafeERC20 for IERC20;
@@ -120,12 +119,15 @@ abstract contract Matcher is Offer, IMatcher {
 
                 // Check if CU available.
                 if (
+                    computeUnit.deal != address(0)
                     // Blacklisted provider we filtered out above via: !deal.isProviderAllowed(offer.provider).
-                    providersAccessType != IConfig.AccessType.WHITELIST
-                        && (
-                            computeUnit.deal != address(0) || peer.commitmentId == bytes32(0x000000000)
-                                || capacity.getStatus(peer.commitmentId) != ICapacity.CCStatus.Active
-                        )
+                    || (
+                        providersAccessType != IConfig.AccessType.WHITELIST
+                            && (
+                                peer.commitmentId == bytes32(0x000000000)
+                                    || capacity.getStatus(peer.commitmentId) != ICapacity.CCStatus.Active
+                            )
+                    )
                 ) {
                     continue;
                 }

@@ -2,7 +2,6 @@
 
 pragma solidity ^0.8.19;
 
-import "src/core/interfaces/ICore.sol";
 import "../Vesting.sol";
 
 /// @title Capacity contract interface
@@ -136,6 +135,7 @@ interface ICapacity {
         uint256 filledRemainingFailedUnitsInLastEpoch;
         uint256 exitedUnitCount;
         uint256 totalSlashedCollateral;
+        mapping(bytes32 => bool) isUnitExited;
     }
 
     struct CommitmentProgress {
@@ -144,6 +144,7 @@ interface ICapacity {
         uint256 snapshotEpoch;
         uint256 activeUnitCount;
         uint256 nextAdditionalActiveUnitCount;
+        mapping(uint256 => uint256) successCountByEpoch;
     }
 
     struct CommitmentView {
@@ -197,7 +198,7 @@ interface ICapacity {
     function onUnitMovedToDeal(bytes32 commitmentId, bytes32 unitId) external;
     function onUnitReturnedFromDeal(bytes32 commitmentId, bytes32 unitId) external;
 
-    // ----------------- Mutables -----------------
+    // ----------------- Mutable -----------------
     /// @dev Creates a new commitment
     /// @param peerId Peer id which linked to the commitment
     /// @param duration The duration of the commitment in Epochs
@@ -222,7 +223,7 @@ interface ICapacity {
     function depositCollateral(bytes32[] calldata commitmentIds) external payable;
 
     /// @dev Submits a proof for the commitment
-    /// @param unitId Compute unit id which provied the proof
+    /// @param unitId Compute unit id which provide the proof
     /// @param localUnitNonce The local nonce of the unit for calculating the target hash. It's the proof
     /// @param resultHash The target hash of this proof
     function submitProof(bytes32 unitId, bytes32 localUnitNonce, bytes32 resultHash) external;

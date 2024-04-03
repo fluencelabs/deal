@@ -11,7 +11,7 @@ import type {
   OfferShort,
   Peer,
   ProviderBase,
-  ProviderShort
+  ProviderShort,
 } from "../types/schemes.js";
 import type {
   BasicOfferFragment,
@@ -22,28 +22,29 @@ import {
   serializeProviderName,
   serializeRewards,
 } from "./logics.js";
-import {
-  calculateTimestamp,
-} from "../utils.js";
+import { calculateTimestamp } from "../utils.js";
 import type {
   BasicDealFragment,
   ComputeUnitBasicFragment,
 } from "../indexerClient/queries/deals-query.generated.js";
 import type { CapacityCommitmentBasicFragment } from "../indexerClient/queries/capacity-commitments-query.generated.js";
 import { FLTToken } from "../constants.js";
-import type {
-  ComputeUnitWithCcDataBasicFragment
-} from "../indexerClient/queries/peers-query.generated.js";
+import type { ComputeUnitWithCcDataBasicFragment } from "../indexerClient/queries/peers-query.generated.js";
 import {
   type SerializationSettings,
-  tokenValueToRounded
+  tokenValueToRounded,
 } from "../../utils/serializers.js";
 import {
   serializeEffectors,
-  serializeContractRateToPercentage
+  serializeContractRateToPercentage,
 } from "../../utils/indexerClient/serializers.js";
 
-export function serializeOfferShort(offer: BasicOfferFragment, serializationSettings: SerializationSettings,): OfferShort {
+const BIG_INT_ZERO = BigInt(0);
+
+export function serializeOfferShort(
+  offer: BasicOfferFragment,
+  serializationSettings: SerializationSettings,
+): OfferShort {
   return {
     id: offer.id,
     createdAt: Number(offer.createdAt),
@@ -57,8 +58,8 @@ export function serializeOfferShort(offer: BasicOfferFragment, serializationSett
     // USDC.
     pricePerEpoch: tokenValueToRounded(
       offer.pricePerEpoch,
-      serializationSettings.parseTokenToFixedDefault,
       offer.paymentToken.decimals,
+      serializationSettings.paymentTokenValueAdditionalFormatter,
     ),
     effectors: serializeEffectors(offer.effectors),
     providerId: offer.provider.id,
@@ -87,7 +88,9 @@ export function serializeProviderShort(
   const composedOffers = [];
   if (provider.offers) {
     for (const offer of provider.offers) {
-      composedOffers.push(serializeOfferShort(offer as BasicOfferFragment, serializationSettings));
+      composedOffers.push(
+        serializeOfferShort(offer as BasicOfferFragment, serializationSettings),
+      );
     }
   }
   return {
@@ -110,14 +113,11 @@ export function serializeComputeUnits(
 }
 
 export function serializeComputeUnitsWithStatus(
-  computeUnitsWithCcDataBasicFragment: Array<ComputeUnitWithCcDataBasicFragment>
+  computeUnitsWithCcDataBasicFragment: Array<ComputeUnitWithCcDataBasicFragment>,
 ): Array<ComputeUnitsWithCCStatus> {
   let res: Array<ComputeUnitsWithCCStatus> = [];
   for (const computeUnit of computeUnitsWithCcDataBasicFragment) {
-    const { status } =
-      serializeCUStatus(
-        computeUnit,
-      );
+    const { status } = serializeCUStatus(computeUnit);
 
     res.push({
       id: computeUnit.id,
@@ -126,7 +126,7 @@ export function serializeComputeUnitsWithStatus(
       successProofs: computeUnit.submittedProofsCount,
     });
   }
-  return res
+  return res;
 }
 
 export function serializePeers(peers: Array<BasicPeerFragment>): Array<Peer> {
@@ -175,8 +175,8 @@ export function serializeDealsShort(
     // USDC.
     balance: tokenValueToRounded(
       freeBalance,
-      serializationSettings.parseTokenToFixedDefault,
       deal.paymentToken.decimals,
+      serializationSettings.paymentTokenValueAdditionalFormatter,
     ),
     status: fromRpcForDealShort.dealStatus
       ? fromRpcForDealShort.dealStatus
@@ -184,8 +184,8 @@ export function serializeDealsShort(
     // USDC.
     totalEarnings: tokenValueToRounded(
       totalEarnings,
-      serializationSettings.parseTokenToFixedDefault,
       deal.paymentToken.decimals,
+      serializationSettings.paymentTokenValueAdditionalFormatter,
     ),
     registeredWorkers: deal.registeredWorkersCurrentCount,
     matchedWorkers: deal.matchedWorkersCurrentCount,
@@ -248,22 +248,27 @@ export function serializeCapacityCommitmentDetail(
   serializationSettings: SerializationSettings,
   precision: number,
 ): CapacityCommitmentDetail {
-  const _totalRewards = totalRewards ? totalRewards : BigInt(0);
-  const _unlockedRewards = unlockedRewards ? unlockedRewards : BigInt(0);
+  const _totalRewards = totalRewards ? BigInt(totalRewards) : BIG_INT_ZERO;
+  const _unlockedRewards = unlockedRewards
+    ? BigInt(unlockedRewards)
+    : BIG_INT_ZERO;
   // First of all convert to [0, 1] with accordance of precision and than to [0, 100] to % format.
-  const rewardDelegatorRatePercentage = serializeContractRateToPercentage(rewardDelegatorRate, precision);
+  const rewardDelegatorRatePercentage = serializeContractRateToPercentage(
+    rewardDelegatorRate,
+    precision,
+  );
   const unclockedRewardsSerialized = serializeRewards(
     _unlockedRewards,
     rewardDelegatorRate,
     precision,
     serializationSettings,
-  )
+  );
   const notWithdrawnRewardsSerialized = serializeRewards(
     _totalRewards,
     rewardDelegatorRate,
     precision,
     serializationSettings,
-  )
+  );
   return {
     ...serializeCapacityCommitmentShort(
       capacityCommitmentFromIndexer,
@@ -275,26 +280,30 @@ export function serializeCapacityCommitmentDetail(
     // FLT.
     totalCollateral: tokenValueToRounded(
       totalCollateral,
-      serializationSettings.parseNativeTokenToFixedDefault,
+      Number(FLTToken.decimals),
+      serializationSettings.nativeTokenValueAdditionalFormatter,
     ),
     collateralToken: FLTToken,
     rewardDelegatorRate: rewardDelegatorRatePercentage,
     // FLT.
     rewardsUnlocked: tokenValueToRounded(
       _unlockedRewards,
-      serializationSettings.parseNativeTokenToFixedDefault,
+      Number(FLTToken.decimals),
+      serializationSettings.nativeTokenValueAdditionalFormatter,
     ),
     rewardsUnlockedDelegator: unclockedRewardsSerialized.delegator,
     rewardsUnlockedProvider: unclockedRewardsSerialized.provider,
     rewardsNotWithdrawn: tokenValueToRounded(
       _totalRewards,
-      serializationSettings.parseNativeTokenToFixedDefault,
+      Number(FLTToken.decimals),
+      serializationSettings.nativeTokenValueAdditionalFormatter,
     ),
     rewardsNotWithdrawnDelegator: notWithdrawnRewardsSerialized.delegator,
     rewardsNotWithdrawnProvider: notWithdrawnRewardsSerialized.provider,
     rewardsTotal: tokenValueToRounded(
-      _totalRewards + rewardWithdrawn,
-      serializationSettings.parseNativeTokenToFixedDefault,
+      _totalRewards + BigInt(rewardWithdrawn),
+      Number(FLTToken.decimals),
+      serializationSettings.nativeTokenValueAdditionalFormatter,
     ),
     delegatorAddress:
       delegatorAddress == "0x0000000000000000000000000000000000000000"

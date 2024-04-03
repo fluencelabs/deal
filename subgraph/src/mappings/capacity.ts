@@ -3,6 +3,7 @@ import {
   createOrLoadCapacityCommitmentStatsPerEpoch,
   createOrLoadCapacityCommitmentToComputeUnit,
   createOrLoadComputeUnitPerEpochStat,
+  createOrLoadEpochStatistic,
   createOrLoadGraphNetwork,
   createOrLoadProvider,
   UNO_BIG_INT,
@@ -78,7 +79,21 @@ export function handleCommitmentCreated(event: CommitmentCreated): void {
   commitment.failedEpoch = ZERO_BIG_INT;
   commitment.exitedUnitCount = 0;
   commitment.nextCCFailedEpoch = ZERO_BIG_INT;
-  commitment.computeUnitsCount = 0;
+  // When peer in CC, we can not modify number of CUs of this peer. Thus,
+  //  we could save number of compute units for the commitment when CC created
+  //  instead of waiting for collateral to be deposited
+  //  (i.e. depositCollateral).
+  const loadedComputeUnits = peer.computeUnits.load();
+  const loadedComputeUnitsLength = loadedComputeUnits.length;
+  commitment.computeUnitsCount = loadedComputeUnitsLength;
+  for (let i = 0; i < loadedComputeUnitsLength; i++) {
+    // We rely on contract logic that it is not possible to emit event with not existing CUs.
+    //  Also, we rely that previously we save computeUnits successfully in prev. handler of computeUnitCreated.
+    createOrLoadCapacityCommitmentToComputeUnit(
+      commitment.id,
+      loadedComputeUnits[i].id,
+    );
+  }
   commitment.nextAdditionalActiveUnitCount = 0;
   commitment.snapshotEpoch = ZERO_BIG_INT;
   commitment.deleted = false;
@@ -105,15 +120,7 @@ export function handleCommitmentActivated(event: CommitmentActivated): void {
   commitment.startEpoch = event.params.startEpoch;
   commitment.endEpoch = event.params.endEpoch;
   commitment.activeUnitCount = event.params.unitIds.length;
-
-  commitment.computeUnitsCount = event.params.unitIds.length;
-  for (let i = 0; i < event.params.unitIds.length; i++) {
-    const computeUnitId = event.params.unitIds[i].toHexString();
-    // We rely on contract logic that it is not possible to emit event with not existing CUs.
-    //  Also, we relay that previously we save computeUnitId successfully in prev. handler.
-    const computeUnit = ComputeUnit.load(computeUnitId) as ComputeUnit;
-    createOrLoadCapacityCommitmentToComputeUnit(commitment.id, computeUnit.id);
-  }
+  // Note, we add CUs to CC directly on after CommitmentCreated event.
   commitment.nextAdditionalActiveUnitCount = 0;
   const graphNetwork = createOrLoadGraphNetwork();
 
@@ -229,6 +236,11 @@ export function handleCommitmentStatsUpdated(
     BigInt.fromI32(graphNetwork.initTimestamp),
     BigInt.fromI32(graphNetwork.coreEpochDuration),
   );
+  const epochStatistic = createOrLoadEpochStatistic(
+    event.block.timestamp,
+    currentEpoch,
+    event.block.number,
+  );
 
   let peer = Peer.load(commitment.peer) as Peer;
   peer.currentCCNextCCFailedEpoch = commitment.nextCCFailedEpoch;
@@ -238,7 +250,7 @@ export function handleCommitmentStatsUpdated(
   let capacityCommitmentStatsPerEpoch =
     createOrLoadCapacityCommitmentStatsPerEpoch(
       commitment.id,
-      currentEpoch.toString(),
+      epochStatistic.id,
     );
 
   // totalFailCount is calculated by prevEpoch
@@ -250,16 +262,10 @@ export function handleCommitmentStatsUpdated(
     commitment.nextAdditionalActiveUnitCount;
   capacityCommitmentStatsPerEpoch.currentCCNextCCFailedEpoch =
     commitment.nextCCFailedEpoch;
-  if (capacityCommitmentStatsPerEpoch.blockNumberStart > event.block.number) {
-    capacityCommitmentStatsPerEpoch.blockNumberStart = event.block.number;
-  }
-  if (capacityCommitmentStatsPerEpoch.blockNumberEnd < event.block.number) {
-    capacityCommitmentStatsPerEpoch.blockNumberEnd = event.block.number;
-  }
   capacityCommitmentStatsPerEpoch.save();
 }
 
-export function handleUnitActivated(event: UnitActivated): void { }
+export function handleUnitActivated(event: UnitActivated): void {}
 
 // Handle that Compute Unit moved from CC to Deal with arguments of CC and CU.
 // Currently, it updates only capacityCommitmentStatsPerEpoch.
@@ -274,48 +280,63 @@ export function handleUnitDeactivated(event: UnitDeactivated): void {
   const capacityCommitment = CapacityCommitment.load(
     event.params.commitmentId.toHexString(),
   ) as CapacityCommitment;
+  const epochStatistic = createOrLoadEpochStatistic(
+    event.block.timestamp,
+    currentEpoch,
+    event.block.number,
+  );
   let capacityCommitmentStatsPerEpoch =
     createOrLoadCapacityCommitmentStatsPerEpoch(
       capacityCommitment.id,
-      currentEpoch.toString(),
+      epochStatistic.id,
     );
   const computeUnit = ComputeUnit.load(
     event.params.unitId.toHexString(),
   ) as ComputeUnit;
   const computeUnitPerEpochStat = createOrLoadComputeUnitPerEpochStat(
     computeUnit.id,
-    currentEpoch.toString(),
+    epochStatistic.id,
   );
 
   // When compute unit added to Deal we also should calculate if we need to
   //  decrease counter named computeUnitsWithMinRequiredProofsSubmittedCounter.
-  if (computeUnitPerEpochStat.submittedProofsCount >= graphNetwork.minRequiredProofsPerEpoch) {
+  if (
+    computeUnitPerEpochStat.submittedProofsCount >=
+    graphNetwork.minRequiredProofsPerEpoch
+  ) {
     // Decrease computeUnitsWithMinRequiredProofsSubmittedCounter.
     capacityCommitmentStatsPerEpoch.computeUnitsWithMinRequiredProofsSubmittedCounter =
-      capacityCommitmentStatsPerEpoch.computeUnitsWithMinRequiredProofsSubmittedCounter - 1;
+      capacityCommitmentStatsPerEpoch.computeUnitsWithMinRequiredProofsSubmittedCounter -
+      1;
     capacityCommitmentStatsPerEpoch.save();
   }
 }
 
 export function handleProofSubmitted(event: ProofSubmitted): void {
   let proofSubmitted = new SubmittedProof(event.transaction.hash.toHexString());
+  const blockTimestamp = event.block.timestamp;
   let capacityCommitment = CapacityCommitment.load(
     event.params.commitmentId.toHexString(),
   ) as CapacityCommitment;
   let computeUnit = ComputeUnit.load(
     event.params.unitId.toHexString(),
   ) as ComputeUnit;
-  const provider = createOrLoadProvider(computeUnit.provider, event.block.timestamp);
+  const provider = createOrLoadProvider(computeUnit.provider, blockTimestamp);
   let graphNetwork = createOrLoadGraphNetwork();
   const currentEpoch = calculateEpoch(
-    event.block.timestamp,
+    blockTimestamp,
     BigInt.fromI32(graphNetwork.initTimestamp),
     BigInt.fromI32(graphNetwork.coreEpochDuration),
+  );
+  const epochStatistic = createOrLoadEpochStatistic(
+    blockTimestamp,
+    currentEpoch,
+    event.block.number,
   );
   let capacityCommitmentStatsPerEpoch =
     createOrLoadCapacityCommitmentStatsPerEpoch(
       capacityCommitment.id,
-      currentEpoch.toString(),
+      epochStatistic.id,
     );
 
   proofSubmitted.capacityCommitmentStatsPerEpoch =
@@ -325,7 +346,7 @@ export function handleProofSubmitted(event: ProofSubmitted): void {
   proofSubmitted.provider = provider.id;
   proofSubmitted.peer = computeUnit.peer;
   proofSubmitted.localUnitNonce = event.params.localUnitNonce;
-  proofSubmitted.createdAt = event.block.timestamp;
+  proofSubmitted.createdAt = blockTimestamp;
   proofSubmitted.createdEpoch = currentEpoch;
   proofSubmitted.save();
 
@@ -343,7 +364,7 @@ export function handleProofSubmitted(event: ProofSubmitted): void {
 
   let computeUnitPerEpochStat = createOrLoadComputeUnitPerEpochStat(
     computeUnit.id,
-    currentEpoch.toString(),
+    epochStatistic.id,
   );
   computeUnitPerEpochStat.submittedProofsCount =
     computeUnitPerEpochStat.submittedProofsCount + 1;

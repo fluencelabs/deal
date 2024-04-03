@@ -1,4 +1,4 @@
-import {AppCID, formatAddress, getEffectorCID} from "./utils";
+import { AppCID, formatAddress, getEffectorCID } from "./utils";
 import {
   AppCIDChanged,
   ComputeUnitJoined,
@@ -6,14 +6,16 @@ import {
   MaxPaidEpochUpdated,
   Withdrawn,
   WorkerIdUpdated,
-  ComputeUnitRemoved, ProviderAddedToAccessList, ProviderRemovedFromAccessList,
+  ComputeUnitRemoved,
+  ProviderAddedToAccessList,
+  ProviderRemovedFromAccessList,
 } from "../../generated/Market/Deal";
 import { ComputeUnit, Deal } from "../../generated/schema";
 import {
   createOrLoadDealToProvidersAccess,
-  createOrLoadProvider
+  createOrLoadProvider,
 } from "../models";
-import {store} from "@graphprotocol/graph-ts";
+import { store } from "@graphprotocol/graph-ts";
 
 export function handleDeposited(event: Deposited): void {
   let deal = Deal.load(formatAddress(event.address)) as Deal;
@@ -80,15 +82,25 @@ export function handleWorkerIdUpdated(event: WorkerIdUpdated): void {
   }
 }
 
-export function handleProviderAddedToAccessList(event: ProviderAddedToAccessList): void {
+export function handleProviderAddedToAccessList(
+  event: ProviderAddedToAccessList,
+): void {
   const deal = Deal.load(formatAddress(event.address)) as Deal;
-  const provider = createOrLoadProvider(formatAddress(event.params.provider), event.block.timestamp);
+  const provider = createOrLoadProvider(
+    formatAddress(event.params.provider),
+    event.block.timestamp,
+  );
   createOrLoadDealToProvidersAccess(deal.id, provider.id);
 }
 
-export function handleProviderRemovedFromAccessList(event: ProviderRemovedFromAccessList): void {
+export function handleProviderRemovedFromAccessList(
+  event: ProviderRemovedFromAccessList,
+): void {
   const deal = Deal.load(formatAddress(event.address)) as Deal;
-  const provider = createOrLoadProvider(formatAddress(event.params.provider), event.block.timestamp);
+  const provider = createOrLoadProvider(
+    formatAddress(event.params.provider),
+    event.block.timestamp,
+  );
   const entity = createOrLoadDealToProvidersAccess(deal.id, provider.id);
   store.remove("OfferToEffector", entity.id);
 }
