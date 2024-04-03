@@ -3,8 +3,6 @@
 pragma solidity ^0.8.19;
 
 import "./IEpochController.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "src/core/interfaces/ICore.sol";
 
 /// @title Capacity constants contract interface
 /// @dev The constants contract is responsible for managing the constants for the capacity commitment
@@ -39,6 +37,26 @@ interface ICapacityConst is IEpochController {
         MaxRewardPerEpoch,
         MinProofsPerEpoch,
         MaxProofsPerEpoch
+    }
+
+    struct CapacityConstInitArgs {
+        uint256 fltPrice;
+        uint256 usdCollateralPerUnit;
+        uint256 usdTargetRevenuePerEpoch;
+        uint256 minDuration;
+        uint256 minRewardPerEpoch;
+        uint256 maxRewardPerEpoch;
+        uint256 vestingPeriodDuration;
+        uint256 vestingPeriodCount;
+        uint256 slashingRate;
+        uint256 minProofsPerEpoch;
+        uint256 maxProofsPerEpoch;
+        uint256 withdrawEpochsAfterFailed;
+        uint256 maxFailedRatio;
+        bytes32 difficulty;
+        uint256 initRewardPool;
+        address randomXProxy;
+        address oracle;
     }
 
     // #region ------------------ External View Functions ------------------

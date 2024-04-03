@@ -1,30 +1,26 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.19;
 
-import {Test, console2} from "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import "forge-std/console.sol";
-import "src/deal/Deal.sol";
-import "src/deal/interfaces/IConfig.sol";
-import "src/core/modules/market/Offer.sol";
-import "test/utils/DeployDealSystem.sol";
+
+import "src/deal/interfaces/IDeal.sol";
+import "src/core/modules/market/interfaces/IOffer.sol";
+
+import "test/utils/TestWithDeployment.sol";
 import "test/utils/TestHelper.sol";
 
-contract AddWorkers is Test {
+contract AddWorkers is TestWithDeployment {
     using SafeERC20 for IERC20;
-    using TestHelper for DeployDealSystem.Deployment;
-
-    DeployDealSystem.Deployment deployment;
+    using TestHelper for TestWithDeployment.Deployment;
 
     // ------------------ Test ------------------
-
     function setUp() public {
-        deployment = DeployDealSystem.deployDealSystem();
+        _deploySystem();
     }
 
     function test_AddOneWorker() public {
-        Deal deal = deployment.deployDealWithoutFactory(10, 10, 1, 1 ether);
+        IDeal deal = deployment.deployDealWithoutFactory(10, 10, 1, 1 ether);
 
         assertEq(
             uint256(deal.getStatus()), uint256(IDeal.Status.NOT_ENOUGH_WORKERS), "status should be NOT_ENOUGH_WORKERS"
@@ -49,7 +45,7 @@ contract AddWorkers is Test {
         uint256 targetWorkers = 100;
         uint256 pricePerEpoch = 1 ether;
         uint256 startDeposit = deployment.core.minDealDepositedEpochs() * pricePerEpoch * targetWorkers;
-        Deal deal = deployment.deployDealWithoutFactory(minWorkers, targetWorkers, 1, pricePerEpoch, startDeposit);
+        IDeal deal = deployment.deployDealWithoutFactory(minWorkers, targetWorkers, 1, pricePerEpoch, startDeposit);
 
         (address[] memory computeProviders, bytes32[] memory peerIds, bytes32[] memory unitIds) =
             TestHelper.generateProviders(minWorkers);
@@ -73,7 +69,7 @@ contract AddWorkers is Test {
 
         vm.mockCall(
             address(deployment.core.market()),
-            abi.encodeWithSelector(Offer.getComputePeer.selector, peerId),
+            abi.encodeWithSelector(IOffer.getComputePeer.selector, peerId),
             abi.encode(TestHelper.pseudoRandom("offerId"), TestHelper.pseudoRandom("commitmentId"), 1, computeProvider)
         );
         vm.prank(computeProvider);

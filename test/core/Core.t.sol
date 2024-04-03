@@ -2,10 +2,14 @@
 pragma solidity ^0.8.19;
 
 import {Test, console2} from "forge-std/Test.sol";
-import "src/core/Core.sol";
-import "test/utils/DeployDealSystem.sol";
+import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-contract CoreTest is Test {
+import "src/core/interfaces/ICore.sol";
+import "src/core/interfaces/ICapacityConst.sol";
+import "test/utils/TestWithDeployment.sol";
+
+contract CoreTest is TestWithDeployment {
     using SafeERC20 for IERC20;
 
     event Initialized(uint8 version); // version is 255 for _disableInitializers
@@ -15,63 +19,68 @@ contract CoreTest is Test {
 
     address constant NOT_AN_OWNER = address(1234);
 
-    DeployDealSystem.Deployment deployment;
-
     function setUp() external {
-        deployment = DeployDealSystem.deployDealSystem();
+        _deploySystem();
     }
 
     function test_CoreHasInitializedValues() external {
         assertNotEq(address(deployment.core.dealImpl()), address(0), "Deal impl not initialized in Core");
-        assertEq(deployment.core.epochDuration(), DeployDealSystem.DEFAULT_EPOCH_DURATION, "Epoch duration not set");
+        assertEq(deployment.core.epochDuration(), TestWithDeployment.DEFAULT_EPOCH_DURATION, "Epoch duration not set");
         assertEq(
             deployment.core.minDealDepositedEpochs(),
-            DeployDealSystem.DEFAULT_MIN_DEPOSITED_EPOCHS,
+            TestWithDeployment.DEFAULT_MIN_DEPOSITED_EPOCHS,
             "Min deal deposited Epochs not set"
         );
         assertEq(
             deployment.core.minDealRematchingEpochs(),
-            DeployDealSystem.DEFAULT_MIN_REMATCHING_EPOCHS,
+            TestWithDeployment.DEFAULT_MIN_REMATCHING_EPOCHS,
             "Min deal rematching Epochs not set"
         );
     }
 
     function test_InitializerIsDisabledForImplementation() external {
-        address randomX = address(new RandomXProxy());
         vm.expectEmit(false, false, false, true);
         emit Initialized(type(uint8).max); // _disableInitializers emits this, @see Initializable.sol
-        Core coreImpl = new Core(); // there is _disableInitializers() in the constructor
+
+        ICore coreImpl = ICore(deployCode("out/Core.sol/Core.json")); // there is _disableInitializers() in the constructor
         IDeal dealImpl = deployment.core.dealImpl();
-        vm.expectRevert("Initializable: contract is already initialized");
-        coreImpl.initialize(
-            DeployDealSystem.DEFAULT_EPOCH_DURATION,
-            DeployDealSystem.DEFAULT_MIN_DEPOSITED_EPOCHS,
-            DeployDealSystem.DEFAULT_MIN_REMATCHING_EPOCHS,
-            DeployDealSystem.DEFAULT_MIN_PROTOCOL_VERSION,
-            DeployDealSystem.DEFAULT_MAX_PROTOCOL_VERSION,
+
+        try coreImpl.initialize(
+            TestWithDeployment.DEFAULT_EPOCH_DURATION,
+            TestWithDeployment.DEFAULT_MIN_DEPOSITED_EPOCHS,
+            TestWithDeployment.DEFAULT_MIN_REMATCHING_EPOCHS,
+            TestWithDeployment.DEFAULT_MIN_PROTOCOL_VERSION,
+            TestWithDeployment.DEFAULT_MAX_PROTOCOL_VERSION,
             dealImpl,
             false,
-            DeployDealSystem.DEFAULT_FLT_PRICE,
-            DeployDealSystem.DEFAULT_USD_COLLATERAL_PER_UNIT,
-            DeployDealSystem.DEFAULT_USD_TARGET_REVENUE_PER_EPOCH,
-            DeployDealSystem.DEFAULT_MIN_DURATION,
-            DeployDealSystem.DEFAULT_MIN_REWARD_PER_EPOCH,
-            DeployDealSystem.DEFAULT_MAX_REWARD_PER_EPOCH,
-            DeployDealSystem.DEFAULT_VESTING_PERIOD_DURATION,
-            DeployDealSystem.DEFAULT_VESTING_PERIOD_COUNT,
-            DeployDealSystem.DEFAULT_SLASHING_RATE,
-            DeployDealSystem.DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH,
-            DeployDealSystem.DEFAULT_MAX_PROOFS_PER_EPOCH,
-            DeployDealSystem.DEFAULT_WITHDRAW_EPOCHS_AFTER_FAILED,
-            DeployDealSystem.DEFAULT_MAX_FAILED_RATIO,
-            DeployDealSystem.DEFAULT_DIFFICULTY_TARGET,
-            DeployDealSystem.DEFAULT_INIT_REWARD_POOL,
-            randomX
-        );
+            ICapacityConst.CapacityConstInitArgs({
+                fltPrice: TestWithDeployment.DEFAULT_FLT_PRICE,
+                usdCollateralPerUnit: TestWithDeployment.DEFAULT_USD_COLLATERAL_PER_UNIT,
+                usdTargetRevenuePerEpoch: TestWithDeployment.DEFAULT_USD_TARGET_REVENUE_PER_EPOCH,
+                minDuration: TestWithDeployment.DEFAULT_MIN_DURATION,
+                minRewardPerEpoch: TestWithDeployment.DEFAULT_MIN_REWARD_PER_EPOCH,
+                maxRewardPerEpoch: TestWithDeployment.DEFAULT_MAX_REWARD_PER_EPOCH,
+                vestingPeriodDuration: TestWithDeployment.DEFAULT_VESTING_PERIOD_DURATION,
+                vestingPeriodCount: TestWithDeployment.DEFAULT_VESTING_PERIOD_COUNT,
+                slashingRate: TestWithDeployment.DEFAULT_SLASHING_RATE,
+                minProofsPerEpoch: TestWithDeployment.DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH,
+                maxProofsPerEpoch: TestWithDeployment.DEFAULT_MAX_PROOFS_PER_EPOCH,
+                withdrawEpochsAfterFailed: TestWithDeployment.DEFAULT_WITHDRAW_EPOCHS_AFTER_FAILED,
+                maxFailedRatio: TestWithDeployment.DEFAULT_MAX_FAILED_RATIO,
+                difficulty: TestWithDeployment.DEFAULT_DIFFICULTY_TARGET,
+                initRewardPool: TestWithDeployment.DEFAULT_INIT_REWARD_POOL,
+                randomXProxy: deployCode("out/RandomXProxy.sol/RandomXProxy.json"),
+                oracle: TestWithDeployment.DEFAULT_ORACLE
+            })
+        ) {
+            assertEq(true, false, "Expected revert");
+        } catch Error(string memory reason) {
+            assertEq(reason, "Initializable: contract is already initialized");
+        }
     }
 
     function test_InitializeModules() external {
-        // initialized in DeployDealSystem, lets's check it
+        // initialized in TestWithDeployment, lets's check it
         assertNotEq(address(deployment.core.capacity()), address(0), "Capacity not initialized in Core");
         assertNotEq(address(deployment.core.market()), address(0), "Market not initialized in Core");
         assertNotEq(address(deployment.core.dealFactory()), address(0), "DealFactory not initialized in Core");
@@ -85,7 +94,7 @@ contract CoreTest is Test {
         vm.expectRevert("New deal implementation is not a contract");
         deployment.core.setDealImpl(IDeal(address(123)));
 
-        IDeal newDealImpl = new Deal();
+        IDeal newDealImpl = IDeal(deployCode("out/Deal.sol/Deal.json"));
 
         // ownable check
         vm.expectRevert(abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, NOT_AN_OWNER));
@@ -99,14 +108,14 @@ contract CoreTest is Test {
     }
 
     function test_Upgrade() external {
-        Core coreImpl = new Core();
-        deployment.core.upgradeTo(address(coreImpl));
+        ICore coreImpl = ICore(deployCode("out/Core.sol/Core.json"));
+        UUPSUpgradeable(address(deployment.core)).upgradeTo(address(coreImpl));
 
         // ownable check
-        coreImpl = new Core();
+        coreImpl = ICore(deployCode("out/Core.sol/Core.json"));
         vm.expectRevert(abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, NOT_AN_OWNER));
         vm.prank(NOT_AN_OWNER);
-        deployment.core.upgradeTo(address(coreImpl));
+        UUPSUpgradeable(address(deployment.core)).upgradeTo(address(coreImpl));
     }
 
     function test_GlobalConst() external {
