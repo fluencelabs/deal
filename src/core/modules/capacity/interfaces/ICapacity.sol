@@ -161,6 +161,12 @@ interface ICapacity {
         uint256 exitedUnitCount;
     }
 
+    struct RewardInfo {
+        uint256 minProofsPerEpoch;
+        uint256 maxProofsPerEpoch;
+        uint256 totalSuccessProofs;
+    }
+
     // ------------------ Initializer ------------------
     function initialize(bytes32 initGlobalNonce_) external;
 
@@ -185,6 +191,8 @@ interface ICapacity {
     /// @return totalVestedRewards total vested reward of the commitment
     function unlockedRewards(bytes32 commitmentId) external view returns (uint256);
     function getGlobalNonce() external view returns (bytes32);
+
+    function getRewardInfo(uint256 epoch) external view returns (RewardInfo memory);
 
     // ----------------- Deal Callbacks -----------------
     function onUnitMovedToDeal(bytes32 commitmentId, bytes32 unitId) external;
