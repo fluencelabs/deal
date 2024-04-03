@@ -428,6 +428,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         bytes32 peerId = cc.info.peerId;
 
         IMarket.ComputePeer memory peer = market.getComputePeer(peerId);
+        IMarket.Offer memory offer = market.getOffer(peer.offerId);
 
         require(offer.provider == msg.sender, "Only provider can remove capacity commitment");
 
