@@ -126,7 +126,7 @@ export class DealCliClient {
         return {
           id: offer.id,
         };
-      }) || []
+      })
     );
   }
 }
