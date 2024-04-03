@@ -72,6 +72,14 @@ export class DealCliClient {
     });
   }
 
+  /*
+   * @deprecated: use getOffers instead.
+   */
+  async getOffer(offerId: string): Promise<OfferDetail | null> {
+    const offers = await this.getOffers({ids: [offerId]});
+    return offers[0] ?? null;
+  }
+
   async getDealsByProvider(
     providerId: string,
     paginator: IndexerPaginatorIn = {
