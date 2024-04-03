@@ -112,7 +112,7 @@ export const BasicPeerFragmentDoc = gql`
 export const OffersQueryDocument = gql`
     query OffersQuery($filters: Offer_filter, $offset: Int, $limit: Int, $orderBy: Offer_orderBy, $orderType: OrderDirection) {
   offers(
-    where: $filters
+    where: {and: [$filters, {deleted: false}]}
     first: $limit
     skip: $offset
     orderBy: $orderBy

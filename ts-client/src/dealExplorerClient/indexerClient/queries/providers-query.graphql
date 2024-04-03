@@ -1,4 +1,5 @@
 # Exclude deleted Peers.
+# Exclude deleted Offers.
 
 query ProvidersQuery(
   $filters: Provider_filter,
@@ -23,7 +24,10 @@ query ProvidersQuery(
 
 fragment ProviderOfProvidersQuery on Provider {
     ...ProviderABC
-    offers {
+    offers(
+      # Exclude deleted Offers.
+      where: {deleted: false}
+    ) {
       # TODO: resolve Not all fragments have an unique name: ProvidersBasicOffer
       #  by migrating to another engine.
       ...ProvidersBasicOffer

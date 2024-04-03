@@ -1,5 +1,6 @@
 # Exclude deleted CUs.
 # Exclude deleted Peers.
+# Exclude deleted Offers.
 
 query OffersQuery(
   $filters: Offer_filter,
@@ -9,7 +10,13 @@ query OffersQuery(
   $orderType: OrderDirection,
 ) {
   offers(
-      where: $filters
+      where: {
+        and: [
+          $filters,
+          # Exclude deleted Offers.
+          {deleted: false}
+        ]
+      }
       first: $limit
       skip: $offset
       orderBy: $orderBy
