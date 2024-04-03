@@ -1,5 +1,5 @@
 import type { Interface, Result, ethers } from "ethers";
-import { IMulticall3__factory, type IMulticall3 } from "../index.js";
+import { Multicall3__factory, type Multicall3 } from "../index.js";
 import { getLogger } from "./logger.js";
 
 const logger = getLogger("deal-ts-clients:rpcClientABC");
@@ -18,13 +18,13 @@ export type TxResultsConverter = (result: Result | null, ...opt: any[]) => any;
  */
 export abstract class Multicall3ContractClientABC {
   _caller: ethers.Provider | ethers.Signer;
-  _multicall3Contract: IMulticall3;
+  _multicall3Contract: Multicall3;
   constructor(
     caller: ethers.Provider | ethers.Signer,
     multicall3ContractAddress: string,
   ) {
     this._caller = caller;
-    this._multicall3Contract = IMulticall3__factory.connect(
+    this._multicall3Contract = Multicall3__factory.connect(
       multicall3ContractAddress,
       this._caller,
     );

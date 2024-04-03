@@ -57,9 +57,9 @@ test-ts-client:
 	@cd ts-client && npm run test
 	@echo "\033[0;32mSuccess! Tests passed.\033[0m"
 
-test:  ## Test for solidity contracts & ts-clients
+test-all:  ## Test for solidity contracts & ts-clients
 	@make verify-command program=forge
-	@make run-contract-tests
+	@make test-contracts
 	@cd ts-client && npm run test
 	@echo "\033[0;32mSuccess! Tests passed.\033[0m"
 

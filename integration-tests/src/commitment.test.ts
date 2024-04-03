@@ -272,7 +272,7 @@ describe("Capacity commitment", () => {
     assert(cuId, "cuID not defined");
 
     console.log("Sending proofs...");
-    await sendProof(signerAddress, cuId, 2, Number(CC_DURATION_DEFAULT - 1n));
+    await sendProof(signerAddress, cuId, 2, Number(CC_DURATION_DEFAULT - 2n));
 
     const currentStateAfterSentProofs =
       await capacityContract.getCommitment(commitmentId);
@@ -304,7 +304,7 @@ describe("Capacity commitment", () => {
       commitmentId,
     );
 
-    console.log("Waiting for withdraw epoches to pass...");
+    console.log("Waiting for withdraw epochs to pass...");
     const withdrawEpochs = await coreContract.withdrawEpochsAfterFailed();
     await skipEpoch(provider, epochDuration, withdrawEpochs);
 
@@ -539,7 +539,7 @@ describe("Capacity commitment", () => {
     expect(currentStateAfterSentProofs.status).toEqual(BigInt(CCStatus.Active));
 
     console.log("Sending insufficient amount of proofs...");
-    await sendProof(signerAddress, cuId, 1, Number(CC_MAX_FAILED_RATIO));
+    await sendProof(signerAddress, cuId, 1, Number(CC_MAX_FAILED_RATIO) - 1);
 
     const nextStatus = await capacityContract.getCommitment(commitmentId);
     expect(nextStatus.status).toEqual(BigInt(CCStatus.Failed));

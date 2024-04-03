@@ -210,7 +210,7 @@ export async function registerMarketOffersFromFixtures(
     for (let i = 0; i < providerFixture.peerIds.length; i++) {
       expect(
         providerFixture.providerAddress,
-        "[Fixture validation] provider uddress should be presented.",
+        "[Fixture validation] provider address should be presented.",
       ).not.to.equal("");
 
       const peerId = providerFixture.peerIds[i];

@@ -82,7 +82,7 @@ jobs:
           forge build --sizes
 
       - name: Run Forge tests
-        run: forge test -vvv
+        run: make test-contracts
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2

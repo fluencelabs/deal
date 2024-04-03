@@ -798,7 +798,6 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
             snapshotEpoch = failedEpoch;
         }
 
-
         // if lastMinProofsEpoch is zero then we should use startEpoch - 1 because (startEpoch - 1) is the first 'snapshot' epoch
         uint256 lastSnapshotEpoch = unitInfo.lastSnapshotEpoch;
         if (lastSnapshotEpoch == 0) {
