@@ -2,13 +2,12 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import "src/utils/OwnableUpgradableDiamond.sol";
-import "src/deal/base/Types.sol";
-import "src/deal/interfaces/IDeal.sol";
+
 import "src/core/modules/BaseModule.sol";
+import "src/deal/interfaces/IDeal.sol";
+
 import "./interfaces/IOffer.sol";
 
 abstract contract Offer is BaseModule, IOffer {
@@ -173,6 +172,8 @@ abstract contract Offer is BaseModule, IOffer {
         require(offer.peerCount == 0, "Offer has compute peers");
 
         delete offerStorage.offers[offerId];
+
+        emit OfferRemoved(offerId);
     }
 
     function addComputePeers(bytes32 offerId, RegisterComputePeer[] calldata peers) external {
@@ -388,7 +389,7 @@ abstract contract Offer is BaseModule, IOffer {
         return _getOfferStorage().offers[offerId];
     }
 
-    function _getComutePeer(bytes32 peerId) internal view returns (ComputePeer storage) {
+    function _getComputePeer(bytes32 peerId) internal view returns (ComputePeer storage) {
         return _getOfferStorage().peers[peerId];
     }
 

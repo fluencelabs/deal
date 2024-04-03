@@ -1,17 +1,38 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.19;
 
-import {Test, console2} from "forge-std/Test.sol";
-import "forge-std/console.sol";
+import {Test} from "forge-std/Test.sol";
+
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import "./DeployDealSystem.sol";
-import "src/dev/TestERC20.sol";
-import "src/core/Core.sol";
-import "src/deal/Deal.sol";
+
+import "src/core/interfaces/ICore.sol";
+import "src/deal/interfaces/IDeal.sol";
+
+import "./TestWithDeployment.sol";
 
 library TestHelper {
+    struct DealParams {
+        CIDV1 appCID;
+        IERC20 paymentToken;
+        uint256 minWorkers;
+        uint256 targetWorkers;
+        uint256 maxWorkersPerProvider;
+        uint256 pricePerWorkerEpoch;
+        CIDV1[] effectors;
+        uint256 protocolVersion;
+    }
+
+    struct DeployDealParams {
+        uint256 minWorkers;
+        uint256 maxWorkersPerProvider;
+        uint256 targetWorkers;
+        uint256 pricePerWorkerEpoch;
+        uint256 depositAmount;
+        uint256 protocolVersion;
+    }
+
     function pseudoRandom(bytes memory seed) internal view returns (bytes32) {
         return keccak256(abi.encodePacked(blockhash(block.number - 1), seed));
     }
@@ -32,18 +53,57 @@ library TestHelper {
         }
     }
 
+    function deployDeal(TestWithDeployment.Deployment storage deployment, DeployDealParams memory params)
+        internal
+        returns (IDeal, DealParams memory)
+    {
+        CIDV1[] memory effectors = new CIDV1[](10);
+        for (uint256 i = 0; i < 10; i++) {
+            effectors[i] = CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("effector", i))});
+        }
+
+        CIDV1 memory appCID = CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("appCID", 0))});
+
+        DealParams memory dealParams = DealParams({
+            appCID: appCID,
+            paymentToken: IERC20(address(deployment.tUSD)),
+            minWorkers: params.minWorkers,
+            targetWorkers: params.targetWorkers,
+            maxWorkersPerProvider: params.maxWorkersPerProvider,
+            pricePerWorkerEpoch: params.pricePerWorkerEpoch,
+            effectors: effectors,
+            protocolVersion: params.protocolVersion
+        });
+
+        IDeal deal = deployment.dealFactory.deployDeal(
+            dealParams.appCID,
+            dealParams.paymentToken,
+            params.depositAmount,
+            dealParams.minWorkers,
+            dealParams.targetWorkers,
+            dealParams.maxWorkersPerProvider,
+            dealParams.pricePerWorkerEpoch,
+            effectors,
+            IConfig.AccessType.NONE,
+            new address[](0),
+            dealParams.protocolVersion
+        );
+
+        return (deal, dealParams);
+    }
+
     function deployDealWithoutFactory(
-        DeployDealSystem.Deployment storage deployment,
+        TestWithDeployment.Deployment storage deployment,
         uint256 minWorkers_,
         uint256 targetWorkers_,
         uint256 maxWorkersPerProvider_,
         uint256 pricePerWorkerEpoch_,
         uint256 deposit_
-    ) internal returns (Deal) {
+    ) internal returns (IDeal) {
         ERC1967Proxy proxy = new ERC1967Proxy(
             address(deployment.dealImpl),
             abi.encodeWithSelector(
-                Deal.initialize.selector,
+                IDeal.initialize.selector,
                 deployment.core,
                 CIDV1({prefixes: 0x12345678, hash: pseudoRandom(abi.encode("appCID", 0))}),
                 IERC20(address(deployment.tUSD)),
@@ -58,7 +118,7 @@ library TestHelper {
             )
         );
 
-        Deal deal = Deal(address(proxy));
+        IDeal deal = IDeal(address(proxy));
 
         deployment.tUSD.approve(address(deal), deposit_);
         deal.deposit(deposit_);
@@ -67,12 +127,12 @@ library TestHelper {
     }
 
     function deployDealWithoutFactory(
-        DeployDealSystem.Deployment storage deployment,
+        TestWithDeployment.Deployment storage deployment,
         uint256 minWorkers_,
         uint256 targetWorkers_,
         uint256 maxWorkersPerProvider_,
         uint256 pricePerWorkerEpoch_
-    ) internal returns (Deal) {
+    ) internal returns (IDeal) {
         uint256 deposit_ = deployment.core.minDealDepositedEpochs() * pricePerWorkerEpoch_ * targetWorkers_;
         return deployDealWithoutFactory(
             deployment, minWorkers_, targetWorkers_, maxWorkersPerProvider_, pricePerWorkerEpoch_, deposit_

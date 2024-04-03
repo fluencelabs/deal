@@ -15,10 +15,11 @@ import {
   Initialized,
   MarketOfferRegistered,
   MinPricePerEpochUpdated,
+  OfferRemoved,
   PaymentTokenUpdated,
   PeerCreated,
   PeerRemoved,
-  ProviderInfoUpdated,
+  ProviderInfoUpdated
 } from "../../generated/Market/Market";
 import {
   createOrLoadDealToJoinedOfferPeer,
@@ -111,6 +112,7 @@ export function handleMarketOfferRegistered(
   offer.pricePerEpoch = event.params.minPricePerWorkerEpoch;
   offer.createdAt = event.block.timestamp;
   offer.updatedAt = event.block.timestamp;
+  offer.deleted = false;
   offer.save();
 
   let graphNetwork = createOrLoadGraphNetwork();
@@ -325,6 +327,19 @@ export function handlePeerRemoved(event: PeerRemoved): void {
 
   // Upd stats below.
   _updatePeerStats(-1, provider);
+}
+
+export function handleOfferRemoved(event: OfferRemoved): void {
+  let offer = Offer.load(event.params.offerId.toHexString()) as Offer;
+  let provider = createOrLoadProvider(offer.provider, event.block.timestamp);
+
+  offer.deleted = true;
+  offer.save();
+
+  // Upd stats below.
+  let graphNetwork = createOrLoadGraphNetwork();
+  graphNetwork.offersTotal = graphNetwork.offersTotal.minus(UNO_BIG_INT);
+  graphNetwork.save();
 }
 
 // Additional helper functions.

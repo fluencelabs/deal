@@ -3,8 +3,8 @@
 pragma solidity ^0.8.19;
 
 import "src/utils/OwnableUpgradableDiamond.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {PRECISION, GlobalConst} from "src/core/GlobalConst.sol";
+import {PRECISION} from "src/utils/Common.sol";
+
 import "./interfaces/ICapacityConst.sol";
 import "./EpochController.sol";
 
@@ -57,6 +57,7 @@ contract CapacityConst is ICapacityConst, OwnableUpgradableDiamond, EpochControl
         CommitmentConst commitment;
         ProofConst proof;
         RewardConst reward;
+        address oracle;
     }
 
     function _getConstStorage() private pure returns (ConstStorage storage s) {
@@ -68,51 +69,36 @@ contract CapacityConst is ICapacityConst, OwnableUpgradableDiamond, EpochControl
     // #endregion ------------------ Storage ------------------
 
     // #region ------------------ Initializer ------------------
-    function __CapacityConst_init(
-        uint256 fltPrice_,
-        uint256 usdCollateralPerUnit_,
-        uint256 usdTargetRevenuePerEpoch_,
-        uint256 minDuration_,
-        uint256 minRewardPerEpoch_,
-        uint256 maxRewardPerEpoch_,
-        uint256 vestingPeriodDuration_,
-        uint256 vestingPeriodCount_,
-        uint256 slashingRate_,
-        uint256 minProofsPerEpoch_,
-        uint256 maxProofsPerEpoch_,
-        uint256 withdrawEpochsAfterFailed_,
-        uint256 maxFailedRatio_,
-        bytes32 difficulty_,
-        uint256 initRewardPool_,
-        address randomXProxy_
-    ) internal onlyInitializing {
+    function __CapacityConst_init(CapacityConstInitArgs memory initArgs) internal onlyInitializing {
         ConstStorage storage constantsStorage = _getConstStorage();
 
-        constantsStorage.commitment.minDuration = minDuration_;
-        constantsStorage.commitment.usdCollateralPerUnit = usdCollateralPerUnit_;
-        constantsStorage.commitment.slashingRate = slashingRate_;
-        constantsStorage.commitment.withdrawEpochsAfterFailed = withdrawEpochsAfterFailed_;
-        constantsStorage.commitment.maxFailedRatio = maxFailedRatio_;
+        constantsStorage.commitment.minDuration = initArgs.minDuration;
+        constantsStorage.commitment.usdCollateralPerUnit = initArgs.usdCollateralPerUnit;
+        constantsStorage.commitment.slashingRate = initArgs.slashingRate;
+        constantsStorage.commitment.withdrawEpochsAfterFailed = initArgs.withdrawEpochsAfterFailed;
+        constantsStorage.commitment.maxFailedRatio = initArgs.maxFailedRatio;
 
-        constantsStorage.reward.usdTargetRevenuePerEpoch = usdTargetRevenuePerEpoch_;
-        constantsStorage.reward.minRewardPerEpoch = minRewardPerEpoch_;
-        constantsStorage.reward.maxRewardPerEpoch = maxRewardPerEpoch_;
-        constantsStorage.reward.vestingPeriodDuration = vestingPeriodDuration_;
-        constantsStorage.reward.vestingPeriodCount = vestingPeriodCount_;
+        constantsStorage.reward.usdTargetRevenuePerEpoch = initArgs.usdTargetRevenuePerEpoch;
+        constantsStorage.reward.minRewardPerEpoch = initArgs.minRewardPerEpoch;
+        constantsStorage.reward.maxRewardPerEpoch = initArgs.maxRewardPerEpoch;
+        constantsStorage.reward.vestingPeriodDuration = initArgs.vestingPeriodDuration;
+        constantsStorage.reward.vestingPeriodCount = initArgs.vestingPeriodCount;
 
-        constantsStorage.proof.minProofsPerEpoch = minProofsPerEpoch_;
-        constantsStorage.proof.maxProofsPerEpoch = maxProofsPerEpoch_;
-        constantsStorage.proof.difficulty = difficulty_;
-        constantsStorage.proof.nextDifficulty = difficulty_;
+        constantsStorage.proof.minProofsPerEpoch = initArgs.minProofsPerEpoch;
+        constantsStorage.proof.maxProofsPerEpoch = initArgs.maxProofsPerEpoch;
+        constantsStorage.proof.difficulty = initArgs.difficulty;
+        constantsStorage.proof.nextDifficulty = initArgs.difficulty;
 
-        constantsStorage.randomXProxy = randomXProxy_;
+        constantsStorage.randomXProxy = initArgs.randomXProxy;
+        constantsStorage.oracle = initArgs.oracle;
 
         constantsStorage.reward.rewardPoolPerEpochs.push(
-            RewardPoolPerEpoch({epoch: currentEpoch(), value: initRewardPool_})
+            RewardPoolPerEpoch({epoch: currentEpoch(), value: initArgs.initRewardPool})
         );
 
-        constantsStorage.fltPrice = fltPrice_;
-        constantsStorage.commitment.fltCollateralPerUnit = _calcFLTCollateralPerUnit(usdCollateralPerUnit_, fltPrice_);
+        constantsStorage.fltPrice = initArgs.fltPrice;
+        constantsStorage.commitment.fltCollateralPerUnit =
+            _calcFLTCollateralPerUnit(initArgs.usdCollateralPerUnit, initArgs.fltPrice);
     }
     // #endregion ------------------ Initializer ------------------
 
@@ -190,6 +176,10 @@ contract CapacityConst is ICapacityConst, OwnableUpgradableDiamond, EpochControl
         return _getConstStorage().randomXProxy;
     }
 
+    function oracle() public view returns (address) {
+        return _getConstStorage().oracle;
+    }
+
     function getRewardPool(uint256 epoch) public view returns (uint256) {
         ConstStorage storage constantsStorage = _getConstStorage();
 
@@ -217,8 +207,9 @@ contract CapacityConst is ICapacityConst, OwnableUpgradableDiamond, EpochControl
     // #endregion ------------------ External View Functions ------------------
 
     // #region ------------------ External Mutable Functions ------------------
-    function setFLTPrice(uint256 fltPrice_) public onlyOwner {
+    function setFLTPrice(uint256 fltPrice_) public {
         ConstStorage storage constantsStorage = _getConstStorage();
+        require(msg.sender == constantsStorage.oracle, "Only oracle can set FLT price");
         constantsStorage.fltPrice = fltPrice_;
 
         _setRewardPool(fltPrice_, constantsStorage.activeUnitCount);
@@ -270,14 +261,23 @@ contract CapacityConst is ICapacityConst, OwnableUpgradableDiamond, EpochControl
         }
         // proof section
         else if (constantType == CapacityConstantType.MinProofsPerEpoch) {
+            require(v > 0, "GlobalConst: minProofsPerEpoch must be greater than 0");
             constantsStorage.proof.minProofsPerEpoch = v;
         } else if (constantType == CapacityConstantType.MaxProofsPerEpoch) {
+            require(v > 0, "GlobalConst: maxProofsPerEpoch must be greater than 0");
             constantsStorage.proof.maxProofsPerEpoch = v;
         } else {
             revert("GlobalConst: unknown constant type");
         }
 
         emit CapacityConstantUpdated(constantType, v);
+    }
+
+    function setOracle(address oracle_) public onlyOwner {
+        require(oracle_ != address(0), "Oracle shouldn't be zero address");
+        ConstStorage storage constantsStorage = _getConstStorage();
+        constantsStorage.oracle = oracle_;
+        emit OracleSet(oracle_);
     }
     // #endregion ------------------ External Mutable Functions ------------------
 

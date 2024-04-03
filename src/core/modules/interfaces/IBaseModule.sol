@@ -2,7 +2,6 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "src/core/interfaces/ICore.sol";
 
 /// @dev Base module interface. This interface is used for all modules in the core contract

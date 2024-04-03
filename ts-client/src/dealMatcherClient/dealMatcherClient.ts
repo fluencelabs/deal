@@ -79,6 +79,8 @@ export class DealMatcherClient {
     const indexerGetOffersParams: OffersQueryQueryVariables = {
       limit: offersPerPageLimit,
       filters: {
+        //  Exclude deleted Offers.
+        deleted: false,
         // TODO: We do not need Offers with ALL peers already linked to the Deal (protocol restriction).
         pricePerEpoch_lte: getMatchedOffersIn.pricePerWorkerEpoch,
         paymentToken: getMatchedOffersIn.paymentToken.toLowerCase(),
