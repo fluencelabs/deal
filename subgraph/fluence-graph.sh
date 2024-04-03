@@ -1,7 +1,6 @@
 #! /usr/bin/env bash
 
-# Note, only for local it uses prefix as full name to deploy subgraph.
-SUBGRAPH_NAME_PREFIX="fluence-deal-contracts"
+SUBGRAPH_NAME="fluence-deal-contracts"
 # Directory with saved deployments. It will append rows with other deployments.
 SUBGRAPH_DEPLOYMENTS_DIR="deployments"
 
@@ -9,14 +8,18 @@ help() {
 script_name="$(basename $0)"
 cat<<HELP
 Usage: [BASIC_AUTH_SUBGRAPH] ${script_name} network action
-Deploy subgraph to Fluence.
+Deploy subgraph to Fluence stands, or local. Store deployment artifacts.
 
   network       Fluence network to run against - local, stage, dar or kras
   action        action to run - create, deploy or remove
 
 Examples:
   BASIC_AUTH_SUBGRAPH=user:pass ${script_name} stage deploy     Deploy subgraph to stage
-  ${script_name} local deploy                                   Deploy subgraph to local
+  ${script_name} local deploy                                   Deploy subgraph to local (BASIC_AUTH_SUBGRAPH not used)
+
+Envs:
+  - GRAPHNODE_ADMIN_URL_LOCAL: url for local network admin graph panel.
+  - GRAPHNODE_QUERY_URL_LOCAL: url for local network graph query
 HELP
 }
 
@@ -48,7 +51,8 @@ done
 # Prepare variables depending on network
 case "$network" in
   local)
-    GRAPHNODE_URL="${GRAPHNODE_URL:-http://localhost:8020}"
+    GRAPHNODE_URL="${GRAPHNODE_ADMIN_URL_LOCAL:-http://localhost:8020}"
+    GRAPH_NODE_QUERY_URL="${GRAPHNODE_QUERY_URL_LOCAL:-http://localhost:8000}/subgraphs/name/"
     IPFS_URL="${IPFS_URL:-http://localhost:5001}"
     ;;
   stage)
@@ -120,30 +124,29 @@ case "$network" in
     ;;
 esac
 
-echo "Create unique subgraph name for the current state of contract deployments via git commit hash (ignore this suffix for local)..."
+echo "Prepare deployment log: url + current commit hash..."
+DEPLOYMENT_LOG_PATH="${SUBGRAPH_DEPLOYMENTS_DIR}/${network}.txt"
 case "$network" in
   local|stage|kras|dar)
-    SUBGRAPH_NAME="${SUBGRAPH_NAME_PREFIX}"
+    DEPLOYMENT_LOG="${GRAPH_NODE_QUERY_URL}${SUBGRAPH_NAME} --- $(git rev-parse --short HEAD)"
     ;;
-#  TODO: resolve: do we need versioning of subgraph or not finally.
-#  stage|kras|dar)
-#    SUBGRAPH_NAME="${SUBGRAPH_NAME_PREFIX}-$(git rev-parse --short HEAD)"
-#    ;;
 esac
 
 case "$action" in
   deploy)
-    echo "Deploying subgraph on ${network} stand with subgraph name: $SUBGRAPH_NAME and version label $SUBGRAPH_VERSION_LABEL..."
+    echo "Deploying subgraph on ${network} stand with subgraph name: ${SUBGRAPH_NAME} and version label ${SUBGRAPH_VERSION_LABEL}..."
     auth_header=$(echo -n ${BASIC_AUTH_SUBGRAPH} | base64)
-    graph deploy --node ${GRAPHNODE_URL} --headers "{\"Authorization\": \"Basic ${auth_header}\"}" --ipfs ${IPFS_URL} --network ${SUBGRAPH_NETWORK} --network-file configs/${network}-networks-config.json --version-label ${SUBGRAPH_VERSION_LABEL} ${SUBGRAPH_NAME} \
+    graph deploy --node ${GRAPHNODE_URL} --headers "{\"Authorization\": \"Basic ${auth_header}\"}" --ipfs ${IPFS_URL} --network ${SUBGRAPH_NETWORK} --network-file configs/${network}-networks-config.json --version-label ${SUBGRAPH_VERSION_LABEL} ${SUBGRAPH_NAME}
+    echo "Store deployment log into ${DEPLOYMENT_LOG_PATH}..."
+    echo "${DEPLOYMENT_LOG}" > ${DEPLOYMENT_LOG_PATH}
     ;;
   create)
     echo "Creating subgraph on Fluence with name: $SUBGRAPH_NAME..."
     graph create --node ${GRAPHNODE_URL} ${SUBGRAPH_NAME}
-    echo "${GRAPH_NODE_QUERY_URL}${SUBGRAPH_NAME}" >> ${SUBGRAPH_DEPLOYMENTS_DIR}/${network}.txt
     ;;
   remove)
     echo "Removing subgraph on Fluence with name: $SUBGRAPH_NAME..."
     graph remove --node ${GRAPHNODE_URL} ${SUBGRAPH_NAME}
+#    TODO:
     ;;
 esac
