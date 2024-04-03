@@ -119,12 +119,15 @@ abstract contract Matcher is Offer, IMatcher {
 
                 // Check if CU available.
                 if (
+                    computeUnit.deal != address(0)
                     // Blacklisted provider we filtered out above via: !deal.isProviderAllowed(offer.provider).
-                    providersAccessType != IConfig.AccessType.WHITELIST
-                        && (
-                            computeUnit.deal != address(0) || peer.commitmentId == bytes32(0x000000000)
-                                || capacity.getStatus(peer.commitmentId) != ICapacity.CCStatus.Active
-                        )
+                    || (
+                        providersAccessType != IConfig.AccessType.WHITELIST
+                            && (
+                                peer.commitmentId == bytes32(0x000000000)
+                                    || capacity.getStatus(peer.commitmentId) != ICapacity.CCStatus.Active
+                            )
+                    )
                 ) {
                     continue;
                 }
