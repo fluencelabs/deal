@@ -65,7 +65,6 @@ case "$network" in
     GRAPHNODE_URL="https://${basic_auth}graph-node-admin-${network}.fluence.dev"
     # To save logs of created subgraphs on Fluence stands.
     GRAPH_NODE_QUERY_URL="https://graph-node-${network}.fluence.dev/subgraphs/name/"
-    # TODO: IPFS why does not work with auth (before deploy request Tolay to open ports)
     IPFS_URL="https://graph-node-ipfs-${network}.fluence.dev"
     ;;
   kras|dar)
@@ -78,7 +77,6 @@ case "$network" in
     GRAPHNODE_URL="https://${basic_auth}graph-node-admin.${network}.fluence.dev"
     # To save logs of created subgraphs on Fluence stands.
     GRAPH_NODE_QUERY_URL="https://graph-node.${network}.fluence.dev/subgraphs/name/"
-    # TODO: IPFS why does not work with auth (before deploy request Tolay to open ports)
     IPFS_URL="https://graph-node-ipfs.${network}.fluence.dev"
 esac
 
@@ -124,7 +122,7 @@ case "$network" in
     ;;
 esac
 
-echo "Prepare deployment log: url + current commit hash..."
+echo "Prepare deployment log: url & current commit hash..."
 DEPLOYMENT_LOG_PATH="${SUBGRAPH_DEPLOYMENTS_DIR}/${network}.txt"
 case "$network" in
   local|stage|kras|dar)
@@ -141,12 +139,12 @@ case "$action" in
     echo "${DEPLOYMENT_LOG}" > ${DEPLOYMENT_LOG_PATH}
     ;;
   create)
-    echo "Creating subgraph on Fluence with name: $SUBGRAPH_NAME..."
+    echo "Creating subgraph on ${network} with name: ${SUBGRAPH_NAME}..."
     graph create --node ${GRAPHNODE_URL} ${SUBGRAPH_NAME}
     ;;
   remove)
-    echo "Removing subgraph on Fluence with name: $SUBGRAPH_NAME..."
+    echo "Removing subgraph on ${network} with name: ${SUBGRAPH_NAME}..."
     graph remove --node ${GRAPHNODE_URL} ${SUBGRAPH_NAME}
-#    TODO:
+    echo "" > ${DEPLOYMENT_LOG_PATH}
     ;;
 esac
