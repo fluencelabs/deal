@@ -3,8 +3,8 @@
 pragma solidity ^0.8.19;
 
 import "src/utils/OwnableUpgradableDiamond.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {PRECISION, GlobalConst} from "src/core/GlobalConst.sol";
+import {PRECISION} from "src/utils/Common.sol";
+
 import "./interfaces/ICapacityConst.sol";
 import "./EpochController.sol";
 
@@ -68,51 +68,35 @@ contract CapacityConst is ICapacityConst, OwnableUpgradableDiamond, EpochControl
     // #endregion ------------------ Storage ------------------
 
     // #region ------------------ Initializer ------------------
-    function __CapacityConst_init(
-        uint256 fltPrice_,
-        uint256 usdCollateralPerUnit_,
-        uint256 usdTargetRevenuePerEpoch_,
-        uint256 minDuration_,
-        uint256 minRewardPerEpoch_,
-        uint256 maxRewardPerEpoch_,
-        uint256 vestingPeriodDuration_,
-        uint256 vestingPeriodCount_,
-        uint256 slashingRate_,
-        uint256 minProofsPerEpoch_,
-        uint256 maxProofsPerEpoch_,
-        uint256 withdrawEpochsAfterFailed_,
-        uint256 maxFailedRatio_,
-        bytes32 difficulty_,
-        uint256 initRewardPool_,
-        address randomXProxy_
-    ) internal onlyInitializing {
+    function __CapacityConst_init(CapacityConstInitArgs memory initArgs) internal onlyInitializing {
         ConstStorage storage constantsStorage = _getConstStorage();
 
-        constantsStorage.commitment.minDuration = minDuration_;
-        constantsStorage.commitment.usdCollateralPerUnit = usdCollateralPerUnit_;
-        constantsStorage.commitment.slashingRate = slashingRate_;
-        constantsStorage.commitment.withdrawEpochsAfterFailed = withdrawEpochsAfterFailed_;
-        constantsStorage.commitment.maxFailedRatio = maxFailedRatio_;
+        constantsStorage.commitment.minDuration = initArgs.minDuration;
+        constantsStorage.commitment.usdCollateralPerUnit = initArgs.usdCollateralPerUnit;
+        constantsStorage.commitment.slashingRate = initArgs.slashingRate;
+        constantsStorage.commitment.withdrawEpochsAfterFailed = initArgs.withdrawEpochsAfterFailed;
+        constantsStorage.commitment.maxFailedRatio = initArgs.maxFailedRatio;
 
-        constantsStorage.reward.usdTargetRevenuePerEpoch = usdTargetRevenuePerEpoch_;
-        constantsStorage.reward.minRewardPerEpoch = minRewardPerEpoch_;
-        constantsStorage.reward.maxRewardPerEpoch = maxRewardPerEpoch_;
-        constantsStorage.reward.vestingPeriodDuration = vestingPeriodDuration_;
-        constantsStorage.reward.vestingPeriodCount = vestingPeriodCount_;
+        constantsStorage.reward.usdTargetRevenuePerEpoch = initArgs.usdTargetRevenuePerEpoch;
+        constantsStorage.reward.minRewardPerEpoch = initArgs.minRewardPerEpoch;
+        constantsStorage.reward.maxRewardPerEpoch = initArgs.maxRewardPerEpoch;
+        constantsStorage.reward.vestingPeriodDuration = initArgs.vestingPeriodDuration;
+        constantsStorage.reward.vestingPeriodCount = initArgs.vestingPeriodCount;
 
-        constantsStorage.proof.minProofsPerEpoch = minProofsPerEpoch_;
-        constantsStorage.proof.maxProofsPerEpoch = maxProofsPerEpoch_;
-        constantsStorage.proof.difficulty = difficulty_;
-        constantsStorage.proof.nextDifficulty = difficulty_;
+        constantsStorage.proof.minProofsPerEpoch = initArgs.minProofsPerEpoch;
+        constantsStorage.proof.maxProofsPerEpoch = initArgs.maxProofsPerEpoch;
+        constantsStorage.proof.difficulty = initArgs.difficulty;
+        constantsStorage.proof.nextDifficulty = initArgs.difficulty;
 
-        constantsStorage.randomXProxy = randomXProxy_;
+        constantsStorage.randomXProxy = initArgs.randomXProxy;
 
         constantsStorage.reward.rewardPoolPerEpochs.push(
-            RewardPoolPerEpoch({epoch: currentEpoch(), value: initRewardPool_})
+            RewardPoolPerEpoch({epoch: currentEpoch(), value: initArgs.initRewardPool})
         );
 
-        constantsStorage.fltPrice = fltPrice_;
-        constantsStorage.commitment.fltCollateralPerUnit = _calcFLTCollateralPerUnit(usdCollateralPerUnit_, fltPrice_);
+        constantsStorage.fltPrice = initArgs.fltPrice;
+        constantsStorage.commitment.fltCollateralPerUnit =
+            _calcFLTCollateralPerUnit(initArgs.usdCollateralPerUnit, initArgs.fltPrice);
     }
     // #endregion ------------------ Initializer ------------------
 

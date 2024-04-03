@@ -2,13 +2,11 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "src/core/modules/capacity/interfaces/ICapacity.sol";
-import "src/core/modules/market/interfaces/IMarket.sol";
+import "./ICapacityConst.sol";
 
 /// @title Global Constants contract interface
 /// @dev Global Constants contract stores global constants of the system and it is responsible for changing them
-interface IGlobalConst {
+interface IGlobalConst is ICapacityConst {
     // ------------------ Events ------------------
     /// @dev Emitted when a constant with uint256 value is updated
     /// @param constantType Constant type

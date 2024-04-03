@@ -249,8 +249,8 @@ export interface ProofByComputeUnit {
 // @param createdAtEpochStartBlockNumber: undefined when no transaction submitted for the epoch with proofs.
 export interface ProofStatsByCapacityCommitment {
   createdAtEpoch: number;
-  createdAtEpochBlockNumberStart: number | undefined;
-  createdAtEpochBlockNumberEnd: number | undefined;
+  epochBlockStart: number | undefined;
+  epochBlockEnd: number | undefined;
   computeUnitsExpected: number;
   computeUnitsSuccess: number;
   computeUnitsFailed: number;

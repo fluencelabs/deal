@@ -3,7 +3,7 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "src/deal/base/Types.sol";
+import {CIDV1} from "src/utils/Common.sol";
 
 /// @title Config contract interface
 /// @dev Config contract is responsible for managing the configuration of the deal

@@ -12,9 +12,10 @@ import {
   CapacityCommitmentStatsPerEpoch,
   ComputeUnitPerEpochStat,
   ComputeUnit,
+  EpochStatistic,
 } from "../generated/schema";
 import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts";
-import { getTokenDecimals, getTokenSymbol } from "./contracts";
+import { calculateEpoch, getTokenDecimals, getTokenSymbol } from "./contracts";
 import { formatAddress } from "./mappings/utils";
 
 export const ZERO_BIG_INT = BigInt.fromI32(0);
@@ -56,7 +57,7 @@ export function createOrLoadProvider(
     // Upd stats below.
     let graphNetwork = createOrLoadGraphNetwork();
     graphNetwork.providersTotal = graphNetwork.providersTotal.plus(UNO_BIG_INT);
-    graphNetwork.save()
+    graphNetwork.save();
   }
   return entity as Provider;
 }
@@ -196,6 +197,7 @@ export function createOrLoadGraphNetwork(): GraphNetwork {
     graphNetwork = new GraphNetwork("1");
     graphNetwork.dealsTotal = ZERO_BIG_INT;
     graphNetwork.providersTotal = ZERO_BIG_INT;
+    graphNetwork.providersRegisteredTotal = ZERO_BIG_INT;
     graphNetwork.offersTotal = ZERO_BIG_INT;
     graphNetwork.tokensTotal = ZERO_BIG_INT;
     graphNetwork.effectorsTotal = ZERO_BIG_INT;
@@ -257,23 +259,22 @@ export function createOrLoadCapacityCommitmentToComputeUnit(
 
 export function createOrLoadCapacityCommitmentStatsPerEpoch(
   capacityCommitmentId: string,
-  epoch: string,
+  epochStatisticId: string,
 ): CapacityCommitmentStatsPerEpoch {
-  const concattedIds = capacityCommitmentId.concat(epoch);
+  const concattedIds = capacityCommitmentId.concat(epochStatisticId);
   let entity = CapacityCommitmentStatsPerEpoch.load(concattedIds);
 
   if (entity == null) {
     entity = new CapacityCommitmentStatsPerEpoch(concattedIds);
     entity.capacityCommitment = capacityCommitmentId;
-    entity.epoch = BigInt.fromString(epoch);
+    entity.epochStatistic = epochStatisticId;
+    entity.epoch = BigInt.fromString(epochStatisticId);
     entity.totalFailCount = 0;
     entity.exitedUnitCount = 0;
     entity.activeUnitCount = 0;
     entity.nextAdditionalActiveUnitCount = 0;
     entity.currentCCNextCCFailedEpoch = ZERO_BIG_INT;
     entity.submittedProofsCount = 0;
-    entity.blockNumberStart = MAX_UINT_256;
-    entity.blockNumberEnd = ZERO_BIG_INT;
     entity.computeUnitsWithMinRequiredProofsSubmittedCounter = 0;
     entity.save();
   }
@@ -282,18 +283,37 @@ export function createOrLoadCapacityCommitmentStatsPerEpoch(
 
 export function createOrLoadComputeUnitPerEpochStat(
   computeUnitId: string,
-  epoch: string,
+  epochStatisticId: string,
 ): ComputeUnitPerEpochStat {
-  const concattedIds = computeUnitId.concat(epoch);
+  const concattedIds = computeUnitId.concat(epochStatisticId);
   let entity = ComputeUnitPerEpochStat.load(concattedIds);
 
   if (entity == null) {
     let computeUnit = ComputeUnit.load(computeUnitId) as ComputeUnit;
     entity = new ComputeUnitPerEpochStat(concattedIds);
     entity.submittedProofsCount = 0;
-    entity.epoch = BigInt.fromString(epoch);
+    entity.epochStatistic = epochStatisticId;
     entity.computeUnit = computeUnit.id;
     entity.save();
   }
   return entity as ComputeUnitPerEpochStat;
+}
+
+export function createOrLoadEpochStatistic(
+  timestamp: BigInt,
+  currentEpoch: BigInt,
+  currentBlock: BigInt,
+): EpochStatistic {
+  const currentEpochId = currentEpoch.toString();
+  let entity = EpochStatistic.load(currentEpochId);
+
+  if (entity == null) {
+    entity = new EpochStatistic(currentEpochId);
+    entity.startBlock = currentBlock;
+    entity.endBlock = currentBlock;
+    entity.startTimestamp = timestamp;
+    entity.endTimestamp = timestamp;
+    entity.save();
+  }
+  return entity as EpochStatistic;
 }
