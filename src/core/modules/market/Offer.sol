@@ -387,7 +387,7 @@ abstract contract Offer is BaseModule, IOffer {
         return _getOfferStorage().offers[offerId];
     }
 
-    function _getComutePeer(bytes32 peerId) internal view returns (ComputePeer storage) {
+    function _getComputePeer(bytes32 peerId) internal view returns (ComputePeer storage) {
         return _getOfferStorage().peers[peerId];
     }
 
