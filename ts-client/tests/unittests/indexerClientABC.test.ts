@@ -17,7 +17,7 @@ function checkFluenceEnvConfig(stand: string) {
     return
   }
   const allSavedSubgraphUrls = fs.readFileSync(getDeploymentPath(stand), "utf8").split('\n').filter((url) => url.length > 0)
-  const lastSavedSubgraphUrl = allSavedSubgraphUrls[allSavedSubgraphUrls.length - 1];
+  const lastSavedSubgraphUrl = (allSavedSubgraphUrls[allSavedSubgraphUrls.length - 1]).split(' ')[0];
   expect(getIndexerUrl(stand), "Possibly you forgot to update indexerClient/config.ts with the last subgraph URL.").toBe(lastSavedSubgraphUrl)
 }
 
