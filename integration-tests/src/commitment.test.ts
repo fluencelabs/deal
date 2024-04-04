@@ -541,6 +541,8 @@ describe("Capacity commitment", () => {
     console.log("Sending insufficient amount of proofs...");
     await sendProof(signerAddress, cuId, 1, Number(CC_MAX_FAILED_RATIO) - 1);
 
+    await skipEpoch(provider, epochDuration, 1);
+
     const nextStatus = await capacityContract.getCommitment(commitmentId);
     expect(nextStatus.status).toEqual(BigInt(CCStatus.Failed));
   });
