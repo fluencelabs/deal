@@ -284,7 +284,6 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         require(currentEpoch >= cc.info.startEpoch, "Capacity commitment is not started");
 
         UnitInfo storage unitInfo = cc.unitInfoById[unitId];
-        require(!unitInfo.isInactive, "Compute unit is in deal");
 
         uint256 expiredEpoch = _expiredEpoch(cc);
         // #endregion
