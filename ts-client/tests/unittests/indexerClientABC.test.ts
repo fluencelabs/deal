@@ -1,9 +1,9 @@
-import {describe, expect, test} from "vitest";
+import { describe, expect, test } from "vitest";
 import * as fs from "fs";
-import {getIndexerUrl} from "../../src/utils/indexerClient/config";
+import { getIndexerUrl } from "../../src/utils/indexerClient/config";
 
 function getDeploymentPath(stand: string) {
-  return `../subgraph/deployments/${stand}.txt`
+  return `../subgraph/deployments/${stand}.txt`;
 }
 
 function isStandDeploymentTxtRecordExists(stand: string) {
@@ -13,12 +13,19 @@ function isStandDeploymentTxtRecordExists(stand: string) {
 function checkFluenceEnvConfig(stand: string) {
   // Check that file exists firstly
   if (!isStandDeploymentTxtRecordExists(stand)) {
-    console.warn(`file for ${stand} not found, nothing to check`)
-    return
+    console.warn(`file for ${stand} not found, nothing to check`);
+    return;
   }
-  const allSavedSubgraphUrls = fs.readFileSync(getDeploymentPath(stand), "utf8").split('\n').filter((url) => url.length > 0)
-  const lastSavedSubgraphUrl = allSavedSubgraphUrls[allSavedSubgraphUrls.length - 1];
-  expect(getIndexerUrl(stand), "Possibly you forgot to update indexerClient/config.ts with the last subgraph URL.").toBe(lastSavedSubgraphUrl)
+  const allSavedSubgraphUrls = fs
+    .readFileSync(getDeploymentPath(stand), "utf8")
+    .split("\n")
+    .filter((url) => url.length > 0);
+  const lastSavedSubgraphUrl =
+    allSavedSubgraphUrls[allSavedSubgraphUrls.length - 1];
+  expect(
+    getIndexerUrl(stand),
+    "Possibly you forgot to update indexerClient/config.ts with the last subgraph URL.",
+  ).toBe(lastSavedSubgraphUrl);
 }
 
 describe("#configs", () => {
@@ -31,4 +38,4 @@ describe("#configs", () => {
   test("It uses last dar subgraph url.", async () => {
     checkFluenceEnvConfig("dar");
   });
-})
+});
