@@ -12,6 +12,8 @@ import "src/core/interfaces/ICore.sol";
 import "src/core/interfaces/ICapacityConst.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
 import "src/core/modules/capacity/interfaces/ICapacity.sol";
+
+import {PRECISION} from "src/utils/Common.sol";
 import "src/utils/Multicall3.sol";
 
 contract DeployContracts is Deployment, Script {
@@ -51,7 +53,7 @@ contract DeployContracts is Deployment, Script {
 
     // ------------------ Deploy result ------------------
     string constant DEPLOYMENTS_PATH = "/deployments/";
-    string private fullDeploymentsPath;
+    string private envName;
     // ------------------ Types ------------------
 
     struct ENV {
@@ -83,9 +85,7 @@ contract DeployContracts is Deployment, Script {
     }
 
     function setUp() external {
-        string memory envName = vm.envString("CONTRACTS_ENV_NAME");
-        string memory fileNames = string.concat(envName, ".json");
-        fullDeploymentsPath = string.concat(vm.projectRoot(), DEPLOYMENTS_PATH, fileNames);
+        envName = vm.envString("CONTRACTS_ENV_NAME");
     }
 
     function run() external {
@@ -293,7 +293,7 @@ contract DeployContracts is Deployment, Script {
             abi.encode(
                 coreImpl,
                 abi.encodeWithSelector(
-                    Core.initialize.selector,
+                    ICore.initialize.selector,
                     epochDuration_,
                     minDepositedEpochs_,
                     minRematchingEpochs_,
@@ -370,7 +370,7 @@ contract DeployContracts is Deployment, Script {
     function _startDeploy() internal virtual {
         bool isTestnet = vm.envOr("TEST", false);
         if (!isTestnet) {
-            _loadDeployment(fullDeploymentsPath);
+            _loadDeployment(envName);
         }
 
         vm.startBroadcast();
@@ -382,7 +382,7 @@ contract DeployContracts is Deployment, Script {
 
         if (!isTestnet) {
             _printDeployments();
-            _saveDeployment(fullDeploymentsPath);
+            _saveDeployment(envName);
         }
 
         vm.stopBroadcast();

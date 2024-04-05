@@ -8,10 +8,10 @@ import "src/core/interfaces/ICore.sol";
 import "src/deal/interfaces/IDeal.sol";
 import "src/dev/test/interfaces/IDealWithPublicInternals.sol";
 
-import "test/utils/TestWithDeployment.sol";
+import "test/utils/TestWithLocalDeployment.sol";
 import "test/utils/TestHelper.sol";
 
-contract GetStatus is TestWithDeployment {
+contract GetStatus is TestWithLocalDeployment {
     using SafeERC20 for IERC20;
     using TestHelper for TestWithDeployment.Deployment;
 
@@ -19,7 +19,7 @@ contract GetStatus is TestWithDeployment {
     IDealWithPublicInternals dealContract;
 
     // ------------------ Test ------------------
-    function setUp() public {
+    function setUp() public override {
         testCore = new TestCore();
         dealContract =
             IDealWithPublicInternals(deployCode("out/DealWithPublicInternals.sol/DealWithPublicInternals.json"));

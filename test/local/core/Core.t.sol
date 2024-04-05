@@ -7,9 +7,9 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import "src/core/interfaces/ICore.sol";
 import "src/core/interfaces/ICapacityConst.sol";
-import "test/utils/TestWithDeployment.sol";
+import "test/utils/TestWithLocalDeployment.sol";
 
-contract CoreTest is TestWithDeployment {
+contract CoreTest is TestWithLocalDeployment {
     using SafeERC20 for IERC20;
 
     event Initialized(uint8 version); // version is 255 for _disableInitializers
@@ -19,21 +19,17 @@ contract CoreTest is TestWithDeployment {
 
     address constant NOT_AN_OWNER = address(1234);
 
-    function setUp() external {
-        _deploySystem();
-    }
-
     function test_CoreHasInitializedValues() external {
         assertNotEq(address(deployment.core.dealImpl()), address(0), "Deal impl not initialized in Core");
-        assertEq(deployment.core.epochDuration(), TestWithDeployment.DEFAULT_EPOCH_DURATION, "Epoch duration not set");
+        assertEq(deployment.core.epochDuration(), TestWithLocalDeployment.DEFAULT_EPOCH_DURATION, "Epoch duration not set");
         assertEq(
             deployment.core.minDealDepositedEpochs(),
-            TestWithDeployment.DEFAULT_MIN_DEPOSITED_EPOCHS,
+            TestWithLocalDeployment.DEFAULT_MIN_DEPOSITED_EPOCHS,
             "Min deal deposited Epochs not set"
         );
         assertEq(
             deployment.core.minDealRematchingEpochs(),
-            TestWithDeployment.DEFAULT_MIN_REMATCHING_EPOCHS,
+            TestWithLocalDeployment.DEFAULT_MIN_REMATCHING_EPOCHS,
             "Min deal rematching Epochs not set"
         );
     }
@@ -46,31 +42,31 @@ contract CoreTest is TestWithDeployment {
         IDeal dealImpl = deployment.core.dealImpl();
 
         try coreImpl.initialize(
-            TestWithDeployment.DEFAULT_EPOCH_DURATION,
-            TestWithDeployment.DEFAULT_MIN_DEPOSITED_EPOCHS,
-            TestWithDeployment.DEFAULT_MIN_REMATCHING_EPOCHS,
-            TestWithDeployment.DEFAULT_MIN_PROTOCOL_VERSION,
-            TestWithDeployment.DEFAULT_MAX_PROTOCOL_VERSION,
+            TestWithLocalDeployment.DEFAULT_EPOCH_DURATION,
+            TestWithLocalDeployment.DEFAULT_MIN_DEPOSITED_EPOCHS,
+            TestWithLocalDeployment.DEFAULT_MIN_REMATCHING_EPOCHS,
+            TestWithLocalDeployment.DEFAULT_MIN_PROTOCOL_VERSION,
+            TestWithLocalDeployment.DEFAULT_MAX_PROTOCOL_VERSION,
             dealImpl,
             false,
             ICapacityConst.CapacityConstInitArgs({
-                fltPrice: TestWithDeployment.DEFAULT_FLT_PRICE,
-                usdCollateralPerUnit: TestWithDeployment.DEFAULT_USD_COLLATERAL_PER_UNIT,
-                usdTargetRevenuePerEpoch: TestWithDeployment.DEFAULT_USD_TARGET_REVENUE_PER_EPOCH,
-                minDuration: TestWithDeployment.DEFAULT_MIN_DURATION,
-                minRewardPerEpoch: TestWithDeployment.DEFAULT_MIN_REWARD_PER_EPOCH,
-                maxRewardPerEpoch: TestWithDeployment.DEFAULT_MAX_REWARD_PER_EPOCH,
-                vestingPeriodDuration: TestWithDeployment.DEFAULT_VESTING_PERIOD_DURATION,
-                vestingPeriodCount: TestWithDeployment.DEFAULT_VESTING_PERIOD_COUNT,
-                slashingRate: TestWithDeployment.DEFAULT_SLASHING_RATE,
-                minProofsPerEpoch: TestWithDeployment.DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH,
-                maxProofsPerEpoch: TestWithDeployment.DEFAULT_MAX_PROOFS_PER_EPOCH,
-                withdrawEpochsAfterFailed: TestWithDeployment.DEFAULT_WITHDRAW_EPOCHS_AFTER_FAILED,
-                maxFailedRatio: TestWithDeployment.DEFAULT_MAX_FAILED_RATIO,
-                difficulty: TestWithDeployment.DEFAULT_DIFFICULTY_TARGET,
-                initRewardPool: TestWithDeployment.DEFAULT_INIT_REWARD_POOL,
+                fltPrice: TestWithLocalDeployment.DEFAULT_FLT_PRICE,
+                usdCollateralPerUnit: TestWithLocalDeployment.DEFAULT_USD_COLLATERAL_PER_UNIT,
+                usdTargetRevenuePerEpoch: TestWithLocalDeployment.DEFAULT_USD_TARGET_REVENUE_PER_EPOCH,
+                minDuration: TestWithLocalDeployment.DEFAULT_MIN_DURATION,
+                minRewardPerEpoch: TestWithLocalDeployment.DEFAULT_MIN_REWARD_PER_EPOCH,
+                maxRewardPerEpoch: TestWithLocalDeployment.DEFAULT_MAX_REWARD_PER_EPOCH,
+                vestingPeriodDuration: TestWithLocalDeployment.DEFAULT_VESTING_PERIOD_DURATION,
+                vestingPeriodCount: TestWithLocalDeployment.DEFAULT_VESTING_PERIOD_COUNT,
+                slashingRate: TestWithLocalDeployment.DEFAULT_SLASHING_RATE,
+                minProofsPerEpoch: TestWithLocalDeployment.DEFAULT_MIN_REQUIERD_PROOFS_PER_EPOCH,
+                maxProofsPerEpoch: TestWithLocalDeployment.DEFAULT_MAX_PROOFS_PER_EPOCH,
+                withdrawEpochsAfterFailed: TestWithLocalDeployment.DEFAULT_WITHDRAW_EPOCHS_AFTER_FAILED,
+                maxFailedRatio: TestWithLocalDeployment.DEFAULT_MAX_FAILED_RATIO,
+                difficulty: TestWithLocalDeployment.DEFAULT_DIFFICULTY_TARGET,
+                initRewardPool: TestWithLocalDeployment.DEFAULT_INIT_REWARD_POOL,
                 randomXProxy: deployCode("out/RandomXProxy.sol/RandomXProxy.json"),
-                oracle: TestWithDeployment.DEFAULT_ORACLE
+                oracle: TestWithLocalDeployment.DEFAULT_ORACLE
             })
         ) {
             assertEq(true, false, "Expected revert");
@@ -80,7 +76,7 @@ contract CoreTest is TestWithDeployment {
     }
 
     function test_InitializeModules() external {
-        // initialized in TestWithDeployment, lets's check it
+        // initialized in TestWithLocalDeployment, lets's check it
         assertNotEq(address(deployment.core.capacity()), address(0), "Capacity not initialized in Core");
         assertNotEq(address(deployment.core.market()), address(0), "Market not initialized in Core");
         assertNotEq(address(deployment.core.dealFactory()), address(0), "DealFactory not initialized in Core");

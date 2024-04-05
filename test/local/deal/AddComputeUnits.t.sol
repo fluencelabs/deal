@@ -6,18 +6,14 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "src/deal/interfaces/IDeal.sol";
 
-import "test/utils/TestWithDeployment.sol";
+import "test/utils/TestWithLocalDeployment.sol";
 import "test/utils/TestHelper.sol";
 
-contract AddComputeUnits is TestWithDeployment {
+contract AddComputeUnits is TestWithLocalDeployment {
     using SafeERC20 for IERC20;
-    using TestHelper for TestWithDeployment.Deployment;
+    using TestHelper for TestWithLocalDeployment.Deployment;
 
     // ------------------ Test ------------------
-    function setUp() public {
-        _deploySystem();
-    }
-
     function test_AddOneUnit() public {
         IDeal deal = deployment.deployDealWithoutFactory(10, 10, 1, 1 ether);
 

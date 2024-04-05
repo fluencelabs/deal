@@ -1,88 +1,28 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "forge-std/Script.sol";
 import "forge-std/Vm.sol";
-import "src/deal/Deal.sol";
-import "src/core/Core.sol";
-import "src/dev/OwnableFaucet.sol";
-import "src/dev/TestERC20.sol";
+
+import "./DeploymentJson.sol";
 
 contract Deployment is ScriptBase {
+    using DeploymentJson for DeploymentJson.DeploymentInfo;
+
     using Strings for string;
     using stdJson for string;
 
-    // ------------------ Types ------------------
-
-    struct DeployedContract {
-        address addr;
-        bytes32 codeHash;
-        uint256 blockNumber;
-        bytes32 creationCodeHash;
-    }
-
-    struct DeploymentInfo {
-        string[] contractNames;
-        mapping(string => DeployedContract) contracts;
-    }
-
     // ------------------ Variables ------------------
-    DeploymentInfo deployment;
+    DeploymentJson.DeploymentInfo deployment;
 
     // ------------------ Internal functions ------------------
-    function _loadDeployment(string memory path) internal {
-        if (!vm.exists(path)) {
-            return;
-        }
-
-        string memory file = vm.readFile(path);
-        string[] memory keys = vm.parseJsonKeys(file, "");
-
-        deployment.contractNames = keys;
-        for (uint256 i = 0; i < keys.length; i++) {
-            string memory key = keys[i];
-
-            DeployedContract memory deployedContract;
-
-            deployedContract.addr = abi.decode(vm.parseJson(file, string.concat(".", key, ".addr")), (address));
-            deployedContract.codeHash = abi.decode(vm.parseJson(file, string.concat(".", key, ".codeHash")), (bytes32));
-            deployedContract.blockNumber =
-                abi.decode(vm.parseJson(file, string.concat(".", key, ".blockNumber")), (uint256));
-            deployedContract.creationCodeHash =
-                abi.decode(vm.parseJson(file, string.concat(".", key, ".creationCodeHash")), (bytes32));
-
-            deployment.contracts[key] = deployedContract;
-        }
+    function _loadDeployment(string memory env) internal {
+        deployment.load(vm, env);
     }
 
-    function _saveDeployment(string memory path) internal {
-        string memory mainJsonKey = "";
-        string memory json = "";
-        for (uint256 i = 0; i < deployment.contractNames.length; i++) {
-            string memory name = deployment.contractNames[i];
-
-            DeployedContract memory deployedContract = deployment.contracts[name];
-            name.serialize("addr", deployedContract.addr);
-            name.serialize("codeHash", deployedContract.codeHash);
-            name.serialize("blockNumber", deployedContract.blockNumber);
-            string memory deployedContractObject = name.serialize("creationCodeHash", deployedContract.creationCodeHash);
-
-            json = mainJsonKey.serialize(name, deployedContractObject);
-        }
-
-        if (json.equal("")) {
-            return;
-        }
-
-        json.write(path);
-
-        // TODO: rm hack below on solving https://github.com/foundry-rs/forge-std/issues/488.
-        string memory a = "";
-        json = a.serialize(a, a.serialize("creationCodeHash", a));
+    function _saveDeployment(string memory env) internal {
+        deployment.save(vm, env);
     }
 
     function _deployContract(string memory contractName, string memory artifactName, bytes memory args)
@@ -118,7 +58,7 @@ contract Deployment is ScriptBase {
             delete deployment.contracts[contractName];
         }
 
-        DeployedContract memory deployedContract = deployment.contracts[contractName];
+       DeploymentJson.DeployedContract memory deployedContract = deployment.contracts[contractName];
 
         string memory artifact = string.concat(artifactName, ".sol");
         bytes memory creationCode = abi.encodePacked(vm.getCode(artifact), args);
@@ -146,7 +86,7 @@ contract Deployment is ScriptBase {
 
         console.log("Deploy %s at %s", contractName, addr);
 
-        deployedContract = DeployedContract({
+        deployedContract = DeploymentJson.DeployedContract({
             addr: addr,
             codeHash: codeHash,
             blockNumber: block.number,
@@ -162,7 +102,7 @@ contract Deployment is ScriptBase {
     }
 
     function _doNeedToRedeploy(string memory contractName, string memory artifactName) internal view returns (bool) {
-        DeployedContract memory deployedContract = deployment.contracts[contractName];
+        DeploymentJson.DeployedContract memory deployedContract = deployment.contracts[contractName];
 
         string memory artifact = string.concat(artifactName, ".sol");
         bytes memory code = vm.getDeployedCode(artifact);
@@ -179,7 +119,7 @@ contract Deployment is ScriptBase {
         console.log("----------------- Deployments -----------------");
         for (uint256 i = 0; i < deployment.contractNames.length; i++) {
             string memory name = deployment.contractNames[i];
-            DeployedContract memory deployedContract = deployment.contracts[name];
+            DeploymentJson.DeployedContract memory deployedContract = deployment.contracts[name];
 
             console.log(StdStyle.green(name), deployedContract.addr);
         }
@@ -192,7 +132,7 @@ contract Deployment is ScriptBase {
             deployment.contractNames.push(contractName);
         }
 
-        deployment.contracts[contractName] = DeployedContract({
+        deployment.contracts[contractName] = DeploymentJson.DeployedContract({
             addr: addr,
             codeHash: codeHash,
             blockNumber: block.number,

@@ -13,7 +13,7 @@ import "src/utils/BytesConverter.sol";
 import "test/utils/TestWithDeployment.sol";
 import "test/utils/TestHelper.sol";
 
-contract CapacityCommitmentTest is TestWithDeployment {
+abstract contract CapacityCommitmentTest is TestWithDeployment {
     using SafeERC20 for IERC20;
     using BytesConverter for bytes32;
 
@@ -48,8 +48,8 @@ contract CapacityCommitmentTest is TestWithDeployment {
     uint256 rewardCCDelegationRate;
 
     // ------------------ Test ------------------
-    function setUp() public {
-        _deploySystem();
+    function setUp() public virtual override {
+        super.setUp();
 
         paymentToken = address(deployment.tUSD);
         minPricePerWorkerEpoch = 1000;

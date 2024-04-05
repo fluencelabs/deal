@@ -9,12 +9,12 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "src/deal/interfaces/IDeal.sol";
 import "src/core/modules/market/interfaces/IOffer.sol";
 
-import "test/utils/TestWithDeployment.sol";
+import "test/utils/TestWithLocalDeployment.sol";
 import "test/utils/TestHelper.sol";
 
-contract Rewards is TestWithDeployment {
+contract Rewards is TestWithLocalDeployment {
     using SafeERC20 for IERC20;
-    using TestHelper for TestWithDeployment.Deployment;
+    using TestHelper for TestWithLocalDeployment.Deployment;
 
     struct Params {
         uint256 minWorkers;
@@ -23,10 +23,6 @@ contract Rewards is TestWithDeployment {
         uint256 pricePerWorkerEpoch;
         uint256 minAmount;
         uint256 protocolVersion;
-    }
-
-    function setUp() public {
-        _deploySystem();
     }
 
     function test_RewardWithOneWorker() public {

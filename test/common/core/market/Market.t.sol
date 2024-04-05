@@ -2,14 +2,13 @@
 pragma solidity ^0.8.19;
 
 import {Test} from "forge-std/Test.sol";
-import "forge-std/console.sol";
 
 import "test/utils/TestWithDeployment.sol";
 import "test/utils/TestHelper.sol";
 
 import "src/core/modules/market/interfaces/IMarket.sol";
 
-contract MarketTest is TestWithDeployment {
+abstract contract MarketTest is TestWithDeployment {
     using SafeERC20 for IERC20;
 
     // ------------------ Constants ------------------
@@ -39,9 +38,9 @@ contract MarketTest is TestWithDeployment {
     uint256 maxProtocolVersion;
 
     // ------------------ Test ------------------
-    function setUp() public {
+    function setUp() public override virtual {
         bool initialized = deployment.initialized;
-        _deploySystem();
+        super.setUp();
 
         if (initialized) {
             return;
@@ -49,8 +48,8 @@ contract MarketTest is TestWithDeployment {
 
         paymentToken = address(deployment.tUSD);
         minPricePerWorkerEpoch = 1000;
-        minProtocolVersion = DEFAULT_MIN_PROTOCOL_VERSION;
-        maxProtocolVersion = DEFAULT_MAX_PROTOCOL_VERSION;
+        minProtocolVersion = deployment.core.minProtocolVersion();
+        maxProtocolVersion = deployment.core.maxProtocolVersion();
 
         for (uint256 i = 0; i < 10; i++) {
             effectors.push(CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("effector", i))}));

@@ -12,14 +12,14 @@ import "src/dev/test/interfaces/ICapacityConstWithPublicInternals.sol";
 import "src/core/interfaces/ICapacityConst.sol";
 import "src/utils/BytesConverter.sol";
 
-import "test/utils/TestWithDeployment.sol";
+import "test/utils/TestWithLocalDeployment.sol";
 import "test/utils/TestHelper.sol";
 
 interface ISetConstant {
     function setCapacityConstant(uint8 constantType, uint256 newValue) external;
 }
 
-contract CapacityConstTest is TestWithDeployment {
+contract CapacityConstTest is TestWithLocalDeployment {
     using SafeERC20 for IERC20;
     using BytesConverter for bytes32;
 
@@ -31,7 +31,7 @@ contract CapacityConstTest is TestWithDeployment {
     // ------------------ Test ------------------
     ICapacityConstWithPublicInternals capacityConst;
 
-    function setUp() public {
+    function setUp() public override {
         capacityConst = ICapacityConstWithPublicInternals(
             address(
                 new ERC1967Proxy(
