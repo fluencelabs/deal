@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.13.8](https://github.com/fluencelabs/deal/compare/v0.13.7...v0.13.8) (2024-04-04)
+
+
+### Features
+
+* cliClient get offers and offer ids by provider [fixes CHAIN-448 CHAIN-449] ([#403](https://github.com/fluencelabs/deal/issues/403)) ([6637593](https://github.com/fluencelabs/deal/commit/66375933fb1909de3e9acd219c8972a2cfec7271))
+* set proper chain id ([#415](https://github.com/fluencelabs/deal/issues/415)) ([fd7049f](https://github.com/fluencelabs/deal/commit/fd7049fa34ed01a5aa40a80bcdad412b3befc6f5))
+
+
+### Bug Fixes
+
+* remove invalid release logic from submit proof ([#406](https://github.com/fluencelabs/deal/issues/406)) ([90ce155](https://github.com/fluencelabs/deal/commit/90ce1553a9a00870f21eb98143cdfdb0584a3023))
+
 ## [0.13.7](https://github.com/fluencelabs/deal/compare/v0.13.6...v0.13.7) (2024-04-01)
 
 
