@@ -28,8 +28,8 @@ env:
   FOUNDRY_PROFILE: "ci"
 
 jobs:
-  integration-tests:
-    name: "Integration tests"
+  build_contracts_packages_and_run_tests_from_prettier_to_integration:
+    name: "Run Prettier Tests, Unittests, Integration Tests"
     runs-on: ubuntu-latest
 
     steps:
@@ -37,6 +37,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Run Prettier Test
+        uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: --all-files
 
       - name: Setup node
         uses: actions/setup-node@v3
