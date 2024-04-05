@@ -3,9 +3,9 @@
 This repo consists of 3 main parts:
 
 - `src` - Foundry contracts (read more https://book.getfoundry.sh/). Generally, repo
-    follow structure of Foundry repo.
+  follow structure of Foundry repo.
 - `subgraph` - javascript client to interact with the graph node, called subgraph (read more
-    https://thegraph.com/docs/quick-start), [README](subgraph/README.md)
+  https://thegraph.com/docs/quick-start), [README](subgraph/README.md)
 - `ts-client` - npm package from contract developers to interact with contracts, more in [README](ts-client/README.md)
 - `integration-tests` - npm module to prepare integration tests for Deal contracts flow, more in [README](integration-tests/README.md)
 
@@ -13,13 +13,14 @@ To access to the general points of the each part in the repo root **makefile**
 is presented. Below are main commands of the makefile.
 
 | The root [package.json](package.json) consists of dev packages for prettier and code linting via **Husky**.
-More about in 
+More about in
 
 # Table of contents
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
--   [Deal Contracts System](#deal-contracts-system)
+
+- [Deal Contracts System](#deal-contracts-system)
 
 - [Requirements](#requirements)
 - [Contract](#contract)
@@ -54,9 +55,9 @@ More about in
 
 Full requirements to develop in this repo.
 
--   foundry (https://book.getfoundry.sh/)
--   makefile (TODO)
--   node version 18.16
+- foundry (https://book.getfoundry.sh/)
+- makefile (TODO)
+- node version 18.16
 
 # Contract
 
@@ -72,14 +73,14 @@ Because scripts and makefile supports env (actually makefile reads env from .env
 
 Below is the list of env. For description we aim you to [.example.env](.example.env) directly.
 
--   PRIVATE_KEY
--   LOCAL_CHAIN_BLOCK_MINING_INTERVAL
--   MAX_FAILED_RATIO
--   IS_MOCKED_RANDOMX
+- PRIVATE_KEY
+- LOCAL_CHAIN_BLOCK_MINING_INTERVAL
+- MAX_FAILED_RATIO
+- IS_MOCKED_RANDOMX
 
 ## Makefile
 
-Below is some of useful **makefile** commands with their descriptions. 
+Below is some of useful **makefile** commands with their descriptions.
 
 To check out all commands and their descriptions run `make help`.
 
@@ -143,13 +144,13 @@ $ PRIVATE_KEY=${} make deploy-{network_name}
 
 ## Test
 
--   Contracts
+- Contracts
 
 ```shell
 $ forge test
 ```
 
--   TS Clients
+- TS Clients
 
 ```shell
 cd ts-client && npm test unittests
@@ -194,17 +195,17 @@ $ make create-pure-market-local
 # Development Guide
 
 ## Lint and Prettier
-In the monorepo we use general code style defined in [.editorconfig](.editorconfig) that prettier uses. 
-With help of **husky** developer should configure its pre-commit hooks.
+
+In the monorepo we use general code style defined in [.editorconfig](.editorconfig) and mirrored in [.prettierrc](.prettierrc) (it is mirrored coz of this [issue](https://github.com/prettier/prettier/issues/15401)).
+
+> Note, that in repo CI process maintain the prettier check.
 
 ## Configure Pre Commit Hook
-Basically **husky** pre-commit hooks installed on `npm install` from the source root.
 
-### ToDo:
-- [ ] add  activate lint:contracts for sol contracts and run it: `npx prettier --write --plugin=prettier-plugin-solidity 'src/**/*.sol'
-`
+To install pre-commit follow instruction here: https://pre-commit.com/
 
 ## Setup Deal Infrastructure
+
 > TODO: add flow on how to work with already built images from registry.
 
 Let`s suppose you want to boot up local network and subgraph (thus, all deal infrastructure) to develop on the repo locally.
@@ -245,17 +246,16 @@ make create-pure-market-local
 
 ## Tips
 
--   To stop and cleanup dev environment run:
+- To stop and cleanup dev environment run:
 
 ```bash
 docker-compose -f docker/docker-compose.yml down --volumes
 ```
 
--   To redeploy contracts:
+- To redeploy contracts:
 
 ```bash
 make deploy-contracts-local
 ```
 
 and do not forget to repeat from 3d step (depends on your needs).
-
