@@ -91,7 +91,6 @@ dataSources:
           handler: handleComputeUnitRemoved
         - event: PeerRemoved(indexed bytes32,indexed bytes32)
           handler: handlePeerRemoved
-          # TODO: support remove Offer.
       file: ./src/mappings/market.ts
   - kind: ethereum/contract
     name: DealFactory
