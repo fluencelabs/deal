@@ -16,16 +16,7 @@
     "codegen:dealCliClient": "graphql-codegen --config codegen-deal-cli-indexer.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "create-pure-market-script": "vitest run create-pure-market.test",
-    "lint:staged": "lint-staged"
-  },
-  "lint-staged": {
-    "src/**/*.{ts,json}": [
-      "prettier --write"
-    ],
-    "tests/**/*.ts": [
-      "prettier --write"
-    ]
+    "create-pure-market-script": "vitest run create-pure-market.test"
   },
   "files": [
     "dist"
