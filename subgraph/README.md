@@ -119,8 +119,8 @@ If you updated contract and want to push this update to the subgraph, I could re
 npm run compile && npm run create:local && npm run deploy:local
 ```
 
+# Deploy
 
-# Deploy 
 For deploy it uses [fluence-graph.sh](fluence-graph.sh) script. Check its help for more info. Tl;dr: it is gateway to deploy manage subgraph deploy on Fluence stands and store artifacts of those deployments.
 
 ## [deprecated] Fluence Stands Versioning
