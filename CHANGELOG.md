@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.9](https://github.com/fluencelabs/deal/compare/v0.13.8...v0.13.9) (2024-04-09)
+
+
+### Features
+
+* optimise query for cc detail view [CHAIN-452] ([#414](https://github.com/fluencelabs/deal/issues/414)) ([86dab22](https://github.com/fluencelabs/deal/commit/86dab22b601c044cd45030dda96751e05810fe23))
+
 ## [0.13.8](https://github.com/fluencelabs/deal/compare/v0.13.7...v0.13.8) (2024-04-04)
 
 
