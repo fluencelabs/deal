@@ -30,8 +30,8 @@ mumbai = "https://rpc.ankr.com/polygon_mumbai"
 
 [profile.test]
 src = "test"
-out = "test-out"
+out = "out-test"
 test = "test"
-script = "test"
+script = "script-local"
 via_ir = false
 optimizer = false
