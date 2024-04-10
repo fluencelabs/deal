@@ -99,13 +99,13 @@ export type CapacityCommitmentSubmittedProofsArgs = {
 export type CapacityCommitmentStatsPerEpoch = {
   __typename?: 'CapacityCommitmentStatsPerEpoch';
   activeUnitCount: Scalars['Int']['output'];
-  blockNumberEnd: Scalars['BigInt']['output'];
-  blockNumberStart: Scalars['BigInt']['output'];
   capacityCommitment: CapacityCommitment;
   /** Should be update after ComputeUnitPerEpochStat.submittedProofsCount reached min proofs border. */
   computeUnitsWithMinRequiredProofsSubmittedCounter: Scalars['Int']['output'];
   currentCCNextCCFailedEpoch: Scalars['BigInt']['output'];
+  /** Additional field to support ordering by epoch. */
   epoch: Scalars['BigInt']['output'];
+  epochStatistic: EpochStatistic;
   exitedUnitCount: Scalars['Int']['output'];
   id: Scalars['ID']['output'];
   nextAdditionalActiveUnitCount: Scalars['Int']['output'];
@@ -136,22 +136,6 @@ export type CapacityCommitmentStatsPerEpoch_Filter = {
   activeUnitCount_not?: InputMaybe<Scalars['Int']['input']>;
   activeUnitCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
   and?: InputMaybe<Array<InputMaybe<CapacityCommitmentStatsPerEpoch_Filter>>>;
-  blockNumberEnd?: InputMaybe<Scalars['BigInt']['input']>;
-  blockNumberEnd_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  blockNumberEnd_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  blockNumberEnd_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  blockNumberEnd_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  blockNumberEnd_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  blockNumberEnd_not?: InputMaybe<Scalars['BigInt']['input']>;
-  blockNumberEnd_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  blockNumberStart?: InputMaybe<Scalars['BigInt']['input']>;
-  blockNumberStart_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  blockNumberStart_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  blockNumberStart_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  blockNumberStart_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  blockNumberStart_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  blockNumberStart_not?: InputMaybe<Scalars['BigInt']['input']>;
-  blockNumberStart_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   capacityCommitment?: InputMaybe<Scalars['String']['input']>;
   capacityCommitment_?: InputMaybe<CapacityCommitment_Filter>;
   capacityCommitment_contains?: InputMaybe<Scalars['String']['input']>;
@@ -190,6 +174,27 @@ export type CapacityCommitmentStatsPerEpoch_Filter = {
   currentCCNextCCFailedEpoch_not?: InputMaybe<Scalars['BigInt']['input']>;
   currentCCNextCCFailedEpoch_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   epoch?: InputMaybe<Scalars['BigInt']['input']>;
+  epochStatistic?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_?: InputMaybe<EpochStatistic_Filter>;
+  epochStatistic_contains?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_ends_with?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_gt?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_gte?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  epochStatistic_lt?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_lte?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_not?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_not_contains?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  epochStatistic_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_starts_with?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
   epoch_gt?: InputMaybe<Scalars['BigInt']['input']>;
   epoch_gte?: InputMaybe<Scalars['BigInt']['input']>;
   epoch_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
@@ -243,8 +248,6 @@ export type CapacityCommitmentStatsPerEpoch_Filter = {
 
 export type CapacityCommitmentStatsPerEpoch_OrderBy =
   | 'activeUnitCount'
-  | 'blockNumberEnd'
-  | 'blockNumberStart'
   | 'capacityCommitment'
   | 'capacityCommitment__activeUnitCount'
   | 'capacityCommitment__collateralPerUnit'
@@ -270,6 +273,12 @@ export type CapacityCommitmentStatsPerEpoch_OrderBy =
   | 'computeUnitsWithMinRequiredProofsSubmittedCounter'
   | 'currentCCNextCCFailedEpoch'
   | 'epoch'
+  | 'epochStatistic'
+  | 'epochStatistic__endBlock'
+  | 'epochStatistic__endTimestamp'
+  | 'epochStatistic__id'
+  | 'epochStatistic__startBlock'
+  | 'epochStatistic__startTimestamp'
   | 'exitedUnitCount'
   | 'id'
   | 'nextAdditionalActiveUnitCount'
@@ -374,6 +383,7 @@ export type CapacityCommitmentToComputeUnit_OrderBy =
   | 'capacityCommitment__totalFailCount'
   | 'computeUnit'
   | 'computeUnit__createdAt'
+  | 'computeUnit__deleted'
   | 'computeUnit__id'
   | 'computeUnit__submittedProofsCount'
   | 'computeUnit__workerId'
@@ -623,6 +633,7 @@ export type CapacityCommitment_OrderBy =
   | 'peer__currentCCCollateralDepositedAt'
   | 'peer__currentCCEndEpoch'
   | 'peer__currentCCNextCCFailedEpoch'
+  | 'peer__deleted'
   | 'peer__id'
   | 'peer__isAnyJoinedDeals'
   | 'provider'
@@ -648,6 +659,7 @@ export type ComputeUnit = {
   __typename?: 'ComputeUnit';
   createdAt: Scalars['BigInt']['output'];
   deal?: Maybe<Deal>;
+  deleted: Scalars['Boolean']['output'];
   id: Scalars['ID']['output'];
   peer: Peer;
   /** In order to simplify relation for query. */
@@ -671,7 +683,7 @@ export type ComputeUnitPerEpochStat = {
   __typename?: 'ComputeUnitPerEpochStat';
   capacityCommitment?: Maybe<CapacityCommitment>;
   computeUnit: ComputeUnit;
-  epoch: Scalars['BigInt']['output'];
+  epochStatistic: EpochStatistic;
   id: Scalars['ID']['output'];
   submittedProofsCount: Scalars['Int']['output'];
 };
@@ -722,14 +734,27 @@ export type ComputeUnitPerEpochStat_Filter = {
   computeUnit_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
   computeUnit_starts_with?: InputMaybe<Scalars['String']['input']>;
   computeUnit_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
-  epoch?: InputMaybe<Scalars['BigInt']['input']>;
-  epoch_gt?: InputMaybe<Scalars['BigInt']['input']>;
-  epoch_gte?: InputMaybe<Scalars['BigInt']['input']>;
-  epoch_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  epoch_lt?: InputMaybe<Scalars['BigInt']['input']>;
-  epoch_lte?: InputMaybe<Scalars['BigInt']['input']>;
-  epoch_not?: InputMaybe<Scalars['BigInt']['input']>;
-  epoch_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  epochStatistic?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_?: InputMaybe<EpochStatistic_Filter>;
+  epochStatistic_contains?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_ends_with?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_gt?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_gte?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  epochStatistic_lt?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_lte?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_not?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_not_contains?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_not_contains_nocase?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_not_ends_with?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_not_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  epochStatistic_not_starts_with?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_starts_with?: InputMaybe<Scalars['String']['input']>;
+  epochStatistic_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
   id_gt?: InputMaybe<Scalars['ID']['input']>;
   id_gte?: InputMaybe<Scalars['ID']['input']>;
@@ -774,10 +799,16 @@ export type ComputeUnitPerEpochStat_OrderBy =
   | 'capacityCommitment__totalFailCount'
   | 'computeUnit'
   | 'computeUnit__createdAt'
+  | 'computeUnit__deleted'
   | 'computeUnit__id'
   | 'computeUnit__submittedProofsCount'
   | 'computeUnit__workerId'
-  | 'epoch'
+  | 'epochStatistic'
+  | 'epochStatistic__endBlock'
+  | 'epochStatistic__endTimestamp'
+  | 'epochStatistic__id'
+  | 'epochStatistic__startBlock'
+  | 'epochStatistic__startTimestamp'
   | 'id'
   | 'submittedProofsCount';
 
@@ -814,6 +845,10 @@ export type ComputeUnit_Filter = {
   deal_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
   deal_starts_with?: InputMaybe<Scalars['String']['input']>;
   deal_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  deleted?: InputMaybe<Scalars['Boolean']['input']>;
+  deleted_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+  deleted_not?: InputMaybe<Scalars['Boolean']['input']>;
+  deleted_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
   id?: InputMaybe<Scalars['ID']['input']>;
   id_gt?: InputMaybe<Scalars['ID']['input']>;
   id_gte?: InputMaybe<Scalars['ID']['input']>;
@@ -913,6 +948,7 @@ export type ComputeUnit_OrderBy =
   | 'deal__registeredWorkersCurrentCount'
   | 'deal__targetWorkers'
   | 'deal__withdrawalSum'
+  | 'deleted'
   | 'id'
   | 'peer'
   | 'peer__computeUnitsInDeal'
@@ -920,6 +956,7 @@ export type ComputeUnit_OrderBy =
   | 'peer__currentCCCollateralDepositedAt'
   | 'peer__currentCCEndEpoch'
   | 'peer__currentCCNextCCFailedEpoch'
+  | 'peer__deleted'
   | 'peer__id'
   | 'peer__isAnyJoinedDeals'
   | 'provider'
@@ -1205,6 +1242,7 @@ export type DealToJoinedOfferPeer_OrderBy =
   | 'peer__currentCCCollateralDepositedAt'
   | 'peer__currentCCEndEpoch'
   | 'peer__currentCCNextCCFailedEpoch'
+  | 'peer__deleted'
   | 'peer__id'
   | 'peer__isAnyJoinedDeals';
 
@@ -1306,6 +1344,7 @@ export type DealToPeer_OrderBy =
   | 'peer__currentCCCollateralDepositedAt'
   | 'peer__currentCCEndEpoch'
   | 'peer__currentCCNextCCFailedEpoch'
+  | 'peer__deleted'
   | 'peer__id'
   | 'peer__isAnyJoinedDeals';
 
@@ -1653,6 +1692,77 @@ export type Effector_OrderBy =
   | 'id'
   | 'offers';
 
+/** This model is designed to store epoch related information. Note, that in other models it is more efficient to store epoch as bigint rather than relation to that model (with relation you could complicate your queries by epoch, or you will need to store additional epoch field anyway). */
+export type EpochStatistic = {
+  __typename?: 'EpochStatistic';
+  endBlock: Scalars['BigInt']['output'];
+  endTimestamp: Scalars['BigInt']['output'];
+  /** Epoch number. Note, that for current epoch right boarder is approximate. */
+  id: Scalars['ID']['output'];
+  startBlock: Scalars['BigInt']['output'];
+  startTimestamp: Scalars['BigInt']['output'];
+};
+
+export type EpochStatistic_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>;
+  and?: InputMaybe<Array<InputMaybe<EpochStatistic_Filter>>>;
+  endBlock?: InputMaybe<Scalars['BigInt']['input']>;
+  endBlock_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  endBlock_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  endBlock_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  endBlock_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  endBlock_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  endBlock_not?: InputMaybe<Scalars['BigInt']['input']>;
+  endBlock_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  endTimestamp?: InputMaybe<Scalars['BigInt']['input']>;
+  endTimestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  endTimestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  endTimestamp_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  endTimestamp_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  endTimestamp_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  endTimestamp_not?: InputMaybe<Scalars['BigInt']['input']>;
+  endTimestamp_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  id_gt?: InputMaybe<Scalars['ID']['input']>;
+  id_gte?: InputMaybe<Scalars['ID']['input']>;
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  id_lt?: InputMaybe<Scalars['ID']['input']>;
+  id_lte?: InputMaybe<Scalars['ID']['input']>;
+  id_not?: InputMaybe<Scalars['ID']['input']>;
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>;
+  or?: InputMaybe<Array<InputMaybe<EpochStatistic_Filter>>>;
+  startBlock?: InputMaybe<Scalars['BigInt']['input']>;
+  startBlock_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  startBlock_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  startBlock_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  startBlock_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  startBlock_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  startBlock_not?: InputMaybe<Scalars['BigInt']['input']>;
+  startBlock_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  startTimestamp?: InputMaybe<Scalars['BigInt']['input']>;
+  startTimestamp_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  startTimestamp_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  startTimestamp_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  startTimestamp_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  startTimestamp_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  startTimestamp_not?: InputMaybe<Scalars['BigInt']['input']>;
+  startTimestamp_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+};
+
+export type EpochStatistic_OrderBy =
+  | 'endBlock'
+  | 'endTimestamp'
+  | 'id'
+  | 'startBlock'
+  | 'startTimestamp';
+
+/**
+ * In the scheme below we used behaviour where deleted entity marked as deleted=True instead of actual deletion (in contrast as in contract).
+ * Thus, please refer to the deleted field when querying the data.
+ * Note, all deleted entities are out of scope for presented counters in all models.
+ *
+ */
 export type GraphNetwork = {
   __typename?: 'GraphNetwork';
   capacityCommitmentsTotal: Scalars['BigInt']['output'];
@@ -1672,7 +1782,7 @@ export type GraphNetwork = {
   proofsTotal: Scalars['BigInt']['output'];
   /** Providers that register themselves in the network with setInfo() method. */
   providersRegisteredTotal: Scalars['BigInt']['output'];
-  /** @deprecated TODO: deprecate. */
+  /** @deprecated TODO: deprecate because it is not used. changed to providersRegisteredTotal used. */
   providersTotal: Scalars['BigInt']['output'];
   tokensTotal: Scalars['BigInt']['output'];
 };
@@ -1877,6 +1987,7 @@ export type GraphNetwork_OrderBy =
 
 export type Offer = {
   __typename?: 'Offer';
+  /** It depends on if CU in deal or not. */
   computeUnitsAvailable?: Maybe<Scalars['Int']['output']>;
   computeUnitsTotal?: Maybe<Scalars['Int']['output']>;
   createdAt: Scalars['BigInt']['output'];
@@ -2157,6 +2268,7 @@ export type Peer = {
   currentCCEndEpoch?: Maybe<Scalars['BigInt']['output']>;
   currentCCNextCCFailedEpoch?: Maybe<Scalars['BigInt']['output']>;
   currentCapacityCommitment?: Maybe<CapacityCommitment>;
+  deleted: Scalars['Boolean']['output'];
   /** ref to peerId in contract. */
   id: Scalars['ID']['output'];
   isAnyJoinedDeals: Scalars['Boolean']['output'];
@@ -2259,6 +2371,10 @@ export type Peer_Filter = {
   currentCapacityCommitment_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
   currentCapacityCommitment_starts_with?: InputMaybe<Scalars['String']['input']>;
   currentCapacityCommitment_starts_with_nocase?: InputMaybe<Scalars['String']['input']>;
+  deleted?: InputMaybe<Scalars['Boolean']['input']>;
+  deleted_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+  deleted_not?: InputMaybe<Scalars['Boolean']['input']>;
+  deleted_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
   id?: InputMaybe<Scalars['ID']['input']>;
   id_gt?: InputMaybe<Scalars['ID']['input']>;
   id_gte?: InputMaybe<Scalars['ID']['input']>;
@@ -2347,6 +2463,7 @@ export type Peer_OrderBy =
   | 'currentCapacityCommitment__submittedProofsCount'
   | 'currentCapacityCommitment__totalCollateral'
   | 'currentCapacityCommitment__totalFailCount'
+  | 'deleted'
   | 'id'
   | 'isAnyJoinedDeals'
   | 'joinedDeals'
@@ -2370,6 +2487,7 @@ export type Peer_OrderBy =
 export type Provider = {
   __typename?: 'Provider';
   approved: Scalars['Boolean']['output'];
+  /** It depends on if CU in deal or not. */
   computeUnitsAvailable: Scalars['Int']['output'];
   computeUnitsTotal: Scalars['Int']['output'];
   createdAt: Scalars['BigInt']['output'];
@@ -2503,6 +2621,8 @@ export type Query = {
   deals: Array<Deal>;
   effector?: Maybe<Effector>;
   effectors: Array<Effector>;
+  epochStatistic?: Maybe<EpochStatistic>;
+  epochStatistics: Array<EpochStatistic>;
   graphNetwork?: Maybe<GraphNetwork>;
   graphNetworks: Array<GraphNetwork>;
   offer?: Maybe<Offer>;
@@ -2720,6 +2840,24 @@ export type QueryEffectorsArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>;
   subgraphError?: _SubgraphErrorPolicy_;
   where?: InputMaybe<Effector_Filter>;
+};
+
+
+export type QueryEpochStatisticArgs = {
+  block?: InputMaybe<Block_Height>;
+  id: Scalars['ID']['input'];
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type QueryEpochStatisticsArgs = {
+  block?: InputMaybe<Block_Height>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<EpochStatistic_OrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  subgraphError?: _SubgraphErrorPolicy_;
+  where?: InputMaybe<EpochStatistic_Filter>;
 };
 
 
@@ -3012,8 +3150,6 @@ export type SubmittedProof_OrderBy =
   | 'capacityCommitment'
   | 'capacityCommitmentStatsPerEpoch'
   | 'capacityCommitmentStatsPerEpoch__activeUnitCount'
-  | 'capacityCommitmentStatsPerEpoch__blockNumberEnd'
-  | 'capacityCommitmentStatsPerEpoch__blockNumberStart'
   | 'capacityCommitmentStatsPerEpoch__computeUnitsWithMinRequiredProofsSubmittedCounter'
   | 'capacityCommitmentStatsPerEpoch__currentCCNextCCFailedEpoch'
   | 'capacityCommitmentStatsPerEpoch__epoch'
@@ -3045,6 +3181,7 @@ export type SubmittedProof_OrderBy =
   | 'capacityCommitment__totalFailCount'
   | 'computeUnit'
   | 'computeUnit__createdAt'
+  | 'computeUnit__deleted'
   | 'computeUnit__id'
   | 'computeUnit__submittedProofsCount'
   | 'computeUnit__workerId'
@@ -3058,6 +3195,7 @@ export type SubmittedProof_OrderBy =
   | 'peer__currentCCCollateralDepositedAt'
   | 'peer__currentCCEndEpoch'
   | 'peer__currentCCNextCCFailedEpoch'
+  | 'peer__deleted'
   | 'peer__id'
   | 'peer__isAnyJoinedDeals'
   | 'provider'
@@ -3096,6 +3234,8 @@ export type Subscription = {
   deals: Array<Deal>;
   effector?: Maybe<Effector>;
   effectors: Array<Effector>;
+  epochStatistic?: Maybe<EpochStatistic>;
+  epochStatistics: Array<EpochStatistic>;
   graphNetwork?: Maybe<GraphNetwork>;
   graphNetworks: Array<GraphNetwork>;
   offer?: Maybe<Offer>;
@@ -3313,6 +3453,24 @@ export type SubscriptionEffectorsArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>;
   subgraphError?: _SubgraphErrorPolicy_;
   where?: InputMaybe<Effector_Filter>;
+};
+
+
+export type SubscriptionEpochStatisticArgs = {
+  block?: InputMaybe<Block_Height>;
+  id: Scalars['ID']['input'];
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type SubscriptionEpochStatisticsArgs = {
+  block?: InputMaybe<Block_Height>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<EpochStatistic_OrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  subgraphError?: _SubgraphErrorPolicy_;
+  where?: InputMaybe<EpochStatistic_Filter>;
 };
 
 

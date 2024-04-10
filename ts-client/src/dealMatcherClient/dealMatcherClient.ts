@@ -1,12 +1,10 @@
 import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type { ContractsENV } from "../client/config.js";
 import type { OffersQueryQueryVariables } from "./indexerClient/queries/offers-query.generated.js";
-import {
-  serializeDealProviderAccessLists
-} from "../utils/indexerClient/serializers.js";
+import { serializeDealProviderAccessLists } from "../utils/indexerClient/serializers.js";
 import { getLogger } from "../utils/logger.js";
 
-const logger = getLogger("deal-ts-clients:dealMatcherClient")
+const logger = getLogger("deal-ts-clients:dealMatcherClient");
 
 // Structure match matchDeal() arguments.
 // Currently: bytes32[] calldata offers, bytes32[][] calldata computeUnits.
@@ -92,7 +90,8 @@ export class DealMatcherClient {
       peersFilters: {
         and: [
           {
-            computeUnits_: { deal: null },
+            deleted: false,
+            computeUnits_: { deal: null, deleted: false },
             // Check for CC Active status below and depends on provider whitlist filter.
           },
           {
@@ -110,7 +109,7 @@ export class DealMatcherClient {
           },
         ],
       },
-      computeUnitsFilters: { deal: null },
+      computeUnitsFilters: { deal: null, deleted: false },
       peersLimit: peersPerPageLimit,
       // We do not need more than 1 CU per peer. Apply restriction to already fetched and filtered data.
       computeUnitsLimit: 1,
@@ -139,6 +138,7 @@ export class DealMatcherClient {
       // No whitelist, thus, check for active cc status is required.
       // For Peers.
       indexerGetOffersParams.filters!["peers_"] = {
+        deleted: false,
         // Do not fetch peers with no any of compute units in "active" status at all.
         // Check if CU status is Active - if it has current capacity commitment and
         //  cc.info.startEpoch <= currentEpoch_.

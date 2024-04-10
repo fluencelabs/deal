@@ -1,3 +1,5 @@
+# Exclude deleted Peers.
+
 query ProvidersQuery(
   $filters: Provider_filter,
   $offset: Int,
@@ -66,7 +68,7 @@ fragment ProvidersBasicOffer on Offer {
     provider {
       id
     }
-    peers {
+    peers(where: {deleted: false}) {
       id
     }
 }

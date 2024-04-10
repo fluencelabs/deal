@@ -1,22 +1,23 @@
 specVersion: 0.0.5
-description: TODO
-repository: https://TODO
+description: FluenceLabs Deal System Subgraph Scheme
+repository: https://github.com/fluencelabs/deal
 schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
     name: Core
-    network: kras
+    network: dar
     source:
       abi: Core
-      address: "0xd5439DF0723Ab1ee7Ded6a3EBEf6BF23e8087958"
-      startBlock: 3935
+      address: "0x5e23C8ffcEc1E5E2090618160Fb2f44b9F00151D"
+      startBlock: 8452
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - GraphNetwork
+        - EpochStatistic
       abis:
         - name: Core
           file: ../out/Core.sol/Core.json
@@ -27,14 +28,16 @@ dataSources:
           handler: handleWhitelistAccessGranted
         - event: WhitelistAccessRevoked(address)
           handler: handleWhitelistAccessRevoked
+      blockHandlers:
+        - handler: handleNewBlock
       file: ./src/mappings/core.ts
   - kind: ethereum/contract
     name: Market
-    network: kras
+    network: dar
     source:
       abi: Market
-      address: "0x4CCE76Ef4e044622d7727f6A95688D3fC27Ea6b7"
-      startBlock: 3935
+      address: "0xE3b414F66D816DecA0Ae2Cb5e9ef0c685b3093D9"
+      startBlock: 8452
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -84,14 +87,18 @@ dataSources:
           handler: handleComputeUnitAddedToDeal
         - event: ComputeUnitRemovedFromDeal(indexed bytes32,address,bytes32)
           handler: handleComputeUnitRemovedFromDeal
+        - event: ComputeUnitRemoved(indexed bytes32,indexed bytes32)
+          handler: handleComputeUnitRemoved
+        - event: PeerRemoved(indexed bytes32,indexed bytes32)
+          handler: handlePeerRemoved
       file: ./src/mappings/market.ts
   - kind: ethereum/contract
     name: DealFactory
-    network: kras
+    network: dar
     source:
       abi: DealFactory
-      address: "0x711Edd2d19dF1cE480120F377898A3dE46A08200"
-      startBlock: 3935
+      address: "0x3F7ee34Ef15AA38EAE60d59127Cee44c820a9fcd"
+      startBlock: 8452
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -114,11 +121,11 @@ dataSources:
       file: ./src/mappings/deal-factory.ts
   - kind: ethereum/contract
     name: Capacity
-    network: kras
+    network: dar
     source:
       abi: Capacity
-      address: "0xb0f7AceA17aE7892B0432e89E467f55f57B76Cef"
-      startBlock: 3935
+      address: "0x066D0E888b62b7C2571cF867d2b26D6AfeFaC720"
+      startBlock: 8452
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -128,7 +135,8 @@ dataSources:
         - Peer
         - SubmittedProof
         - CapacityCommitmentStatsPerEpoch
-        - ComputeUnitPerEpochStats
+        - ComputeUnitPerEpochStat
+        - EpochStatistic
       abis:
         - name: Capacity
           file: ../out/Capacity.sol/Capacity.json
@@ -165,7 +173,7 @@ dataSources:
 templates:
   - name: Deal
     kind: ethereum/contract
-    network: kras
+    network: dar
     source:
       abi: Deal
     mapping:

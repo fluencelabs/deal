@@ -19,12 +19,10 @@ export type Peer = {
   computeUnits: Array<ComputeUnit>;
 };
 
-
 export type Effector = {
   cid: string;
   description: string;
 };
-
 
 export interface OfferDetail {
   id: string;
@@ -41,5 +39,9 @@ export interface OfferDetail {
 }
 
 export interface DealByProvider {
+  id: string;
+}
+
+export interface OfferByProvider {
   id: string;
 }
