@@ -6,11 +6,6 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "forge-std/Script.sol";
-import "forge-std/Vm.sol";
-import "src/deal/Deal.sol";
-import "src/core/Core.sol";
-import "src/dev/OwnableFaucet.sol";
-import "src/dev/TestERC20.sol";
 
 contract Deployment is ScriptBase {
     using Strings for string;
