@@ -16,6 +16,11 @@ install-npms: ## Install and deal-ts-clients and subgraph
 	@cd subgraph && npm install
 	@echo "\033[0;32mSuccess! Run npm install in both npm modules: ts-client and subgraph.\033[0m"
 
+validate-upgrade: ## Validate upgrade
+	@make verify-command program=npx
+	@make build-contracts
+	@npx @openzeppelin/upgrades-core validate out/build-info 
+
 build-contracts: ## Build contracts
 	@make verify-command program=forge
 	@forge build
