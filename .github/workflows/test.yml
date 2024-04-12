@@ -38,6 +38,11 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Run Prettier Test
+        uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: --all-files
+
       - name: Setup node
         uses: actions/setup-node@v3
         with:

@@ -58,8 +58,8 @@ interface CallImplProps {
 describe("#getMatchedOffers", () => {
   async function _callImpl(callImplProps: CallImplProps) {
     // First of all check protocol restirction.
-    expect(callImplProps.CUsMockedPage1).lessThanOrEqual(1)
-    expect(callImplProps.CUsMockedPage2).lessThanOrEqual(1)
+    expect(callImplProps.CUsMockedPage1).lessThanOrEqual(1);
+    expect(callImplProps.CUsMockedPage2).lessThanOrEqual(1);
 
     const _getMatchedOffersPageSpy = vi.spyOn(
       DealMatcherClient.prototype,

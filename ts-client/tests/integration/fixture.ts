@@ -232,8 +232,9 @@ export async function registerMarketOffersFromFixtures(
         providerFixture.minProtocolVersion,
         providerFixture.maxProtocolVersion,
       );
-    const registerMarketOfferTxResult =
-      await registerMarketOfferTx.wait(wait_confirmations);
+    const registerMarketOfferTxResult = await registerMarketOfferTx.wait(
+      wait_confirmations,
+    );
     // Save offer ID by parsing event.
     providerFixture.offerId = getEventValue({
       txReceipt: registerMarketOfferTxResult!,
@@ -264,8 +265,9 @@ export async function createCommitmentForProviderFixtures(
       ZERO_ADDRESS,
       1,
     );
-    const createCommitmentTxResult =
-      await createCommitmentTx.wait(wait_confirmations);
+    const createCommitmentTxResult = await createCommitmentTx.wait(
+      wait_confirmations,
+    );
     createdCCIds.push(
       getEventValue({
         txReceipt: createCommitmentTxResult!,
