@@ -55,6 +55,10 @@ deploy-subgraph-%: ## Deploy subgraph to network {local, kras, dar, stage}
 	@make verify-command program=npm
 	@cd subgraph && npm run create:$* && npm run deploy:$*
 
+delete-subgraph-%: ## Delete subgraph from network {local, kras, dar, stage}
+	@make verify-command program=npm
+	@cd subgraph  && npm run delete:$*
+
 deploy-contracts-local: ## Deploy contracts to local network
 	@make verify-command program=forge
 	@CONTRACTS_ENV_NAME=local forge script script/Deploy.s.sol --rpc-url local  \

@@ -1,1 +1,1 @@
-https://graph-node.dar.fluence.dev/subgraphs/name/fluence-deal-contracts --- 3be161bd
+https://graph-node.dar.fluence.dev/subgraphs/name/fluence-deal-contracts
