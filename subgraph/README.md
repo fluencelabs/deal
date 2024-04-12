@@ -142,7 +142,6 @@ Deployment Versioning Logic is inside [fluence-graph.sh](fluence-graph.sh), and 
 3. WARN! Currently, after deploy of the new subgraph for the git commit you ought to update url in the [ts-client/src/indexerClient/config.ts](ts-client/src/indexerClient/config.ts) to sync ts-client and newly deployed subgraph (**ts-client has test for that mapping**).
 4. When need to **delete deprecated subgraph** you manually process the following command: `npm run delete:{stage,kras,dar,local}`.
 
-TODO: make flow better and use template actually instead.
 TODO: move this flow into CI/CD process.
 
 ## To Localhost
