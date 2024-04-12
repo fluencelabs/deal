@@ -29,7 +29,7 @@ env:
 
 jobs:
   integration-tests:
-    name: "Run Prettier Tests, Unittests, Integration Tests"
+    name: "Integration Tests"
     runs-on: ubuntu-latest
 
     steps:
