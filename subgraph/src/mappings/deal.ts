@@ -69,17 +69,17 @@ export function handleWorkerIdUpdated(event: WorkerIdUpdated): void {
   let computeUnit = ComputeUnit.load(
     event.params.computeUnitId.toHexString(),
   ) as ComputeUnit;
-  let deal = Deal.load(formatAddress(event.address)) as Deal;
-
-  computeUnit.workerId = event.params.workerId.toHexString();
-  computeUnit.save();
 
   // Update stats below.
   // Check that worker already counted and counter should not be updated.
   if (computeUnit.workerId == null) {
+    let deal = Deal.load(formatAddress(event.address)) as Deal;
     deal.registeredWorkersCurrentCount = deal.registeredWorkersCurrentCount + 1;
     deal.save();
   }
+
+  computeUnit.workerId = event.params.workerId.toHexString();
+  computeUnit.save();
 }
 
 export function handleProviderAddedToAccessList(
