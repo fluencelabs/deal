@@ -9,7 +9,7 @@
   - [Query through GUI](#query-through-gui)
   - [Tricks & Tips](#tricks--tips)
 - [Deploy](#deploy)
-  - [deprecated Fluence Stands Versioning](#fluence-stands-versioning)
+  - [Fluence Stands Versioning](#fluence-stands-versioning)
   - [To Localhost](#to-localhost)
   - [To TheGraph Studio [not for subnets]](#to-thegraph-studio-not-for-subnets)
   - [To Hosted Service [not for subnets]](#to-hosted-service-not-for-subnets)
