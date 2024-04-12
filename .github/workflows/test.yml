@@ -29,7 +29,7 @@ env:
 
 jobs:
   integration-tests:
-    name: "Integration Tests"
+    name: "Integration tests"
     runs-on: ubuntu-latest
 
     steps:
