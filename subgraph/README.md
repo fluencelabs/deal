@@ -1,5 +1,10 @@
 # Subgraph
 
+# Table of Contents
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 - [Project Structure](#project-structure)
 - [Develop](#develop)
 - [Debug Note](#debug-note)
@@ -9,11 +14,13 @@
   - [Query through GUI](#query-through-gui)
   - [Tricks & Tips](#tricks--tips)
 - [Deploy](#deploy)
-  - [Fluence Stands Versioning](#fluence-stands-versioning)
+  - [Fluence Subgraph Versioning](#fluence-subgraph-versioning)
   - [To Localhost](#to-localhost)
   - [To TheGraph Studio [not for subnets]](#to-thegraph-studio-not-for-subnets)
   - [To Hosted Service [not for subnets]](#to-hosted-service-not-for-subnets)
 - [TODO](#todo)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Project Structure
 
