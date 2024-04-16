@@ -31,7 +31,7 @@ function checkFluenceEnvConfig(stand: string) {
 }
 
 describe("#configs", () => {
-  test.only("It uses last stage subgraph url.", async () => {
+  test("It uses last stage subgraph url.", async () => {
     checkFluenceEnvConfig("stage");
   });
   test("It uses last kras subgraph url.", async () => {
