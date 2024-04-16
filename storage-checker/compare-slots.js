@@ -13,16 +13,6 @@ const compareSlots = (prev, curr) => {
   const results = [];
   const prevMap = arrayToMap(prev);
   const currMap = arrayToMap(curr);
-  // find new one
-  for (const slotAndOffset of currMap.keys()) {
-    if (!prevMap.has(slotAndOffset)) {
-      results.push(
-        `New item at ${slotAndOffset}: ${currMap.get(slotAndOffset).type} ${
-          currMap.get(slotAndOffset).label
-        }`,
-      );
-    }
-  }
   // check deleted ones
   for (const slotAndOffset of prevMap.keys()) {
     if (!currMap.has(slotAndOffset)) {
