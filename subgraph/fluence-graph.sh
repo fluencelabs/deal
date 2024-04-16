@@ -36,7 +36,12 @@ while (($#)); do
       ;;
     delete)
       action="$1"
-      echo "2: $2"
+      if [[ $2 == "" ]]; then
+        echo "For delete action subgraph name is required."
+        exit 1
+      else
+        subgraph_to_delete="$2"
+      fi
       shift
       ;;
     local|stage|kras|dar)
@@ -133,7 +138,7 @@ case "$action" in
     graph deploy --node ${GRAPHNODE_URL} --headers "{\"Authorization\": \"Basic ${auth_header}\"}" --ipfs ${IPFS_URL} --network ${SUBGRAPH_NETWORK} --network-file configs/${network}-networks-config.json --version-label ${SUBGRAPH_VERSION_LABEL} ${SUBGRAPH_NAME}
     # Finally store logs if needed.
     if [[ $network == "local" ]]; then
-      echo "Ignore save of deployment log for local."
+      echo "Artifacts of local network are ignored."
     else
       echo "Append deployment URL: ${SUBGRAPH_NAME} into ${DEPLOYMENT_LOG_PATH}..."
       echo "${SUBGRAPH_NAME}" >> ${DEPLOYMENT_LOG_PATH}
@@ -144,11 +149,11 @@ case "$action" in
     graph create --node ${GRAPHNODE_URL} ${SUBGRAPH_NAME}
     ;;
   delete)
-    echo "Removing subgraph on ${network} with name: ${SUBGRAPH_NAME} (also from artifacts: ${DEPLOYMENT_LOG_PATH})..."
+    echo "Deleting subgraph on ${network} with name: ${subgraph_to_delete} (also update artifacts in: ${DEPLOYMENT_LOG_PATH})..."
     if [[ $network == "local" ]]; then
-      echo "Ignore to update deployment log for local."
+      echo "Artifacts of local network are ignored."
     else
-      graph remove --node ${GRAPHNODE_URL} ${SUBGRAPH_NAME} && sed -e "s/${SUBGRAPH_NAME}//g" -i '' ${DEPLOYMENT_LOG_PATH}
+      graph remove --node ${GRAPHNODE_URL} ${subgraph_to_delete} && sed -e "s/${subgraph_to_delete}//g" -i '' ${DEPLOYMENT_LOG_PATH}
       # Delete empty lines as well.
       sed -e '/^$/d' -i '' ${DEPLOYMENT_LOG_PATH}
     fi
