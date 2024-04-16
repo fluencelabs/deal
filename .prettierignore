@@ -1,0 +1,12 @@
+ts-client/**/*generated.ts
+ts-client/**/*generated.types.ts
+.github
+CHANGELOG.md
+out
+node_modules
+lib
+deployments
+*package.json
+*package-lock.json
+src
+test

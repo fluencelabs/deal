@@ -1,7 +1,20 @@
-query OfferQuery(
-  $id: ID!
+# Exclude deleted CUs.
+# Exclude deleted Peers.
+
+query OfferDetailsQuery(
+  $filters: Offer_filter,
+  $offset: Int,
+  $limit: Int,
+  $orderBy: Offer_orderBy,
+  $orderType: OrderDirection,
 ) {
-  offer(id: $id) {
+  offers(
+      where: $filters
+      first: $limit
+      skip: $offset
+      orderBy: $orderBy
+      orderDirection: $orderType
+  ) {
     ...OfferDetail
   }
 }
@@ -28,14 +41,13 @@ fragment OfferDetail on Offer {
       approved
       name
     }
-    peers {
+    peers(where: {deleted: false}) {
         id
-        computeUnits {
+        computeUnits(where: {deleted: false}) {
             ...ComputeUnitBasic
         }
     }
 }
-
 
 fragment ComputeUnitBasic on ComputeUnit {
     id
@@ -48,4 +60,22 @@ fragment ComputeUnitBasic on ComputeUnit {
 fragment EffectorBasic on Effector {
   id
   description
+}
+
+query OfferIdsQuery(
+  $filters: Offer_filter,
+  $offset: Int,
+  $limit: Int,
+  $orderBy: Offer_orderBy,
+  $orderType: OrderDirection,
+) {
+  offers(
+      where: $filters
+      first: $limit
+      skip: $offset
+      orderBy: $orderBy
+      orderDirection: $orderType
+  ) {
+    id
+  }
 }

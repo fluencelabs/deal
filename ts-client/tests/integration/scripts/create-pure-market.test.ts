@@ -84,11 +84,16 @@ async function main() {
   // Print data of signer before running into a bunch of transactions.
   console.info(`Signer address: ${signerAddress}`);
   console.info(
-    `Signer balance: ${ethers.formatEther(await provider.getBalance(signerAddress))} ETH`,
+    `Signer balance: ${ethers.formatEther(
+      await provider.getBalance(signerAddress),
+    )} ETH`,
   );
   // TODO: why our USDC has no decimals method? change on fetching decimals instead of const 6 below.
   console.info(
-    `Signer USDC balance: ${ethers.formatUnits(await paymentToken.balanceOf(signerAddress), 6)} USDC`,
+    `Signer USDC balance: ${ethers.formatUnits(
+      await paymentToken.balanceOf(signerAddress),
+      6,
+    )} USDC`,
   );
 
   // Prepare market fixture.

@@ -1,3 +1,5 @@
+# Exclude deleted CUs.
+
 query CapacityCommitmentsQuery(
   $filters: CapacityCommitment_filter
   $offset: Int
@@ -23,7 +25,8 @@ query CapacityCommitmentQuery($id: ID!) {
   capacityCommitment(id: $id) {
     ...CapacityCommitmentBasic
     delegator
-    computeUnits {
+    # Exclude deleted CUs.
+    computeUnits(where: {computeUnit_: {deleted: false}}) {
       computeUnit {
         id
         deal {
@@ -118,9 +121,11 @@ query CapacityCommitmentStatsPerEpochQuery(
     orderDirection: $orderType
   ) {
     id
-    epoch
-    blockNumberEnd
-    blockNumberStart
+    epochStatistic {
+      id
+      startBlock
+      endBlock
+    }
     capacityCommitment {
       id
     }
@@ -131,12 +136,6 @@ query CapacityCommitmentStatsPerEpochQuery(
     currentCCNextCCFailedEpoch
     submittedProofsCount
     computeUnitsWithMinRequiredProofsSubmittedCounter
-    submittedProofs {
-      id
-      computeUnit {
-        id
-      }
-    }
   }
 }
 
@@ -158,7 +157,11 @@ query ComputeUnitPerEpochStatsQuery(
     computeUnit {
       id
     }
-    epoch
+    epochStatistic {
+      id
+      startBlock
+      endBlock
+    }
     submittedProofsCount
   }
 }

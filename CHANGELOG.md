@@ -1,5 +1,58 @@
 # Changelog
 
+## [0.13.9](https://github.com/fluencelabs/deal/compare/v0.13.8...v0.13.9) (2024-04-09)
+
+
+### Features
+
+* optimise query for cc detail view [CHAIN-452] ([#414](https://github.com/fluencelabs/deal/issues/414)) ([86dab22](https://github.com/fluencelabs/deal/commit/86dab22b601c044cd45030dda96751e05810fe23))
+
+## [0.13.8](https://github.com/fluencelabs/deal/compare/v0.13.7...v0.13.8) (2024-04-04)
+
+
+### Features
+
+* cliClient get offers and offer ids by provider [fixes CHAIN-448 CHAIN-449] ([#403](https://github.com/fluencelabs/deal/issues/403)) ([6637593](https://github.com/fluencelabs/deal/commit/66375933fb1909de3e9acd219c8972a2cfec7271))
+* set proper chain id ([#415](https://github.com/fluencelabs/deal/issues/415)) ([fd7049f](https://github.com/fluencelabs/deal/commit/fd7049fa34ed01a5aa40a80bcdad412b3befc6f5))
+
+
+### Bug Fixes
+
+* remove invalid release logic from submit proof ([#406](https://github.com/fluencelabs/deal/issues/406)) ([90ce155](https://github.com/fluencelabs/deal/commit/90ce1553a9a00870f21eb98143cdfdb0584a3023))
+
+## [0.13.7](https://github.com/fluencelabs/deal/compare/v0.13.6...v0.13.7) (2024-04-01)
+
+
+### Features
+
+* count epoch block number [chain-438] ([#393](https://github.com/fluencelabs/deal/issues/393)) ([cf84c2c](https://github.com/fluencelabs/deal/commit/cf84c2c9de9ae73f39e512dfa6863a22b1786c31))
+
+
+### Bug Fixes
+
+* subgraph after offer updated [chain 442] ([#399](https://github.com/fluencelabs/deal/issues/399)) ([ae07000](https://github.com/fluencelabs/deal/commit/ae070005568dc58e6dc22b3c9837d4adb9f090b5))
+
+## [0.13.6](https://github.com/fluencelabs/deal/compare/v0.13.5...v0.13.6) (2024-03-28)
+
+
+### Features
+
+* redeploy dar ([#395](https://github.com/fluencelabs/deal/issues/395)) ([b2a97c3](https://github.com/fluencelabs/deal/commit/b2a97c31cfd2547bd2fc028bdecc05a7a0d6876e))
+
+## [0.13.5](https://github.com/fluencelabs/deal/compare/v0.13.4...v0.13.5) (2024-03-28)
+
+
+### Features
+
+* deploy dar ([#391](https://github.com/fluencelabs/deal/issues/391)) ([b2c9aca](https://github.com/fluencelabs/deal/commit/b2c9aca0a8bced0b8582c1ae967a42400c6ed83d))
+
+## [0.13.4](https://github.com/fluencelabs/deal/compare/v0.13.3...v0.13.4) (2024-03-28)
+
+
+### Bug Fixes
+
+* ux issue with providers and offers spam chain 441 ([#390](https://github.com/fluencelabs/deal/issues/390)) ([ab0c0b9](https://github.com/fluencelabs/deal/commit/ab0c0b974b6a393142b6c11ad3d358df730b6a31))
+
 ## [0.13.3](https://github.com/fluencelabs/deal/compare/v0.13.2...v0.13.3) (2024-03-26)
 
 

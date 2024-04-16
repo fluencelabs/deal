@@ -2,19 +2,26 @@
 
 This repo consists of 3 main parts:
 
-- `contracts` - Foundry (read more https://book.getfoundry.sh/). Generally, repo
+- `src` - Foundry contracts (read more https://book.getfoundry.sh/). Generally, repo
   follow structure of Foundry repo.
-- `subgraph` - javascript client to interact with the graph node (read more
-  https://thegraph.com/docs/quick-start)
-- `ts-client` - npm package from contract developers to interact with contracts
+- `subgraph` - javascript client to interact with the graph node, called subgraph (read more
+  https://thegraph.com/docs/quick-start), [README](subgraph/README.md)
+- `ts-client` - npm package from contract developers to interact with contracts, more in [README](ts-client/README.md)
+- `integration-tests` - npm module to prepare integration tests for Deal contracts flow, more in [README](integration-tests/README.md)
 
 To access to the general points of the each part in the repo root **makefile**
 is presented. Below are main commands of the makefile.
 
+| The root [package.json](package.json) consists of dev packages for prettier and code linting via **Husky**.
+More about in
+
 # Table of contents
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 - [Deal Contracts System](#deal-contracts-system)
-- [Table of contents](#table-of-contents)
+
 - [Requirements](#requirements)
 - [Contract](#contract)
   - [Env](#env)
@@ -35,12 +42,17 @@ is presented. Below are main commands of the makefile.
   - [Gas Snapshots](#gas-snapshots)
 - [Subgraph (Contract Indexer)](#subgraph-contract-indexer)
   - [Development Tricks & Tips](#development-tricks--tips)
-- [Development Guid (with Deal Infrastructure)](#development-guid-with-deal-infrastructure)
+- [Development Guide](#development-guide)
+  - [Lint and Prettier](#lint-and-prettier)
+  - [Configure Pre Commit Hook](#configure-pre-commit-hook)
+    - [ToDo:](#todo)
+  - [Setup Deal Infrastructure](#setup-deal-infrastructure)
   - [Tips](#tips)
-- [Ts-Client](#ts-client)
 
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Requirements
+
 Full requirements to develop in this repo.
 
 - foundry (https://book.getfoundry.sh/)
@@ -48,14 +60,17 @@ Full requirements to develop in this repo.
 - node version 18.16
 
 # Contract
+
 To work with contracts we use forge (foundry): to deploy, to test unittests. Thus, to work in the repo you first of all should install Foundry: https://book.getfoundry.sh/
 
 To run foundry commands and commands that create artifacts and insert contract artifacts into packages/modules: ts-client, subgraph we use `makefile` (and we use makefile for even further steps after: to build & deploy those modules after injecting artefacts of contracts into them).
 
 ## Env
+
 Because scripts and makefile supports env (actually makefile reads env from .env) we note that in the repo we leave [.example.env](.example.env).
 
 ### Notable Env
+
 Below is the list of env. For description we aim you to [.example.env](.example.env) directly.
 
 - PRIVATE_KEY
@@ -64,7 +79,10 @@ Below is the list of env. For description we aim you to [.example.env](.example.
 - IS_MOCKED_RANDOMX
 
 ## Makefile
-Below is some of useful **makefile** commands with their descriptions. To check out all commands run `make help`.
+
+Below is some of useful **makefile** commands with their descriptions.
+
+To check out all commands and their descriptions run `make help`.
 
 ### Install NPM packages
 
@@ -174,7 +192,19 @@ market on our contracts:
 $ make create-pure-market-local
 ```
 
-# Development Guid (with Deal Infrastructure)
+# Development Guide
+
+## Lint and Prettier
+
+In the monorepo we use general code style defined in [.editorconfig](.editorconfig) and mirrored in [.prettierrc](.prettierrc) (it is mirrored coz of this [issue](https://github.com/prettier/prettier/issues/15401)).
+
+> Note, that in repo CI process maintain the prettier check.
+
+## Configure Pre Commit Hook
+
+To install pre-commit follow instruction here: https://pre-commit.com/
+
+## Setup Deal Infrastructure
 
 > TODO: add flow on how to work with already built images from registry.
 
@@ -215,6 +245,7 @@ make create-pure-market-local
 ```
 
 ## Tips
+
 - To stop and cleanup dev environment run:
 
 ```bash
@@ -227,7 +258,4 @@ docker-compose -f docker/docker-compose.yml down --volumes
 make deploy-contracts-local
 ```
 
-and do not forget to repeat from 3d step (depends on your needs). 
-
-# Ts-Client
-for `ts-client` module check out [README.md](ts-client/README.md).
+and do not forget to repeat from 3d step (depends on your needs).
