@@ -17,7 +17,8 @@ const compareSlots = (prev, curr) => {
   for (const slotAndOffset of currMap.keys()) {
     if (!prevMap.has(slotAndOffset)) {
       results.push(
-        `New item at ${slotAndOffset}: ${currMap.get(slotAndOffset).type} ${currMap.get(slotAndOffset).label
+        `New item at ${slotAndOffset}: ${currMap.get(slotAndOffset).type} ${
+          currMap.get(slotAndOffset).label
         }`,
       );
     }
@@ -26,7 +27,8 @@ const compareSlots = (prev, curr) => {
   for (const slotAndOffset of prevMap.keys()) {
     if (!currMap.has(slotAndOffset)) {
       results.push(
-        `Deleted item at ${slotAndOffset}: ${prevMap.get(slotAndOffset).type} ${prevMap.get(slotAndOffset).label
+        `Deleted item at ${slotAndOffset}: ${prevMap.get(slotAndOffset).type} ${
+          prevMap.get(slotAndOffset).label
         }`,
       );
     }

@@ -4,14 +4,18 @@ const path = require("path");
 const outDir = path.join(__dirname, "..", "out");
 const storageLayoutFile = path.join("ci/", "storage-layout.json");
 
-const files = fs.readdirSync(outDir).map((dir) => {
-  if (!fs.lstatSync(path.join(outDir, dir)).isDirectory()) {
-    return "";
-  }
-  return fs.readdirSync(path.join(outDir, dir)).map((file) => {
-    return path.join(dir, file);
-  });
-}).flat().filter((val) => val !== "");
+const files = fs
+  .readdirSync(outDir)
+  .map((dir) => {
+    if (!fs.lstatSync(path.join(outDir, dir)).isDirectory()) {
+      return "";
+    }
+    return fs.readdirSync(path.join(outDir, dir)).map((file) => {
+      return path.join(dir, file);
+    });
+  })
+  .flat()
+  .filter((val) => val !== "");
 
 const storageLayout = {};
 
