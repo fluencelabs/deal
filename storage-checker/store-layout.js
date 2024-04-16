@@ -1,17 +1,17 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const outDir = path.join(__dirname, '..', 'out');
-const storageLayoutFile = path.join('ci/', 'storage-layout.json');
+const outDir = path.join(__dirname, "..", "out");
+const storageLayoutFile = path.join("ci/", "storage-layout.json");
 
 const files = fs.readdirSync(outDir).map((dir) => {
   if (!fs.lstatSync(path.join(outDir, dir)).isDirectory()) {
-    return '';
+    return "";
   }
   return fs.readdirSync(path.join(outDir, dir)).map((file) => {
     return path.join(dir, file);
   });
-}).flat().filter((val) => val !== '');
+}).flat().filter((val) => val !== "");
 
 const storageLayout = {};
 
@@ -21,7 +21,7 @@ for (const file of files) {
     // for /out/contracts/CBOR.sol/CBOR.json
     continue;
   }
-  const data = fs.readFileSync(filePath, 'utf8');
+  const data = fs.readFileSync(filePath, "utf8");
   const json = JSON.parse(data);
   const layout = json.storageLayout.storage;
   storageLayout[file] = layout;
