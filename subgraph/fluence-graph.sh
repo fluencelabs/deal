@@ -1,4 +1,5 @@
 #! /usr/bin/env bash
+set -e
 
 SUBGRAPH_NAME_PREFIX="fluence-deal-contracts"
 # Directory with saved deployments. It will append rows with other deployments.
