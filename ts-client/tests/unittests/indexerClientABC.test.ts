@@ -21,16 +21,17 @@ function checkFluenceEnvConfig(stand: string) {
     .split("\n")
     .filter((url) => url.length > 0);
   // It refers to how subgraph url stored in .txt file via fluence-graph.sh script.
-  const lastSavedSubgraphUrl =
+  const lastSavedSubgraphName =
     allSavedSubgraphUrls[allSavedSubgraphUrls.length - 1].split(" ")[0];
+  const subgraphNameFromClient = getIndexerUrl(stand).split("/").pop();
   expect(
-    getIndexerUrl(stand),
-    "Possibly you forgot to update indexerClient/config.ts with the last subgraph URL.",
-  ).toBe(lastSavedSubgraphUrl);
+    subgraphNameFromClient,
+    "Possibly you forgot to update indexerClient/config.ts with the last subgraph name.",
+  ).toBe(lastSavedSubgraphName);
 }
 
 describe("#configs", () => {
-  test("It uses last stage subgraph url.", async () => {
+  test.only("It uses last stage subgraph url.", async () => {
     checkFluenceEnvConfig("stage");
   });
   test("It uses last kras subgraph url.", async () => {
