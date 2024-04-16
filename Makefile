@@ -55,9 +55,9 @@ deploy-subgraph-%: ## Deploy subgraph to network {local, kras, dar, stage}
 	@make verify-command program=npm
 	@cd subgraph && npm run create:$* && npm run deploy:$*
 
-delete-subgraph-%: ## Delete subgraph from network {local, kras, dar, stage}
+delete-subgraph-%: ## Delete subgraph from network {local, kras, dar, stage}, dnf to set SUBGRAPH_NAME_TO_DELETE
 	@make verify-command program=npm
-	@cd subgraph  && npm run delete:$*
+	@cd subgraph  && ./fluence-graph.sh delete $*
 
 deploy-contracts-local: ## Deploy contracts to local network
 	@make verify-command program=forge

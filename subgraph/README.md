@@ -140,7 +140,7 @@ Deployment Versioning Logic is inside [fluence-graph.sh](fluence-graph.sh), and 
    - it creates log of created subgraph inside [deployments](deployments) dir for you to remember what subgraphs to delete in the future.
 2. It deploys actual code to index contracts according to [configs](configs) and uses [subgraph.yaml](subgraph.yaml) as template (uses addresses and block number from config).
 3. WARN! Currently, after deploy of the new subgraph for the git commit you ought to update url in the [ts-client/src/indexerClient/config.ts](ts-client/src/indexerClient/config.ts) to sync ts-client and newly deployed subgraph (**ts-client has test for that mapping**).
-4. When need to delete subgraph you manually process the following command: `npm run delete:{stage,kras,dar,local}`.
+4. When need to delete subgraph you manually process the following command e.g.: `SUBGRAPH_NAME_TO_DELETE=fluence-deal-contracts ./fluence-graph.sh delete local`.
 
 TODO: move this flow into CI/CD process.
 
@@ -194,5 +194,5 @@ graph deploy --product hosted-service --network mumbai <githubName>/fluence-deal
 - [ ] subgraph tests
 - [ ] fix docker versions
 - [ ] it is mb better to flag CU and etc as removed instead of deleting as it is in, e.g. `store.remove('ComputeUnit', computeUnitEntity.id)`
-- [ ] rm warn about to hexString instead of hex()
-- [ ] where is delete events? (e.g. peer deleted)
+- [x] rm warn about to hexString instead of hex()
+- [x] where is delete events? (e.g. peer deleted)
