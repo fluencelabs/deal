@@ -3,12 +3,12 @@ const path = require("path");
 const { compareSlots } = require("./compare-slots");
 
 const outDir = path.join(__dirname, "..", "out");
-const storageLayoutFile = path.join("ci/", "storage-layout.json");
+const prevStorageLayoutFile = path.join(__dirname, "storage-layout-dump.json");
 
 let prevStorageLayout = {};
 
-if (fs.existsSync(storageLayoutFile)) {
-  const data = fs.readFileSync(storageLayoutFile, "utf8");
+if (fs.existsSync(prevStorageLayoutFile)) {
+  const data = fs.readFileSync(prevStorageLayoutFile, "utf8");
   prevStorageLayout = JSON.parse(data);
   console.log(
     "Previous storage layout loaded: ",

@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 const outDir = path.join(__dirname, "..", "out");
-const storageLayoutFile = path.join("ci/", "storage-layout.json");
+const storageLayoutFile = path.join(__dirname, "storage-layout-dump.json");
 
 const files = fs
   .readdirSync(outDir)
