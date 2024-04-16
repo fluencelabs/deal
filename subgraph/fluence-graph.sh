@@ -31,7 +31,6 @@ while (($#)); do
   case "$1" in
     deploy|create)
       action="$1"
-      echo "1: $1"
       shift
       ;;
     delete)
