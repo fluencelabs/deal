@@ -1,1 +1,2 @@
 https://graph-node.kras.fluence.dev/subgraphs/name/fluence-deal-contracts
+fluence-deal-contracts-ef23b85
