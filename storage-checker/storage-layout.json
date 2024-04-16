@@ -1,0 +1,818 @@
+{
+  "AccountCbor.sol/AccountCBOR.json": [],
+  "AccountTypes.sol/AccountTypes.json": [],
+  "Actor.sol/Actor.json": [],
+  "Address.sol/Address.json": [],
+  "AddressUpgradeable.sol/AddressUpgradeable.json": [],
+  "BaseModule.sol/BaseModule.json": [
+    {
+      "astId": 4469,
+      "contract": "src/core/modules/BaseModule.sol:BaseModule",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/core/modules/BaseModule.sol:BaseModule",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "BigIntCbor.sol/BigIntCBOR.json": [],
+  "Buffer.sol/Buffer.json": [],
+  "BytesCbor.sol/BytesCBOR.json": [],
+  "BytesConverter.sol/BytesConverter.json": [],
+  "CBOR.sol/CBOR.json": [],
+  "Capacity.sol/Capacity.json": [
+    {
+      "astId": 4469,
+      "contract": "src/core/modules/capacity/Capacity.sol:Capacity",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/core/modules/capacity/Capacity.sol:Capacity",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    },
+    {
+      "astId": 4451,
+      "contract": "src/core/modules/capacity/Capacity.sol:Capacity",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_array(t_uint256)50_storage"
+    },
+    {
+      "astId": 4766,
+      "contract": "src/core/modules/capacity/Capacity.sol:Capacity",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "51",
+      "type": "t_array(t_uint256)50_storage"
+    },
+    {
+      "astId": 5171,
+      "contract": "src/core/modules/capacity/Capacity.sol:Capacity",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "101",
+      "type": "t_array(t_uint256)50_storage"
+    }
+  ],
+  "CapacityConst.sol/CapacityConst.json": [
+    {
+      "astId": 4469,
+      "contract": "src/core/CapacityConst.sol:CapacityConst",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/core/CapacityConst.sol:CapacityConst",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "CapacityConstWithPublicInternals.sol/CapacityConstWithPublicInternals.json": [
+    {
+      "astId": 4469,
+      "contract": "src/dev/test/CapacityConstWithPublicInternals.sol:CapacityConstWithPublicInternals",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/dev/test/CapacityConstWithPublicInternals.sol:CapacityConstWithPublicInternals",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "CborDecode.sol/CBORDecoder.json": [],
+  "CommonTypes.sol/CommonTypes.json": [],
+  "Config.sol/Config.json": [
+    {
+      "astId": 4469,
+      "contract": "src/deal/Config.sol:Config",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/deal/Config.sol:Config",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "ConfigWithPublicInternals.sol/ConfigWithPublicInternals.json": [
+    {
+      "astId": 4469,
+      "contract": "src/dev/test/ConfigWithPublicInternals.sol:ConfigWithPublicInternals",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/dev/test/ConfigWithPublicInternals.sol:ConfigWithPublicInternals",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "Context.sol/Context.json": [],
+  "Core.sol/Core.json": [
+    {
+      "astId": 4469,
+      "contract": "src/core/Core.sol:Core",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/core/Core.sol:Core",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    },
+    {
+      "astId": 4451,
+      "contract": "src/core/Core.sol:Core",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_array(t_uint256)50_storage"
+    },
+    {
+      "astId": 4766,
+      "contract": "src/core/Core.sol:Core",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "51",
+      "type": "t_array(t_uint256)50_storage"
+    }
+  ],
+  "DataCapTypes.sol/DataCapTypes.json": [],
+  "Deal.sol/Deal.json": [
+    {
+      "astId": 4469,
+      "contract": "src/deal/Deal.sol:Deal",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/deal/Deal.sol:Deal",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    },
+    {
+      "astId": 5171,
+      "contract": "src/deal/Deal.sol:Deal",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_array(t_uint256)50_storage"
+    }
+  ],
+  "DealFactory.sol/DealFactory.json": [
+    {
+      "astId": 371,
+      "contract": "src/core/modules/market/DealFactory.sol:DealFactory",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 374,
+      "contract": "src/core/modules/market/DealFactory.sol:DealFactory",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    },
+    {
+      "astId": 353,
+      "contract": "src/core/modules/market/DealFactory.sol:DealFactory",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_array(t_uint256)50_storage"
+    },
+    {
+      "astId": 668,
+      "contract": "src/core/modules/market/DealFactory.sol:DealFactory",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "51",
+      "type": "t_array(t_uint256)50_storage"
+    }
+  ],
+  "DealProxy.sol/DealProxy.json": [],
+  "DealSnapshot.sol/DealSnapshot.json": [],
+  "DealWithPublicInternals.sol/DealWithPublicInternals.json": [
+    {
+      "astId": 4469,
+      "contract": "src/dev/test/DealWithPublicInternals.sol:DealWithPublicInternals",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/dev/test/DealWithPublicInternals.sol:DealWithPublicInternals",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    },
+    {
+      "astId": 5171,
+      "contract": "src/dev/test/DealWithPublicInternals.sol:DealWithPublicInternals",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_array(t_uint256)50_storage"
+    }
+  ],
+  "ERC1967UpgradeUpgradeable.sol/ERC1967UpgradeUpgradeable.json": [
+    {
+      "astId": 4469,
+      "contract": "lib/filecoin-solidity/lib/openzeppelin-contracts-upgradeable/contracts/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:ERC1967UpgradeUpgradeable",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "lib/filecoin-solidity/lib/openzeppelin-contracts-upgradeable/contracts/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:ERC1967UpgradeUpgradeable",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    },
+    {
+      "astId": 4451,
+      "contract": "lib/filecoin-solidity/lib/openzeppelin-contracts-upgradeable/contracts/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:ERC1967UpgradeUpgradeable",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_array(t_uint256)50_storage"
+    }
+  ],
+  "ERC20.sol/ERC20.json": [
+    {
+      "astId": 5463,
+      "contract": "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol:ERC20",
+      "label": "_balances",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_mapping(t_address,t_uint256)"
+    },
+    {
+      "astId": 5469,
+      "contract": "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol:ERC20",
+      "label": "_allowances",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_mapping(t_address,t_mapping(t_address,t_uint256))"
+    },
+    {
+      "astId": 5471,
+      "contract": "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol:ERC20",
+      "label": "_totalSupply",
+      "offset": 0,
+      "slot": "2",
+      "type": "t_uint256"
+    },
+    {
+      "astId": 5473,
+      "contract": "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol:ERC20",
+      "label": "_name",
+      "offset": 0,
+      "slot": "3",
+      "type": "t_string_storage"
+    },
+    {
+      "astId": 5475,
+      "contract": "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol:ERC20",
+      "label": "_symbol",
+      "offset": 0,
+      "slot": "4",
+      "type": "t_string_storage"
+    }
+  ],
+  "EnumerableSet.sol/EnumerableSet.json": [],
+  "EpochController.sol/EpochController.json": [
+    {
+      "astId": 4469,
+      "contract": "src/core/EpochController.sol:EpochController",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/core/EpochController.sol:EpochController",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "FilecoinCbor.sol/FilecoinCBOR.json": [],
+  "GlobalConst.sol/GlobalConst.json": [
+    {
+      "astId": 4469,
+      "contract": "src/core/GlobalConst.sol:GlobalConst",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/core/GlobalConst.sol:GlobalConst",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "IBaseModule.sol/IBaseModule.json": [],
+  "IBeaconUpgradeable.sol/IBeaconUpgradeable.json": [],
+  "ICapacity.sol/ICapacity.json": [],
+  "ICapacityConst.sol/ICapacityConst.json": [],
+  "ICapacityConstWithPublicInternals.sol/ICapacityConstWithPublicInternals.json": [],
+  "IConfig.sol/IConfig.json": [],
+  "IConfigWithPublicInternals.sol/IConfigWithPublicInternals.json": [],
+  "ICore.sol/ICore.json": [],
+  "IDeal.sol/IDeal.json": [],
+  "IDealFactory.sol/IDealFactory.json": [],
+  "IDealWithPublicInternals.sol/IDealWithPublicInternals.json": [],
+  "IERC1967Upgradeable.sol/IERC1967Upgradeable.json": [],
+  "IERC20.sol/IERC20.json": [],
+  "IERC20Metadata.sol/IERC20Metadata.json": [],
+  "IERC20Permit.sol/IERC20Permit.json": [],
+  "IEpochController.sol/IEpochController.json": [],
+  "IGlobalConst.sol/IGlobalConst.json": [],
+  "IMarket.sol/IMarket.json": [],
+  "IMatcher.sol/IMatcher.json": [],
+  "IOffer.sol/IOffer.json": [],
+  "IWorkerManager.sol/IWorkerManager.json": [],
+  "Initializable.sol/Initializable.json": [
+    {
+      "astId": 4469,
+      "contract": "lib/filecoin-solidity/lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol:Initializable",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "lib/filecoin-solidity/lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol:Initializable",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "Market.sol/Market.json": [
+    {
+      "astId": 371,
+      "contract": "src/core/modules/market/Market.sol:Market",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 374,
+      "contract": "src/core/modules/market/Market.sol:Market",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    },
+    {
+      "astId": 353,
+      "contract": "src/core/modules/market/Market.sol:Market",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_array(t_uint256)50_storage"
+    },
+    {
+      "astId": 668,
+      "contract": "src/core/modules/market/Market.sol:Market",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "51",
+      "type": "t_array(t_uint256)50_storage"
+    },
+    {
+      "astId": 1073,
+      "contract": "src/core/modules/market/Market.sol:Market",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "101",
+      "type": "t_array(t_uint256)50_storage"
+    }
+  ],
+  "Matcher.sol/Matcher.json": [
+    {
+      "astId": 371,
+      "contract": "src/core/modules/market/Matcher.sol:Matcher",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 374,
+      "contract": "src/core/modules/market/Matcher.sol:Matcher",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "Misc.sol/Misc.json": [],
+  "Multicall.sol/Multicall.json": [],
+  "Multicall3.sol/Multicall3.json": [],
+  "MulticallUpgradeable.sol/MulticallUpgradeable.json": [
+    {
+      "astId": 4469,
+      "contract": "lib/filecoin-solidity/lib/openzeppelin-contracts-upgradeable/contracts/utils/MulticallUpgradeable.sol:MulticallUpgradeable",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "lib/filecoin-solidity/lib/openzeppelin-contracts-upgradeable/contracts/utils/MulticallUpgradeable.sol:MulticallUpgradeable",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    },
+    {
+      "astId": 5171,
+      "contract": "lib/filecoin-solidity/lib/openzeppelin-contracts-upgradeable/contracts/utils/MulticallUpgradeable.sol:MulticallUpgradeable",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_array(t_uint256)50_storage"
+    }
+  ],
+  "Offer.sol/Offer.json": [
+    {
+      "astId": 371,
+      "contract": "src/core/modules/market/Offer.sol:Offer",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 374,
+      "contract": "src/core/modules/market/Offer.sol:Offer",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "Ownable.sol/Ownable.json": [
+    {
+      "astId": 5290,
+      "contract": "lib/openzeppelin-contracts/contracts/access/Ownable.sol:Ownable",
+      "label": "_owner",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_address"
+    }
+  ],
+  "OwnableFaucet.sol/OwnableFaucet.json": [
+    {
+      "astId": 5290,
+      "contract": "src/dev/OwnableFaucet.sol:OwnableFaucet",
+      "label": "_owner",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_address"
+    }
+  ],
+  "OwnableUpgradableDiamond.sol/OwnableUpgradableDiamond.json": [
+    {
+      "astId": 4469,
+      "contract": "src/utils/OwnableUpgradableDiamond.sol:OwnableUpgradableDiamond",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/utils/OwnableUpgradableDiamond.sol:OwnableUpgradableDiamond",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "Proxy.sol/Proxy.json": [],
+  "RandomXProxy.sol/RandomXProxy.json": [],
+  "RandomXProxyMock.sol/RandomXProxyMock.json": [],
+  "SafeERC20.sol/SafeERC20.json": [],
+  "Snapshot.sol/Snapshot.json": [],
+  "StorageMocks.sol/CapacityConstStorageMock.json": [
+    {
+      "astId": 20638,
+      "contract": "src/mocks/StorageMocks.sol:CapacityConstStorageMock",
+      "label": "_capacityConstStorage",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(ConstStorage)7728_storage"
+    }
+  ],
+  "StorageMocks.sol/CapacityStorageMock.json": [
+    {
+      "astId": 20650,
+      "contract": "src/mocks/StorageMocks.sol:CapacityStorageMock",
+      "label": "_capacityStorage",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(CommitmentStorage)9988_storage"
+    }
+  ],
+  "StorageMocks.sol/ConfigStorageMock.json": [
+    {
+      "astId": 20670,
+      "contract": "src/mocks/StorageMocks.sol:ConfigStorageMock",
+      "label": "_configStorage",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(ConfigStorage)17441_storage"
+    }
+  ],
+  "StorageMocks.sol/CoreStorageMock.json": [
+    {
+      "astId": 20634,
+      "contract": "src/mocks/StorageMocks.sol:CoreStorageMock",
+      "label": "_coreStorage",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(CoreStorage)8855_storage"
+    }
+  ],
+  "StorageMocks.sol/DealFactoryStorageMock.json": [
+    {
+      "astId": 20662,
+      "contract": "src/mocks/StorageMocks.sol:DealFactoryStorageMock",
+      "label": "_dealFactoryStorage",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(DealFactoryStorage)14085_storage"
+    }
+  ],
+  "StorageMocks.sol/DealStorageMock.json": [
+    {
+      "astId": 20666,
+      "contract": "src/mocks/StorageMocks.sol:DealStorageMock",
+      "label": "_dealStorage",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(DealStorage)20334_storage"
+    }
+  ],
+  "StorageMocks.sol/EpochControllerStorageMock.json": [
+    {
+      "astId": 20642,
+      "contract": "src/mocks/StorageMocks.sol:EpochControllerStorageMock",
+      "label": "_epochControllerStorage",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(EpochControllerStorage)9160_storage"
+    }
+  ],
+  "StorageMocks.sol/GlobalStorageMock.json": [
+    {
+      "astId": 20646,
+      "contract": "src/mocks/StorageMocks.sol:GlobalStorageMock",
+      "label": "_globalStorage",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(GlobalConstStorage)9275_storage"
+    }
+  ],
+  "StorageMocks.sol/MatcherStorageMock.json": [
+    {
+      "astId": 20654,
+      "contract": "src/mocks/StorageMocks.sol:MatcherStorageMock",
+      "label": "_matcherStorage",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(MatcherStorage)14379_storage"
+    }
+  ],
+  "StorageMocks.sol/OfferStorageMock.json": [
+    {
+      "astId": 20658,
+      "contract": "src/mocks/StorageMocks.sol:OfferStorageMock",
+      "label": "_offerStorage",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(OfferStorage)14887_storage"
+    }
+  ],
+  "StorageMocks.sol/OwnableUpgradableDiamondStorageMock.json": [
+    {
+      "astId": 20678,
+      "contract": "src/mocks/StorageMocks.sol:OwnableUpgradableDiamondStorageMock",
+      "label": "_ownableUpgradableDiamondStorage",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(OwnableStorage)20811_storage"
+    }
+  ],
+  "StorageMocks.sol/WhitelistStorageMock.json": [
+    {
+      "astId": 20682,
+      "contract": "src/mocks/StorageMocks.sol:WhitelistStorageMock",
+      "label": "_whitelistStorage",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(WhitelistStorage)21201_storage"
+    }
+  ],
+  "StorageMocks.sol/WorkerManagerStorageMock.json": [
+    {
+      "astId": 20674,
+      "contract": "src/mocks/StorageMocks.sol:WorkerManagerStorageMock",
+      "label": "_workerManagerStorage",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(WorkerManagerStorage)19633_storage"
+    }
+  ],
+  "StorageSlotUpgradeable.sol/StorageSlotUpgradeable.json": [],
+  "TestERC20.sol/TestERC20.json": [
+    {
+      "astId": 5463,
+      "contract": "src/dev/TestERC20.sol:TestERC20",
+      "label": "_balances",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_mapping(t_address,t_uint256)"
+    },
+    {
+      "astId": 5469,
+      "contract": "src/dev/TestERC20.sol:TestERC20",
+      "label": "_allowances",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_mapping(t_address,t_mapping(t_address,t_uint256))"
+    },
+    {
+      "astId": 5471,
+      "contract": "src/dev/TestERC20.sol:TestERC20",
+      "label": "_totalSupply",
+      "offset": 0,
+      "slot": "2",
+      "type": "t_uint256"
+    },
+    {
+      "astId": 5473,
+      "contract": "src/dev/TestERC20.sol:TestERC20",
+      "label": "_name",
+      "offset": 0,
+      "slot": "3",
+      "type": "t_string_storage"
+    },
+    {
+      "astId": 5475,
+      "contract": "src/dev/TestERC20.sol:TestERC20",
+      "label": "_symbol",
+      "offset": 0,
+      "slot": "4",
+      "type": "t_string_storage"
+    },
+    {
+      "astId": 21481,
+      "contract": "src/dev/TestERC20.sol:TestERC20",
+      "label": "_decimals",
+      "offset": 0,
+      "slot": "5",
+      "type": "t_uint8"
+    }
+  ],
+  "UUPSUpgradeable.sol/UUPSUpgradeable.json": [
+    {
+      "astId": 4469,
+      "contract": "lib/filecoin-solidity/lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol:UUPSUpgradeable",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "lib/filecoin-solidity/lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol:UUPSUpgradeable",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    },
+    {
+      "astId": 4451,
+      "contract": "lib/filecoin-solidity/lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol:UUPSUpgradeable",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_array(t_uint256)50_storage"
+    },
+    {
+      "astId": 4766,
+      "contract": "lib/filecoin-solidity/lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol:UUPSUpgradeable",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "51",
+      "type": "t_array(t_uint256)50_storage"
+    }
+  ],
+  "Vesting.sol/Vesting.json": [],
+  "Whitelist.sol/Whitelist.json": [
+    {
+      "astId": 4469,
+      "contract": "src/utils/Whitelist.sol:Whitelist",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/utils/Whitelist.sol:Whitelist",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "WorkerManager.sol/WorkerManager.json": [
+    {
+      "astId": 4469,
+      "contract": "src/deal/WorkerManager.sol:WorkerManager",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/deal/WorkerManager.sol:WorkerManager",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "draft-IERC1822Upgradeable.sol/IERC1822ProxiableUpgradeable.json": []
+}
