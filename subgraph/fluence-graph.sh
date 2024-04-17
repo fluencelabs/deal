@@ -1,5 +1,4 @@
 #! /usr/bin/env bash
-set -e
 
 SUBGRAPH_NAME_PREFIX="fluence-deal-contracts"
 # Directory with saved deployments. It will append rows with other deployments.
@@ -86,7 +85,7 @@ echo "Trying to connect to Graph Node at ${GRAPHNODE_URL}..."
 while [[ $retries > 0 ]]; do
   status_code=$(curl -o /dev/null -s -w "%{http_code}\n" -X POST -H "Content-Type: application/json" -d '{"foo":"bar"}' ${GRAPHNODE_URL})
   if [[ $status_code == "200" ]]; then
-    echo "Succesfully connected to Graph Node."
+    echo "Successfully connected to Graph Node. Sleep before start 10 seconds."
     sleep 10
     break
   else
@@ -130,6 +129,8 @@ case "$network" in
 esac
 
 DEPLOYMENT_LOG_PATH="${SUBGRAPH_DEPLOYMENTS_DIR}/${network}.txt"
+# Need to exit if not deployed successfully (to stop update artifacts).
+set -e
 case "$action" in
   deploy)
     echo "Deploying subgraph on ${network} stand with subgraph name: ${SUBGRAPH_NAME} and version label ${SUBGRAPH_VERSION_LABEL}..."
