@@ -1,5 +1,10 @@
 # Subgraph
 
+# Table of Contents
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 - [Project Structure](#project-structure)
 - [Develop](#develop)
 - [Debug Note](#debug-note)
@@ -9,11 +14,13 @@
   - [Query through GUI](#query-through-gui)
   - [Tricks & Tips](#tricks--tips)
 - [Deploy](#deploy)
-  - [deprecated Fluence Stands Versioning](#fluence-stands-versioning)
+  - [Fluence Subgraph Versioning](#fluence-subgraph-versioning)
   - [To Localhost](#to-localhost)
   - [To TheGraph Studio [not for subnets]](#to-thegraph-studio-not-for-subnets)
   - [To Hosted Service [not for subnets]](#to-hosted-service-not-for-subnets)
 - [TODO](#todo)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Project Structure
 
@@ -123,17 +130,18 @@ npm run compile && npm run create:local && npm run deploy:local
 
 For deploy it uses [fluence-graph.sh](fluence-graph.sh) script. Check its help for more info. Tl;dr: it is gateway to deploy manage subgraph deploy on Fluence stands and store artifacts of those deployments.
 
-## [deprecated] Fluence Stands Versioning
+## Fluence Subgraph Versioning
 
-Logic is inside [fluence-graph.sh](fluence-graph.sh) and it is used in package.json and accessed via makefile commands finally as well. Generally, the deploy flow is the next:
+Deployment Versioning Logic is inside [fluence-graph.sh](fluence-graph.sh), and it is used in package.json and accessed via makefile commands finally as well. Generally, the deploy flow is the next:
 
-1. It creates subgraph for fluence network (stage, dar, etc) via `npm run create:stage` with subgraph named like `fluence-deal-contracts-<commit hash>` (for local hash commit is ignored).
-   - it creates log of created subgraph inside [deployments](deployments) dir to not forget to remove then outdated subgraphs.
+> Note that to run script against Fluence stands you need also to define BASIC_AUTH_SUBGRAPH env. Check `help` if of the [fluence-graph.sh](fluence-graph.sh).
+
+1. It creates subgraph for fluence network (stage, dar, kras) via `npm run create:stage` with subgraph named like `fluence-deal-contracts-<commit hash>` (for local - without hash commit).
+   - it creates log of created subgraph inside [deployments](deployments) dir for you to remember what subgraphs to delete in the future.
 2. It deploys actual code to index contracts according to [configs](configs) and uses [subgraph.yaml](subgraph.yaml) as template (uses addresses and block number from config).
-3. WARN! Currently, after deploy of the new subgraph for the git commit you ought to update url in the [ts-client/src/indexerClient/config.ts](ts-client/src/indexerClient/config.ts) to sync ts-client and newly deployed subraph (ts-client has test for that check).
-4. When need to delete you need to delete subgraph you process manually command: `graph remove --node ${GRAPHNODE_URL} ${SUBGRAPH_NAME}` and delete from file currently. Thus, we free resources for current stand indexer.
+3. WARN! Currently, after deploy of the new subgraph for the git commit you ought to update url in the [ts-client/src/indexerClient/config.ts](ts-client/src/indexerClient/config.ts) to sync ts-client and newly deployed subgraph (**ts-client has test for that mapping**).
+4. When need to delete subgraph you manually process the following command e.g.: `SUBGRAPH_NAME_TO_DELETE=fluence-deal-contracts ./fluence-graph.sh delete local`.
 
-TODO: make flow better and use template actually instead.
 TODO: move this flow into CI/CD process.
 
 ## To Localhost
@@ -186,5 +194,5 @@ graph deploy --product hosted-service --network mumbai <githubName>/fluence-deal
 - [ ] subgraph tests
 - [ ] fix docker versions
 - [ ] it is mb better to flag CU and etc as removed instead of deleting as it is in, e.g. `store.remove('ComputeUnit', computeUnitEntity.id)`
-- [ ] rm warn about to hexString instead of hex()
-- [ ] where is delete events? (e.g. peer deleted)
+- [x] rm warn about to hexString instead of hex()
+- [x] where is delete events? (e.g. peer deleted)
