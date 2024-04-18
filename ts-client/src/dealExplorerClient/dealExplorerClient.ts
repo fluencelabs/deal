@@ -24,7 +24,6 @@ import type {
   ProviderShortListView,
   ComputeUnitDetail,
   ProofBasicListView,
-  ProofBasic,
   ProofStatsByCapacityCommitmentListView,
   ProofStatsByCapacityCommitment,
   ComputeUnitStatsPerCapacityCommitmentEpoch,
@@ -68,7 +67,6 @@ import {
   FILTER_MULTISELECT_MAX,
   getTotalCounter,
 } from "./utils.js";
-import { serializeCUStatus } from "./serializers/logics.js";
 import {
   FiltersError,
   serializeCapacityCommitmentsFiltersToIndexer,
@@ -97,7 +95,6 @@ import {
 } from "./serializers/orderby.js";
 import type { ICapacity } from "../typechain-types/index.js";
 import type { CapacityCommitmentBasicFragment } from "./indexerClient/queries/capacity-commitments-query.generated.js";
-import { FLTToken } from "./constants.js";
 import {
   serializeDealProviderAccessLists,
   serializeEffectorDescription,
@@ -109,7 +106,6 @@ import {
 } from "../utils/serializers/tokens.js";
 import {
   peerIdByte58toContractHex,
-  peerIdContractHexToBase58
 } from "../utils/serializers/fluence.js";
 
 /*
