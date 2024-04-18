@@ -105,7 +105,8 @@ import {
   tokenValueToRounded,
 } from "../utils/serializers/tokens.js";
 import {
-  peerIdByte58toContractHex,
+  cidIndexerHexToCIDBase32,
+  peerIdByte58toContractHex
 } from "../utils/serializers/fluence.js";
 
 /*
@@ -680,9 +681,9 @@ export class DealExplorerClient {
       // data.deals.map(deal => { return deal.id })
       res = data.effectors.map((effector) => {
         return {
-          cid: effector.id,
+          cid: cidIndexerHexToCIDBase32(effector.id),
           description: serializeEffectorDescription({
-            cid: effector.id,
+            cid: cidIndexerHexToCIDBase32(effector.id),
             description: effector.description,
           }),
         };

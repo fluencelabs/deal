@@ -16,6 +16,7 @@ import type {
 } from "../indexerClient/generated.types.js";
 import { valueToTokenValue } from "../../utils/serializers/tokens.js";
 import { serializePercentageToContractRate } from "../../utils/indexerClient/serializers.js";
+import { cidBase32ToIndexerHex } from "../../utils/serializers/fluence.js";
 
 export class FiltersError extends Error {}
 export class ValidTogetherFiltersError extends FiltersError {}
@@ -96,7 +97,7 @@ export async function serializeOffersFiltersToIndexerType(
   }
   if (v.effectorIds) {
     convertedFilters.and?.push({
-      effectors_: { effector_in: v.effectorIds },
+      effectors_: { effector_in: v.effectorIds.map((effector) => {return cidBase32ToIndexerHex(effector)}) },
     });
   }
   if (v.createdAtFrom) {
@@ -154,7 +155,7 @@ export async function serializeDealsFiltersToIndexer(
   }
   if (v.effectorIds) {
     convertedFilters.and?.push({
-      effectors_: { effector_in: v.effectorIds },
+      effectors_: { effector_in: v.effectorIds.map((effector) => {return cidBase32ToIndexerHex(effector)}) },
     });
   }
   if (v.createdAtFrom) {
