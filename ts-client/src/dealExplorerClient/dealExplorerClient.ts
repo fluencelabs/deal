@@ -106,7 +106,7 @@ import {
 import {
   type SerializationSettings,
   tokenValueToRounded,
-} from "../utils/serializers.js";
+} from "../utils/serializers/tokens.js";
 
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.

@@ -33,7 +33,7 @@ import type { ComputeUnitWithCcDataBasicFragment } from "../indexerClient/querie
 import {
   type SerializationSettings,
   tokenValueToRounded,
-} from "../../utils/serializers.js";
+} from "../../utils/serializers/tokens.js";
 import {
   serializeEffectors,
   serializeContractRateToPercentage,

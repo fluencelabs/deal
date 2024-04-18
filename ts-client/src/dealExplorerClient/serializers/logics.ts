@@ -6,7 +6,7 @@ import type { ComputeUnitStatus } from "../types/schemes.js";
 import {
   type SerializationSettings,
   tokenValueToRounded,
-} from "../../utils/serializers.js";
+} from "../../utils/serializers/tokens.js";
 import { FLTToken } from "../constants.js";
 
 export function serializeProviderName(

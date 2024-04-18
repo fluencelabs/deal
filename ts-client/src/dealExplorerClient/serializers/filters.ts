@@ -14,7 +14,7 @@ import type {
   Offer_Filter,
   Provider_Filter,
 } from "../indexerClient/generated.types.js";
-import { valueToTokenValue } from "../../utils/serializers.js";
+import { valueToTokenValue } from "../../utils/serializers/tokens.js";
 import { serializePercentageToContractRate } from "../../utils/indexerClient/serializers.js";
 
 export class FiltersError extends Error {}
