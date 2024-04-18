@@ -35,6 +35,7 @@ export interface ChildEntitiesByProviderFilter {
   status?: ProviderChildEntityStatusFilter | undefined;
 }
 
+// @param peerId: the id of the peer in base58 format.
 export interface ChildEntitiesByPeerFilter {
   peerId: string;
   status?: ProviderChildEntityStatusFilter | undefined;

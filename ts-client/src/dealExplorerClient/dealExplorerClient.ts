@@ -80,14 +80,14 @@ import {
 } from "./serializers/filters.js";
 import {
   serializeCapacityCommitmentDetail,
-  serializeCapacityCommitmentShort,
+  serializeCapacityCommitmentShort, serializeComputeUnitDetail,
   serializeComputeUnits,
   serializeComputeUnitsWithStatus,
   serializeDealsShort,
-  serializeOfferShort,
+  serializeOfferShort, serializePeerDetail,
   serializePeers,
   serializeProviderBase,
-  serializeProviderShort,
+  serializeProviderShort, serializeSubmittedProofs
 } from "./serializers/schemes.js";
 import {
   serializeCapacityCommitmentsOrderByToIndexer,
@@ -107,6 +107,10 @@ import {
   type SerializationSettings,
   tokenValueToRounded,
 } from "../utils/serializers/tokens.js";
+import {
+  peerIdByte58toContractHex,
+  peerIdContractHexToBase58
+} from "../utils/serializers/fluence.js";
 
 /*
  * @dev Currently this client depends on contract artifacts and on subgraph artifacts.
@@ -386,7 +390,7 @@ export class DealExplorerClient {
   ) {
     await this._init();
     const convertedFilters: CapacityCommitmentsFilters = {
-      search: capacityCommitmentsByProviderFilter.peerId,
+      search: peerIdByte58toContractHex(capacityCommitmentsByProviderFilter.peerId),
     };
     if (
       capacityCommitmentsByProviderFilter.status &&
@@ -856,27 +860,20 @@ export class DealExplorerClient {
   }
 
   // @notice [Figma] Peer ID.
+  // @param peerId: Peer id in base58.
   async getPeer(peerId: string): Promise<PeerDetail | null> {
     await this._init();
-    const data = await this._indexerClient.getPeer({ id: peerId });
+    const data = await this._indexerClient.getPeer({ id: peerIdByte58toContractHex(peerId) });
     if (!data || !data.peer) {
       return null;
     }
     const peer = data.peer;
 
-    return {
-      id: peer.id,
-      providerId: peer.provider.id,
-      offerId: peer.offer.id,
-      computeUnitsInDeal: peer.computeUnitsInDeal,
-      computeUnitsInCapacityCommitment: peer.currentCapacityCommitment
-        ? peer.currentCapacityCommitment?.activeUnitCount
-        : 0,
-      computeUnitsTotal: peer.computeUnitsTotal,
-    };
+    return serializePeerDetail(peer)
   }
 
   // @notice [Figma] Peer ID: Deals.
+  // @param peerId: Peer id in base58.
   async getDealsByPeer(
     peerId: string,
     offset: number = 0,
@@ -890,7 +887,7 @@ export class DealExplorerClient {
       `orderBy & orderType params are not supported yet. Thus, ${orderBy} & ${orderType} are ignored.`,
     );
     const data = await this._indexerClient.getPeerDeals({
-      peerId: peerId,
+      peerId: peerIdByte58toContractHex(peerId),
       dealsOffset: offset,
       dealsLimit: limit,
       dealsOrderBy: null,
@@ -951,30 +948,7 @@ export class DealExplorerClient {
     }
     const computeUnit = data.computeUnit;
 
-    const { status } = serializeCUStatus(computeUnit);
-    const currentPeerCapacityCommitment =
-      computeUnit.peer.currentCapacityCommitment;
-
-    return {
-      id: computeUnit.id,
-      workerId: computeUnit.workerId ?? undefined,
-      providerId: computeUnit.provider.id,
-      currentCommitmentId: currentPeerCapacityCommitment?.id,
-      peerId: computeUnit.peer.id,
-      // FLT.
-      collateral: currentPeerCapacityCommitment
-        ? tokenValueToRounded(
-            currentPeerCapacityCommitment.collateralPerUnit,
-            Number(FLTToken.decimals),
-            this._serializationSettings.nativeTokenValueAdditionalFormatter,
-          )
-        : "0",
-      successProofs: currentPeerCapacityCommitment
-        ? currentPeerCapacityCommitment.submittedProofsCount
-        : 0,
-      collateralToken: FLTToken,
-      status,
-    };
+    return serializeComputeUnitDetail(computeUnit, this._serializationSettings);
   }
 
   // @notice [Figma] List of Proofs.
@@ -997,19 +971,9 @@ export class DealExplorerClient {
       orderType,
       orderBy: serializeProofsOrderByToIndexer(orderBy),
     });
-    const res: Array<ProofBasic> = data.submittedProofs.map((proof) => {
-      return {
-        transactionId: proof.id,
-        capacityCommitmentId: proof.capacityCommitment.id,
-        computeUnitId: proof.computeUnit.id,
-        peerId: proof.peer.id,
-        createdAt: Number(proof.createdAt),
-        providerId: proof.peer.provider.id,
-        createdAtEpoch: Number(proof.createdEpoch),
-      };
-    });
+
     return {
-      data: res,
+      data: serializeSubmittedProofs(data.submittedProofs),
       total: getTotalCounter(filters, data.graphNetworks[0]?.proofsTotal ?? 0),
     };
   }
@@ -1051,6 +1015,7 @@ export class DealExplorerClient {
   }
 
   // @notice [Figma] Peer Id. List of compute units (currently not in Figma).
+  // @param peerId: Peer id in base58.
   async getComputeUnitsByPeer(
     peerId: string,
     offset: number = 0,
@@ -1063,7 +1028,7 @@ export class DealExplorerClient {
     // To get data of CUs by capacity commitment we filter CUs by peer id of the CC.
     const data = await this._indexerClient.getComputeUnits({
       filters: {
-        peer_: { id: peerId },
+        peer_: { id: peerIdByte58toContractHex(peerId) },
       },
       offset,
       limit,
