@@ -30,7 +30,8 @@
     "graphql-request": "^6.1.0",
     "graphql-scalars": "^1.22.4",
     "graphql-tag": "^2.12.6",
-    "multiformats": "^13.1.0"
+    "ipfs-http-client": "^60.0.1",
+    "multiformats": "^13.0.1"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "5.0.2",
