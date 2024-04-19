@@ -90,6 +90,11 @@ jobs:
       - name: Run Forge tests
         run: forge test -vvv
 
+      - name: Compare current storage layout to dump
+        working-directory: storage-checker
+        run: node compare.js
+        continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'review-storage-layout-change') }}
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -154,8 +159,3 @@ jobs:
         working-directory: integration-tests
         env:
           RPC_URL: "http://localhost:8545"
-
-      - name: Compare current storage layout to dump
-        working-directory: storage-checker
-        run: node compare.js
-        continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'review-storage-layout-change') }}
