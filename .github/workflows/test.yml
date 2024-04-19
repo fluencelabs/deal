@@ -158,3 +158,4 @@ jobs:
       - name: Compare current storage layout to dump
         working-directory: storage-checker
         run: node compare.js
+        continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'review-storage-layout-change') }}
