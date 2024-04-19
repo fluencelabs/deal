@@ -173,5 +173,5 @@ jobs:
             storage-checker/package-lock.json
 
       - name: Compare current storage layout to dump
-        working-directory: storage-layout
+        working-directory: storage-checker
         run: node compare.js
