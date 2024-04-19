@@ -658,6 +658,7 @@ export class DealExplorerClient {
         whitelist,
         blacklist,
         effectors: effectors,
+        appCID: cidIndexerHexToCIDBase32(deal.appCID),
       };
     }
     return res;
