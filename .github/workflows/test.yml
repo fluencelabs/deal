@@ -153,3 +153,25 @@ jobs:
         working-directory: integration-tests
         env:
           RPC_URL: "http://localhost:8545"
+
+  storage-layout:
+    name: "Compare storage layout"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          registry-url: "https://registry.npmjs.org"
+          cache-dependency-path: |
+            storage-checker/package-lock.json
+
+      - name: Compare current storage layout to dump
+        working-directory: storage-layout
+        run: node compare.js
