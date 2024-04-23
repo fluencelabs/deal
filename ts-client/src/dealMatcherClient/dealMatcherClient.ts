@@ -424,20 +424,21 @@ export class DealMatcherClient {
     if (!deal) {
       throw new DealNotFoundError(dealId);
     }
-    const coreInitTimestamp = Number(graphNetworks[0].initTimestamp);
-    const coreEpochDuration = graphNetworks[0].coreEpochDuration;
-    const coreMinDealRematchingEpochs = graphNetworks[0]?.coreMinDealRematchingEpochs;
     if (
       graphNetworks.length == 0 ||
-      coreInitTimestamp == null ||
-      coreEpochDuration == null ||
-      coreMinDealRematchingEpochs == null ||
+      graphNetworks[0] == undefined ||
+      graphNetworks[0].initTimestamp == null ||
+      graphNetworks[0].coreEpochDuration == null ||
+      graphNetworks[0].coreMinDealRematchingEpochs == null ||
       _meta?.block.timestamp == null
     ) {
       throw new Error(
         `Assertation Error: Inconsistent states of the Subgraph: server error. Retry later.`,
       );
     }
+    const coreInitTimestamp = Number(graphNetworks[0].initTimestamp);
+    const coreEpochDuration = graphNetworks[0].coreEpochDuration;
+    const coreMinDealRematchingEpochs = graphNetworks[0]?.coreMinDealRematchingEpochs;
     if (deal.effectors == null) {
       throw new Error(`Assertation Error: Effectors of a deal: ${dealId} are null.`);
     }
