@@ -31,6 +31,7 @@ export function parseEffectors(effectors: Array<AppCID>): Array<string> {
 }
 
 /*
+ @dev Note, on this concatenation logic cli and ts-client rely on.
  @dev Use with changetype, e.g.
  >>> changetype<AppCID>(event.params.effector)
  */

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import * as fs from "fs";
-import { getIndexerUrl } from "../../src/utils/indexerClient/config";
+import { getIndexerUrl } from "../../../../src/utils/indexerClient/config";
 
 function getDeploymentPath(stand: string) {
   return `../subgraph/deployments/${stand}.txt`;

@@ -1,5 +1,7 @@
 // General Simple Serializers presented here: from indexer models to more simple ones.
 
+import { cidIndexerHexToCIDBase32 } from "../serializers/fluence.js";
+
 export function serializeDealProviderAccessLists(
   providersAccessType: number,
   providersAccessList:
@@ -43,9 +45,9 @@ export function serializeEffectors(
   }
   for (const effector of manyToManyEffectors) {
     composedEffectors.push({
-      cid: effector.effector.id,
+      cid: cidIndexerHexToCIDBase32(effector.effector.id),
       description: serializeEffectorDescription({
-        cid: effector.effector.id,
+        cid: cidIndexerHexToCIDBase32(effector.effector.id),
         description: effector.effector.description,
       }),
     });

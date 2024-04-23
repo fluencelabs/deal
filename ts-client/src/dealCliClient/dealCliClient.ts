@@ -6,7 +6,7 @@ import type {
   OfferDetail,
 } from "./types/schemes.js";
 import { serializeOfferDetail } from "./serializers/schemes.js";
-import type { SerializationSettings } from "../utils/serializers.js";
+import type { SerializationSettings } from "../utils/serializers/tokens.js";
 import type { OffersFilterIn } from "./types/filters.js";
 import type { IndexerPaginatorIn } from "./types/paginators.js";
 import { serializeOffersFilterIn } from "./serializers/filters.js";
