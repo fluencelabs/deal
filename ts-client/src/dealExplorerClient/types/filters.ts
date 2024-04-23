@@ -4,7 +4,7 @@ export type ProviderChildEntityStatusFilter = "all" | "active" | "inactive";
 
 /*
  * @param paymentTokens: tokens addresses.
- * @para search: strict search only.
+ * @param search: strict search only.
  * @param onlyApproved: if provider of the offer is Approved.
  * @param onlyActive: deprecated - use status filter instead
  * @param status: active - if any of the CUs in the offer is Active (available for matching). inactive - otherwise.
