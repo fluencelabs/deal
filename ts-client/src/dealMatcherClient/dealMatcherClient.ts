@@ -46,6 +46,15 @@ export class DealAlreadyMatchedError extends Error {
   }
 }
 
+export class DealMatchedRecentlyError extends Error {
+  constructor(dealId: string, matchedAt: number, matchedEpoch: number, nextEpochToRematch: number) {
+    super(
+      `Deal  ${dealId} has been matched recently at: ${matchedAt} (${matchedEpoch} epoch). Wait for ${nextEpochToRematch} epoch to rematch.`,
+    );
+    Object.setPrototypeOf(this, DealAlreadyMatchedError.prototype);
+  }
+}
+
 export class DealMatcherClient {
   private _indexerClient: IndexerClient;
   public MAX_PER_PAGE: number;
@@ -185,8 +194,9 @@ export class DealMatcherClient {
     return fetched.offers;
   }
 
-  // It requests indexer page by page until it fullfils the getMatchedOffersIn
-  //  config or until reached the end of potentially matched compute units.
+  // It requests indexer page by page for CUs from Offers until it fulfills the
+  //  getMatchedOffersIn config or until reached the end of potentially matched
+  //  Compute Units.
   async getMatchedOffers(
     getMatchedOffersIn: GetMatchedOffersIn,
   ): Promise<GetMatchedOffersOut> {
@@ -414,14 +424,22 @@ export class DealMatcherClient {
     if (!deal) {
       throw new DealNotFoundError(dealId);
     }
+    const coreInitTimestamp = Number(graphNetworks[0].initTimestamp);
+    const coreEpochDuration = graphNetworks[0].coreEpochDuration;
+    const coreMinDealRematchingEpochs = graphNetworks[0]?.coreMinDealRematchingEpochs;
     if (
       graphNetworks.length == 0 ||
-      graphNetworks[0]?.coreEpochDuration == null ||
+      coreInitTimestamp == null ||
+      coreEpochDuration == null ||
+      coreMinDealRematchingEpochs == null ||
       _meta?.block.timestamp == null
     ) {
       throw new Error(
-        `Inconsistent states of the Subgraph: server error. Retry later.`,
+        `Assertation Error: Inconsistent states of the Subgraph: server error. Retry later.`,
       );
+    }
+    if (deal.effectors == null) {
+      throw new Error(`Assertation Error: Effectors of a deal: ${dealId} are null.`);
     }
     const alreadyMatchedComputeUnits = deal.addedComputeUnits?.length ?? 0;
     const targetWorkerSlotsToMatch =
@@ -429,13 +447,25 @@ export class DealMatcherClient {
     if (targetWorkerSlotsToMatch == 0) {
       throw new DealAlreadyMatchedError(dealId, alreadyMatchedComputeUnits);
     }
+    const currentEpoch = this.calculateEpoch(
+      _meta.block.timestamp,
+      coreInitTimestamp,
+      coreEpochDuration,
+    )
+    const matchedAtEpoch = deal.matchedAt !== undefined ? this.calculateEpoch(
+      deal.matchedAt,
+      coreInitTimestamp,
+      coreEpochDuration,
+    ) : 0
+    // currentEpoch > lastMatchedEpoch + minDealRematchingEpochs
+    const nextEpochToRematch = matchedAtEpoch + coreMinDealRematchingEpochs;
+    if (currentEpoch <= nextEpochToRematch) {
+      throw new DealMatchedRecentlyError(dealId, deal.matchedAt, matchedAtEpoch, nextEpochToRematch);
+    }
     const minWorkersToMatch = Math.max(
       deal.minWorkers - alreadyMatchedComputeUnits,
       0,
     );
-    if (deal.effectors == null) {
-      throw new Error(`Effectors of a deal: ${dealId} are null - assert.`);
-    }
     const { whitelist, blacklist } = serializeDealProviderAccessLists(
       deal.providersAccessType,
       deal.providersAccessList,
@@ -451,11 +481,7 @@ export class DealMatcherClient {
       targetWorkerSlotToMatch: targetWorkerSlotsToMatch,
       minWorkersToMatch: minWorkersToMatch,
       maxWorkersPerProvider: deal.maxWorkersPerProvider,
-      currentEpoch: this.calculateEpoch(
-        _meta.block.timestamp,
-        Number(graphNetworks[0].initTimestamp),
-        graphNetworks[0].coreEpochDuration,
-      ),
+      currentEpoch,
       providersWhiteList: whitelist,
       providersBlackList: blacklist,
     });
