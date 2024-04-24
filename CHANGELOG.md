@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.13.10](https://github.com/fluencelabs/deal/compare/v0.13.9...v0.13.10) (2024-04-24)
+
+
+### Features
+
+* add subgraph versioning v2 ([#424](https://github.com/fluencelabs/deal/issues/424)) ([ac94587](https://github.com/fluencelabs/deal/commit/ac9458718265ee57f8f9d5b5dcc70983d91fb1aa))
+* deploy subgraph to dar and kras ([#430](https://github.com/fluencelabs/deal/issues/430)) ([be90830](https://github.com/fluencelabs/deal/commit/be9083044d84c8be065fb4b584a98f8177bb1b6f))
+* format to base58 chain 467 ([#427](https://github.com/fluencelabs/deal/issues/427)) ([6136b71](https://github.com/fluencelabs/deal/commit/6136b719f1e2115d3fbb0683e62feae701c85805))
+* prettier for whole monorepo [feat CHAIN-446] ([#402](https://github.com/fluencelabs/deal/issues/402)) ([ea50f06](https://github.com/fluencelabs/deal/commit/ea50f0667ea32252dfcaa775f513ba3cbd2a457a))
+
+
+### Bug Fixes
+
+* negative-active-workers-CHAIN-456 ([#421](https://github.com/fluencelabs/deal/issues/421)) ([7c760fe](https://github.com/fluencelabs/deal/commit/7c760fef33b3f18f1b90a5c03c5a759cbbe0ccc6))
+
 ## [0.13.9](https://github.com/fluencelabs/deal/compare/v0.13.8...v0.13.9) (2024-04-09)
 
 
