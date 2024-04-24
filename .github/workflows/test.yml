@@ -88,7 +88,7 @@ jobs:
           forge build --sizes
 
       - name: Run Forge tests
-        run: make test-contracts
+        run: forge test -vvv
 
       - name: Compare current storage layout to dump
         working-directory: storage-checker
