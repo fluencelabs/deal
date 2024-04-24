@@ -49,7 +49,7 @@ build-all: ## Build contracts and npms
 	@make build-contracts
 	@make build-npms
 
-run-tests: ## Test for solidity contracts & ts-clients
+test-contracts:
 	@make verify-command program=forge
 	@forge build
 	@FOUNDRY_PROFILE=test forge test 
