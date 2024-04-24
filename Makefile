@@ -10,7 +10,15 @@ LOCAL_CHAIN_BLOCK_MINING_INTERVAL ?= 1
 verify-command: ## Verify command
 	@command -v $(program) > /dev/null || (echo "\033[0;31m$(program) is not installed. Please install $(program) and try again.\033[0m" && exit 1)
 
-install-npms: ## Install root for pre-commit and deal-ts-clients, and subgraph
+fmt-contracts:
+	@forge fmt
+	@FOUNDRY_PROFILE=test forge fmt
+
+clean:
+	@forge clean
+	@FOUNDRY_PROFILE=test forge clean
+
+install-npms: ## Install and deal-ts-clients and subgraph
 	@make verify-command program=npm
 	@npm install
 	@cd ts-client && npm install
