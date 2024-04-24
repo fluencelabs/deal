@@ -9,11 +9,11 @@ export const getIndexerUrl = (env: ContractsENV) => {
   switch (env) {
     case "kras":
       indexerUrl =
-        "https://graph-node.kras.fluence.dev/subgraphs/name/fluence-deal-contracts";
+        "https://graph-node.kras.fluence.dev/subgraphs/name/fluence-deal-contracts-6136b71";
       break;
     case "dar":
       indexerUrl =
-        "https://graph-node.dar.fluence.dev/subgraphs/name/fluence-deal-contracts";
+        "https://graph-node.dar.fluence.dev/subgraphs/name/fluence-deal-contracts-6136b71";
       break;
     case "stage":
       indexerUrl =
