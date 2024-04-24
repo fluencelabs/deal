@@ -14,7 +14,7 @@ fs_permissions = [
 gas_reports = ["*"]
 optimizer = true
 optimizer_runs = 0 # TODO: add 
-extra_output = ["devdoc"]
+extra_output = ["devdoc", "storageLayout"]
 
 [rpc_endpoints]
 local = "http://0.0.0.0:8545"

@@ -51,6 +51,7 @@ jobs:
           cache-dependency-path: |
             ts-client/package-lock.json
             integration-tests/package-lock.json
+            storage-checker/package-lock.json
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
@@ -88,6 +89,11 @@ jobs:
 
       - name: Run Forge tests
         run: forge test -vvv
+
+      - name: Compare current storage layout to dump
+        working-directory: storage-checker
+        run: node compare.js
+        continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'review-storage-layout-change') }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
