@@ -50,7 +50,7 @@ export type CapacityCommitmentStatsPerEpochQueryQueryVariables = Types.Exact<{
 }>;
 
 
-export type CapacityCommitmentStatsPerEpochQueryQuery = { __typename?: 'Query', capacityCommitmentStatsPerEpoches: Array<{ __typename?: 'CapacityCommitmentStatsPerEpoch', id: string, totalFailCount: number, exitedUnitCount: number, activeUnitCount: number, nextAdditionalActiveUnitCount: number, currentCCNextCCFailedEpoch: any, submittedProofsCount: number, computeUnitsWithMinRequiredProofsSubmittedCounter: number, epochStatistic: { __typename?: 'EpochStatistic', id: string, startBlock: any, endBlock: any }, capacityCommitment: { __typename?: 'CapacityCommitment', id: string }, submittedProofs?: Array<{ __typename?: 'SubmittedProof', id: string, computeUnit: { __typename?: 'ComputeUnit', id: string } }> | null }> };
+export type CapacityCommitmentStatsPerEpochQueryQuery = { __typename?: 'Query', capacityCommitmentStatsPerEpoches: Array<{ __typename?: 'CapacityCommitmentStatsPerEpoch', id: string, totalFailCount: number, exitedUnitCount: number, activeUnitCount: number, nextAdditionalActiveUnitCount: number, currentCCNextCCFailedEpoch: any, submittedProofsCount: number, computeUnitsWithMinRequiredProofsSubmittedCounter: number, epochStatistic: { __typename?: 'EpochStatistic', id: string, startBlock: any, endBlock: any }, capacityCommitment: { __typename?: 'CapacityCommitment', id: string } }> };
 
 export type ComputeUnitPerEpochStatsQueryQueryVariables = Types.Exact<{
   filters?: Types.InputMaybe<Types.ComputeUnitPerEpochStat_Filter>;
@@ -187,12 +187,6 @@ export const CapacityCommitmentStatsPerEpochQueryDocument = gql`
     currentCCNextCCFailedEpoch
     submittedProofsCount
     computeUnitsWithMinRequiredProofsSubmittedCounter
-    submittedProofs {
-      id
-      computeUnit {
-        id
-      }
-    }
   }
 }
     `;

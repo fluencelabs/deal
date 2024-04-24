@@ -10,16 +10,9 @@ LOCAL_CHAIN_BLOCK_MINING_INTERVAL ?= 1
 verify-command: ## Verify command
 	@command -v $(program) > /dev/null || (echo "\033[0;31m$(program) is not installed. Please install $(program) and try again.\033[0m" && exit 1)
 
-fmt-contracts:
-	@forge fmt
-	@FOUNDRY_PROFILE=test forge fmt
-
-clean:
-	@forge clean
-	@FOUNDRY_PROFILE=test forge clean
-	
-install-npms: ## Install and deal-ts-clients and subgraph
+install-npms: ## Install root for pre-commit and deal-ts-clients, and subgraph
 	@make verify-command program=npm
+	@npm install
 	@cd ts-client && npm install
 	@cd subgraph && npm install
 	@echo "\033[0;32mSuccess! Run npm install in both npm modules: ts-client and subgraph.\033[0m"
@@ -44,9 +37,11 @@ build-npms: ## Build all npms: subgraph and ts-clients
 	@make build-subgraph
 	@echo "\033[0;32mSuccess! Build of all NPM packages completed.\033[0m"
 
-build-all: build-contracts build-npms ## Build contracts and npms
+build-all: ## Build contracts and npms
+	@make build-contracts
+	@make build-npms
 
-test-contracts:
+run-tests: ## Test for solidity contracts & ts-clients
 	@make verify-command program=forge
 	@forge build
 	@FOUNDRY_PROFILE=test forge test 
@@ -123,4 +118,4 @@ create-pure-market-local: ## Create market on a local blockchain with Anvil mnem
 
 help: ## List makefile targets
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
-	| awk 'BEGIN {FS = ":.*?## "}; {printf "%-30s %s\n", $$1, $$2}'
+	| awk 'BEGIN {FS = ":"}; {printf "%-30s %s\n", $$2, $$3}'

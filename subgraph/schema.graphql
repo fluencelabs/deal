@@ -3,7 +3,6 @@ In the scheme below we used behaviour where deleted entity marked as deleted=Tru
 Thus, please refer to the deleted field when querying the data.
 Note, all deleted entities are out of scope for presented counters in all models.
 """
-
 type GraphNetwork @entity {
   "ID is set to 1"
   id: ID! # for example trick thanks to https://github.com/graphprotocol/graph-network-analytics-subgraph/blob/00d32f153f7b6bcef4344b934e3c9a9286304658/schema.graphql#L4.
