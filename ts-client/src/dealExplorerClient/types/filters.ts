@@ -3,11 +3,12 @@ import type { DealStatus } from "./schemes.js";
 export type ProviderChildEntityStatusFilter = "all" | "active" | "inactive";
 
 /*
- * @dev :param paymentTokens: tokens addresses.
- * @dev :para search: strict search only.
- * @dev :param onlyApproved: if provider of the offer is Approved.
- * @dev :param onlyActive: deprecated - use status filter instead
- * @dev :param status: active - if any of the CUs in the offer is Active (available for matching). inactive - otherwise.
+ * @param paymentTokens: tokens addresses.
+ * @param search: strict search only.
+ * @param onlyApproved: if provider of the offer is Approved.
+ * @param onlyActive: deprecated - use status filter instead
+ * @param status: active - if any of the CUs in the offer is Active (available for matching). inactive - otherwise.
+ * @param effectorIds: CIDs of effectors.
  */
 export interface OffersFilters {
   search?: string | undefined;
@@ -35,6 +36,7 @@ export interface ChildEntitiesByProviderFilter {
   status?: ProviderChildEntityStatusFilter | undefined;
 }
 
+// @param peerId: the id of the peer in base58 format.
 export interface ChildEntitiesByPeerFilter {
   peerId: string;
   status?: ProviderChildEntityStatusFilter | undefined;

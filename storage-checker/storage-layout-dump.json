@@ -1,0 +1,4427 @@
+{
+  "AccountCbor.sol/AccountCBOR.json": [],
+  "AccountTypes.sol/AccountTypes.json": [],
+  "Actor.sol/Actor.json": [],
+  "AddComputeUnits.t.sol/AddComputeUnits.json": [
+    {
+      "astId": 7636,
+      "contract": "test/deal/AddComputeUnits.t.sol:AddComputeUnits",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 5371,
+      "contract": "test/deal/AddComputeUnits.t.sol:AddComputeUnits",
+      "label": "IS_TEST",
+      "offset": 0,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 5373,
+      "contract": "test/deal/AddComputeUnits.t.sol:AddComputeUnits",
+      "label": "_failed",
+      "offset": 1,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9130,
+      "contract": "test/deal/AddComputeUnits.t.sol:AddComputeUnits",
+      "label": "stdChainsInitialized",
+      "offset": 2,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9151,
+      "contract": "test/deal/AddComputeUnits.t.sol:AddComputeUnits",
+      "label": "chains",
+      "offset": 0,
+      "slot": "8",
+      "type": "t_mapping(t_string_memory_ptr,t_struct(Chain)9146_storage)"
+    },
+    {
+      "astId": 9155,
+      "contract": "test/deal/AddComputeUnits.t.sol:AddComputeUnits",
+      "label": "defaultRpcUrls",
+      "offset": 0,
+      "slot": "9",
+      "type": "t_mapping(t_string_memory_ptr,t_string_storage)"
+    },
+    {
+      "astId": 9159,
+      "contract": "test/deal/AddComputeUnits.t.sol:AddComputeUnits",
+      "label": "idToAlias",
+      "offset": 0,
+      "slot": "10",
+      "type": "t_mapping(t_uint256,t_string_storage)"
+    },
+    {
+      "astId": 9162,
+      "contract": "test/deal/AddComputeUnits.t.sol:AddComputeUnits",
+      "label": "fallbackToDefaultRpcUrls",
+      "offset": 0,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9902,
+      "contract": "test/deal/AddComputeUnits.t.sol:AddComputeUnits",
+      "label": "gasMeteringOff",
+      "offset": 1,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 11939,
+      "contract": "test/deal/AddComputeUnits.t.sol:AddComputeUnits",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "12",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 12807,
+      "contract": "test/deal/AddComputeUnits.t.sol:AddComputeUnits",
+      "label": "_excludedContracts",
+      "offset": 0,
+      "slot": "19",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12810,
+      "contract": "test/deal/AddComputeUnits.t.sol:AddComputeUnits",
+      "label": "_excludedSenders",
+      "offset": 0,
+      "slot": "20",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12813,
+      "contract": "test/deal/AddComputeUnits.t.sol:AddComputeUnits",
+      "label": "_targetedContracts",
+      "offset": 0,
+      "slot": "21",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12816,
+      "contract": "test/deal/AddComputeUnits.t.sol:AddComputeUnits",
+      "label": "_targetedSenders",
+      "offset": 0,
+      "slot": "22",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12819,
+      "contract": "test/deal/AddComputeUnits.t.sol:AddComputeUnits",
+      "label": "_excludedArtifacts",
+      "offset": 0,
+      "slot": "23",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12822,
+      "contract": "test/deal/AddComputeUnits.t.sol:AddComputeUnits",
+      "label": "_targetedArtifacts",
+      "offset": 0,
+      "slot": "24",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12826,
+      "contract": "test/deal/AddComputeUnits.t.sol:AddComputeUnits",
+      "label": "_targetedArtifactSelectors",
+      "offset": 0,
+      "slot": "25",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12830,
+      "contract": "test/deal/AddComputeUnits.t.sol:AddComputeUnits",
+      "label": "_targetedSelectors",
+      "offset": 0,
+      "slot": "26",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12834,
+      "contract": "test/deal/AddComputeUnits.t.sol:AddComputeUnits",
+      "label": "_targetedInterfaces",
+      "offset": 0,
+      "slot": "27",
+      "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
+    },
+    {
+      "astId": 80792,
+      "contract": "test/deal/AddComputeUnits.t.sol:AddComputeUnits",
+      "label": "deployment",
+      "offset": 0,
+      "slot": "28",
+      "type": "t_struct(Deployment)83901_storage"
+    },
+    {
+      "astId": 80795,
+      "contract": "test/deal/AddComputeUnits.t.sol:AddComputeUnits",
+      "label": "dealImpl",
+      "offset": 0,
+      "slot": "34",
+      "type": "t_contract(Deal)69512"
+    }
+  ],
+  "AddWorkers.t.sol/AddWorkers.json": [
+    {
+      "astId": 7636,
+      "contract": "test/deal/AddWorkers.t.sol:AddWorkers",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 5371,
+      "contract": "test/deal/AddWorkers.t.sol:AddWorkers",
+      "label": "IS_TEST",
+      "offset": 0,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 5373,
+      "contract": "test/deal/AddWorkers.t.sol:AddWorkers",
+      "label": "_failed",
+      "offset": 1,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9130,
+      "contract": "test/deal/AddWorkers.t.sol:AddWorkers",
+      "label": "stdChainsInitialized",
+      "offset": 2,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9151,
+      "contract": "test/deal/AddWorkers.t.sol:AddWorkers",
+      "label": "chains",
+      "offset": 0,
+      "slot": "8",
+      "type": "t_mapping(t_string_memory_ptr,t_struct(Chain)9146_storage)"
+    },
+    {
+      "astId": 9155,
+      "contract": "test/deal/AddWorkers.t.sol:AddWorkers",
+      "label": "defaultRpcUrls",
+      "offset": 0,
+      "slot": "9",
+      "type": "t_mapping(t_string_memory_ptr,t_string_storage)"
+    },
+    {
+      "astId": 9159,
+      "contract": "test/deal/AddWorkers.t.sol:AddWorkers",
+      "label": "idToAlias",
+      "offset": 0,
+      "slot": "10",
+      "type": "t_mapping(t_uint256,t_string_storage)"
+    },
+    {
+      "astId": 9162,
+      "contract": "test/deal/AddWorkers.t.sol:AddWorkers",
+      "label": "fallbackToDefaultRpcUrls",
+      "offset": 0,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9902,
+      "contract": "test/deal/AddWorkers.t.sol:AddWorkers",
+      "label": "gasMeteringOff",
+      "offset": 1,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 11939,
+      "contract": "test/deal/AddWorkers.t.sol:AddWorkers",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "12",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 12807,
+      "contract": "test/deal/AddWorkers.t.sol:AddWorkers",
+      "label": "_excludedContracts",
+      "offset": 0,
+      "slot": "19",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12810,
+      "contract": "test/deal/AddWorkers.t.sol:AddWorkers",
+      "label": "_excludedSenders",
+      "offset": 0,
+      "slot": "20",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12813,
+      "contract": "test/deal/AddWorkers.t.sol:AddWorkers",
+      "label": "_targetedContracts",
+      "offset": 0,
+      "slot": "21",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12816,
+      "contract": "test/deal/AddWorkers.t.sol:AddWorkers",
+      "label": "_targetedSenders",
+      "offset": 0,
+      "slot": "22",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12819,
+      "contract": "test/deal/AddWorkers.t.sol:AddWorkers",
+      "label": "_excludedArtifacts",
+      "offset": 0,
+      "slot": "23",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12822,
+      "contract": "test/deal/AddWorkers.t.sol:AddWorkers",
+      "label": "_targetedArtifacts",
+      "offset": 0,
+      "slot": "24",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12826,
+      "contract": "test/deal/AddWorkers.t.sol:AddWorkers",
+      "label": "_targetedArtifactSelectors",
+      "offset": 0,
+      "slot": "25",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12830,
+      "contract": "test/deal/AddWorkers.t.sol:AddWorkers",
+      "label": "_targetedSelectors",
+      "offset": 0,
+      "slot": "26",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12834,
+      "contract": "test/deal/AddWorkers.t.sol:AddWorkers",
+      "label": "_targetedInterfaces",
+      "offset": 0,
+      "slot": "27",
+      "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
+    },
+    {
+      "astId": 81228,
+      "contract": "test/deal/AddWorkers.t.sol:AddWorkers",
+      "label": "deployment",
+      "offset": 0,
+      "slot": "28",
+      "type": "t_struct(Deployment)83901_storage"
+    }
+  ],
+  "Address.sol/Address.json": [],
+  "AddressUpgradeable.sol/AddressUpgradeable.json": [],
+  "Base.sol/CommonBase.json": [
+    {
+      "astId": 7636,
+      "contract": "lib/forge-std/src/Base.sol:CommonBase",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(StdStorage)13814_storage"
+    }
+  ],
+  "Base.sol/ScriptBase.json": [
+    {
+      "astId": 7636,
+      "contract": "lib/forge-std/src/Base.sol:ScriptBase",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(StdStorage)13814_storage"
+    }
+  ],
+  "Base.sol/TestBase.json": [
+    {
+      "astId": 7636,
+      "contract": "lib/forge-std/src/Base.sol:TestBase",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(StdStorage)13814_storage"
+    }
+  ],
+  "BaseModule.sol/BaseModule.json": [
+    {
+      "astId": 4469,
+      "contract": "src/core/modules/BaseModule.sol:BaseModule",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/core/modules/BaseModule.sol:BaseModule",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "BigIntCbor.sol/BigIntCBOR.json": [],
+  "BitMaps.sol/BitMaps.json": [],
+  "Buffer.sol/Buffer.json": [],
+  "BytesCbor.sol/BytesCBOR.json": [],
+  "BytesConverter.sol/BytesConverter.json": [],
+  "CBOR.sol/CBOR.json": [],
+  "Capacity.sol/Capacity.json": [
+    {
+      "astId": 4469,
+      "contract": "src/core/modules/capacity/Capacity.sol:Capacity",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/core/modules/capacity/Capacity.sol:Capacity",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    },
+    {
+      "astId": 4451,
+      "contract": "src/core/modules/capacity/Capacity.sol:Capacity",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_array(t_uint256)50_storage"
+    },
+    {
+      "astId": 4766,
+      "contract": "src/core/modules/capacity/Capacity.sol:Capacity",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "51",
+      "type": "t_array(t_uint256)50_storage"
+    },
+    {
+      "astId": 5171,
+      "contract": "src/core/modules/capacity/Capacity.sol:Capacity",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "101",
+      "type": "t_array(t_uint256)50_storage"
+    }
+  ],
+  "CapacityCommitment.t.sol/CapacityCommitmentTest.json": [
+    {
+      "astId": 7636,
+      "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 5371,
+      "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
+      "label": "IS_TEST",
+      "offset": 0,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 5373,
+      "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
+      "label": "_failed",
+      "offset": 1,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9130,
+      "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
+      "label": "stdChainsInitialized",
+      "offset": 2,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9151,
+      "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
+      "label": "chains",
+      "offset": 0,
+      "slot": "8",
+      "type": "t_mapping(t_string_memory_ptr,t_struct(Chain)9146_storage)"
+    },
+    {
+      "astId": 9155,
+      "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
+      "label": "defaultRpcUrls",
+      "offset": 0,
+      "slot": "9",
+      "type": "t_mapping(t_string_memory_ptr,t_string_storage)"
+    },
+    {
+      "astId": 9159,
+      "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
+      "label": "idToAlias",
+      "offset": 0,
+      "slot": "10",
+      "type": "t_mapping(t_uint256,t_string_storage)"
+    },
+    {
+      "astId": 9162,
+      "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
+      "label": "fallbackToDefaultRpcUrls",
+      "offset": 0,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9902,
+      "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
+      "label": "gasMeteringOff",
+      "offset": 1,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 11939,
+      "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "12",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 12807,
+      "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
+      "label": "_excludedContracts",
+      "offset": 0,
+      "slot": "19",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12810,
+      "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
+      "label": "_excludedSenders",
+      "offset": 0,
+      "slot": "20",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12813,
+      "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
+      "label": "_targetedContracts",
+      "offset": 0,
+      "slot": "21",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12816,
+      "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
+      "label": "_targetedSenders",
+      "offset": 0,
+      "slot": "22",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12819,
+      "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
+      "label": "_excludedArtifacts",
+      "offset": 0,
+      "slot": "23",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12822,
+      "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
+      "label": "_targetedArtifacts",
+      "offset": 0,
+      "slot": "24",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12826,
+      "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
+      "label": "_targetedArtifactSelectors",
+      "offset": 0,
+      "slot": "25",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12830,
+      "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
+      "label": "_targetedSelectors",
+      "offset": 0,
+      "slot": "26",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12834,
+      "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
+      "label": "_targetedInterfaces",
+      "offset": 0,
+      "slot": "27",
+      "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
+    },
+    {
+      "astId": 74137,
+      "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
+      "label": "deployment",
+      "offset": 0,
+      "slot": "28",
+      "type": "t_struct(Deployment)83901_storage"
+    },
+    {
+      "astId": 74141,
+      "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
+      "label": "registerPeers",
+      "offset": 0,
+      "slot": "34",
+      "type": "t_array(t_struct(RegisterComputePeer)67247_storage)dyn_storage"
+    },
+    {
+      "astId": 74143,
+      "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
+      "label": "minPricePerWorkerEpoch",
+      "offset": 0,
+      "slot": "35",
+      "type": "t_uint256"
+    },
+    {
+      "astId": 74147,
+      "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
+      "label": "effectors",
+      "offset": 0,
+      "slot": "36",
+      "type": "t_array(t_struct(CIDV1)70435_storage)dyn_storage"
+    },
+    {
+      "astId": 74149,
+      "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
+      "label": "paymentToken",
+      "offset": 0,
+      "slot": "37",
+      "type": "t_address"
+    },
+    {
+      "astId": 74151,
+      "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
+      "label": "ccDuration",
+      "offset": 0,
+      "slot": "38",
+      "type": "t_uint256"
+    },
+    {
+      "astId": 74153,
+      "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
+      "label": "ccDelegator",
+      "offset": 0,
+      "slot": "39",
+      "type": "t_address"
+    },
+    {
+      "astId": 74155,
+      "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
+      "label": "rewardCCDelegationRate",
+      "offset": 0,
+      "slot": "40",
+      "type": "t_uint256"
+    }
+  ],
+  "CapacityCommitment.t.sol/MockActorCallActorPrecompile.json": [],
+  "CapacityConst.sol/CapacityConst.json": [
+    {
+      "astId": 4469,
+      "contract": "src/core/CapacityConst.sol:CapacityConst",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/core/CapacityConst.sol:CapacityConst",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "CapacityConst.t.sol/CpacityConstTest.json": [
+    {
+      "astId": 7636,
+      "contract": "test/core/CapacityConst.t.sol:CpacityConstTest",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 5371,
+      "contract": "test/core/CapacityConst.t.sol:CpacityConstTest",
+      "label": "IS_TEST",
+      "offset": 0,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 5373,
+      "contract": "test/core/CapacityConst.t.sol:CpacityConstTest",
+      "label": "_failed",
+      "offset": 1,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9130,
+      "contract": "test/core/CapacityConst.t.sol:CpacityConstTest",
+      "label": "stdChainsInitialized",
+      "offset": 2,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9151,
+      "contract": "test/core/CapacityConst.t.sol:CpacityConstTest",
+      "label": "chains",
+      "offset": 0,
+      "slot": "8",
+      "type": "t_mapping(t_string_memory_ptr,t_struct(Chain)9146_storage)"
+    },
+    {
+      "astId": 9155,
+      "contract": "test/core/CapacityConst.t.sol:CpacityConstTest",
+      "label": "defaultRpcUrls",
+      "offset": 0,
+      "slot": "9",
+      "type": "t_mapping(t_string_memory_ptr,t_string_storage)"
+    },
+    {
+      "astId": 9159,
+      "contract": "test/core/CapacityConst.t.sol:CpacityConstTest",
+      "label": "idToAlias",
+      "offset": 0,
+      "slot": "10",
+      "type": "t_mapping(t_uint256,t_string_storage)"
+    },
+    {
+      "astId": 9162,
+      "contract": "test/core/CapacityConst.t.sol:CpacityConstTest",
+      "label": "fallbackToDefaultRpcUrls",
+      "offset": 0,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9902,
+      "contract": "test/core/CapacityConst.t.sol:CpacityConstTest",
+      "label": "gasMeteringOff",
+      "offset": 1,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 11939,
+      "contract": "test/core/CapacityConst.t.sol:CpacityConstTest",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "12",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 12807,
+      "contract": "test/core/CapacityConst.t.sol:CpacityConstTest",
+      "label": "_excludedContracts",
+      "offset": 0,
+      "slot": "19",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12810,
+      "contract": "test/core/CapacityConst.t.sol:CpacityConstTest",
+      "label": "_excludedSenders",
+      "offset": 0,
+      "slot": "20",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12813,
+      "contract": "test/core/CapacityConst.t.sol:CpacityConstTest",
+      "label": "_targetedContracts",
+      "offset": 0,
+      "slot": "21",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12816,
+      "contract": "test/core/CapacityConst.t.sol:CpacityConstTest",
+      "label": "_targetedSenders",
+      "offset": 0,
+      "slot": "22",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12819,
+      "contract": "test/core/CapacityConst.t.sol:CpacityConstTest",
+      "label": "_excludedArtifacts",
+      "offset": 0,
+      "slot": "23",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12822,
+      "contract": "test/core/CapacityConst.t.sol:CpacityConstTest",
+      "label": "_targetedArtifacts",
+      "offset": 0,
+      "slot": "24",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12826,
+      "contract": "test/core/CapacityConst.t.sol:CpacityConstTest",
+      "label": "_targetedArtifactSelectors",
+      "offset": 0,
+      "slot": "25",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12830,
+      "contract": "test/core/CapacityConst.t.sol:CpacityConstTest",
+      "label": "_targetedSelectors",
+      "offset": 0,
+      "slot": "26",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12834,
+      "contract": "test/core/CapacityConst.t.sol:CpacityConstTest",
+      "label": "_targetedInterfaces",
+      "offset": 0,
+      "slot": "27",
+      "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
+    },
+    {
+      "astId": 72311,
+      "contract": "test/core/CapacityConst.t.sol:CpacityConstTest",
+      "label": "capacityConst",
+      "offset": 0,
+      "slot": "28",
+      "type": "t_contract(TestCapacityConst)73532"
+    }
+  ],
+  "CapacityConst.t.sol/ISetConstant.json": [],
+  "CapacityConst.t.sol/TestCapacityConst.json": [
+    {
+      "astId": 4469,
+      "contract": "test/core/CapacityConst.t.sol:TestCapacityConst",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "test/core/CapacityConst.t.sol:TestCapacityConst",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "CapacityConstWithPublicInternals.sol/CapacityConstWithPublicInternals.json": [
+    {
+      "astId": 4469,
+      "contract": "src/dev/test/CapacityConstWithPublicInternals.sol:CapacityConstWithPublicInternals",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/dev/test/CapacityConstWithPublicInternals.sol:CapacityConstWithPublicInternals",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "CborDecode.sol/CBORDecoder.json": [],
+  "CommitPeriod.t.sol/CommitPeriod.json": [
+    {
+      "astId": 7636,
+      "contract": "test/deal/CommitPeriod.t.sol:CommitPeriod",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 5371,
+      "contract": "test/deal/CommitPeriod.t.sol:CommitPeriod",
+      "label": "IS_TEST",
+      "offset": 0,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 5373,
+      "contract": "test/deal/CommitPeriod.t.sol:CommitPeriod",
+      "label": "_failed",
+      "offset": 1,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9130,
+      "contract": "test/deal/CommitPeriod.t.sol:CommitPeriod",
+      "label": "stdChainsInitialized",
+      "offset": 2,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9151,
+      "contract": "test/deal/CommitPeriod.t.sol:CommitPeriod",
+      "label": "chains",
+      "offset": 0,
+      "slot": "8",
+      "type": "t_mapping(t_string_memory_ptr,t_struct(Chain)9146_storage)"
+    },
+    {
+      "astId": 9155,
+      "contract": "test/deal/CommitPeriod.t.sol:CommitPeriod",
+      "label": "defaultRpcUrls",
+      "offset": 0,
+      "slot": "9",
+      "type": "t_mapping(t_string_memory_ptr,t_string_storage)"
+    },
+    {
+      "astId": 9159,
+      "contract": "test/deal/CommitPeriod.t.sol:CommitPeriod",
+      "label": "idToAlias",
+      "offset": 0,
+      "slot": "10",
+      "type": "t_mapping(t_uint256,t_string_storage)"
+    },
+    {
+      "astId": 9162,
+      "contract": "test/deal/CommitPeriod.t.sol:CommitPeriod",
+      "label": "fallbackToDefaultRpcUrls",
+      "offset": 0,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9902,
+      "contract": "test/deal/CommitPeriod.t.sol:CommitPeriod",
+      "label": "gasMeteringOff",
+      "offset": 1,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 11939,
+      "contract": "test/deal/CommitPeriod.t.sol:CommitPeriod",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "12",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 12807,
+      "contract": "test/deal/CommitPeriod.t.sol:CommitPeriod",
+      "label": "_excludedContracts",
+      "offset": 0,
+      "slot": "19",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12810,
+      "contract": "test/deal/CommitPeriod.t.sol:CommitPeriod",
+      "label": "_excludedSenders",
+      "offset": 0,
+      "slot": "20",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12813,
+      "contract": "test/deal/CommitPeriod.t.sol:CommitPeriod",
+      "label": "_targetedContracts",
+      "offset": 0,
+      "slot": "21",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12816,
+      "contract": "test/deal/CommitPeriod.t.sol:CommitPeriod",
+      "label": "_targetedSenders",
+      "offset": 0,
+      "slot": "22",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12819,
+      "contract": "test/deal/CommitPeriod.t.sol:CommitPeriod",
+      "label": "_excludedArtifacts",
+      "offset": 0,
+      "slot": "23",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12822,
+      "contract": "test/deal/CommitPeriod.t.sol:CommitPeriod",
+      "label": "_targetedArtifacts",
+      "offset": 0,
+      "slot": "24",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12826,
+      "contract": "test/deal/CommitPeriod.t.sol:CommitPeriod",
+      "label": "_targetedArtifactSelectors",
+      "offset": 0,
+      "slot": "25",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12830,
+      "contract": "test/deal/CommitPeriod.t.sol:CommitPeriod",
+      "label": "_targetedSelectors",
+      "offset": 0,
+      "slot": "26",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12834,
+      "contract": "test/deal/CommitPeriod.t.sol:CommitPeriod",
+      "label": "_targetedInterfaces",
+      "offset": 0,
+      "slot": "27",
+      "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
+    },
+    {
+      "astId": 81597,
+      "contract": "test/deal/CommitPeriod.t.sol:CommitPeriod",
+      "label": "deployment",
+      "offset": 0,
+      "slot": "28",
+      "type": "t_struct(Deployment)83901_storage"
+    },
+    {
+      "astId": 81600,
+      "contract": "test/deal/CommitPeriod.t.sol:CommitPeriod",
+      "label": "dealContract",
+      "offset": 0,
+      "slot": "34",
+      "type": "t_contract(TestDealContract)82208"
+    }
+  ],
+  "CommitPeriod.t.sol/TestDealContract.json": [
+    {
+      "astId": 4469,
+      "contract": "test/deal/CommitPeriod.t.sol:TestDealContract",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "test/deal/CommitPeriod.t.sol:TestDealContract",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    },
+    {
+      "astId": 5171,
+      "contract": "test/deal/CommitPeriod.t.sol:TestDealContract",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_array(t_uint256)50_storage"
+    }
+  ],
+  "CommonTypes.sol/CommonTypes.json": [],
+  "Config.sol/Config.json": [
+    {
+      "astId": 4469,
+      "contract": "src/deal/Config.sol:Config",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/deal/Config.sol:Config",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "ConfigContract.t.sol/ConfigContract.json": [
+    {
+      "astId": 7636,
+      "contract": "test/deal/ConfigContract.t.sol:ConfigContract",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 5371,
+      "contract": "test/deal/ConfigContract.t.sol:ConfigContract",
+      "label": "IS_TEST",
+      "offset": 0,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 5373,
+      "contract": "test/deal/ConfigContract.t.sol:ConfigContract",
+      "label": "_failed",
+      "offset": 1,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9130,
+      "contract": "test/deal/ConfigContract.t.sol:ConfigContract",
+      "label": "stdChainsInitialized",
+      "offset": 2,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9151,
+      "contract": "test/deal/ConfigContract.t.sol:ConfigContract",
+      "label": "chains",
+      "offset": 0,
+      "slot": "8",
+      "type": "t_mapping(t_string_memory_ptr,t_struct(Chain)9146_storage)"
+    },
+    {
+      "astId": 9155,
+      "contract": "test/deal/ConfigContract.t.sol:ConfigContract",
+      "label": "defaultRpcUrls",
+      "offset": 0,
+      "slot": "9",
+      "type": "t_mapping(t_string_memory_ptr,t_string_storage)"
+    },
+    {
+      "astId": 9159,
+      "contract": "test/deal/ConfigContract.t.sol:ConfigContract",
+      "label": "idToAlias",
+      "offset": 0,
+      "slot": "10",
+      "type": "t_mapping(t_uint256,t_string_storage)"
+    },
+    {
+      "astId": 9162,
+      "contract": "test/deal/ConfigContract.t.sol:ConfigContract",
+      "label": "fallbackToDefaultRpcUrls",
+      "offset": 0,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9902,
+      "contract": "test/deal/ConfigContract.t.sol:ConfigContract",
+      "label": "gasMeteringOff",
+      "offset": 1,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 11939,
+      "contract": "test/deal/ConfigContract.t.sol:ConfigContract",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "12",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 12807,
+      "contract": "test/deal/ConfigContract.t.sol:ConfigContract",
+      "label": "_excludedContracts",
+      "offset": 0,
+      "slot": "19",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12810,
+      "contract": "test/deal/ConfigContract.t.sol:ConfigContract",
+      "label": "_excludedSenders",
+      "offset": 0,
+      "slot": "20",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12813,
+      "contract": "test/deal/ConfigContract.t.sol:ConfigContract",
+      "label": "_targetedContracts",
+      "offset": 0,
+      "slot": "21",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12816,
+      "contract": "test/deal/ConfigContract.t.sol:ConfigContract",
+      "label": "_targetedSenders",
+      "offset": 0,
+      "slot": "22",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12819,
+      "contract": "test/deal/ConfigContract.t.sol:ConfigContract",
+      "label": "_excludedArtifacts",
+      "offset": 0,
+      "slot": "23",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12822,
+      "contract": "test/deal/ConfigContract.t.sol:ConfigContract",
+      "label": "_targetedArtifacts",
+      "offset": 0,
+      "slot": "24",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12826,
+      "contract": "test/deal/ConfigContract.t.sol:ConfigContract",
+      "label": "_targetedArtifactSelectors",
+      "offset": 0,
+      "slot": "25",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12830,
+      "contract": "test/deal/ConfigContract.t.sol:ConfigContract",
+      "label": "_targetedSelectors",
+      "offset": 0,
+      "slot": "26",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12834,
+      "contract": "test/deal/ConfigContract.t.sol:ConfigContract",
+      "label": "_targetedInterfaces",
+      "offset": 0,
+      "slot": "27",
+      "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
+    },
+    {
+      "astId": 82268,
+      "contract": "test/deal/ConfigContract.t.sol:ConfigContract",
+      "label": "deployment",
+      "offset": 0,
+      "slot": "28",
+      "type": "t_struct(Deployment)83901_storage"
+    },
+    {
+      "astId": 82271,
+      "contract": "test/deal/ConfigContract.t.sol:ConfigContract",
+      "label": "config",
+      "offset": 0,
+      "slot": "34",
+      "type": "t_contract(ConfigTestContract)82670"
+    },
+    {
+      "astId": 82274,
+      "contract": "test/deal/ConfigContract.t.sol:ConfigContract",
+      "label": "configParams",
+      "offset": 0,
+      "slot": "35",
+      "type": "t_struct(ConfigContractParams)82246_storage"
+    }
+  ],
+  "ConfigContract.t.sol/ConfigTestContract.json": [
+    {
+      "astId": 4469,
+      "contract": "test/deal/ConfigContract.t.sol:ConfigTestContract",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "test/deal/ConfigContract.t.sol:ConfigTestContract",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "ConfigWithPublicInternals.sol/ConfigWithPublicInternals.json": [
+    {
+      "astId": 4469,
+      "contract": "src/dev/test/ConfigWithPublicInternals.sol:ConfigWithPublicInternals",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/dev/test/ConfigWithPublicInternals.sol:ConfigWithPublicInternals",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "Context.sol/Context.json": [],
+  "Core.sol/Core.json": [
+    {
+      "astId": 4469,
+      "contract": "src/core/Core.sol:Core",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/core/Core.sol:Core",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    },
+    {
+      "astId": 4451,
+      "contract": "src/core/Core.sol:Core",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_array(t_uint256)50_storage"
+    },
+    {
+      "astId": 4766,
+      "contract": "src/core/Core.sol:Core",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "51",
+      "type": "t_array(t_uint256)50_storage"
+    }
+  ],
+  "Core.t.sol/CoreTest.json": [
+    {
+      "astId": 7636,
+      "contract": "test/core/Core.t.sol:CoreTest",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 5371,
+      "contract": "test/core/Core.t.sol:CoreTest",
+      "label": "IS_TEST",
+      "offset": 0,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 5373,
+      "contract": "test/core/Core.t.sol:CoreTest",
+      "label": "_failed",
+      "offset": 1,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9130,
+      "contract": "test/core/Core.t.sol:CoreTest",
+      "label": "stdChainsInitialized",
+      "offset": 2,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9151,
+      "contract": "test/core/Core.t.sol:CoreTest",
+      "label": "chains",
+      "offset": 0,
+      "slot": "8",
+      "type": "t_mapping(t_string_memory_ptr,t_struct(Chain)9146_storage)"
+    },
+    {
+      "astId": 9155,
+      "contract": "test/core/Core.t.sol:CoreTest",
+      "label": "defaultRpcUrls",
+      "offset": 0,
+      "slot": "9",
+      "type": "t_mapping(t_string_memory_ptr,t_string_storage)"
+    },
+    {
+      "astId": 9159,
+      "contract": "test/core/Core.t.sol:CoreTest",
+      "label": "idToAlias",
+      "offset": 0,
+      "slot": "10",
+      "type": "t_mapping(t_uint256,t_string_storage)"
+    },
+    {
+      "astId": 9162,
+      "contract": "test/core/Core.t.sol:CoreTest",
+      "label": "fallbackToDefaultRpcUrls",
+      "offset": 0,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9902,
+      "contract": "test/core/Core.t.sol:CoreTest",
+      "label": "gasMeteringOff",
+      "offset": 1,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 11939,
+      "contract": "test/core/Core.t.sol:CoreTest",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "12",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 12807,
+      "contract": "test/core/Core.t.sol:CoreTest",
+      "label": "_excludedContracts",
+      "offset": 0,
+      "slot": "19",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12810,
+      "contract": "test/core/Core.t.sol:CoreTest",
+      "label": "_excludedSenders",
+      "offset": 0,
+      "slot": "20",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12813,
+      "contract": "test/core/Core.t.sol:CoreTest",
+      "label": "_targetedContracts",
+      "offset": 0,
+      "slot": "21",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12816,
+      "contract": "test/core/Core.t.sol:CoreTest",
+      "label": "_targetedSenders",
+      "offset": 0,
+      "slot": "22",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12819,
+      "contract": "test/core/Core.t.sol:CoreTest",
+      "label": "_excludedArtifacts",
+      "offset": 0,
+      "slot": "23",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12822,
+      "contract": "test/core/Core.t.sol:CoreTest",
+      "label": "_targetedArtifacts",
+      "offset": 0,
+      "slot": "24",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12826,
+      "contract": "test/core/Core.t.sol:CoreTest",
+      "label": "_targetedArtifactSelectors",
+      "offset": 0,
+      "slot": "25",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12830,
+      "contract": "test/core/Core.t.sol:CoreTest",
+      "label": "_targetedSelectors",
+      "offset": 0,
+      "slot": "26",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12834,
+      "contract": "test/core/Core.t.sol:CoreTest",
+      "label": "_targetedInterfaces",
+      "offset": 0,
+      "slot": "27",
+      "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
+    },
+    {
+      "astId": 73567,
+      "contract": "test/core/Core.t.sol:CoreTest",
+      "label": "deployment",
+      "offset": 0,
+      "slot": "28",
+      "type": "t_struct(Deployment)83901_storage"
+    }
+  ],
+  "DataCapTypes.sol/DataCapTypes.json": [],
+  "Deal.sol/Deal.json": [
+    {
+      "astId": 4469,
+      "contract": "src/deal/Deal.sol:Deal",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/deal/Deal.sol:Deal",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    },
+    {
+      "astId": 5171,
+      "contract": "src/deal/Deal.sol:Deal",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_array(t_uint256)50_storage"
+    }
+  ],
+  "DealFactory.sol/DealFactory.json": [
+    {
+      "astId": 4469,
+      "contract": "src/core/modules/market/DealFactory.sol:DealFactory",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/core/modules/market/DealFactory.sol:DealFactory",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    },
+    {
+      "astId": 4451,
+      "contract": "src/core/modules/market/DealFactory.sol:DealFactory",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_array(t_uint256)50_storage"
+    },
+    {
+      "astId": 4766,
+      "contract": "src/core/modules/market/DealFactory.sol:DealFactory",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "51",
+      "type": "t_array(t_uint256)50_storage"
+    }
+  ],
+  "DealFactory.t.sol/DealFactoryTest.json": [
+    {
+      "astId": 7636,
+      "contract": "test/core/market/DealFactory.t.sol:DealFactoryTest",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 5371,
+      "contract": "test/core/market/DealFactory.t.sol:DealFactoryTest",
+      "label": "IS_TEST",
+      "offset": 0,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 5373,
+      "contract": "test/core/market/DealFactory.t.sol:DealFactoryTest",
+      "label": "_failed",
+      "offset": 1,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9130,
+      "contract": "test/core/market/DealFactory.t.sol:DealFactoryTest",
+      "label": "stdChainsInitialized",
+      "offset": 2,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9151,
+      "contract": "test/core/market/DealFactory.t.sol:DealFactoryTest",
+      "label": "chains",
+      "offset": 0,
+      "slot": "8",
+      "type": "t_mapping(t_string_memory_ptr,t_struct(Chain)9146_storage)"
+    },
+    {
+      "astId": 9155,
+      "contract": "test/core/market/DealFactory.t.sol:DealFactoryTest",
+      "label": "defaultRpcUrls",
+      "offset": 0,
+      "slot": "9",
+      "type": "t_mapping(t_string_memory_ptr,t_string_storage)"
+    },
+    {
+      "astId": 9159,
+      "contract": "test/core/market/DealFactory.t.sol:DealFactoryTest",
+      "label": "idToAlias",
+      "offset": 0,
+      "slot": "10",
+      "type": "t_mapping(t_uint256,t_string_storage)"
+    },
+    {
+      "astId": 9162,
+      "contract": "test/core/market/DealFactory.t.sol:DealFactoryTest",
+      "label": "fallbackToDefaultRpcUrls",
+      "offset": 0,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9902,
+      "contract": "test/core/market/DealFactory.t.sol:DealFactoryTest",
+      "label": "gasMeteringOff",
+      "offset": 1,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 11939,
+      "contract": "test/core/market/DealFactory.t.sol:DealFactoryTest",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "12",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 12807,
+      "contract": "test/core/market/DealFactory.t.sol:DealFactoryTest",
+      "label": "_excludedContracts",
+      "offset": 0,
+      "slot": "19",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12810,
+      "contract": "test/core/market/DealFactory.t.sol:DealFactoryTest",
+      "label": "_excludedSenders",
+      "offset": 0,
+      "slot": "20",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12813,
+      "contract": "test/core/market/DealFactory.t.sol:DealFactoryTest",
+      "label": "_targetedContracts",
+      "offset": 0,
+      "slot": "21",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12816,
+      "contract": "test/core/market/DealFactory.t.sol:DealFactoryTest",
+      "label": "_targetedSenders",
+      "offset": 0,
+      "slot": "22",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12819,
+      "contract": "test/core/market/DealFactory.t.sol:DealFactoryTest",
+      "label": "_excludedArtifacts",
+      "offset": 0,
+      "slot": "23",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12822,
+      "contract": "test/core/market/DealFactory.t.sol:DealFactoryTest",
+      "label": "_targetedArtifacts",
+      "offset": 0,
+      "slot": "24",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12826,
+      "contract": "test/core/market/DealFactory.t.sol:DealFactoryTest",
+      "label": "_targetedArtifactSelectors",
+      "offset": 0,
+      "slot": "25",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12830,
+      "contract": "test/core/market/DealFactory.t.sol:DealFactoryTest",
+      "label": "_targetedSelectors",
+      "offset": 0,
+      "slot": "26",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12834,
+      "contract": "test/core/market/DealFactory.t.sol:DealFactoryTest",
+      "label": "_targetedInterfaces",
+      "offset": 0,
+      "slot": "27",
+      "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
+    },
+    {
+      "astId": 75892,
+      "contract": "test/core/market/DealFactory.t.sol:DealFactoryTest",
+      "label": "deployment",
+      "offset": 0,
+      "slot": "28",
+      "type": "t_struct(Deployment)83901_storage"
+    }
+  ],
+  "DealHelper.sol/DealHelper.json": [],
+  "DealProxy.sol/DealProxy.json": [],
+  "DealSnapshot.sol/DealSnapshot.json": [],
+  "DealWithPublicInternals.sol/DealWithPublicInternals.json": [
+    {
+      "astId": 4469,
+      "contract": "src/dev/test/DealWithPublicInternals.sol:DealWithPublicInternals",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/dev/test/DealWithPublicInternals.sol:DealWithPublicInternals",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    },
+    {
+      "astId": 5171,
+      "contract": "src/dev/test/DealWithPublicInternals.sol:DealWithPublicInternals",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_array(t_uint256)50_storage"
+    }
+  ],
+  "Deploy.s.sol/DeployContracts.json": [
+    {
+      "astId": 7636,
+      "contract": "script/Deploy.s.sol:DeployContracts",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 57224,
+      "contract": "script/Deploy.s.sol:DeployContracts",
+      "label": "deployments",
+      "offset": 0,
+      "slot": "7",
+      "type": "t_struct(Deployments)57221_storage"
+    },
+    {
+      "astId": 9130,
+      "contract": "script/Deploy.s.sol:DeployContracts",
+      "label": "stdChainsInitialized",
+      "offset": 0,
+      "slot": "9",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9151,
+      "contract": "script/Deploy.s.sol:DeployContracts",
+      "label": "chains",
+      "offset": 0,
+      "slot": "10",
+      "type": "t_mapping(t_string_memory_ptr,t_struct(Chain)9146_storage)"
+    },
+    {
+      "astId": 9155,
+      "contract": "script/Deploy.s.sol:DeployContracts",
+      "label": "defaultRpcUrls",
+      "offset": 0,
+      "slot": "11",
+      "type": "t_mapping(t_string_memory_ptr,t_string_storage)"
+    },
+    {
+      "astId": 9159,
+      "contract": "script/Deploy.s.sol:DeployContracts",
+      "label": "idToAlias",
+      "offset": 0,
+      "slot": "12",
+      "type": "t_mapping(t_uint256,t_string_storage)"
+    },
+    {
+      "astId": 9162,
+      "contract": "script/Deploy.s.sol:DeployContracts",
+      "label": "fallbackToDefaultRpcUrls",
+      "offset": 0,
+      "slot": "13",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9902,
+      "contract": "script/Deploy.s.sol:DeployContracts",
+      "label": "gasMeteringOff",
+      "offset": 1,
+      "slot": "13",
+      "type": "t_bool"
+    },
+    {
+      "astId": 7687,
+      "contract": "script/Deploy.s.sol:DeployContracts",
+      "label": "IS_SCRIPT",
+      "offset": 2,
+      "slot": "13",
+      "type": "t_bool"
+    },
+    {
+      "astId": 55314,
+      "contract": "script/Deploy.s.sol:DeployContracts",
+      "label": "fullDeploymentsPath",
+      "offset": 0,
+      "slot": "14",
+      "type": "t_string_storage"
+    }
+  ],
+  "DeployDealSystem.sol/DeployDealSystem.json": [],
+  "DeployKras.s.sol/DeployKras.json": [
+    {
+      "astId": 7636,
+      "contract": "script/DeployKras.s.sol:DeployKras",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 57224,
+      "contract": "script/DeployKras.s.sol:DeployKras",
+      "label": "deployments",
+      "offset": 0,
+      "slot": "7",
+      "type": "t_struct(Deployments)57221_storage"
+    },
+    {
+      "astId": 9130,
+      "contract": "script/DeployKras.s.sol:DeployKras",
+      "label": "stdChainsInitialized",
+      "offset": 0,
+      "slot": "9",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9151,
+      "contract": "script/DeployKras.s.sol:DeployKras",
+      "label": "chains",
+      "offset": 0,
+      "slot": "10",
+      "type": "t_mapping(t_string_memory_ptr,t_struct(Chain)9146_storage)"
+    },
+    {
+      "astId": 9155,
+      "contract": "script/DeployKras.s.sol:DeployKras",
+      "label": "defaultRpcUrls",
+      "offset": 0,
+      "slot": "11",
+      "type": "t_mapping(t_string_memory_ptr,t_string_storage)"
+    },
+    {
+      "astId": 9159,
+      "contract": "script/DeployKras.s.sol:DeployKras",
+      "label": "idToAlias",
+      "offset": 0,
+      "slot": "12",
+      "type": "t_mapping(t_uint256,t_string_storage)"
+    },
+    {
+      "astId": 9162,
+      "contract": "script/DeployKras.s.sol:DeployKras",
+      "label": "fallbackToDefaultRpcUrls",
+      "offset": 0,
+      "slot": "13",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9902,
+      "contract": "script/DeployKras.s.sol:DeployKras",
+      "label": "gasMeteringOff",
+      "offset": 1,
+      "slot": "13",
+      "type": "t_bool"
+    },
+    {
+      "astId": 7687,
+      "contract": "script/DeployKras.s.sol:DeployKras",
+      "label": "IS_SCRIPT",
+      "offset": 2,
+      "slot": "13",
+      "type": "t_bool"
+    },
+    {
+      "astId": 56610,
+      "contract": "script/DeployKras.s.sol:DeployKras",
+      "label": "fullDeploymentsPath",
+      "offset": 0,
+      "slot": "14",
+      "type": "t_string_storage"
+    }
+  ],
+  "Depoyments.sol/Depoyments.json": [
+    {
+      "astId": 7636,
+      "contract": "script/utils/Depoyments.sol:Depoyments",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 57224,
+      "contract": "script/utils/Depoyments.sol:Depoyments",
+      "label": "deployments",
+      "offset": 0,
+      "slot": "7",
+      "type": "t_struct(Deployments)57221_storage"
+    }
+  ],
+  "ERC1967Proxy.sol/ERC1967Proxy.json": [],
+  "ERC1967Upgrade.sol/ERC1967Upgrade.json": [],
+  "ERC1967UpgradeUpgradeable.sol/ERC1967UpgradeUpgradeable.json": [
+    {
+      "astId": 4469,
+      "contract": "lib/filecoin-solidity/lib/openzeppelin-contracts-upgradeable/contracts/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:ERC1967UpgradeUpgradeable",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "lib/filecoin-solidity/lib/openzeppelin-contracts-upgradeable/contracts/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:ERC1967UpgradeUpgradeable",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    },
+    {
+      "astId": 4451,
+      "contract": "lib/filecoin-solidity/lib/openzeppelin-contracts-upgradeable/contracts/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:ERC1967UpgradeUpgradeable",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_array(t_uint256)50_storage"
+    }
+  ],
+  "ERC20.sol/ERC20.json": [
+    {
+      "astId": 50734,
+      "contract": "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol:ERC20",
+      "label": "_balances",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_mapping(t_address,t_uint256)"
+    },
+    {
+      "astId": 50740,
+      "contract": "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol:ERC20",
+      "label": "_allowances",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_mapping(t_address,t_mapping(t_address,t_uint256))"
+    },
+    {
+      "astId": 50742,
+      "contract": "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol:ERC20",
+      "label": "_totalSupply",
+      "offset": 0,
+      "slot": "2",
+      "type": "t_uint256"
+    },
+    {
+      "astId": 50744,
+      "contract": "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol:ERC20",
+      "label": "_name",
+      "offset": 0,
+      "slot": "3",
+      "type": "t_string_storage"
+    },
+    {
+      "astId": 50746,
+      "contract": "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol:ERC20",
+      "label": "_symbol",
+      "offset": 0,
+      "slot": "4",
+      "type": "t_string_storage"
+    }
+  ],
+  "EnumerableSet.sol/EnumerableSet.json": [],
+  "EpochController.sol/EpochController.json": [
+    {
+      "astId": 4469,
+      "contract": "src/core/EpochController.sol:EpochController",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/core/EpochController.sol:EpochController",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "FilecoinCbor.sol/FilecoinCBOR.json": [],
+  "GetStatus.t.sol/GetStatus.json": [
+    {
+      "astId": 7636,
+      "contract": "test/deal/GetStatus.t.sol:GetStatus",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 5371,
+      "contract": "test/deal/GetStatus.t.sol:GetStatus",
+      "label": "IS_TEST",
+      "offset": 0,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 5373,
+      "contract": "test/deal/GetStatus.t.sol:GetStatus",
+      "label": "_failed",
+      "offset": 1,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9130,
+      "contract": "test/deal/GetStatus.t.sol:GetStatus",
+      "label": "stdChainsInitialized",
+      "offset": 2,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9151,
+      "contract": "test/deal/GetStatus.t.sol:GetStatus",
+      "label": "chains",
+      "offset": 0,
+      "slot": "8",
+      "type": "t_mapping(t_string_memory_ptr,t_struct(Chain)9146_storage)"
+    },
+    {
+      "astId": 9155,
+      "contract": "test/deal/GetStatus.t.sol:GetStatus",
+      "label": "defaultRpcUrls",
+      "offset": 0,
+      "slot": "9",
+      "type": "t_mapping(t_string_memory_ptr,t_string_storage)"
+    },
+    {
+      "astId": 9159,
+      "contract": "test/deal/GetStatus.t.sol:GetStatus",
+      "label": "idToAlias",
+      "offset": 0,
+      "slot": "10",
+      "type": "t_mapping(t_uint256,t_string_storage)"
+    },
+    {
+      "astId": 9162,
+      "contract": "test/deal/GetStatus.t.sol:GetStatus",
+      "label": "fallbackToDefaultRpcUrls",
+      "offset": 0,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9902,
+      "contract": "test/deal/GetStatus.t.sol:GetStatus",
+      "label": "gasMeteringOff",
+      "offset": 1,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 11939,
+      "contract": "test/deal/GetStatus.t.sol:GetStatus",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "12",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 12807,
+      "contract": "test/deal/GetStatus.t.sol:GetStatus",
+      "label": "_excludedContracts",
+      "offset": 0,
+      "slot": "19",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12810,
+      "contract": "test/deal/GetStatus.t.sol:GetStatus",
+      "label": "_excludedSenders",
+      "offset": 0,
+      "slot": "20",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12813,
+      "contract": "test/deal/GetStatus.t.sol:GetStatus",
+      "label": "_targetedContracts",
+      "offset": 0,
+      "slot": "21",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12816,
+      "contract": "test/deal/GetStatus.t.sol:GetStatus",
+      "label": "_targetedSenders",
+      "offset": 0,
+      "slot": "22",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12819,
+      "contract": "test/deal/GetStatus.t.sol:GetStatus",
+      "label": "_excludedArtifacts",
+      "offset": 0,
+      "slot": "23",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12822,
+      "contract": "test/deal/GetStatus.t.sol:GetStatus",
+      "label": "_targetedArtifacts",
+      "offset": 0,
+      "slot": "24",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12826,
+      "contract": "test/deal/GetStatus.t.sol:GetStatus",
+      "label": "_targetedArtifactSelectors",
+      "offset": 0,
+      "slot": "25",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12830,
+      "contract": "test/deal/GetStatus.t.sol:GetStatus",
+      "label": "_targetedSelectors",
+      "offset": 0,
+      "slot": "26",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12834,
+      "contract": "test/deal/GetStatus.t.sol:GetStatus",
+      "label": "_targetedInterfaces",
+      "offset": 0,
+      "slot": "27",
+      "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
+    },
+    {
+      "astId": 82697,
+      "contract": "test/deal/GetStatus.t.sol:GetStatus",
+      "label": "deployment",
+      "offset": 0,
+      "slot": "28",
+      "type": "t_struct(Deployment)83901_storage"
+    },
+    {
+      "astId": 82700,
+      "contract": "test/deal/GetStatus.t.sol:GetStatus",
+      "label": "testCore",
+      "offset": 0,
+      "slot": "34",
+      "type": "t_contract(TestCore)83094"
+    },
+    {
+      "astId": 82703,
+      "contract": "test/deal/GetStatus.t.sol:GetStatus",
+      "label": "dealContract",
+      "offset": 0,
+      "slot": "35",
+      "type": "t_contract(TestDealContract)83275"
+    }
+  ],
+  "GetStatus.t.sol/TestCore.json": [
+    {
+      "astId": 83075,
+      "contract": "test/deal/GetStatus.t.sol:TestCore",
+      "label": "currentEpoch",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint256"
+    }
+  ],
+  "GetStatus.t.sol/TestDealContract.json": [
+    {
+      "astId": 4469,
+      "contract": "test/deal/GetStatus.t.sol:TestDealContract",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "test/deal/GetStatus.t.sol:TestDealContract",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    },
+    {
+      "astId": 5171,
+      "contract": "test/deal/GetStatus.t.sol:TestDealContract",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_array(t_uint256)50_storage"
+    },
+    {
+      "astId": 83098,
+      "contract": "test/deal/GetStatus.t.sol:TestDealContract",
+      "label": "_freeBalance",
+      "offset": 0,
+      "slot": "51",
+      "type": "t_uint256"
+    }
+  ],
+  "GlobalConst.sol/GlobalConst.json": [
+    {
+      "astId": 4469,
+      "contract": "src/core/GlobalConst.sol:GlobalConst",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/core/GlobalConst.sol:GlobalConst",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "IBaseModule.sol/IBaseModule.json": [],
+  "IBeacon.sol/IBeacon.json": [],
+  "IBeaconUpgradeable.sol/IBeaconUpgradeable.json": [],
+  "ICapacity.sol/ICapacity.json": [],
+  "ICapacityConst.sol/ICapacityConst.json": [],
+  "ICapacityConstWithPublicInternals.sol/ICapacityConstWithPublicInternals.json": [],
+  "IConfig.sol/IConfig.json": [],
+  "IConfigWithPublicInternals.sol/IConfigWithPublicInternals.json": [],
+  "ICore.sol/ICore.json": [],
+  "IDeal.sol/IDeal.json": [],
+  "IDealFactory.sol/IDealFactory.json": [],
+  "IDealWithPublicInternals.sol/IDealWithPublicInternals.json": [],
+  "IERC1967.sol/IERC1967.json": [],
+  "IERC1967Upgradeable.sol/IERC1967Upgradeable.json": [],
+  "IERC20.sol/IERC20.json": [],
+  "IERC20Metadata.sol/IERC20Metadata.json": [],
+  "IERC20Permit.sol/IERC20Permit.json": [],
+  "IEpochController.sol/IEpochController.json": [],
+  "IGlobalConst.sol/IGlobalConst.json": [],
+  "IMarket.sol/IMarket.json": [],
+  "IMatcher.sol/IMatcher.json": [],
+  "IMulticall3.sol/IMulticall3.json": [],
+  "IOffer.sol/IOffer.json": [],
+  "IWorkerManager.sol/IWorkerManager.json": [],
+  "Initializable.sol/Initializable.json": [
+    {
+      "astId": 4469,
+      "contract": "lib/filecoin-solidity/lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol:Initializable",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "lib/filecoin-solidity/lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol:Initializable",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "Market.sol/Market.json": [
+    {
+      "astId": 4469,
+      "contract": "src/core/modules/market/Market.sol:Market",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/core/modules/market/Market.sol:Market",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    },
+    {
+      "astId": 4451,
+      "contract": "src/core/modules/market/Market.sol:Market",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_array(t_uint256)50_storage"
+    },
+    {
+      "astId": 4766,
+      "contract": "src/core/modules/market/Market.sol:Market",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "51",
+      "type": "t_array(t_uint256)50_storage"
+    },
+    {
+      "astId": 5171,
+      "contract": "src/core/modules/market/Market.sol:Market",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "101",
+      "type": "t_array(t_uint256)50_storage"
+    }
+  ],
+  "Market.t.sol/MarketTest.json": [
+    {
+      "astId": 7636,
+      "contract": "test/core/market/Market.t.sol:MarketTest",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 5371,
+      "contract": "test/core/market/Market.t.sol:MarketTest",
+      "label": "IS_TEST",
+      "offset": 0,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 5373,
+      "contract": "test/core/market/Market.t.sol:MarketTest",
+      "label": "_failed",
+      "offset": 1,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9130,
+      "contract": "test/core/market/Market.t.sol:MarketTest",
+      "label": "stdChainsInitialized",
+      "offset": 2,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9151,
+      "contract": "test/core/market/Market.t.sol:MarketTest",
+      "label": "chains",
+      "offset": 0,
+      "slot": "8",
+      "type": "t_mapping(t_string_memory_ptr,t_struct(Chain)9146_storage)"
+    },
+    {
+      "astId": 9155,
+      "contract": "test/core/market/Market.t.sol:MarketTest",
+      "label": "defaultRpcUrls",
+      "offset": 0,
+      "slot": "9",
+      "type": "t_mapping(t_string_memory_ptr,t_string_storage)"
+    },
+    {
+      "astId": 9159,
+      "contract": "test/core/market/Market.t.sol:MarketTest",
+      "label": "idToAlias",
+      "offset": 0,
+      "slot": "10",
+      "type": "t_mapping(t_uint256,t_string_storage)"
+    },
+    {
+      "astId": 9162,
+      "contract": "test/core/market/Market.t.sol:MarketTest",
+      "label": "fallbackToDefaultRpcUrls",
+      "offset": 0,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9902,
+      "contract": "test/core/market/Market.t.sol:MarketTest",
+      "label": "gasMeteringOff",
+      "offset": 1,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 11939,
+      "contract": "test/core/market/Market.t.sol:MarketTest",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "12",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 12807,
+      "contract": "test/core/market/Market.t.sol:MarketTest",
+      "label": "_excludedContracts",
+      "offset": 0,
+      "slot": "19",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12810,
+      "contract": "test/core/market/Market.t.sol:MarketTest",
+      "label": "_excludedSenders",
+      "offset": 0,
+      "slot": "20",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12813,
+      "contract": "test/core/market/Market.t.sol:MarketTest",
+      "label": "_targetedContracts",
+      "offset": 0,
+      "slot": "21",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12816,
+      "contract": "test/core/market/Market.t.sol:MarketTest",
+      "label": "_targetedSenders",
+      "offset": 0,
+      "slot": "22",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12819,
+      "contract": "test/core/market/Market.t.sol:MarketTest",
+      "label": "_excludedArtifacts",
+      "offset": 0,
+      "slot": "23",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12822,
+      "contract": "test/core/market/Market.t.sol:MarketTest",
+      "label": "_targetedArtifacts",
+      "offset": 0,
+      "slot": "24",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12826,
+      "contract": "test/core/market/Market.t.sol:MarketTest",
+      "label": "_targetedArtifactSelectors",
+      "offset": 0,
+      "slot": "25",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12830,
+      "contract": "test/core/market/Market.t.sol:MarketTest",
+      "label": "_targetedSelectors",
+      "offset": 0,
+      "slot": "26",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12834,
+      "contract": "test/core/market/Market.t.sol:MarketTest",
+      "label": "_targetedInterfaces",
+      "offset": 0,
+      "slot": "27",
+      "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
+    },
+    {
+      "astId": 76350,
+      "contract": "test/core/market/Market.t.sol:MarketTest",
+      "label": "deployment",
+      "offset": 0,
+      "slot": "28",
+      "type": "t_struct(Deployment)83901_storage"
+    },
+    {
+      "astId": 76354,
+      "contract": "test/core/market/Market.t.sol:MarketTest",
+      "label": "registerPeers",
+      "offset": 0,
+      "slot": "34",
+      "type": "t_array(t_struct(RegisterComputePeer)67247_storage)dyn_storage"
+    },
+    {
+      "astId": 76356,
+      "contract": "test/core/market/Market.t.sol:MarketTest",
+      "label": "minPricePerWorkerEpoch",
+      "offset": 0,
+      "slot": "35",
+      "type": "t_uint256"
+    },
+    {
+      "astId": 76358,
+      "contract": "test/core/market/Market.t.sol:MarketTest",
+      "label": "paymentToken",
+      "offset": 0,
+      "slot": "36",
+      "type": "t_address"
+    },
+    {
+      "astId": 76362,
+      "contract": "test/core/market/Market.t.sol:MarketTest",
+      "label": "effectors",
+      "offset": 0,
+      "slot": "37",
+      "type": "t_array(t_struct(CIDV1)70435_storage)dyn_storage"
+    },
+    {
+      "astId": 76364,
+      "contract": "test/core/market/Market.t.sol:MarketTest",
+      "label": "minProtocolVersion",
+      "offset": 0,
+      "slot": "38",
+      "type": "t_uint256"
+    },
+    {
+      "astId": 76366,
+      "contract": "test/core/market/Market.t.sol:MarketTest",
+      "label": "maxProtocolVersion",
+      "offset": 0,
+      "slot": "39",
+      "type": "t_uint256"
+    }
+  ],
+  "Matcher.sol/Matcher.json": [
+    {
+      "astId": 4469,
+      "contract": "src/core/modules/market/Matcher.sol:Matcher",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/core/modules/market/Matcher.sol:Matcher",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "Matcher.t.sol/DealMock.json": [
+    {
+      "astId": 77812,
+      "contract": "test/core/market/Matcher.t.sol:DealMock",
+      "label": "pricePerWorkerEpoch",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint256"
+    },
+    {
+      "astId": 77814,
+      "contract": "test/core/market/Matcher.t.sol:DealMock",
+      "label": "paymentToken",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_address"
+    },
+    {
+      "astId": 77817,
+      "contract": "test/core/market/Matcher.t.sol:DealMock",
+      "label": "appCID",
+      "offset": 0,
+      "slot": "2",
+      "type": "t_struct(CIDV1)70435_storage"
+    },
+    {
+      "astId": 77819,
+      "contract": "test/core/market/Matcher.t.sol:DealMock",
+      "label": "creationBlock",
+      "offset": 0,
+      "slot": "4",
+      "type": "t_uint256"
+    },
+    {
+      "astId": 77821,
+      "contract": "test/core/market/Matcher.t.sol:DealMock",
+      "label": "computeUnitCount",
+      "offset": 0,
+      "slot": "5",
+      "type": "t_uint256"
+    },
+    {
+      "astId": 77823,
+      "contract": "test/core/market/Matcher.t.sol:DealMock",
+      "label": "targetWorkers",
+      "offset": 0,
+      "slot": "6",
+      "type": "t_uint256"
+    },
+    {
+      "astId": 77825,
+      "contract": "test/core/market/Matcher.t.sol:DealMock",
+      "label": "maxWorkersPerProvider",
+      "offset": 0,
+      "slot": "7",
+      "type": "t_uint256"
+    },
+    {
+      "astId": 77827,
+      "contract": "test/core/market/Matcher.t.sol:DealMock",
+      "label": "minWorkers",
+      "offset": 0,
+      "slot": "8",
+      "type": "t_uint256"
+    },
+    {
+      "astId": 77829,
+      "contract": "test/core/market/Matcher.t.sol:DealMock",
+      "label": "owner",
+      "offset": 0,
+      "slot": "9",
+      "type": "t_address"
+    },
+    {
+      "astId": 77831,
+      "contract": "test/core/market/Matcher.t.sol:DealMock",
+      "label": "protocolVersion",
+      "offset": 0,
+      "slot": "10",
+      "type": "t_uint256"
+    },
+    {
+      "astId": 77835,
+      "contract": "test/core/market/Matcher.t.sol:DealMock",
+      "label": "_effectors",
+      "offset": 0,
+      "slot": "11",
+      "type": "t_array(t_struct(CIDV1)70435_storage)dyn_storage"
+    },
+    {
+      "astId": 77839,
+      "contract": "test/core/market/Matcher.t.sol:DealMock",
+      "label": "unitExists",
+      "offset": 0,
+      "slot": "12",
+      "type": "t_mapping(t_bytes32,t_bool)"
+    },
+    {
+      "astId": 77843,
+      "contract": "test/core/market/Matcher.t.sol:DealMock",
+      "label": "computeProviderByUnitId",
+      "offset": 0,
+      "slot": "13",
+      "type": "t_mapping(t_bytes32,t_address)"
+    },
+    {
+      "astId": 77847,
+      "contract": "test/core/market/Matcher.t.sol:DealMock",
+      "label": "peerIdByUnitId",
+      "offset": 0,
+      "slot": "14",
+      "type": "t_mapping(t_bytes32,t_bytes32)"
+    },
+    {
+      "astId": 77851,
+      "contract": "test/core/market/Matcher.t.sol:DealMock",
+      "label": "computeUnitCountByProvider",
+      "offset": 0,
+      "slot": "15",
+      "type": "t_mapping(t_address,t_uint256)"
+    },
+    {
+      "astId": 77855,
+      "contract": "test/core/market/Matcher.t.sol:DealMock",
+      "label": "isComputePeerExist",
+      "offset": 0,
+      "slot": "16",
+      "type": "t_mapping(t_bytes32,t_bool)"
+    }
+  ],
+  "Matcher.t.sol/MatcherTest.json": [
+    {
+      "astId": 7636,
+      "contract": "test/core/market/Matcher.t.sol:MatcherTest",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 5371,
+      "contract": "test/core/market/Matcher.t.sol:MatcherTest",
+      "label": "IS_TEST",
+      "offset": 0,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 5373,
+      "contract": "test/core/market/Matcher.t.sol:MatcherTest",
+      "label": "_failed",
+      "offset": 1,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9130,
+      "contract": "test/core/market/Matcher.t.sol:MatcherTest",
+      "label": "stdChainsInitialized",
+      "offset": 2,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9151,
+      "contract": "test/core/market/Matcher.t.sol:MatcherTest",
+      "label": "chains",
+      "offset": 0,
+      "slot": "8",
+      "type": "t_mapping(t_string_memory_ptr,t_struct(Chain)9146_storage)"
+    },
+    {
+      "astId": 9155,
+      "contract": "test/core/market/Matcher.t.sol:MatcherTest",
+      "label": "defaultRpcUrls",
+      "offset": 0,
+      "slot": "9",
+      "type": "t_mapping(t_string_memory_ptr,t_string_storage)"
+    },
+    {
+      "astId": 9159,
+      "contract": "test/core/market/Matcher.t.sol:MatcherTest",
+      "label": "idToAlias",
+      "offset": 0,
+      "slot": "10",
+      "type": "t_mapping(t_uint256,t_string_storage)"
+    },
+    {
+      "astId": 9162,
+      "contract": "test/core/market/Matcher.t.sol:MatcherTest",
+      "label": "fallbackToDefaultRpcUrls",
+      "offset": 0,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9902,
+      "contract": "test/core/market/Matcher.t.sol:MatcherTest",
+      "label": "gasMeteringOff",
+      "offset": 1,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 11939,
+      "contract": "test/core/market/Matcher.t.sol:MatcherTest",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "12",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 12807,
+      "contract": "test/core/market/Matcher.t.sol:MatcherTest",
+      "label": "_excludedContracts",
+      "offset": 0,
+      "slot": "19",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12810,
+      "contract": "test/core/market/Matcher.t.sol:MatcherTest",
+      "label": "_excludedSenders",
+      "offset": 0,
+      "slot": "20",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12813,
+      "contract": "test/core/market/Matcher.t.sol:MatcherTest",
+      "label": "_targetedContracts",
+      "offset": 0,
+      "slot": "21",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12816,
+      "contract": "test/core/market/Matcher.t.sol:MatcherTest",
+      "label": "_targetedSenders",
+      "offset": 0,
+      "slot": "22",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12819,
+      "contract": "test/core/market/Matcher.t.sol:MatcherTest",
+      "label": "_excludedArtifacts",
+      "offset": 0,
+      "slot": "23",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12822,
+      "contract": "test/core/market/Matcher.t.sol:MatcherTest",
+      "label": "_targetedArtifacts",
+      "offset": 0,
+      "slot": "24",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12826,
+      "contract": "test/core/market/Matcher.t.sol:MatcherTest",
+      "label": "_targetedArtifactSelectors",
+      "offset": 0,
+      "slot": "25",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12830,
+      "contract": "test/core/market/Matcher.t.sol:MatcherTest",
+      "label": "_targetedSelectors",
+      "offset": 0,
+      "slot": "26",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12834,
+      "contract": "test/core/market/Matcher.t.sol:MatcherTest",
+      "label": "_targetedInterfaces",
+      "offset": 0,
+      "slot": "27",
+      "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
+    },
+    {
+      "astId": 76930,
+      "contract": "test/core/market/Matcher.t.sol:MatcherTest",
+      "label": "deployment",
+      "offset": 0,
+      "slot": "28",
+      "type": "t_struct(Deployment)83901_storage"
+    }
+  ],
+  "Math.sol/Math.json": [],
+  "Misc.sol/Misc.json": [],
+  "MockERC20.sol/MockERC20.json": [
+    {
+      "astId": 36015,
+      "contract": "lib/forge-std/src/mocks/MockERC20.sol:MockERC20",
+      "label": "name",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_string_storage"
+    },
+    {
+      "astId": 36017,
+      "contract": "lib/forge-std/src/mocks/MockERC20.sol:MockERC20",
+      "label": "symbol",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_string_storage"
+    },
+    {
+      "astId": 36019,
+      "contract": "lib/forge-std/src/mocks/MockERC20.sol:MockERC20",
+      "label": "decimals",
+      "offset": 0,
+      "slot": "2",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 36021,
+      "contract": "lib/forge-std/src/mocks/MockERC20.sol:MockERC20",
+      "label": "totalSupply",
+      "offset": 0,
+      "slot": "3",
+      "type": "t_uint256"
+    },
+    {
+      "astId": 36025,
+      "contract": "lib/forge-std/src/mocks/MockERC20.sol:MockERC20",
+      "label": "balanceOf",
+      "offset": 0,
+      "slot": "4",
+      "type": "t_mapping(t_address,t_uint256)"
+    },
+    {
+      "astId": 36031,
+      "contract": "lib/forge-std/src/mocks/MockERC20.sol:MockERC20",
+      "label": "allowance",
+      "offset": 0,
+      "slot": "5",
+      "type": "t_mapping(t_address,t_mapping(t_address,t_uint256))"
+    },
+    {
+      "astId": 36033,
+      "contract": "lib/forge-std/src/mocks/MockERC20.sol:MockERC20",
+      "label": "INITIAL_CHAIN_ID",
+      "offset": 0,
+      "slot": "6",
+      "type": "t_uint256"
+    },
+    {
+      "astId": 36035,
+      "contract": "lib/forge-std/src/mocks/MockERC20.sol:MockERC20",
+      "label": "INITIAL_DOMAIN_SEPARATOR",
+      "offset": 0,
+      "slot": "7",
+      "type": "t_bytes32"
+    },
+    {
+      "astId": 36039,
+      "contract": "lib/forge-std/src/mocks/MockERC20.sol:MockERC20",
+      "label": "nonces",
+      "offset": 0,
+      "slot": "8",
+      "type": "t_mapping(t_address,t_uint256)"
+    },
+    {
+      "astId": 36042,
+      "contract": "lib/forge-std/src/mocks/MockERC20.sol:MockERC20",
+      "label": "initialized",
+      "offset": 0,
+      "slot": "9",
+      "type": "t_bool"
+    }
+  ],
+  "MockERC721.sol/IERC721TokenReceiver.json": [],
+  "MockERC721.sol/MockERC721.json": [
+    {
+      "astId": 36543,
+      "contract": "lib/forge-std/src/mocks/MockERC721.sol:MockERC721",
+      "label": "name",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_string_storage"
+    },
+    {
+      "astId": 36545,
+      "contract": "lib/forge-std/src/mocks/MockERC721.sol:MockERC721",
+      "label": "symbol",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_string_storage"
+    },
+    {
+      "astId": 36557,
+      "contract": "lib/forge-std/src/mocks/MockERC721.sol:MockERC721",
+      "label": "_ownerOf",
+      "offset": 0,
+      "slot": "2",
+      "type": "t_mapping(t_uint256,t_address)"
+    },
+    {
+      "astId": 36561,
+      "contract": "lib/forge-std/src/mocks/MockERC721.sol:MockERC721",
+      "label": "_balanceOf",
+      "offset": 0,
+      "slot": "3",
+      "type": "t_mapping(t_address,t_uint256)"
+    },
+    {
+      "astId": 36610,
+      "contract": "lib/forge-std/src/mocks/MockERC721.sol:MockERC721",
+      "label": "getApproved",
+      "offset": 0,
+      "slot": "4",
+      "type": "t_mapping(t_uint256,t_address)"
+    },
+    {
+      "astId": 36616,
+      "contract": "lib/forge-std/src/mocks/MockERC721.sol:MockERC721",
+      "label": "isApprovedForAll",
+      "offset": 0,
+      "slot": "5",
+      "type": "t_mapping(t_address,t_mapping(t_address,t_bool))"
+    },
+    {
+      "astId": 36619,
+      "contract": "lib/forge-std/src/mocks/MockERC721.sol:MockERC721",
+      "label": "initialized",
+      "offset": 0,
+      "slot": "6",
+      "type": "t_bool"
+    }
+  ],
+  "Multicall.sol/Multicall.json": [],
+  "Multicall3.sol/Multicall3.json": [],
+  "MulticallUpgradeable.sol/MulticallUpgradeable.json": [
+    {
+      "astId": 4469,
+      "contract": "lib/filecoin-solidity/lib/openzeppelin-contracts-upgradeable/contracts/utils/MulticallUpgradeable.sol:MulticallUpgradeable",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "lib/filecoin-solidity/lib/openzeppelin-contracts-upgradeable/contracts/utils/MulticallUpgradeable.sol:MulticallUpgradeable",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    },
+    {
+      "astId": 5171,
+      "contract": "lib/filecoin-solidity/lib/openzeppelin-contracts-upgradeable/contracts/utils/MulticallUpgradeable.sol:MulticallUpgradeable",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_array(t_uint256)50_storage"
+    }
+  ],
+  "Offer.sol/Offer.json": [
+    {
+      "astId": 4469,
+      "contract": "src/core/modules/market/Offer.sol:Offer",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/core/modules/market/Offer.sol:Offer",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "Offer.t.sol/OfferTest.json": [
+    {
+      "astId": 7636,
+      "contract": "test/core/market/Offer.t.sol:OfferTest",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 5371,
+      "contract": "test/core/market/Offer.t.sol:OfferTest",
+      "label": "IS_TEST",
+      "offset": 0,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 5373,
+      "contract": "test/core/market/Offer.t.sol:OfferTest",
+      "label": "_failed",
+      "offset": 1,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9130,
+      "contract": "test/core/market/Offer.t.sol:OfferTest",
+      "label": "stdChainsInitialized",
+      "offset": 2,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9151,
+      "contract": "test/core/market/Offer.t.sol:OfferTest",
+      "label": "chains",
+      "offset": 0,
+      "slot": "8",
+      "type": "t_mapping(t_string_memory_ptr,t_struct(Chain)9146_storage)"
+    },
+    {
+      "astId": 9155,
+      "contract": "test/core/market/Offer.t.sol:OfferTest",
+      "label": "defaultRpcUrls",
+      "offset": 0,
+      "slot": "9",
+      "type": "t_mapping(t_string_memory_ptr,t_string_storage)"
+    },
+    {
+      "astId": 9159,
+      "contract": "test/core/market/Offer.t.sol:OfferTest",
+      "label": "idToAlias",
+      "offset": 0,
+      "slot": "10",
+      "type": "t_mapping(t_uint256,t_string_storage)"
+    },
+    {
+      "astId": 9162,
+      "contract": "test/core/market/Offer.t.sol:OfferTest",
+      "label": "fallbackToDefaultRpcUrls",
+      "offset": 0,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9902,
+      "contract": "test/core/market/Offer.t.sol:OfferTest",
+      "label": "gasMeteringOff",
+      "offset": 1,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 11939,
+      "contract": "test/core/market/Offer.t.sol:OfferTest",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "12",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 12807,
+      "contract": "test/core/market/Offer.t.sol:OfferTest",
+      "label": "_excludedContracts",
+      "offset": 0,
+      "slot": "19",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12810,
+      "contract": "test/core/market/Offer.t.sol:OfferTest",
+      "label": "_excludedSenders",
+      "offset": 0,
+      "slot": "20",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12813,
+      "contract": "test/core/market/Offer.t.sol:OfferTest",
+      "label": "_targetedContracts",
+      "offset": 0,
+      "slot": "21",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12816,
+      "contract": "test/core/market/Offer.t.sol:OfferTest",
+      "label": "_targetedSenders",
+      "offset": 0,
+      "slot": "22",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12819,
+      "contract": "test/core/market/Offer.t.sol:OfferTest",
+      "label": "_excludedArtifacts",
+      "offset": 0,
+      "slot": "23",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12822,
+      "contract": "test/core/market/Offer.t.sol:OfferTest",
+      "label": "_targetedArtifacts",
+      "offset": 0,
+      "slot": "24",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12826,
+      "contract": "test/core/market/Offer.t.sol:OfferTest",
+      "label": "_targetedArtifactSelectors",
+      "offset": 0,
+      "slot": "25",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12830,
+      "contract": "test/core/market/Offer.t.sol:OfferTest",
+      "label": "_targetedSelectors",
+      "offset": 0,
+      "slot": "26",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12834,
+      "contract": "test/core/market/Offer.t.sol:OfferTest",
+      "label": "_targetedInterfaces",
+      "offset": 0,
+      "slot": "27",
+      "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
+    },
+    {
+      "astId": 78072,
+      "contract": "test/core/market/Offer.t.sol:OfferTest",
+      "label": "deployment",
+      "offset": 0,
+      "slot": "28",
+      "type": "t_struct(Deployment)83901_storage"
+    },
+    {
+      "astId": 78074,
+      "contract": "test/core/market/Offer.t.sol:OfferTest",
+      "label": "paymentToken",
+      "offset": 0,
+      "slot": "34",
+      "type": "t_address"
+    }
+  ],
+  "Ownable.sol/Ownable.json": [
+    {
+      "astId": 50179,
+      "contract": "lib/openzeppelin-contracts/contracts/access/Ownable.sol:Ownable",
+      "label": "_owner",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_address"
+    }
+  ],
+  "OwnableFaucet.sol/OwnableFaucet.json": [
+    {
+      "astId": 50179,
+      "contract": "src/dev/OwnableFaucet.sol:OwnableFaucet",
+      "label": "_owner",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_address"
+    }
+  ],
+  "OwnableFaucet.t.sol/ContractWhichCantReceiveEther.json": [],
+  "OwnableFaucet.t.sol/OwnableFaucetTest.json": [
+    {
+      "astId": 7636,
+      "contract": "test/OwnableFaucet.t.sol:OwnableFaucetTest",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 5371,
+      "contract": "test/OwnableFaucet.t.sol:OwnableFaucetTest",
+      "label": "IS_TEST",
+      "offset": 0,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 5373,
+      "contract": "test/OwnableFaucet.t.sol:OwnableFaucetTest",
+      "label": "_failed",
+      "offset": 1,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9130,
+      "contract": "test/OwnableFaucet.t.sol:OwnableFaucetTest",
+      "label": "stdChainsInitialized",
+      "offset": 2,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9151,
+      "contract": "test/OwnableFaucet.t.sol:OwnableFaucetTest",
+      "label": "chains",
+      "offset": 0,
+      "slot": "8",
+      "type": "t_mapping(t_string_memory_ptr,t_struct(Chain)9146_storage)"
+    },
+    {
+      "astId": 9155,
+      "contract": "test/OwnableFaucet.t.sol:OwnableFaucetTest",
+      "label": "defaultRpcUrls",
+      "offset": 0,
+      "slot": "9",
+      "type": "t_mapping(t_string_memory_ptr,t_string_storage)"
+    },
+    {
+      "astId": 9159,
+      "contract": "test/OwnableFaucet.t.sol:OwnableFaucetTest",
+      "label": "idToAlias",
+      "offset": 0,
+      "slot": "10",
+      "type": "t_mapping(t_uint256,t_string_storage)"
+    },
+    {
+      "astId": 9162,
+      "contract": "test/OwnableFaucet.t.sol:OwnableFaucetTest",
+      "label": "fallbackToDefaultRpcUrls",
+      "offset": 0,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9902,
+      "contract": "test/OwnableFaucet.t.sol:OwnableFaucetTest",
+      "label": "gasMeteringOff",
+      "offset": 1,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 11939,
+      "contract": "test/OwnableFaucet.t.sol:OwnableFaucetTest",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "12",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 12807,
+      "contract": "test/OwnableFaucet.t.sol:OwnableFaucetTest",
+      "label": "_excludedContracts",
+      "offset": 0,
+      "slot": "19",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12810,
+      "contract": "test/OwnableFaucet.t.sol:OwnableFaucetTest",
+      "label": "_excludedSenders",
+      "offset": 0,
+      "slot": "20",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12813,
+      "contract": "test/OwnableFaucet.t.sol:OwnableFaucetTest",
+      "label": "_targetedContracts",
+      "offset": 0,
+      "slot": "21",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12816,
+      "contract": "test/OwnableFaucet.t.sol:OwnableFaucetTest",
+      "label": "_targetedSenders",
+      "offset": 0,
+      "slot": "22",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12819,
+      "contract": "test/OwnableFaucet.t.sol:OwnableFaucetTest",
+      "label": "_excludedArtifacts",
+      "offset": 0,
+      "slot": "23",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12822,
+      "contract": "test/OwnableFaucet.t.sol:OwnableFaucetTest",
+      "label": "_targetedArtifacts",
+      "offset": 0,
+      "slot": "24",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12826,
+      "contract": "test/OwnableFaucet.t.sol:OwnableFaucetTest",
+      "label": "_targetedArtifactSelectors",
+      "offset": 0,
+      "slot": "25",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12830,
+      "contract": "test/OwnableFaucet.t.sol:OwnableFaucetTest",
+      "label": "_targetedSelectors",
+      "offset": 0,
+      "slot": "26",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12834,
+      "contract": "test/OwnableFaucet.t.sol:OwnableFaucetTest",
+      "label": "_targetedInterfaces",
+      "offset": 0,
+      "slot": "27",
+      "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
+    },
+    {
+      "astId": 72179,
+      "contract": "test/OwnableFaucet.t.sol:OwnableFaucetTest",
+      "label": "faucet",
+      "offset": 0,
+      "slot": "28",
+      "type": "t_contract(OwnableFaucet)70877"
+    }
+  ],
+  "OwnableUpgradableDiamond.sol/OwnableUpgradableDiamond.json": [
+    {
+      "astId": 4469,
+      "contract": "src/utils/OwnableUpgradableDiamond.sol:OwnableUpgradableDiamond",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/utils/OwnableUpgradableDiamond.sol:OwnableUpgradableDiamond",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "Proxy.sol/Proxy.json": [],
+  "RandomXProxy.sol/RandomXProxy.json": [],
+  "RandomXProxyMock.sol/RandomXProxyMock.json": [],
+  "Rewards.t.sol/Rewards.json": [
+    {
+      "astId": 7636,
+      "contract": "test/deal/Rewards.t.sol:Rewards",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 5371,
+      "contract": "test/deal/Rewards.t.sol:Rewards",
+      "label": "IS_TEST",
+      "offset": 0,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 5373,
+      "contract": "test/deal/Rewards.t.sol:Rewards",
+      "label": "_failed",
+      "offset": 1,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9130,
+      "contract": "test/deal/Rewards.t.sol:Rewards",
+      "label": "stdChainsInitialized",
+      "offset": 2,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9151,
+      "contract": "test/deal/Rewards.t.sol:Rewards",
+      "label": "chains",
+      "offset": 0,
+      "slot": "8",
+      "type": "t_mapping(t_string_memory_ptr,t_struct(Chain)9146_storage)"
+    },
+    {
+      "astId": 9155,
+      "contract": "test/deal/Rewards.t.sol:Rewards",
+      "label": "defaultRpcUrls",
+      "offset": 0,
+      "slot": "9",
+      "type": "t_mapping(t_string_memory_ptr,t_string_storage)"
+    },
+    {
+      "astId": 9159,
+      "contract": "test/deal/Rewards.t.sol:Rewards",
+      "label": "idToAlias",
+      "offset": 0,
+      "slot": "10",
+      "type": "t_mapping(t_uint256,t_string_storage)"
+    },
+    {
+      "astId": 9162,
+      "contract": "test/deal/Rewards.t.sol:Rewards",
+      "label": "fallbackToDefaultRpcUrls",
+      "offset": 0,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9902,
+      "contract": "test/deal/Rewards.t.sol:Rewards",
+      "label": "gasMeteringOff",
+      "offset": 1,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 11939,
+      "contract": "test/deal/Rewards.t.sol:Rewards",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "12",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 12807,
+      "contract": "test/deal/Rewards.t.sol:Rewards",
+      "label": "_excludedContracts",
+      "offset": 0,
+      "slot": "19",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12810,
+      "contract": "test/deal/Rewards.t.sol:Rewards",
+      "label": "_excludedSenders",
+      "offset": 0,
+      "slot": "20",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12813,
+      "contract": "test/deal/Rewards.t.sol:Rewards",
+      "label": "_targetedContracts",
+      "offset": 0,
+      "slot": "21",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12816,
+      "contract": "test/deal/Rewards.t.sol:Rewards",
+      "label": "_targetedSenders",
+      "offset": 0,
+      "slot": "22",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12819,
+      "contract": "test/deal/Rewards.t.sol:Rewards",
+      "label": "_excludedArtifacts",
+      "offset": 0,
+      "slot": "23",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12822,
+      "contract": "test/deal/Rewards.t.sol:Rewards",
+      "label": "_targetedArtifacts",
+      "offset": 0,
+      "slot": "24",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12826,
+      "contract": "test/deal/Rewards.t.sol:Rewards",
+      "label": "_targetedArtifactSelectors",
+      "offset": 0,
+      "slot": "25",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12830,
+      "contract": "test/deal/Rewards.t.sol:Rewards",
+      "label": "_targetedSelectors",
+      "offset": 0,
+      "slot": "26",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12834,
+      "contract": "test/deal/Rewards.t.sol:Rewards",
+      "label": "_targetedInterfaces",
+      "offset": 0,
+      "slot": "27",
+      "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
+    },
+    {
+      "astId": 83304,
+      "contract": "test/deal/Rewards.t.sol:Rewards",
+      "label": "deployment",
+      "offset": 0,
+      "slot": "28",
+      "type": "t_struct(Deployment)83901_storage"
+    }
+  ],
+  "SafeERC20.sol/SafeERC20.json": [],
+  "Script.sol/Script.json": [
+    {
+      "astId": 7636,
+      "contract": "lib/forge-std/src/Script.sol:Script",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 9130,
+      "contract": "lib/forge-std/src/Script.sol:Script",
+      "label": "stdChainsInitialized",
+      "offset": 0,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9151,
+      "contract": "lib/forge-std/src/Script.sol:Script",
+      "label": "chains",
+      "offset": 0,
+      "slot": "8",
+      "type": "t_mapping(t_string_memory_ptr,t_struct(Chain)9146_storage)"
+    },
+    {
+      "astId": 9155,
+      "contract": "lib/forge-std/src/Script.sol:Script",
+      "label": "defaultRpcUrls",
+      "offset": 0,
+      "slot": "9",
+      "type": "t_mapping(t_string_memory_ptr,t_string_storage)"
+    },
+    {
+      "astId": 9159,
+      "contract": "lib/forge-std/src/Script.sol:Script",
+      "label": "idToAlias",
+      "offset": 0,
+      "slot": "10",
+      "type": "t_mapping(t_uint256,t_string_storage)"
+    },
+    {
+      "astId": 9162,
+      "contract": "lib/forge-std/src/Script.sol:Script",
+      "label": "fallbackToDefaultRpcUrls",
+      "offset": 0,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9902,
+      "contract": "lib/forge-std/src/Script.sol:Script",
+      "label": "gasMeteringOff",
+      "offset": 1,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 7687,
+      "contract": "lib/forge-std/src/Script.sol:Script",
+      "label": "IS_SCRIPT",
+      "offset": 2,
+      "slot": "11",
+      "type": "t_bool"
+    }
+  ],
+  "SignedMath.sol/SignedMath.json": [],
+  "Snapshot.sol/Snapshot.json": [],
+  "StdAssertions.sol/StdAssertions.json": [
+    {
+      "astId": 5371,
+      "contract": "lib/forge-std/src/StdAssertions.sol:StdAssertions",
+      "label": "IS_TEST",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_bool"
+    },
+    {
+      "astId": 5373,
+      "contract": "lib/forge-std/src/StdAssertions.sol:StdAssertions",
+      "label": "_failed",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "StdChains.sol/StdChains.json": [
+    {
+      "astId": 9130,
+      "contract": "lib/forge-std/src/StdChains.sol:StdChains",
+      "label": "stdChainsInitialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9151,
+      "contract": "lib/forge-std/src/StdChains.sol:StdChains",
+      "label": "chains",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_mapping(t_string_memory_ptr,t_struct(Chain)9146_storage)"
+    },
+    {
+      "astId": 9155,
+      "contract": "lib/forge-std/src/StdChains.sol:StdChains",
+      "label": "defaultRpcUrls",
+      "offset": 0,
+      "slot": "2",
+      "type": "t_mapping(t_string_memory_ptr,t_string_storage)"
+    },
+    {
+      "astId": 9159,
+      "contract": "lib/forge-std/src/StdChains.sol:StdChains",
+      "label": "idToAlias",
+      "offset": 0,
+      "slot": "3",
+      "type": "t_mapping(t_uint256,t_string_storage)"
+    },
+    {
+      "astId": 9162,
+      "contract": "lib/forge-std/src/StdChains.sol:StdChains",
+      "label": "fallbackToDefaultRpcUrls",
+      "offset": 0,
+      "slot": "4",
+      "type": "t_bool"
+    }
+  ],
+  "StdCheats.sol/StdCheats.json": [
+    {
+      "astId": 9902,
+      "contract": "lib/forge-std/src/StdCheats.sol:StdCheats",
+      "label": "gasMeteringOff",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_bool"
+    },
+    {
+      "astId": 11939,
+      "contract": "lib/forge-std/src/StdCheats.sol:StdCheats",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_struct(StdStorage)13814_storage"
+    }
+  ],
+  "StdCheats.sol/StdCheatsSafe.json": [
+    {
+      "astId": 9902,
+      "contract": "lib/forge-std/src/StdCheats.sol:StdCheatsSafe",
+      "label": "gasMeteringOff",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "StdError.sol/stdError.json": [],
+  "StdInvariant.sol/StdInvariant.json": [
+    {
+      "astId": 12807,
+      "contract": "lib/forge-std/src/StdInvariant.sol:StdInvariant",
+      "label": "_excludedContracts",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12810,
+      "contract": "lib/forge-std/src/StdInvariant.sol:StdInvariant",
+      "label": "_excludedSenders",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12813,
+      "contract": "lib/forge-std/src/StdInvariant.sol:StdInvariant",
+      "label": "_targetedContracts",
+      "offset": 0,
+      "slot": "2",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12816,
+      "contract": "lib/forge-std/src/StdInvariant.sol:StdInvariant",
+      "label": "_targetedSenders",
+      "offset": 0,
+      "slot": "3",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12819,
+      "contract": "lib/forge-std/src/StdInvariant.sol:StdInvariant",
+      "label": "_excludedArtifacts",
+      "offset": 0,
+      "slot": "4",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12822,
+      "contract": "lib/forge-std/src/StdInvariant.sol:StdInvariant",
+      "label": "_targetedArtifacts",
+      "offset": 0,
+      "slot": "5",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12826,
+      "contract": "lib/forge-std/src/StdInvariant.sol:StdInvariant",
+      "label": "_targetedArtifactSelectors",
+      "offset": 0,
+      "slot": "6",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12830,
+      "contract": "lib/forge-std/src/StdInvariant.sol:StdInvariant",
+      "label": "_targetedSelectors",
+      "offset": 0,
+      "slot": "7",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12834,
+      "contract": "lib/forge-std/src/StdInvariant.sol:StdInvariant",
+      "label": "_targetedInterfaces",
+      "offset": 0,
+      "slot": "8",
+      "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
+    }
+  ],
+  "StdJson.sol/stdJson.json": [],
+  "StdMath.sol/stdMath.json": [],
+  "StdStorage.sol/stdStorage.json": [],
+  "StdStorage.sol/stdStorageSafe.json": [],
+  "StdStyle.sol/StdStyle.json": [],
+  "StdUtils.sol/StdUtils.json": [],
+  "StorageMocks.sol/CapacityConstStorageMock.json": [
+    {
+      "astId": 70973,
+      "contract": "src/mocks/StorageMocks.sol:CapacityConstStorageMock",
+      "label": "_capacityConstStorage",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(ConstStorage)58057_storage"
+    }
+  ],
+  "StorageMocks.sol/CapacityStorageMock.json": [
+    {
+      "astId": 70985,
+      "contract": "src/mocks/StorageMocks.sol:CapacityStorageMock",
+      "label": "_capacityStorage",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(CommitmentStorage)60320_storage"
+    }
+  ],
+  "StorageMocks.sol/ConfigStorageMock.json": [
+    {
+      "astId": 71005,
+      "contract": "src/mocks/StorageMocks.sol:ConfigStorageMock",
+      "label": "_configStorage",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(ConfigStorage)67682_storage"
+    }
+  ],
+  "StorageMocks.sol/CoreStorageMock.json": [
+    {
+      "astId": 70969,
+      "contract": "src/mocks/StorageMocks.sol:CoreStorageMock",
+      "label": "_coreStorage",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(CoreStorage)59130_storage"
+    }
+  ],
+  "StorageMocks.sol/DealFactoryStorageMock.json": [
+    {
+      "astId": 70997,
+      "contract": "src/mocks/StorageMocks.sol:DealFactoryStorageMock",
+      "label": "_dealFactoryStorage",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(DealFactoryStorage)64334_storage"
+    }
+  ],
+  "StorageMocks.sol/DealStorageMock.json": [
+    {
+      "astId": 71001,
+      "contract": "src/mocks/StorageMocks.sol:DealStorageMock",
+      "label": "_dealStorage",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(DealStorage)68277_storage"
+    }
+  ],
+  "StorageMocks.sol/EpochControllerStorageMock.json": [
+    {
+      "astId": 70977,
+      "contract": "src/mocks/StorageMocks.sol:EpochControllerStorageMock",
+      "label": "_epochControllerStorage",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(EpochControllerStorage)59479_storage"
+    }
+  ],
+  "StorageMocks.sol/GlobalStorageMock.json": [
+    {
+      "astId": 70981,
+      "contract": "src/mocks/StorageMocks.sol:GlobalStorageMock",
+      "label": "_globalStorage",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(GlobalConstStorage)59600_storage"
+    }
+  ],
+  "StorageMocks.sol/MatcherStorageMock.json": [
+    {
+      "astId": 70989,
+      "contract": "src/mocks/StorageMocks.sol:MatcherStorageMock",
+      "label": "_matcherStorage",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(MatcherStorage)64631_storage"
+    }
+  ],
+  "StorageMocks.sol/OfferStorageMock.json": [
+    {
+      "astId": 70993,
+      "contract": "src/mocks/StorageMocks.sol:OfferStorageMock",
+      "label": "_offerStorage",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(OfferStorage)65141_storage"
+    }
+  ],
+  "StorageMocks.sol/OwnableUpgradableDiamondStorageMock.json": [
+    {
+      "astId": 71013,
+      "contract": "src/mocks/StorageMocks.sol:OwnableUpgradableDiamondStorageMock",
+      "label": "_ownableUpgradableDiamondStorage",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(OwnableStorage)71673_storage"
+    }
+  ],
+  "StorageMocks.sol/WhitelistStorageMock.json": [
+    {
+      "astId": 71017,
+      "contract": "src/mocks/StorageMocks.sol:WhitelistStorageMock",
+      "label": "_whitelistStorage",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(WhitelistStorage)72065_storage"
+    }
+  ],
+  "StorageMocks.sol/WorkerManagerStorageMock.json": [
+    {
+      "astId": 71009,
+      "contract": "src/mocks/StorageMocks.sol:WorkerManagerStorageMock",
+      "label": "_workerManagerStorage",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(WorkerManagerStorage)69894_storage"
+    }
+  ],
+  "StorageSlot.sol/StorageSlot.json": [],
+  "StorageSlotUpgradeable.sol/StorageSlotUpgradeable.json": [],
+  "String.sol/String.json": [],
+  "Strings.sol/Strings.json": [],
+  "TestERC20.sol/TestERC20.json": [
+    {
+      "astId": 50734,
+      "contract": "src/dev/TestERC20.sol:TestERC20",
+      "label": "_balances",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_mapping(t_address,t_uint256)"
+    },
+    {
+      "astId": 50740,
+      "contract": "src/dev/TestERC20.sol:TestERC20",
+      "label": "_allowances",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_mapping(t_address,t_mapping(t_address,t_uint256))"
+    },
+    {
+      "astId": 50742,
+      "contract": "src/dev/TestERC20.sol:TestERC20",
+      "label": "_totalSupply",
+      "offset": 0,
+      "slot": "2",
+      "type": "t_uint256"
+    },
+    {
+      "astId": 50744,
+      "contract": "src/dev/TestERC20.sol:TestERC20",
+      "label": "_name",
+      "offset": 0,
+      "slot": "3",
+      "type": "t_string_storage"
+    },
+    {
+      "astId": 50746,
+      "contract": "src/dev/TestERC20.sol:TestERC20",
+      "label": "_symbol",
+      "offset": 0,
+      "slot": "4",
+      "type": "t_string_storage"
+    },
+    {
+      "astId": 70884,
+      "contract": "src/dev/TestERC20.sol:TestERC20",
+      "label": "_decimals",
+      "offset": 0,
+      "slot": "5",
+      "type": "t_uint8"
+    }
+  ],
+  "TestHelper.sol/TestHelper.json": [],
+  "UUPSUpgradeable.sol/UUPSUpgradeable.json": [
+    {
+      "astId": 4469,
+      "contract": "lib/filecoin-solidity/lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol:UUPSUpgradeable",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "lib/filecoin-solidity/lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol:UUPSUpgradeable",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    },
+    {
+      "astId": 4451,
+      "contract": "lib/filecoin-solidity/lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol:UUPSUpgradeable",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_array(t_uint256)50_storage"
+    },
+    {
+      "astId": 4766,
+      "contract": "lib/filecoin-solidity/lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol:UUPSUpgradeable",
+      "label": "__gap",
+      "offset": 0,
+      "slot": "51",
+      "type": "t_array(t_uint256)50_storage"
+    }
+  ],
+  "Vesting.sol/Vesting.json": [],
+  "Vesting.t.sol/VestingTest.json": [
+    {
+      "astId": 7636,
+      "contract": "test/core/capacity/Vesting.t.sol:VestingTest",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 5371,
+      "contract": "test/core/capacity/Vesting.t.sol:VestingTest",
+      "label": "IS_TEST",
+      "offset": 0,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 5373,
+      "contract": "test/core/capacity/Vesting.t.sol:VestingTest",
+      "label": "_failed",
+      "offset": 1,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9130,
+      "contract": "test/core/capacity/Vesting.t.sol:VestingTest",
+      "label": "stdChainsInitialized",
+      "offset": 2,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9151,
+      "contract": "test/core/capacity/Vesting.t.sol:VestingTest",
+      "label": "chains",
+      "offset": 0,
+      "slot": "8",
+      "type": "t_mapping(t_string_memory_ptr,t_struct(Chain)9146_storage)"
+    },
+    {
+      "astId": 9155,
+      "contract": "test/core/capacity/Vesting.t.sol:VestingTest",
+      "label": "defaultRpcUrls",
+      "offset": 0,
+      "slot": "9",
+      "type": "t_mapping(t_string_memory_ptr,t_string_storage)"
+    },
+    {
+      "astId": 9159,
+      "contract": "test/core/capacity/Vesting.t.sol:VestingTest",
+      "label": "idToAlias",
+      "offset": 0,
+      "slot": "10",
+      "type": "t_mapping(t_uint256,t_string_storage)"
+    },
+    {
+      "astId": 9162,
+      "contract": "test/core/capacity/Vesting.t.sol:VestingTest",
+      "label": "fallbackToDefaultRpcUrls",
+      "offset": 0,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9902,
+      "contract": "test/core/capacity/Vesting.t.sol:VestingTest",
+      "label": "gasMeteringOff",
+      "offset": 1,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 11939,
+      "contract": "test/core/capacity/Vesting.t.sol:VestingTest",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "12",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 12807,
+      "contract": "test/core/capacity/Vesting.t.sol:VestingTest",
+      "label": "_excludedContracts",
+      "offset": 0,
+      "slot": "19",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12810,
+      "contract": "test/core/capacity/Vesting.t.sol:VestingTest",
+      "label": "_excludedSenders",
+      "offset": 0,
+      "slot": "20",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12813,
+      "contract": "test/core/capacity/Vesting.t.sol:VestingTest",
+      "label": "_targetedContracts",
+      "offset": 0,
+      "slot": "21",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12816,
+      "contract": "test/core/capacity/Vesting.t.sol:VestingTest",
+      "label": "_targetedSenders",
+      "offset": 0,
+      "slot": "22",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12819,
+      "contract": "test/core/capacity/Vesting.t.sol:VestingTest",
+      "label": "_excludedArtifacts",
+      "offset": 0,
+      "slot": "23",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12822,
+      "contract": "test/core/capacity/Vesting.t.sol:VestingTest",
+      "label": "_targetedArtifacts",
+      "offset": 0,
+      "slot": "24",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12826,
+      "contract": "test/core/capacity/Vesting.t.sol:VestingTest",
+      "label": "_targetedArtifactSelectors",
+      "offset": 0,
+      "slot": "25",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12830,
+      "contract": "test/core/capacity/Vesting.t.sol:VestingTest",
+      "label": "_targetedSelectors",
+      "offset": 0,
+      "slot": "26",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12834,
+      "contract": "test/core/capacity/Vesting.t.sol:VestingTest",
+      "label": "_targetedInterfaces",
+      "offset": 0,
+      "slot": "27",
+      "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
+    },
+    {
+      "astId": 75586,
+      "contract": "test/core/capacity/Vesting.t.sol:VestingTest",
+      "label": "vesting",
+      "offset": 0,
+      "slot": "28",
+      "type": "t_struct(Info)63547_storage"
+    }
+  ],
+  "Vm.sol/Vm.json": [],
+  "Vm.sol/VmSafe.json": [],
+  "Whitelist.sol/Whitelist.json": [
+    {
+      "astId": 4469,
+      "contract": "src/utils/Whitelist.sol:Whitelist",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/utils/Whitelist.sol:Whitelist",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "WorkerManager.sol/WorkerManager.json": [
+    {
+      "astId": 4469,
+      "contract": "src/deal/WorkerManager.sol:WorkerManager",
+      "label": "_initialized",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_uint8"
+    },
+    {
+      "astId": 4472,
+      "contract": "src/deal/WorkerManager.sol:WorkerManager",
+      "label": "_initializing",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "console.sol/console.json": [],
+  "console2.sol/console2.json": [],
+  "draft-IERC1822.sol/IERC1822Proxiable.json": [],
+  "draft-IERC1822Upgradeable.sol/IERC1822ProxiableUpgradeable.json": [],
+  "safeconsole.sol/safeconsole.json": [],
+  "test.sol/DSTest.json": [
+    {
+      "astId": 5371,
+      "contract": "lib/forge-std/lib/ds-test/src/test.sol:DSTest",
+      "label": "IS_TEST",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_bool"
+    },
+    {
+      "astId": 5373,
+      "contract": "lib/forge-std/lib/ds-test/src/test.sol:DSTest",
+      "label": "_failed",
+      "offset": 1,
+      "slot": "0",
+      "type": "t_bool"
+    }
+  ],
+  "test.sol/Test.json": [
+    {
+      "astId": 7636,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 5371,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "IS_TEST",
+      "offset": 0,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 5373,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "_failed",
+      "offset": 1,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9130,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "stdChainsInitialized",
+      "offset": 2,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9151,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "chains",
+      "offset": 0,
+      "slot": "8",
+      "type": "t_mapping(t_string_memory_ptr,t_struct(Chain)9146_storage)"
+    },
+    {
+      "astId": 9155,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "defaultRpcUrls",
+      "offset": 0,
+      "slot": "9",
+      "type": "t_mapping(t_string_memory_ptr,t_string_storage)"
+    },
+    {
+      "astId": 9159,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "idToAlias",
+      "offset": 0,
+      "slot": "10",
+      "type": "t_mapping(t_uint256,t_string_storage)"
+    },
+    {
+      "astId": 9162,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "fallbackToDefaultRpcUrls",
+      "offset": 0,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9902,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "gasMeteringOff",
+      "offset": 1,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 11939,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "12",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 12807,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "_excludedContracts",
+      "offset": 0,
+      "slot": "19",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12810,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "_excludedSenders",
+      "offset": 0,
+      "slot": "20",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12813,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "_targetedContracts",
+      "offset": 0,
+      "slot": "21",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12816,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "_targetedSenders",
+      "offset": 0,
+      "slot": "22",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12819,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "_excludedArtifacts",
+      "offset": 0,
+      "slot": "23",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12822,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "_targetedArtifacts",
+      "offset": 0,
+      "slot": "24",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12826,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "_targetedArtifactSelectors",
+      "offset": 0,
+      "slot": "25",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12830,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "_targetedSelectors",
+      "offset": 0,
+      "slot": "26",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12834,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "_targetedInterfaces",
+      "offset": 0,
+      "slot": "27",
+      "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
+    }
+  ]
+}

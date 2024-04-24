@@ -4,14 +4,14 @@ import type {
   CapacityCommitmentDetail,
   CapacityCommitmentShort,
   CapacityCommitmentStatus,
-  ComputeUnit,
+  ComputeUnit, ComputeUnitDetail,
   ComputeUnitsWithCCStatus,
   DealShort,
   DealStatus,
   OfferShort,
-  Peer,
+  Peer, PeerDetail, ProofBasic,
   ProviderBase,
-  ProviderShort,
+  ProviderShort
 } from "../types/schemes.js";
 import type {
   BasicOfferFragment,
@@ -33,11 +33,12 @@ import type { ComputeUnitWithCcDataBasicFragment } from "../indexerClient/querie
 import {
   type SerializationSettings,
   tokenValueToRounded,
-} from "../../utils/serializers.js";
+} from "../../utils/serializers/tokens.js";
 import {
   serializeEffectors,
   serializeContractRateToPercentage,
 } from "../../utils/indexerClient/serializers.js";
+import { peerIdContractHexToBase58 } from "../../utils/serializers/fluence.js";
 
 const BIG_INT_ZERO = BigInt(0);
 
@@ -134,7 +135,7 @@ export function serializePeers(peers: Array<BasicPeerFragment>): Array<Peer> {
   if (peers) {
     for (const peer of peers) {
       peersComposed.push({
-        id: peer.id,
+        id: peerIdContractHexToBase58(peer.id),
         offerId: peer.offer.id,
         computeUnits: peer.computeUnits
           ? serializeComputeUnits(
@@ -223,7 +224,7 @@ export function serializeCapacityCommitmentShort(
     startedAt,
     expiredAt,
     providerId: capacityCommitmentFromIndexer.peer.provider.id,
-    peerId: capacityCommitmentFromIndexer.peer.id,
+    peerId: peerIdContractHexToBase58(capacityCommitmentFromIndexer.peer.id),
     computeUnitsCount: Number(capacityCommitmentFromIndexer.computeUnitsCount),
     status: statusFromRpc,
     rewardDelegatorRate: serializeContractRateToPercentage(
@@ -310,4 +311,105 @@ export function serializeCapacityCommitmentDetail(
         ? null
         : delegatorAddress,
   };
+}
+
+export function serializePeerDetail(peerIn: {
+  __typename?: "Peer";
+  id: string;
+  computeUnitsTotal: number;
+  computeUnitsInDeal: number;
+  offer: { __typename?: "Offer"; id: string };
+  provider: { __typename?: "Provider"; id: string; name: string };
+  currentCapacityCommitment?: {
+    __typename?: "CapacityCommitment";
+    activeUnitCount: number
+  } | null
+}): PeerDetail {
+  return {
+    id: peerIdContractHexToBase58(peerIn.id),
+    providerId: peerIn.provider.id,
+    offerId: peerIn.offer.id,
+    computeUnitsInDeal: peerIn.computeUnitsInDeal,
+    computeUnitsInCapacityCommitment: peerIn.currentCapacityCommitment
+      ? peerIn.currentCapacityCommitment.activeUnitCount
+      : 0,
+    computeUnitsTotal: peerIn.computeUnitsTotal,
+  }
+}
+
+export function serializeComputeUnitDetail(computeUnitIn: {
+  __typename?: "ComputeUnit";
+  id: string;
+  workerId?: string | null;
+  submittedProofsCount: number;
+  provider: { __typename?: "Provider"; id: string; name: string };
+  deal?: { __typename?: "Deal"; id: string } | null;
+  peer: {
+    __typename?: "Peer";
+    id: string;
+    currentCapacityCommitment?: {
+      __typename?: "CapacityCommitment";
+      id: string;
+      collateralPerUnit: any;
+      submittedProofsCount: number;
+      startEpoch: any
+    } | null;
+    provider: { __typename?: "Provider"; id: string }
+  }
+}, serializationSettings: SerializationSettings): ComputeUnitDetail {
+  const { status } = serializeCUStatus(computeUnitIn);
+  const currentPeerCapacityCommitment =
+    computeUnitIn.peer.currentCapacityCommitment;
+
+  return {
+    id: computeUnitIn.id,
+    workerId: computeUnitIn.workerId ?? undefined,
+    providerId: computeUnitIn.provider.id,
+    currentCommitmentId: currentPeerCapacityCommitment?.id,
+    peerId: peerIdContractHexToBase58(computeUnitIn.peer.id),
+    // FLT.
+    collateral: currentPeerCapacityCommitment
+      ? tokenValueToRounded(
+          currentPeerCapacityCommitment.collateralPerUnit,
+          Number(FLTToken.decimals),
+          serializationSettings.nativeTokenValueAdditionalFormatter,
+        )
+      : "0",
+    successProofs: currentPeerCapacityCommitment
+      ? currentPeerCapacityCommitment.submittedProofsCount
+      : 0,
+    collateralToken: FLTToken,
+    status,
+  };
+}
+
+export function serializeSubmittedProofs(submittedProofs: Array<{
+  __typename?: "SubmittedProof";
+  id: string;
+  createdAt: any;
+  createdEpoch: any;
+  capacityCommitment: {
+    __typename?: "CapacityCommitment";
+    id: string;
+    startEpoch: any;
+    endEpoch: any
+  };
+  computeUnit: { __typename?: "ComputeUnit"; id: string };
+  peer: {
+    __typename?: "Peer";
+    id: string;
+    provider: { __typename?: "Provider"; id: string }
+  }
+}>): ProofBasic[] {
+  return submittedProofs.map((proof) => {
+      return {
+        transactionId: proof.id,
+        capacityCommitmentId: proof.capacityCommitment.id,
+        computeUnitId: proof.computeUnit.id,
+        peerId: peerIdContractHexToBase58(proof.peer.id),
+        createdAt: Number(proof.createdAt),
+        providerId: proof.peer.provider.id,
+        createdAtEpoch: Number(proof.createdEpoch),
+      };
+    });
 }

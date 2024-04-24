@@ -3,7 +3,7 @@ import type { OfferDetailFragment } from "../indexerClient/queries/offers-query.
 import {
   type SerializationSettings,
   tokenValueToRounded,
-} from "../../utils/serializers.js";
+} from "../../utils/serializers/tokens.js";
 import { serializeEffectors } from "../../utils/indexerClient/serializers.js";
 
 export function serializeOfferDetail(
