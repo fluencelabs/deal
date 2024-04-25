@@ -15,9 +15,9 @@ export type ProvidersQueryQueryVariables = Types.Exact<{
 }>;
 
 
-export type ProvidersQueryQuery = { __typename?: 'Query', providers: Array<{ __typename?: 'Provider', id: string, name: string, createdAt: any, computeUnitsAvailable: number, computeUnitsTotal: number, approved: boolean, offers?: Array<{ __typename?: 'Offer', id: string, createdAt: any, pricePerEpoch: any, computeUnitsTotal?: number | null, computeUnitsAvailable?: number | null, paymentToken: { __typename?: 'Token', id: string, symbol: string, decimals: number }, effectors?: Array<{ __typename?: 'OfferToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null, provider: { __typename?: 'Provider', id: string }, peers?: Array<{ __typename?: 'Peer', id: string }> | null }> | null }>, graphNetworks: Array<{ __typename?: 'GraphNetwork', providersRegisteredTotal: any }> };
+export type ProvidersQueryQuery = { __typename?: 'Query', providers: Array<{ __typename?: 'Provider', peerCount: number, id: string, name: string, createdAt: any, computeUnitsAvailable: number, computeUnitsTotal: number, approved: boolean, offers?: Array<{ __typename?: 'Offer', id: string, createdAt: any, pricePerEpoch: any, computeUnitsTotal?: number | null, computeUnitsAvailable?: number | null, paymentToken: { __typename?: 'Token', id: string, symbol: string, decimals: number }, effectors?: Array<{ __typename?: 'OfferToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null, provider: { __typename?: 'Provider', id: string }, peers?: Array<{ __typename?: 'Peer', id: string }> | null }> | null }>, graphNetworks: Array<{ __typename?: 'GraphNetwork', providersRegisteredTotal: any }> };
 
-export type ProviderOfProvidersQueryFragment = { __typename?: 'Provider', id: string, name: string, createdAt: any, computeUnitsAvailable: number, computeUnitsTotal: number, approved: boolean, offers?: Array<{ __typename?: 'Offer', id: string, createdAt: any, pricePerEpoch: any, computeUnitsTotal?: number | null, computeUnitsAvailable?: number | null, paymentToken: { __typename?: 'Token', id: string, symbol: string, decimals: number }, effectors?: Array<{ __typename?: 'OfferToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null, provider: { __typename?: 'Provider', id: string }, peers?: Array<{ __typename?: 'Peer', id: string }> | null }> | null };
+export type ProviderOfProvidersQueryFragment = { __typename?: 'Provider', peerCount: number, id: string, name: string, createdAt: any, computeUnitsAvailable: number, computeUnitsTotal: number, approved: boolean, offers?: Array<{ __typename?: 'Offer', id: string, createdAt: any, pricePerEpoch: any, computeUnitsTotal?: number | null, computeUnitsAvailable?: number | null, paymentToken: { __typename?: 'Token', id: string, symbol: string, decimals: number }, effectors?: Array<{ __typename?: 'OfferToEffector', effector: { __typename?: 'Effector', id: string, description: string } }> | null, provider: { __typename?: 'Provider', id: string }, peers?: Array<{ __typename?: 'Peer', id: string }> | null }> | null };
 
 export type ProviderQueryQueryVariables = Types.Exact<{
   id: Types.Scalars['ID']['input'];
@@ -79,6 +79,7 @@ export const ProviderOfProvidersQueryFragmentDoc = gql`
   offers {
     ...ProvidersBasicOffer
   }
+  peerCount
 }
     ${ProviderAbcFragmentDoc}
 ${ProvidersBasicOfferFragmentDoc}`;
