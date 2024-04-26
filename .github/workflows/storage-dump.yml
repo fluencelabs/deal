@@ -40,7 +40,7 @@ jobs:
 
       - name: Dump storage layout
         working-directory: storage-checker
-        run: node storage-layout-dump.json
+        run: node store-layout.js
 
       - name: Commit storage layout dump
         uses: stefanzweifel/git-auto-commit-action@v5
