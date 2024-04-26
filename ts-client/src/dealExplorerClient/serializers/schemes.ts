@@ -96,6 +96,7 @@ export function serializeProviderShort(
   }
   return {
     ...providerBase,
+    peerCount: Number(provider.peerCount),
     offers: composedOffers,
   } as ProviderShort;
 }

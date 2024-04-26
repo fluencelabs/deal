@@ -28,6 +28,7 @@ fragment ProviderOfProvidersQuery on Provider {
       #  by migrating to another engine.
       ...ProvidersBasicOffer
     }
+    peerCount
 }
 
 

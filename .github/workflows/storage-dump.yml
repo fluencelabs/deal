@@ -20,6 +20,16 @@ jobs:
           token: ${{ secrets.FLUENCEBOT_RELEASE_PLEASE_PAT }}
           submodules: recursive
 
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Run Forge build
+        run: |
+          forge --version
+          forge build
+
       - name: Setup node
         uses: actions/setup-node@v3
         with:
