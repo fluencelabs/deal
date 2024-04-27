@@ -3896,6 +3896,160 @@
   "StorageSlotUpgradeable.sol/StorageSlotUpgradeable.json": [],
   "String.sol/String.json": [],
   "Strings.sol/Strings.json": [],
+  "Test.sol/Test.json": [
+    {
+      "astId": 7636,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 5371,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "IS_TEST",
+      "offset": 0,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 5373,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "_failed",
+      "offset": 1,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9130,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "stdChainsInitialized",
+      "offset": 2,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9151,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "chains",
+      "offset": 0,
+      "slot": "8",
+      "type": "t_mapping(t_string_memory_ptr,t_struct(Chain)9146_storage)"
+    },
+    {
+      "astId": 9155,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "defaultRpcUrls",
+      "offset": 0,
+      "slot": "9",
+      "type": "t_mapping(t_string_memory_ptr,t_string_storage)"
+    },
+    {
+      "astId": 9159,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "idToAlias",
+      "offset": 0,
+      "slot": "10",
+      "type": "t_mapping(t_uint256,t_string_storage)"
+    },
+    {
+      "astId": 9162,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "fallbackToDefaultRpcUrls",
+      "offset": 0,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 9902,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "gasMeteringOff",
+      "offset": 1,
+      "slot": "11",
+      "type": "t_bool"
+    },
+    {
+      "astId": 11939,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "stdstore",
+      "offset": 0,
+      "slot": "12",
+      "type": "t_struct(StdStorage)13814_storage"
+    },
+    {
+      "astId": 12807,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "_excludedContracts",
+      "offset": 0,
+      "slot": "19",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12810,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "_excludedSenders",
+      "offset": 0,
+      "slot": "20",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12813,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "_targetedContracts",
+      "offset": 0,
+      "slot": "21",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12816,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "_targetedSenders",
+      "offset": 0,
+      "slot": "22",
+      "type": "t_array(t_address)dyn_storage"
+    },
+    {
+      "astId": 12819,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "_excludedArtifacts",
+      "offset": 0,
+      "slot": "23",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12822,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "_targetedArtifacts",
+      "offset": 0,
+      "slot": "24",
+      "type": "t_array(t_string_storage)dyn_storage"
+    },
+    {
+      "astId": 12826,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "_targetedArtifactSelectors",
+      "offset": 0,
+      "slot": "25",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12830,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "_targetedSelectors",
+      "offset": 0,
+      "slot": "26",
+      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
+    },
+    {
+      "astId": 12834,
+      "contract": "lib/forge-std/src/Test.sol:Test",
+      "label": "_targetedInterfaces",
+      "offset": 0,
+      "slot": "27",
+      "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
+    }
+  ],
   "TestERC20.sol/TestERC20.json": [
     {
       "astId": 50734,
@@ -4203,160 +4357,6 @@
       "offset": 1,
       "slot": "0",
       "type": "t_bool"
-    }
-  ],
-  "test.sol/Test.json": [
-    {
-      "astId": 7636,
-      "contract": "lib/forge-std/src/Test.sol:Test",
-      "label": "stdstore",
-      "offset": 0,
-      "slot": "0",
-      "type": "t_struct(StdStorage)13814_storage"
-    },
-    {
-      "astId": 5371,
-      "contract": "lib/forge-std/src/Test.sol:Test",
-      "label": "IS_TEST",
-      "offset": 0,
-      "slot": "7",
-      "type": "t_bool"
-    },
-    {
-      "astId": 5373,
-      "contract": "lib/forge-std/src/Test.sol:Test",
-      "label": "_failed",
-      "offset": 1,
-      "slot": "7",
-      "type": "t_bool"
-    },
-    {
-      "astId": 9130,
-      "contract": "lib/forge-std/src/Test.sol:Test",
-      "label": "stdChainsInitialized",
-      "offset": 2,
-      "slot": "7",
-      "type": "t_bool"
-    },
-    {
-      "astId": 9151,
-      "contract": "lib/forge-std/src/Test.sol:Test",
-      "label": "chains",
-      "offset": 0,
-      "slot": "8",
-      "type": "t_mapping(t_string_memory_ptr,t_struct(Chain)9146_storage)"
-    },
-    {
-      "astId": 9155,
-      "contract": "lib/forge-std/src/Test.sol:Test",
-      "label": "defaultRpcUrls",
-      "offset": 0,
-      "slot": "9",
-      "type": "t_mapping(t_string_memory_ptr,t_string_storage)"
-    },
-    {
-      "astId": 9159,
-      "contract": "lib/forge-std/src/Test.sol:Test",
-      "label": "idToAlias",
-      "offset": 0,
-      "slot": "10",
-      "type": "t_mapping(t_uint256,t_string_storage)"
-    },
-    {
-      "astId": 9162,
-      "contract": "lib/forge-std/src/Test.sol:Test",
-      "label": "fallbackToDefaultRpcUrls",
-      "offset": 0,
-      "slot": "11",
-      "type": "t_bool"
-    },
-    {
-      "astId": 9902,
-      "contract": "lib/forge-std/src/Test.sol:Test",
-      "label": "gasMeteringOff",
-      "offset": 1,
-      "slot": "11",
-      "type": "t_bool"
-    },
-    {
-      "astId": 11939,
-      "contract": "lib/forge-std/src/Test.sol:Test",
-      "label": "stdstore",
-      "offset": 0,
-      "slot": "12",
-      "type": "t_struct(StdStorage)13814_storage"
-    },
-    {
-      "astId": 12807,
-      "contract": "lib/forge-std/src/Test.sol:Test",
-      "label": "_excludedContracts",
-      "offset": 0,
-      "slot": "19",
-      "type": "t_array(t_address)dyn_storage"
-    },
-    {
-      "astId": 12810,
-      "contract": "lib/forge-std/src/Test.sol:Test",
-      "label": "_excludedSenders",
-      "offset": 0,
-      "slot": "20",
-      "type": "t_array(t_address)dyn_storage"
-    },
-    {
-      "astId": 12813,
-      "contract": "lib/forge-std/src/Test.sol:Test",
-      "label": "_targetedContracts",
-      "offset": 0,
-      "slot": "21",
-      "type": "t_array(t_address)dyn_storage"
-    },
-    {
-      "astId": 12816,
-      "contract": "lib/forge-std/src/Test.sol:Test",
-      "label": "_targetedSenders",
-      "offset": 0,
-      "slot": "22",
-      "type": "t_array(t_address)dyn_storage"
-    },
-    {
-      "astId": 12819,
-      "contract": "lib/forge-std/src/Test.sol:Test",
-      "label": "_excludedArtifacts",
-      "offset": 0,
-      "slot": "23",
-      "type": "t_array(t_string_storage)dyn_storage"
-    },
-    {
-      "astId": 12822,
-      "contract": "lib/forge-std/src/Test.sol:Test",
-      "label": "_targetedArtifacts",
-      "offset": 0,
-      "slot": "24",
-      "type": "t_array(t_string_storage)dyn_storage"
-    },
-    {
-      "astId": 12826,
-      "contract": "lib/forge-std/src/Test.sol:Test",
-      "label": "_targetedArtifactSelectors",
-      "offset": 0,
-      "slot": "25",
-      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
-    },
-    {
-      "astId": 12830,
-      "contract": "lib/forge-std/src/Test.sol:Test",
-      "label": "_targetedSelectors",
-      "offset": 0,
-      "slot": "26",
-      "type": "t_array(t_struct(FuzzSelector)12798_storage)dyn_storage"
-    },
-    {
-      "astId": 12834,
-      "contract": "lib/forge-std/src/Test.sol:Test",
-      "label": "_targetedInterfaces",
-      "offset": 0,
-      "slot": "27",
-      "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
     }
   ]
 }
