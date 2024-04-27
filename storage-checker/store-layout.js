@@ -31,5 +31,8 @@ for (const file of files) {
   storageLayout[file] = layout;
 }
 
-fs.writeFileSync(storageLayoutFile, JSON.stringify(storageLayout, null, 2));
+fs.writeFileSync(
+  storageLayoutFile,
+  JSON.stringify(storageLayout, null, 2) + "\n",
+);
 console.log("Storage layout saved!");

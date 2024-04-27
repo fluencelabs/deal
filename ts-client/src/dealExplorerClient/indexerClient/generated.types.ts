@@ -938,6 +938,7 @@ export type ComputeUnit_OrderBy =
   | 'deal__createdAt'
   | 'deal__depositedSum'
   | 'deal__id'
+  | 'deal__matchedAt'
   | 'deal__matchedWorkersCurrentCount'
   | 'deal__maxPaidEpoch'
   | 'deal__maxWorkersPerProvider'
@@ -983,6 +984,8 @@ export type Deal = {
   id: Scalars['ID']['output'];
   /** Many to many to access joined peers to maintain protocol restrictions */
   joinedPeers?: Maybe<Array<DealToPeer>>;
+  /** The last matched timestamp. */
+  matchedAt?: Maybe<Scalars['BigInt']['output']>;
   /** Currently matched workers == matched compute units. */
   matchedWorkersCurrentCount: Scalars['Int']['output'];
   maxPaidEpoch?: Maybe<Scalars['BigInt']['output']>;
@@ -1105,6 +1108,7 @@ export type DealToEffector_OrderBy =
   | 'deal__createdAt'
   | 'deal__depositedSum'
   | 'deal__id'
+  | 'deal__matchedAt'
   | 'deal__matchedWorkersCurrentCount'
   | 'deal__maxPaidEpoch'
   | 'deal__maxWorkersPerProvider'
@@ -1218,6 +1222,7 @@ export type DealToJoinedOfferPeer_OrderBy =
   | 'deal__createdAt'
   | 'deal__depositedSum'
   | 'deal__id'
+  | 'deal__matchedAt'
   | 'deal__matchedWorkersCurrentCount'
   | 'deal__maxPaidEpoch'
   | 'deal__maxWorkersPerProvider'
@@ -1328,6 +1333,7 @@ export type DealToPeer_OrderBy =
   | 'deal__createdAt'
   | 'deal__depositedSum'
   | 'deal__id'
+  | 'deal__matchedAt'
   | 'deal__matchedWorkersCurrentCount'
   | 'deal__maxPaidEpoch'
   | 'deal__maxWorkersPerProvider'
@@ -1420,6 +1426,7 @@ export type DealToProvidersAccess_OrderBy =
   | 'deal__createdAt'
   | 'deal__depositedSum'
   | 'deal__id'
+  | 'deal__matchedAt'
   | 'deal__matchedWorkersCurrentCount'
   | 'deal__maxPaidEpoch'
   | 'deal__maxWorkersPerProvider'
@@ -1492,6 +1499,14 @@ export type Deal_Filter = {
   id_not?: InputMaybe<Scalars['ID']['input']>;
   id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>;
   joinedPeers_?: InputMaybe<DealToPeer_Filter>;
+  matchedAt?: InputMaybe<Scalars['BigInt']['input']>;
+  matchedAt_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  matchedAt_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  matchedAt_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  matchedAt_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  matchedAt_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  matchedAt_not?: InputMaybe<Scalars['BigInt']['input']>;
+  matchedAt_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   matchedWorkersCurrentCount?: InputMaybe<Scalars['Int']['input']>;
   matchedWorkersCurrentCount_gt?: InputMaybe<Scalars['Int']['input']>;
   matchedWorkersCurrentCount_gte?: InputMaybe<Scalars['Int']['input']>;
@@ -1617,6 +1632,7 @@ export type Deal_OrderBy =
   | 'effectors'
   | 'id'
   | 'joinedPeers'
+  | 'matchedAt'
   | 'matchedWorkersCurrentCount'
   | 'maxPaidEpoch'
   | 'maxWorkersPerProvider'
@@ -1771,6 +1787,7 @@ export type GraphNetwork = {
   capacityMaxFailedRatio?: Maybe<Scalars['Int']['output']>;
   coreContractAddress?: Maybe<Scalars['String']['output']>;
   coreEpochDuration?: Maybe<Scalars['Int']['output']>;
+  coreMinDealRematchingEpochs?: Maybe<Scalars['Int']['output']>;
   corePrecision?: Maybe<Scalars['Int']['output']>;
   dealsTotal: Scalars['BigInt']['output'];
   effectorsTotal: Scalars['BigInt']['output'];
@@ -1856,6 +1873,14 @@ export type GraphNetwork_Filter = {
   coreEpochDuration_lte?: InputMaybe<Scalars['Int']['input']>;
   coreEpochDuration_not?: InputMaybe<Scalars['Int']['input']>;
   coreEpochDuration_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  coreMinDealRematchingEpochs?: InputMaybe<Scalars['Int']['input']>;
+  coreMinDealRematchingEpochs_gt?: InputMaybe<Scalars['Int']['input']>;
+  coreMinDealRematchingEpochs_gte?: InputMaybe<Scalars['Int']['input']>;
+  coreMinDealRematchingEpochs_in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  coreMinDealRematchingEpochs_lt?: InputMaybe<Scalars['Int']['input']>;
+  coreMinDealRematchingEpochs_lte?: InputMaybe<Scalars['Int']['input']>;
+  coreMinDealRematchingEpochs_not?: InputMaybe<Scalars['Int']['input']>;
+  coreMinDealRematchingEpochs_not_in?: InputMaybe<Array<Scalars['Int']['input']>>;
   corePrecision?: InputMaybe<Scalars['Int']['input']>;
   corePrecision_gt?: InputMaybe<Scalars['Int']['input']>;
   corePrecision_gte?: InputMaybe<Scalars['Int']['input']>;
@@ -1973,6 +1998,7 @@ export type GraphNetwork_OrderBy =
   | 'capacityMaxFailedRatio'
   | 'coreContractAddress'
   | 'coreEpochDuration'
+  | 'coreMinDealRematchingEpochs'
   | 'corePrecision'
   | 'dealsTotal'
   | 'effectorsTotal'

@@ -77,6 +77,7 @@ export type ProviderBase = {
 
 export interface ProviderShort extends ProviderBase {
   offers: Array<OfferShort>;
+  peerCount: number;
 }
 
 export interface ProviderDetail extends ProviderBase {
