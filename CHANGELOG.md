@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.13.11](https://github.com/fluencelabs/deal/compare/v0.13.10...v0.13.11) (2024-04-28)
+
+
+### Features
+
+* new-column [CHAIN-483] ([#432](https://github.com/fluencelabs/deal/issues/432)) ([fae21cd](https://github.com/fluencelabs/deal/commit/fae21cd1bfa32765bf7125c6210ab87cc3018209))
+* storage checker ([#426](https://github.com/fluencelabs/deal/issues/426)) ([6b7516f](https://github.com/fluencelabs/deal/commit/6b7516f9fe6310fbf4e734f341e4674c18d109a8))
+
+
+### Bug Fixes
+
+* storage checker ([#438](https://github.com/fluencelabs/deal/issues/438)) ([9f50def](https://github.com/fluencelabs/deal/commit/9f50defc794072d171fb662daa0c0afead1bd7be))
+* storage-checker prettier, minor ([#437](https://github.com/fluencelabs/deal/issues/437)) ([c07ded6](https://github.com/fluencelabs/deal/commit/c07ded6db09e5f36c416d71cb1b252399a85294e))
+
 ## [0.13.10](https://github.com/fluencelabs/deal/compare/v0.13.9...v0.13.10) (2024-04-24)
 
 
