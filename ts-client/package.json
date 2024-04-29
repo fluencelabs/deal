@@ -1,6 +1,6 @@
 {
   "name": "@fluencelabs/deal-ts-clients",
-  "version": "0.13.9",
+  "version": "0.13.10",
   "main": "dist/index.js",
   "type": "module",
   "types": "dist/index.d.ts",
@@ -29,7 +29,9 @@
     "graphql": "^16.8.1",
     "graphql-request": "^6.1.0",
     "graphql-scalars": "^1.22.4",
-    "graphql-tag": "^2.12.6"
+    "graphql-tag": "^2.12.6",
+    "ipfs-http-client": "^60.0.1",
+    "multiformats": "^13.0.1"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "5.0.2",
