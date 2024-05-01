@@ -185,6 +185,8 @@ interface ICapacity {
     function unlockedRewards(bytes32 commitmentId) external view returns (uint256);
     function getGlobalNonce() external view returns (bytes32);
 
+    function getTotalRewardPool() external view returns (uint256);
+
     // ----------------- Deal Callbacks -----------------
     function onUnitMovedToDeal(bytes32 commitmentId, bytes32 unitId) external;
     function onUnitReturnedFromDeal(bytes32 commitmentId, bytes32 unitId) external;
@@ -223,6 +225,10 @@ interface ICapacity {
     /// @param commitmentId Commitment id
     /// @param unitIds Compute unit ids which will be removed from the commitment
     function removeCUFromCC(bytes32 commitmentId, bytes32[] calldata unitIds) external;
+
+    function fixReward(bytes32 commitmentId) external;
+
+    function withdrawCollateral() external;
 
     /// @dev Withdraws the reward from the commitment
     /// @param commitmentId Commitment id
