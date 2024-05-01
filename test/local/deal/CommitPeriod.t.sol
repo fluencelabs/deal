@@ -9,19 +9,19 @@ import "src/deal/interfaces/IDeal.sol";
 import "src/deal/DealSnapshot.sol";
 import "src/dev/test/interfaces/IDealWithPublicInternals.sol";
 
-import "test/utils/TestWithDeployment.sol";
+import "test/utils/TestWithLocalDeployment.sol";
 import "test/utils/TestHelper.sol";
 
-contract CommitPeriod is TestWithDeployment {
+contract CommitPeriod is TestWithLocalDeployment {
     using SafeERC20 for IERC20;
-    using TestHelper for TestWithDeployment.Deployment;
+    using TestHelper for TestWithLocalDeployment.Deployment;
     using DealSnapshot for DealSnapshot.Cache;
 
     IDealWithPublicInternals dealContract;
 
     // ------------------ Test ------------------
-    function setUp() public {
-        _deploySystem();
+    function setUp() public override {
+        super.setUp();
         dealContract =
             IDealWithPublicInternals(deployCode("out/DealWithPublicInternals.sol/DealWithPublicInternals.json"));
     }

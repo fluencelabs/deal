@@ -7,10 +7,10 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "src/deal/interfaces/IConfig.sol";
 import "src/dev/test/interfaces/IConfigWithPublicInternals.sol";
 
-import "test/utils/TestWithDeployment.sol";
+import "test/utils/TestWithLocalDeployment.sol";
 import "test/utils/TestHelper.sol";
 
-contract ConfigContract is TestWithDeployment {
+contract ConfigContract is TestWithLocalDeployment {
     using SafeERC20 for IERC20;
 
     struct ConfigContractParams {
@@ -29,8 +29,8 @@ contract ConfigContract is TestWithDeployment {
     ConfigContractParams configParams;
 
     // ------------------ Test ------------------
-    function setUp() public {
-        _deploySystem();
+    function setUp() public override {
+        super.setUp();
 
         configParams.globalCore = deployment.core;
         configParams.appCID = CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("appCID", 0))});

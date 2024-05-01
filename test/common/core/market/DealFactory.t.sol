@@ -9,15 +9,11 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "test/utils/TestWithDeployment.sol";
 import "test/utils/TestHelper.sol";
 
-contract DealFactoryTest is TestWithDeployment {
+abstract contract DealFactoryTest is TestWithDeployment {
     using SafeERC20 for IERC20;
     using TestHelper for TestWithDeployment.Deployment;
 
     // ------------------ Test ------------------
-    function setUp() public {
-        _deploySystem();
-    }
-
     function test_Deploy() public {
         uint256 pricePerWorkerEpoch = 1 ether;
         uint256 targetWorkers = 3;

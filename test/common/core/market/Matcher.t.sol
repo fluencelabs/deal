@@ -13,7 +13,7 @@ import "src/core/modules/market/interfaces/IOffer.sol";
 import "test/utils/TestWithDeployment.sol";
 import "test/utils/TestHelper.sol";
 
-contract MatcherTest is TestWithDeployment {
+abstract contract MatcherTest is TestWithDeployment {
     using SafeERC20 for IERC20;
 
     // ------------------ Events ------------------
@@ -75,10 +75,6 @@ contract MatcherTest is TestWithDeployment {
     }
 
     // ------------------ Test ------------------
-    function setUp() public {
-        _deploySystem();
-    }
-
     struct MatcherTestParams {
         DealMock deal;
         uint256 offerCount;
@@ -101,8 +97,8 @@ contract MatcherTest is TestWithDeployment {
             offerCount: 3,
             unitCountPerPeer: 1,
             peerCountPerOffer: 3,
-            minProtocolVersion: DEFAULT_MIN_PROTOCOL_VERSION,
-            maxProtocolVersion: DEFAULT_MAX_PROTOCOL_VERSION
+            minProtocolVersion: deployment.core.minProtocolVersion(),
+            maxProtocolVersion: deployment.core.maxProtocolVersion()
         });
 
         args.appCID = CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("appCID"))});
@@ -110,7 +106,7 @@ contract MatcherTest is TestWithDeployment {
         args.pricePerWorkerEpoch = 1 ether;
         args.minWorkers = 1;
         args.maxWorkersPerProvider = params.unitCountPerPeer * params.peerCountPerOffer * params.offerCount;
-        args.protocolVersion = DEFAULT_MIN_PROTOCOL_VERSION;
+        args.protocolVersion = deployment.core.minProtocolVersion();
         args.owner = address(this);
         args.creationBlock = block.number;
 
