@@ -869,7 +869,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
             (core.getRewardPool(nextEpochAfterLastSnapshot) * lastProofCount) / rewardInfo.totalSuccessProofs;
 
         if (reward > 0) {
-            cc.vesting.add(reward, nextEpochAfterLastSnapshot, core.vestingPeriodDuration(), core.vestingPeriodCount());
+            cc.vesting.add(reward, snapshotEpoch, core.vestingPeriodDuration(), core.vestingPeriodCount());
         }
 
         delete unitInfo.proofCountByEpoch[nextEpochAfterLastSnapshot];
