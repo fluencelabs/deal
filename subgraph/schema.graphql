@@ -27,6 +27,7 @@ type GraphNetwork @entity {
   coreEpochDuration: Int
   initTimestamp: Int
   corePrecision: Int
+  coreMinDealRematchingEpochs: Int
   # Capacity consts are below.
   capacityMaxFailedRatio: Int
   minRequiredProofsPerEpoch: Int
@@ -210,6 +211,8 @@ type Deal @entity {
   providersAccessList: [DealToProvidersAccess!] @derivedFrom(field: "deal")
   #  balance: BigInt!  # on-request via frontend
   #  status: DealStatus!  # on-request via frontend
+  "The last matched timestamp."
+  matchedAt: BigInt
 
   # Add Statistics below.
   withdrawalSum: BigInt!

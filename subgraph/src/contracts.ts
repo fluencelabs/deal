@@ -83,6 +83,10 @@ export function getPrecision(contractAddress: Address): BigInt {
   return Core.bind(contractAddress).precision();
 }
 
+export function getMinDealRematchingEpochs(contractAddress: Address): BigInt {
+  return Core.bind(contractAddress).minDealRematchingEpochs();
+}
+
 export function calculateNextFailedCCEpoch(
   maxFailedRatio: BigInt,
   unitCount: BigInt,
