@@ -32,6 +32,7 @@ const files = fs
   .filter((val) => val !== "");
 
 const storageLayout = {};
+let brokenState = false;
 
 for (const file of files) {
   const filePath = path.join(outDir, file);
@@ -51,7 +52,10 @@ for (const file of files) {
     if (JSON.stringify(prev) !== JSON.stringify(curr)) {
       console.log("Updated file: ", file);
       const compare = compareSlots(prev, curr);
-      console.log(compare);
+      if (compare.length > 0) {
+        brokenState = true;
+        console.log(compare);
+      }
     }
   }
   prevFiles.splice(prevFiles.indexOf(file), 1);
@@ -60,6 +64,10 @@ for (const file of files) {
 if (prevFiles.length > 0) {
   console.log("Files deleted: ");
   console.log(prevFiles);
+  brokenState = true;
+}
+
+if (brokenState) {
   process.exit(1);
 }
 
