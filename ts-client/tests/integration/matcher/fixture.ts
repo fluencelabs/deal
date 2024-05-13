@@ -6,15 +6,8 @@ import { ZERO_ADDRESS } from "./constants";
 import { expect } from "vitest";
 
 interface MarketExample {
-  providerWithCapacityCommitments: ProviderFixtureModel;
-  providerToBeMatched: ProviderFixtureModel;
-  providerWithoutCapacityCommitments: ProviderFixtureModel;
-  dealToMatchWithWhiteListedProvider: DealModel;
-  dealWithoutWhitelist: DealModel;
-  dealWithWhitelist: DealModel;
-  //     TODO: with CC but without deposit
-  //     TODO: with CC that expired soon.
-  //     TODO: deal to match with CC active.
+  providerExample: ProviderFixtureModel;
+  dealExample: DealFixtureModel;
 }
 
 interface CID {
@@ -35,7 +28,7 @@ interface ProviderFixtureModel {
   maxProtocolVersion: number;
 }
 
-interface DealModel {
+interface DealFixtureModel {
   dealId?: string; // assigned after deal deployed.
   developerAddress: string;
   appCID: CID;
@@ -52,87 +45,47 @@ interface DealModel {
   protocolVersion: number;
 }
 
-export function getMarketExampleFixture(paymentToken: string): MarketExample {
-  const effectors: CID[] = [
-    {
-      prefix: "0x12345678",
-      hash: ethers.hexlify(ethers.randomBytes(32)),
-      description: "IPFS",
-    },
-    {
-      prefix: "0x12345678",
-      hash: ethers.hexlify(ethers.randomBytes(32)),
-      description: "cURL",
-    },
-  ];
-  const minPricePerEpoch = ethers.parseEther("0.00001");
+export function generateEffector(): CID {
   return {
-    providerWithCapacityCommitments: {
+    prefix: "0x12345678",
+    hash: ethers.hexlify(ethers.randomBytes(32)),
+    description: "IPFS",
+  };
+}
+
+// Get success example of provider with offer fully matched deal.
+export function getMarketExampleFixture(
+  paymentToken: string,
+  effectors: CID[],
+): MarketExample {
+  const minPricePerEpochWEI = ethers.parseEther("0.00001");
+  return {
+    providerExample: {
       providerAddress: "",
       peerIds: [
         ethers.hexlify(ethers.randomBytes(32)),
         ethers.hexlify(ethers.randomBytes(32)),
       ],
       computeUnitsPerPeers: [
-        new Array(20).fill("0").map(() => {
+        new Array(1).fill("0").map(() => {
           return ethers.hexlify(ethers.randomBytes(32));
         }),
-        new Array(20).fill("0").map(() => {
-          return ethers.hexlify(ethers.randomBytes(32));
-        }),
-      ],
-      effectors,
-      minPricePerEpoch: minPricePerEpoch.toString(),
-      paymentTokenAddress: paymentToken,
-      minProtocolVersion: 1,
-      maxProtocolVersion: 1,
-    },
-    providerToBeMatched: {
-      providerAddress: "",
-      peerIds: [
-        ethers.hexlify(ethers.randomBytes(32)),
-        ethers.hexlify(ethers.randomBytes(32)),
-      ],
-      computeUnitsPerPeers: [
-        new Array(4).fill("0").map(() => {
-          return ethers.hexlify(ethers.randomBytes(32));
-        }),
-        new Array(4).fill("0").map(() => {
+        new Array(1).fill("0").map(() => {
           return ethers.hexlify(ethers.randomBytes(32));
         }),
       ],
       effectors,
-      minPricePerEpoch: minPricePerEpoch.toString(),
+      minPricePerEpoch: minPricePerEpochWEI.toString(),
       paymentTokenAddress: paymentToken,
       minProtocolVersion: 1,
       maxProtocolVersion: 1,
     },
-    providerWithoutCapacityCommitments: {
-      providerAddress: "",
-      peerIds: [
-        ethers.hexlify(ethers.randomBytes(32)),
-        ethers.hexlify(ethers.randomBytes(32)),
-      ],
-      computeUnitsPerPeers: [
-        new Array(2).fill("0").map(() => {
-          return ethers.hexlify(ethers.randomBytes(32));
-        }),
-        new Array(2).fill("0").map(() => {
-          return ethers.hexlify(ethers.randomBytes(32));
-        }),
-      ],
-      effectors,
-      minPricePerEpoch: minPricePerEpoch.toString(),
-      paymentTokenAddress: paymentToken,
-      minProtocolVersion: 1,
-      maxProtocolVersion: 1,
-    },
-    dealToMatchWithWhiteListedProvider: {
+    dealExample: {
       developerAddress: "",
       appCID: {
         prefix: ethers.hexlify(ethers.randomBytes(4)),
         hash: ethers.hexlify(ethers.randomBytes(32)),
-        description: "dealAPPCID",
+        description: "dealExample",
       },
       paymentTokenAddress: paymentToken,
       // pricePerWorkerEpoch * newTargetWorkers * core.minDealDepositedEpochs();
@@ -140,46 +93,10 @@ export function getMarketExampleFixture(paymentToken: string): MarketExample {
       minWorkers: 2,
       targetWorkers: 2,
       maxWorkerPerProvider: 2,
-      pricePerWorkerEpoch: ethers.parseEther("0.01").toString(),
+      pricePerWorkerEpoch: minPricePerEpochWEI.toString(),
       effectors,
-      listAccessType: 1,
+      listAccessType: 0,
       listAccess: [], // provider address will be added after.
-      protocolVersion: 1,
-    },
-    dealWithoutWhitelist: {
-      developerAddress: "",
-      appCID: {
-        prefix: ethers.hexlify(ethers.randomBytes(4)),
-        hash: ethers.hexlify(ethers.randomBytes(32)),
-        description: "dealAPPCID",
-      },
-      paymentTokenAddress: paymentToken,
-      depositAmount: null,
-      minWorkers: 1,
-      targetWorkers: 1,
-      maxWorkerPerProvider: 1,
-      pricePerWorkerEpoch: ethers.parseEther("0.01").toString(),
-      effectors,
-      listAccessType: 0,
-      listAccess: [],
-      protocolVersion: 1,
-    },
-    dealWithWhitelist: {
-      developerAddress: "",
-      appCID: {
-        prefix: ethers.hexlify(ethers.randomBytes(4)),
-        hash: ethers.hexlify(ethers.randomBytes(32)),
-        description: "dealAPPCID",
-      },
-      paymentTokenAddress: paymentToken,
-      depositAmount: null,
-      minWorkers: 1,
-      targetWorkers: 1,
-      maxWorkerPerProvider: 1,
-      pricePerWorkerEpoch: ethers.parseEther("0.01").toString(),
-      effectors,
-      listAccessType: 0,
-      listAccess: [],
       protocolVersion: 1,
     },
   };
@@ -300,7 +217,7 @@ export async function depositCollateral(
 
 // It creates Deal from fixture model and update fixture with deal ID.
 export async function createDealsFromFixtures(
-  deals: Array<DealModel>,
+  deals: Array<DealFixtureModel>,
   // TODO: add deployerAddress to fixture instead.
   deployerAddress: string,
   paymentToken: IERC20,
