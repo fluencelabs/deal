@@ -5,7 +5,7 @@ mkdir /testnet
 fendermint genesis --genesis-file /testnet/genesis.json \
   new \
   --chain-name test \
-  --base-fee 1000 \
+  --base-fee 10 \
   --timestamp 1680101412 \
   --power-scale 0
 
@@ -19,25 +19,25 @@ fendermint genesis --genesis-file /testnet/genesis.json \
 fendermint genesis --genesis-file /testnet/genesis.json \
   add-account \
   --public-key /testnet/keys/alice.pk \
-  --balance 10 \
+  --balance 50000000000000000000000 \
   --kind ethereum
 
 fendermint genesis --genesis-file /testnet/genesis.json \
   add-account \
   --public-key /testnet/keys/bob.pk \
-  --balance 10 \
+  --balance 50000000000000000000000 \
   --kind ethereum
 
 fendermint genesis --genesis-file /testnet/genesis.json \
   add-account \
   --public-key /testnet/keys/charlie.pk \
-  --balance 10 \
+  --balance 50000000000000000000000 \
   --kind ethereum
 
 fendermint genesis --genesis-file /testnet/genesis.json \
   add-account \
   --public-key /testnet/keys/dave.pk \
-  --balance 10 \
+  --balance 50000000000000000000000 \
   --kind ethereum
 
 # Add multi-sig account
@@ -49,7 +49,7 @@ fendermint genesis --genesis-file /testnet/genesis.json \
   --threshold 2 \
   --vesting-start 0 \
   --vesting-duration 1000000 \
-  --balance 30
+  --balance 50000000000000000000000
 
 # Add bob as validator
 fendermint genesis --genesis-file /testnet/genesis.json \
