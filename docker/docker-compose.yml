@@ -164,7 +164,6 @@ services:
       postgres_user: postgres
       postgres_pass: ""
       postgres_db: postgres
-      ipfs: 'ipfs:5001'
       ethereum: ${GRAPH_NODE_ETHEREUM_PATH:-local:http://eth-api:8545}
       ipfs: "ipfs:5001"
       GRAPH_LOG: info
