@@ -12,14 +12,6 @@ on:
       - "synchronize"
       - "opened"
       - "reopened"
-  push:
-    branches:
-      - "main"
-    paths-ignore:
-      - "**.md"
-      - ".github/**"
-      - "!.github/workflows/e2e.yml"
-      - "!.github/workflows/artifacts.yml"
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"

@@ -30,11 +30,7 @@ services:
     image: postgres:14
     ports:
       - "5432:5432"
-    command:
-      [
-        "postgres",
-        "-cshared_preload_libraries=pg_stat_statements"
-      ]
+    command: ["postgres", "-cshared_preload_libraries=pg_stat_statements"]
     environment:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: ""
@@ -58,7 +54,6 @@ services:
     volumes:
       - fendermint:/fendermint/data
 
-  # Blockchain backend
   cometbft:
     image: ${COMETBFT_IMAGE:-cometbft}
     build:
@@ -123,7 +118,6 @@ services:
     environment:
       - EPOCH_DURATION
 
-  # Blockscout services
   blockscout:
     image: offchainlabs/blockscout:v1.0.0-c8db5b1
     restart: always
@@ -156,11 +150,15 @@ services:
   graph-node:
     image: graphprotocol/graph-node:v0.33.0
     ports:
-      - '8000:8000'
-      - '8001:8001'
-      - '8020:8020'
-      - '8030:8030'
-      - '8040:8040'
+      - "8000:8000"
+      - "8001:8001"
+      - "8020:8020"
+      - "8030:8030"
+      - "8040:8040"
+    depends_on:
+      - ipfs
+      - postgres
+      - chain-rpc
     environment:
       postgres_host: postgres
       postgres_user: postgres
@@ -168,6 +166,7 @@ services:
       postgres_db: postgres
       ipfs: 'ipfs:5001'
       ethereum: ${GRAPH_NODE_ETHEREUM_PATH:-local:http://eth-api:8545}
+      ipfs: "ipfs:5001"
       GRAPH_LOG: info
       # https://github.com/graphprotocol/graph-node/issues/3159#issuecomment-1062827725
       ETHEREUM_REORG_THRESHOLD: 1

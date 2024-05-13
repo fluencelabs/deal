@@ -1,5 +1,66 @@
 # Changelog
 
+## [0.13.11](https://github.com/fluencelabs/deal/compare/v0.13.10...v0.13.11) (2024-04-28)
+
+
+### Features
+
+* new-column [CHAIN-483] ([#432](https://github.com/fluencelabs/deal/issues/432)) ([fae21cd](https://github.com/fluencelabs/deal/commit/fae21cd1bfa32765bf7125c6210ab87cc3018209))
+* storage checker ([#426](https://github.com/fluencelabs/deal/issues/426)) ([6b7516f](https://github.com/fluencelabs/deal/commit/6b7516f9fe6310fbf4e734f341e4674c18d109a8))
+
+
+### Bug Fixes
+
+* storage checker ([#438](https://github.com/fluencelabs/deal/issues/438)) ([9f50def](https://github.com/fluencelabs/deal/commit/9f50defc794072d171fb662daa0c0afead1bd7be))
+* storage-checker prettier, minor ([#437](https://github.com/fluencelabs/deal/issues/437)) ([c07ded6](https://github.com/fluencelabs/deal/commit/c07ded6db09e5f36c416d71cb1b252399a85294e))
+
+## [0.13.10](https://github.com/fluencelabs/deal/compare/v0.13.9...v0.13.10) (2024-04-24)
+
+
+### Features
+
+* add subgraph versioning v2 ([#424](https://github.com/fluencelabs/deal/issues/424)) ([ac94587](https://github.com/fluencelabs/deal/commit/ac9458718265ee57f8f9d5b5dcc70983d91fb1aa))
+* deploy subgraph to dar and kras ([#430](https://github.com/fluencelabs/deal/issues/430)) ([be90830](https://github.com/fluencelabs/deal/commit/be9083044d84c8be065fb4b584a98f8177bb1b6f))
+* format to base58 chain 467 ([#427](https://github.com/fluencelabs/deal/issues/427)) ([6136b71](https://github.com/fluencelabs/deal/commit/6136b719f1e2115d3fbb0683e62feae701c85805))
+* prettier for whole monorepo [feat CHAIN-446] ([#402](https://github.com/fluencelabs/deal/issues/402)) ([ea50f06](https://github.com/fluencelabs/deal/commit/ea50f0667ea32252dfcaa775f513ba3cbd2a457a))
+
+
+### Bug Fixes
+
+* negative-active-workers-CHAIN-456 ([#421](https://github.com/fluencelabs/deal/issues/421)) ([7c760fe](https://github.com/fluencelabs/deal/commit/7c760fef33b3f18f1b90a5c03c5a759cbbe0ccc6))
+
+## [0.13.9](https://github.com/fluencelabs/deal/compare/v0.13.8...v0.13.9) (2024-04-09)
+
+
+### Features
+
+* optimise query for cc detail view [CHAIN-452] ([#414](https://github.com/fluencelabs/deal/issues/414)) ([86dab22](https://github.com/fluencelabs/deal/commit/86dab22b601c044cd45030dda96751e05810fe23))
+
+## [0.13.8](https://github.com/fluencelabs/deal/compare/v0.13.7...v0.13.8) (2024-04-04)
+
+
+### Features
+
+* cliClient get offers and offer ids by provider [fixes CHAIN-448 CHAIN-449] ([#403](https://github.com/fluencelabs/deal/issues/403)) ([6637593](https://github.com/fluencelabs/deal/commit/66375933fb1909de3e9acd219c8972a2cfec7271))
+* set proper chain id ([#415](https://github.com/fluencelabs/deal/issues/415)) ([fd7049f](https://github.com/fluencelabs/deal/commit/fd7049fa34ed01a5aa40a80bcdad412b3befc6f5))
+
+
+### Bug Fixes
+
+* remove invalid release logic from submit proof ([#406](https://github.com/fluencelabs/deal/issues/406)) ([90ce155](https://github.com/fluencelabs/deal/commit/90ce1553a9a00870f21eb98143cdfdb0584a3023))
+
+## [0.13.7](https://github.com/fluencelabs/deal/compare/v0.13.6...v0.13.7) (2024-04-01)
+
+
+### Features
+
+* count epoch block number [chain-438] ([#393](https://github.com/fluencelabs/deal/issues/393)) ([cf84c2c](https://github.com/fluencelabs/deal/commit/cf84c2c9de9ae73f39e512dfa6863a22b1786c31))
+
+
+### Bug Fixes
+
+* subgraph after offer updated [chain 442] ([#399](https://github.com/fluencelabs/deal/issues/399)) ([ae07000](https://github.com/fluencelabs/deal/commit/ae070005568dc58e6dc22b3c9837d4adb9f090b5))
+
 ## [0.13.6](https://github.com/fluencelabs/deal/compare/v0.13.5...v0.13.6) (2024-03-28)
 
 

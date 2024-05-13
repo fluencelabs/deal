@@ -1,5 +1,6 @@
 import type {
-  OfferQueryQueryVariables,
+  OfferDetailsQueryQueryVariables,
+  OfferIdsQueryQueryVariables,
   Sdk as OffersSdk,
 } from "./queries/offers-query.generated.js";
 import type {
@@ -20,8 +21,12 @@ export class IndexerClient extends IndexerClientABC {
     this.dealsClient = getDealsSdk(this._graphqlClient);
   }
 
-  async getOffer(variables: OfferQueryQueryVariables) {
-    return await this.offersClient.OfferQuery(variables);
+  async getOfferDetails(variables: OfferDetailsQueryQueryVariables) {
+    return await this.offersClient.OfferDetailsQuery(variables);
+  }
+
+  async getOfferIds(variables: OfferIdsQueryQueryVariables) {
+    return await this.offersClient.OfferIdsQuery(variables);
   }
 
   async getDeals(variables: DealsQueryQueryVariables) {

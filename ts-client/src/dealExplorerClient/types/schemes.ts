@@ -77,6 +77,7 @@ export type ProviderBase = {
 
 export interface ProviderShort extends ProviderBase {
   offers: Array<OfferShort>;
+  peerCount: number;
 }
 
 export interface ProviderDetail extends ProviderBase {
@@ -185,6 +186,7 @@ export interface DealDetail extends DealShort {
   whitelist: Array<string>;
   blacklist: Array<string>;
   effectors: Array<Effector>;
+  appCID: string;
 }
 
 // [Figma: Peer ID]

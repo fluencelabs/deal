@@ -28,7 +28,7 @@ export const getDeployment = (env: ContractsENV) => {
   switch (env) {
     case "dar":
       deployment = dar;
-      chainId = 3525067388221321;
+      chainId = 2358716091832359;
       break;
     case "stage":
       deployment = stage;

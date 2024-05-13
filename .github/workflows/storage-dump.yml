@@ -1,0 +1,51 @@
+name: "Storage layout dump"
+
+on:
+  push:
+    branches:
+      - "main"
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+
+jobs:
+  dump-storage-layout:
+    name: "Dump storage layout"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.FLUENCEBOT_RELEASE_PLEASE_PAT }}
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Run Forge build
+        run: |
+          forge --version
+          forge build
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          registry-url: "https://registry.npmjs.org"
+          cache-dependency-path: |
+            storage-checker/package-lock.json
+
+      - name: Dump storage layout
+        working-directory: storage-checker
+        run: node store-layout.js
+
+      - name: Commit storage layout dump
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: Update storage layout dump"
+          commit_user_name: fluencebot
+          commit_user_email: devops@fluence.one
+          commit_author: fluencebot <devops@fluence.one>

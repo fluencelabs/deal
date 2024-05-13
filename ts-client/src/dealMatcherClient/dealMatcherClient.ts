@@ -180,11 +180,7 @@ export class DealMatcherClient {
     const fetched = await this._indexerClient.getOffers(indexerGetOffersParams);
     logger.info(`[_getMatchedOffersPage] Got response from indexer.`);
     logger.debug(
-      `[_getMatchedOffersPage] Fetched data: ${JSON.stringify(
-        fetched,
-        null,
-        2,
-      )}`,
+      `[_getMatchedOffersPage] Fetched data: ${JSON.stringify(fetched, null, 2)}`,
     );
     return fetched.offers;
   }

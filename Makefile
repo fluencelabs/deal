@@ -9,8 +9,9 @@ IPC_URL ?= http://eth-api:8545
 verify-command: ## Verify command
 	@command -v $(program) > /dev/null || (echo "\033[0;31m$(program) is not installed. Please install $(program) and try again.\033[0m" && exit 1)
 
-install-npms: ## Install and deal-ts-clients and subgraph
+install-npms: ## Install root for pre-commit and deal-ts-clients, and subgraph
 	@make verify-command program=npm
+	@npm install
 	@cd ts-client && npm install
 	@cd subgraph && npm install
 	@echo "\033[0;32mSuccess! Run npm install in both npm modules: ts-client and subgraph.\033[0m"
@@ -35,9 +36,11 @@ build-npms: ## Build all npms: subgraph and ts-clients
 	@make build-subgraph
 	@echo "\033[0;32mSuccess! Build of all NPM packages completed.\033[0m"
 
-build-all: build-contracts build-npms ## Build contracts and npms
+build-all: ## Build contracts and npms
+	@make build-contracts
+	@make build-npms
 
-run-tests:  ## Test for solidity contracts & ts-clients
+run-tests: ## Test for solidity contracts & ts-clients
 	@make verify-command program=forge
 	@forge test
 	@cd ts-client && npm run test
@@ -50,6 +53,10 @@ start-local-chain: ## Start local chain
 deploy-subgraph-%: ## Deploy subgraph to network {local, kras, dar, stage}
 	@make verify-command program=npm
 	@cd subgraph && npm run create:$* && npm run deploy:$*
+
+delete-subgraph-%: ## Delete subgraph from network {local, kras, dar, stage}, do not forget to set SUBGRAPH_NAME_TO_DELETE
+	@make verify-command program=npm
+	@cd subgraph  && npm run delete:$*
 
 deploy-contracts-local: ## Deploy contracts to local network
 	@make verify-command program=forge
@@ -111,4 +118,4 @@ create-pure-market-local: ## Create market on a local blockchain with Anvil mnem
 
 help: ## List makefile targets
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
-	| awk 'BEGIN {FS = ":.*?## "}; {printf "%-30s %s\n", $$1, $$2}'
+	| awk 'BEGIN {FS = ":"}; {printf "%-30s %s\n", $$2, $$3}'

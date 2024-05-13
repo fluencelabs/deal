@@ -11,13 +11,6 @@ on:
       - "synchronize"
       - "opened"
       - "reopened"
-  push:
-    branches:
-      - "main"
-    paths-ignore:
-      - "**.md"
-      - ".github/**"
-      - "!.github/workflows/test.yml"
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
@@ -38,6 +31,11 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Run Prettier Test
+        uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: --all-files
+
       - name: Setup node
         uses: actions/setup-node@v3
         with:
@@ -46,6 +44,7 @@ jobs:
           cache-dependency-path: |
             ts-client/package-lock.json
             integration-tests/package-lock.json
+            storage-checker/package-lock.json
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
@@ -83,6 +82,11 @@ jobs:
 
       - name: Run Forge tests
         run: forge test -vvv
+
+      - name: Compare current storage layout to dump
+        working-directory: storage-checker
+        run: node compare.js
+        continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'review-storage-layout-change') }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
