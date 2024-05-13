@@ -10,7 +10,7 @@ import {
   IDealFactory,
   IERC20,
   IMarket,
-} from "../../src";
+} from "../../../src";
 import {
   ethers,
   HDNodeWallet,

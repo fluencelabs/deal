@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { ICapacity, IDealFactory, IERC20, IMarket } from "../../src";
+import { ICapacity, IDealFactory, IERC20, IMarket } from "../../../src";
 import { getEventValue } from "./events";
 import { ZERO_ADDRESS } from "./constants";
 
@@ -24,7 +24,7 @@ interface CID {
 }
 
 interface ProviderFixtureModel {
-  offerId?: string; // assigned after offer deployed.
+  offerId?: string; // assigned after offer is deployed.
   providerAddress: string;
   peerIds: string[];
   computeUnitsPerPeers: string[][];
