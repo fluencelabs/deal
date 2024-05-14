@@ -28,9 +28,10 @@ import { getSdk as getProvidersSdk } from "./queries/providers-query.generated.j
 import type {
   CapacityCommitmentQueryQueryVariables,
   CapacityCommitmentStatsPerEpochQueryQueryVariables,
+  CapacityCommitmentWithCUsQueryQueryVariables,
   ComputeUnitPerEpochStatsQueryQueryVariables,
   Sdk as CapacityCommitmentsSdk,
-  SubmittedProofsQueryQueryVariables,
+  SubmittedProofsQueryQueryVariables
 } from "./queries/capacity-commitments-query.generated.js";
 import type { Sdk as ContractConstantsSdk } from "./queries/constants-query.generated.js";
 import { getSdk as getContractConstantsSdk } from "./queries/constants-query.generated.js";
@@ -103,6 +104,14 @@ export class IndexerClient extends IndexerClientABC {
     variables: CapacityCommitmentQueryQueryVariables,
   ) {
     return await this.capacityCommitmentsClient.CapacityCommitmentQuery(
+      variables,
+    );
+  }
+
+  async getCapacityCommitmentWithCUs(
+    variables: CapacityCommitmentWithCUsQueryQueryVariables,
+  ) {
+    return await this.capacityCommitmentsClient.CapacityCommitmentWithCUsQuery(
       variables,
     );
   }

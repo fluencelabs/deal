@@ -11,4 +11,6 @@ export {
   DealMatcherClient,
   type GetMatchedOffersOut,
   DealNotFoundError,
+  DealMatchedRecentlyError,
+  DealAlreadyMatchedError,
 } from "./dealMatcherClient/dealMatcherClient.js";

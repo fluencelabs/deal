@@ -12,7 +12,6 @@ verify-command: ## Verify command
 
 install-npms: ## Install root for pre-commit and deal-ts-clients, and subgraph
 	@make verify-command program=npm
-	@npm install
 	@cd ts-client && npm install
 	@cd subgraph && npm install
 	@echo "\033[0;32mSuccess! Run npm install in both npm modules: ts-client and subgraph.\033[0m"
