@@ -1,8 +1,8 @@
-# Integration tests
+# Integration Tests for Fluence Deal Contracts
 
 ## Initialization
 
-> To run these tests, you need the following services up and running: **subgraph**, **chain-rpc**
+> To run these tests, you need the following services up and running: **chain-rpc**
 > Easiest way to run them is via docker compose. For this, you need to have SNAPSHOT_ID from the e2e action in this repo's PRs.
 
 -   Start Docker services by the following command: `SNAPHSHOT_ID=abcdef-1234-1 docker compose up -d`
