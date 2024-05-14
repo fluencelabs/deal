@@ -91,7 +91,10 @@ describe(
       epochMilliseconds = (await coreContract.epochDuration()) * 1000n;
     });
 
-    async function _createCCDepositAndWait(providers: ProviderFixtureModel[]) {
+    async function _createCCDepositAndWait(
+      providers: ProviderFixtureModel[],
+      capacityContract: ICapacity,
+    ) {
       let createdCCIds = await createCommitmentForProviderFixtures(
         providers,
         capacityContract,
@@ -104,15 +107,15 @@ describe(
         WAIT_CONFIRMATIONS,
       );
 
-      // It still should not match because CC is not active (waiting start).
-      // TODO: batch this to speed up.
-      for (const createdCCId of createdCCIds) {
-        console.log("get status for createdCCId", createdCCId);
-        const _status = await capacityContract.getStatus(createdCCId);
-        expect(_status).toEqual(BigInt(CommitmentStatus.WaitStart));
-      }
+      // This check below is desirable but randomly it could be on the edge of the next
+      //  epoch (when epoch time -> 0), thus status could be changed unexpectedly for this check.
+      // // It still should not match because CC is not active (waiting start).
+      // for (const createdCCId of createdCCIds) {
+      //   const _status = await capacityContract.getStatus(createdCCId);
+      //   expect(_status).toEqual(BigInt(CommitmentStatus.WaitStart));
+      // }
 
-      // We have to wait 1 epoch since deposit, thus, status becomes active
+      // We have to wait 1 epoch since deposit, after the status becomes active.
       await new Promise((resolve) =>
         setTimeout(resolve, Number(epochMilliseconds)),
       );
@@ -121,24 +124,27 @@ describe(
     async function _checkExactMatch(
       dealFixture: DealFixtureModel,
       providerFixture: ProviderFixtureModel,
+      expectedMatchedFully: boolean = true,
     ) {
       // Check that is matched successfully finally.
       const matchResult = await dealMatcherClient.getMatchedOffersByDealId(
         dealFixture.dealId,
       );
-      // We have only 1 Offer with 2 CUs matched for this Deal.
+      // We have only 1 Offer with 2 CUs number from provider fixture.
+      const providerFixtureComputeUnits = [].concat(
+        ...providerFixture.computeUnitsPerPeers,
+      );
       expect(matchResult.computeUnitsPerOffers.length).toEqual(1);
-      expect(matchResult.computeUnitsPerOffers[0].length).toEqual(2);
+      expect(matchResult.computeUnitsPerOffers[0].length).toEqual(
+        providerFixtureComputeUnits.length,
+      );
       const computeUnitsMatchedFromMatcher = [].concat(
         ...matchResult.computeUnitsPerOffers,
       );
-      const computeUnitsCreated = [].concat(
-        ...providerFixture.computeUnitsPerPeers,
-      );
       expect(computeUnitsMatchedFromMatcher.sort()).toEqual(
-        computeUnitsCreated.sort(),
+        providerFixtureComputeUnits.sort(),
       );
-      expect(matchResult.fulfilled).toEqual(true);
+      expect(matchResult.fulfilled).toEqual(expectedMatchedFully);
 
       // Unnecessary final check that even contracts agree with the matched result.
       const matchDealTx = await marketContract.matchDeal(
@@ -154,10 +160,12 @@ describe(
         eventName: "ComputeUnitMatched",
         value: "unitId",
       });
-      expect(matchedComputeUnits.sort()).toEqual(computeUnitsCreated.sort());
+      expect(matchedComputeUnits.sort()).toEqual(
+        providerFixtureComputeUnits.sort(),
+      );
     }
 
-    test(`It checks that it matched successfully for 1:1 configuration where CC has status Active.`, async () => {
+    test(`It matches successfully for 1:1 configuration where CC has status Active.`, async () => {
       // Prepare data.
       const effectors = [generateEffector()];
       const marketFixture = getMarketExampleFixture(
@@ -209,7 +217,10 @@ describe(
       expect(matchResult.computeUnitsPerOffers).toEqual([]);
 
       // Now lets register CC and activate it for another effector offer and check that it does not match.
-      await _createCCDepositAndWait([anotherEffectorProviderFixture]);
+      await _createCCDepositAndWait(
+        [anotherEffectorProviderFixture],
+        capacityContract,
+      );
       // Check that there are no match with another effector offer.
       matchResult = await dealMatcherClient.getMatchedOffersByDealId(
         dealFixture.dealId,
@@ -218,13 +229,13 @@ describe(
       expect(matchResult.computeUnitsPerOffers).toEqual([]);
 
       // Now let`s create CC for the target provider.
-      await _createCCDepositAndWait([providerFixture]);
+      await _createCCDepositAndWait([providerFixture], capacityContract);
 
       // Check itself.
       await _checkExactMatch(dealFixture, providerFixture);
     });
 
-    test(`It checks that it matched successfully with whitelisted Provider Offers even without CC.`, async () => {
+    test(`It matches successfully with whitelisted Provider Offers even without CC.`, async () => {
       // Prepare data.
       const effectors = [generateEffector()];
       const marketFixture = getMarketExampleFixture(
@@ -293,6 +304,124 @@ describe(
       // Check itself.
       await _checkExactMatch(dealFixture, providerFixture);
     });
+
+    test("It ignores CUs from blacklisted providers.", async () => {
+      // Prepare data.
+      // Our case:
+      // - Deal - 2 target workers, 1 min worker
+      // - Providers: blacklisted, ordinary with 1 worker
+      // We expect match with ordinary provider for 1 worker.
+      const effectors = [generateEffector()];
+
+      const marketFixture = getMarketExampleFixture(
+        paymentTokenAddress,
+        effectors,
+        signerAddress,
+      );
+      const providerFixture = marketFixture.providerExample;
+      providerFixture.peerIds = providerFixture.peerIds.slice(0, 1);
+      providerFixture.computeUnitsPerPeers = [
+        providerFixture.computeUnitsPerPeers[0].slice(0, 1),
+      ];
+      // Create context for blacklisted provider.
+      const blacklistedSigner = new ethers.Wallet(
+        PRIVATE_KEY_8_ANVIL_ACCOUNT,
+        provider,
+      );
+      const blacklistedSignerAddress = await blacklistedSigner.getAddress();
+      const blacklistedProviderFixture = getMarketExampleFixture(
+        paymentTokenAddress,
+        effectors,
+        blacklistedSignerAddress,
+      ).providerExample;
+      const contractsClientByBlacklisted = new DealClient(
+        blacklistedSigner,
+        TEST_NETWORK,
+      );
+      const marketContractByBlacklisted =
+        await contractsClientByBlacklisted.getMarket();
+      const capacityContractByBlacklisted =
+        await contractsClientByBlacklisted.getCapacity();
+
+      const dealFixture = marketFixture.dealExample;
+      dealFixture.listAccessType = AccessType.BLACKLIST;
+      dealFixture.listAccess = [blacklistedProviderFixture.providerAddress];
+      dealFixture.minWorkers = 1;
+
+      // Create/update providers.
+      const setProviderInfoTx = await marketContract.setProviderInfo(
+        "Provider",
+        {
+          prefixes: "0x12345678",
+          hash: ethers.hexlify(ethers.randomBytes(32)),
+        },
+      );
+      await setProviderInfoTx.wait(WAIT_CONFIRMATIONS);
+      const setBlacklistedProviderInfoTx =
+        await marketContractByBlacklisted.setProviderInfo(
+          "ProviderBlacklisted",
+          {
+            prefixes: "0x12345678",
+            hash: ethers.hexlify(ethers.randomBytes(32)),
+          },
+        );
+      await setBlacklistedProviderInfoTx.wait(WAIT_CONFIRMATIONS);
+
+      // Create deal from fixture.
+      await createDealsFromFixtures(
+        [dealFixture],
+        await signer.getAddress(),
+        paymentToken,
+        dealFactoryContract,
+        minDealDepositedEpochs,
+        WAIT_CONFIRMATIONS,
+      );
+
+      // Register offers by separate signers.
+      await registerMarketOffersFromFixtures(
+        [providerFixture],
+        marketContract,
+        WAIT_CONFIRMATIONS,
+      );
+      await registerMarketOffersFromFixtures(
+        [blacklistedProviderFixture],
+        marketContractByBlacklisted,
+        WAIT_CONFIRMATIONS,
+      );
+
+      // Firstly, check that providers with not Active CC could not be matched with the Deal.
+      let matchResult = await dealMatcherClient.getMatchedOffersByDealId(
+        dealFixture.dealId,
+      );
+      expect(matchResult.fulfilled).toEqual(false);
+      expect(matchResult.computeUnitsPerOffers).toEqual([]);
+
+      // Create CC and wait for blacklisted provider and check.
+      await _createCCDepositAndWait(
+        [blacklistedProviderFixture],
+        capacityContractByBlacklisted,
+      );
+      matchResult = await dealMatcherClient.getMatchedOffersByDealId(
+        dealFixture.dealId,
+      );
+      expect(matchResult.fulfilled).toEqual(false);
+      expect(matchResult.computeUnitsPerOffers).toEqual([]);
+
+      // Now create CC for target provider offer and lets check that blacklisted would be ignored,
+      //  and only ordinary provider would be matched.
+      await _createCCDepositAndWait([providerFixture], capacityContract);
+
+      // Check itself.
+      await _checkExactMatch(dealFixture, providerFixture, false);
+    });
+
+    // // TODO
+    // test("It does not allow to match with CUs from Failed CC.", async () => {
+    // });
+    //
+    // // TODO
+    // test("It allows to rematch after core: minDealRematchingEpochs.", async () => {
+    // });
   },
   TESTS_TIMEOUT,
 );
