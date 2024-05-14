@@ -145,10 +145,10 @@ jobs:
 
       - name: Install packed ts-client
         run: npm i
-        working-directory: integration-tests
+        working-directory: integration-tests-contracts
 
       - name: Run integration tests
         run: npm run test
-        working-directory: integration-tests
+        working-directory: integration-tests-contracts
         env:
           RPC_URL: "http://localhost:8545"
