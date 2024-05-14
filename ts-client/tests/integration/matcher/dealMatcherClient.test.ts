@@ -1,4 +1,3 @@
-// TODO: relocate to test integration-tests folder.
 import { beforeAll, describe, expect, test } from "vitest";
 import {
   CommitmentStatus,
