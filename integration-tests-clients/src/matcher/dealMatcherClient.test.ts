@@ -1,19 +1,17 @@
 import { beforeAll, describe, expect, test } from "vitest";
 import {
-  CommitmentStatus,
-  ContractsENV,
   DealClient,
   DealMatcherClient,
+  AccessType,
   ICapacity,
   ICore,
   IDealFactory,
   IERC20,
   IMarket,
-} from "../../../src";
+} from "@fluencelabs/deal-ts-clients";
 import {
   ethers,
   HDNodeWallet,
-  JsonRpcProvider,
   JsonRpcSigner,
   Wallet,
 } from "ethers";
@@ -26,12 +24,10 @@ import {
   getMarketExampleFixture,
   ProviderFixtureModel,
   registerMarketOffersFromFixtures,
-} from "./fixture";
-import { getEventValues } from "./events";
-import { AccessType } from "../../../src/client/client";
+} from "./fixture.js";
+import { getEventValues } from "./events.js";
+import { TEST_NETWORK, PROVIDER } from "../env.js";
 
-const TEST_NETWORK: ContractsENV = "local";
-const TEST_RPC_URL = `http://localhost:8545`;
 // Empirically measured time for subgraph indexing on 4CPU, 8Gb mem.
 const DEFAULT_SUBGRAPH_TIME_INDEXING = 300000;
 const TESTS_TIMEOUT = 120000 + 30000 + DEFAULT_SUBGRAPH_TIME_INDEXING;
@@ -59,7 +55,6 @@ const PRIVATE_KEY_8_ANVIL_ACCOUNT =
 describe(
   "#getMatchedOffersByDealId",
   () => {
-    let provider: JsonRpcProvider;
     let signer: Wallet | JsonRpcSigner | HDNodeWallet;
     let contractsClient: DealClient;
     let dealMatcherClient: DealMatcherClient;
@@ -74,8 +69,7 @@ describe(
     let epochMilliseconds: bigint;
 
     beforeAll(async () => {
-      provider = new ethers.JsonRpcProvider(TEST_RPC_URL);
-      signer = ethers.Wallet.fromPhrase(LOCAL_SIGNER_MNEMONIC, provider);
+      signer = ethers.Wallet.fromPhrase(LOCAL_SIGNER_MNEMONIC, PROVIDER);
       signerAddress = await signer.getAddress();
       contractsClient = new DealClient(signer, TEST_NETWORK);
       dealMatcherClient = new DealMatcherClient("local");
@@ -325,7 +319,7 @@ describe(
       // Create context for blacklisted provider.
       const blacklistedSigner = new ethers.Wallet(
         PRIVATE_KEY_8_ANVIL_ACCOUNT,
-        provider,
+        PROVIDER,
       );
       const blacklistedSignerAddress = await blacklistedSigner.getAddress();
       const blacklistedProviderFixture = getMarketExampleFixture(

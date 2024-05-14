@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
-import { ICapacity, IDealFactory, IERC20, IMarket } from "../../../src";
-import { getEventValue } from "./events";
-import { ZERO_ADDRESS } from "./constants";
+import { ICapacity, IDealFactory, IERC20, IMarket } from "../../../ts-client/src";
+import { getEventValue } from "./events.js";
+import { ZERO_ADDRESS } from "./constants.js";
 
 import { expect } from "vitest";
 

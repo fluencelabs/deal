@@ -4,6 +4,6 @@ import { config } from "dotenv";
 
 config({ path: [".env", ".env.local"] });
 
-const TEST_NETWORK: ContractsENV = "local";
+export const TEST_NETWORK: ContractsENV = "local";
 
-export const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
+export const PROVIDER = new ethers.JsonRpcProvider(process.env.RPC_URL);
