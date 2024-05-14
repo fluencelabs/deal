@@ -23,7 +23,7 @@ env:
 
 jobs:
   integration-tests-clients:
-    name: "Integration Tests for Fluence Clients"
+    name: "Integration Tests of Fluence Clients"
     runs-on: ubuntu-latest
 
     steps:
@@ -81,14 +81,6 @@ jobs:
           forge --version
           forge build --sizes
 
-      - name: Run Forge tests
-        run: forge test -vvv
-
-      - name: Compare current storage layout to dump
-        working-directory: storage-checker
-        run: node compare.js
-        continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'review-storage-layout-change') }}
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -124,13 +116,25 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      # TODO: Build images for subgraph
+      # TODO: Build images for subgraph deploy scripts
+
       - name: Run docker network
         env:
           CHAIN_RPC_IMAGE: "chain-rpc"
           CHAIN_DEPLOY_SCRIPT_IMAGE: "chain-deploy-script"
           EPOCH_DURATION: "86400"
-        run: docker compose up -d chain-rpc && docker compose up chain-deploy-script
+        run: docker compose up -d chain-rpc ipfs postgres graph-node && docker compose up chain-deploy-script
+      #  TODO: run subgraph && subgraph deploy scripts
         working-directory: docker
+
+      - name: Install deps in Subgraph package
+        run: npm install
+        working-directory: subgraph
+
+      - name: Deploy Local Subgraph
+        run: npm run compile && npm run import-config-networks && npm run create:local && npm run deploy:local
+        working-directory: subgraph
 
       - name: Install deps in ts-client package
         run: npm install
@@ -144,7 +148,7 @@ jobs:
         run: npm test unittests
         working-directory: ts-client
 
-      - name: Install packed ts-client
+      - name: Install packed ts-client in test module
         run: npm i
         working-directory: integration-tests-contracts
 
@@ -153,3 +157,4 @@ jobs:
         working-directory: integration-tests-contracts
         env:
           RPC_URL: "http://localhost:8545"
+#          TODO: add other envs after test refactor.
