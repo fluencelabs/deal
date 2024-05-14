@@ -1,5 +1,5 @@
 # This workflow is heavy due to dependencies on blockchain and Subgraph with its own dependencies.
-name: "Integration Tests for Fluence Clients"
+name: "test"
 
 on:
   pull_request:
