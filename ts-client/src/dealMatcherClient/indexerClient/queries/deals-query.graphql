@@ -6,6 +6,7 @@ query DealQuery(
     maxWorkersPerProvider
     minWorkers
     pricePerWorkerEpoch
+    matchedAt
     paymentToken {
       id
     }
@@ -37,6 +38,6 @@ query DealQuery(
   graphNetworks(first:1) {
     coreEpochDuration
     initTimestamp
+    coreMinDealRematchingEpochs
   }
-
 }
