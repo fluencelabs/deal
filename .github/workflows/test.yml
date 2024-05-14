@@ -1,4 +1,5 @@
 name: "test"
+# TODO: rename to tests of Fluence Contracts.
 
 on:
   pull_request:
