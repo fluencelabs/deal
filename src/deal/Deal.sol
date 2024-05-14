@@ -223,7 +223,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         ComputeUnit memory unit = getComputeUnit(computeUnitId);
         DealSnapshot.Cache memory snapshot = _preCommitPeriod();
 
-        _withdrawReward(computeUnitId, unit.peerId, unit.provider, snapshot);
+        _withdrawReward(computeUnitId, unit.workerId, unit.provider, snapshot);
 
         uint256 newWorkerCount = _removeComputeUnit(computeUnitId);
         _postCommitPeriod(snapshot, newWorkerCount);
