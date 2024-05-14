@@ -987,9 +987,11 @@ export class DealExplorerClient {
   ): Promise<ComputeUnitsWithCCStatusListView> {
     await this._init();
 
-    const capacityCommitment =
-      await this.getCapacityCommitment(capacityCommitmentId);
-    if (!capacityCommitment) {
+    const capacityCommitmentFetched =
+      await this._indexerClient.getCapacityCommitment({
+        id: capacityCommitmentId,
+      });
+    if (!capacityCommitmentFetched || !capacityCommitmentFetched.capacityCommitment) {
       throw new Error(
         `Capacity commitment with id ${capacityCommitmentId} not found.`,
       );
@@ -998,7 +1000,7 @@ export class DealExplorerClient {
     // To get data of CUs by capacity commitment we filter CUs by peer id of the CC.
     const data = await this._indexerClient.getComputeUnits({
       filters: {
-        peer_: { id: capacityCommitment.peerId },
+        peer_: { id: capacityCommitmentFetched.capacityCommitment.peer.id },
       },
       offset,
       limit,
@@ -1049,14 +1051,6 @@ export class DealExplorerClient {
     orderType: OrderType = DEFAULT_ORDER_TYPE,
   ): Promise<ProofStatsByCapacityCommitmentListView> {
     await this._init();
-
-    const capacityCommitment =
-      await this.getCapacityCommitment(capacityCommitmentId);
-    if (!capacityCommitment) {
-      throw new Error(
-        `Capacity commitment with id ${capacityCommitmentId} not found.`,
-      );
-    }
 
     const data = await this._indexerClient.getCapacityCommitmentStatsPerEpoches(
       {
@@ -1110,7 +1104,7 @@ export class DealExplorerClient {
     await this._init();
     // Get all CU linked to CC.
     const capacityCommitmentFetched =
-      await this._indexerClient.getCapacityCommitment({
+      await this._indexerClient.getCapacityCommitmentWithCUs({
         id: capacityCommitmentId,
       });
     if (!capacityCommitmentFetched.capacityCommitment) {

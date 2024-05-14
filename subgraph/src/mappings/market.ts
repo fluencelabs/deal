@@ -214,6 +214,7 @@ export function handleEffectorRemoved(event: EffectorRemoved): void {
   offer.save();
 }
 
+// This event is kinda the main event for match CU with deal.
 // Note, in Deal we also handle ComputeUnitJoined.
 // Note, in Capacity we also handle handleUnitDeactivated.
 // Note, this event is kinda the main event for match CU with deal.
@@ -238,6 +239,7 @@ export function handleComputeUnitAddedToDeal(
 
   // Upd stats.
   deal.matchedWorkersCurrentCount = deal.matchedWorkersCurrentCount + 1;
+  deal.matchedAt = event.block.timestamp;
   deal.save();
 
   peer.computeUnitsInDeal = peer.computeUnitsInDeal + 1;

@@ -1,0 +1,8 @@
+{
+    "bootstrap-sha": "ebba07a443b3682c9016f2f999d073c9a230037f",
+    "release-type": "simple",
+    "versioning" : "always-bump-patch",
+    "packages": {
+      ".": {}
+    }
+}

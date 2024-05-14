@@ -11,7 +11,7 @@ export type DealQueryQueryVariables = Types.Exact<{
 }>;
 
 
-export type DealQueryQuery = { __typename?: 'Query', deal?: { __typename?: 'Deal', id: string, maxWorkersPerProvider: number, minWorkers: number, pricePerWorkerEpoch: any, targetWorkers: number, providersAccessType: number, paymentToken: { __typename?: 'Token', id: string }, addedComputeUnits?: Array<{ __typename?: 'ComputeUnit', id: string, provider: { __typename?: 'Provider', id: string } }> | null, effectors?: Array<{ __typename?: 'DealToEffector', effector: { __typename?: 'Effector', id: string } }> | null, providersAccessList?: Array<{ __typename?: 'DealToProvidersAccess', provider: { __typename?: 'Provider', id: string } }> | null } | null, _meta?: { __typename?: '_Meta_', block: { __typename?: '_Block_', timestamp?: number | null } } | null, graphNetworks: Array<{ __typename?: 'GraphNetwork', coreEpochDuration?: number | null, initTimestamp?: number | null }> };
+export type DealQueryQuery = { __typename?: 'Query', deal?: { __typename?: 'Deal', id: string, maxWorkersPerProvider: number, minWorkers: number, pricePerWorkerEpoch: any, matchedAt?: any | null, targetWorkers: number, providersAccessType: number, paymentToken: { __typename?: 'Token', id: string }, addedComputeUnits?: Array<{ __typename?: 'ComputeUnit', id: string, provider: { __typename?: 'Provider', id: string } }> | null, effectors?: Array<{ __typename?: 'DealToEffector', effector: { __typename?: 'Effector', id: string } }> | null, providersAccessList?: Array<{ __typename?: 'DealToProvidersAccess', provider: { __typename?: 'Provider', id: string } }> | null } | null, _meta?: { __typename?: '_Meta_', block: { __typename?: '_Block_', timestamp?: number | null } } | null, graphNetworks: Array<{ __typename?: 'GraphNetwork', coreEpochDuration?: number | null, initTimestamp?: number | null, coreMinDealRematchingEpochs?: number | null }> };
 
 
 export const DealQueryDocument = gql`
@@ -21,6 +21,7 @@ export const DealQueryDocument = gql`
     maxWorkersPerProvider
     minWorkers
     pricePerWorkerEpoch
+    matchedAt
     paymentToken {
       id
     }
@@ -51,6 +52,7 @@ export const DealQueryDocument = gql`
   graphNetworks(first: 1) {
     coreEpochDuration
     initTimestamp
+    coreMinDealRematchingEpochs
   }
 }
     `;
