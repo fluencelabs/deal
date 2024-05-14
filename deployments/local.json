@@ -10,8 +10,6 @@
     "blockNumber": 8,
     "codeHash": "0x52e5f04bc843e15cbac5f133b623d7d02b5f725e5bfe16ec3500b2ead63173e3",
     "creationCodeHash": "0x100e552233f2fd4924e423a773934fe76d30c671cc26fff230b4f9831c44fb26"
-    "codeHash": "0x6290a99c087ffc0feb745167d33454bdb291a5b7c426f02a1254b6c6c5af53fc",
-    "creationCodeHash": "0xd0c537a06b8fc1bf6f57a45d4a216850bd783ad911497ce8dd18a2f36cbe1221"
   },
   "Core": {
     "addr": "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
