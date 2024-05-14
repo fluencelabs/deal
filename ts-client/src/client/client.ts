@@ -45,6 +45,12 @@ export enum DealStatus {
   SMALL_BALANCE,
 }
 
+export enum AccessType {
+  NONE,
+  WHITELIST,
+  BLACKLIST
+}
+
 export class DealClient {
   private deployment: Deployment;
 
