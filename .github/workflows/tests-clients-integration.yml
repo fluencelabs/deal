@@ -1,0 +1,155 @@
+# This workflow is heavy due to dependencies on blockchain and Subgraph with its own dependencies.
+name: "Integration Tests for Fluence Clients"
+
+on:
+  pull_request:
+    paths-ignore:
+      - "**.md"
+      - ".github/**"
+      - "!.github/workflows/tests-clients-integration.yml"
+    types:
+      - "labeled"
+      - "synchronize"
+      - "opened"
+      - "reopened"
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+env:
+  FORCE_COLOR: true
+  FOUNDRY_PROFILE: "ci"
+
+jobs:
+  integration-tests-clients:
+    name: "Integration Tests for Fluence Clients"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Run Prettier Test
+        uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: --all-files
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          registry-url: "https://registry.npmjs.org"
+          cache-dependency-path: |
+            ts-client/package-lock.json
+            integration-tests/package-lock.json
+            storage-checker/package-lock.json
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Cache contract artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            cache
+            out
+          key: ${{ runner.os }}-amd64-contracts-${{ hashFiles('foundry.toml', 'src/**/*') }}
+          restore-keys: |
+            ${{ runner.os }}-amd64-contracts-
+
+      - name: Invalidate cache
+        if: >
+          github.event_name == 'push' ||
+          contains(github.event.pull_request.labels.*.name, 'clean-cache')
+        run: forge clean
+
+      - name: Remove "clean-cache" label
+        if: contains(github.event.pull_request.labels.*.name, 'clean-cache')
+        uses: buildsville/add-remove-label@v2.0.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          labels: clean-cache
+          type: remove
+
+      - name: Run Forge build
+        run: |
+          forge --version
+          forge build --sizes
+
+      - name: Run Forge tests
+        run: forge test -vvv
+
+      - name: Compare current storage layout to dump
+        working-directory: storage-checker
+        run: node compare.js
+        continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'review-storage-layout-change') }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build contracts container base
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile
+          target: contracts
+          tags: contracts
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build chain-rpc image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile
+          target: chain-rpc
+          tags: |
+            chain-rpc
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build chain-deploy-script image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile
+          target: chain-deploy-script
+          tags: |
+            chain-deploy-script
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run docker network
+        env:
+          CHAIN_RPC_IMAGE: "chain-rpc"
+          CHAIN_DEPLOY_SCRIPT_IMAGE: "chain-deploy-script"
+          EPOCH_DURATION: "86400"
+        run: docker compose up -d chain-rpc && docker compose up chain-deploy-script
+        working-directory: docker
+
+      - name: Install deps in ts-client package
+        run: npm install
+        working-directory: ts-client
+
+      - name: Build ts-client package
+        run: npm run build
+        working-directory: ts-client
+
+      - name: Run Unittests in ts-client package
+        run: npm test unittests
+        working-directory: ts-client
+
+      - name: Install packed ts-client
+        run: npm i
+        working-directory: integration-tests-contracts
+
+      - name: Run integration tests
+        run: npm run test
+        working-directory: integration-tests-contracts
+        env:
+          RPC_URL: "http://localhost:8545"
