@@ -10,13 +10,13 @@ interface MarketExample {
   dealExample: DealFixtureModel;
 }
 
-interface CID {
+export interface CID {
   prefix: string;
   hash: string;
   description: string;
 }
 
-interface ProviderFixtureModel {
+export interface ProviderFixtureModel {
   offerId?: string; // assigned after offer is deployed.
   providerAddress: string;
   peerIds: string[];
@@ -28,7 +28,7 @@ interface ProviderFixtureModel {
   maxProtocolVersion: number;
 }
 
-interface DealFixtureModel {
+export interface DealFixtureModel {
   dealId?: string; // assigned after deal deployed.
   developerAddress: string;
   appCID: CID;
@@ -57,11 +57,12 @@ export function generateEffector(): CID {
 export function getMarketExampleFixture(
   paymentToken: string,
   effectors: CID[],
+  providerAddress: string,
 ): MarketExample {
   const minPricePerEpochWEI = ethers.parseEther("0.00001");
   return {
     providerExample: {
-      providerAddress: "",
+      providerAddress: providerAddress,
       peerIds: [
         ethers.hexlify(ethers.randomBytes(32)),
         ethers.hexlify(ethers.randomBytes(32)),
@@ -100,16 +101,6 @@ export function getMarketExampleFixture(
       protocolVersion: 1,
     },
   };
-}
-
-// It updates provider address into provider fixture dictionaries.
-export function updateProviderFixtureAddress(
-  address: string,
-  providers: Array<ProviderFixtureModel>,
-) {
-  for (const providerFixture of providers) {
-    providerFixture.providerAddress = address;
-  }
 }
 
 // It registers market offer via provided fixture and also updates fixture with offer ID
@@ -204,9 +195,9 @@ export async function depositCollateral(
 ) {
   let valueToSendForCollateralAll = BigInt(0);
   for (const CCId of capacityCommitmentIds) {
-    const capcityCommitment = await capacityContract.getCommitment(CCId);
+    const capacityCommitment = await capacityContract.getCommitment(CCId);
     valueToSendForCollateralAll +=
-      capcityCommitment.unitCount * capcityCommitment.collateralPerUnit;
+      capacityCommitment.unitCount * capacityCommitment.collateralPerUnit;
   }
   const depositCollateralTx = await capacityContract.depositCollateral(
     capacityCommitmentIds,

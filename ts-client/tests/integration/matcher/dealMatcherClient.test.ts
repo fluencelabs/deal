@@ -21,6 +21,7 @@ import {
 import {
   createCommitmentForProviderFixtures,
   createDealsFromFixtures,
+  DealFixtureModel,
   depositCollateral,
   generateEffector,
   getMarketExampleFixture,
@@ -28,6 +29,7 @@ import {
   registerMarketOffersFromFixtures,
 } from "./fixture";
 import { getEventValues } from "./events";
+import { AccessType } from "../../../src/client/client";
 
 const TEST_NETWORK: ContractsENV = "local";
 const TEST_RPC_URL = `http://localhost:8545`;
@@ -45,12 +47,15 @@ const PRIVATE_KEY_8_ANVIL_ACCOUNT =
  * e2e test with dependencies:
  *  - Deployed contracts (locally),
  *  - Deployed Subgraph and aimed to the deployed contracts.
- * Notice: chain snapshot is not going to work correctly since we connect indexer
- *  to the chain as well and indexer should be snapshoted as well.
- * Notice: Each tests for matching within this module must be with different
- *  effectors. Thus, until the filtration by effectors works well we could
+
+ * Notice: Each test for matching within this module must be with different
+ *  effectors (now it is random). Thus, until the filtration by effectors works well we could
  *  "separate" tests for the matcher method (To ensure the hypothesis in all
  *  positive tests below additional check that no match with different effector is presented).
+ * FAQ:
+ * - Why so many considerations about state?
+ *  Blockchain snapshot is not going to work correctly for the tests since we use indexer (Subgraph)
+ *  in conjunction with the chain as well and indexer should be snapshotted as well (but it is not possible for the Subgraph).
  */
 describe(
   "#getMatchedOffersByDealId",
@@ -86,7 +91,7 @@ describe(
       epochMilliseconds = (await coreContract.epochDuration()) * 1000n;
     });
 
-    async function createCCDepositAndWait(providers: ProviderFixtureModel[]) {
+    async function _createCCDepositAndWait(providers: ProviderFixtureModel[]) {
       let createdCCIds = await createCommitmentForProviderFixtures(
         providers,
         capacityContract,
@@ -111,6 +116,45 @@ describe(
       await new Promise((resolve) =>
         setTimeout(resolve, Number(epochMilliseconds)),
       );
+    }
+
+    async function _checkExactMatch(
+      dealFixture: DealFixtureModel,
+      providerFixture: ProviderFixtureModel,
+    ) {
+      // Check that is matched successfully finally.
+      const matchResult = await dealMatcherClient.getMatchedOffersByDealId(
+        dealFixture.dealId,
+      );
+      // We have only 1 Offer with 2 CUs matched for this Deal.
+      expect(matchResult.computeUnitsPerOffers.length).toEqual(1);
+      expect(matchResult.computeUnitsPerOffers[0].length).toEqual(2);
+      const computeUnitsMatchedFromMatcher = [].concat(
+        ...matchResult.computeUnitsPerOffers,
+      );
+      const computeUnitsCreated = [].concat(
+        ...providerFixture.computeUnitsPerPeers,
+      );
+      expect(computeUnitsMatchedFromMatcher.sort()).toEqual(
+        computeUnitsCreated.sort(),
+      );
+      expect(matchResult.fulfilled).toEqual(true);
+
+      // Unnecessary final check that even contracts agree with the matched result.
+      const matchDealTx = await marketContract.matchDeal(
+        dealFixture.dealId,
+        matchResult.offers,
+        matchResult.computeUnitsPerOffers,
+      );
+      const matchDealTxResult = await matchDealTx.wait(WAIT_CONFIRMATIONS);
+
+      const matchedComputeUnits = getEventValues({
+        txReceipt: matchDealTxResult!,
+        contract: marketContract,
+        eventName: "ComputeUnitMatched",
+        value: "unitId",
+      });
+      expect(matchedComputeUnits.sort()).toEqual(computeUnitsCreated.sort());
     }
 
     test(`It checks that it matched successfully for 1:1 configuration where CC has status Active.`, async () => {
@@ -151,13 +195,13 @@ describe(
         WAIT_CONFIRMATIONS,
       );
 
-      // Firstly, check that provider with not Active CC could not be matched with the Deal.
       await registerMarketOffersFromFixtures(
         [providerFixture, anotherEffectorProviderFixture],
         marketContract,
         WAIT_CONFIRMATIONS,
       );
 
+      // Firstly, check that provider with not Active CC could not be matched with the Deal.
       let matchResult = await dealMatcherClient.getMatchedOffersByDealId(
         dealFixture.dealId,
       );
@@ -165,7 +209,7 @@ describe(
       expect(matchResult.computeUnitsPerOffers).toEqual([]);
 
       // Now lets register CC and activate it for another effector offer and check that it does not match.
-      await createCCDepositAndWait([anotherEffectorProviderFixture]);
+      await _createCCDepositAndWait([anotherEffectorProviderFixture]);
       // Check that there are no match with another effector offer.
       matchResult = await dealMatcherClient.getMatchedOffersByDealId(
         dealFixture.dealId,
@@ -174,103 +218,81 @@ describe(
       expect(matchResult.computeUnitsPerOffers).toEqual([]);
 
       // Now let`s create CC for the target provider.
-      await createCCDepositAndWait([providerFixture]);
+      await _createCCDepositAndWait([providerFixture]);
 
-      // Check that is matched successfully finally.
-      matchResult = await dealMatcherClient.getMatchedOffersByDealId(
-        dealFixture.dealId,
-      );
-      console.log("TODO: matchResult", matchResult);
-      // We have only 1 Offer with 2 CUs matched for this Deal.
-      expect(matchResult.computeUnitsPerOffers.length).toEqual(1);
-      expect(matchResult.computeUnitsPerOffers[0].length).toEqual(2);
-      expect(matchResult.fulfilled).toEqual(true);
-
-      // Unnecessary final check that even contracts agree with the matched result.
-      const matchDealTx = await marketContract.matchDeal(
-        dealFixture.dealId,
-        matchResult.offers,
-        matchResult.computeUnitsPerOffers,
-      );
-      const matchDealTxResult = await matchDealTx.wait(WAIT_CONFIRMATIONS);
-
-      const matchedComputeUnits = getEventValues({
-        txReceipt: matchDealTxResult!,
-        contract: marketContract,
-        eventName: "ComputeUnitMatched",
-        value: "unitId",
-      });
-      const computeUnitsMatchedFromMatcher = [].concat(
-        ...matchResult.computeUnitsPerOffers,
-      );
-      const computeUnitsCreated = [].concat(
-        ...providerFixture.computeUnitsPerPeers,
-      );
-      expect(computeUnitsMatchedFromMatcher.sort()).toEqual(
-        computeUnitsCreated.sort(),
-      );
-      expect(matchedComputeUnits.sort()).toEqual(computeUnitsCreated.sort());
+      // Check itself.
+      await _checkExactMatch(dealFixture, providerFixture);
     });
 
-    // test(`It checks that it matched successfully with whitelisted Provider Offers even without CC.`, async () => {
-    //   // TODO: when it becomes possible to flush, depreacte use of another signer
-    //   // Lets use another signer for this case
-    //   signer = new ethers.Wallet(PRIVATE_KEY_8_ANVIL_ACCOUNT, provider);
-    //   const signerAddress = await signer.getAddress();
-    //   contractsClient = new DealClient(signer, TEST_NETWORK);
-    //   paymentToken = await contractsClient.getUSDC();
-    //   paymentTokenAddress = await paymentToken.getAddress();
-    //   dealFactoryContract = await contractsClient.getDealFactory();
-    //   coreContract = await contractsClient.getCore();
-    //   marketContract = await contractsClient.getMarket();
-    //   capacityContract = await contractsClient.getCapacity();
-    //
-    //   const marketFixture = getMarketExampleFixture(paymentTokenAddress);
-    //   const providerFixture = marketFixture.providerToBeMatched;
-    //   const dealFixture = marketFixture.dealToMatchWithWhiteListedProvider;
-    //   // Post-prepare fixtures.
-    //   updateProviderFixtureAddress(signerAddress, [providerFixture]);
-    //   dealFixture.listAccess = [
-    //     marketFixture.providerToBeMatched.providerAddress,
-    //   ];
-    //
-    //   const setProviderInfoTx = await marketContract.setProviderInfo(
-    //     "TestProvider8AnvilAccount",
-    //     {
-    //       prefixes: "0x12345678",
-    //       hash: ethers.hexlify(ethers.randomBytes(32)),
-    //     },
-    //   );
-    //   await setProviderInfoTx.wait(WAIT_CONFIRMATIONS);
-    //
-    //   await createDealsFromFixtures(
-    //     [dealFixture],
-    //     signerAddress,
-    //     paymentToken,
-    //     dealFactoryContract,
-    //     minDealDepositedEpochs,
-    //     WAIT_CONFIRMATIONS,
-    //   );
-    //
-    //   await registerMarketOffersFromFixtures(
-    //     [providerFixture],
-    //     marketContract,
-    //     WAIT_CONFIRMATIONS,
-    //   );
-    //
-    //   const matchResult = await dealMatcherClient.getMatchedOffersByDealId(
-    //     dealFixture.dealId,
-    //   );
-    //   console.log("matchResult", matchResult);
-    //   expect(matchResult.fulfilled).toEqual(true);
-    //
-    //   // Unnecessary final check that even contracts agree with the matched result.
-    //   const matchDealTx = await marketContract.matchDeal(
-    //     dealFixture.dealId,
-    //     matchResult.offers,
-    //     matchResult.computeUnitsPerOffers,
-    //   );
-    // });
+    test(`It checks that it matched successfully with whitelisted Provider Offers even without CC.`, async () => {
+      // Prepare data.
+      const effectors = [generateEffector()];
+      const marketFixture = getMarketExampleFixture(
+        paymentTokenAddress,
+        effectors,
+        signerAddress,
+      );
+      const providerFixture = marketFixture.providerExample;
+      const dealFixture = marketFixture.dealExample;
+      // Also check that it does not match with offers with different effectors.
+      const anotherEffectors = [generateEffector()];
+      const anotherEffectorProviderFixture = getMarketExampleFixture(
+        paymentTokenAddress,
+        anotherEffectors,
+        signerAddress,
+      ).providerExample;
+
+      // Add whitelist for this test case.
+      dealFixture.listAccessType = AccessType.WHITELIST;
+      // Also include test for anotherEffectorProviderFixture. Offer from
+      //  another provider should be excluded coz of another effector (not the same as it is in the Deal).
+      dealFixture.listAccess = [
+        providerFixture.providerAddress,
+        anotherEffectorProviderFixture.providerAddress,
+      ];
+
+      // Create/update provider.
+      const setProviderInfoTx = await marketContract.setProviderInfo(
+        "ProviderWithActiveCC",
+        {
+          prefixes: "0x12345678",
+          hash: ethers.hexlify(ethers.randomBytes(32)),
+        },
+      );
+      await setProviderInfoTx.wait(WAIT_CONFIRMATIONS);
+
+      await createDealsFromFixtures(
+        [dealFixture],
+        signerAddress,
+        paymentToken,
+        dealFactoryContract,
+        minDealDepositedEpochs,
+        WAIT_CONFIRMATIONS,
+      );
+
+      // Register Offer with another effectors.
+      await registerMarketOffersFromFixtures(
+        [anotherEffectorProviderFixture],
+        marketContract,
+        WAIT_CONFIRMATIONS,
+      );
+      // Check that there are no match with another effector Offer.
+      let matchResult = await dealMatcherClient.getMatchedOffersByDealId(
+        dealFixture.dealId,
+      );
+      expect(matchResult.fulfilled).toEqual(false);
+      expect(matchResult.computeUnitsPerOffers).toEqual([]);
+
+      // Register target Provider Offer.
+      await registerMarketOffersFromFixtures(
+        [providerFixture],
+        marketContract,
+        WAIT_CONFIRMATIONS,
+      );
+
+      // Check itself.
+      await _checkExactMatch(dealFixture, providerFixture);
+    });
   },
   TESTS_TIMEOUT,
 );
