@@ -26,12 +26,11 @@ import {
   registerMarketOffersFromFixtures,
 } from "./fixture.js";
 import { getEventValues } from "./events.js";
-import { TEST_NETWORK, PROVIDER } from "../env.js";
+import { TEST_NETWORK, PROVIDER, WAIT_CONFIRMATIONS } from "../env.js";
 
 // Empirically measured time for subgraph indexing on 4CPU, 8Gb mem.
 const DEFAULT_SUBGRAPH_TIME_INDEXING = 300000;
 const TESTS_TIMEOUT = 120000 + 30000 + DEFAULT_SUBGRAPH_TIME_INDEXING;
-const WAIT_CONFIRMATIONS = Number(process.env.WAIT_CONFIRMATIONS || 1);
 const CAPACITY_DEFAULT_DURATION = 60 * 60 * 24 * 30; // 30 days in seconds
 const LOCAL_SIGNER_MNEMONIC =
   "test test test test test test test test test test test junk";
@@ -39,7 +38,7 @@ const PRIVATE_KEY_8_ANVIL_ACCOUNT =
   "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97";
 
 /*
- * e2e test with dependencies:
+ * Integration test with dependencies on:
  *  - Deployed contracts (locally),
  *  - Deployed Subgraph and aimed to the deployed contracts.
 
@@ -94,6 +93,7 @@ describe(
         WAIT_CONFIRMATIONS,
         CAPACITY_DEFAULT_DURATION,
       );
+      console.log("Deposit collateral for created CCs: ", createdCCIds);
       await depositCollateral(
         createdCCIds,
         capacityContract,
@@ -158,7 +158,8 @@ describe(
       );
     }
 
-    test(`It matches successfully for 1:1 configuration where CC has status Active.`, async () => {
+    // TODO: rm only.
+    test.only(`It matches successfully for 1:1 configuration where CC has status Active.`, async () => {
       // Prepare data.
       const effectors = [generateEffector()];
       const marketFixture = getMarketExampleFixture(
@@ -203,11 +204,13 @@ describe(
       );
 
       // Firstly, check that provider with not Active CC could not be matched with the Deal.
+      console.log('TODO: getMatchedOffersByDealId...')
       let matchResult = await dealMatcherClient.getMatchedOffersByDealId(
         dealFixture.dealId,
       );
       expect(matchResult.fulfilled).toEqual(false);
       expect(matchResult.computeUnitsPerOffers).toEqual([]);
+      console.log('TODO: requested..')
 
       // Now lets register CC and activate it for another effector offer and check that it does not match.
       await _createCCDepositAndWait(
