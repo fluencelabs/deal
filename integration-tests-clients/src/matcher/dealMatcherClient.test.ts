@@ -218,11 +218,13 @@ describe(
         capacityContract,
       );
       // Check that there are no match with another effector offer.
+      console.log('TODO: next check...')
       matchResult = await dealMatcherClient.getMatchedOffersByDealId(
         dealFixture.dealId,
       );
       expect(matchResult.fulfilled).toEqual(false);
       expect(matchResult.computeUnitsPerOffers).toEqual([]);
+      console.log('TODO: checed...')
 
       // Now let`s create CC for the target provider.
       await _createCCDepositAndWait([providerFixture], capacityContract);
