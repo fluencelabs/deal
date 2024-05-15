@@ -1,19 +1,57 @@
 # Integration Tests For Fluence Contract Clients
 
-i.e. offchain matcher client, Fluence cli client - with additional dependencies on Subgraph and Chain RPC.
+Repository for integrations tests with additional dependencies on Subgraph and Chain RPC. E.g.
+
+-   [presented] Offchain matcher client [../ts-client/src/dealMatcherClient](../ts-client/src/dealMatcherClient)
+-   [TODO] Fluence Cli client [../ts-client/src/dealCliClient](../ts-client/src/dealCliClient)
+-   [TODO] Fluence Network Explorer Client [../ts-client/src/dealExplorerClient](../ts-client/src/dealExplorerClient)
+
+# Run Tests
+
+> To run these tests, you need the following services up and running: **subgraph**, **chain-rpc**.
+> Moreover, Subgraph should be connected to the chain-rpc and index contracts deployed on that chain.
 
 ## Initialization
 
-> To run these tests, you need the following services up and running: **subgraph**, **chain-rpc**
-> Easiest way to run them is via docker compose. For this, you need to have SNAPSHOT_ID from the e2e action in this repo's PRs.
+You may want to initialize the infrastructure for the tests in 2 ways:
 
--   Start Docker services by the following command: `SNAPHSHOT_ID=abcdef-1234-1 docker compose up -d`
--   Build ts-client package locally or provide the version from private _npm_ registry. The package is published to the private registry after PR's e2e test finishes.
+-   [in case you are develop smth in this repo and want to test] from the sources of this repo
+    -   this case will be covered below.
+-   [in case you are not working directly with this repo] from the **already** published images
+    -   this case is require to define image tags before run containers via `docker compose`,
+        e.g. `export CHAIN_RPC=docker.fluence.dev/chain-rpc:feat-optimise-query-for-cc-CHAIN-452-5f1d332-3883-1 && docker compose up -d`
 
-### How to build ts-client package locally and use it
+Prerequisites for the 1st case
 
--   Run the following command `cd ts-client && npm i && npm run build && npm pack`
--   Copy the created archive to **integration-tests** folder
-    -   or you could use 1 lined command: `npm i -s ../ts-client/fluencelabs-deal-ts-clients-0.7.3.tgz`
--   Put the archive name to **package.json** e.g. `"@fluencelabs/deal-ts-clients": "./fluencelabs-deal-ts-clients-0.2.22.tgz",`
--   Run `npm i`
+-   You installed all dependencies from the root README.md (docker, forge/foundry, npm)
+    -   TODO: leave instruction only for docker as we have multi target Docker image even with subgraph deploy script.
+-   You are not working on Apple Silicon based machine (M1, ...) as we have some issues with docker-compose and docker on M1 for **Subgraph**.
+    -   in case if you want to test on Apple Silicon - use remote server and run the infra on this remote host, for Apple Silicon on May 15 2024 there are no garanties that it will work.
+
+Commands:
+
+0. Install packages in this module
+
+```bash
+npm i
+```
+
+1. Run Infra
+
+```bash
+docker compose -f docker/docker-compose.yml up --no-deps ipfs chain-rpc postgres graph-node -d
+```
+
+2. Deploy contracts & Subgraph & Build package
+
+```bash
+make deploy-contracts-local && make build-all && make deploy-subgraph-local && cd ts-client && npm run build && npm pack
+```
+
+## Run
+
+Run prepared tests
+
+```bash
+npm run test
+```
