@@ -1,5 +1,5 @@
 # This workflow is heavy due to dependencies on blockchain and Subgraph with its own dependencies.
-name: "test"
+name: "test clients integration"
 
 on:
   pull_request:
