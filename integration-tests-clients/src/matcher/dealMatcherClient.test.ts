@@ -72,7 +72,7 @@ describe(
       signer = ethers.Wallet.fromPhrase(LOCAL_SIGNER_MNEMONIC, PROVIDER);
       signerAddress = await signer.getAddress();
       contractsClient = new DealClient(signer, TEST_NETWORK);
-      dealMatcherClient = new DealMatcherClient("local");
+      dealMatcherClient = new DealMatcherClient(TEST_NETWORK);
       paymentToken = await contractsClient.getUSDC();
       paymentTokenAddress = await paymentToken.getAddress();
       dealFactoryContract = await contractsClient.getDealFactory();
