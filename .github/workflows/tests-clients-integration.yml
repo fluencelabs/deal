@@ -123,7 +123,7 @@ jobs:
         run: docker compose up -d chain-rpc ipfs postgres graph-node && docker compose up chain-deploy-script
         working-directory: docker
 
-      # TODO: Build images for subgraph deploy scripts after success chain deploy instead of execution below.
+      # TODO: Build images for subgraph deploy scripts after success chain deploy and artifacts stored instead of execution below.
 
       - name: Install deps in Subgraph package
         run: npm install
