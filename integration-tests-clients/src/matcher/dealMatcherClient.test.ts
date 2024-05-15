@@ -158,8 +158,8 @@ describe(
       );
     }
 
-    // TODO: rm only.
-    test.only(`It matches successfully for 1:1 configuration where CC has status Active.`, async () => {
+    // TODO: uncomment other tests after debug.
+    test(`It matches successfully for 1:1 configuration where CC has status Active.`, async () => {
       // Prepare data.
       const effectors = [generateEffector()];
       const marketFixture = getMarketExampleFixture(
@@ -231,185 +231,185 @@ describe(
       await _checkExactMatch(dealFixture, providerFixture);
     });
 
-    test(`It matches successfully with whitelisted Provider Offers even without CC.`, async () => {
-      // Prepare data.
-      const effectors = [generateEffector()];
-      const marketFixture = getMarketExampleFixture(
-        paymentTokenAddress,
-        effectors,
-        signerAddress,
-      );
-      const providerFixture = marketFixture.providerExample;
-      const dealFixture = marketFixture.dealExample;
-      // Also check that it does not match with offers with different effectors.
-      const anotherEffectors = [generateEffector()];
-      const anotherEffectorProviderFixture = getMarketExampleFixture(
-        paymentTokenAddress,
-        anotherEffectors,
-        signerAddress,
-      ).providerExample;
-
-      // Add whitelist for this test case.
-      dealFixture.listAccessType = AccessType.WHITELIST;
-      // Also include test for anotherEffectorProviderFixture. Offer from
-      //  another provider should be excluded coz of another effector (not the same as it is in the Deal).
-      dealFixture.listAccess = [
-        providerFixture.providerAddress,
-        anotherEffectorProviderFixture.providerAddress,
-      ];
-
-      // Create/update provider.
-      const setProviderInfoTx = await marketContract.setProviderInfo(
-        "ProviderWithActiveCC",
-        {
-          prefixes: "0x12345678",
-          hash: ethers.hexlify(ethers.randomBytes(32)),
-        },
-      );
-      await setProviderInfoTx.wait(WAIT_CONFIRMATIONS);
-
-      await createDealsFromFixtures(
-        [dealFixture],
-        signerAddress,
-        paymentToken,
-        dealFactoryContract,
-        minDealDepositedEpochs,
-        WAIT_CONFIRMATIONS,
-      );
-
-      // Register Offer with another effectors.
-      await registerMarketOffersFromFixtures(
-        [anotherEffectorProviderFixture],
-        marketContract,
-        WAIT_CONFIRMATIONS,
-      );
-      // Check that there are no match with another effector Offer.
-      let matchResult = await dealMatcherClient.getMatchedOffersByDealId(
-        dealFixture.dealId,
-      );
-      expect(matchResult.fulfilled).toEqual(false);
-      expect(matchResult.computeUnitsPerOffers).toEqual([]);
-
-      // Register target Provider Offer.
-      await registerMarketOffersFromFixtures(
-        [providerFixture],
-        marketContract,
-        WAIT_CONFIRMATIONS,
-      );
-
-      // Check itself.
-      await _checkExactMatch(dealFixture, providerFixture);
-    });
-
-    test("It ignores CUs from blacklisted providers.", async () => {
-      // Prepare data.
-      // Our case:
-      // - Deal - 2 target workers, 1 min worker
-      // - Providers: blacklisted, ordinary with 1 worker
-      // We expect match with ordinary provider for 1 worker.
-      const effectors = [generateEffector()];
-
-      const marketFixture = getMarketExampleFixture(
-        paymentTokenAddress,
-        effectors,
-        signerAddress,
-      );
-      const providerFixture = marketFixture.providerExample;
-      providerFixture.peerIds = providerFixture.peerIds.slice(0, 1);
-      providerFixture.computeUnitsPerPeers = [
-        providerFixture.computeUnitsPerPeers[0].slice(0, 1),
-      ];
-      // Create context for blacklisted provider.
-      const blacklistedSigner = new ethers.Wallet(
-        PRIVATE_KEY_8_ANVIL_ACCOUNT,
-        PROVIDER,
-      );
-      const blacklistedSignerAddress = await blacklistedSigner.getAddress();
-      const blacklistedProviderFixture = getMarketExampleFixture(
-        paymentTokenAddress,
-        effectors,
-        blacklistedSignerAddress,
-      ).providerExample;
-      const contractsClientByBlacklisted = new DealClient(
-        blacklistedSigner,
-        TEST_NETWORK,
-      );
-      const marketContractByBlacklisted =
-        await contractsClientByBlacklisted.getMarket();
-      const capacityContractByBlacklisted =
-        await contractsClientByBlacklisted.getCapacity();
-
-      const dealFixture = marketFixture.dealExample;
-      dealFixture.listAccessType = AccessType.BLACKLIST;
-      dealFixture.listAccess = [blacklistedProviderFixture.providerAddress];
-      dealFixture.minWorkers = 1;
-
-      // Create/update providers.
-      const setProviderInfoTx = await marketContract.setProviderInfo(
-        "Provider",
-        {
-          prefixes: "0x12345678",
-          hash: ethers.hexlify(ethers.randomBytes(32)),
-        },
-      );
-      await setProviderInfoTx.wait(WAIT_CONFIRMATIONS);
-      const setBlacklistedProviderInfoTx =
-        await marketContractByBlacklisted.setProviderInfo(
-          "ProviderBlacklisted",
-          {
-            prefixes: "0x12345678",
-            hash: ethers.hexlify(ethers.randomBytes(32)),
-          },
-        );
-      await setBlacklistedProviderInfoTx.wait(WAIT_CONFIRMATIONS);
-
-      // Create deal from fixture.
-      await createDealsFromFixtures(
-        [dealFixture],
-        await signer.getAddress(),
-        paymentToken,
-        dealFactoryContract,
-        minDealDepositedEpochs,
-        WAIT_CONFIRMATIONS,
-      );
-
-      // Register offers by separate signers.
-      await registerMarketOffersFromFixtures(
-        [providerFixture],
-        marketContract,
-        WAIT_CONFIRMATIONS,
-      );
-      await registerMarketOffersFromFixtures(
-        [blacklistedProviderFixture],
-        marketContractByBlacklisted,
-        WAIT_CONFIRMATIONS,
-      );
-
-      // Firstly, check that providers with not Active CC could not be matched with the Deal.
-      let matchResult = await dealMatcherClient.getMatchedOffersByDealId(
-        dealFixture.dealId,
-      );
-      expect(matchResult.fulfilled).toEqual(false);
-      expect(matchResult.computeUnitsPerOffers).toEqual([]);
-
-      // Create CC and wait for blacklisted provider and check.
-      await _createCCDepositAndWait(
-        [blacklistedProviderFixture],
-        capacityContractByBlacklisted,
-      );
-      matchResult = await dealMatcherClient.getMatchedOffersByDealId(
-        dealFixture.dealId,
-      );
-      expect(matchResult.fulfilled).toEqual(false);
-      expect(matchResult.computeUnitsPerOffers).toEqual([]);
-
-      // Now create CC for target provider offer and lets check that blacklisted would be ignored,
-      //  and only ordinary provider would be matched.
-      await _createCCDepositAndWait([providerFixture], capacityContract);
-
-      // Check itself.
-      await _checkExactMatch(dealFixture, providerFixture, false);
-    });
+    // test(`It matches successfully with whitelisted Provider Offers even without CC.`, async () => {
+    //   // Prepare data.
+    //   const effectors = [generateEffector()];
+    //   const marketFixture = getMarketExampleFixture(
+    //     paymentTokenAddress,
+    //     effectors,
+    //     signerAddress,
+    //   );
+    //   const providerFixture = marketFixture.providerExample;
+    //   const dealFixture = marketFixture.dealExample;
+    //   // Also check that it does not match with offers with different effectors.
+    //   const anotherEffectors = [generateEffector()];
+    //   const anotherEffectorProviderFixture = getMarketExampleFixture(
+    //     paymentTokenAddress,
+    //     anotherEffectors,
+    //     signerAddress,
+    //   ).providerExample;
+    //
+    //   // Add whitelist for this test case.
+    //   dealFixture.listAccessType = AccessType.WHITELIST;
+    //   // Also include test for anotherEffectorProviderFixture. Offer from
+    //   //  another provider should be excluded coz of another effector (not the same as it is in the Deal).
+    //   dealFixture.listAccess = [
+    //     providerFixture.providerAddress,
+    //     anotherEffectorProviderFixture.providerAddress,
+    //   ];
+    //
+    //   // Create/update provider.
+    //   const setProviderInfoTx = await marketContract.setProviderInfo(
+    //     "ProviderWithActiveCC",
+    //     {
+    //       prefixes: "0x12345678",
+    //       hash: ethers.hexlify(ethers.randomBytes(32)),
+    //     },
+    //   );
+    //   await setProviderInfoTx.wait(WAIT_CONFIRMATIONS);
+    //
+    //   await createDealsFromFixtures(
+    //     [dealFixture],
+    //     signerAddress,
+    //     paymentToken,
+    //     dealFactoryContract,
+    //     minDealDepositedEpochs,
+    //     WAIT_CONFIRMATIONS,
+    //   );
+    //
+    //   // Register Offer with another effectors.
+    //   await registerMarketOffersFromFixtures(
+    //     [anotherEffectorProviderFixture],
+    //     marketContract,
+    //     WAIT_CONFIRMATIONS,
+    //   );
+    //   // Check that there are no match with another effector Offer.
+    //   let matchResult = await dealMatcherClient.getMatchedOffersByDealId(
+    //     dealFixture.dealId,
+    //   );
+    //   expect(matchResult.fulfilled).toEqual(false);
+    //   expect(matchResult.computeUnitsPerOffers).toEqual([]);
+    //
+    //   // Register target Provider Offer.
+    //   await registerMarketOffersFromFixtures(
+    //     [providerFixture],
+    //     marketContract,
+    //     WAIT_CONFIRMATIONS,
+    //   );
+    //
+    //   // Check itself.
+    //   await _checkExactMatch(dealFixture, providerFixture);
+    // });
+    //
+    // test("It ignores CUs from blacklisted providers.", async () => {
+    //   // Prepare data.
+    //   // Our case:
+    //   // - Deal - 2 target workers, 1 min worker
+    //   // - Providers: blacklisted, ordinary with 1 worker
+    //   // We expect match with ordinary provider for 1 worker.
+    //   const effectors = [generateEffector()];
+    //
+    //   const marketFixture = getMarketExampleFixture(
+    //     paymentTokenAddress,
+    //     effectors,
+    //     signerAddress,
+    //   );
+    //   const providerFixture = marketFixture.providerExample;
+    //   providerFixture.peerIds = providerFixture.peerIds.slice(0, 1);
+    //   providerFixture.computeUnitsPerPeers = [
+    //     providerFixture.computeUnitsPerPeers[0].slice(0, 1),
+    //   ];
+    //   // Create context for blacklisted provider.
+    //   const blacklistedSigner = new ethers.Wallet(
+    //     PRIVATE_KEY_8_ANVIL_ACCOUNT,
+    //     PROVIDER,
+    //   );
+    //   const blacklistedSignerAddress = await blacklistedSigner.getAddress();
+    //   const blacklistedProviderFixture = getMarketExampleFixture(
+    //     paymentTokenAddress,
+    //     effectors,
+    //     blacklistedSignerAddress,
+    //   ).providerExample;
+    //   const contractsClientByBlacklisted = new DealClient(
+    //     blacklistedSigner,
+    //     TEST_NETWORK,
+    //   );
+    //   const marketContractByBlacklisted =
+    //     await contractsClientByBlacklisted.getMarket();
+    //   const capacityContractByBlacklisted =
+    //     await contractsClientByBlacklisted.getCapacity();
+    //
+    //   const dealFixture = marketFixture.dealExample;
+    //   dealFixture.listAccessType = AccessType.BLACKLIST;
+    //   dealFixture.listAccess = [blacklistedProviderFixture.providerAddress];
+    //   dealFixture.minWorkers = 1;
+    //
+    //   // Create/update providers.
+    //   const setProviderInfoTx = await marketContract.setProviderInfo(
+    //     "Provider",
+    //     {
+    //       prefixes: "0x12345678",
+    //       hash: ethers.hexlify(ethers.randomBytes(32)),
+    //     },
+    //   );
+    //   await setProviderInfoTx.wait(WAIT_CONFIRMATIONS);
+    //   const setBlacklistedProviderInfoTx =
+    //     await marketContractByBlacklisted.setProviderInfo(
+    //       "ProviderBlacklisted",
+    //       {
+    //         prefixes: "0x12345678",
+    //         hash: ethers.hexlify(ethers.randomBytes(32)),
+    //       },
+    //     );
+    //   await setBlacklistedProviderInfoTx.wait(WAIT_CONFIRMATIONS);
+    //
+    //   // Create deal from fixture.
+    //   await createDealsFromFixtures(
+    //     [dealFixture],
+    //     await signer.getAddress(),
+    //     paymentToken,
+    //     dealFactoryContract,
+    //     minDealDepositedEpochs,
+    //     WAIT_CONFIRMATIONS,
+    //   );
+    //
+    //   // Register offers by separate signers.
+    //   await registerMarketOffersFromFixtures(
+    //     [providerFixture],
+    //     marketContract,
+    //     WAIT_CONFIRMATIONS,
+    //   );
+    //   await registerMarketOffersFromFixtures(
+    //     [blacklistedProviderFixture],
+    //     marketContractByBlacklisted,
+    //     WAIT_CONFIRMATIONS,
+    //   );
+    //
+    //   // Firstly, check that providers with not Active CC could not be matched with the Deal.
+    //   let matchResult = await dealMatcherClient.getMatchedOffersByDealId(
+    //     dealFixture.dealId,
+    //   );
+    //   expect(matchResult.fulfilled).toEqual(false);
+    //   expect(matchResult.computeUnitsPerOffers).toEqual([]);
+    //
+    //   // Create CC and wait for blacklisted provider and check.
+    //   await _createCCDepositAndWait(
+    //     [blacklistedProviderFixture],
+    //     capacityContractByBlacklisted,
+    //   );
+    //   matchResult = await dealMatcherClient.getMatchedOffersByDealId(
+    //     dealFixture.dealId,
+    //   );
+    //   expect(matchResult.fulfilled).toEqual(false);
+    //   expect(matchResult.computeUnitsPerOffers).toEqual([]);
+    //
+    //   // Now create CC for target provider offer and lets check that blacklisted would be ignored,
+    //   //  and only ordinary provider would be matched.
+    //   await _createCCDepositAndWait([providerFixture], capacityContract);
+    //
+    //   // Check itself.
+    //   await _checkExactMatch(dealFixture, providerFixture, false);
+    // });
 
     // // TODO
     // test("It does not allow to match with CUs from Failed CC.", async () => {
