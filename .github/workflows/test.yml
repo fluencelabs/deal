@@ -1,5 +1,4 @@
 name: "test"
-# TODO: rename to tests of Fluence Contracts.
 
 on:
   pull_request:
@@ -22,6 +21,8 @@ env:
   FOUNDRY_PROFILE: "ci"
 
 jobs:
+  # TODO: rename to tests of Fluence Contracts.
+  # TODO: rename the workflow file to test-contracts-integration.yml
   integration-tests:
     name: "Integration tests"
     runs-on: ubuntu-latest
