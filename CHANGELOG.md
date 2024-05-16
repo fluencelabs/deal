@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.13.12](https://github.com/fluencelabs/deal/compare/v0.13.11...v0.13.12) (2024-05-14)
+
+
+### Bug Fixes
+
+* too-early-to-rematch [CHAIN-487] ([#429](https://github.com/fluencelabs/deal/issues/429)) ([0300795](https://github.com/fluencelabs/deal/commit/0300795a8559df53215058b2a17fc45e5ddee0ee))
+* use peer hex in filters ([#435](https://github.com/fluencelabs/deal/issues/435)) ([6203677](https://github.com/fluencelabs/deal/commit/620367736714bf1a3fa1e5b8920eb90895fd5634))
+
 ## [0.13.11](https://github.com/fluencelabs/deal/compare/v0.13.10...v0.13.11) (2024-04-28)
 
 
