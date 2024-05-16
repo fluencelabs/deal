@@ -12,9 +12,9 @@ import {
   calculateEpoch,
   getCapacityMaxFailedRatio,
   getEpochDuration,
-  getInitTimestamp,
+  getInitTimestamp, getMinDealRematchingEpochs,
   getMinRequiredProofsPerEpoch,
-  getPrecision,
+  getPrecision
 } from "../contracts";
 import { formatAddress } from "./utils";
 import { log, BigInt } from "@graphprotocol/graph-ts/index";
@@ -30,6 +30,9 @@ export function handleInitialized(event: Initialized): void {
   ).toI32();
   graphNetwork.corePrecision = getPrecision(event.address).toI32();
   graphNetwork.minRequiredProofsPerEpoch = getMinRequiredProofsPerEpoch(
+    event.address,
+  ).toI32();
+  graphNetwork.coreMinDealRematchingEpochs = getMinDealRematchingEpochs(
     event.address,
   ).toI32();
 
