@@ -447,17 +447,16 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
 
             require(unit.peerId == peerId, "Compute unit doesn't belong to capacity commitment");
 
+            require(!cc.isUnitExited[unitId], "Compute unit is exited");
             if (unit.deal != address(0x00)) {
                 market.returnComputeUnitFromDeal(unitId);
             }
 
             UnitInfo storage unitInfo = cc.unitInfoById[unitId];
-            bool success =
-                _commitUnitSnapshot(cc, unitInfo, currentEpoch_, expiredEpoch, snapshotCache.current.failedEpoch);
-            if (success) {
-                cc.finish.exitedUnitCount += 1;
-                cc.finish.totalSlashedCollateral += unitInfo.slashedCollateral;
-            }
+            _commitUnitSnapshot(cc, unitInfo, currentEpoch_, expiredEpoch, snapshotCache.current.failedEpoch);
+            cc.finish.exitedUnitCount += 1;
+            cc.finish.totalSlashedCollateral += unitInfo.slashedCollateral;
+            cc.isUnitExited[unitId] = true;
         }
 
         emit CommitmentStatsUpdated(
@@ -869,7 +868,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
             (core.getRewardPool(nextEpochAfterLastSnapshot) * lastProofCount) / rewardInfo.totalSuccessProofs;
 
         if (reward > 0) {
-            cc.vesting.add(reward, nextEpochAfterLastSnapshot, core.vestingPeriodDuration(), core.vestingPeriodCount());
+            cc.vesting.add(reward, snapshotEpoch, core.vestingPeriodDuration(), core.vestingPeriodCount());
         }
 
         delete unitInfo.proofCountByEpoch[nextEpochAfterLastSnapshot];
