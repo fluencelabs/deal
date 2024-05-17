@@ -83,17 +83,27 @@ export function handleCommitmentCreated(event: CommitmentCreated): void {
   //  we could save number of compute units for the commitment when CC created
   //  instead of waiting for collateral to be deposited
   //  (i.e. depositCollateral).
+  // But we should take into consideration that this event consists of CU those **potentially**
+  //  would be in CC when collateral will be deposited finally.
+  //  TODO: Probably, it is better to leave in Subgraph storage state as in the contracts,
+  //   and where it needed(e.g. Network Explorer) - use info about CUs from, e.g. Peer model rather than from CC itself.
+  //   It is planned in CHAIN-537.
   const loadedComputeUnits = peer.computeUnits.load();
   const loadedComputeUnitsLength = loadedComputeUnits.length;
-  commitment.computeUnitsCount = loadedComputeUnitsLength;
+  let addedCUsCount = 0;
   for (let i = 0; i < loadedComputeUnitsLength; i++) {
-    // We rely on contract logic that it is not possible to emit event with not existing CUs.
-    //  Also, we rely that previously we save computeUnits successfully in prev. handler of computeUnitCreated.
+    // Filter out deleted compute units.
+    if (loadedComputeUnits[i].deleted) {
+      continue;
+    }
+    //  We rely on that previously we saved computeUnits successfully in prev. handleComputeUnitCreated handler.
     createOrLoadCapacityCommitmentToComputeUnit(
       commitment.id,
       loadedComputeUnits[i].id,
     );
+    addedCUsCount = addedCUsCount + 1;
   }
+  commitment.computeUnitsCount = addedCUsCount;
   commitment.nextAdditionalActiveUnitCount = 0;
   commitment.snapshotEpoch = ZERO_BIG_INT;
   commitment.deleted = false;
