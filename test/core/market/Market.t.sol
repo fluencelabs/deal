@@ -1,16 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.19;
 
-import {Test, console2} from "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import "forge-std/console.sol";
-import "forge-std/Vm.sol";
-import "src/core/Core.sol";
-import "test/utils/DeployDealSystem.sol";
+
+import "test/utils/TestWithDeployment.sol";
 import "test/utils/TestHelper.sol";
-import "src/core/modules/market/Market.sol";
+
 import "src/core/modules/market/interfaces/IMarket.sol";
 
-contract MarketTest is Test {
+contract MarketTest is TestWithDeployment {
     using SafeERC20 for IERC20;
 
     // ------------------ Constants ------------------
@@ -29,11 +28,8 @@ contract MarketTest is Test {
     event PeerCreated(bytes32 indexed offerId, bytes32 peerId, address owner);
     event ComputeUnitCreated(bytes32 indexed peerId, bytes32 unitId);
 
-    // ------------------ Variables ------------------
-    DeployDealSystem.Deployment deployment;
-
     // Init variables
-    Market.RegisterComputePeer[] registerPeers;
+    IMarket.RegisterComputePeer[] registerPeers;
     uint256 minPricePerWorkerEpoch;
     address paymentToken;
     CIDV1[] effectors;
@@ -43,7 +39,7 @@ contract MarketTest is Test {
     // ------------------ Test ------------------
     function setUp() public {
         bool initialized = deployment.initialized;
-        deployment = DeployDealSystem.deployDealSystem();
+        _deploySystem();
 
         if (initialized) {
             return;
@@ -51,8 +47,8 @@ contract MarketTest is Test {
 
         paymentToken = address(deployment.tUSD);
         minPricePerWorkerEpoch = 1000;
-        minProtocolVersion = DeployDealSystem.DEFAULT_MIN_PROTOCOL_VERSION;
-        maxProtocolVersion = DeployDealSystem.DEFAULT_MAX_PROTOCOL_VERSION;
+        minProtocolVersion = DEFAULT_MIN_PROTOCOL_VERSION;
+        maxProtocolVersion = DEFAULT_MAX_PROTOCOL_VERSION;
 
         for (uint256 i = 0; i < 10; i++) {
             effectors.push(CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("effector", i))}));
@@ -123,12 +119,7 @@ contract MarketTest is Test {
         }
 
         bytes32 retOfferId = deployment.market.registerMarketOffer(
-            minPricePerWorkerEpoch,
-            paymentToken,
-            effectors,
-            registerPeers,
-            minProtocolVersion,
-            maxProtocolVersion
+            minPricePerWorkerEpoch, paymentToken, effectors, registerPeers, minProtocolVersion, maxProtocolVersion
         );
 
         assertEq(retOfferId, offerId, "OfferId mismatch");
@@ -137,15 +128,10 @@ contract MarketTest is Test {
     function test_GetOfferPeersUnits() public {
         deployment.market.setProviderInfo("test", CIDV1({prefixes: 0x12345678, hash: bytes32(0x00)}));
         bytes32 offerId = deployment.market.registerMarketOffer(
-            minPricePerWorkerEpoch,
-            paymentToken,
-            effectors,
-            registerPeers,
-            minProtocolVersion,
-            maxProtocolVersion
+            minPricePerWorkerEpoch, paymentToken, effectors, registerPeers, minProtocolVersion, maxProtocolVersion
         );
 
-        Market.Offer memory offer = deployment.market.getOffer(offerId);
+        IMarket.Offer memory offer = deployment.market.getOffer(offerId);
         assertEq(offer.provider, address(this));
         assertEq(offer.minPricePerWorkerEpoch, minPricePerWorkerEpoch);
         assertEq(offer.paymentToken, paymentToken);
@@ -153,8 +139,8 @@ contract MarketTest is Test {
         assertEq(offer.maxProtocolVersion, maxProtocolVersion);
 
         for (uint256 i = 0; i < registerPeers.length; i++) {
-            Market.RegisterComputePeer memory registerPeer = registerPeers[i];
-            Market.ComputePeer memory computePeer = deployment.market.getComputePeer(registerPeer.peerId);
+            IMarket.RegisterComputePeer memory registerPeer = registerPeers[i];
+            IMarket.ComputePeer memory computePeer = deployment.market.getComputePeer(registerPeer.peerId);
 
             require(computePeer.offerId == offerId, "OfferId mismatch");
             require(computePeer.unitCount == registerPeer.unitIds.length, "NextUnitIndex mismatch");
@@ -162,7 +148,7 @@ contract MarketTest is Test {
 
             for (uint256 j = 0; j < registerPeer.unitIds.length; j++) {
                 bytes32 unitId = registerPeer.unitIds[j];
-                Market.ComputeUnit memory computeUnit = deployment.market.getComputeUnit(unitId);
+                IMarket.ComputeUnit memory computeUnit = deployment.market.getComputeUnit(unitId);
 
                 require(computeUnit.peerId == registerPeer.peerId, "PeerId mismatch");
                 require(computeUnit.deal == address(0), "Deal address mismatch");

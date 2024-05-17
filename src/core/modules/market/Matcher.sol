@@ -5,11 +5,8 @@ pragma solidity ^0.8.19;
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IMatcher.sol";
-import "./interfaces/IMatcher.sol";
 import "src/deal/interfaces/IDeal.sol";
 import "src/deal/interfaces/IConfig.sol";
-import "src/core/modules/BaseModule.sol";
-import "src/utils/OwnableUpgradableDiamond.sol";
 import "./Offer.sol";
 
 abstract contract Matcher is Offer, IMatcher {

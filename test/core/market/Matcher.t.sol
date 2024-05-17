@@ -1,27 +1,25 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.19;
 
-import {Test, console2} from "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import "forge-std/console.sol";
-import "src/core/Core.sol";
-import "src/deal/interfaces/IConfig.sol";
-import "src/deal/interfaces/IDeal.sol";
-import "test/utils/DeployDealSystem.sol";
-import "src/core/modules/market/Market.sol";
-import "src/core/modules/market/interfaces/IOffer.sol";
-import "test/utils/TestHelper.sol";
 import "forge-std/StdCheats.sol";
 
-contract MatcherTest is Test {
+import "src/deal/interfaces/IConfig.sol";
+import "src/deal/interfaces/IDeal.sol";
+import "src/core/modules/market/interfaces/IMarket.sol";
+import "src/core/modules/market/interfaces/IOffer.sol";
+
+import "test/utils/TestWithDeployment.sol";
+import "test/utils/TestHelper.sol";
+
+contract MatcherTest is TestWithDeployment {
     using SafeERC20 for IERC20;
 
     // ------------------ Events ------------------
     event ComputeUnitMatched(
         bytes32 indexed peerId, IDeal deal, bytes32 unitId, uint256 dealCreationBlock, CIDV1 appCID
     );
-
-    // ------------------ Variables ------------------
-    DeployDealSystem.Deployment deployment;
 
     // ------------------ Internals ------------------
 
@@ -78,77 +76,80 @@ contract MatcherTest is Test {
 
     // ------------------ Test ------------------
     function setUp() public {
-        deployment = DeployDealSystem.deployDealSystem();
+        _deploySystem();
+    }
+
+    struct MatcherTestParams {
+        DealMock deal;
+        uint256 offerCount;
+        uint256 unitCountPerPeer;
+        uint256 peerCountPerOffer;
+        uint256 minProtocolVersion;
+        uint256 maxProtocolVersion;
     }
 
     // Simple positive test.
     function test_Match() public {
-        CIDV1[] memory effectors = new CIDV1[](10);
-        for (uint256 i = 0; i < effectors.length; i++) {
-            effectors[i] = CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("effector", i))});
+        DealMock.InitArgs memory args;
+        args.effectors = new CIDV1[](10);
+        for (uint256 i = 0; i < args.effectors.length; i++) {
+            args.effectors[i] = CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("effector", i))});
         }
 
-        address paymentToken = address(deployment.tUSD);
-        uint256 creationBlock = block.number;
-        uint256 pricePerWorkerEpoch = 1 ether;
-        uint256 offerCount = 3;
-        uint256 unitCountPerPeer = 1;
-        uint256 peerCountPerOffer = 3;
-        uint256 minWorkers = 1;
-        uint256 maxWorkersPerProvider = unitCountPerPeer * peerCountPerOffer * offerCount;
-        uint256 protocolVersion = DeployDealSystem.DEFAULT_MIN_PROTOCOL_VERSION;
-        uint256 minProtocolVersion = DeployDealSystem.DEFAULT_MIN_PROTOCOL_VERSION;
-        uint256 maxProtocolVersion = DeployDealSystem.DEFAULT_MAX_PROTOCOL_VERSION;
+        MatcherTestParams memory params = MatcherTestParams({
+            deal: DealMock(address(0)),
+            offerCount: 3,
+            unitCountPerPeer: 1,
+            peerCountPerOffer: 3,
+            minProtocolVersion: DEFAULT_MIN_PROTOCOL_VERSION,
+            maxProtocolVersion: DEFAULT_MAX_PROTOCOL_VERSION
+        });
+
+        args.appCID = CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("appCID"))});
+        args.paymentToken = address(deployment.tUSD);
+        args.pricePerWorkerEpoch = 1 ether;
+        args.minWorkers = 1;
+        args.maxWorkersPerProvider = params.unitCountPerPeer * params.peerCountPerOffer * params.offerCount;
+        args.protocolVersion = DEFAULT_MIN_PROTOCOL_VERSION;
+        args.owner = address(this);
+        args.creationBlock = block.number;
 
         // Total workers: offerCount * unitCountPerPeer * peerCountPerOffer. Thus, we have CU in excess.
-        uint256 targetWorkers = offerCount * peerCountPerOffer * 1;
-        CIDV1 memory appCID = CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("appCID"))});
+        args.targetWorkers = params.offerCount * params.peerCountPerOffer * 1;
 
-        DealMock dealMock = new DealMock(
-            pricePerWorkerEpoch,
-            paymentToken,
-            targetWorkers,
-            maxWorkersPerProvider,
-            minWorkers,
-            effectors,
-            appCID,
-            creationBlock,
-            protocolVersion,
-            address(this)
-        );
+        params.deal = new DealMock(args);
 
         (bytes32[] memory offerIds, bytes32[][] memory peerIds, bytes32[][][] memory unitIds) = _registerOffersAndCC(
-            offerCount,
-            peerCountPerOffer,
-            unitCountPerPeer,
-            effectors,
-            paymentToken,
-            pricePerWorkerEpoch,
-            minProtocolVersion,
-            maxProtocolVersion
+            params.offerCount,
+            params.peerCountPerOffer,
+            params.unitCountPerPeer,
+            args.effectors,
+            args.paymentToken,
+            args.pricePerWorkerEpoch,
+            params.minProtocolVersion,
+            params.maxProtocolVersion
         );
 
         StdCheats.skip(uint256(deployment.core.epochDuration()));
-
         // Convert units 3D array to 2D array.
         // Choose the first targetWorkers.
         bytes32[][] memory unitIds2D = new bytes32[][](offerIds.length);
         uint256 chosenComputeUnits = 0;
         for (uint256 i = 0; i < offerIds.length; i++) {
             // Dynamically choose array size.
-            if ((peerCountPerOffer * unitCountPerPeer) < (targetWorkers - chosenComputeUnits)) {
-                unitIds2D[i] = new bytes32[](peerCountPerOffer * unitCountPerPeer);
+            if ((params.peerCountPerOffer * params.unitCountPerPeer) < (args.targetWorkers - chosenComputeUnits)) {
+                unitIds2D[i] = new bytes32[](params.peerCountPerOffer * params.unitCountPerPeer);
             } else {
-                unitIds2D[i] = new bytes32[](targetWorkers - chosenComputeUnits);
+                unitIds2D[i] = new bytes32[](args.targetWorkers - chosenComputeUnits);
             }
 
             uint256 currentUnitIdx = 0;
             for (uint256 j = 0; j < peerIds[i].length; j++) {
-                if (chosenComputeUnits == targetWorkers) {
+                if (chosenComputeUnits == args.targetWorkers) {
                     break;
                 }
                 for (uint256 k = 0; k < unitIds[i][j].length; k++) {
-                    if (chosenComputeUnits == targetWorkers) {
+                    if (chosenComputeUnits == args.targetWorkers) {
                         break;
                     }
                     unitIds2D[i][currentUnitIdx] = unitIds[i][j][k];
@@ -157,35 +158,35 @@ contract MatcherTest is Test {
 
                     vm.expectEmit(true, true, true, true, address(deployment.market));
                     emit ComputeUnitMatched(
-                        peerIds[i][j], IDeal(address(dealMock)), unitIds[i][j][k], creationBlock, appCID
+                        peerIds[i][j], IDeal(address(params.deal)), unitIds[i][j][k], args.creationBlock, args.appCID
                     );
                 }
             }
         }
-        deployment.market.matchDeal(IDeal(address(dealMock)), offerIds, unitIds2D);
+        deployment.market.matchDeal(IDeal(address(params.deal)), offerIds, unitIds2D);
 
-        assertEq(dealMock.getComputeUnitCount(), targetWorkers, "Wrong number of compute units");
+        assertEq(params.deal.getComputeUnitCount(), args.targetWorkers, "Wrong number of compute units");
         uint256 currentUnit = 0;
         for (uint256 i = 0; i < offerIds.length; i++) {
             bytes32 offerId = offerIds[i];
-            Market.Offer memory offer = deployment.market.getOffer(offerId);
+            IMarket.Offer memory offer = deployment.market.getOffer(offerId);
 
             for (uint256 j = 0; j < peerIds[i].length; j++) {
                 for (uint256 k = 0; k < unitIds[i][j].length; k++) {
                     bytes32 unitId = unitIds[i][j][k];
 
-                    if (currentUnit < targetWorkers) {
+                    if (currentUnit < args.targetWorkers) {
                         // We should found out that those CU are matched.
-                        assertEq(deployment.market.getComputeUnit(unitId).deal, address(dealMock), "Wrong deal");
-                        assertEq(dealMock.computeProviderByUnitId(unitId), offer.provider, "Wrong compute provider");
-                        assertEq(dealMock.peerIdByUnitId(unitId), peerIds[i][j], "Wrong peer id");
-                        assertTrue(dealMock.unitExists(unitId), "Unit does not exist");
+                        assertEq(deployment.market.getComputeUnit(unitId).deal, address(params.deal), "Wrong deal");
+                        assertEq(params.deal.computeProviderByUnitId(unitId), offer.provider, "Wrong compute provider");
+                        assertEq(params.deal.peerIdByUnitId(unitId), peerIds[i][j], "Wrong peer id");
+                        assertTrue(params.deal.unitExists(unitId), "Unit does not exist");
                     } else {
                         // We should found out that those CU are still free.
                         assertEq(deployment.market.getComputeUnit(unitId).deal, address(0), "Expected no deal.");
-                        assertEq(dealMock.computeProviderByUnitId(unitId), address(0), "Expected no provider.");
-                        assertEq(dealMock.peerIdByUnitId(unitId), bytes32(0), "Expected no peer id.");
-                        assertTrue(!dealMock.unitExists(unitId), "Expected unitExists == false.");
+                        assertEq(params.deal.computeProviderByUnitId(unitId), address(0), "Expected no provider.");
+                        assertEq(params.deal.peerIdByUnitId(unitId), bytes32(0), "Expected no peer id.");
+                        assertTrue(!params.deal.unitExists(unitId), "Expected unitExists == false.");
                     }
                     currentUnit += 1;
                 }
@@ -214,28 +215,32 @@ contract DealMock {
     mapping(address => uint256) public computeUnitCountByProvider;
     mapping(bytes32 => bool) public isComputePeerExist;
 
-    constructor(
-        uint256 _pricePerWorkerEpoch,
-        address _paymentToken,
-        uint256 _targetWorkers,
-        uint256 _maxWorkersPerProvider,
-        uint256 _minWorkers,
-        CIDV1[] memory effectors_,
-        CIDV1 memory _appCID,
-        uint256 _creationBlock,
-        uint256 protocolVersion_,
-        address owner_
-    ) {
-        pricePerWorkerEpoch = _pricePerWorkerEpoch;
-        paymentToken = _paymentToken;
-        targetWorkers = _targetWorkers;
-        maxWorkersPerProvider = _maxWorkersPerProvider;
-        minWorkers = _minWorkers;
-        _effectors = effectors_;
-        appCID = _appCID;
-        creationBlock = _creationBlock;
-        protocolVersion = protocolVersion_;
-        owner = owner_;
+    struct InitArgs {
+        uint256 pricePerWorkerEpoch;
+        address paymentToken;
+        uint256 targetWorkers;
+        uint256 maxWorkersPerProvider;
+        uint256 minWorkers;
+        CIDV1[] effectors;
+        CIDV1 appCID;
+        uint256 creationBlock;
+        uint256 protocolVersion;
+        address owner;
+    }
+
+    constructor(InitArgs memory args) {
+        pricePerWorkerEpoch = args.pricePerWorkerEpoch;
+        paymentToken = args.paymentToken;
+        targetWorkers = args.targetWorkers;
+        maxWorkersPerProvider = args.maxWorkersPerProvider;
+        minWorkers = args.minWorkers;
+        for (uint256 i = 0; i < args.effectors.length; i++) {
+            _effectors.push(args.effectors[i]);
+        }
+        appCID = args.appCID;
+        creationBlock = args.creationBlock;
+        protocolVersion = args.protocolVersion;
+        owner = args.owner;
     }
 
     function effectors() external view returns (CIDV1[] memory) {

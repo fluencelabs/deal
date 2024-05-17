@@ -12,7 +12,7 @@ import "src/core/Core.sol";
 import "src/dev/OwnableFaucet.sol";
 import "src/dev/TestERC20.sol";
 
-contract Depoyments is ScriptBase {
+contract Deployment is ScriptBase {
     using Strings for string;
     using stdJson for string;
 
@@ -25,16 +25,16 @@ contract Depoyments is ScriptBase {
         bytes32 creationCodeHash;
     }
 
-    struct Deployments {
+    struct DeploymentInfo {
         string[] contractNames;
         mapping(string => DeployedContract) contracts;
     }
 
     // ------------------ Variables ------------------
-    Deployments deployments;
+    DeploymentInfo deployments;
 
     // ------------------ Internal functions ------------------
-    function _loadDepoyments(string memory path) internal {
+    function _loadDeployment(string memory path) internal {
         if (!vm.exists(path)) {
             return;
         }
@@ -42,7 +42,7 @@ contract Depoyments is ScriptBase {
         string memory file = vm.readFile(path);
         string[] memory keys = vm.parseJsonKeys(file, "");
 
-        deployments.contractNames = keys;
+        deployment.contractNames = keys;
         for (uint256 i = 0; i < keys.length; i++) {
             string memory key = keys[i];
 
@@ -55,17 +55,17 @@ contract Depoyments is ScriptBase {
             deployedContract.creationCodeHash =
                 abi.decode(vm.parseJson(file, string.concat(".", key, ".creationCodeHash")), (bytes32));
 
-            deployments.contracts[key] = deployedContract;
+            deployment.contracts[key] = deployedContract;
         }
     }
 
-    function _saveDeployments(string memory path) internal {
+    function _saveDeployment(string memory path) internal {
         string memory mainJsonKey = "";
         string memory json = "";
-        for (uint256 i = 0; i < deployments.contractNames.length; i++) {
-            string memory name = deployments.contractNames[i];
+        for (uint256 i = 0; i < deployment.contractNames.length; i++) {
+            string memory name = deployment.contractNames[i];
 
-            DeployedContract memory deployedContract = deployments.contracts[name];
+            DeployedContract memory deployedContract = deployment.contracts[name];
             name.serialize("addr", deployedContract.addr);
             name.serialize("codeHash", deployedContract.codeHash);
             name.serialize("blockNumber", deployedContract.blockNumber);
@@ -115,10 +115,10 @@ contract Depoyments is ScriptBase {
         returns (address, bool)
     {
         if (force) {
-            delete deployments.contracts[contractName];
+            delete deployment.contracts[contractName];
         }
 
-        DeployedContract memory deployedContract = deployments.contracts[contractName];
+        DeployedContract memory deployedContract = deployment.contracts[contractName];
 
         string memory artifact = string.concat(artifactName, ".sol");
         bytes memory creationCode = abi.encodePacked(vm.getCode(artifact), args);
@@ -152,17 +152,17 @@ contract Depoyments is ScriptBase {
             blockNumber: block.number,
             creationCodeHash: creationCodeHash
         });
-        deployments.contracts[contractName] = deployedContract;
+        deployment.contracts[contractName] = deployedContract;
 
         if (isNew) {
-            deployments.contractNames.push(contractName);
+            deployment.contractNames.push(contractName);
         }
 
         return (addr, isNew);
     }
 
     function _doNeedToRedeploy(string memory contractName, string memory artifactName) internal view returns (bool) {
-        DeployedContract memory deployedContract = deployments.contracts[contractName];
+        DeployedContract memory deployedContract = deployment.contracts[contractName];
 
         string memory artifact = string.concat(artifactName, ".sol");
         bytes memory code = vm.getDeployedCode(artifact);
@@ -177,9 +177,9 @@ contract Depoyments is ScriptBase {
     function _printDeployments() internal view {
         console.log("\n");
         console.log("----------------- Deployments -----------------");
-        for (uint256 i = 0; i < deployments.contractNames.length; i++) {
-            string memory name = deployments.contractNames[i];
-            DeployedContract memory deployedContract = deployments.contracts[name];
+        for (uint256 i = 0; i < deployment.contractNames.length; i++) {
+            string memory name = deployment.contractNames[i];
+            DeployedContract memory deployedContract = deployment.contracts[name];
 
             console.log(StdStyle.green(name), deployedContract.addr);
         }
@@ -188,11 +188,11 @@ contract Depoyments is ScriptBase {
     function _setContract(string memory contractName, address addr, bytes32 codeHash, bytes32 creationCodeHash)
         internal
     {
-        if (deployments.contracts[contractName].addr == address(0)) {
-            deployments.contractNames.push(contractName);
+        if (deployment.contracts[contractName].addr == address(0)) {
+            deployment.contractNames.push(contractName);
         }
 
-        deployments.contracts[contractName] = DeployedContract({
+        deployment.contracts[contractName] = DeployedContract({
             addr: addr,
             codeHash: codeHash,
             blockNumber: block.number,
@@ -200,7 +200,7 @@ contract Depoyments is ScriptBase {
         });
     }
 
-    // ------------------ Privat functions ------------------
+    // ------------------ Private functions ------------------
     function _extcodehash(address addr) private view returns (bytes32 hash) {
         assembly {
             hash := extcodehash(addr)

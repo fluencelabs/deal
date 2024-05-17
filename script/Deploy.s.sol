@@ -4,24 +4,14 @@ pragma solidity ^0.8.19;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
 import "forge-std/Script.sol";
-import "forge-std/Vm.sol";
-import "src/deal/Deal.sol";
-import "src/core/Core.sol";
-import "src/dev/OwnableFaucet.sol";
-import "src/dev/TestERC20.sol";
-import "./utils/Depoyments.sol";
 import "src/core/Core.sol";
 import "src/core/interfaces/ICore.sol";
-import "src/core/modules/market/Market.sol";
-import "src/core/modules/market/DealFactory.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
-import "src/core/modules/capacity/Capacity.sol";
 import "src/core/modules/capacity/interfaces/ICapacity.sol";
 import "src/utils/Multicall3.sol";
 
-contract DeployContracts is Depoyments, Script {
+contract DeployContracts is Deployment, Script {
     using SafeERC20 for IERC20;
 
     // ------------------ Local ENV constant ------------------
@@ -239,7 +229,7 @@ contract DeployContracts is Depoyments, Script {
     }
 
     function _deployTestTokens() internal returns (IERC20 tUSD) {
-        bytes memory args = abi.encode("USD Token", "tUSD", 6);
+        bytes memory args = abi.encode("USD Token", "axlUSDC", 6);
         tUSD = IERC20(_deployContract("axlUSDC", "TestERC20", args));
     }
 
@@ -308,22 +298,24 @@ contract DeployContracts is Depoyments, Script {
                     maxProtocolVersion_,
                     dealImpl,
                     isWhitelistEnabled_,
-                    fltPrice_,
-                    usdCollateralPerUnit_,
-                    usdTargetRevenuePerEpoch_,
-                    minDuration_,
-                    minRewardPerEpoch_,
-                    maxRewardPerEpoch_,
-                    vestingPeriodDuration_,
-                    vestingPeriodCount_,
-                    slashingRate_,
-                    minProofsPerEpoch_,
-                    maxProofsPerEpoch_,
-                    withdrawEpochsAfterFailed_,
-                    maxFailedRatio_,
-                    difficulty_,
-                    initRewardPool_,
-                    randomXProxy
+                    ICapacityConst.CapacityConstInitArgs({
+                        fltPrice: fltPrice_,
+                        usdCollateralPerUnit: usdCollateralPerUnit_,
+                        usdTargetRevenuePerEpoch: usdTargetRevenuePerEpoch_,
+                        minDuration: minDuration_,
+                        minRewardPerEpoch: minRewardPerEpoch_,
+                        maxRewardPerEpoch: maxRewardPerEpoch_,
+                        vestingPeriodDuration: vestingPeriodDuration_,
+                        vestingPeriodCount: vestingPeriodCount_,
+                        slashingRate: slashingRate_,
+                        minProofsPerEpoch: minProofsPerEpoch_,
+                        maxProofsPerEpoch: maxProofsPerEpoch_,
+                        withdrawEpochsAfterFailed: withdrawEpochsAfterFailed_,
+                        maxFailedRatio: maxFailedRatio_,
+                        difficulty: difficulty_,
+                        initRewardPool: initRewardPool_,
+                        randomXProxy: randomXProxy
+                    })
                 )
             ),
             needToRedeployMarket || needToRedeployCapacity || needToRedeployDealFactory
@@ -335,21 +327,21 @@ contract DeployContracts is Depoyments, Script {
         address dealFactoryImpl = _deployContract("DealFactoryImpl", "DealFactory", abi.encode(coreAddr), isNewCore);
 
         address marketProxy = _deployContract(
-            "Market", "ERC1967Proxy", abi.encode(marketImpl, abi.encodeWithSelector(Market.initialize.selector))
+            "Market", "ERC1967Proxy", abi.encode(marketImpl, abi.encodeWithSelector(IMarket.initialize.selector))
         );
 
         address capacityProxy = _deployContract(
             "Capacity",
             "ERC1967Proxy",
             abi.encode(
-                capacityImpl, abi.encodeWithSelector(Capacity.initialize.selector, initGlobalNonce_, randomXProxy)
+                capacityImpl, abi.encodeWithSelector(ICapacity.initialize.selector, initGlobalNonce_, randomXProxy)
             )
         );
 
         address dealFactoryProxy = _deployContract(
             "DealFactory",
             "ERC1967Proxy",
-            abi.encode(dealFactoryImpl, abi.encodeWithSelector(DealFactory.initialize.selector))
+            abi.encode(dealFactoryImpl, abi.encodeWithSelector(IDealFactory.initialize.selector))
         );
 
         if (needToRedeployCapacity) {
@@ -374,7 +366,7 @@ contract DeployContracts is Depoyments, Script {
     function _startDeploy() internal virtual {
         bool isTestnet = vm.envOr("TEST", false);
         if (!isTestnet) {
-            _loadDepoyments(fullDeploymentsPath);
+            _loadDeployment(fullDeploymentsPath);
         }
 
         vm.startBroadcast();
@@ -386,7 +378,7 @@ contract DeployContracts is Depoyments, Script {
 
         if (!isTestnet) {
             _printDeployments();
-            _saveDeployments(fullDeploymentsPath);
+            _saveDeployment(fullDeploymentsPath);
         }
 
         vm.stopBroadcast();

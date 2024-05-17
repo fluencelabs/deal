@@ -1,20 +1,19 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.19;
 
-import {Test, console2} from "forge-std/Test.sol";
-import "test/utils/DeployDealSystem.sol";
+import {Test} from "forge-std/Test.sol";
+import "test/utils/TestWithDeployment.sol";
 import "test/utils/TestHelper.sol";
 
-contract OfferTest is Test {
+contract OfferTest is TestWithDeployment {
     using SafeERC20 for IERC20;
 
     bytes32 private constant _OFFER_ID_PREFIX = bytes32(uint256(keccak256("fluence.market.offer")) - 1);
 
-    DeployDealSystem.Deployment deployment;
     address paymentToken;
 
     function setUp() external {
-        deployment = DeployDealSystem.deployDealSystem();
+        _deploySystem();
         paymentToken = address(deployment.tUSD);
     }
 
@@ -25,8 +24,8 @@ contract OfferTest is Test {
             paymentToken,
             new CIDV1[](0),
             new IOffer.RegisterComputePeer[](0),
-            DeployDealSystem.DEFAULT_MIN_PROTOCOL_VERSION,
-            DeployDealSystem.DEFAULT_MAX_PROTOCOL_VERSION
+            DEFAULT_MIN_PROTOCOL_VERSION,
+            DEFAULT_MAX_PROTOCOL_VERSION
         );
     }
 
@@ -124,8 +123,8 @@ contract OfferTest is Test {
             paymentToken,
             new CIDV1[](0),
             new IOffer.RegisterComputePeer[](0),
-            DeployDealSystem.DEFAULT_MIN_PROTOCOL_VERSION,
-            DeployDealSystem.DEFAULT_MAX_PROTOCOL_VERSION
+            DEFAULT_MIN_PROTOCOL_VERSION,
+            DEFAULT_MAX_PROTOCOL_VERSION
         );
 
         deployment.market.setProviderInfo("test", CIDV1({prefixes: 0x12345678, hash: bytes32(0x00)}));
@@ -136,8 +135,8 @@ contract OfferTest is Test {
             paymentToken,
             new CIDV1[](0),
             new IOffer.RegisterComputePeer[](0),
-            DeployDealSystem.DEFAULT_MIN_PROTOCOL_VERSION,
-            DeployDealSystem.DEFAULT_MAX_PROTOCOL_VERSION
+            DEFAULT_MIN_PROTOCOL_VERSION,
+            DEFAULT_MAX_PROTOCOL_VERSION
         );
 
         vm.expectRevert("Payment token should be not zero address");
@@ -146,8 +145,8 @@ contract OfferTest is Test {
             address(0),
             new CIDV1[](0),
             new IOffer.RegisterComputePeer[](0),
-            DeployDealSystem.DEFAULT_MIN_PROTOCOL_VERSION,
-            DeployDealSystem.DEFAULT_MAX_PROTOCOL_VERSION
+            DEFAULT_MIN_PROTOCOL_VERSION,
+            DEFAULT_MAX_PROTOCOL_VERSION
         );
 
         vm.expectRevert("Min protocol version too small");
@@ -156,8 +155,8 @@ contract OfferTest is Test {
             paymentToken,
             new CIDV1[](0),
             new IOffer.RegisterComputePeer[](0),
-            DeployDealSystem.DEFAULT_MIN_PROTOCOL_VERSION - 1, // default 1
-            DeployDealSystem.DEFAULT_MAX_PROTOCOL_VERSION
+            DEFAULT_MIN_PROTOCOL_VERSION - 1, // default 1
+            DEFAULT_MAX_PROTOCOL_VERSION
         );
 
         vm.expectRevert("Max protocol version too big");
@@ -166,8 +165,8 @@ contract OfferTest is Test {
             paymentToken,
             new CIDV1[](0),
             new IOffer.RegisterComputePeer[](0),
-            DeployDealSystem.DEFAULT_MIN_PROTOCOL_VERSION,
-            DeployDealSystem.DEFAULT_MAX_PROTOCOL_VERSION + 1
+            DEFAULT_MIN_PROTOCOL_VERSION,
+            DEFAULT_MAX_PROTOCOL_VERSION + 1
         );
 
         vm.expectRevert("Wrong protocol versions");
@@ -186,8 +185,8 @@ contract OfferTest is Test {
                     paymentToken,
                     new CIDV1[](0),
                     new IOffer.RegisterComputePeer[](0),
-                    DeployDealSystem.DEFAULT_MIN_PROTOCOL_VERSION,
-                    DeployDealSystem.DEFAULT_MAX_PROTOCOL_VERSION
+                    DEFAULT_MIN_PROTOCOL_VERSION,
+                    DEFAULT_MAX_PROTOCOL_VERSION
                 )
             )
         );
@@ -199,16 +198,16 @@ contract OfferTest is Test {
             1,
             paymentToken,
             new CIDV1[](0),
-            DeployDealSystem.DEFAULT_MIN_PROTOCOL_VERSION,
-            DeployDealSystem.DEFAULT_MAX_PROTOCOL_VERSION
+            DEFAULT_MIN_PROTOCOL_VERSION,
+            DEFAULT_MAX_PROTOCOL_VERSION
         );
         bytes32 retOfferId = deployment.market.registerMarketOffer(
             1,
             paymentToken,
             new CIDV1[](0),
             new IOffer.RegisterComputePeer[](0),
-            DeployDealSystem.DEFAULT_MIN_PROTOCOL_VERSION,
-            DeployDealSystem.DEFAULT_MAX_PROTOCOL_VERSION
+            DEFAULT_MIN_PROTOCOL_VERSION,
+            DEFAULT_MAX_PROTOCOL_VERSION
         );
         IOffer.Offer memory offer = deployment.market.getOffer(retOfferId);
         assertEq(offer.provider, address(this), "Provider should be equal to address(this)");
@@ -223,8 +222,8 @@ contract OfferTest is Test {
             paymentToken,
             new CIDV1[](0),
             new IOffer.RegisterComputePeer[](0),
-            DeployDealSystem.DEFAULT_MIN_PROTOCOL_VERSION,
-            DeployDealSystem.DEFAULT_MAX_PROTOCOL_VERSION
+            DEFAULT_MIN_PROTOCOL_VERSION,
+            DEFAULT_MAX_PROTOCOL_VERSION
         );
 
         // testing creating offer with compute peers
@@ -253,8 +252,8 @@ contract OfferTest is Test {
             paymentToken,
             new CIDV1[](0),
             peers,
-            DeployDealSystem.DEFAULT_MIN_PROTOCOL_VERSION,
-            DeployDealSystem.DEFAULT_MAX_PROTOCOL_VERSION
+            DEFAULT_MIN_PROTOCOL_VERSION,
+            DEFAULT_MAX_PROTOCOL_VERSION
         );
 
         IOffer.Offer memory offerWithPeers = deployment.market.getOffer(offerWithPeersId);
@@ -395,8 +394,8 @@ contract OfferTest is Test {
             paymentToken,
             new CIDV1[](0),
             peers,
-            DeployDealSystem.DEFAULT_MIN_PROTOCOL_VERSION,
-            DeployDealSystem.DEFAULT_MAX_PROTOCOL_VERSION
+            DEFAULT_MIN_PROTOCOL_VERSION,
+            DEFAULT_MAX_PROTOCOL_VERSION
         );
 
         vm.expectRevert("Peer doesn't exist");
