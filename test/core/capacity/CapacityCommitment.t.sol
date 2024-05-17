@@ -15,10 +15,12 @@ import "src/core/modules/market/Market.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
 import "test/utils/TestHelper.sol";
 import "forge-std/StdCheats.sol";
+import "test/utils/DealHelper.sol";
 
 contract CapacityCommitmentTest is Test {
     using SafeERC20 for IERC20;
     using BytesConverter for bytes32;
+    using DealHelper for DeployDealSystem.Deployment;
 
     // ------------------ Events ------------------
     event CommitmentCreated(
@@ -132,7 +134,7 @@ contract CapacityCommitmentTest is Test {
 
         bytes32 peerId = registerPeers[0].peerId;
 
-        (bytes32 commitmentId,) = _createCapacityCommitment(peerId);
+        bytes32 commitmentId = _createCapacityCommitment(peerId);
 
         Capacity.CommitmentView memory commitment = deployment.capacity.getCommitment(commitmentId);
 
@@ -169,7 +171,7 @@ contract CapacityCommitmentTest is Test {
             bytes32 peerId = registerPeers[i].peerId;
             uint256 unitCount = registerPeers[i].unitIds.length;
             unitCountTotal += unitCount;
-            (bytes32 commitmentId,) = _createCapacityCommitment(peerId);
+            bytes32 commitmentId = _createCapacityCommitment(peerId);
             createdCCIds[i] = commitmentId;
 
             uint256 amount = unitCount * deployment.core.fltCollateralPerUnit();
@@ -286,8 +288,70 @@ contract CapacityCommitmentTest is Test {
         vm.stopPrank();
     }
 
+    function test_ExitCommitment() external {
+        bytes32 peerId = registerPeers[0].peerId;
+        uint256 unitCount = registerPeers[0].unitIds.length;
+        address peerOwner = registerPeers[0].owner;
+        bytes32 unitId = registerPeers[0].unitIds[0];
+
+        (bytes32 commitmentId, bytes32 offerId) = _createAndDepositCapacityCommitment(peerId, unitCount);
+        console.log("curr epoch #1", deployment.core.currentEpoch());
+
+        // warp to next epoch
+        StdCheats.skip(deployment.core.epochDuration());
+
+        console.log("curr epoch #2", deployment.core.currentEpoch());
+
+        StdCheats.skip(ccDuration * 2000);
+        bytes32[] memory unitIds = deployment.market.getComputeUnitIds(peerId);
+        
+        deployment.capacity.removeCUFromCC(commitmentId, unitIds);
+        deployment.capacity.finishCommitment(commitmentId);
+    }
+
+    function test_ExitCommitmentWithDealAfterTime() external {
+        bytes32 peerId = registerPeers[0].peerId;
+        uint256 unitCount = registerPeers[0].unitIds.length;
+        address peerOwner = registerPeers[0].owner;
+        bytes32 unitId = registerPeers[0].unitIds[0];
+
+        (bytes32 commitmentId, bytes32 offerId) = _createAndDepositCapacityCommitment(peerId, unitCount);
+        console.log("curr epoch #1", deployment.core.currentEpoch());
+
+        // warp to next epoch
+        StdCheats.skip(deployment.core.epochDuration());
+
+        console.log("curr epoch #2", deployment.core.currentEpoch());
+
+        uint256 pricePerWorkerEpoch = 1 ether;
+        uint256 targetWorkers = 3;
+        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.core.minDealDepositedEpochs();
+
+        uint256 balanceBefore = deployment.tUSD.balanceOf(address(this));
+
+        deployment.tUSD.safeApprove(address(deployment.dealFactory), minAmount);
+        uint256 protocolVersion = deployment.core.minProtocolVersion();
+        (IDeal d, DealHelper.DealParams memory dealParams) = deployment.deployDeal(1, 2, targetWorkers, pricePerWorkerEpoch, minAmount, protocolVersion);
+
+        bytes32[] memory unitIds = deployment.market.getComputeUnitIds(peerId);
+        bytes32[][] memory unitIds2d = new bytes32[][](1);
+        unitIds2d[0] = unitIds;
+
+        bytes32[] memory offerIds = new bytes32[](1);
+        offerIds[0] = offerId;
+
+        deployment.market.matchDeal(d, offerIds, unitIds2d);
+
+        StdCheats.skip(ccDuration * 2000);
+        
+
+        deployment.capacity.removeCUFromCC(commitmentId, unitIds);
+        deployment.capacity.finishCommitment(commitmentId);
+
+    }
+
     // ------------------ Internals ------------------
-    function _createCapacityCommitment(bytes32 peerId) internal returns (bytes32 commitmentId, bytes32 offerId) {
+    function _createCapacityCommitment(bytes32 peerId) internal returns (bytes32 commitmentId) {
         vm.recordLogs();
         deployment.capacity.createCommitment(peerId, ccDuration, ccDelegator, rewardCCDelegationRate);
 
@@ -295,7 +359,7 @@ contract CapacityCommitmentTest is Test {
 
         (commitmentId,,,) = abi.decode(entries[0].data, (bytes32, address, uint256, uint256));
 
-        return (commitmentId, offerId);
+        return commitmentId;
     }
 
     function _createAndDepositCapacityCommitment(bytes32 peerId, uint256 unitCount)
@@ -312,7 +376,7 @@ contract CapacityCommitmentTest is Test {
             deployment.core.maxProtocolVersion()
         );
 
-        (commitmentId, offerId) = _createCapacityCommitment(peerId);
+        commitmentId = _createCapacityCommitment(peerId);
 
         vm.startPrank(ccDelegator);
 
@@ -322,6 +386,8 @@ contract CapacityCommitmentTest is Test {
         deployment.capacity.depositCollateral{value: unitCount * deployment.core.fltCollateralPerUnit()}(commitmentIds);
         vm.stopPrank();
     }
+
+    receive() external payable { }
 }
 
 contract MockActorCallActorPrecompile {
