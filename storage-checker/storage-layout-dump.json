@@ -156,20 +156,20 @@
       "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
     },
     {
-      "astId": 80792,
+      "astId": 81150,
       "contract": "test/deal/AddComputeUnits.t.sol:AddComputeUnits",
       "label": "deployment",
       "offset": 0,
       "slot": "28",
-      "type": "t_struct(Deployment)83901_storage"
+      "type": "t_struct(Deployment)84259_storage"
     },
     {
-      "astId": 80795,
+      "astId": 81153,
       "contract": "test/deal/AddComputeUnits.t.sol:AddComputeUnits",
       "label": "dealImpl",
       "offset": 0,
       "slot": "34",
-      "type": "t_contract(Deal)69512"
+      "type": "t_contract(Deal)69537"
     }
   ],
   "AddWorkers.t.sol/AddWorkers.json": [
@@ -326,12 +326,12 @@
       "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
     },
     {
-      "astId": 81228,
+      "astId": 81586,
       "contract": "test/deal/AddWorkers.t.sol:AddWorkers",
       "label": "deployment",
       "offset": 0,
       "slot": "28",
-      "type": "t_struct(Deployment)83901_storage"
+      "type": "t_struct(Deployment)84259_storage"
     }
   ],
   "Address.sol/Address.json": [],
@@ -586,23 +586,23 @@
       "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
     },
     {
-      "astId": 74137,
+      "astId": 74167,
       "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
       "label": "deployment",
       "offset": 0,
       "slot": "28",
-      "type": "t_struct(Deployment)83901_storage"
+      "type": "t_struct(Deployment)84259_storage"
     },
     {
-      "astId": 74141,
+      "astId": 74171,
       "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
       "label": "registerPeers",
       "offset": 0,
       "slot": "34",
-      "type": "t_array(t_struct(RegisterComputePeer)67247_storage)dyn_storage"
+      "type": "t_array(t_struct(RegisterComputePeer)67272_storage)dyn_storage"
     },
     {
-      "astId": 74143,
+      "astId": 74173,
       "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
       "label": "minPricePerWorkerEpoch",
       "offset": 0,
@@ -610,15 +610,15 @@
       "type": "t_uint256"
     },
     {
-      "astId": 74147,
+      "astId": 74177,
       "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
       "label": "effectors",
       "offset": 0,
       "slot": "36",
-      "type": "t_array(t_struct(CIDV1)70435_storage)dyn_storage"
+      "type": "t_array(t_struct(CIDV1)70460_storage)dyn_storage"
     },
     {
-      "astId": 74149,
+      "astId": 74179,
       "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
       "label": "paymentToken",
       "offset": 0,
@@ -626,7 +626,7 @@
       "type": "t_address"
     },
     {
-      "astId": 74151,
+      "astId": 74181,
       "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
       "label": "ccDuration",
       "offset": 0,
@@ -634,7 +634,7 @@
       "type": "t_uint256"
     },
     {
-      "astId": 74153,
+      "astId": 74183,
       "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
       "label": "ccDelegator",
       "offset": 0,
@@ -642,7 +642,7 @@
       "type": "t_address"
     },
     {
-      "astId": 74155,
+      "astId": 74185,
       "contract": "test/core/capacity/CapacityCommitment.t.sol:CapacityCommitmentTest",
       "label": "rewardCCDelegationRate",
       "offset": 0,
@@ -823,12 +823,12 @@
       "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
     },
     {
-      "astId": 72311,
+      "astId": 72336,
       "contract": "test/core/CapacityConst.t.sol:CpacityConstTest",
       "label": "capacityConst",
       "offset": 0,
       "slot": "28",
-      "type": "t_contract(TestCapacityConst)73532"
+      "type": "t_contract(TestCapacityConst)73557"
     }
   ],
   "CapacityConst.t.sol/ISetConstant.json": [],
@@ -1005,20 +1005,20 @@
       "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
     },
     {
-      "astId": 81597,
+      "astId": 81955,
       "contract": "test/deal/CommitPeriod.t.sol:CommitPeriod",
       "label": "deployment",
       "offset": 0,
       "slot": "28",
-      "type": "t_struct(Deployment)83901_storage"
+      "type": "t_struct(Deployment)84259_storage"
     },
     {
-      "astId": 81600,
+      "astId": 81958,
       "contract": "test/deal/CommitPeriod.t.sol:CommitPeriod",
       "label": "dealContract",
       "offset": 0,
       "slot": "34",
-      "type": "t_contract(TestDealContract)82208"
+      "type": "t_contract(TestDealContract)82566"
     }
   ],
   "CommitPeriod.t.sol/TestDealContract.json": [
@@ -1220,28 +1220,28 @@
       "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
     },
     {
-      "astId": 82268,
+      "astId": 82626,
       "contract": "test/deal/ConfigContract.t.sol:ConfigContract",
       "label": "deployment",
       "offset": 0,
       "slot": "28",
-      "type": "t_struct(Deployment)83901_storage"
+      "type": "t_struct(Deployment)84259_storage"
     },
     {
-      "astId": 82271,
+      "astId": 82629,
       "contract": "test/deal/ConfigContract.t.sol:ConfigContract",
       "label": "config",
       "offset": 0,
       "slot": "34",
-      "type": "t_contract(ConfigTestContract)82670"
+      "type": "t_contract(ConfigTestContract)83028"
     },
     {
-      "astId": 82274,
+      "astId": 82632,
       "contract": "test/deal/ConfigContract.t.sol:ConfigContract",
       "label": "configParams",
       "offset": 0,
       "slot": "35",
-      "type": "t_struct(ConfigContractParams)82246_storage"
+      "type": "t_struct(ConfigContractParams)82604_storage"
     }
   ],
   "ConfigContract.t.sol/ConfigTestContract.json": [
@@ -1451,12 +1451,12 @@
       "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
     },
     {
-      "astId": 73567,
+      "astId": 73592,
       "contract": "test/core/Core.t.sol:CoreTest",
       "label": "deployment",
       "offset": 0,
       "slot": "28",
-      "type": "t_struct(Deployment)83901_storage"
+      "type": "t_struct(Deployment)84259_storage"
     }
   ],
   "DataCapTypes.sol/DataCapTypes.json": [],
@@ -1674,12 +1674,12 @@
       "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
     },
     {
-      "astId": 75892,
+      "astId": 76250,
       "contract": "test/core/market/DealFactory.t.sol:DealFactoryTest",
       "label": "deployment",
       "offset": 0,
       "slot": "28",
-      "type": "t_struct(Deployment)83901_storage"
+      "type": "t_struct(Deployment)84259_storage"
     }
   ],
   "DealHelper.sol/DealHelper.json": [],
@@ -2112,33 +2112,33 @@
       "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
     },
     {
-      "astId": 82697,
+      "astId": 83055,
       "contract": "test/deal/GetStatus.t.sol:GetStatus",
       "label": "deployment",
       "offset": 0,
       "slot": "28",
-      "type": "t_struct(Deployment)83901_storage"
+      "type": "t_struct(Deployment)84259_storage"
     },
     {
-      "astId": 82700,
+      "astId": 83058,
       "contract": "test/deal/GetStatus.t.sol:GetStatus",
       "label": "testCore",
       "offset": 0,
       "slot": "34",
-      "type": "t_contract(TestCore)83094"
+      "type": "t_contract(TestCore)83452"
     },
     {
-      "astId": 82703,
+      "astId": 83061,
       "contract": "test/deal/GetStatus.t.sol:GetStatus",
       "label": "dealContract",
       "offset": 0,
       "slot": "35",
-      "type": "t_contract(TestDealContract)83275"
+      "type": "t_contract(TestDealContract)83633"
     }
   ],
   "GetStatus.t.sol/TestCore.json": [
     {
-      "astId": 83075,
+      "astId": 83433,
       "contract": "test/deal/GetStatus.t.sol:TestCore",
       "label": "currentEpoch",
       "offset": 0,
@@ -2172,7 +2172,7 @@
       "type": "t_array(t_uint256)50_storage"
     },
     {
-      "astId": 83098,
+      "astId": 83456,
       "contract": "test/deal/GetStatus.t.sol:TestDealContract",
       "label": "_freeBalance",
       "offset": 0,
@@ -2433,23 +2433,23 @@
       "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
     },
     {
-      "astId": 76350,
+      "astId": 76708,
       "contract": "test/core/market/Market.t.sol:MarketTest",
       "label": "deployment",
       "offset": 0,
       "slot": "28",
-      "type": "t_struct(Deployment)83901_storage"
+      "type": "t_struct(Deployment)84259_storage"
     },
     {
-      "astId": 76354,
+      "astId": 76712,
       "contract": "test/core/market/Market.t.sol:MarketTest",
       "label": "registerPeers",
       "offset": 0,
       "slot": "34",
-      "type": "t_array(t_struct(RegisterComputePeer)67247_storage)dyn_storage"
+      "type": "t_array(t_struct(RegisterComputePeer)67272_storage)dyn_storage"
     },
     {
-      "astId": 76356,
+      "astId": 76714,
       "contract": "test/core/market/Market.t.sol:MarketTest",
       "label": "minPricePerWorkerEpoch",
       "offset": 0,
@@ -2457,7 +2457,7 @@
       "type": "t_uint256"
     },
     {
-      "astId": 76358,
+      "astId": 76716,
       "contract": "test/core/market/Market.t.sol:MarketTest",
       "label": "paymentToken",
       "offset": 0,
@@ -2465,15 +2465,15 @@
       "type": "t_address"
     },
     {
-      "astId": 76362,
+      "astId": 76720,
       "contract": "test/core/market/Market.t.sol:MarketTest",
       "label": "effectors",
       "offset": 0,
       "slot": "37",
-      "type": "t_array(t_struct(CIDV1)70435_storage)dyn_storage"
+      "type": "t_array(t_struct(CIDV1)70460_storage)dyn_storage"
     },
     {
-      "astId": 76364,
+      "astId": 76722,
       "contract": "test/core/market/Market.t.sol:MarketTest",
       "label": "minProtocolVersion",
       "offset": 0,
@@ -2481,7 +2481,7 @@
       "type": "t_uint256"
     },
     {
-      "astId": 76366,
+      "astId": 76724,
       "contract": "test/core/market/Market.t.sol:MarketTest",
       "label": "maxProtocolVersion",
       "offset": 0,
@@ -2509,7 +2509,7 @@
   ],
   "Matcher.t.sol/DealMock.json": [
     {
-      "astId": 77812,
+      "astId": 78170,
       "contract": "test/core/market/Matcher.t.sol:DealMock",
       "label": "pricePerWorkerEpoch",
       "offset": 0,
@@ -2517,7 +2517,7 @@
       "type": "t_uint256"
     },
     {
-      "astId": 77814,
+      "astId": 78172,
       "contract": "test/core/market/Matcher.t.sol:DealMock",
       "label": "paymentToken",
       "offset": 0,
@@ -2525,15 +2525,15 @@
       "type": "t_address"
     },
     {
-      "astId": 77817,
+      "astId": 78175,
       "contract": "test/core/market/Matcher.t.sol:DealMock",
       "label": "appCID",
       "offset": 0,
       "slot": "2",
-      "type": "t_struct(CIDV1)70435_storage"
+      "type": "t_struct(CIDV1)70460_storage"
     },
     {
-      "astId": 77819,
+      "astId": 78177,
       "contract": "test/core/market/Matcher.t.sol:DealMock",
       "label": "creationBlock",
       "offset": 0,
@@ -2541,7 +2541,7 @@
       "type": "t_uint256"
     },
     {
-      "astId": 77821,
+      "astId": 78179,
       "contract": "test/core/market/Matcher.t.sol:DealMock",
       "label": "computeUnitCount",
       "offset": 0,
@@ -2549,7 +2549,7 @@
       "type": "t_uint256"
     },
     {
-      "astId": 77823,
+      "astId": 78181,
       "contract": "test/core/market/Matcher.t.sol:DealMock",
       "label": "targetWorkers",
       "offset": 0,
@@ -2557,7 +2557,7 @@
       "type": "t_uint256"
     },
     {
-      "astId": 77825,
+      "astId": 78183,
       "contract": "test/core/market/Matcher.t.sol:DealMock",
       "label": "maxWorkersPerProvider",
       "offset": 0,
@@ -2565,7 +2565,7 @@
       "type": "t_uint256"
     },
     {
-      "astId": 77827,
+      "astId": 78185,
       "contract": "test/core/market/Matcher.t.sol:DealMock",
       "label": "minWorkers",
       "offset": 0,
@@ -2573,7 +2573,7 @@
       "type": "t_uint256"
     },
     {
-      "astId": 77829,
+      "astId": 78187,
       "contract": "test/core/market/Matcher.t.sol:DealMock",
       "label": "owner",
       "offset": 0,
@@ -2581,7 +2581,7 @@
       "type": "t_address"
     },
     {
-      "astId": 77831,
+      "astId": 78189,
       "contract": "test/core/market/Matcher.t.sol:DealMock",
       "label": "protocolVersion",
       "offset": 0,
@@ -2589,15 +2589,15 @@
       "type": "t_uint256"
     },
     {
-      "astId": 77835,
+      "astId": 78193,
       "contract": "test/core/market/Matcher.t.sol:DealMock",
       "label": "_effectors",
       "offset": 0,
       "slot": "11",
-      "type": "t_array(t_struct(CIDV1)70435_storage)dyn_storage"
+      "type": "t_array(t_struct(CIDV1)70460_storage)dyn_storage"
     },
     {
-      "astId": 77839,
+      "astId": 78197,
       "contract": "test/core/market/Matcher.t.sol:DealMock",
       "label": "unitExists",
       "offset": 0,
@@ -2605,7 +2605,7 @@
       "type": "t_mapping(t_bytes32,t_bool)"
     },
     {
-      "astId": 77843,
+      "astId": 78201,
       "contract": "test/core/market/Matcher.t.sol:DealMock",
       "label": "computeProviderByUnitId",
       "offset": 0,
@@ -2613,7 +2613,7 @@
       "type": "t_mapping(t_bytes32,t_address)"
     },
     {
-      "astId": 77847,
+      "astId": 78205,
       "contract": "test/core/market/Matcher.t.sol:DealMock",
       "label": "peerIdByUnitId",
       "offset": 0,
@@ -2621,7 +2621,7 @@
       "type": "t_mapping(t_bytes32,t_bytes32)"
     },
     {
-      "astId": 77851,
+      "astId": 78209,
       "contract": "test/core/market/Matcher.t.sol:DealMock",
       "label": "computeUnitCountByProvider",
       "offset": 0,
@@ -2629,7 +2629,7 @@
       "type": "t_mapping(t_address,t_uint256)"
     },
     {
-      "astId": 77855,
+      "astId": 78213,
       "contract": "test/core/market/Matcher.t.sol:DealMock",
       "label": "isComputePeerExist",
       "offset": 0,
@@ -2791,12 +2791,12 @@
       "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
     },
     {
-      "astId": 76930,
+      "astId": 77288,
       "contract": "test/core/market/Matcher.t.sol:MatcherTest",
       "label": "deployment",
       "offset": 0,
       "slot": "28",
-      "type": "t_struct(Deployment)83901_storage"
+      "type": "t_struct(Deployment)84259_storage"
     }
   ],
   "Math.sol/Math.json": [],
@@ -3142,15 +3142,15 @@
       "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
     },
     {
-      "astId": 78072,
+      "astId": 78430,
       "contract": "test/core/market/Offer.t.sol:OfferTest",
       "label": "deployment",
       "offset": 0,
       "slot": "28",
-      "type": "t_struct(Deployment)83901_storage"
+      "type": "t_struct(Deployment)84259_storage"
     },
     {
-      "astId": 78074,
+      "astId": 78432,
       "contract": "test/core/market/Offer.t.sol:OfferTest",
       "label": "paymentToken",
       "offset": 0,
@@ -3333,12 +3333,12 @@
       "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
     },
     {
-      "astId": 72179,
+      "astId": 72204,
       "contract": "test/OwnableFaucet.t.sol:OwnableFaucetTest",
       "label": "faucet",
       "offset": 0,
       "slot": "28",
-      "type": "t_contract(OwnableFaucet)70877"
+      "type": "t_contract(OwnableFaucet)70902"
     }
   ],
   "OwnableUpgradableDiamond.sol/OwnableUpgradableDiamond.json": [
@@ -3516,12 +3516,12 @@
       "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
     },
     {
-      "astId": 83304,
+      "astId": 83662,
       "contract": "test/deal/Rewards.t.sol:Rewards",
       "label": "deployment",
       "offset": 0,
       "slot": "28",
-      "type": "t_struct(Deployment)83901_storage"
+      "type": "t_struct(Deployment)84259_storage"
     }
   ],
   "SafeERC20.sol/SafeERC20.json": [],
@@ -3764,7 +3764,7 @@
   "StdUtils.sol/StdUtils.json": [],
   "StorageMocks.sol/CapacityConstStorageMock.json": [
     {
-      "astId": 70973,
+      "astId": 70998,
       "contract": "src/mocks/StorageMocks.sol:CapacityConstStorageMock",
       "label": "_capacityConstStorage",
       "offset": 0,
@@ -3774,7 +3774,7 @@
   ],
   "StorageMocks.sol/CapacityStorageMock.json": [
     {
-      "astId": 70985,
+      "astId": 71010,
       "contract": "src/mocks/StorageMocks.sol:CapacityStorageMock",
       "label": "_capacityStorage",
       "offset": 0,
@@ -3784,17 +3784,17 @@
   ],
   "StorageMocks.sol/ConfigStorageMock.json": [
     {
-      "astId": 71005,
+      "astId": 71030,
       "contract": "src/mocks/StorageMocks.sol:ConfigStorageMock",
       "label": "_configStorage",
       "offset": 0,
       "slot": "0",
-      "type": "t_struct(ConfigStorage)67682_storage"
+      "type": "t_struct(ConfigStorage)67707_storage"
     }
   ],
   "StorageMocks.sol/CoreStorageMock.json": [
     {
-      "astId": 70969,
+      "astId": 70994,
       "contract": "src/mocks/StorageMocks.sol:CoreStorageMock",
       "label": "_coreStorage",
       "offset": 0,
@@ -3804,27 +3804,27 @@
   ],
   "StorageMocks.sol/DealFactoryStorageMock.json": [
     {
-      "astId": 70997,
+      "astId": 71022,
       "contract": "src/mocks/StorageMocks.sol:DealFactoryStorageMock",
       "label": "_dealFactoryStorage",
       "offset": 0,
       "slot": "0",
-      "type": "t_struct(DealFactoryStorage)64334_storage"
+      "type": "t_struct(DealFactoryStorage)64349_storage"
     }
   ],
   "StorageMocks.sol/DealStorageMock.json": [
     {
-      "astId": 71001,
+      "astId": 71026,
       "contract": "src/mocks/StorageMocks.sol:DealStorageMock",
       "label": "_dealStorage",
       "offset": 0,
       "slot": "0",
-      "type": "t_struct(DealStorage)68277_storage"
+      "type": "t_struct(DealStorage)68302_storage"
     }
   ],
   "StorageMocks.sol/EpochControllerStorageMock.json": [
     {
-      "astId": 70977,
+      "astId": 71002,
       "contract": "src/mocks/StorageMocks.sol:EpochControllerStorageMock",
       "label": "_epochControllerStorage",
       "offset": 0,
@@ -3834,7 +3834,7 @@
   ],
   "StorageMocks.sol/GlobalStorageMock.json": [
     {
-      "astId": 70981,
+      "astId": 71006,
       "contract": "src/mocks/StorageMocks.sol:GlobalStorageMock",
       "label": "_globalStorage",
       "offset": 0,
@@ -3844,52 +3844,52 @@
   ],
   "StorageMocks.sol/MatcherStorageMock.json": [
     {
-      "astId": 70989,
+      "astId": 71014,
       "contract": "src/mocks/StorageMocks.sol:MatcherStorageMock",
       "label": "_matcherStorage",
       "offset": 0,
       "slot": "0",
-      "type": "t_struct(MatcherStorage)64631_storage"
+      "type": "t_struct(MatcherStorage)64646_storage"
     }
   ],
   "StorageMocks.sol/OfferStorageMock.json": [
     {
-      "astId": 70993,
+      "astId": 71018,
       "contract": "src/mocks/StorageMocks.sol:OfferStorageMock",
       "label": "_offerStorage",
       "offset": 0,
       "slot": "0",
-      "type": "t_struct(OfferStorage)65141_storage"
+      "type": "t_struct(OfferStorage)65156_storage"
     }
   ],
   "StorageMocks.sol/OwnableUpgradableDiamondStorageMock.json": [
     {
-      "astId": 71013,
+      "astId": 71038,
       "contract": "src/mocks/StorageMocks.sol:OwnableUpgradableDiamondStorageMock",
       "label": "_ownableUpgradableDiamondStorage",
       "offset": 0,
       "slot": "0",
-      "type": "t_struct(OwnableStorage)71673_storage"
+      "type": "t_struct(OwnableStorage)71698_storage"
     }
   ],
   "StorageMocks.sol/WhitelistStorageMock.json": [
     {
-      "astId": 71017,
+      "astId": 71042,
       "contract": "src/mocks/StorageMocks.sol:WhitelistStorageMock",
       "label": "_whitelistStorage",
       "offset": 0,
       "slot": "0",
-      "type": "t_struct(WhitelistStorage)72065_storage"
+      "type": "t_struct(WhitelistStorage)72090_storage"
     }
   ],
   "StorageMocks.sol/WorkerManagerStorageMock.json": [
     {
-      "astId": 71009,
+      "astId": 71034,
       "contract": "src/mocks/StorageMocks.sol:WorkerManagerStorageMock",
       "label": "_workerManagerStorage",
       "offset": 0,
       "slot": "0",
-      "type": "t_struct(WorkerManagerStorage)69894_storage"
+      "type": "t_struct(WorkerManagerStorage)69919_storage"
     }
   ],
   "StorageSlot.sol/StorageSlot.json": [],
@@ -4092,7 +4092,7 @@
       "type": "t_string_storage"
     },
     {
-      "astId": 70884,
+      "astId": 70909,
       "contract": "src/dev/TestERC20.sol:TestERC20",
       "label": "_decimals",
       "offset": 0,
@@ -4290,12 +4290,12 @@
       "type": "t_array(t_struct(FuzzInterface)12804_storage)dyn_storage"
     },
     {
-      "astId": 75586,
+      "astId": 75944,
       "contract": "test/core/capacity/Vesting.t.sol:VestingTest",
       "label": "vesting",
       "offset": 0,
       "slot": "28",
-      "type": "t_struct(Info)63547_storage"
+      "type": "t_struct(Info)63559_storage"
     }
   ],
   "Vm.sol/Vm.json": [],
