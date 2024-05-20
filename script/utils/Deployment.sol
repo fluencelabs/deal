@@ -31,7 +31,7 @@ contract Deployment is ScriptBase {
     }
 
     // ------------------ Variables ------------------
-    DeploymentInfo deployments;
+    DeploymentInfo deployment;
 
     // ------------------ Internal functions ------------------
     function _loadDeployment(string memory path) internal {
