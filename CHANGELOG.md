@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.13.13](https://github.com/fluencelabs/deal/compare/v0.13.12...v0.13.13) (2024-05-21)
+
+
+### Features
+
+* deploy subgraph on dar ([#446](https://github.com/fluencelabs/deal/issues/446)) ([774d9d5](https://github.com/fluencelabs/deal/commit/774d9d5a4e3407964eb0db24dc1c55d5f04f72bd))
+
+
+### Bug Fixes
+
+* deal exiting ([#441](https://github.com/fluencelabs/deal/issues/441)) ([29a2bb7](https://github.com/fluencelabs/deal/commit/29a2bb7f86f0aedea13689cbebc6bc11a4f237c2))
+* wrong-cu-number-after-upd [CHAIN-536, Redeploy Subgraph] ([#443](https://github.com/fluencelabs/deal/issues/443)) ([0b7c3e3](https://github.com/fluencelabs/deal/commit/0b7c3e3bc4a26ccbdc7030759ccd342e78649eee))
+* wrong-cu-number-after-upd-CHAIN-536 ([0b7c3e3](https://github.com/fluencelabs/deal/commit/0b7c3e3bc4a26ccbdc7030759ccd342e78649eee))
+
+## [0.13.12](https://github.com/fluencelabs/deal/compare/v0.13.11...v0.13.12) (2024-05-14)
+
+
+### Bug Fixes
+
+* too-early-to-rematch [CHAIN-487] ([#429](https://github.com/fluencelabs/deal/issues/429)) ([0300795](https://github.com/fluencelabs/deal/commit/0300795a8559df53215058b2a17fc45e5ddee0ee))
+* use peer hex in filters ([#435](https://github.com/fluencelabs/deal/issues/435)) ([6203677](https://github.com/fluencelabs/deal/commit/620367736714bf1a3fa1e5b8920eb90895fd5634))
+
 ## [0.13.11](https://github.com/fluencelabs/deal/compare/v0.13.10...v0.13.11) (2024-04-28)
 
 

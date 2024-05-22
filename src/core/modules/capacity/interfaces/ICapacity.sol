@@ -2,7 +2,6 @@
 
 pragma solidity ^0.8.19;
 
-import "src/core/interfaces/ICore.sol";
 import "../Vesting.sol";
 
 /// @title Capacity contract interface
@@ -118,6 +117,7 @@ interface ICapacity {
         CommitmentFinish finish;
         Vesting.Info vesting;
         mapping(bytes32 => UnitInfo) unitInfoById;
+        mapping(bytes32 => bool) isUnitExited;
     }
 
     struct CommitmentInfo {
