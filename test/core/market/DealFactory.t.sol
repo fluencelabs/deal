@@ -1,27 +1,22 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.19;
 
-import {Test, console2} from "forge-std/Test.sol";
-import "forge-std/console.sol";
+
+import {Test} from "forge-std/Test.sol";
+
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "src/core/Core.sol";
-import "src/deal/Deal.sol";
-import "src/deal/interfaces/IConfig.sol";
-import "test/utils/DeployDealSystem.sol";
-import "test/utils/DealHelper.sol";
+
+import "test/utils/TestWithDeployment.sol";
 import "test/utils/TestHelper.sol";
 
-contract DealFactoryTest is Test {
+contract DealFactoryTest is TestWithDeployment {
     using SafeERC20 for IERC20;
-    using DealHelper for DeployDealSystem.Deployment;
-
-    // ------------------ Variables ------------------
-    DeployDealSystem.Deployment deployment;
+    using TestHelper for TestWithDeployment.Deployment;
 
     // ------------------ Test ------------------
     function setUp() public {
-        deployment = DeployDealSystem.deployDealSystem();
+        _deploySystem();
     }
 
     function test_Deploy() public {
@@ -33,8 +28,17 @@ contract DealFactoryTest is Test {
 
         deployment.tUSD.safeApprove(address(deployment.dealFactory), minAmount);
         uint256 protocolVersion = deployment.core.minProtocolVersion();
-        (IDeal d, DealHelper.DealParams memory dealParams) =
-            deployment.deployDeal(1, 2, targetWorkers, pricePerWorkerEpoch, minAmount, protocolVersion);
+
+        (IDeal d, TestHelper.DealParams memory dealParams) = deployment.deployDeal(
+            TestHelper.DeployDealParams({
+                minWorkers: 1,
+                maxWorkersPerProvider: 2,
+                targetWorkers: targetWorkers,
+                pricePerWorkerEpoch: pricePerWorkerEpoch,
+                depositAmount: minAmount,
+                protocolVersion: protocolVersion
+            })
+        );
 
         uint256 balanceDiff = balanceBefore - deployment.tUSD.balanceOf(address(this));
 
@@ -66,7 +70,16 @@ contract DealFactoryTest is Test {
         uint256 protocolVersion = deployment.core.minProtocolVersion();
 
         vm.expectRevert("ERC20: insufficient allowance");
-        deployment.deployDeal(1, 2, targetWorkers, pricePerWorkerEpoch, minAmount, protocolVersion);
+        deployment.deployDeal(
+            TestHelper.DeployDealParams({
+                minWorkers: 1,
+                maxWorkersPerProvider: 2,
+                targetWorkers: targetWorkers,
+                pricePerWorkerEpoch: pricePerWorkerEpoch,
+                depositAmount: minAmount,
+                protocolVersion: protocolVersion
+            })
+        );
     }
 
     function test_RevertIf_NoEnoughBalance() public {
@@ -80,7 +93,16 @@ contract DealFactoryTest is Test {
         uint256 protocolVersion = deployment.core.minProtocolVersion();
 
         vm.expectRevert("ERC20: transfer amount exceeds balance");
-        deployment.deployDeal(1, 2, targetWorkers, pricePerWorkerEpoch, minAmount, protocolVersion);
+        deployment.deployDeal(
+            TestHelper.DeployDealParams({
+                minWorkers: 1,
+                maxWorkersPerProvider: 2,
+                targetWorkers: targetWorkers,
+                pricePerWorkerEpoch: pricePerWorkerEpoch,
+                depositAmount: minAmount,
+                protocolVersion: protocolVersion
+            })
+        );
 
         vm.stopPrank();
     }

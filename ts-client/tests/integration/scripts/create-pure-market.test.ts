@@ -158,7 +158,7 @@ async function main() {
   // console.log('3b. Submit several proofs for first of CU in CC...');
   // TODO: Ensure epoch passed for CC to become active.
   //  - no TooManyProofs
-  //  - ensure minRequierdProofsPerEpoch
+  //  - ensure minRequiredProofsPerEpoch
   // const GLOBAL_NONCE = '0x0102030405060708091011121314151601020304050607080910111213141516';
   // const localNonce = '0x726517ce1ab47e90c7685cfa0746cc56be2917c0abd63bdd7983957fd1f2c674'
   // const hashToSend = '0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff'

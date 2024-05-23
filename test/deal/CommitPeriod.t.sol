@@ -1,29 +1,28 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.19;
 
-import {Test, console2} from "forge-std/Test.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import "forge-std/console.sol";
-import "src/deal/Deal.sol";
-import "src/deal/interfaces/IConfig.sol";
-import "src/core/modules/market/Offer.sol";
-import "test/utils/DeployDealSystem.sol";
-import "test/utils/TestHelper.sol";
-import "src/deal/DealSnapshot.sol";
+import {Test} from "forge-std/Test.sol";
 
-contract CommitPeriod is Test {
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+import "src/deal/interfaces/IDeal.sol";
+import "src/deal/DealSnapshot.sol";
+import "src/dev/test/interfaces/IDealWithPublicInternals.sol";
+
+import "test/utils/TestWithDeployment.sol";
+import "test/utils/TestHelper.sol";
+
+contract CommitPeriod is TestWithDeployment {
     using SafeERC20 for IERC20;
-    using TestHelper for DeployDealSystem.Deployment;
+    using TestHelper for TestWithDeployment.Deployment;
     using DealSnapshot for DealSnapshot.Cache;
 
-    DeployDealSystem.Deployment deployment;
-    TestDealContract dealContract;
+    IDealWithPublicInternals dealContract;
 
     // ------------------ Test ------------------
     function setUp() public {
-        deployment = DeployDealSystem.deployDealSystem();
-        dealContract = new TestDealContract();
+        _deploySystem();
+        dealContract = IDealWithPublicInternals(deployCode("out/DealWithPublicInternals.sol/DealWithPublicInternals.json"));
     }
 
     function test_RecordGaps() public {
@@ -54,7 +53,7 @@ contract CommitPeriod is Test {
         );
     }
 
-    function test_WrtieOffBalanceAndRecordGaps() public {
+    function test_WriteOffBalanceAndRecordGaps() public {
         dealContract.setLockedBalance(0);
 
         uint256 gapsEpochCount = 100;
@@ -85,7 +84,7 @@ contract CommitPeriod is Test {
         );
     }
 
-    function test_WrtieOffBalanceWithoutGaps() public {
+    function test_WriteOffBalanceWithoutGaps() public {
         dealContract.setLockedBalance(0);
 
         uint256 gapsEpochCount = 100;
@@ -119,82 +118,5 @@ contract CommitPeriod is Test {
         vm.mockCall(
             address(0x00), abi.encodeWithSelector(IEpochController.currentEpoch.selector), abi.encode(currentEpoch)
         );
-    }
-}
-
-contract TestDealContract is Deal {
-    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.deal.storage.v1")) - 1);
-    bytes32 private constant _WORKER_STORAGE_SLOT =
-        bytes32(uint256(keccak256("fluence.deal.storage.v1.workerManager")) - 1);
-    bytes32 private constant _CONFIG_STORAGE_SLOT = bytes32(uint256(keccak256("fluence.deal.storage.v1.config")) - 1);
-
-    function _getConfigStorageTest() private pure returns (ConfigStorage storage s) {
-        bytes32 storageSlot = _CONFIG_STORAGE_SLOT;
-        assembly {
-            s.slot := storageSlot
-        }
-    }
-
-    function _getWorkerManagerStorageTest() private pure returns (WorkerManagerStorage storage s) {
-        bytes32 storageSlot = _WORKER_STORAGE_SLOT;
-
-        assembly {
-            s.slot := storageSlot
-        }
-    }
-
-    function _getStorage() private pure returns (DealStorage storage s) {
-        bytes32 storageSlot = _STORAGE_SLOT;
-        assembly {
-            s.slot := storageSlot
-        }
-    }
-
-    function setTotalBalance(uint256 totalBalance) public {
-        _getStorage().totalBalance = totalBalance;
-    }
-
-    function setLockedBalance(uint256 lockedBalance) public {
-        _getStorage().lockedBalance = lockedBalance;
-    }
-
-    function setGapsEpochCount(uint256 gapsEpochCount) public {
-        _getStorage().gapsEpochCount = gapsEpochCount;
-    }
-
-    function setEndedEpoch(uint256 endedEpoch) public {
-        _getStorage().endedEpoch = endedEpoch;
-    }
-
-    function setMaxPaidEpoch(uint256 maxPaidEpoch) public {
-        _getStorage().maxPaidEpoch = maxPaidEpoch;
-    }
-
-    function setLastCommitedEpoch(uint256 lastCommitedEpoch) public {
-        _getStorage().lastCommitedEpoch = lastCommitedEpoch;
-    }
-
-    function setPricePerWorkerEpoch(uint256 pricePerWorkerEpoch_) public {
-        _getConfigStorageTest().pricePerWorkerEpoch = pricePerWorkerEpoch_;
-    }
-
-    function setWorkerCount(uint256 workerCount_) public {
-        _getWorkerManagerStorageTest().workerCount = workerCount_;
-    }
-
-    function setMinWorkers(uint256 minWorkers_) public {
-        _getConfigStorageTest().minWorkers = minWorkers_;
-    }
-
-    function setTargetWorkers(uint256 targetWorkers_) public {
-        _getConfigStorageTest().targetWorkers = targetWorkers_;
-    }
-
-    function preCommitPeriod() public view returns (DealSnapshot.Cache memory) {
-        return _preCommitPeriod();
-    }
-
-    function postCommitPeriod(DealSnapshot.Cache memory snapshot, uint256 newWorkerCount) public {
-        _postCommitPeriod(snapshot, newWorkerCount);
     }
 }

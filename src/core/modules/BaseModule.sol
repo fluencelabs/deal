@@ -4,7 +4,7 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "src/utils/OwnableUpgradableDiamond.sol";
-import "./IBaseModule.sol";
+import "./interfaces/IBaseModule.sol";
 
 contract BaseModule is Initializable, IBaseModule {
     ICore public immutable core;

@@ -5,8 +5,8 @@ pragma solidity ^0.8.19;
 import "./interfaces/ICapacity.sol";
 library Snapshot {
     struct Cache {
-       Params initial;
-       Params current;
+        Params initial;
+        Params current;
     }
 
     struct Params {
@@ -20,9 +20,7 @@ library Snapshot {
         uint256 currentSuccessCount;
     }
     
-    function init(
-        ICapacity.Commitment storage commitment
-    ) internal view returns(Cache memory cache) {
+    function init(ICapacity.Commitment storage commitment) internal view returns (Cache memory cache) {
         cache.initial.status = commitment.info.status;
         cache.initial.failedEpoch = commitment.finish.failedEpoch;
         cache.initial.remainingFailedUnitsInLastEpoch = commitment.finish.remainingFailedUnitsInLastEpoch;
@@ -42,13 +40,10 @@ library Snapshot {
         cache.current.currentSuccessCount = cache.initial.currentSuccessCount;
     }
     
-    function save(
-        Cache memory self,
-        ICapacity.Commitment storage commitment
-    ) internal {
+    function save(Cache memory self, ICapacity.Commitment storage commitment) internal {
         if (self.initial.status != self.current.status) {
             commitment.info.status = self.current.status;
-        } 
+        }
         if (self.initial.failedEpoch != self.current.failedEpoch) {
             commitment.finish.failedEpoch = self.current.failedEpoch;
         }

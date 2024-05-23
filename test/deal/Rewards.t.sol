@@ -1,41 +1,55 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.19;
 
-import {Test, console2} from "forge-std/Test.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import "forge-std/console.sol";
-import "src/deal/Deal.sol";
-import "src/deal/interfaces/IDeal.sol";
-import "src/deal/interfaces/IConfig.sol";
-import "src/core/modules/market/Offer.sol";
-import "test/utils/DeployDealSystem.sol";
-import "test/utils/TestHelper.sol";
-import "test/utils/DealHelper.sol";
+import {Test} from "forge-std/Test.sol";
 import "forge-std/StdCheats.sol";
 
-contract Rewards is Test {
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+import "src/deal/interfaces/IDeal.sol";
+import "src/core/modules/market/interfaces/IOffer.sol";
+
+import "test/utils/TestWithDeployment.sol";
+import "test/utils/TestHelper.sol";
+
+contract Rewards is TestWithDeployment {
     using SafeERC20 for IERC20;
-    using DealHelper for DeployDealSystem.Deployment;
+    using TestHelper for TestWithDeployment.Deployment;
 
-    DeployDealSystem.Deployment deployment;
+    struct Params {
+        uint256 minWorkers;
+        uint256 maxWorkersPerProvider;
+        uint256 targetWorkers;
+        uint256 pricePerWorkerEpoch;
+        uint256 minAmount;
+        uint256 protocolVersion;
+    }
 
-    // ------------------ Test ------------------
     function setUp() public {
-        deployment = DeployDealSystem.deployDealSystem();
+        _deploySystem();
     }
 
     function test_RewardWithOneWorker() public {
-        uint256 minWorkers = 1;
-        uint256 maxWorkersPerProvider = 2;
-        uint256 targetWorkers = 3;
-        uint256 pricePerWorkerEpoch = 1 ether;
-        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.core.minDealDepositedEpochs();
-        uint256 protocolVersion = deployment.core.minProtocolVersion();
+        Params memory params = Params({
+            minWorkers: 1,
+            maxWorkersPerProvider: 2,
+            targetWorkers: 3,
+            pricePerWorkerEpoch: 1 ether,
+            minAmount: 0,
+            protocolVersion: deployment.core.minProtocolVersion()
+        });
+        params.minAmount = params.pricePerWorkerEpoch * params.targetWorkers * deployment.core.minDealDepositedEpochs();
 
-        deployment.tUSD.safeApprove(address(deployment.dealFactory), minAmount);
+        deployment.tUSD.safeApprove(address(deployment.dealFactory), params.minAmount);
         (IDeal deal,) = deployment.deployDeal(
-            minWorkers, maxWorkersPerProvider, targetWorkers, pricePerWorkerEpoch, minAmount, protocolVersion
+            TestHelper.DeployDealParams({
+                minWorkers: params.minWorkers,
+                maxWorkersPerProvider: params.maxWorkersPerProvider,
+                targetWorkers: params.targetWorkers,
+                pricePerWorkerEpoch: params.pricePerWorkerEpoch,
+                depositAmount: params.minAmount,
+                protocolVersion: params.protocolVersion
+            })
         );
 
         address computeProvider = address(0x1234567890123456789012345678901234567890);
@@ -43,8 +57,6 @@ contract Rewards is Test {
         bytes32 peerId = TestHelper.pseudoRandom(abi.encode(computeProvider, "peerId"));
         bytes32 workerId = TestHelper.pseudoRandom(abi.encode(computeProvider, "workerId"));
         bytes32 offerId = TestHelper.pseudoRandom(abi.encode(computeProvider, "offerId"));
-
-        console.logBytes32(peerId);
 
         uint256 balanceDealBefore = deployment.tUSD.balanceOf(address(deal));
         uint256 balanceProviderBefore = deployment.tUSD.balanceOf(computeProvider);
@@ -62,7 +74,7 @@ contract Rewards is Test {
             abi.encode(
                 IOffer.Offer({
                     provider: computeProvider,
-                    minPricePerWorkerEpoch: pricePerWorkerEpoch,
+                    minPricePerWorkerEpoch: params.pricePerWorkerEpoch,
                     paymentToken: address(deployment.tUSD),
                     peerCount: 1,
                     minProtocolVersion: deployment.core.minProtocolVersion(),
@@ -80,7 +92,7 @@ contract Rewards is Test {
         StdCheats.skip(deployment.core.epochDuration() * deployment.core.minDealDepositedEpochs());
 
         uint256 amount = deal.getRewardAmount(unitId);
-        assertEq(amount, pricePerWorkerEpoch * (deployment.core.minDealDepositedEpochs()), "reward amount");
+        assertEq(amount, params.pricePerWorkerEpoch * (deployment.core.minDealDepositedEpochs()), "reward amount");
 
         vm.mockCall(
             address(deployment.market),
@@ -95,7 +107,7 @@ contract Rewards is Test {
             abi.encode(
                 IOffer.Offer({
                     provider: computeProvider,
-                    minPricePerWorkerEpoch: pricePerWorkerEpoch,
+                    minPricePerWorkerEpoch: params.pricePerWorkerEpoch,
                     paymentToken: address(deployment.tUSD),
                     peerCount: 1,
                     minProtocolVersion: deployment.core.minProtocolVersion(),

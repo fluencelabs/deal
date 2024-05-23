@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.19;
 
-import {Test, console2} from "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "forge-std/console.sol";
+
 import "src/deal/interfaces/IConfig.sol";
-import "test/utils/DeployDealSystem.sol";
+import "src/dev/test/interfaces/IConfigWithPublicInternals.sol";
+
+import "test/utils/TestWithDeployment.sol";
 import "test/utils/TestHelper.sol";
 
-contract ConfigContract is Test {
+contract ConfigContract is TestWithDeployment {
     using SafeERC20 for IERC20;
 
     struct ConfigContractParams {
@@ -22,63 +24,52 @@ contract ConfigContract is Test {
         CIDV1[] effectors;
     }
 
-    // ------------------ Types ------------------
-    struct DealParams {
-        CIDV1 appCID;
-        IERC20 paymentToken;
-        uint256 minWorkers;
-        uint256 targetWorkers;
-        uint256 maxWorkersPerProvider;
-        uint256 pricePerWorkerEpoch;
-        CIDV1[] effectors;
-    }
-
     // ------------------ Variables ------------------
-    DeployDealSystem.Deployment deployment;
-    ConfigTestContract config;
+    IConfigWithPublicInternals config;
     ConfigContractParams configParams;
 
     // ------------------ Test ------------------
     function setUp() public {
-        deployment = DeployDealSystem.deployDealSystem();
+        _deploySystem();
 
-        CIDV1[] memory effectors = new CIDV1[](10);
+        configParams.globalCore = deployment.core;
+        configParams.appCID = CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("appCID", 0))});
+        configParams.paymentToken = IERC20(address(deployment.tUSD));
+        configParams.minWorkers = 1;
+        configParams.targetWorkers = 2;
+        configParams.maxWorkersPerProvider = 3;
+        configParams.pricePerWorkerEpoch = 4;
+
         for (uint256 i = 0; i < 10; i++) {
-            effectors[i] = CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("effector", i))});
+            configParams.effectors.push(
+                CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("effector", i))})
+            );
         }
 
-        configParams = ConfigContractParams({
-            globalCore: deployment.core,
-            appCID: CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("appCID", 0))}),
-            paymentToken: IERC20(address(deployment.tUSD)),
-            minWorkers: 1,
-            targetWorkers: 2,
-            maxWorkersPerProvider: 3,
-            pricePerWorkerEpoch: 4,
-            effectors: effectors
-        });
+        IConfigWithPublicInternals configImpl =
+            IConfigWithPublicInternals(deployCode("out/ConfigWithPublicInternals.sol/ConfigWithPublicInternals.json"));
 
-        ConfigTestContract configImpl = new ConfigTestContract();
-
-        ERC1967Proxy proxy = new ERC1967Proxy(
-            address(configImpl),
-            abi.encodeWithSelector(
-                configImpl.Config_init.selector,
-                configParams.globalCore,
-                configParams.appCID,
-                configParams.paymentToken,
-                configParams.minWorkers,
-                configParams.targetWorkers,
-                configParams.maxWorkersPerProvider,
-                configParams.pricePerWorkerEpoch,
-                configParams.effectors,
-                address(this),
-                IConfig.AccessType.NONE,
-                new address[](0)
+        config = IConfigWithPublicInternals(
+            address(
+                new ERC1967Proxy(
+                    address(configImpl),
+                    abi.encodeWithSelector(
+                        configImpl.Config_init.selector,
+                        configParams.globalCore,
+                        configParams.appCID,
+                        configParams.paymentToken,
+                        configParams.minWorkers,
+                        configParams.targetWorkers,
+                        configParams.maxWorkersPerProvider,
+                        configParams.pricePerWorkerEpoch,
+                        configParams.effectors,
+                        address(this),
+                        IConfig.AccessType.NONE,
+                        new address[](0)
+                    )
+                )
             )
         );
-
-        config = ConfigTestContract(address(proxy));
     }
 
     function test_InitContract() public {
@@ -111,39 +102,5 @@ contract ConfigContract is Test {
         CIDV1 memory appCID = config.appCID();
         assertEq(appCID.prefixes, newAppCID.prefixes);
         assertEq(appCID.hash, newAppCID.hash);
-    }
-}
-
-contract ConfigTestContract is Initializable, Config {
-    function Config_init(
-        ICore globalCore_,
-        CIDV1 calldata appCID_,
-        IERC20 paymentToken_,
-        uint256 minWorkers_,
-        uint256 targetWorkers_,
-        uint256 maxWorkersPerProvider_,
-        uint256 pricePerWorkerEpoch_,
-        CIDV1[] calldata effectors_,
-        address owner_,
-        AccessType providersAccessType_,
-        address[] calldata providersAccessList_
-    ) public initializer {
-        __Config_init(
-            globalCore_,
-            appCID_,
-            paymentToken_,
-            minWorkers_,
-            targetWorkers_,
-            maxWorkersPerProvider_,
-            pricePerWorkerEpoch_,
-            effectors_,
-            owner_,
-            providersAccessType_,
-            providersAccessList_
-        );
-    }
-
-    function globalCore() public view returns (ICore) {
-        return _globalCore();
     }
 }

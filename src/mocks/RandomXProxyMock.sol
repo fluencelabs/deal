@@ -2,8 +2,6 @@
 
 pragma solidity ^0.8.19;
 
-import "src/core/interfaces/ICore.sol";
-
 contract RandomXProxyMock {
     bytes32 public immutable difficulty;
 
