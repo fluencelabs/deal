@@ -6,10 +6,10 @@
     "creationCodeHash": "0xf6572f5e8527a1b7b7fdb3ba36ef91f13d714235d4d34c312caa2cf006109ead"
   },
   "CapacityImpl": {
-    "addr": "0x9BEe85D8c40D720287F20e7fF25288b0C7C06DD4",
+    "addr": "0xEF6EceB3E62A9efaF23c686B49398349d6048302",
     "blockNumber": 3935,
-    "codeHash": "0xf32e73582126eb042818093c33d5e5ab0fef633313a02796f15f184c8a36f9ec",
-    "creationCodeHash": "0x092928dc584a3bbe2f644705ff57350c091dd52e2aeb3fe81381b933d0570f79"
+    "codeHash": "0x4b1402e00a9a08d6dec7ead9bb9ff9a9d96a9bc3af5d6074c2ee9b642249526c",
+    "creationCodeHash": ""
   },
   "Core": {
     "addr": "0xd5439DF0723Ab1ee7Ded6a3EBEf6BF23e8087958",
@@ -30,16 +30,16 @@
     "creationCodeHash": "0x47e3e76814f47d62bfd3eed171b4804587c0d94f8e43a15ae59be78eb81fb55d"
   },
   "DealFactoryImpl": {
-    "addr": "0xB78b37F37ef637957Ba6fe49576c83CDa4f1E135",
+    "addr": "0x963adE6817f75d4E91fD6366F0EECcc7822F2f22",
     "blockNumber": 3935,
-    "codeHash": "0x5450046b00ad5ce48f146220f279e3427eaa5bc74f82333df636f9c584d5ee69",
-    "creationCodeHash": "0x652056268bbe868450d0ebcce0df8b0564dc181cf20831af9d1b12c707152780"
+    "codeHash": "0x9535a6c3f31e32ae84b4ac82b4fb6a11679417f8e1489f4b5dcf987675e7aa99",
+    "creationCodeHash": ""
   },
   "DealImpl": {
-    "addr": "0x90e514cA6D527532EEEC56B4C9B2CeD387FEAB48",
+    "addr": "0xd08794956dad9bc7011FAb1C143700aFd6D180C1",
     "blockNumber": 3935,
-    "codeHash": "0x0113e3e3c1ea03e6a74fdf015c951bb10d610c1fb522ff7ff44203e6ec4a5ade",
-    "creationCodeHash": "0xc87f46c967f76f06b49e64c1c0c30915ca01a525904a70904f8a40236eab1d81"
+    "codeHash": "0x52491fb96b321f2fb12abc6ec6121f57fa5111a5c4a38d3a55afcb42d4088970",
+    "creationCodeHash": ""
   },
   "Market": {
     "addr": "0x4CCE76Ef4e044622d7727f6A95688D3fC27Ea6b7",
@@ -48,10 +48,10 @@
     "creationCodeHash": "0xf55ab1257a13fa75fe18cfc941e92391f8d31aefbd9bdf36bcffb00f71ff9e06"
   },
   "MarketImpl": {
-    "addr": "0xa2f25613769308249e01F715CcAa9D843Ec8c46A",
+    "addr": "0xE8d2Bce5b4E7c3070Ab95Ad761FC7B26af69fd97",
     "blockNumber": 3935,
-    "codeHash": "0x9974d97f092133d182c4f50a84308187f9db22404662504725084659515f5280",
-    "creationCodeHash": "0xd0a324f03375221d369389e2d92aa848b647d20836ef46938550f18701a73112"
+    "codeHash": "0xcdbd3fcb4395da6c7057ebfaec85fa0fb4a81d681b119b26e21d6a5f1246223a",
+    "creationCodeHash": ""
   },
   "Multicall3": {
     "addr": "0x7072A3c5a146e65ac191EF354d26fd932E3a1c36",
