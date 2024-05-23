@@ -264,7 +264,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         require(totalValue == 0, "Excessive value");
     }
 
-    function submitProofs(UnitProof[] calldata proofs) external {
+    function submitProofs(UnitProof[] memory proofs) public {
         // #region load contracts and storage
         IMarket market = core.market();
         CommitmentStorage storage s = _getCommitmentStorage();
@@ -369,7 +369,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
             emit ProofSubmitted(commitmentId, unitId, localUnitNonce);
         }
 
-        // #region check proof
+        // #region check proofs
         (bool success, bytes memory result) = core.randomXProxy().delegatecall(
             abi.encodeWithSelector(RandomXProxy.run.selector, globalUnitNonces, localUnitNonces)
         );
@@ -386,6 +386,13 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
             require(hashes[i] <= core.difficulty(), "Proof is bigger than difficulty");
         }
         // #endregion
+    }
+
+    function submitProof(bytes32 unitId, bytes32 localUnitNonce, bytes32 resultHash) external {
+        UnitProof[] memory proofs = new UnitProof[](1);
+        proofs[0] = UnitProof(unitId, localUnitNonce, resultHash);
+
+        submitProofs(proofs);
     }
 
     function finishCommitment(bytes32 commitmentId) external {
