@@ -1,26 +1,19 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.19;
 
-import {Test, console2} from "forge-std/Test.sol";
-import "forge-std/console.sol";
-import "forge-std/Vm.sol";
+import {Test} from "forge-std/Test.sol";
 import "forge-std/StdCheats.sol";
 import "filecoin-solidity/v0.8/utils/Actor.sol";
-import "src/core/Core.sol";
-import "src/core/modules/capacity/Capacity.sol";
+import "src/core/modules/market/interfaces/IMarket.sol";
 import "src/core/modules/capacity/interfaces/ICapacity.sol";
 import "src/utils/BytesConverter.sol";
-import "test/utils/DeployDealSystem.sol";
-import "src/core/modules/market/Market.sol";
-import "src/core/modules/market/interfaces/IMarket.sol";
+import "test/utils/TestWithDeployment.sol";
 import "test/utils/TestHelper.sol";
-import "forge-std/StdCheats.sol";
-import "test/utils/DealHelper.sol";
 
-contract CapacityCommitmentTest is Test {
+contract CapacityCommitmentTest is TestWithDeployment {
     using SafeERC20 for IERC20;
     using BytesConverter for bytes32;
-    using DealHelper for DeployDealSystem.Deployment;
+    using TestHelper for TestWithDeployment.Deployment;
 
     // ------------------ Events ------------------
     event CommitmentCreated(
@@ -42,11 +35,8 @@ contract CapacityCommitmentTest is Test {
     event ProofSubmitted(bytes32 indexed commitmentId, bytes32 indexed unitId, bytes32 localUnitNonce);
     event RewardWithdrawn(bytes32 indexed commitmentId, uint256 amount);
 
-    // ------------------ Variables ------------------
-    DeployDealSystem.Deployment deployment;
-
     // Init variables
-    Market.RegisterComputePeer[] registerPeers;
+    IMarket.RegisterComputePeer[] registerPeers;
     uint256 minPricePerWorkerEpoch;
     CIDV1[] effectors;
     address paymentToken;
@@ -56,7 +46,7 @@ contract CapacityCommitmentTest is Test {
 
     // ------------------ Test ------------------
     function setUp() public {
-        deployment = DeployDealSystem.deployDealSystem();
+        _deploySystem();
 
         paymentToken = address(deployment.tUSD);
         minPricePerWorkerEpoch = 1000;
@@ -136,7 +126,7 @@ contract CapacityCommitmentTest is Test {
 
         bytes32 commitmentId = _createCapacityCommitment(peerId);
 
-        Capacity.CommitmentView memory commitment = deployment.capacity.getCommitment(commitmentId);
+        ICapacity.CommitmentView memory commitment = deployment.capacity.getCommitment(commitmentId);
 
         assertEq(uint256(commitment.status), uint256(ICapacity.CCStatus.WaitDelegation), "Status mismatch");
         assertEq(commitment.peerId, peerId, "PeerId mismatch");
@@ -206,7 +196,7 @@ contract CapacityCommitmentTest is Test {
 
         // Verify commitments info.
         for (uint256 i = 0; i < registerPeers.length; ++i) {
-            Capacity.CommitmentView memory commitment = deployment.capacity.getCommitment(createdCCIds[i]);
+            ICapacity.CommitmentView memory commitment = deployment.capacity.getCommitment(createdCCIds[i]);
             assertEq(uint256(commitment.status), uint256(ICapacity.CCStatus.Active), "Status mismatch");
             assertEq(commitment.peerId, registerPeers[i].peerId, "PeerId mismatch");
             assertEq(commitment.collateralPerUnit, deployment.core.fltCollateralPerUnit(), "CollateralPerUnit mismatch");
@@ -252,12 +242,9 @@ contract CapacityCommitmentTest is Test {
         bytes32 unitId = registerPeers[0].unitIds[0];
 
         (bytes32 commitmentId,) = _createAndDepositCapacityCommitment(peerId, unitCount);
-        console.log("curr epoch #1", deployment.core.currentEpoch());
 
         // warp to next epoch
         StdCheats.skip(deployment.core.epochDuration());
-
-        console.log("curr epoch #2", deployment.core.currentEpoch());
 
         bytes32 targetHash = bytes32(uint256(deployment.core.difficulty()) - 1);
         //TODO: vm mock not working here :(
@@ -278,7 +265,6 @@ contract CapacityCommitmentTest is Test {
             / deployment.core.vestingPeriodCount() * deployment.core.vestingPeriodCount();
         StdCheats.skip(deployment.core.epochDuration());
 
-        console.log("curr epoch #3", deployment.core.currentEpoch());
         bytes32 localUnitNonce = keccak256(abi.encodePacked("localUnitNonce"));
         deployment.capacity.submitProof(unitId, localUnitNonce, targetHash);
 
@@ -291,16 +277,11 @@ contract CapacityCommitmentTest is Test {
     function test_ExitCommitment() external {
         bytes32 peerId = registerPeers[0].peerId;
         uint256 unitCount = registerPeers[0].unitIds.length;
-        address peerOwner = registerPeers[0].owner;
-        bytes32 unitId = registerPeers[0].unitIds[0];
 
-        (bytes32 commitmentId, bytes32 offerId) = _createAndDepositCapacityCommitment(peerId, unitCount);
-        console.log("curr epoch #1", deployment.core.currentEpoch());
+        (bytes32 commitmentId,) = _createAndDepositCapacityCommitment(peerId, unitCount);
 
         // warp to next epoch
         StdCheats.skip(deployment.core.epochDuration());
-
-        console.log("curr epoch #2", deployment.core.currentEpoch());
 
         StdCheats.skip(ccDuration * 2000);
         bytes32[] memory unitIds = deployment.market.getComputeUnitIds(peerId);
@@ -312,26 +293,28 @@ contract CapacityCommitmentTest is Test {
     function test_ExitCommitmentWithDealAfterTime() external {
         bytes32 peerId = registerPeers[0].peerId;
         uint256 unitCount = registerPeers[0].unitIds.length;
-        address peerOwner = registerPeers[0].owner;
-        bytes32 unitId = registerPeers[0].unitIds[0];
 
         (bytes32 commitmentId, bytes32 offerId) = _createAndDepositCapacityCommitment(peerId, unitCount);
-        console.log("curr epoch #1", deployment.core.currentEpoch());
 
         // warp to next epoch
         StdCheats.skip(deployment.core.epochDuration());
-
-        console.log("curr epoch #2", deployment.core.currentEpoch());
 
         uint256 pricePerWorkerEpoch = 1 ether;
         uint256 targetWorkers = 3;
         uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.core.minDealDepositedEpochs();
 
-        uint256 balanceBefore = deployment.tUSD.balanceOf(address(this));
-
         deployment.tUSD.safeApprove(address(deployment.dealFactory), minAmount);
         uint256 protocolVersion = deployment.core.minProtocolVersion();
-        (IDeal d, DealHelper.DealParams memory dealParams) = deployment.deployDeal(1, 2, targetWorkers, pricePerWorkerEpoch, minAmount, protocolVersion);
+        (IDeal d,) = deployment.deployDeal(
+                TestHelper.DeployDealParams({
+                minWorkers: 1,
+                maxWorkersPerProvider: 2,
+                targetWorkers: targetWorkers,
+                pricePerWorkerEpoch: pricePerWorkerEpoch,
+                depositAmount: minAmount,
+                protocolVersion: protocolVersion
+            })
+        );
 
         bytes32[] memory unitIds = deployment.market.getComputeUnitIds(peerId);
         bytes32[][] memory unitIds2d = new bytes32[][](1);

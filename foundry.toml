@@ -3,6 +3,8 @@
 [profile.default]
 src = "src"
 out = "out"
+test = "src"
+script = "src"
 libs = ["lib"]
 via_ir = true
 solc = "0.8.24"
@@ -23,3 +25,11 @@ stage = "https://ipc-stage.fluence.dev"
 dar = "https://ipc.dar.fluence.dev"
 kras = "https://ipc.kras.fluence.dev"
 mumbai = "https://rpc.ankr.com/polygon_mumbai"
+
+[profile.test]
+src = "test"
+out = "out-test"
+test = "test"
+script = "script-local"
+via_ir = false
+optimizer = false
