@@ -219,7 +219,7 @@ contract CapacityCommitmentTest is Test {
         }
     }
 
-    function test_SubmitProofs() public {
+    function test_SubmitProof() public {
         bytes32 peerId = registerPeers[0].peerId;
         uint256 unitCount = registerPeers[0].unitIds.length;
         address peerOwner = registerPeers[0].owner;
@@ -240,14 +240,12 @@ contract CapacityCommitmentTest is Test {
         //TODO: vm mock not working here :(
         vm.etch(address(Actor.CALL_ACTOR_ID), address(new MockActorCallActorPrecompile(targetHash)).code);
 
-        ICapacity.UnitProof[] memory proofs = new ICapacity.UnitProof[](1);
-        proofs[0] = ICapacity.UnitProof({unitId: unitId, localUnitNonce: localUnitNonce, resultHash: targetHash});
-        deployment.capacity.submitProofs(proofs);
+        deployment.capacity.submitProof(unitId, localUnitNonce, targetHash);
 
         vm.stopPrank();
     }
 
-    function test_RewardAfterSubmitProofs() public {
+    function test_RewardAfterSubmitProof() public {
         bytes32 peerId = registerPeers[0].peerId;
         uint256 unitCount = registerPeers[0].unitIds.length;
         address peerOwner = registerPeers[0].owner;
@@ -273,9 +271,7 @@ contract CapacityCommitmentTest is Test {
             vm.expectEmit(true, true, true, false, address(deployment.capacity));
             emit ProofSubmitted(commitmentId, unitId, localUnitNonce_);
 
-            ICapacity.UnitProof[] memory proofs = new ICapacity.UnitProof[](1);
-            proofs[0] = ICapacity.UnitProof({unitId: unitId, localUnitNonce: localUnitNonce_, resultHash: targetHash});
-            deployment.capacity.submitProofs(proofs);
+            deployment.capacity.submitProof(unitId, localUnitNonce, targetHash);
         }
 
         uint256 reward = (
@@ -284,10 +280,9 @@ contract CapacityCommitmentTest is Test {
         StdCheats.skip(deployment.core.epochDuration());
 
         console.log("curr epoch #3", deployment.core.currentEpoch());
+
         bytes32 localUnitNonce = keccak256(abi.encodePacked("localUnitNonce"));
-        ICapacity.UnitProof[] memory proofs = new ICapacity.UnitProof[](1);
-        proofs[0] = ICapacity.UnitProof({unitId: unitId, localUnitNonce: localUnitNonce, resultHash: targetHash});
-        deployment.capacity.submitProofs(proofs);
+        deployment.capacity.submitProofs(unitId, localUnitNonce, targetHash);
 
         assertEq(deployment.capacity.totalRewards(commitmentId), reward, "TotalRewards mismatch");
         assertEq(deployment.capacity.unlockedRewards(commitmentId), 0, "UnlockedRewards mismatch");
@@ -311,7 +306,7 @@ contract CapacityCommitmentTest is Test {
 
         StdCheats.skip(ccDuration * 2000);
         bytes32[] memory unitIds = deployment.market.getComputeUnitIds(peerId);
-        
+
         deployment.capacity.removeCUFromCC(commitmentId, unitIds);
         deployment.capacity.finishCommitment(commitmentId);
     }
@@ -338,7 +333,8 @@ contract CapacityCommitmentTest is Test {
 
         deployment.tUSD.safeApprove(address(deployment.dealFactory), minAmount);
         uint256 protocolVersion = deployment.core.minProtocolVersion();
-        (IDeal d, DealHelper.DealParams memory dealParams) = deployment.deployDeal(1, 2, targetWorkers, pricePerWorkerEpoch, minAmount, protocolVersion);
+        (IDeal d, DealHelper.DealParams memory dealParams) =
+            deployment.deployDeal(1, 2, targetWorkers, pricePerWorkerEpoch, minAmount, protocolVersion);
 
         bytes32[] memory unitIds = deployment.market.getComputeUnitIds(peerId);
         bytes32[][] memory unitIds2d = new bytes32[][](1);
@@ -350,11 +346,9 @@ contract CapacityCommitmentTest is Test {
         deployment.market.matchDeal(d, offerIds, unitIds2d);
 
         StdCheats.skip(ccDuration * 2000);
-        
 
         deployment.capacity.removeCUFromCC(commitmentId, unitIds);
         deployment.capacity.finishCommitment(commitmentId);
-
     }
 
     // ------------------ Internals ------------------
@@ -394,7 +388,7 @@ contract CapacityCommitmentTest is Test {
         vm.stopPrank();
     }
 
-    receive() external payable { }
+    receive() external payable {}
 }
 
 contract MockActorCallActorPrecompile {
