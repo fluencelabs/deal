@@ -235,7 +235,7 @@ contract CapacityCommitmentTest is TestWithDeployment {
         vm.stopPrank();
     }
 
-    function test_RewardAfterSubmitProof() public {
+    function test_RewardAfterSubmitProofs() public {
         bytes32 peerId = registerPeers[0].peerId;
         uint256 unitCount = registerPeers[0].unitIds.length;
         address peerOwner = registerPeers[0].owner;
@@ -258,7 +258,7 @@ contract CapacityCommitmentTest is TestWithDeployment {
             vm.expectEmit(true, true, true, false, address(deployment.capacity));
             emit ProofSubmitted(commitmentId, unitId, localUnitNonce_);
 
-            deployment.capacity.submitProof(unitId, localUnitNonce, targetHash);
+            deployment.capacity.submitProof(unitId, localUnitNonce_, targetHash);
         }
 
         uint256 reward = (
@@ -266,10 +266,8 @@ contract CapacityCommitmentTest is TestWithDeployment {
         ) * deployment.core.vestingPeriodCount();
         StdCheats.skip(deployment.core.epochDuration());
 
-        console.log("curr epoch #3", deployment.core.currentEpoch());
-
         bytes32 localUnitNonce = keccak256(abi.encodePacked("localUnitNonce"));
-        deployment.capacity.submitProofs(unitId, localUnitNonce, targetHash);
+        deployment.capacity.submitProof(unitId, localUnitNonce, targetHash);
 
         assertEq(deployment.capacity.totalRewards(commitmentId), reward, "TotalRewards mismatch");
         assertEq(deployment.capacity.unlockedRewards(commitmentId), 0, "UnlockedRewards mismatch");
