@@ -3,11 +3,11 @@ import {
   DealClient,
   DealMatcherClient,
   AccessType,
-  ICapacity,
-  ICore,
-  IDealFactory,
-  IERC20,
-  IMarket,
+  type ICapacity,
+  type ICore,
+  type IDealFactory,
+  type IERC20,
+  type IMarket,
 } from "@fluencelabs/deal-ts-clients";
 import {
   ethers,
@@ -18,11 +18,11 @@ import {
 import {
   createCommitmentForProviderFixtures,
   createDealsFromFixtures,
-  DealFixtureModel,
+  type DealFixtureModel,
   depositCollateral,
   generateEffector,
   getMarketExampleFixture,
-  ProviderFixtureModel,
+  type ProviderFixtureModel,
   registerMarketOffersFromFixtures,
 } from "./fixture.js";
 import { getEventValues } from "./events.js";

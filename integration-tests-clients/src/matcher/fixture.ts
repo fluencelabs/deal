@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { ICapacity, IDealFactory, IERC20, IMarket } from "../../../ts-client/src";
+import type { ICapacity, IDealFactory, IERC20, IMarket } from "../../../ts-client/src/index.ts";
 import { getEventValue } from "./events.js";
 import { ZERO_ADDRESS } from "./constants.js";
 
@@ -118,7 +118,7 @@ export async function registerMarketOffersFromFixtures(
     for (let i = 0; i < providerFixture.peerIds.length; i++) {
       expect(
         providerFixture.providerAddress,
-        "[Fixture validation] provider uddress should be presented.",
+        "[Fixture validation] provider address should be presented.",
       ).not.to.equal("");
 
       const peerId = providerFixture.peerIds[i];
