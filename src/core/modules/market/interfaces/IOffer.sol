@@ -2,9 +2,8 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "src/deal/interfaces/IDeal.sol";
-import "src/deal/base/Types.sol";
+import {CIDV1} from "src/utils/Common.sol";
 
 /// @title Offer contract interface
 /// @dev Offer contract is responsible for managing the offers in the market
@@ -185,19 +184,22 @@ interface IOffer {
         uint256 maxProtocolVersion
     ) external returns (bytes32);
 
-    /// @dev Remove an offer
+    /// @dev Remove an offer.
+    /// @dev Only owner can change offer after all Peers removed (and CUs before).
     function removeOffer(bytes32 offerId) external;
 
     /// @dev Add compute peers to an offer
     function addComputePeers(bytes32 offerId, RegisterComputePeer[] calldata peers) external;
 
-    /// @dev Remove compute peers from an offer
+    /// @dev Remove compute peers from an offer after all CUs removed.
+    /// @dev Only owner can remove Peer.
     function removeComputePeer(bytes32 peerId) external;
 
     /// @dev Add compute units to a peer
     function addComputeUnits(bytes32 peerId, bytes32[] calldata unitIds) external;
 
-    /// @dev Remove compute units from a peer
+    /// @dev Remove compute units from a peer.
+    /// @dev Only owner can remove Compute Unit that not in Deal and in CC.
     function removeComputeUnit(bytes32 unitId) external;
 
     // Change offer

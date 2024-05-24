@@ -2,13 +2,9 @@
 
 pragma solidity ^0.8.19;
 
-import "src/utils/OwnableUpgradableDiamond.sol";
-import "src/core/EpochController.sol";
 import "./CapacityConst.sol";
 import "./interfaces/IGlobalConst.sol";
-import "./interfaces/ICapacityConst.sol";
 
-uint256 constant PRECISION = 1e7; // min: 0.0000001
 
 contract GlobalConst is IGlobalConst, CapacityConst {
     // ------------------ Storage ------------------
