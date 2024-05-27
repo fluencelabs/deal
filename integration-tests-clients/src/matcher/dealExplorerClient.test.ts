@@ -63,21 +63,18 @@ describe(
         hash: ethers.hexlify(ethers.randomBytes(32)),
       });
 
-      const firstUnitId = ethers.hexlify(ethers.randomBytes(32));
+      const peerId = ethers.hexlify(ethers.randomBytes(32));
+
+      const unitIdToBeRemovedAfterUpdate = ethers.hexlify(
+        ethers.randomBytes(32),
+      );
+
       const unitIds = [
-        firstUnitId,
+        unitIdToBeRemovedAfterUpdate,
         ...new Array(2).fill(0).map(() => {
           return ethers.hexlify(ethers.randomBytes(32));
         }),
       ];
-
-      const peerId = ethers.hexlify(ethers.randomBytes(32));
-
-      const peerWithUnits = {
-        peerId,
-        unitIds,
-        owner: signerAddress,
-      };
 
       const registerMarketOfferTxReceipt = await sign(
         marketContract.registerMarketOffer,
@@ -87,7 +84,13 @@ describe(
           prefixes: effector.prefix,
           hash: effector.hash,
         })),
-        [peerWithUnits],
+        [
+          {
+            peerId,
+            unitIds,
+            owner: signerAddress,
+          },
+        ],
         1,
         1,
       );
@@ -100,11 +103,15 @@ describe(
       });
 
       assert(typeof offerId === "string");
-      await sign(marketContract.removeComputeUnit, firstUnitId);
+
+      await sign(
+        marketContract.removeComputeUnit,
+        unitIdToBeRemovedAfterUpdate,
+      );
 
       const createCommitmentTx = await sign(
         capacityContract.createCommitment,
-        peerWithUnits.peerId,
+        peerId,
         60 * 60 * 24 * 30, // 30 days in seconds
         ethers.ZeroAddress,
         1,
@@ -128,16 +135,17 @@ describe(
           capacityCommitmentUpdated.collateralPerUnit,
       });
 
-      // We have to wait 2 epochs since deposit, after the status becomes active.
       await wait(epochMilliseconds);
 
       await setTryTimeout(
         "trying to get offer from explorer",
         async () => {
-          const offerFromExplorer = await dealExplorerClient.getOffer(offerId);
+          const {
+            data: [firstOffer],
+          } = await dealExplorerClient.getOffers({ search: offerId });
 
-          assert(offerFromExplorer !== null);
-          expect(offerFromExplorer.totalComputeUnits).toEqual(2);
+          assert(firstOffer !== undefined);
+          expect(firstOffer.totalComputeUnits).toEqual(2);
         },
         (e) => {
           throw e;
@@ -145,14 +153,22 @@ describe(
         60000,
       );
 
+      const offer = await dealExplorerClient.getOffer(offerId);
+      assert(offer !== null);
+      expect(offer.totalComputeUnits).toEqual(2);
+
       const {
         data: [ccFromExplorer],
-      } = await dealExplorerClient.getCapacityCommitmentsByPeer({
-        peerId: peerIdContractHexToBase58(peerId),
+      } = await dealExplorerClient.getCapacityCommitments({
+        search: ccId,
       });
 
       assert(ccFromExplorer !== undefined);
       expect(ccFromExplorer.computeUnitsCount).toEqual(2);
+
+      const cc = await dealExplorerClient.getCapacityCommitment(ccId);
+      assert(cc !== null);
+      expect(cc.computeUnitsCount).toEqual(2);
     });
   },
   TESTS_TIMEOUT,
