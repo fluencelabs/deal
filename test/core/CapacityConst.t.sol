@@ -58,7 +58,8 @@ contract CpacityConstTest is TestWithDeployment {
             maxFailedRatio: 100,
             difficulty: 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF,
             initRewardPool: 1500 ether,
-            randomXProxy: address(0x123)
+            randomXProxy: address(0x123),
+            oracle: address(456)
         });
 
         _initCapacityConst(args);
@@ -82,7 +83,8 @@ contract CpacityConstTest is TestWithDeployment {
             maxFailedRatio: 100,
             difficulty: 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF,
             initRewardPool: 1500 ether,
-            randomXProxy: address(0x123)
+            randomXProxy: address(0x123),
+            oracle: address(456)
         });
 
         _initCapacityConst(args);
@@ -160,7 +162,8 @@ contract CpacityConstTest is TestWithDeployment {
             maxFailedRatio: 100,
             difficulty: 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF,
             initRewardPool: 1500 ether,
-            randomXProxy: address(0x123)
+            randomXProxy: address(0x123),
+            oracle: address(456)
         });
         _initCapacityConst(args);
 
@@ -190,7 +193,8 @@ contract CpacityConstTest is TestWithDeployment {
             maxFailedRatio: 100,
             difficulty: 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF,
             initRewardPool: 1500 ether,
-            randomXProxy: address(0x123)
+            randomXProxy: address(0x123),
+            oracle: address(456)
         });
 
         _initCapacityConst(args);
@@ -201,6 +205,7 @@ contract CpacityConstTest is TestWithDeployment {
         uint256 newPrice = 4 * PRECISION;
 
         // #region set price in first epoch
+        vm.prank(args.oracle);
         capacityConst.setFLTPrice(newPrice);
 
         assertEq(capacityConst.fltPrice(), newPrice, "fltPrice not changed");
@@ -219,6 +224,7 @@ contract CpacityConstTest is TestWithDeployment {
         uint256 nextEpoch = currentEpoch + 1;
 
         _skipEpochs(1);
+        vm.prank(args.oracle);
         capacityConst.setFLTPrice(newPrice);
 
         assertEq(capacityConst.fltPrice(), newPrice, "second epoch: fltPrice not changed");
@@ -239,6 +245,7 @@ contract CpacityConstTest is TestWithDeployment {
 
         // #region set price in second epoch again
         newPrice = PRECISION / 20;
+        vm.prank(args.oracle);
         capacityConst.setFLTPrice(newPrice);
 
         assertEq(capacityConst.fltPrice(), newPrice, "second epoch again: fltPrice not changed");

@@ -50,6 +50,7 @@ contract TestWithDeployment is Test {
     bytes32 public constant DEFAULT_DIFFICULTY_TARGET =
         0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
     bytes32 public constant DEFAULT_INIT_GLOBAL_NONCE = keccak256("init_global_nonce");
+    address public DEFAULT_ORACLE = address(456);
 
     // ------------------ Variables ------------------
     Deployment public deployment;
@@ -89,7 +90,8 @@ contract TestWithDeployment is Test {
                             maxFailedRatio: DEFAULT_MAX_FAILED_RATIO,
                             difficulty: DEFAULT_DIFFICULTY_TARGET,
                             initRewardPool: DEFAULT_INIT_REWARD_POOL,
-                            randomXProxy: deployCode("out/RandomXProxy.sol/RandomXProxy.json")
+                            randomXProxy: deployCode("out/RandomXProxy.sol/RandomXProxy.json"),
+                            oracle: DEFAULT_ORACLE
                         })
                     )
                 )
