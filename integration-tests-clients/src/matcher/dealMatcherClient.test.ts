@@ -16,16 +16,15 @@ import {
   Wallet,
 } from "ethers";
 import {
-  createCommitmentForProviderFixtures,
+  createCCDepositAndWait,
   createDealsFromFixtures,
   type DealFixtureModel,
-  depositCollateral,
   generateEffector,
   getMarketExampleFixture,
   type ProviderFixtureModel,
-  registerMarketOffersFromFixtures,
-} from "./fixture.js";
-import { getEventValues } from "./events.js";
+  registerMarketOffersFromFixtures
+} from "../utils/fixture.js";
+import { getEventValues } from "../utils/events.js";
 import { TEST_NETWORK, PROVIDER, WAIT_CONFIRMATIONS } from "../env.js";
 
 // Empirically measured time for subgraph indexing on 4CPU, 8Gb mem.
@@ -82,37 +81,6 @@ describe(
 
       epochMilliseconds = (await coreContract.epochDuration()) * 1000n;
     });
-
-    async function _createCCDepositAndWait(
-      providers: ProviderFixtureModel[],
-      capacityContract: ICapacity,
-    ) {
-      let createdCCIds = await createCommitmentForProviderFixtures(
-        providers,
-        capacityContract,
-        WAIT_CONFIRMATIONS,
-        CAPACITY_DEFAULT_DURATION,
-      );
-      console.log("Deposit collateral for created CCs: ", createdCCIds);
-      await depositCollateral(
-        createdCCIds,
-        capacityContract,
-        WAIT_CONFIRMATIONS,
-      );
-
-      // This check below is desirable but randomly it could be on the edge of the next
-      //  epoch (when epoch time -> 0), thus status could be changed unexpectedly for this check.
-      // // It still should not match because CC is not active (waiting start).
-      // for (const createdCCId of createdCCIds) {
-      //   const _status = await capacityContract.getStatus(createdCCId);
-      //   expect(_status).toEqual(BigInt(CommitmentStatus.WaitStart));
-      // }
-
-      // We have to wait 1 epoch since deposit, after the status becomes active.
-      await new Promise((resolve) =>
-        setTimeout(resolve, Number(epochMilliseconds)),
-      );
-    }
 
     async function _checkExactMatch(
       dealFixture: DealFixtureModel,
@@ -211,9 +179,11 @@ describe(
       expect(matchResult.computeUnitsPerOffers).toEqual([]);
 
       // Now lets register CC and activate it for another effector offer and check that it does not match.
-      await _createCCDepositAndWait(
+      await createCCDepositAndWait(
         [anotherEffectorProviderFixture],
         capacityContract,
+        epochMilliseconds,
+        CAPACITY_DEFAULT_DURATION,
       );
       // Check that there are no match with another effector offer.
       matchResult = await dealMatcherClient.getMatchedOffersByDealId(
@@ -223,7 +193,7 @@ describe(
       expect(matchResult.computeUnitsPerOffers).toEqual([]);
 
       // Now let`s create CC for the target provider.
-      await _createCCDepositAndWait([providerFixture], capacityContract);
+      await createCCDepositAndWait([providerFixture], capacityContract, epochMilliseconds, CAPACITY_DEFAULT_DURATION);
 
       // Check itself.
       await _checkExactMatch(dealFixture, providerFixture);
@@ -391,9 +361,11 @@ describe(
       expect(matchResult.computeUnitsPerOffers).toEqual([]);
 
       // Create CC and wait for blacklisted provider and check.
-      await _createCCDepositAndWait(
+      await createCCDepositAndWait(
         [blacklistedProviderFixture],
         capacityContractByBlacklisted,
+        epochMilliseconds,
+        CAPACITY_DEFAULT_DURATION,
       );
       matchResult = await dealMatcherClient.getMatchedOffersByDealId(
         dealFixture.dealId,
@@ -403,7 +375,7 @@ describe(
 
       // Now create CC for target provider offer and lets check that blacklisted would be ignored,
       //  and only ordinary provider would be matched.
-      await _createCCDepositAndWait([providerFixture], capacityContract);
+      await createCCDepositAndWait([providerFixture], capacityContract, epochMilliseconds, CAPACITY_DEFAULT_DURATION);
 
       // Check itself.
       await _checkExactMatch(dealFixture, providerFixture, false);
