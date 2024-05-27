@@ -15,7 +15,7 @@ function methodCallToString([method, ...args]: [
   { name: string },
   ...unknown[],
 ]) {
-  return `${method.name}(${JSON.stringify(args, null, 2).slice(1, -1)})`;
+  return `${method.name}(${stringifyUnknown(args).slice(1, -1)})`;
 }
 
 export async function sign<
@@ -171,7 +171,7 @@ export function stringifyUnknown(unknown: unknown): string {
       return "undefined";
     }
 
-    return JSON.stringify(unknown, null, 2);
+    return jsonStringify(unknown);
   } catch {
     // eslint-disable-next-line no-restricted-syntax
     return String(unknown);
@@ -199,4 +199,26 @@ export function peerIdContractHexToBase58(peerIdHex: string) {
       ]),
     )
     .slice(BASE_58_PREFIX.length);
+}
+
+export function jsonStringify(unknown: unknown): string {
+  return JSON.stringify(
+    unknown,
+    (_key, value: unknown) => {
+      if (value instanceof Uint8Array) {
+        return `Uint8Array<${JSON.stringify([...value])}>`;
+      }
+
+      if (typeof value === "bigint") {
+        return bigintToStr(value);
+      }
+
+      return value;
+    },
+    2,
+  );
+}
+
+export function bigintToStr(num: bigint): string {
+  return num.toString();
 }

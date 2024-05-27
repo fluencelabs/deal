@@ -11,7 +11,12 @@ import { ethers, HDNodeWallet, JsonRpcSigner, Wallet } from "ethers";
 import { generateEffector } from "./fixture.js";
 import { getEventValue } from "./events.js";
 import { TEST_NETWORK, PROVIDER } from "../env.js";
-import { sign, wait, peerIdContractHexToBase58 } from "../utils.js";
+import {
+  sign,
+  wait,
+  peerIdContractHexToBase58,
+  setTryTimeout,
+} from "../utils.js";
 import assert from "node:assert";
 
 // Empirically measured time for subgraph indexing on 4CPU, 8Gb mem.
@@ -124,12 +129,21 @@ describe(
       });
 
       // We have to wait 2 epochs since deposit, after the status becomes active.
-      await wait(epochMilliseconds * 2);
+      await wait(epochMilliseconds);
 
-      const offerFromExplorer = await dealExplorerClient.getOffer(offerId);
+      await setTryTimeout(
+        "trying to get offer from explorer",
+        async () => {
+          const offerFromExplorer = await dealExplorerClient.getOffer(offerId);
 
-      assert(offerFromExplorer !== null);
-      expect(offerFromExplorer.totalComputeUnits).toEqual(2);
+          assert(offerFromExplorer !== null);
+          expect(offerFromExplorer.totalComputeUnits).toEqual(2);
+        },
+        (e) => {
+          throw e;
+        },
+        60000,
+      );
 
       const {
         data: [ccFromExplorer],
