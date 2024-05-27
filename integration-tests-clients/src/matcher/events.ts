@@ -33,7 +33,7 @@ export function getEventValue<T extends string, U extends Contract<T>>({
 
   assert(
     log !== undefined,
-    `Event '${eventName}' with hash '${topicHash}' not found in logs of the transaction`,
+    `Event '${eventName}' with hash '${topicHash}' not found in logs of the transaction.`,
   );
 
   const res: unknown = contract.interface
@@ -44,4 +44,33 @@ export function getEventValue<T extends string, U extends Contract<T>>({
     ?.args.getValue(value);
 
   return res;
+}
+
+export function getEventValues<T extends string, U extends Contract<T>>({
+  txReceipt,
+  contract,
+  eventName,
+  value,
+}: GetEventValueArgs<T, U>) {
+  const { topicHash } = contract.getEvent(eventName).fragment;
+
+  const logs = txReceipt.logs.filter((log) => {
+    return log.topics[0] === topicHash;
+  });
+
+  assert(
+    logs.length !== 0,
+    `Events '${eventName}' with hash '${topicHash}' not found in logs of the successful transaction.`,
+  );
+
+  return logs.map((log) => {
+    const res: unknown = contract.interface
+      .parseLog({
+        data: log.data,
+        topics: [...log.topics],
+      })
+      ?.args.getValue(value);
+
+    return res;
+  });
 }
