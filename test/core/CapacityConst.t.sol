@@ -16,9 +16,11 @@ interface ISetConstant {
     function setCapacityConstant(uint8 constantType, uint256 newValue) external;
 }
 
-contract CpacityConstTest is TestWithDeployment {
+contract CapacityConstTest is TestWithDeployment {
     using SafeERC20 for IERC20;
     using BytesConverter for bytes32;
+
+    address constant NOT_AN_OWNER = address(1234);
 
     // ------------------ Events ------------------
     error OwnableUnauthorizedAccount(address account);
@@ -205,6 +207,15 @@ contract CpacityConstTest is TestWithDeployment {
         uint256 newPrice = 4 * PRECISION;
 
         // #region set price in first epoch
+        vm.prank(NOT_AN_OWNER);
+        vm.expectRevert(abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, NOT_AN_OWNER));
+        capacityConst.setOracle(address(12345678));
+
+        capacityConst.setOracle(address(12345678));
+        vm.expectRevert("Only oracle can set FLT price");
+        capacityConst.setFLTPrice(newPrice);
+
+        capacityConst.setOracle(args.oracle);
         vm.prank(args.oracle);
         capacityConst.setFLTPrice(newPrice);
 

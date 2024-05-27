@@ -126,5 +126,8 @@ interface ICapacityConst is IEpochController {
 
     /// @dev Sets a constant with a uint256 value
     function setCapacityConstant(CapacityConstantType constantType, uint256 v) external;
+
+    /// @dev Sets a new oracle
+    function setOracle(address oracle_) external;
     // #endregion ------------------ External Mutable Functions ------------------
 }

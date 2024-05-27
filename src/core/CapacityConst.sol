@@ -269,7 +269,7 @@ contract CapacityConst is ICapacityConst, OwnableUpgradableDiamond, EpochControl
         emit CapacityConstantUpdated(constantType, v);
     }
 
-    function setOracle(address oracle_) public onlyOwner {
+    function setOracle(address oracle_) external onlyOwner {
         require(oracle_ != address(0), "Oracle shouldn't be zero address");
         ConstStorage storage constantsStorage = _getConstStorage();
         constantsStorage.oracle = oracle_;
