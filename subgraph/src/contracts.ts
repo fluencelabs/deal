@@ -94,6 +94,7 @@ export function calculateNextFailedCCEpoch(
   nextAdditionalActiveUnitCount: BigInt,
   totalFailCount: BigInt,
   lastSnapshotEpoch: BigInt,
+  endEpoch: BigInt,
 ): BigInt {
   // if activeUnitCount is 0, then it is impossible to fail.
   if (activeUnitCount == ZERO_BIG_INT) {
@@ -137,8 +138,15 @@ export function calculateNextFailedCCEpoch(
     failedEpoch += numberOfFillFailedEpoch;
   }
 
-  // CUrrently it is not used. Artifact from contract side.
+  // Currently it is not used. Artifact from contract side.
   // const remainingFailsForLastEpoch = remainingFails % activeUnitCount;
+
+  // Note, that current implementation differs from the contract implementation by lines below.
+  //  If the following - failed epoch is beyond end epoch (right boarder of CC), then it will not fail, return MAX_UINT_256.
+  // Filtration of CC in client rely on this logic.
+  if (failedEpoch > endEpoch) {
+    return MAX_UINT_256
+  }
   return failedEpoch;
 }
 
