@@ -31,12 +31,10 @@ import type {
 const DEFAULT_SUBGRAPH_TIME_INDEXING = 300000;
 const TESTS_TIMEOUT = 120000 + 30000 + DEFAULT_SUBGRAPH_TIME_INDEXING;
 const CAPACITY_DEFAULT_DURATION = 3; // if 1 epoch 15 sec -> 75 [sec].
+const SUBGRAPH_MAX_INDEXING_TIME = 10000  // 10 [sec].
 const LOCAL_SIGNER_MNEMONIC =
   "test test test test test test test test test test test junk";
 
-// Note, that MIN_DURATION * EPOCH_DURATION (them are set up during contract deploy) should not be exited the test timeout.
-// In those tests also note timeframes for waitSubgraphToIndex() and block confirmation time of your test node.
-//  Thus, those all times above should be taken into consideration when you write/run the tests below.
 describe(
   "#dealExplorerClient",
   () => {
@@ -137,7 +135,7 @@ describe(
           WAIT_CONFIRMATIONS,
           CAPACITY_DEFAULT_DURATION,
         );
-        await waitSubgraphToIndex()
+        await waitSubgraphToIndex(SUBGRAPH_MAX_INDEXING_TIME)
 
         console.log("--- Check that after creation of CC, statuses are WaitDelegation. ---")
         // Also check the same status on blockchain before.
@@ -153,7 +151,7 @@ describe(
           capacityContract,
           WAIT_CONFIRMATIONS,
         );
-        await waitSubgraphToIndex()
+        await waitSubgraphToIndex(SUBGRAPH_MAX_INDEXING_TIME)
 
         await assertClientStatusFilter(CCCreatedRightBefore, 'waitDelegation', 0)
         await assertClientStatusFilter(CCCreatedRightBefore, 'failed', 0)
@@ -201,7 +199,7 @@ describe(
         console.log(`Remove all CUs from target CC: ${chosenCC}...`)
         const removeCCTx = await capacityContract.removeCUFromCC(chosenCC, providerFixture.computeUnitsPerPeers[0])
         await removeCCTx.wait(WAIT_CONFIRMATIONS)
-        await waitSubgraphToIndex()
+        await waitSubgraphToIndex(SUBGRAPH_MAX_INDEXING_TIME)
 
         // Assert that status of CC the same after remove of CUs from CC.
         await assertClientStatusFilter(CCCreatedRightBefore, 'inactive', 2)
@@ -210,7 +208,7 @@ describe(
         console.log(`Send finishCommitment for the target CC: ${chosenCC}`)
         const finishCCTx = await capacityContract.finishCommitment(chosenCC)
         await finishCCTx.wait(WAIT_CONFIRMATIONS)
-        await waitSubgraphToIndex()
+        await waitSubgraphToIndex(SUBGRAPH_MAX_INDEXING_TIME)
 
         await assertClientStatusFilter(CCCreatedRightBefore, 'waitStart', 0)
         await assertClientStatusFilter(CCCreatedRightBefore, 'waitDelegation', 0)

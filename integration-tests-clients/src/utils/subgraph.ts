@@ -1,7 +1,5 @@
-const DEFAULT_TIME_TO_INDEX = 5000  // 5 sec.
-
-export async function waitSubgraphToIndex() {
+export async function waitSubgraphToIndex(milliseconds) {
   return await new Promise((resolve) =>
-    setTimeout(resolve, DEFAULT_TIME_TO_INDEX),
+    setTimeout(resolve, milliseconds),
   );
 }
