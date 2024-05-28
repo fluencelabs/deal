@@ -37,6 +37,11 @@ export interface ChildEntitiesByProviderFilter {
   status?: ProviderChildEntityStatusFilter | undefined;
 }
 
+export interface CapacityCommitmentsByProviderFilter {
+  providerId: string;
+  status?: CapacityCommitmentsStatusFilter | undefined;
+}
+
 // @param peerId: the id of the peer in base58 format.
 export interface ChildEntitiesByPeerFilter {
   peerId: string;
