@@ -160,6 +160,8 @@ describe(
 
         await assertNothingForStatus(CCCreatedRightBefore, 'waitDelegation')
         await assertNothingForStatus(CCCreatedRightBefore, 'failed')
+        await assertNothingForStatus(CCCreatedRightBefore, 'inactive')
+        await assertNothingForStatus(CCCreatedRightBefore, 'removed')
 
         // Code commented because it is difficult to check waitStart coz it takes 1 epoch, and deposit could be on the edge of epoch.
         // fetchedCCs = await explorerClient.getCapacityCommitments({
@@ -193,7 +195,10 @@ describe(
         statusCCFromChain = Number(await capacityContract.getStatus(chosenCC))
         expect(statusCCFromChain).toEqual(CommitmentStatus.Inactive)
         // Other asserts.
+        await assertNothingForStatus(CCCreatedRightBefore, 'waitDelegation')
+        await assertNothingForStatus(CCCreatedRightBefore, 'waitStart')
         await assertNothingForStatus(CCCreatedRightBefore, 'active')
+        await assertNothingForStatus(CCCreatedRightBefore, 'removed')
         await assertNothingForStatus(CCCreatedRightBefore, 'failed')
 
         // Finally check the target filter.
@@ -223,6 +228,9 @@ describe(
         await finishCCTx.wait(WAIT_CONFIRMATIONS)
         await waitSubgraphToIndex()
 
+        await assertNothingForStatus(CCCreatedRightBefore, 'waitStart')
+        await assertNothingForStatus(CCCreatedRightBefore, 'waitDelegation')
+        // TODO: inactive (1).
         await assertNothingForStatus(CCCreatedRightBefore, 'failed')
 
         // Target check on chain.
