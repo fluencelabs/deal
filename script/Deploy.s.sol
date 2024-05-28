@@ -30,7 +30,7 @@ contract DeployContracts is Deployment, Script {
     uint256 constant DEFAULT_FLT_PRICE = 1 * PRECISION; // 1 USD
     uint256 constant DEFAULT_USD_COLLATERAL_PER_UNIT = PRECISION / 10; // 0.1 USD
     uint256 constant DEFAULT_USD_TARGET_REVENUE_PER_EPOCH = PRECISION / 10 * 3; // 0.3 USD
-    uint256 constant DEFAULT_MIN_DURATION = 10;
+    uint256 constant DEFAULT_MIN_DURATION = 10;  // min duration of CC epoch.
     uint256 constant DEFAULT_MIN_REWARD_PER_EPOCH = 100 ether;
     uint256 constant DEFAULT_MAX_REWARD_PER_EPOCH = 200 ether;
     uint256 constant DEFAULT_VESTING_PERIOD_DURATION = 3;
