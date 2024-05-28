@@ -107,6 +107,10 @@ jobs:
 
       - name: Build chain-deploy-script image
         uses: docker/build-push-action@v5
+        env:
+          # Adjust values for the integration test.
+          MAX_FAILED_RATIO: 99999999
+          MIN_DURATION: 1
         with:
           context: .
           file: docker/Dockerfile
@@ -150,8 +154,15 @@ jobs:
         run: npm i
         working-directory: integration-tests-clients
 
-      - name: Run integration tests
-        run: npm run test
+      - name: Run integration tests for Network Explorer Client
+        run: npm run test-explorer
+        working-directory: integration-tests-clients
+        env:
+          RPC_URL: "http://localhost:8545"
+#          TODO: add other envs after test refactor.
+
+      - name: Run integration tests for Matcher Client
+        run: npm run test-matcher
         working-directory: integration-tests-clients
         env:
           RPC_URL: "http://localhost:8545"
