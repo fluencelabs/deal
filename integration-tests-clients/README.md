@@ -4,12 +4,17 @@ Repository for integrations tests with additional dependencies on Subgraph and C
 
 -   [presented] Offchain matcher client [../ts-client/src/dealMatcherClient](../ts-client/src/dealMatcherClient)
 -   [TODO] Fluence Cli client [../ts-client/src/dealCliClient](../ts-client/src/dealCliClient)
--   [TODO] Fluence Network Explorer Client [../ts-client/src/dealExplorerClient](../ts-client/src/dealExplorerClient)
+-   [presented] Fluence Network Explorer Client [../ts-client/src/dealExplorerClient](../ts-client/src/dealExplorerClient)
 
 # Run Tests
 
-> To run these tests, you need the following services up and running: **subgraph**, **chain-rpc**.
+To run these tests, you need the following services up and running: **subgraph**, **chain-rpc**.
+
 > Moreover, Subgraph should be connected to the chain-rpc and index contracts deployed on that chain.
+
+Note, that test nodes (e.g. Anvil) may have time "degradation" after long run.
+
+You could experience it with those tests, especially in places where asserts rely on time checks.
 
 ## Initialization
 

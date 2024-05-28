@@ -79,7 +79,7 @@ describe(
     }
 
     describe("#getCapacityCommitments", () => {
-      test("It filters by status correctly.", async () => {
+      test("It filters by status: from WAIT_DELEGATION to REMOVED through INACTIVE.", async () => {
               // Prepare data.
         const effectors = [generateEffector()];
         const marketFixture = getMarketExampleFixture(
