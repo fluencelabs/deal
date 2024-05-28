@@ -126,7 +126,6 @@ describe(
       );
     }
 
-    // TODO: uncomment other tests after debug.
     test(`It matches successfully for 1:1 configuration where CC has status Active.`, async () => {
       // Prepare data.
       const effectors = [generateEffector()];
