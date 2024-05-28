@@ -23,6 +23,9 @@ import {
 } from "../utils/fixture.js";
 import { TEST_NETWORK, PROVIDER, WAIT_CONFIRMATIONS } from "../env.js";
 import { waitSubgraphToIndex } from "../utils/subgraph.js";
+import type {
+  CapacityCommitmentsStatusFilter
+} from "@fluencelabs/deal-ts-clients/dist/dealExplorerClient/types/filters.js";
 
 // Empirically measured time for subgraph indexing on 4CPU, 8Gb mem.
 const DEFAULT_SUBGRAPH_TIME_INDEXING = 300000;
@@ -65,6 +68,14 @@ describe(
 
       epochMilliseconds = (await coreContract.epochDuration()) * 1000n;
     });
+
+    async function assertNothingForStatus(CCCreatedRightBefore: number, status: CapacityCommitmentsStatusFilter) {
+        const fetchedCCs = await explorerClient.getCapacityCommitments({
+          createdAtFrom: CCCreatedRightBefore,
+          status: status,
+        })
+        expect(fetchedCCs.data.length).toEqual(0)
+    }
 
     describe("#getCapacityCommitments", () => {
       test.only("It filters by status correctly.", async () => {
@@ -146,12 +157,9 @@ describe(
           WAIT_CONFIRMATIONS,
         );
         await waitSubgraphToIndex()
-        // And check that nothing for wait delegation though.
-        fetchedCCs = await explorerClient.getCapacityCommitments({
-          createdAtFrom: CCCreatedRightBefore,
-          status: "waitDelegation"
-        })
-        expect(fetchedCCs.data.length).toEqual(0)
+
+        await assertNothingForStatus(CCCreatedRightBefore, 'waitDelegation')
+        await assertNothingForStatus(CCCreatedRightBefore, 'failed')
 
         // Code commented because it is difficult to check waitStart coz it takes 1 epoch, and deposit could be on the edge of epoch.
         // fetchedCCs = await explorerClient.getCapacityCommitments({
@@ -163,9 +171,8 @@ describe(
         await new Promise((resolve) =>
           setTimeout(resolve, Number(epochMilliseconds)),
         );
-        // Check on chain before.
+        // Assert chain state before.
         statusCCFromChain = Number(await capacityContract.getStatus(chosenCC))
-        console.log(`TODO: got for ${chosenCC}: statusCCFromChain: ${statusCCFromChain}`)
         expect(statusCCFromChain).toEqual(CommitmentStatus.Active)
         // Check then in client.
         fetchedCCs = await explorerClient.getCapacityCommitments({
@@ -184,14 +191,11 @@ describe(
         console.log('--- Check that CC should not be ACTIVE after CC period passed. ---')
         // Assert chain state.
         statusCCFromChain = Number(await capacityContract.getStatus(chosenCC))
-        console.log(`TODO: check inactive got for ${chosenCC}: statusCCFromChain: ${statusCCFromChain}`)
         expect(statusCCFromChain).toEqual(CommitmentStatus.Inactive)
-        // Assert client active filter.
-        fetchedCCs = await explorerClient.getCapacityCommitments({
-          createdAtFrom: CCCreatedRightBefore,
-          status: "active"
-        })
-        expect(fetchedCCs.data.length).toEqual(0)
+        // Other asserts.
+        await assertNothingForStatus(CCCreatedRightBefore, 'active')
+        await assertNothingForStatus(CCCreatedRightBefore, 'failed')
+
         // Finally check the target filter.
         fetchedCCs = await explorerClient.getCapacityCommitments({
           createdAtFrom: CCCreatedRightBefore,
@@ -211,6 +215,7 @@ describe(
           status: "inactive"
         })
         expect(fetchedCCs.data.length).toEqual(2)
+        await assertNothingForStatus(CCCreatedRightBefore, 'failed')
 
         // Target check for this block.
         console.log(`Send finishCommitment for the target CC: ${chosenCC}`)
@@ -218,21 +223,23 @@ describe(
         await finishCCTx.wait(WAIT_CONFIRMATIONS)
         await waitSubgraphToIndex()
 
+        await assertNothingForStatus(CCCreatedRightBefore, 'failed')
+
         // Target check on chain.
         statusCCFromChain = Number(await capacityContract.getStatus(chosenCC))
-        console.log(`TODO: check removed got for ${chosenCC}: statusCCFromChain: ${statusCCFromChain}`)
         expect(statusCCFromChain).toEqual(CommitmentStatus.Removed)
         // Target check of client.
         fetchedCCs = await explorerClient.getCapacityCommitments({
           createdAtFrom: CCCreatedRightBefore,
           status: "removed"
         })
-        // We removed only 1 CC.
+        // We removed only 1 CC (chosenCC).
         expect(fetchedCCs.data.length).toEqual(1)
+        expect(fetchedCCs.data[0].id).toEqual(chosenCC)
       });
     })
 
-  //   TODO: add test flow for failed status and remove at the end.
+  //   TODO: add test flow for failed status.
   },
   TESTS_TIMEOUT,
 );
