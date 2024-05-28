@@ -20,6 +20,7 @@ import { cidBase32ToIndexerHex } from "../../utils/serializers/fluence.js";
 
 export class FiltersError extends Error {}
 export class ValidTogetherFiltersError extends FiltersError {}
+export class FilterNotSupported extends Error {}
 
 export async function serializeProviderFiltersToIndexer(
   providersFilters?: ProvidersFilters,
@@ -298,9 +299,8 @@ export function serializeCapacityCommitmentsFiltersToIndexer(
         deleted: false,
       })
     } else {
-      throw new Error('Not supported.')
+      throw new FilterNotSupported(`status = ${v.status}`)
     }
-
   }
   return convertedFilters;
 }
