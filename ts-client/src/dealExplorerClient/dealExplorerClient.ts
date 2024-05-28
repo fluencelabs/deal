@@ -50,7 +50,8 @@ import type {
   ComputeUnitsOrderBy,
   ProofStatsByCapacityCommitmentOrderBy,
   ComputeUnitStatsPerCapacityCommitmentEpochOrderBy,
-  ChildEntitiesByPeerFilter,
+  CapacityCommitmentsByPeerFilter,
+  CapacityCommitmentsByProviderFilter,
 } from "./types/filters.js";
 import { IndexerClient } from "./indexerClient/indexerClient.js";
 import type {
@@ -352,7 +353,7 @@ export class DealExplorerClient {
 
   // @notice [Figma] Provider Capacity.
   async getCapacityCommitmentsByProvider(
-    capacityCommitmentsByProviderFilter: ChildEntitiesByProviderFilter,
+    capacityCommitmentsByProviderFilter: CapacityCommitmentsByProviderFilter,
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: CapacityCommitmentsOrderBy = "createdAt",
@@ -363,8 +364,7 @@ export class DealExplorerClient {
       search: capacityCommitmentsByProviderFilter.providerId.toLowerCase(),
     };
     if (
-      capacityCommitmentsByProviderFilter.status &&
-      capacityCommitmentsByProviderFilter.status != "all"
+      capacityCommitmentsByProviderFilter.status
     ) {
       convertedFilters.status = capacityCommitmentsByProviderFilter.status;
     }
@@ -379,7 +379,7 @@ export class DealExplorerClient {
 
   // @notice [Figma] Peer ID. Capacity Commitments.
   async getCapacityCommitmentsByPeer(
-    capacityCommitmentsByProviderFilter: ChildEntitiesByPeerFilter,
+    capacityCommitmentsByProviderFilter: CapacityCommitmentsByPeerFilter,
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: CapacityCommitmentsOrderBy = "createdAt",
@@ -390,8 +390,7 @@ export class DealExplorerClient {
       search: peerIdByte58toContractHex(capacityCommitmentsByProviderFilter.peerId),
     };
     if (
-      capacityCommitmentsByProviderFilter.status &&
-      capacityCommitmentsByProviderFilter.status != "all"
+      capacityCommitmentsByProviderFilter.status
     ) {
       convertedFilters.status = capacityCommitmentsByProviderFilter.status;
     }
@@ -803,6 +802,7 @@ export class DealExplorerClient {
   }
 
   // @notice [Figma] List of capacity.
+  // @notice [Figma] Capacity Commitments.
   async getCapacityCommitments(
     filters?: CapacityCommitmentsFilters,
     offset: number = 0,

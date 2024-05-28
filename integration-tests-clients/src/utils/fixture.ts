@@ -1,9 +1,10 @@
 import { ethers } from "ethers";
-import type { ICapacity, IDealFactory, IERC20, IMarket } from "../../../ts-client/src/index.ts";
+import type { ICapacity, IDealFactory, IERC20, IMarket } from "@fluencelabs/deal-ts-clients";
 import { getEventValue } from "./events.js";
-import { ZERO_ADDRESS } from "./constants.js";
+import { ZERO_ADDRESS } from "../matcher/constants.js";
 
 import { expect } from "vitest";
+import { WAIT_CONFIRMATIONS } from "../env.js";
 
 interface MarketExample {
   providerExample: ProviderFixtureModel;
@@ -263,4 +264,37 @@ export async function createDealsFromFixtures(
       value: "deal",
     }) as string;
   }
+}
+
+export async function createCCDepositAndWait(
+      providers: ProviderFixtureModel[],
+      capacityContract: ICapacity,
+      epochMilliseconds: BigInt,
+      capacityDuration: number,
+    ) {
+  let createdCCIds = await createCommitmentForProviderFixtures(
+    providers,
+    capacityContract,
+    WAIT_CONFIRMATIONS,
+    capacityDuration,
+  );
+  console.log("Deposit collateral for created CCs: ", createdCCIds);
+  await depositCollateral(
+    createdCCIds,
+    capacityContract,
+    WAIT_CONFIRMATIONS,
+  );
+
+  // This check below is desirable but randomly it could be on the edge of the next
+  //  epoch (when epoch time -> 0), thus status could be changed unexpectedly for this check.
+  // // It still should not match because CC is not active (waiting start).
+  // for (const createdCCId of createdCCIds) {
+  //   const _status = await capacityContract.getStatus(createdCCId);
+  //   expect(_status).toEqual(BigInt(CommitmentStatus.WaitStart));
+  // }
+
+  // We have to wait 1 epoch since deposit, after the status becomes active.
+  await new Promise((resolve) =>
+    setTimeout(resolve, Number(epochMilliseconds)),
+  );
 }

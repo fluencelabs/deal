@@ -9,7 +9,8 @@
   "description": "Integration Tests for Fluence Contract Clients",
   "main": "index.js",
   "scripts": {
-    "test": "vitest dealExplorerClient.test.ts --no-file-parallelism",
+    "test-explorer": "vitest run dealExplorerClient.test.ts --no-file-parallelism",
+    "test-matcher": "vitest run dealMatcherClient.test.ts --no-file-parallelism",
     "lint": "prettier src --check && eslint --cache \"./src/**/*.ts\"",
     "set-local-env": "EPOCH_DURATION=86400 docker compose -f ../docker/docker-compose.yml up -d --build chain-deploy-script"
   },

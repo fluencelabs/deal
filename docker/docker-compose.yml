@@ -77,6 +77,8 @@ services:
         condition: service_healthy
     environment:
       - EPOCH_DURATION
+      - MAX_FAILED_RATIO
+      - MIN_DURATION
 
   # Blockscout services
   blockscout:

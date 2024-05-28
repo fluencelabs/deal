@@ -8,8 +8,8 @@ import {
   type IMarket,
 } from "@fluencelabs/deal-ts-clients";
 import { ethers, HDNodeWallet, JsonRpcSigner, Wallet } from "ethers";
-import { generateEffector } from "./fixture.js";
-import { getEventValue } from "./events.js";
+import { generateEffector } from "../utils/fixture.js";
+import { getEventValue } from "../utils/events.js";
 import { TEST_NETWORK, PROVIDER } from "../env.js";
 import {
   sign,
