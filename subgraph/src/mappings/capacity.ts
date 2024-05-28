@@ -147,6 +147,7 @@ export function handleCommitmentActivated(event: CommitmentActivated): void {
     BigInt.fromString(commitment.nextAdditionalActiveUnitCount.toString()),
     BigInt.fromString(commitment.totalFailCount.toString()),
     BigInt.fromString(commitment.snapshotEpoch.toString()),
+    commitment.endEpoch,
   );
   commitment.nextCCFailedEpoch = _calculatedFailedEpoch;
   commitment.save();
@@ -236,6 +237,7 @@ export function handleCommitmentStatsUpdated(
       BigInt.fromString(commitment.nextAdditionalActiveUnitCount.toString()),
       BigInt.fromString(commitment.totalFailCount.toString()),
       BigInt.fromString(event.params.changedEpoch.toString()),
+      commitment.endEpoch,
     );
     commitment.nextCCFailedEpoch = _calculatedFailedEpoch;
   }
