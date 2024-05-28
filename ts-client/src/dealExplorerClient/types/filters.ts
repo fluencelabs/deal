@@ -1,6 +1,7 @@
 import type { DealStatus } from "./schemes.js";
 
 export type ProviderChildEntityStatusFilter = "all" | "active" | "inactive";
+export type CapacityCommitmentsStatusFilter = 'inactive' | 'active' | 'waitDelegation' | 'waitStart' | 'failed' | 'removed'
 
 /*
  * @param paymentTokens: tokens addresses.
@@ -70,7 +71,7 @@ export interface CapacityCommitmentsFilters {
   createdAtTo?: number | undefined;
   // @deprecated
   onlyActive?: boolean;
-  status?: "active" | "inactive";
+  status?: CapacityCommitmentsStatusFilter;
   rewardDelegatorRateFrom?: number | undefined;
   rewardDelegatorRateTo?: number | undefined;
 }

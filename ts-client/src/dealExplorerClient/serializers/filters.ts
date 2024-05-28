@@ -246,35 +246,93 @@ export function serializeCapacityCommitmentsFiltersToIndexer(
       ),
     });
   }
-  // TODO: deprecate onlyActive.
-  if (v.onlyActive || (v.status && v.status == "active")) {
-    if (currentEpoch == undefined) {
-      throw new Error(
-        "Assertion: currentEpoch is undefined but v.onlyActive filter is used.",
-      );
+  if (v.status) {
+    if (v.status == 'waitDelegation') {
+      convertedFilters.and?.push({
+        status: "WaitDelegation",
+        deleted: false,
+      })
+    } else if (v.status == 'waitStart') {
+      convertedFilters.and?.push({
+        status: "WaitStart",
+        // start epoch should be the current one.
+        startEpoch_lte: currentEpoch,
+        endEpoch_gt: currentEpoch,
+        deleted: false,
+      })
+    } else if (v.status == 'active') {
+      // TODO: check with matcher.
+      convertedFilters.and?.push({
+        // The last stored status by events should be exactly WaitStart.
+        status: "WaitStart",
+        // Start epoch should be the next.
+        startEpoch_lte: currentEpoch,
+        endEpoch_gt: currentEpoch,
+        // On each submitProof indexer should save nextCCFailedEpoch, and
+        //  in query we relay on that field to filter Failed CC.
+        nextCCFailedEpoch_gt: currentEpoch,
+        deleted: false,
+      })
+    } else if (v.status == "inactive") {
+      convertedFilters.and?.push({
+        deleted: false,
+        // The last stored status.
+        status: "WaitStart",
+        // According to contracts we need to check not only by expiredAt filter but also if it became failed already (thus, exclude).
+        endEpoch_lte: currentEpoch,
+        nextCCFailedEpoch_gt: currentEpoch,
+      })
+    } else if (v.status == 'removed') {
+      convertedFilters.and?.push({
+        deleted: false,
+        status: "Removed",
+      })
+    } else if (v.status == "failed") {
+      convertedFilters.and?.push({
+       // Check that we are in the timerange of CC before it becomes inactive.
+        startEpoch_lte: currentEpoch,
+        endEpoch_gt: currentEpoch,
+        // On each submitProof indexer should save nextCCFailedEpoch, and
+        //  in query we relay on that field to get Failed CC.
+        nextCCFailedEpoch_lte: currentEpoch,
+        status_not_in: ["WaitDelegation", "Removed"],
+        deleted: false,
+      })
+    } else {
+      throw new Error('Not supported.')
     }
-    convertedFilters.and?.push({
-      // Duplication as it is in DealExplorerClient: serializeCapacityCommitmentsFiltersToIndexer.
-      startEpoch_lte: currentEpoch,
-      endEpoch_gt: currentEpoch,
-      // On each submitProof indexer should save nextCCFailedEpoch, and
-      //  in query we relay on that field to filter Failed CC.
-      nextCCFailedEpoch_gt: currentEpoch,
-      deleted: false,
-      // Wait delegation is duplicating startEpoch_lte check, though.
-      status_not_in: ["WaitDelegation", "Removed", "Failed"],
-    });
+
   }
-  if (v.status && v.status == "inactive") {
-    if (currentEpoch == undefined) {
-      throw new Error(
-        "Assertion: currentEpoch is undefined but v.onlyActive filter is used.",
-      );
-    }
-    convertedFilters.and?.push({
-      endEpoch_lte: currentEpoch,
-    });
-  }
+  console.log('TODO', currentEpoch)
+  // // TODO: deprecate onlyActive.
+  // if (v.onlyActive || (v.status && v.status == "active")) {
+  //   if (currentEpoch == undefined) {
+  //     throw new Error(
+  //       "Assertion: currentEpoch is undefined but v.onlyActive filter is used.",
+  //     );
+  //   }
+  //   convertedFilters.and?.push({
+  //     // Duplication as it is in DealExplorerClient: serializeCapacityCommitmentsFiltersToIndexer.
+  //     startEpoch_lte: currentEpoch,
+  //     endEpoch_gt: currentEpoch,
+  //     // On each submitProof indexer should save nextCCFailedEpoch, and
+  //     //  in query we relay on that field to filter Failed CC.
+  //     nextCCFailedEpoch_gt: currentEpoch,
+  //     deleted: false,
+  //     // Wait delegation is duplicating startEpoch_lte check, though.
+  //     status_not_in: ["WaitDelegation", "Removed", "Failed"],
+  //   });
+  // }
+  // if (v.status && v.status == "inactive") {
+  //   if (currentEpoch == undefined) {
+  //     throw new Error(
+  //       "Assertion: currentEpoch is undefined but v.onlyActive filter is used.",
+  //     );
+  //   }
+  //   convertedFilters.and?.push({
+  //     endEpoch_lte: currentEpoch,
+  //   });
+  // }
   return convertedFilters;
 }
 

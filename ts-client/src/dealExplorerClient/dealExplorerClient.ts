@@ -803,6 +803,7 @@ export class DealExplorerClient {
   }
 
   // @notice [Figma] List of capacity.
+  // @notice [Figma] Capacity Commitments.
   async getCapacityCommitments(
     filters?: CapacityCommitmentsFilters,
     offset: number = 0,

@@ -69,12 +69,13 @@ describe(
       epochMilliseconds = (await coreContract.epochDuration()) * 1000n;
     });
 
-    async function assertNothingForStatus(CCCreatedRightBefore: number, status: CapacityCommitmentsStatusFilter) {
+    async function assertClientStatusFilter(CCCreatedRightBefore: number, status: CapacityCommitmentsStatusFilter, expectedCC: number) {
         const fetchedCCs = await explorerClient.getCapacityCommitments({
           createdAtFrom: CCCreatedRightBefore,
           status: status,
         })
-        expect(fetchedCCs.data.length).toEqual(0)
+        expect(fetchedCCs.data.length).toEqual(expectedCC)
+        return fetchedCCs
     }
 
     describe("#getCapacityCommitments", () => {
@@ -124,7 +125,7 @@ describe(
         )
 
         // Check that no CCs for the date filter.
-        let fetchedCCs = await explorerClient.getCapacityCommitments({
+        const fetchedCCs = await explorerClient.getCapacityCommitments({
           createdAtFrom: CCCreatedRightBefore,
         })
         expect(fetchedCCs.data.length).toEqual(0)
@@ -144,11 +145,7 @@ describe(
         let statusCCFromChain = Number(await capacityContract.getStatus(chosenCC))
         expect(statusCCFromChain).toEqual(CommitmentStatus.WaitDelegation)
 
-        fetchedCCs = await explorerClient.getCapacityCommitments({
-          createdAtFrom: CCCreatedRightBefore,
-          status: "waitDelegation"
-        })
-        expect(fetchedCCs.data.length).toEqual(2)
+        await assertClientStatusFilter(CCCreatedRightBefore, 'waitDelegation', 2)
 
         console.log("Deposit collateral for created CCs: ", createdCCIds);
         await depositCollateral(
@@ -158,10 +155,10 @@ describe(
         );
         await waitSubgraphToIndex()
 
-        await assertNothingForStatus(CCCreatedRightBefore, 'waitDelegation')
-        await assertNothingForStatus(CCCreatedRightBefore, 'failed')
-        await assertNothingForStatus(CCCreatedRightBefore, 'inactive')
-        await assertNothingForStatus(CCCreatedRightBefore, 'removed')
+        await assertClientStatusFilter(CCCreatedRightBefore, 'waitDelegation', 0)
+        await assertClientStatusFilter(CCCreatedRightBefore, 'failed', 0)
+        await assertClientStatusFilter(CCCreatedRightBefore, 'inactive', 0)
+        await assertClientStatusFilter(CCCreatedRightBefore, 'removed', 0)
 
         // Code commented because it is difficult to check waitStart coz it takes 1 epoch, and deposit could be on the edge of epoch.
         // fetchedCCs = await explorerClient.getCapacityCommitments({
@@ -177,11 +174,7 @@ describe(
         statusCCFromChain = Number(await capacityContract.getStatus(chosenCC))
         expect(statusCCFromChain).toEqual(CommitmentStatus.Active)
         // Check then in client.
-        fetchedCCs = await explorerClient.getCapacityCommitments({
-          createdAtFrom: CCCreatedRightBefore,
-          status: "active"
-        })
-        expect(fetchedCCs.data.length).toEqual(2)
+        await assertClientStatusFilter(CCCreatedRightBefore,'active', 2)
 
         // Wait for CC to be expired, thus, wait for CAPACITY_DEFAULT_DURATION.
         const expirationPeriod = CAPACITY_DEFAULT_DURATION * Number(epochMilliseconds)
@@ -195,18 +188,14 @@ describe(
         statusCCFromChain = Number(await capacityContract.getStatus(chosenCC))
         expect(statusCCFromChain).toEqual(CommitmentStatus.Inactive)
         // Other asserts.
-        await assertNothingForStatus(CCCreatedRightBefore, 'waitDelegation')
-        await assertNothingForStatus(CCCreatedRightBefore, 'waitStart')
-        await assertNothingForStatus(CCCreatedRightBefore, 'active')
-        await assertNothingForStatus(CCCreatedRightBefore, 'removed')
-        await assertNothingForStatus(CCCreatedRightBefore, 'failed')
+        await assertClientStatusFilter(CCCreatedRightBefore, 'waitDelegation', 0)
+        await assertClientStatusFilter(CCCreatedRightBefore, 'waitStart', 0)
+        await assertClientStatusFilter(CCCreatedRightBefore, 'active', 0)
+        await assertClientStatusFilter(CCCreatedRightBefore, 'removed', 0)
+        await assertClientStatusFilter(CCCreatedRightBefore, 'failed', 0)
 
         // Finally check the target filter.
-        fetchedCCs = await explorerClient.getCapacityCommitments({
-          createdAtFrom: CCCreatedRightBefore,
-          status: "inactive"
-        })
-        expect(fetchedCCs.data.length).toEqual(2)
+        await assertClientStatusFilter(CCCreatedRightBefore, 'inactive', 2)
 
         console.log("--- Check that REMOVED filter works properly. ---")
         console.log(`Remove all CUs from target CC: ${chosenCC}...`)
@@ -215,12 +204,7 @@ describe(
         await waitSubgraphToIndex()
 
         // Assert that status of CC the same after remove of CUs from CC.
-        fetchedCCs = await explorerClient.getCapacityCommitments({
-          createdAtFrom: CCCreatedRightBefore,
-          status: "inactive"
-        })
-        expect(fetchedCCs.data.length).toEqual(2)
-        await assertNothingForStatus(CCCreatedRightBefore, 'failed')
+        await assertClientStatusFilter(CCCreatedRightBefore, 'inactive', 2)
 
         // Target check for this block.
         console.log(`Send finishCommitment for the target CC: ${chosenCC}`)
@@ -228,22 +212,19 @@ describe(
         await finishCCTx.wait(WAIT_CONFIRMATIONS)
         await waitSubgraphToIndex()
 
-        await assertNothingForStatus(CCCreatedRightBefore, 'waitStart')
-        await assertNothingForStatus(CCCreatedRightBefore, 'waitDelegation')
-        // TODO: inactive (1).
-        await assertNothingForStatus(CCCreatedRightBefore, 'failed')
+        await assertClientStatusFilter(CCCreatedRightBefore, 'waitStart', 0)
+        await assertClientStatusFilter(CCCreatedRightBefore, 'waitDelegation', 0)
+        // TODO: remove only
+        // We still have 1 untouched CC.
+        await assertClientStatusFilter(CCCreatedRightBefore, 'inactive', 1)
+        await assertClientStatusFilter(CCCreatedRightBefore, 'failed', 0)
 
         // Target check on chain.
         statusCCFromChain = Number(await capacityContract.getStatus(chosenCC))
         expect(statusCCFromChain).toEqual(CommitmentStatus.Removed)
-        // Target check of client.
-        fetchedCCs = await explorerClient.getCapacityCommitments({
-          createdAtFrom: CCCreatedRightBefore,
-          status: "removed"
-        })
-        // We removed only 1 CC (chosenCC).
-        expect(fetchedCCs.data.length).toEqual(1)
-        expect(fetchedCCs.data[0].id).toEqual(chosenCC)
+        // Target check of client, we removed only 1 CC out of 2.
+        const fetchedTargetCC = await assertClientStatusFilter(CCCreatedRightBefore, 'removed', 1)
+        expect(fetchedTargetCC.data[0].id).toEqual(chosenCC)
       });
     })
 
