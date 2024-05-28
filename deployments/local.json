@@ -20,8 +20,8 @@
   "CoreImpl": {
     "addr": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
     "blockNumber": 30,
-    "codeHash": "0x3bd77eccccc029f3869182e5b1621b541d9867a581ababe883ed5b78351ebce4",
-    "creationCodeHash": "0x0c67b8d5835c91513a61c3c40169ec8278a70516b5c11a8e7dce0ac9c603bcaf"
+    "codeHash": "0xbdecb1cccccb1ee21be01242a57ea26c5a6ede1626d7c0188b4944e1486febdd",
+    "creationCodeHash": "0xf36295dc45a867bed6ee9be19d53b364fa1308f8b791102878b11721ab7f11ac"
   },
   "DealFactory": {
     "addr": "0x59b670e9fA9D0A427751Af201D676719a970857b",
