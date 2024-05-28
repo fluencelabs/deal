@@ -37,15 +37,17 @@ export interface ChildEntitiesByProviderFilter {
   status?: ProviderChildEntityStatusFilter | undefined;
 }
 
+// @param status: do not specify status to retrieve all
 export interface CapacityCommitmentsByProviderFilter {
   providerId: string;
   status?: CapacityCommitmentsStatusFilter | undefined;
 }
 
 // @param peerId: the id of the peer in base58 format.
-export interface ChildEntitiesByPeerFilter {
+// @param status: do not specify status to retrieve all
+export interface CapacityCommitmentsByPeerFilter {
   peerId: string;
-  status?: ProviderChildEntityStatusFilter | undefined;
+  status?: CapacityCommitmentsStatusFilter | undefined;
 }
 
 // @dev Where is "OnlyActive" filter? - currently, it should be filtered by

@@ -50,7 +50,7 @@ import type {
   ComputeUnitsOrderBy,
   ProofStatsByCapacityCommitmentOrderBy,
   ComputeUnitStatsPerCapacityCommitmentEpochOrderBy,
-  ChildEntitiesByPeerFilter,
+  CapacityCommitmentsByPeerFilter,
   CapacityCommitmentsByProviderFilter,
 } from "./types/filters.js";
 import { IndexerClient } from "./indexerClient/indexerClient.js";
@@ -379,7 +379,7 @@ export class DealExplorerClient {
 
   // @notice [Figma] Peer ID. Capacity Commitments.
   async getCapacityCommitmentsByPeer(
-    capacityCommitmentsByProviderFilter: ChildEntitiesByPeerFilter,
+    capacityCommitmentsByProviderFilter: CapacityCommitmentsByPeerFilter,
     offset: number = 0,
     limit: number = this.DEFAULT_PAGE_LIMIT,
     orderBy: CapacityCommitmentsOrderBy = "createdAt",
@@ -390,8 +390,7 @@ export class DealExplorerClient {
       search: peerIdByte58toContractHex(capacityCommitmentsByProviderFilter.peerId),
     };
     if (
-      capacityCommitmentsByProviderFilter.status &&
-      capacityCommitmentsByProviderFilter.status != "all"
+      capacityCommitmentsByProviderFilter.status
     ) {
       convertedFilters.status = capacityCommitmentsByProviderFilter.status;
     }
