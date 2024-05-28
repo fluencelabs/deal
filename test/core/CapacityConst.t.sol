@@ -170,10 +170,11 @@ contract CapacityConstTest is TestWithDeployment {
         _initCapacityConst(args);
 
         address sender = address(0x1234567890123456789012345678901234567890);
-        vm.prank(sender);
+        vm.startPrank(sender);
 
         vm.expectRevert(abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, sender));
         capacityConst.setCapacityConstant(ICapacityConst.CapacityConstantType.MinDuration, 10);
+        vm.stopPrank();
     }
 
     function test_setPrice() public {
@@ -207,17 +208,25 @@ contract CapacityConstTest is TestWithDeployment {
         uint256 newPrice = 4 * PRECISION;
 
         // #region set price in first epoch
-        vm.prank(NOT_AN_OWNER);
+        vm.startPrank(NOT_AN_OWNER);
         vm.expectRevert(abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, NOT_AN_OWNER));
         capacityConst.setOracle(address(12345678));
+        vm.stopPrank();
 
         capacityConst.setOracle(address(12345678));
+
         vm.expectRevert("Only oracle can set FLT price");
         capacityConst.setFLTPrice(newPrice);
 
+        vm.expectEmit(false, false, false, true);
+        emit ICapacityConst.OracleSet(args.oracle);
         capacityConst.setOracle(args.oracle);
-        vm.prank(args.oracle);
+
+        vm.startPrank(args.oracle);
+        vm.expectEmit(false, false, false, true);
+        emit ICapacityConst.FLTPriceUpdated(newPrice);
         capacityConst.setFLTPrice(newPrice);
+        vm.stopPrank();
 
         assertEq(capacityConst.fltPrice(), newPrice, "fltPrice not changed");
         assertEq(
@@ -235,8 +244,9 @@ contract CapacityConstTest is TestWithDeployment {
         uint256 nextEpoch = currentEpoch + 1;
 
         _skipEpochs(1);
-        vm.prank(args.oracle);
+        vm.startPrank(args.oracle);
         capacityConst.setFLTPrice(newPrice);
+        vm.stopPrank();
 
         assertEq(capacityConst.fltPrice(), newPrice, "second epoch: fltPrice not changed");
         assertEq(
@@ -256,8 +266,9 @@ contract CapacityConstTest is TestWithDeployment {
 
         // #region set price in second epoch again
         newPrice = PRECISION / 20;
-        vm.prank(args.oracle);
+        vm.startPrank(args.oracle);
         capacityConst.setFLTPrice(newPrice);
+        vm.stopPrank();
 
         assertEq(capacityConst.fltPrice(), newPrice, "second epoch again: fltPrice not changed");
         assertEq(
