@@ -79,7 +79,7 @@ describe(
     }
 
     describe("#getCapacityCommitments", () => {
-      test.only("It filters by status correctly.", async () => {
+      test("It filters by status correctly.", async () => {
               // Prepare data.
         const effectors = [generateEffector()];
         const marketFixture = getMarketExampleFixture(
@@ -214,7 +214,6 @@ describe(
 
         await assertClientStatusFilter(CCCreatedRightBefore, 'waitStart', 0)
         await assertClientStatusFilter(CCCreatedRightBefore, 'waitDelegation', 0)
-        // TODO: remove only
         // We still have 1 untouched CC.
         await assertClientStatusFilter(CCCreatedRightBefore, 'inactive', 1)
         await assertClientStatusFilter(CCCreatedRightBefore, 'failed', 0)
