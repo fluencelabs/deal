@@ -261,7 +261,6 @@ export function serializeCapacityCommitmentsFiltersToIndexer(
         deleted: false,
       })
     } else if (v.status == 'active') {
-      // TODO: check with matcher.
       convertedFilters.and?.push({
         // The last stored status by events should be exactly WaitStart.
         status: "WaitStart",
@@ -303,36 +302,6 @@ export function serializeCapacityCommitmentsFiltersToIndexer(
     }
 
   }
-  console.log('TODO', currentEpoch)
-  // // TODO: deprecate onlyActive.
-  // if (v.onlyActive || (v.status && v.status == "active")) {
-  //   if (currentEpoch == undefined) {
-  //     throw new Error(
-  //       "Assertion: currentEpoch is undefined but v.onlyActive filter is used.",
-  //     );
-  //   }
-  //   convertedFilters.and?.push({
-  //     // Duplication as it is in DealExplorerClient: serializeCapacityCommitmentsFiltersToIndexer.
-  //     startEpoch_lte: currentEpoch,
-  //     endEpoch_gt: currentEpoch,
-  //     // On each submitProof indexer should save nextCCFailedEpoch, and
-  //     //  in query we relay on that field to filter Failed CC.
-  //     nextCCFailedEpoch_gt: currentEpoch,
-  //     deleted: false,
-  //     // Wait delegation is duplicating startEpoch_lte check, though.
-  //     status_not_in: ["WaitDelegation", "Removed", "Failed"],
-  //   });
-  // }
-  // if (v.status && v.status == "inactive") {
-  //   if (currentEpoch == undefined) {
-  //     throw new Error(
-  //       "Assertion: currentEpoch is undefined but v.onlyActive filter is used.",
-  //     );
-  //   }
-  //   convertedFilters.and?.push({
-  //     endEpoch_lte: currentEpoch,
-  //   });
-  // }
   return convertedFilters;
 }
 
