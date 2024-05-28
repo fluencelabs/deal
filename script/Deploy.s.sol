@@ -21,7 +21,8 @@ contract DeployContracts is Deployment, Script {
     uint256 constant LOCAL_tUSD_BALANCE = 1000000 ether;
 
     // ------------------ Default constant ------------------
-    uint256 constant DEFAULT_EPOCH_DURATION = 15 seconds;
+    // need to make it longer than integration tests, so 3600s
+    uint256 constant DEFAULT_EPOCH_DURATION = 3600 seconds;
     uint256 constant DEFAULT_MIN_DEPOSITED_EPOCHS = 2;
     uint256 constant DEFAULT_MIN_REMATCHING_EPOCHS = 2;
     uint256 constant DEFAULT_MIN_PROTOCOL_VERSION = 1;

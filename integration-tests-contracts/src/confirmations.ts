@@ -61,7 +61,7 @@ export function checkEvent<E extends TypedContractEvent>(
 
   return tx.logs.filter((log): log is EventLog => {
     if (!isEventLog(log)) {
-      throw new Error("Log doesn't contain args");
+      return false;
     }
 
     return log.topics[0] === event.fragment.topicHash;

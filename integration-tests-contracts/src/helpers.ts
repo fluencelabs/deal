@@ -1,8 +1,12 @@
 import { getDefaultOfferFixture, randomCID } from "./fixtures.js";
 import { type ICapacity, type IMarket } from "@fluencelabs/deal-ts-clients";
-import { CC_DURATION_DEFAULT, DEFAULT_CONFIRMATIONS } from "./constants.js";
+import {
+  CC_DURATION_DEFAULT,
+  CC_PRECISION,
+  DEFAULT_CONFIRMATIONS, DEFAULT_DELEGATION_RATE
+} from "./constants.js";
 import { assert, expect } from "vitest";
-import { checkEvents } from "./confirmations.js";
+import { checkEvent, checkEvents } from "./confirmations.js";
 
 export interface RegisterMarketOfferReturnValue
   extends Omit<
@@ -20,10 +24,14 @@ export async function registerMarketOffer(
   market: IMarket,
   signerAddress: string,
   paymentTokenAddress: string,
+  peers: number = 1,
+  cus: number = 1,
 ): Promise<RegisterMarketOfferReturnValue> {
   const registeredOffer = getDefaultOfferFixture(
     signerAddress,
     paymentTokenAddress,
+    peers,
+    cus,
   );
 
   console.log("Register Provider by setProviderInfo...");
@@ -68,7 +76,7 @@ export async function registerMarketOffer(
 
 export async function createCommitments(
   capacity: ICapacity,
-  signerAddress: string,
+  delegator: string,
   peerIds: string[],
   _duration: bigint | undefined = undefined,
 ) {
@@ -88,8 +96,8 @@ export async function createCommitments(
     const createCommitmentTx = await capacity.createCommitment(
       peerId,
       duration,
-      signerAddress,
-      1,
+      delegator,
+      DEFAULT_DELEGATION_RATE,
     );
     await createCommitmentTx.wait(DEFAULT_CONFIRMATIONS);
   }
@@ -118,6 +126,7 @@ export async function depositCollateral(
 
   for (const commitmentId of commitmentIds) {
     const commitment = await capacity.getCommitment(commitmentId);
+    console.log(commitment.collateralPerUnit, "collateralPerUnit");
     const collateralToApproveCommitment =
       commitment.collateralPerUnit * commitment.unitCount;
     console.log(
@@ -137,21 +146,20 @@ export async function depositCollateral(
     "...",
   );
 
-  const depositCollateralTx = await capacity.depositCollateral(commitmentIds, {
-    value: collateralToApproveCommitments,
-  });
-  await depositCollateralTx.wait(DEFAULT_CONFIRMATIONS);
-  await checkEvents(
-    capacity,
+  const depositCollateralReceipt = await capacity
+    .depositCollateral(commitmentIds, {
+      value: collateralToApproveCommitments,
+    })
+    .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
+
+  const depositEvents = checkEvent(
     capacity.filters.CollateralDeposited,
-    1,
-    depositCollateralTx,
+    depositCollateralReceipt,
   );
-  const [activatedEvent] = await checkEvents(
-    capacity,
+  expect(depositEvents.length).toEqual(commitmentIds.length);
+  const activatedEvents = checkEvent(
     capacity.filters.CommitmentActivated,
-    1,
-    depositCollateralTx,
+    depositCollateralReceipt,
   );
-  assert(activatedEvent, "CC not activated");
+  expect(activatedEvents.length).toEqual(commitmentIds.length);
 }
