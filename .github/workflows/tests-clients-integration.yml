@@ -1,11 +1,12 @@
-name: "test"
+# This workflow is heavy due to dependencies on blockchain and Subgraph with its own dependencies.
+name: "test clients integration"
 
 on:
   pull_request:
     paths-ignore:
       - "**.md"
       - ".github/**"
-      - "!.github/workflows/test.yml"
+      - "!.github/workflows/tests-clients-integration.yml"
     types:
       - "labeled"
       - "synchronize"
@@ -21,10 +22,8 @@ env:
   FOUNDRY_PROFILE: "ci"
 
 jobs:
-  # TODO: rename to tests of Fluence Contracts.
-  # TODO: rename the workflow file to test-contracts-integration.yml
-  integration-tests:
-    name: "Integration tests"
+  integration-tests-clients:
+    name: "Integration Tests of Fluence Clients"
     runs-on: ubuntu-latest
 
     steps:
@@ -82,14 +81,6 @@ jobs:
           forge --version
           forge build --sizes
 
-      - name: Run Forge tests
-        run: make test-contracts
-
-      - name: Compare current storage layout to dump
-        working-directory: storage-checker
-        run: node compare.js
-        continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'review-storage-layout-change') }}
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -125,13 +116,23 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Run docker network
+      - name: Run docker network for Chain & Subgraph & Deploy contracts
         env:
           CHAIN_RPC_IMAGE: "chain-rpc"
           CHAIN_DEPLOY_SCRIPT_IMAGE: "chain-deploy-script"
-          EPOCH_DURATION: "86400"
-        run: docker compose up -d chain-rpc && docker compose up chain-deploy-script
+        run: docker compose up -d chain-rpc ipfs postgres graph-node && docker compose up chain-deploy-script
         working-directory: docker
+
+      # TODO: Build images for subgraph deploy scripts after success chain deploy and artifacts stored instead of execution below.
+
+      - name: Install deps in Subgraph package
+        run: npm install
+        working-directory: subgraph
+
+      # TODO: there should be use of "subgraph-deploy-script" image instead.
+      - name: Deploy Local Subgraph
+        run: npm run compile && npm run import-config-networks && npm run create:local && npm run deploy:local
+        working-directory: subgraph
 
       - name: Install deps in ts-client package
         run: npm install
@@ -141,12 +142,17 @@ jobs:
         run: npm run build
         working-directory: ts-client
 
-      - name: Install packed ts-client
+      - name: Run Unittests in ts-client package
+        run: npm test unittests
+        working-directory: ts-client
+
+      - name: Install packed ts-client in test module
         run: npm i
-        working-directory: integration-tests-contracts
+        working-directory: integration-tests-clients
 
       - name: Run integration tests
         run: npm run test
-        working-directory: integration-tests-contracts
+        working-directory: integration-tests-clients
         env:
           RPC_URL: "http://localhost:8545"
+#          TODO: add other envs after test refactor.
