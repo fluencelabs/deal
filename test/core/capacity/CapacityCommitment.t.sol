@@ -222,7 +222,7 @@ contract CapacityCommitmentTest is TestWithDeployment {
         vm.startPrank(peerOwner);
 
         bytes32 localUnitNonce = keccak256(abi.encodePacked("localUnitNonce"));
-        bytes32 targetHash = bytes32(uint256(deployment.core.difficulty()) - 1);
+        bytes32 targetHash = deployment.core.difficulty();
 
         vm.expectEmit(true, true, true, false, address(deployment.capacity));
         emit ProofSubmitted(commitmentId, unitId, localUnitNonce);
@@ -246,7 +246,7 @@ contract CapacityCommitmentTest is TestWithDeployment {
         // warp to next epoch
         StdCheats.skip(deployment.core.epochDuration());
 
-        bytes32 targetHash = bytes32(uint256(deployment.core.difficulty()) - 1);
+        bytes32 targetHash = deployment.core.difficulty();
         //TODO: vm mock not working here :(
         vm.etch(address(Actor.CALL_ACTOR_ID), address(new MockActorCallActorPrecompile(targetHash)).code);
 
