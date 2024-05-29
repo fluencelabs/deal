@@ -228,7 +228,7 @@ contract CapacityCommitmentTest is TestWithDeployment {
         // RandomXProxyMock returns difficulty
         bytes32 targetHash = deployment.core.difficulty();
 
-        vm.expectEmit(true, true, true, false, address(deployment.capacity));
+        vm.expectEmit(true, true, false, true, address(deployment.capacity));
         emit ProofSubmitted(commitmentId, unitId, localUnitNonce);
 
         deployment.capacity.submitProof(unitId, localUnitNonce, targetHash);
@@ -257,7 +257,7 @@ contract CapacityCommitmentTest is TestWithDeployment {
             // RandomXProxyMock returns difficulty
             targetHashes[i] = deployment.core.difficulty();
 
-            vm.expectEmit(true, true, true, false, address(deployment.capacity));
+            vm.expectEmit(true, true, false, true, address(deployment.capacity));
             emit ProofSubmitted(commitmentId, unitIds[i], localUnitNonces[i]);
         }
 
@@ -356,7 +356,7 @@ contract CapacityCommitmentTest is TestWithDeployment {
         for (uint256 i = 0; i < maxProofsPerEpoch; i++) {
             bytes32 localUnitNonce_ = keccak256(abi.encodePacked("localUnitNonce", i));
 
-            vm.expectEmit(true, true, true, false, address(deployment.capacity));
+            vm.expectEmit(true, true, false, true, address(deployment.capacity));
             emit ProofSubmitted(commitmentId, unitId, localUnitNonce_);
 
             deployment.capacity.submitProof(unitId, localUnitNonce_, targetHash);

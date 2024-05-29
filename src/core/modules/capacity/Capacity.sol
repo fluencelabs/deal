@@ -286,9 +286,10 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         }
         // #endregion
 
-        bytes32[] memory globalUnitNonces = new bytes32[](unitIds.length);
+        uint256 proofsLength = unitIds.length;
+        bytes32[] memory globalUnitNonces = new bytes32[](proofsLength);
 
-        for (uint256 i = 0; i < unitIds.length; i++) {
+        for (uint256 i = 0; i < proofsLength; i++) {
             // #region init and verify variables
             bytes32 unitId = unitIds[i];
             bytes32 localUnitNonce = localUnitNonces[i];
@@ -320,6 +321,7 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
             _commitUnitSnapshot(cc, unitInfo, currentEpoch, expiredEpoch, snapshotCache.current.failedEpoch);
             // #endregion
 
+            // TODO: Is it necessary to calculate next global nonce each proof? Maybe once per transaction is enough?
             // pseudo-random next global nonce
             s.nextGlobalNonce = keccak256(
                 abi.encodePacked(s.globalNonce, blockhash(block.number - 1), unitId, localUnitNonce, resultHash)
@@ -383,9 +385,9 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
 
         bytes32[] memory hashes = abi.decode(result, (bytes32[]));
 
-        require(hashes.length == unitIds.length, "Invalid result length");
+        require(hashes.length == proofsLength, "Invalid result length");
 
-        for (uint256 i = 0; i < unitIds.length; i++) {
+        for (uint256 i = 0; i < proofsLength; i++) {
             require(hashes[i] == resultHashes[i], "Proof is not valid");
             require(hashes[i] <= core.difficulty(), "Proof is bigger than difficulty");
         }
