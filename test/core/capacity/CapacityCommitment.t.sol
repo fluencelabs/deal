@@ -222,13 +222,11 @@ contract CapacityCommitmentTest is TestWithDeployment {
         vm.startPrank(peerOwner);
 
         bytes32 localUnitNonce = keccak256(abi.encodePacked("localUnitNonce"));
+        // RandomXProxyMock returns difficulty
         bytes32 targetHash = deployment.core.difficulty();
 
         vm.expectEmit(true, true, true, false, address(deployment.capacity));
         emit ProofSubmitted(commitmentId, unitId, localUnitNonce);
-
-        //TODO: vm mock not working here :(
-        vm.etch(address(Actor.CALL_ACTOR_ID), address(new MockActorCallActorPrecompile(targetHash)).code);
 
         deployment.capacity.submitProof(unitId, localUnitNonce, targetHash);
 
@@ -246,9 +244,8 @@ contract CapacityCommitmentTest is TestWithDeployment {
         // warp to next epoch
         StdCheats.skip(deployment.core.epochDuration());
 
+        // RandomXProxyMock returns difficulty
         bytes32 targetHash = deployment.core.difficulty();
-        //TODO: vm mock not working here :(
-        vm.etch(address(Actor.CALL_ACTOR_ID), address(new MockActorCallActorPrecompile(targetHash)).code);
 
         vm.startPrank(peerOwner);
         uint256 maxProofsPerEpoch = deployment.core.maxProofsPerEpoch();
@@ -371,22 +368,4 @@ contract CapacityCommitmentTest is TestWithDeployment {
 
     receive() external payable {}
 }
-
-contract MockActorCallActorPrecompile {
-    bytes32 immutable targetHash;
-
-    fallback() external {
-        bytes memory cborEncoded = abi.encodePacked(bytes1(0x81), bytes1(0xC2), bytes1(0x58), bytes1(0x20), targetHash);
-
-        bytes memory ret = abi.encode(int256(0), uint64(Misc.CBOR_CODEC), cborEncoded);
-        uint256 length = ret.length;
-
-        assembly {
-            return(add(ret, 0x20), length)
-        }
-    }
-
-    constructor(bytes32 targetHash_) {
-        targetHash = targetHash_;
-    }
-}
+ 

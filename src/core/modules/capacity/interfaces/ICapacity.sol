@@ -160,12 +160,6 @@ interface ICapacity {
         uint256 exitedUnitCount;
     }
 
-    struct UnitProof {
-        bytes32 unitId;
-        bytes32 localUnitNonce;
-        bytes32 resultHash;
-    }
-
     // ------------------ Initializer ------------------
     function initialize(bytes32 initGlobalNonce_) external;
 
@@ -220,13 +214,19 @@ interface ICapacity {
     function depositCollateral(bytes32[] calldata commitmentIds) external payable;
 
     /// @dev Submits proofs for the commitment
-    /// @param proofs Proofs for units, each containing unitId, localUnitNonce and resultHash
-    function submitProofs(UnitProof[] calldata proofs) external;
+    /// @param unitIds Compute unit ids which provide the proof
+    /// @param localUnitNonces Local nonces of the units for calculating the target hashes. It's the proof
+    /// @param resultHashes Target hashes of this proof
+    function submitProofs(
+        bytes32[] memory unitIds,
+        bytes32[] memory localUnitNonces,
+        bytes32[] memory resultHashes
+    ) external;
 
     /// @dev Submits a proof for the commitment
     /// @param unitId Compute unit id which provide the proof
-    /// @param localUnitNonce The local nonce of the unit for calculating the target hash. It's the proof
-    /// @param resultHash The target hash of this proof
+    /// @param localUnitNonce Local nonce of the unit for calculating the target hash. It's the proof
+    /// @param resultHash Target hash of this proof
     function submitProof(bytes32 unitId, bytes32 localUnitNonce, bytes32 resultHash) external;
 
     /// @dev Remove CU from Ended or Failed CC. Need to call this function before finish the commitment

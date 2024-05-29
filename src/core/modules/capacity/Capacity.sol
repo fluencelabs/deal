@@ -263,7 +263,15 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         require(totalValue == 0, "Excessive value");
     }
 
-    function submitProofs(UnitProof[] memory proofs) public {
+    function submitProofs(
+        bytes32[] memory unitIds,
+        bytes32[] memory localUnitNonces,
+        bytes32[] memory resultHashes
+    ) public {
+        require(unitIds.length > 0, "No proofs given");
+        require(unitIds.length == localUnitNonces.length, "Invalid local nonces number");
+        require(unitIds.length == resultHashes.length, "Invalid result hashes number");
+
         // #region load contracts and storage
         IMarket market = core.market();
         CommitmentStorage storage s = _getCommitmentStorage();
@@ -278,16 +286,13 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         }
         // #endregion
 
-        bytes32[] memory localUnitNonces = new bytes32[](proofs.length);
-        bytes32[] memory globalUnitNonces = new bytes32[](proofs.length);
+        bytes32[] memory globalUnitNonces = new bytes32[](unitIds.length);
 
-        for (uint256 i = 0; i < proofs.length; i++) {
+        for (uint256 i = 0; i < unitIds.length; i++) {
             // #region init and verify variables
-            bytes32 unitId = proofs[i].unitId;
-            bytes32 localUnitNonce = proofs[i].localUnitNonce;
-            bytes32 resultHash = proofs[i].resultHash;
-
-            localUnitNonces[i] = localUnitNonce;
+            bytes32 unitId = unitIds[i];
+            bytes32 localUnitNonce = localUnitNonces[i];
+            bytes32 resultHash = resultHashes[i];
 
             IMarket.ComputeUnit memory unit = market.getComputeUnit(unitId);
             IMarket.ComputePeer memory peer = market.getComputePeer(unit.peerId);
@@ -378,20 +383,25 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
 
         bytes32[] memory hashes = abi.decode(result, (bytes32[]));
 
-        require(hashes.length == proofs.length, "Invalid result length");
+        require(hashes.length == unitIds.length, "Invalid result length");
 
-        for (uint256 i = 0; i < proofs.length; i++) {
-            require(hashes[i] == proofs[i].resultHash, "Proof is not valid");
+        for (uint256 i = 0; i < unitIds.length; i++) {
+            require(hashes[i] == resultHashes[i], "Proof is not valid");
             require(hashes[i] <= core.difficulty(), "Proof is bigger than difficulty");
         }
         // #endregion
     }
 
     function submitProof(bytes32 unitId, bytes32 localUnitNonce, bytes32 resultHash) external {
-        UnitProof[] memory proofs = new UnitProof[](1);
-        proofs[0] = UnitProof(unitId, localUnitNonce, resultHash);
+        bytes32[] memory unitIds = new bytes32[](1);
+        bytes32[] memory localUnitNonces = new bytes32[](1);
+        bytes32[] memory resultHashes = new bytes32[](1);
 
-        submitProofs(proofs);
+        unitIds[0] = unitId;
+        localUnitNonces[0] = localUnitNonce;
+        resultHashes[0] = resultHash;
+
+        submitProofs(unitIds, localUnitNonces, resultHashes);
     }
 
     function finishCommitment(bytes32 commitmentId) external {
