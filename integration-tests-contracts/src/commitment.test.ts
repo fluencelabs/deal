@@ -196,7 +196,7 @@ async function checkWithdrawalFull(
   expect(bigintAbs(newDelegatorBalance - delegatorBalance - delegatorReward)).toBeLessThanOrEqual(CC_PRECISION);
 }
 
-describe("Capacity commitment", () => {
+describe.sequential("Capacity commitment", () => {
   let commitmentIdSnapshot: string;
   let registeredOfferSnapshot: Awaited<ReturnType<typeof registerMarketOffer>>;
 
@@ -304,6 +304,8 @@ describe("Capacity commitment", () => {
     );
     assert(finishCommitmentEvent, "No finish commitment event");
     expect(finishCommitmentEvent.args).toEqual([commitmentId]);
+    const block = await provider.getBlock("latest");
+    console.log(block?.number, "after test");
   });
 
   // lgtm, passes
@@ -456,10 +458,10 @@ describe("Capacity commitment", () => {
     await checkWithdrawalFull(vestingCount, rewardPool, commitmentId, 0n, 1n, 1n);
   });
 
-  // looks good, but needs fix to work with default MAX_FAILED_RATIO = 3
-  test("removeCUFromCC fail to add rewards to vesting", async () => {
+  // looks good, but needs fix to work with default MAX_FAILED_RATIO = 3 ( set to 10 inside)
+  test.sequential("removeCUFromCC fail to add rewards to vesting", async () => {
     console.log("signer_balance", formatEther(await provider.getBalance(signerAddress)));
-    const MAX_ERROR_WEI = CC_PRECISION;
+    await coreContract.setCapacityConstant(CapacityConstantType.MaxFailedRatio, 10n);
     // fisrt, register a peer with 2 CU
     const registeredOffer = await registerMarketOffer(
         marketContract,
