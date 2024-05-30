@@ -564,132 +564,132 @@
   "Snapshot.sol/Snapshot.json": [],
   "StorageMocks.sol/CapacityConstStorageMock.json": [
     {
-      "astId": 29987,
+      "astId": 30060,
       "contract": "src/mocks/StorageMocks.sol:CapacityConstStorageMock",
       "label": "_capacityConstStorage",
       "offset": 0,
       "slot": "0",
-      "type": "t_struct(ConstStorage)16630_storage"
+      "type": "t_struct(ConstStorage)16632_storage"
     }
   ],
   "StorageMocks.sol/CapacityStorageMock.json": [
     {
-      "astId": 29999,
+      "astId": 30072,
       "contract": "src/mocks/StorageMocks.sol:CapacityStorageMock",
       "label": "_capacityStorage",
       "offset": 0,
       "slot": "0",
-      "type": "t_struct(CommitmentStorage)18817_storage"
+      "type": "t_struct(CommitmentStorage)18890_storage"
     }
   ],
   "StorageMocks.sol/ConfigStorageMock.json": [
     {
-      "astId": 30019,
+      "astId": 30092,
       "contract": "src/mocks/StorageMocks.sol:ConfigStorageMock",
       "label": "_configStorage",
       "offset": 0,
       "slot": "0",
-      "type": "t_struct(ConfigStorage)26214_storage"
+      "type": "t_struct(ConfigStorage)26287_storage"
     }
   ],
   "StorageMocks.sol/CoreStorageMock.json": [
     {
-      "astId": 29983,
+      "astId": 30056,
       "contract": "src/mocks/StorageMocks.sol:CoreStorageMock",
       "label": "_coreStorage",
       "offset": 0,
       "slot": "0",
-      "type": "t_struct(CoreStorage)17685_storage"
+      "type": "t_struct(CoreStorage)17745_storage"
     }
   ],
   "StorageMocks.sol/DealFactoryStorageMock.json": [
     {
-      "astId": 30011,
+      "astId": 30084,
       "contract": "src/mocks/StorageMocks.sol:DealFactoryStorageMock",
       "label": "_dealFactoryStorage",
       "offset": 0,
       "slot": "0",
-      "type": "t_struct(DealFactoryStorage)22858_storage"
+      "type": "t_struct(DealFactoryStorage)22931_storage"
     }
   ],
   "StorageMocks.sol/DealStorageMock.json": [
     {
-      "astId": 30015,
+      "astId": 30088,
       "contract": "src/mocks/StorageMocks.sol:DealStorageMock",
       "label": "_dealStorage",
       "offset": 0,
       "slot": "0",
-      "type": "t_struct(DealStorage)29097_storage"
+      "type": "t_struct(DealStorage)29170_storage"
     }
   ],
   "StorageMocks.sol/EpochControllerStorageMock.json": [
     {
-      "astId": 29991,
+      "astId": 30064,
       "contract": "src/mocks/StorageMocks.sol:EpochControllerStorageMock",
       "label": "_epochControllerStorage",
       "offset": 0,
       "slot": "0",
-      "type": "t_struct(EpochControllerStorage)17990_storage"
+      "type": "t_struct(EpochControllerStorage)18050_storage"
     }
   ],
   "StorageMocks.sol/GlobalStorageMock.json": [
     {
-      "astId": 29995,
+      "astId": 30068,
       "contract": "src/mocks/StorageMocks.sol:GlobalStorageMock",
       "label": "_globalStorage",
       "offset": 0,
       "slot": "0",
-      "type": "t_struct(GlobalConstStorage)18105_storage"
+      "type": "t_struct(GlobalConstStorage)18165_storage"
     }
   ],
   "StorageMocks.sol/MatcherStorageMock.json": [
     {
-      "astId": 30003,
+      "astId": 30076,
       "contract": "src/mocks/StorageMocks.sol:MatcherStorageMock",
       "label": "_matcherStorage",
       "offset": 0,
       "slot": "0",
-      "type": "t_struct(MatcherStorage)23152_storage"
+      "type": "t_struct(MatcherStorage)23225_storage"
     }
   ],
   "StorageMocks.sol/OfferStorageMock.json": [
     {
-      "astId": 30007,
+      "astId": 30080,
       "contract": "src/mocks/StorageMocks.sol:OfferStorageMock",
       "label": "_offerStorage",
       "offset": 0,
       "slot": "0",
-      "type": "t_struct(OfferStorage)23659_storage"
+      "type": "t_struct(OfferStorage)23732_storage"
     }
   ],
   "StorageMocks.sol/OwnableUpgradableDiamondStorageMock.json": [
     {
-      "astId": 30027,
+      "astId": 30100,
       "contract": "src/mocks/StorageMocks.sol:OwnableUpgradableDiamondStorageMock",
       "label": "_ownableUpgradableDiamondStorage",
       "offset": 0,
       "slot": "0",
-      "type": "t_struct(OwnableStorage)30697_storage"
+      "type": "t_struct(OwnableStorage)30770_storage"
     }
   ],
   "StorageMocks.sol/WhitelistStorageMock.json": [
     {
-      "astId": 30031,
+      "astId": 30104,
       "contract": "src/mocks/StorageMocks.sol:WhitelistStorageMock",
       "label": "_whitelistStorage",
       "offset": 0,
       "slot": "0",
-      "type": "t_struct(WhitelistStorage)31087_storage"
+      "type": "t_struct(WhitelistStorage)31160_storage"
     }
   ],
   "StorageMocks.sol/WorkerManagerStorageMock.json": [
     {
-      "astId": 30023,
+      "astId": 30096,
       "contract": "src/mocks/StorageMocks.sol:WorkerManagerStorageMock",
       "label": "_workerManagerStorage",
       "offset": 0,
       "slot": "0",
-      "type": "t_struct(WorkerManagerStorage)28396_storage"
+      "type": "t_struct(WorkerManagerStorage)28469_storage"
     }
   ],
   "StorageSlotUpgradeable.sol/StorageSlotUpgradeable.json": [],
@@ -735,7 +735,7 @@
       "type": "t_string_storage"
     },
     {
-      "astId": 29405,
+      "astId": 29478,
       "contract": "src/dev/TestERC20.sol:TestERC20",
       "label": "_decimals",
       "offset": 0,
