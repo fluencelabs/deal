@@ -67,7 +67,8 @@ contract CoreTest is TestWithDeployment {
                 maxFailedRatio: TestWithDeployment.DEFAULT_MAX_FAILED_RATIO,
                 difficulty: TestWithDeployment.DEFAULT_DIFFICULTY_TARGET,
                 initRewardPool: TestWithDeployment.DEFAULT_INIT_REWARD_POOL,
-                randomXProxy: deployCode("out/RandomXProxy.sol/RandomXProxy.json")
+                randomXProxy: deployCode("out/RandomXProxy.sol/RandomXProxy.json"),
+                oracle: TestWithDeployment.DEFAULT_ORACLE
             })
         ) {
             assertEq(true, false, "Expected revert");
