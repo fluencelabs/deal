@@ -316,7 +316,8 @@ contract DeployContracts is Deployment, Script {
                         maxFailedRatio: maxFailedRatio_,
                         difficulty: difficulty_,
                         initRewardPool: initRewardPool_,
-                        randomXProxy: randomXProxy
+                        randomXProxy: randomXProxy,
+                        oracle: address(0)
                     })
                 )
             ),

@@ -14,6 +14,10 @@ interface ICapacityConst is IEpochController {
     /// @param newValue The new value of the constant
     event CapacityConstantUpdated(CapacityConstantType constantType, uint256 newValue);
 
+    /// @dev Emitted when new oracle address is set
+    /// @param oracle The oracle address
+    event OracleSet(address oracle);
+
     /// @dev Emitted when the FLT price is updated
     /// @param newValue The new value of the FLT price
     event FLTPriceUpdated(uint256 newValue);
@@ -53,6 +57,7 @@ interface ICapacityConst is IEpochController {
         bytes32 difficulty;
         uint256 initRewardPool;
         address randomXProxy;
+        address oracle;
     }
 
     // #region ------------------ External View Functions ------------------
@@ -121,5 +126,8 @@ interface ICapacityConst is IEpochController {
 
     /// @dev Sets a constant with a uint256 value
     function setCapacityConstant(CapacityConstantType constantType, uint256 v) external;
+
+    /// @dev Sets a new oracle
+    function setOracle(address oracle_) external;
     // #endregion ------------------ External Mutable Functions ------------------
 }

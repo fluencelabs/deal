@@ -56,6 +56,7 @@ contract CapacityConst is ICapacityConst, OwnableUpgradableDiamond, EpochControl
         CommitmentConst commitment;
         ProofConst proof;
         RewardConst reward;
+        address oracle;
     }
 
     function _getConstStorage() private pure returns (ConstStorage storage s) {
@@ -88,6 +89,7 @@ contract CapacityConst is ICapacityConst, OwnableUpgradableDiamond, EpochControl
         constantsStorage.proof.nextDifficulty = initArgs.difficulty;
 
         constantsStorage.randomXProxy = initArgs.randomXProxy;
+        constantsStorage.oracle = initArgs.oracle;
 
         constantsStorage.reward.rewardPoolPerEpochs.push(
             RewardPoolPerEpoch({epoch: currentEpoch(), value: initArgs.initRewardPool})
@@ -173,6 +175,10 @@ contract CapacityConst is ICapacityConst, OwnableUpgradableDiamond, EpochControl
         return _getConstStorage().randomXProxy;
     }
 
+    function oracle() public view returns (address) {
+        return _getConstStorage().oracle;
+    }
+
     function getRewardPool(uint256 epoch) public view returns (uint256) {
         if (epoch == 0) {
             revert("Min epoch is positive number");
@@ -204,8 +210,9 @@ contract CapacityConst is ICapacityConst, OwnableUpgradableDiamond, EpochControl
     // #endregion ------------------ External View Functions ------------------
 
     // #region ------------------ External Mutable Functions ------------------
-    function setFLTPrice(uint256 fltPrice_) public onlyOwner {
+    function setFLTPrice(uint256 fltPrice_) public {
         ConstStorage storage constantsStorage = _getConstStorage();
+        require(msg.sender == constantsStorage.oracle, "Only oracle can set FLT price");
         constantsStorage.fltPrice = fltPrice_;
 
         _setRewardPool(fltPrice_, constantsStorage.activeUnitCount);
@@ -264,6 +271,13 @@ contract CapacityConst is ICapacityConst, OwnableUpgradableDiamond, EpochControl
         }
 
         emit CapacityConstantUpdated(constantType, v);
+    }
+
+    function setOracle(address oracle_) external onlyOwner {
+        require(oracle_ != address(0), "Oracle shouldn't be zero address");
+        ConstStorage storage constantsStorage = _getConstStorage();
+        constantsStorage.oracle = oracle_;
+        emit OracleSet(oracle_);
     }
     // #endregion ------------------ External Mutable Functions ------------------
 
