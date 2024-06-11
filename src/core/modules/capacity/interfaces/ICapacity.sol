@@ -118,6 +118,7 @@ interface ICapacity {
         Vesting.Info vesting;
         mapping(bytes32 => UnitInfo) unitInfoById;
         mapping(bytes32 => bool) isUnitExited;
+        mapping(uint256 => uint256) successCountByEpoch;
     }
 
     struct CommitmentInfo {
