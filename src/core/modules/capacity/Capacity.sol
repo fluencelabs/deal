@@ -24,13 +24,6 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
     using Vesting for Vesting.Info;
     using Snapshot for Snapshot.Cache;
 
-    // #region ------------------ Types ------------------
-    struct RewardInfo {
-        uint256 minProofsPerEpoch;
-        uint256 totalSuccessProofs;
-    }
-    // #endregion
-
     // #region ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.capacity.storage.v1")) - 1);
 
@@ -137,6 +130,20 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         }
 
         return s.globalNonce;
+    }
+
+    function getRewardInfo(uint256 epoch) external view returns (RewardInfo memory) {
+        RewardInfo storage rewardInfo = _getCommitmentStorage().rewardInfoByEpoch[epoch];
+
+        if (rewardInfo.minProofsPerEpoch != 0) {
+            return rewardInfo;
+        }
+
+        return RewardInfo({
+            minProofsPerEpoch: core.minProofsPerEpoch(),
+            maxProofsPerEpoch: core.maxProofsPerEpoch(),
+            totalSuccessProofs: 0
+        });
     }
     // #endregion
 
@@ -310,9 +317,13 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         // #endregion
 
         uint256 unitProofCount = unitInfo.proofCountByEpoch[currentEpoch] + 1;
-        if (unitProofCount > core.maxProofsPerEpoch()) {
+
+        RewardInfo storage rewardInfo = _getOrSaveRewardPool(currentEpoch);
+        if (unitProofCount > rewardInfo.maxProofsPerEpoch) {
             revert TooManyProofs();
         }
+
+        uint256 minProofsPerEpoch_ = rewardInfo.minProofsPerEpoch;
 
         // #region save localUnitNonce
         bytes32 globalUnitNonce_ = keccak256(abi.encodePacked(s.globalNonce, unitId));
@@ -323,13 +334,6 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         // #region save info about proof
 
         // load unitProofCount and add one because we submit new proof
-
-        RewardInfo storage rewardInfo = s.rewardInfoByEpoch[currentEpoch];
-        uint256 minProofsPerEpoch_ = rewardInfo.minProofsPerEpoch;
-        if (minProofsPerEpoch_ == 0) {
-            minProofsPerEpoch_ = core.minProofsPerEpoch();
-            rewardInfo.minProofsPerEpoch = minProofsPerEpoch_;
-        }
 
         if (unitProofCount == minProofsPerEpoch_) {
             // if proofCount is equal to minRequiredCCProofs, then we have one success for the current epoch
@@ -877,6 +881,19 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
 
         delete unitInfo.proofCountByEpoch[nextEpochAfterLastSnapshot];
         // #endregion
+    }
+
+    function _getOrSaveRewardPool(uint256 epoch) internal returns (RewardInfo storage rewardInfo) {
+        CommitmentStorage storage s = _getCommitmentStorage();
+        rewardInfo = s.rewardInfoByEpoch[epoch];
+
+        if (rewardInfo.minProofsPerEpoch != 0) {
+            return rewardInfo;
+        }
+
+        rewardInfo.minProofsPerEpoch = core.minProofsPerEpoch();
+        rewardInfo.maxProofsPerEpoch = core.maxProofsPerEpoch();
+        rewardInfo.totalSuccessProofs = 0;
     }
     // #endregion
 }
