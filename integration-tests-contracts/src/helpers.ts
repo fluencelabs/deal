@@ -110,6 +110,9 @@ export async function createCommitments(
     filterCreatedCC,
     fromBlock.number,
   );
+  if (capacityCommitmentCreatedEvents.length != peerIds.length) {
+      console.log("unexpected created commitment number: expected =", peerIds.length, "actual =", capacityCommitmentCreatedEvents.length);
+  }
   // 1 CC for each peer.
   expect(capacityCommitmentCreatedEvents.length).toBe(createdCommitments);
 

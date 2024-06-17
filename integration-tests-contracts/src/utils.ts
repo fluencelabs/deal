@@ -27,26 +27,21 @@ export async function skipEpoch(
 
 export function snapshot(createSnapshot: () => Promise<void>) {
   let snapshotId: unknown;
-  let testIsRunning: boolean = false;
 
   beforeAll(async () => {
     await createSnapshot();
+    await provider.send("evm_setAutomine", [true]);
+    await provider.send("evm_setIntervalMining", [1]);
   }, 180000);
 
   beforeEach(async () => {
     snapshotId = await provider.send("evm_snapshot", []);
-    assert(!testIsRunning, "concurrent testing");
-    testIsRunning = true;
     const block = await provider.getBlock("latest");
     assert(block !== null, "Block is null");
     console.log(block.number, "beforeEach");
-    await provider.send("evm_setIntervalMining", [1]);
   });
 
   afterEach(async () => {
-    await provider.send("evm_setIntervalMining", [0]);
-    assert(testIsRunning, "concurrent testing");
-    testIsRunning = false;
     await provider.send("evm_revert", [snapshotId]);
     const block = await provider.getBlock("latest");
     assert(block !== null, "Block is null");

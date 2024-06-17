@@ -458,9 +458,8 @@ describe.sequential("Capacity commitment", () => {
     await checkWithdrawalFull(vestingCount, rewardPool, commitmentId, 0n, 1n, 1n);
   });
 
-  // looks good, but needs fix to work with default MAX_FAILED_RATIO = 3 ( set to 10 inside)
-  test.sequential("removeCUFromCC fail to add rewards to vesting", async () => {
-    console.log("signer_balance", formatEther(await provider.getBalance(signerAddress)));
+  // lgtm, passes
+  test("Vesting.add can reward for epoch from far past", async () => {
     await coreContract.setCapacityConstant(CapacityConstantType.MaxFailedRatio, 10n);
     // fisrt, register a peer with 2 CU
     const registeredOffer = await registerMarketOffer(
@@ -476,8 +475,11 @@ describe.sequential("Capacity commitment", () => {
     const vestingDuration = await coreContract.vestingPeriodDuration();
     const vestingCount = await coreContract.vestingPeriodCount();
     const rewardPool = await coreContract.getRewardPool(currentEpoch);
-    console.log(vestingDuration, vestingCount);
-
+    const minProofsPerEpoch = await coreContract.minProofsPerEpoch();
+    const maxProofsPerEpoch = await coreContract.maxProofsPerEpoch();
+    const maxFailedRatio = await coreContract.maxFailedRatio();
+    console.log(`min proofs ${minProofsPerEpoch}, max proofs ${maxProofsPerEpoch}, max_failed_ratio ${maxFailedRatio}`)
+    console.log("vesting params", vestingDuration, vestingCount);
 
     // create a really long commitment
     const [commitmentId] = await createCommitments(
@@ -490,10 +492,6 @@ describe.sequential("Capacity commitment", () => {
     console.log("Commitment is created", commitmentId);
 
     assert(commitmentId, "Commitment ID doesn't exist");
-
-    // set next epoch, so the vesting for the first epoch will happen right at the vesting point
-    const waitEpoch = (2n * vestingDuration - 0n) - (await coreContract.currentEpoch() % vestingDuration);
-    await skipEpoch(epochDuration, waitEpoch);
     await DepositCC([commitmentId], registeredOffer.peers, 50n);
 
     const cuId1 = registeredOffer.peers[0]?.unitIds[0];
@@ -509,34 +507,31 @@ describe.sequential("Capacity commitment", () => {
     const ccInfo = await capacityContract.getCommitment(commitmentId);
     console.log(ccInfo);
 
-    const minProofsPerEpoch = await coreContract.minProofsPerEpoch();
-    const maxProofsPerEpoch = await coreContract.maxProofsPerEpoch();
-    const maxFailedRatio = await coreContract.maxFailedRatio();
-    console.log(`min proofs ${minProofsPerEpoch}, max prrofs ${maxProofsPerEpoch}, max_failed_ratio ${maxFailedRatio}`)
-
     // send minimal number of proofs for CU2 at the start and dont send any more. That will hold vesting for CU2 until removeCUFromCC
-    console.log(`min proofs ${minProofsPerEpoch}, max prrofs ${maxProofsPerEpoch}, max_failed_ratio ${maxFailedRatio}`)
     console.log("epoch: ", await coreContract.currentEpoch())
 
     // send first proof for CU2
     await sendProof(signerAddress, cuId2, Number(minProofsPerEpoch), 1);
-    await skipEpoch(epochDuration, 1n);
-    //const epochAfterFirstProof = await coreContract.currentEpoch();
-    //const epochsToWait = vestingDuration - (epochAfterFirstProof % vestingDuration);
-    // No vesting should happen
-    expect(await capacityContract.totalRewards(commitmentId)).toBe(0n);
+
     // ensure that vesting start for CU1 will be different from "startEpoch" one
-    //await skipEpoch(epochDuration, epochsToWait);
+    await skipEpoch(epochDuration, 2n * vestingDuration);
+
+    // No vesting should happen for CU1
+    expect(await capacityContract.totalRewards(commitmentId)).toBe(0n);
+
     console.log("epoch: ", await coreContract.currentEpoch())
     console.log("commitment status: ", await capacityContract.getStatus(commitmentId))
+
     // send minimal number of proofs for CU1 for 1 epochs to record vesting
     await sendProof(signerAddress, cuId1, Number(minProofsPerEpoch), 1);
+
     // still no vesting should happen
     expect(await capacityContract.totalRewards(commitmentId)).toBe(0n);
-    await sendProof(signerAddress, cuId1, Number(minProofsPerEpoch), 1);
+
+    await sendProof(signerAddress, cuId1, Number(1), 1);
     {
       const totalRewards = await capacityContract.totalRewards(commitmentId)
-      expect(bigintAbs(totalRewards)).toBeLessThanOrEqual(1n * rewardPool);
+      expect(bigintAbs(totalRewards - 1n * rewardPool)).toBeLessThanOrEqual(CC_PRECISION);
     }
     // wait for many epochs to ensure CC is failed
     await skipEpoch(epochDuration, 40n);
@@ -548,7 +543,7 @@ describe.sequential("Capacity commitment", () => {
         .then((tx) => tx.wait(DEFAULT_CONFIRMATIONS));
   });
 
-  // lgtm, mostly passes but may be flaky with 10x lower error
+  // lgtm, passes
   test("Long-term CC with full reward withdrawals", async () => {
     const registeredOffer = await registerMarketOffer(
       marketContract,
