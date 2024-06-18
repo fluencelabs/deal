@@ -4,24 +4,15 @@ pragma solidity ^0.8.19;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
 import "forge-std/Script.sol";
-import "forge-std/Vm.sol";
-import "src/deal/Deal.sol";
-import "src/core/Core.sol";
-import "src/dev/OwnableFaucet.sol";
-import "src/dev/TestERC20.sol";
-import "./utils/Depoyments.sol";
+import "./utils/Deployment.sol";
 import "src/core/Core.sol";
 import "src/core/interfaces/ICore.sol";
-import "src/core/modules/market/Market.sol";
-import "src/core/modules/market/DealFactory.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
-import "src/core/modules/capacity/Capacity.sol";
 import "src/core/modules/capacity/interfaces/ICapacity.sol";
 import "src/utils/Multicall3.sol";
 
-contract DeployKras is Depoyments, Script {
+contract DeployKras is Deployment, Script {
     using SafeERC20 for IERC20;
 
     // ------------------ Default constant ------------------
@@ -74,7 +65,7 @@ contract DeployKras is Depoyments, Script {
         console.log("\nStart deploying...");
         console.log("Deployer address:", address(msg.sender));
 
-        Multicall3(_deployContract("Multicall3", "Multicall3", abi.encode()));
+        _deployContract("Multicall3", "Multicall3", abi.encode());
         address randomXProxy = _deployContract("RandomXProxy", "RandomXProxy", new bytes(0));
 
         address coreImpl = _deployContract("CoreImpl", "Core", new bytes(0));
@@ -94,22 +85,25 @@ contract DeployKras is Depoyments, Script {
                     MAX_PROTOCOL_VERSION,
                     dealImpl,
                     IS_WHITELIST_ENABLED,
-                    FLT_PRICE,
-                    USD_COLLATERAL_PER_UNIT,
-                    USD_TARGET_REVENUE_PER_EPOCH,
-                    MIN_DURATION,
-                    MIN_REWARD_PER_EPOCH,
-                    MAX_REWARD_PER_EPOCH,
-                    VESTING_PERIOD_DURATION,
-                    VESTING_PERIOD_COUNT,
-                    SLASHING_RATE,
-                    MIN_PROOFS_PER_EPOCH,
-                    MAX_PROOFS_PER_EPOCH,
-                    WITHDRAW_EPOCHS_AFTER_FAILED,
-                    MAX_FAILED_RATIO,
-                    DIFFICULTY,
-                    INIT_REWARD_POOL,
-                    randomXProxy
+                    ICapacityConst.CapacityConstInitArgs({
+                        fltPrice: FLT_PRICE,
+                        usdCollateralPerUnit: USD_COLLATERAL_PER_UNIT,
+                        usdTargetRevenuePerEpoch: USD_TARGET_REVENUE_PER_EPOCH,
+                        minDuration: MIN_DURATION,
+                        minRewardPerEpoch: MIN_REWARD_PER_EPOCH,
+                        maxRewardPerEpoch: MAX_REWARD_PER_EPOCH,
+                        vestingPeriodDuration: VESTING_PERIOD_DURATION,
+                        vestingPeriodCount: VESTING_PERIOD_COUNT,
+                        slashingRate: SLASHING_RATE,
+                        minProofsPerEpoch: MIN_PROOFS_PER_EPOCH,
+                        maxProofsPerEpoch: MAX_PROOFS_PER_EPOCH,
+                        withdrawEpochsAfterFailed: WITHDRAW_EPOCHS_AFTER_FAILED,
+                        maxFailedRatio: MAX_FAILED_RATIO,
+                        difficulty: DIFFICULTY,
+                        initRewardPool: INIT_REWARD_POOL,
+                        randomXProxy: randomXProxy,
+                        oracle: address(0)
+                    })
                 )
             )
         );
@@ -119,19 +113,19 @@ contract DeployKras is Depoyments, Script {
         address dealFactoryImpl = _deployContract("DealFactoryImpl", "DealFactory", abi.encode(coreAddr));
 
         address marketProxy = _deployContract(
-            "Market", "ERC1967Proxy", abi.encode(marketImpl, abi.encodeWithSelector(Market.initialize.selector))
+            "Market", "ERC1967Proxy", abi.encode(marketImpl, abi.encodeWithSelector(IMarket.initialize.selector))
         );
         address capacityProxy = _deployContract(
             "Capacity",
             "ERC1967Proxy",
             abi.encode(
-                capacityImpl, abi.encodeWithSelector(Capacity.initialize.selector, INIT_GLOBAL_NONCE, randomXProxy)
+                capacityImpl, abi.encodeWithSelector(ICapacity.initialize.selector, INIT_GLOBAL_NONCE, randomXProxy)
             )
         );
         address dealFactoryProxy = _deployContract(
             "DealFactory",
             "ERC1967Proxy",
-            abi.encode(dealFactoryImpl, abi.encodeWithSelector(DealFactory.initialize.selector))
+            abi.encode(dealFactoryImpl, abi.encodeWithSelector(IDealFactory.initialize.selector))
         );
 
         (bool success,) = address(capacityProxy).call{value: INIT_CC_BALANCE}(new bytes(0));
@@ -143,7 +137,7 @@ contract DeployKras is Depoyments, Script {
         );
 
         _printDeployments();
-        _saveDeployments(fullDeploymentsPath);
+        _saveDeployment(fullDeploymentsPath);
 
         vm.stopBroadcast();
         console.log("\nDeploy finished");
