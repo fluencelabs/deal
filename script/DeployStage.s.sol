@@ -21,13 +21,12 @@ import "src/core/modules/capacity/Capacity.sol";
 import "src/core/modules/capacity/interfaces/ICapacity.sol";
 import "src/utils/Multicall3.sol";
 
-contract DeployKras is Depoyments, Script {
+contract DeployStage is Deployment, Script {
     using SafeERC20 for IERC20;
 
     // ------------------ Default constant ------------------
-    address constant USDC = address(0xE277D4cb6e522769e7962FB239d5342138891bE6);
 
-    uint256 constant EPOCH_DURATION = 1 days;
+    uint256 constant EPOCH_DURATION = 1 hours;
     uint256 constant MIN_DEPOSITED_EPOCHS = 2;
     uint256 constant MIN_REMATCHING_EPOCHS = 2;
     uint256 constant MIN_PROTOCOL_VERSION = 1;
@@ -36,14 +35,14 @@ contract DeployKras is Depoyments, Script {
     uint256 constant FLT_PRICE = 0.5e7; // 0.5 USD
     uint256 constant USD_COLLATERAL_PER_UNIT = 1e7; // 1 USD
     uint256 constant USD_TARGET_REVENUE_PER_EPOCH = 0.33e7; // 10 USD per month, $0.33 per epoch
-    uint256 constant MIN_DURATION = 5;
+    uint256 constant MIN_DURATION = 1;
     uint256 constant MIN_REWARD_PER_EPOCH = 100 * 1e18;
     uint256 constant MAX_REWARD_PER_EPOCH = 1000 * 1e18;
     uint256 constant VESTING_PERIOD_DURATION = 2;
     uint256 constant VESTING_PERIOD_COUNT = 6;
 
     uint256 constant SLASHING_RATE = 0;
-    uint256 constant MIN_PROOFS_PER_EPOCH = 30;
+    uint256 constant MIN_PROOFS_PER_EPOCH = 10;
     uint256 constant MAX_PROOFS_PER_EPOCH = 50;
     uint256 constant WITHDRAW_EPOCHS_AFTER_FAILED = 0;
     uint256 constant MAX_FAILED_RATIO = 4;
@@ -51,9 +50,9 @@ contract DeployKras is Depoyments, Script {
     bytes32 public constant INIT_GLOBAL_NONCE = keccak256("fluence nonce");
     bytes32 public constant DIFFICULTY = 0x0000241FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
     uint256 constant INIT_REWARD_POOL = 500e18;
-    uint256 constant INIT_CC_BALANCE = 30000e18;
+    uint256 constant INIT_CC_BALANCE = 3000e18;
 
-    bool constant IS_WHITELIST_ENABLED = true;
+    bool constant IS_WHITELIST_ENABLED = false;
 
     // ------------------ Deploy result ------------------
     string constant DEPLOYMENTS_PATH = "/deployments/";
@@ -61,20 +60,26 @@ contract DeployKras is Depoyments, Script {
     // ------------------ Types ------------------
 
     function setUp() external {
-        string memory fileNames = string.concat("kras", ".json");
+        string memory fileNames = string.concat("stage", ".json");
         fullDeploymentsPath = string.concat(vm.projectRoot(), DEPLOYMENTS_PATH, fileNames);
     }
 
     function run() external {
         _printENV();
 
-        _setContract("axlUSDC", USDC, bytes32(0x00), bytes32(0x00));
-
         vm.startBroadcast();
         console.log("\nStart deploying...");
         console.log("Deployer address:", address(msg.sender));
 
+        IERC20 tUSD = _deployTestTokens();
+
         Multicall3(_deployContract("Multicall3", "Multicall3", abi.encode()));
+
+        (address faucet, bool isNew) = _deployTestFaucet(tUSD);
+        if (isNew) {
+            tUSD.safeTransfer(address(faucet), 1_000_000_000_000 ether);
+        }
+
         address randomXProxy = _deployContract("RandomXProxy", "RandomXProxy", new bytes(0));
 
         address coreImpl = _deployContract("CoreImpl", "Core", new bytes(0));
@@ -135,7 +140,7 @@ contract DeployKras is Depoyments, Script {
         );
 
         (bool success,) = address(capacityProxy).call{value: INIT_CC_BALANCE}(new bytes(0));
-        require(success, "DeployKrasContracts: failed to transfer initial CC balance");
+        require(success, "DeployStageContracts: failed to transfer initial CC balance");
 
         console.log("\nCore deployed, initializing modules as well...");
         ICore(coreAddr).initializeModules(
@@ -143,17 +148,26 @@ contract DeployKras is Depoyments, Script {
         );
 
         _printDeployments();
-        _saveDeployments(fullDeploymentsPath);
+        _saveDeployment(fullDeploymentsPath);
 
         vm.stopBroadcast();
         console.log("\nDeploy finished");
+    }
+
+    function _deployTestTokens() internal returns (IERC20 tUSD) {
+        bytes memory args = abi.encode("USD Token", "axlUSDC", 6);
+        tUSD = IERC20(_deployContract("axlUSDC", "TestERC20", args));
+    }
+
+    function _deployTestFaucet(IERC20 tUSD) internal returns (address faucet, bool isNew) {
+        bytes memory args = abi.encode(tUSD);
+        return _tryDeployContract("Faucet", "OwnableFaucet", args);
     }
 
     // ------------------ Internal functions ------------------
     function _printENV() internal view {
         console.log("----------------- ENV -----------------");
         console.log(StdStyle.blue("CHAIN_ID:"), block.chainid);
-        console.log(StdStyle.blue("USDC:"), USDC);
 
         console.log(StdStyle.blue("EPOCH_DURATION:"), EPOCH_DURATION);
         console.log(StdStyle.blue("MIN_DEPOSITED_EPOCHS:"), MIN_DEPOSITED_EPOCHS);
