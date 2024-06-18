@@ -13,7 +13,8 @@ contract RandomXProxy {
     using BytesConverter for bytes32;
     using BytesConverter for bytes;
 
-    CommonTypes.FilActorId internal constant ActorID = CommonTypes.FilActorId.wrap(0x70768565);
+    CommonTypes.FilActorId internal constant OldActorID = CommonTypes.FilActorId.wrap(0x70768565);
+    CommonTypes.FilActorId internal constant NewActorID = CommonTypes.FilActorId.wrap(0x70768562);
     uint256 internal constant RunRandomX = 2044353154;
     uint256 internal constant RunRandomXBatched = 4200016682;
 
@@ -26,7 +27,7 @@ contract RandomXProxy {
         bytes memory se_request = _serializeRandomXParameters(ks, hs);
 
         (int256 ret_code, bytes memory actor_result) =
-            Actor.callByID(ActorID, RunRandomXBatched, Misc.CBOR_CODEC, se_request, 0, false);
+            Actor.callByID(NewActorID, RunRandomXBatched, Misc.CBOR_CODEC, se_request, 0, false);
         require(ret_code == 0, "Fluence actor failed");
 
         bytes32[] memory result = _deserializeActorResult(actor_result);
