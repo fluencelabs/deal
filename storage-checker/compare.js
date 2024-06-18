@@ -21,7 +21,10 @@ const prevFiles = Object.keys(prevStorageLayout);
 const files = fs
   .readdirSync(outDir)
   .map((dir) => {
-    if (!fs.lstatSync(path.join(outDir, dir)).isDirectory()) {
+    if (
+      !fs.lstatSync(path.join(outDir, dir)).isDirectory() ||
+      dir === "build-info"
+    ) {
       return "";
     }
     return fs.readdirSync(path.join(outDir, dir)).map((file) => {
@@ -42,7 +45,7 @@ for (const file of files) {
   }
   const data = fs.readFileSync(filePath, "utf8");
   const json = JSON.parse(data);
-  const layout = json.storageLayout.storage;
+  const layout = json.storageLayout?.storage ?? [];
   storageLayout[file] = layout;
   if (!prevFiles.includes(file)) {
     console.log("New file: ", file);
