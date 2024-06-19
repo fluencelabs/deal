@@ -499,7 +499,6 @@ contract Capacity is UUPSUpgradeable, MulticallUpgradeable, BaseModule, ICapacit
         address provider = market.getOffer(peer.offerId).provider;
         uint256 amount = cc.vesting.withdraw(currentEpoch);
 
-        require(amount > 0, "attempt to withdraw zero money");
         uint256 rewardBalance = s.rewardBalance;
         require(
             amount <= rewardBalance, "Not enough reward balance pool on the contract. Wait when DAO will refill it."

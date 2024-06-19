@@ -180,10 +180,6 @@ contract CapacityConst is ICapacityConst, OwnableUpgradableDiamond, EpochControl
     }
 
     function getRewardPool(uint256 epoch) public view returns (uint256) {
-        if (epoch == 0) {
-            revert("Min epoch is positive number");
-        }
-
         ConstStorage storage constantsStorage = _getConstStorage();
 
         uint256 length = constantsStorage.reward.rewardPoolPerEpochs.length;
