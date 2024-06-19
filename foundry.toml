@@ -20,11 +20,13 @@ extra_output = ["devdoc", "storageLayout"]
 
 [rpc_endpoints]
 local = "http://0.0.0.0:8545"
+<<<<<<< HEAD
 arbutrum = "http://0.0.0.0:8545"
+=======
+>>>>>>> origin/main
 stage = "https://ipc.stage.fluence.dev"
 dar = "https://ipc.dar.fluence.dev"
 kras = "https://ipc.kras.fluence.dev"
-mumbai = "https://rpc.ankr.com/polygon_mumbai"
 
 [profile.test]
 src = "test"

@@ -7,7 +7,7 @@
   "scripts": {
     "build": "npm run generate-contract-types && npm run update-deployments && shx rm -rf dist && tsc -b",
     "build:ts": "shx rm -rf dist && tsc -b",
-    "generate-contract-types": "shx rm -rf ./src/typechain-types && typechain --target ethers-v6 '../out/**/*.json' --out-dir ./src/typechain-types --node16-modules && npm run replace-imports",
+    "generate-contract-types": "shx rm -rf ./src/typechain-types && typechain --target ethers-v6 '../out/*.sol/*.json' --out-dir ./src/typechain-types --node16-modules && npm run replace-imports",
     "replace-imports": "node replace-imports.js",
     "update-deployments": "rm -rf src/deployments && cp -r ../deployments ./src/deployments",
     "fmt": "prettier 'src/**/*.ts' --w",
