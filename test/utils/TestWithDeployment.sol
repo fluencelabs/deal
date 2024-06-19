@@ -90,7 +90,7 @@ contract TestWithDeployment is Test {
                             maxFailedRatio: DEFAULT_MAX_FAILED_RATIO,
                             difficulty: DEFAULT_DIFFICULTY_TARGET,
                             initRewardPool: DEFAULT_INIT_REWARD_POOL,
-                            randomXProxy: deployCode("out/RandomXProxy.sol/RandomXProxy.json"),
+                            randomXProxy: deployCode("out/RandomXProxyMock.sol/RandomXProxyMock.json", abi.encode(DEFAULT_DIFFICULTY_TARGET)),
                             oracle: DEFAULT_ORACLE
                         })
                     )
