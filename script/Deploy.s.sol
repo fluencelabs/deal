@@ -95,7 +95,7 @@ contract DeployContracts is Deployment, Script {
         IERC20 tUSD = _deployTestTokens();
 
         // Deploy Multicall3 as **helper** contract to fetch info only from the chain.
-        // Thus, this contract is not belongs to Fluence contract ecosystem.
+        // Thus, this contract does not belong to Fluence contract ecosystem.
         _deployMulticall3();
 
         if (env.chainId == LOCAL_CHAIN_ID) {
@@ -150,7 +150,7 @@ contract DeployContracts is Deployment, Script {
         uint256 minProtocolVersion = vm.envOr("MIN_PROTOCOL_VERSION", DEFAULT_MIN_PROTOCOL_VERSION);
         uint256 maxProtocolVersion = vm.envOr("MAX_PROTOCOL_VERSION", DEFAULT_MAX_PROTOCOL_VERSION);
 
-        uint256 fltPice = vm.envOr("FLT_PRICE", DEFAULT_FLT_PRICE);
+        uint256 fltPrice = vm.envOr("FLT_PRICE", DEFAULT_FLT_PRICE);
         uint256 usdCollateralPerUnit = vm.envOr("USD_COLLATERAL_PER_UNIT", DEFAULT_USD_COLLATERAL_PER_UNIT);
         uint256 usdTargetRevenuePerEpoch =
             vm.envOr("USD_TARGET_REVENUE_PER_EPOCH", DEFAULT_USD_TARGET_REVENUE_PER_EPOCH);
@@ -180,7 +180,7 @@ contract DeployContracts is Deployment, Script {
         console.log(StdStyle.blue("MIN_PROTOCOL_VERSION:"), minProtocolVersion);
         console.log(StdStyle.blue("MAX_PROTOCOL_VERSION:"), maxProtocolVersion);
 
-        console.log(StdStyle.blue("FLT_PRICE:"), fltPice);
+        console.log(StdStyle.blue("FLT_PRICE:"), fltPrice);
         console.log(StdStyle.blue("USD_COLLATERAL_PER_UNIT:"), usdCollateralPerUnit);
         console.log(StdStyle.blue("USD_TARGET_REVENUE_PER_EPOCH:"), usdTargetRevenuePerEpoch);
         console.log(StdStyle.blue("MIN_DURATION:"), minDuration);
@@ -209,7 +209,7 @@ contract DeployContracts is Deployment, Script {
             minRematchingEpochs: minRematchingEpochs,
             minProtocolVersion: minProtocolVersion,
             maxProtocolVersion: maxProtocolVersion,
-            fltPrice: fltPice,
+            fltPrice: fltPrice,
             usdCollateralPerUnit: usdCollateralPerUnit,
             usdTargetRevenuePerEpoch: usdTargetRevenuePerEpoch,
             minDuration: minDuration,
