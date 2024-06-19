@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.14.0](https://github.com/fluencelabs/deal/compare/v0.13.13...v0.14.0) (2024-06-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* build and test optimisation ([#445](https://github.com/fluencelabs/deal/issues/445))
+
+### Features
+
+* Batching on `submitProof(s)` [CHAIN-407] ([#344](https://github.com/fluencelabs/deal/issues/344)) ([dea5371](https://github.com/fluencelabs/deal/commit/dea53717f67ca3d7d82a3071e10256baa00d4005))
+* build and test optimisation ([#445](https://github.com/fluencelabs/deal/issues/445)) ([09aec74](https://github.com/fluencelabs/deal/commit/09aec747511d8563f610fc4ad1ffb0dae18c6bc6))
+* matcher tests [chain-434] ([#442](https://github.com/fluencelabs/deal/issues/442)) ([b3a0ee0](https://github.com/fluencelabs/deal/commit/b3a0ee0f736be3ed0f0c607a14685447df859812))
+* oracle ([#449](https://github.com/fluencelabs/deal/issues/449)) ([a12c512](https://github.com/fluencelabs/deal/commit/a12c512eef5eabe4285891c712aa454531d09553))
+
+
+### Bug Fixes
+
+* fix ts-client build (changed artifacts) ([#453](https://github.com/fluencelabs/deal/issues/453)) ([256f50c](https://github.com/fluencelabs/deal/commit/256f50c8800d341c15bfe1eb33a3ec7b3aec2c74))
+* kras deployment script fix ([#454](https://github.com/fluencelabs/deal/issues/454)) ([49ad3df](https://github.com/fluencelabs/deal/commit/49ad3dfbe75b1220608825ece99459a6403aa615))
+
 ## [0.13.13](https://github.com/fluencelabs/deal/compare/v0.13.12...v0.13.13) (2024-05-21)
 
 
