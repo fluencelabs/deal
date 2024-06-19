@@ -120,6 +120,7 @@ jobs:
         env:
           CHAIN_RPC_IMAGE: "chain-rpc"
           CHAIN_DEPLOY_SCRIPT_IMAGE: "chain-deploy-script"
+          EPOCH_DURATION: "15" # seconds, tests are waiting for epoch change in real time
         run: docker compose up -d chain-rpc ipfs postgres graph-node && docker compose up chain-deploy-script
         working-directory: docker
 
