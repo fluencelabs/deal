@@ -103,34 +103,46 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build chain-rpc image
+      - name: Build fendermint image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: docker/Dockerfile
-          target: chain-rpc
+          target: fendermint
           tags: |
-            chain-rpc
+            fendermint
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build chain-deploy-script image
+      - name: Build cometbft image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: docker/Dockerfile
-          target: chain-deploy-script
+          target: cometbft
           tags: |
-            chain-deploy-script
+            cometbft
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build ipc-deploy-script image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile
+          target: ipc-deploy-script
+          tags: |
+            ipc-deploy-script
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Run docker network
         env:
-          CHAIN_RPC_IMAGE: "chain-rpc"
-          CHAIN_DEPLOY_SCRIPT_IMAGE: "chain-deploy-script"
+          FENDERMINT_IMAGE: "fendermint"
+          COMETBFT_IMAGE: "cometbft"
+          IPC_DEPLOY_SCRIPT_IMAGE: "ipc-deploy-script"
           EPOCH_DURATION: "86400"
-        run: docker compose up -d chain-rpc && docker compose up chain-deploy-script
+        run: docker compose up -d federmint cometbft eth-api && docker compose up ipc-deploy-script
         working-directory: docker
 
       - name: Install deps in ts-client package

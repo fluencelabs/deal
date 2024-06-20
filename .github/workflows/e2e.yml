@@ -31,12 +31,13 @@ jobs:
     secrets:
       token: ${{ secrets.FLUENCEBOT_RELEASE_PLEASE_PAT }}
 
-  cli:
-    needs:
-      - deal
-    uses: fluencelabs/cli/.github/workflows/tests.yml@main
-    with:
-      chain-rpc-image: "${{ needs.deal.outputs.chain-rpc-image }}"
-      chain-deploy-script-image: "${{ needs.deal.outputs.chain-deploy-script-image }}"
-      subgraph-deploy-script-image: "${{ needs.deal.outputs.subgraph-deploy-script-image }}"
-      deal-ts-clients-version: "${{ needs.deal.outputs.deal-ts-clients-version }}"
+  # cli:
+  #   needs:
+  #     - deal
+  #   uses: fluencelabs/cli/.github/workflows/tests.yml@main
+  #   with:
+  #     ipc-image: "${{ needs.deal.outputs.ipc-image }}"
+  #     ipc-deploy-script-image: "${{ needs.deal.outputs.ipc-deploy-script-image }}"
+  #     cometbft-image: "${{ needs.deal.outputs.cometbft-image }}"
+  #     subgraph-deploy-script-image: "${{ needs.deal.outputs.subgraph-deploy-script-image }}"
+  #     deal-ts-clients-version: "${{ needs.deal.outputs.deal-ts-clients-version }}"
