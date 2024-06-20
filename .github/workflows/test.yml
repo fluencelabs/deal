@@ -21,6 +21,8 @@ env:
   FOUNDRY_PROFILE: "ci"
 
 jobs:
+  # TODO: rename to tests of Fluence Contracts.
+  # TODO: rename the workflow file to test-contracts-integration.yml
   integration-tests:
     name: "Integration tests"
     runs-on: ubuntu-latest
@@ -81,7 +83,7 @@ jobs:
           forge build --sizes
 
       - name: Run Forge tests
-        run: forge test -vvv
+        run: make test-contracts
 
       - name: Compare current storage layout to dump
         working-directory: storage-checker
@@ -151,16 +153,12 @@ jobs:
         run: npm run build
         working-directory: ts-client
 
-      - name: Run Unittests in ts-client package
-        run: npm test unittests
-        working-directory: ts-client
-
       - name: Install packed ts-client
         run: npm i
-        working-directory: integration-tests
+        working-directory: integration-tests-contracts
 
       - name: Run integration tests
         run: npm run test
-        working-directory: integration-tests
+        working-directory: integration-tests-contracts
         env:
           RPC_URL: "http://localhost:8545"

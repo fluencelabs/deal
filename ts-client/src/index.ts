@@ -1,4 +1,4 @@
-export { DealClient, DealStatus, CommitmentStatus } from "./client/client.js";
+export { DealClient, DealStatus, CommitmentStatus, AccessType } from "./client/client.js";
 export * from "./client/config.js";
 export * from "./typechain-types/index.js";
 export { DealExplorerClient } from "./dealExplorerClient/dealExplorerClient.js";
@@ -11,4 +11,6 @@ export {
   DealMatcherClient,
   type GetMatchedOffersOut,
   DealNotFoundError,
+  DealMatchedRecentlyError,
+  DealAlreadyMatchedError,
 } from "./dealMatcherClient/dealMatcherClient.js";

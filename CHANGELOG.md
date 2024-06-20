@@ -1,5 +1,47 @@
 # Changelog
 
+## [0.14.0](https://github.com/fluencelabs/deal/compare/v0.13.13...v0.14.0) (2024-06-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* build and test optimisation ([#445](https://github.com/fluencelabs/deal/issues/445))
+
+### Features
+
+* Batching on `submitProof(s)` [CHAIN-407] ([#344](https://github.com/fluencelabs/deal/issues/344)) ([dea5371](https://github.com/fluencelabs/deal/commit/dea53717f67ca3d7d82a3071e10256baa00d4005))
+* build and test optimisation ([#445](https://github.com/fluencelabs/deal/issues/445)) ([09aec74](https://github.com/fluencelabs/deal/commit/09aec747511d8563f610fc4ad1ffb0dae18c6bc6))
+* matcher tests [chain-434] ([#442](https://github.com/fluencelabs/deal/issues/442)) ([b3a0ee0](https://github.com/fluencelabs/deal/commit/b3a0ee0f736be3ed0f0c607a14685447df859812))
+* oracle ([#449](https://github.com/fluencelabs/deal/issues/449)) ([a12c512](https://github.com/fluencelabs/deal/commit/a12c512eef5eabe4285891c712aa454531d09553))
+
+
+### Bug Fixes
+
+* fix ts-client build (changed artifacts) ([#453](https://github.com/fluencelabs/deal/issues/453)) ([256f50c](https://github.com/fluencelabs/deal/commit/256f50c8800d341c15bfe1eb33a3ec7b3aec2c74))
+* kras deployment script fix ([#454](https://github.com/fluencelabs/deal/issues/454)) ([49ad3df](https://github.com/fluencelabs/deal/commit/49ad3dfbe75b1220608825ece99459a6403aa615))
+
+## [0.13.13](https://github.com/fluencelabs/deal/compare/v0.13.12...v0.13.13) (2024-05-21)
+
+
+### Features
+
+* deploy subgraph on dar ([#446](https://github.com/fluencelabs/deal/issues/446)) ([774d9d5](https://github.com/fluencelabs/deal/commit/774d9d5a4e3407964eb0db24dc1c55d5f04f72bd))
+
+
+### Bug Fixes
+
+* deal exiting ([#441](https://github.com/fluencelabs/deal/issues/441)) ([29a2bb7](https://github.com/fluencelabs/deal/commit/29a2bb7f86f0aedea13689cbebc6bc11a4f237c2))
+* wrong-cu-number-after-upd [CHAIN-536, Redeploy Subgraph] ([#443](https://github.com/fluencelabs/deal/issues/443)) ([0b7c3e3](https://github.com/fluencelabs/deal/commit/0b7c3e3bc4a26ccbdc7030759ccd342e78649eee))
+* wrong-cu-number-after-upd-CHAIN-536 ([0b7c3e3](https://github.com/fluencelabs/deal/commit/0b7c3e3bc4a26ccbdc7030759ccd342e78649eee))
+
+## [0.13.12](https://github.com/fluencelabs/deal/compare/v0.13.11...v0.13.12) (2024-05-14)
+
+
+### Bug Fixes
+
+* too-early-to-rematch [CHAIN-487] ([#429](https://github.com/fluencelabs/deal/issues/429)) ([0300795](https://github.com/fluencelabs/deal/commit/0300795a8559df53215058b2a17fc45e5ddee0ee))
+* use peer hex in filters ([#435](https://github.com/fluencelabs/deal/issues/435)) ([6203677](https://github.com/fluencelabs/deal/commit/620367736714bf1a3fa1e5b8920eb90895fd5634))
+
 ## [0.13.11](https://github.com/fluencelabs/deal/compare/v0.13.10...v0.13.11) (2024-04-28)
 
 

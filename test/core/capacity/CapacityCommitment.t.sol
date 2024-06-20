@@ -1,24 +1,19 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.19;
 
-import {Test, console2} from "forge-std/Test.sol";
-import "forge-std/console.sol";
-import "forge-std/Vm.sol";
+import {Test} from "forge-std/Test.sol";
 import "forge-std/StdCheats.sol";
 import "filecoin-solidity/v0.8/utils/Actor.sol";
-import "src/core/Core.sol";
-import "src/core/modules/capacity/Capacity.sol";
+import "src/core/modules/market/interfaces/IMarket.sol";
 import "src/core/modules/capacity/interfaces/ICapacity.sol";
 import "src/utils/BytesConverter.sol";
-import "test/utils/DeployDealSystem.sol";
-import "src/core/modules/market/Market.sol";
-import "src/core/modules/market/interfaces/IMarket.sol";
+import "test/utils/TestWithDeployment.sol";
 import "test/utils/TestHelper.sol";
-import "forge-std/StdCheats.sol";
 
-contract CapacityCommitmentTest is Test {
+contract CapacityCommitmentTest is TestWithDeployment {
     using SafeERC20 for IERC20;
     using BytesConverter for bytes32;
+    using TestHelper for TestWithDeployment.Deployment;
 
     // ------------------ Events ------------------
     event CommitmentCreated(
@@ -40,11 +35,11 @@ contract CapacityCommitmentTest is Test {
     event ProofSubmitted(bytes32 indexed commitmentId, bytes32 indexed unitId, bytes32 localUnitNonce);
     event RewardWithdrawn(bytes32 indexed commitmentId, uint256 amount);
 
-    // ------------------ Variables ------------------
-    DeployDealSystem.Deployment deployment;
+    // ------------------ Errors ------------------
+    error TooManyProofs();
 
     // Init variables
-    Market.RegisterComputePeer[] registerPeers;
+    IMarket.RegisterComputePeer[] registerPeers;
     uint256 minPricePerWorkerEpoch;
     CIDV1[] effectors;
     address paymentToken;
@@ -54,7 +49,7 @@ contract CapacityCommitmentTest is Test {
 
     // ------------------ Test ------------------
     function setUp() public {
-        deployment = DeployDealSystem.deployDealSystem();
+        _deploySystem();
 
         paymentToken = address(deployment.tUSD);
         minPricePerWorkerEpoch = 1000;
@@ -132,9 +127,9 @@ contract CapacityCommitmentTest is Test {
 
         bytes32 peerId = registerPeers[0].peerId;
 
-        (bytes32 commitmentId,) = _createCapacityCommitment(peerId);
+        bytes32 commitmentId = _createCapacityCommitment(peerId);
 
-        Capacity.CommitmentView memory commitment = deployment.capacity.getCommitment(commitmentId);
+        ICapacity.CommitmentView memory commitment = deployment.capacity.getCommitment(commitmentId);
 
         assertEq(uint256(commitment.status), uint256(ICapacity.CCStatus.WaitDelegation), "Status mismatch");
         assertEq(commitment.peerId, peerId, "PeerId mismatch");
@@ -169,7 +164,7 @@ contract CapacityCommitmentTest is Test {
             bytes32 peerId = registerPeers[i].peerId;
             uint256 unitCount = registerPeers[i].unitIds.length;
             unitCountTotal += unitCount;
-            (bytes32 commitmentId,) = _createCapacityCommitment(peerId);
+            bytes32 commitmentId = _createCapacityCommitment(peerId);
             createdCCIds[i] = commitmentId;
 
             uint256 amount = unitCount * deployment.core.fltCollateralPerUnit();
@@ -204,7 +199,7 @@ contract CapacityCommitmentTest is Test {
 
         // Verify commitments info.
         for (uint256 i = 0; i < registerPeers.length; ++i) {
-            Capacity.CommitmentView memory commitment = deployment.capacity.getCommitment(createdCCIds[i]);
+            ICapacity.CommitmentView memory commitment = deployment.capacity.getCommitment(createdCCIds[i]);
             assertEq(uint256(commitment.status), uint256(ICapacity.CCStatus.Active), "Status mismatch");
             assertEq(commitment.peerId, registerPeers[i].peerId, "PeerId mismatch");
             assertEq(commitment.collateralPerUnit, deployment.core.fltCollateralPerUnit(), "CollateralPerUnit mismatch");
@@ -230,15 +225,114 @@ contract CapacityCommitmentTest is Test {
         vm.startPrank(peerOwner);
 
         bytes32 localUnitNonce = keccak256(abi.encodePacked("localUnitNonce"));
-        bytes32 targetHash = bytes32(uint256(deployment.core.difficulty()) - 1);
+        // RandomXProxyMock returns difficulty
+        bytes32 targetHash = deployment.core.difficulty();
 
-        vm.expectEmit(true, true, true, false, address(deployment.capacity));
+        vm.expectEmit(true, true, false, true, address(deployment.capacity));
         emit ProofSubmitted(commitmentId, unitId, localUnitNonce);
 
-        //TODO: vm mock not working here :(
-        vm.etch(address(Actor.CALL_ACTOR_ID), address(new MockActorCallActorPrecompile(targetHash)).code);
-
         deployment.capacity.submitProof(unitId, localUnitNonce, targetHash);
+
+        vm.stopPrank();
+    }
+
+    function test_SubmitProofs() public {
+        bytes32 peerId = registerPeers[0].peerId;
+        uint256 unitCount = registerPeers[0].unitIds.length;
+        address peerOwner = registerPeers[0].owner;
+
+        (bytes32 commitmentId,) = _createAndDepositCapacityCommitment(peerId, unitCount);
+
+        StdCheats.skip(uint256(deployment.core.epochDuration()));
+
+        vm.startPrank(peerOwner);
+
+        uint64 proofsPerUnit = 4;
+        bytes32[] memory unitIds = new bytes32[](proofsPerUnit * unitCount);
+        bytes32[] memory localUnitNonces = new bytes32[](proofsPerUnit * unitCount);
+        bytes32[] memory targetHashes = new bytes32[](proofsPerUnit * unitCount);
+        for (uint256 i = 0; i < proofsPerUnit * unitCount; ++i) {
+            unitIds[i] = registerPeers[0].unitIds[i % unitCount];
+            localUnitNonces[i] = keccak256(abi.encodePacked("localUnitNonce", i));
+            // RandomXProxyMock returns difficulty
+            targetHashes[i] = deployment.core.difficulty();
+
+            vm.expectEmit(true, true, false, true, address(deployment.capacity));
+            emit ProofSubmitted(commitmentId, unitIds[i], localUnitNonces[i]);
+        }
+
+        deployment.capacity.submitProofs(unitIds, localUnitNonces, targetHashes);
+
+        vm.stopPrank();
+    }
+
+    function test_SubmitProofs_TooManyProofs() public {
+        bytes32 peerId = registerPeers[0].peerId;
+        uint256 unitCount = registerPeers[0].unitIds.length;
+        address peerOwner = registerPeers[0].owner;
+
+        (bytes32 commitmentId,) = _createAndDepositCapacityCommitment(peerId, unitCount);
+
+        StdCheats.skip(uint256(deployment.core.epochDuration()));
+
+        vm.startPrank(peerOwner);
+
+        uint256 maxProofs = deployment.core.maxProofsPerEpoch();
+
+        bytes32[] memory unitIds = new bytes32[](unitCount + maxProofs);
+        bytes32[] memory localUnitNonces = new bytes32[](unitCount + maxProofs);
+        bytes32[] memory targetHashes = new bytes32[](unitCount + maxProofs);
+        for (uint256 i = 0; i < unitCount; ++i) {
+            unitIds[i] = registerPeers[0].unitIds[i];
+            localUnitNonces[i] = keccak256(abi.encodePacked("localUnitNonce", i));
+            // RandomXProxyMock returns difficulty
+            targetHashes[i] = deployment.core.difficulty();
+        }
+
+        for (uint256 i = unitCount; i < maxProofs + unitCount; ++i) {
+            unitIds[i] = registerPeers[0].unitIds[0];
+            localUnitNonces[i] = keccak256(abi.encodePacked("localUnitNonce-max", i));
+            // RandomXProxyMock returns difficulty
+            targetHashes[i] = deployment.core.difficulty();
+        }
+
+        vm.expectRevert(TooManyProofs.selector);
+
+        deployment.capacity.submitProofs(unitIds, localUnitNonces, targetHashes);
+
+        vm.stopPrank();
+    }
+
+    function test_SubmitProofs_AlreadySubmitted() public {
+        bytes32 peerId = registerPeers[0].peerId;
+        uint256 unitCount = registerPeers[0].unitIds.length;
+        address peerOwner = registerPeers[0].owner;
+
+        (bytes32 commitmentId,) = _createAndDepositCapacityCommitment(peerId, unitCount);
+
+        StdCheats.skip(uint256(deployment.core.epochDuration()));
+
+        vm.startPrank(peerOwner);
+
+        bytes32[] memory unitIds = new bytes32[](unitCount + 1);
+        bytes32[] memory localUnitNonces = new bytes32[](unitCount + 1);
+        bytes32[] memory targetHashes = new bytes32[](unitCount + 1);
+        for (uint256 i = 0; i < unitCount; ++i) {
+            unitIds[i] = registerPeers[0].unitIds[i];
+            localUnitNonces[i] = keccak256(abi.encodePacked("localUnitNonce", i));
+            // RandomXProxyMock returns difficulty
+            targetHashes[i] = deployment.core.difficulty();
+        }
+
+        unitIds[unitCount] = registerPeers[0].unitIds[0];
+        // Repeated local unit nonce
+        localUnitNonces[unitCount] = keccak256(abi.encodePacked("localUnitNonce", uint256(0)));
+        // RandomXProxyMock returns difficulty
+        targetHashes[unitCount] = deployment.core.difficulty();
+        
+        vm.expectRevert("Proof is already submitted for this unit");
+
+        deployment.capacity.submitProofs(unitIds, localUnitNonces, targetHashes);
 
         vm.stopPrank();
     }
@@ -250,33 +344,29 @@ contract CapacityCommitmentTest is Test {
         bytes32 unitId = registerPeers[0].unitIds[0];
 
         (bytes32 commitmentId,) = _createAndDepositCapacityCommitment(peerId, unitCount);
-        console.log("curr epoch #1", deployment.core.currentEpoch());
 
         // warp to next epoch
         StdCheats.skip(deployment.core.epochDuration());
 
-        console.log("curr epoch #2", deployment.core.currentEpoch());
-
-        bytes32 targetHash = bytes32(uint256(deployment.core.difficulty()) - 1);
-        //TODO: vm mock not working here :(
-        vm.etch(address(Actor.CALL_ACTOR_ID), address(new MockActorCallActorPrecompile(targetHash)).code);
+        // RandomXProxyMock returns difficulty
+        bytes32 targetHash = deployment.core.difficulty();
 
         vm.startPrank(peerOwner);
         uint256 maxProofsPerEpoch = deployment.core.maxProofsPerEpoch();
         for (uint256 i = 0; i < maxProofsPerEpoch; i++) {
             bytes32 localUnitNonce_ = keccak256(abi.encodePacked("localUnitNonce", i));
 
-            vm.expectEmit(true, true, true, false, address(deployment.capacity));
+            vm.expectEmit(true, true, false, true, address(deployment.capacity));
             emit ProofSubmitted(commitmentId, unitId, localUnitNonce_);
 
             deployment.capacity.submitProof(unitId, localUnitNonce_, targetHash);
         }
 
-        uint256 reward = deployment.core.getRewardPool(deployment.core.currentEpoch())
-            / deployment.core.vestingPeriodCount() * deployment.core.vestingPeriodCount();
+        uint256 reward = (
+            deployment.core.getRewardPool(deployment.core.currentEpoch()) / deployment.core.vestingPeriodCount()
+        ) * deployment.core.vestingPeriodCount();
         StdCheats.skip(deployment.core.epochDuration());
 
-        console.log("curr epoch #3", deployment.core.currentEpoch());
         bytes32 localUnitNonce = keccak256(abi.encodePacked("localUnitNonce"));
         deployment.capacity.submitProof(unitId, localUnitNonce, targetHash);
 
@@ -286,8 +376,65 @@ contract CapacityCommitmentTest is Test {
         vm.stopPrank();
     }
 
+    function test_ExitCommitment() external {
+        bytes32 peerId = registerPeers[0].peerId;
+        uint256 unitCount = registerPeers[0].unitIds.length;
+
+        (bytes32 commitmentId,) = _createAndDepositCapacityCommitment(peerId, unitCount);
+
+        // warp to next epoch
+        StdCheats.skip(deployment.core.epochDuration());
+
+        StdCheats.skip(ccDuration * 2000);
+        bytes32[] memory unitIds = deployment.market.getComputeUnitIds(peerId);
+
+        deployment.capacity.removeCUFromCC(commitmentId, unitIds);
+        deployment.capacity.finishCommitment(commitmentId);
+    }
+
+    function test_ExitCommitmentWithDealAfterTime() external {
+        bytes32 peerId = registerPeers[0].peerId;
+        uint256 unitCount = registerPeers[0].unitIds.length;
+
+        (bytes32 commitmentId, bytes32 offerId) = _createAndDepositCapacityCommitment(peerId, unitCount);
+
+        // warp to next epoch
+        StdCheats.skip(deployment.core.epochDuration());
+
+        uint256 pricePerWorkerEpoch = 1 ether;
+        uint256 targetWorkers = 3;
+        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.core.minDealDepositedEpochs();
+
+        deployment.tUSD.safeApprove(address(deployment.dealFactory), minAmount);
+        uint256 protocolVersion = deployment.core.minProtocolVersion();
+        (IDeal d,) = deployment.deployDeal(
+            TestHelper.DeployDealParams({
+                minWorkers: 1,
+                maxWorkersPerProvider: 2,
+                targetWorkers: targetWorkers,
+                pricePerWorkerEpoch: pricePerWorkerEpoch,
+                depositAmount: minAmount,
+                protocolVersion: protocolVersion
+            })
+        );
+
+        bytes32[] memory unitIds = deployment.market.getComputeUnitIds(peerId);
+        bytes32[][] memory unitIds2d = new bytes32[][](1);
+        unitIds2d[0] = unitIds;
+
+        bytes32[] memory offerIds = new bytes32[](1);
+        offerIds[0] = offerId;
+
+        deployment.market.matchDeal(d, offerIds, unitIds2d);
+
+        StdCheats.skip(ccDuration * 2000);
+
+        deployment.capacity.removeCUFromCC(commitmentId, unitIds);
+        deployment.capacity.finishCommitment(commitmentId);
+    }
+
     // ------------------ Internals ------------------
-    function _createCapacityCommitment(bytes32 peerId) internal returns (bytes32 commitmentId, bytes32 offerId) {
+    function _createCapacityCommitment(bytes32 peerId) internal returns (bytes32 commitmentId) {
         vm.recordLogs();
         deployment.capacity.createCommitment(peerId, ccDuration, ccDelegator, rewardCCDelegationRate);
 
@@ -295,7 +442,7 @@ contract CapacityCommitmentTest is Test {
 
         (commitmentId,,,) = abi.decode(entries[0].data, (bytes32, address, uint256, uint256));
 
-        return (commitmentId, offerId);
+        return commitmentId;
     }
 
     function _createAndDepositCapacityCommitment(bytes32 peerId, uint256 unitCount)
@@ -312,7 +459,7 @@ contract CapacityCommitmentTest is Test {
             deployment.core.maxProtocolVersion()
         );
 
-        (commitmentId, offerId) = _createCapacityCommitment(peerId);
+        commitmentId = _createCapacityCommitment(peerId);
 
         vm.startPrank(ccDelegator);
 
@@ -322,23 +469,7 @@ contract CapacityCommitmentTest is Test {
         deployment.capacity.depositCollateral{value: unitCount * deployment.core.fltCollateralPerUnit()}(commitmentIds);
         vm.stopPrank();
     }
+
+    receive() external payable {}
 }
-
-contract MockActorCallActorPrecompile {
-    bytes32 immutable targetHash;
-
-    fallback() external {
-        bytes memory cborEncoded = abi.encodePacked(bytes1(0x81), bytes1(0xC2), bytes1(0x58), bytes1(0x20), targetHash);
-
-        bytes memory ret = abi.encode(int256(0), uint64(Misc.CBOR_CODEC), cborEncoded);
-        uint256 length = ret.length;
-
-        assembly {
-            return(add(ret, 0x20), length)
-        }
-    }
-
-    constructor(bytes32 targetHash_) {
-        targetHash = targetHash_;
-    }
-}
+ 

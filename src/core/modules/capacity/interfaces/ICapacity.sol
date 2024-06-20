@@ -2,7 +2,6 @@
 
 pragma solidity ^0.8.19;
 
-import "src/core/interfaces/ICore.sol";
 import "../Vesting.sol";
 
 /// @title Capacity contract interface
@@ -118,6 +117,7 @@ interface ICapacity {
         CommitmentFinish finish;
         Vesting.Info vesting;
         mapping(bytes32 => UnitInfo) unitInfoById;
+        mapping(bytes32 => bool) isUnitExited;
     }
 
     struct CommitmentInfo {
@@ -189,7 +189,7 @@ interface ICapacity {
     function onUnitMovedToDeal(bytes32 commitmentId, bytes32 unitId) external;
     function onUnitReturnedFromDeal(bytes32 commitmentId, bytes32 unitId) external;
 
-    // ----------------- Mutables -----------------
+    // ----------------- Mutable -----------------
     /// @dev Creates a new commitment
     /// @param peerId Peer id which linked to the commitment
     /// @param duration The duration of the commitment in Epochs
@@ -213,10 +213,20 @@ interface ICapacity {
     /// @param commitmentIds Commitment ids
     function depositCollateral(bytes32[] calldata commitmentIds) external payable;
 
+    /// @dev Submits proofs for the commitment
+    /// @param unitIds Compute unit ids which provide the proof
+    /// @param localUnitNonces Local nonces of the units for calculating the target hashes. It's the proof
+    /// @param resultHashes Target hashes of this proof
+    function submitProofs(
+        bytes32[] memory unitIds,
+        bytes32[] memory localUnitNonces,
+        bytes32[] memory resultHashes
+    ) external;
+
     /// @dev Submits a proof for the commitment
-    /// @param unitId Compute unit id which provied the proof
-    /// @param localUnitNonce The local nonce of the unit for calculating the target hash. It's the proof
-    /// @param resultHash The target hash of this proof
+    /// @param unitId Compute unit id which provide the proof
+    /// @param localUnitNonce Local nonce of the unit for calculating the target hash. It's the proof
+    /// @param resultHash Target hash of this proof
     function submitProof(bytes32 unitId, bytes32 localUnitNonce, bytes32 resultHash) external;
 
     /// @dev Remove CU from Ended or Failed CC. Need to call this function before finish the commitment

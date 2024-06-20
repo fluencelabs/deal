@@ -3,6 +3,8 @@
 [profile.default]
 src = "src"
 out = "out"
+test = "src"
+script = "src"
 libs = ["lib"]
 via_ir = true
 solc = "0.8.24"
@@ -18,8 +20,14 @@ extra_output = ["devdoc", "storageLayout"]
 
 [rpc_endpoints]
 local = "http://0.0.0.0:8545"
-arbutrum = "http://0.0.0.0:8545"
-stage = "https://ipc-stage.fluence.dev"
+stage = "https://ipc.stage.fluence.dev"
 dar = "https://ipc.dar.fluence.dev"
 kras = "https://ipc.kras.fluence.dev"
-mumbai = "https://rpc.ankr.com/polygon_mumbai"
+
+[profile.test]
+src = "test"
+out = "out-test"
+test = "test"
+script = "script-local"
+via_ir = false
+optimizer = false

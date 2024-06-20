@@ -22,7 +22,14 @@ export type CapacityCommitmentQueryQueryVariables = Types.Exact<{
 }>;
 
 
-export type CapacityCommitmentQueryQuery = { __typename?: 'Query', capacityCommitment?: { __typename?: 'CapacityCommitment', delegator: string, id: string, status?: Types.CapacityCommitmentStatus | null, createdAt: any, startEpoch: any, endEpoch: any, computeUnitsCount: number, totalCollateral: any, rewardWithdrawn: any, rewardDelegatorRate: number, duration: any, computeUnits?: Array<{ __typename?: 'CapacityCommitmentToComputeUnit', computeUnit: { __typename?: 'ComputeUnit', id: string, deal?: { __typename?: 'Deal', id: string } | null } }> | null, peer: { __typename?: 'Peer', id: string, provider: { __typename?: 'Provider', id: string } } } | null };
+export type CapacityCommitmentQueryQuery = { __typename?: 'Query', capacityCommitment?: { __typename?: 'CapacityCommitment', delegator: string, id: string, status?: Types.CapacityCommitmentStatus | null, createdAt: any, startEpoch: any, endEpoch: any, computeUnitsCount: number, totalCollateral: any, rewardWithdrawn: any, rewardDelegatorRate: number, duration: any, peer: { __typename?: 'Peer', id: string, provider: { __typename?: 'Provider', id: string } } } | null };
+
+export type CapacityCommitmentWithCUsQueryQueryVariables = Types.Exact<{
+  id: Types.Scalars['ID']['input'];
+}>;
+
+
+export type CapacityCommitmentWithCUsQueryQuery = { __typename?: 'Query', capacityCommitment?: { __typename?: 'CapacityCommitment', delegator: string, id: string, status?: Types.CapacityCommitmentStatus | null, createdAt: any, startEpoch: any, endEpoch: any, computeUnitsCount: number, totalCollateral: any, rewardWithdrawn: any, rewardDelegatorRate: number, duration: any, computeUnits?: Array<{ __typename?: 'CapacityCommitmentToComputeUnit', computeUnit: { __typename?: 'ComputeUnit', id: string, deal?: { __typename?: 'Deal', id: string } | null } }> | null, peer: { __typename?: 'Peer', id: string, provider: { __typename?: 'Provider', id: string } } } | null };
 
 export type SubmittedProofsQueryQueryVariables = Types.Exact<{
   filters?: Types.InputMaybe<Types.SubmittedProof_Filter>;
@@ -116,6 +123,14 @@ export const CapacityCommitmentsQueryDocument = gql`
     ${CapacityCommitmentBasicFragmentDoc}`;
 export const CapacityCommitmentQueryDocument = gql`
     query CapacityCommitmentQuery($id: ID!) {
+  capacityCommitment(id: $id) {
+    ...CapacityCommitmentBasic
+    delegator
+  }
+}
+    ${CapacityCommitmentBasicFragmentDoc}`;
+export const CapacityCommitmentWithCUsQueryDocument = gql`
+    query CapacityCommitmentWithCUsQuery($id: ID!) {
   capacityCommitment(id: $id) {
     ...CapacityCommitmentBasic
     delegator
@@ -225,6 +240,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     CapacityCommitmentQuery(variables: CapacityCommitmentQueryQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<CapacityCommitmentQueryQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<CapacityCommitmentQueryQuery>(CapacityCommitmentQueryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'CapacityCommitmentQuery', 'query', variables);
+    },
+    CapacityCommitmentWithCUsQuery(variables: CapacityCommitmentWithCUsQueryQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<CapacityCommitmentWithCUsQueryQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<CapacityCommitmentWithCUsQueryQuery>(CapacityCommitmentWithCUsQueryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'CapacityCommitmentWithCUsQuery', 'query', variables);
     },
     SubmittedProofsQuery(variables?: SubmittedProofsQueryQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<SubmittedProofsQueryQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<SubmittedProofsQueryQuery>(SubmittedProofsQueryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SubmittedProofsQuery', 'query', variables);

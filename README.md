@@ -7,7 +7,8 @@ This repo consists of 3 main parts:
 - `subgraph` - javascript client to interact with the graph node, called subgraph (read more
   https://thegraph.com/docs/quick-start), [README](subgraph/README.md)
 - `ts-client` - npm package from contract developers to interact with contracts, more in [README](ts-client/README.md)
-- `integration-tests` - npm module to prepare integration tests for Deal contracts flow, more in [README](integration-tests/README.md)
+- `integration-tests-contracts` - npm module to store integration tests for Deal contracts flow, more in [README](integration-tests-contracts/README.md)
+- `integration-tests-clients` - npm module to store integration tests for clients of the Fluence Contracts, e.g. Fluence Network Client, Offchain Matcher, more in [README](integration-tests-clients/README.md)
 
 To access to the general points of the each part in the repo root **makefile**
 is presented. Below are main commands of the makefile.

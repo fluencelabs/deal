@@ -2,41 +2,20 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/MulticallUpgradeable.sol";
-import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 import "src/core/interfaces/ICore.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
 import "src/utils/OwnableUpgradableDiamond.sol";
 import "./DealSnapshot.sol";
 import "./WorkerManager.sol";
 import "./interfaces/IDeal.sol";
-import "./interfaces/IConfig.sol";
-import "forge-std/console.sol";
 
 contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
     using SafeERC20 for IERC20;
     using DealSnapshot for DealSnapshot.Cache;
 
-    // ------------------ Types ------------------
-    struct ComputeUnitPaymentInfo {
-        uint256 snapshotEpoch;
-        uint256 gapsDelta;
-    }
-
     // ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.deal.storage.v1")) - 1);
-
-    struct DealStorage {
-        uint256 totalBalance;
-        uint256 lockedBalance;
-        uint256 gapsEpochCount;
-        uint256 maxPaidEpoch;
-        uint256 lastCommitedEpoch;
-        mapping(bytes32 => ComputeUnitPaymentInfo) cUnitPaymentInfo;
-        uint256 endedEpoch;
-        uint256 protocolVersion;
-    }
 
     function _getDealStorage() private pure returns (DealStorage storage s) {
         bytes32 storageSlot = _STORAGE_SLOT;
@@ -223,7 +202,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         ComputeUnit memory unit = getComputeUnit(computeUnitId);
         DealSnapshot.Cache memory snapshot = _preCommitPeriod();
 
-        _withdrawReward(computeUnitId, unit.peerId, unit.provider, snapshot);
+        _withdrawReward(computeUnitId, unit.workerId, unit.provider, snapshot);
 
         uint256 newWorkerCount = _removeComputeUnit(computeUnitId);
         _postCommitPeriod(snapshot, newWorkerCount);
