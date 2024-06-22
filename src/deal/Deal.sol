@@ -2,13 +2,17 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts-upgradeable/utils/MulticallUpgradeable.sol";
-import "src/core/interfaces/ICore.sol";
-import "src/core/modules/market/interfaces/IMarket.sol";
-import "src/utils/OwnableUpgradableDiamond.sol";
-import "./DealSnapshot.sol";
-import "./WorkerManager.sol";
-import "./interfaces/IDeal.sol";
+import {MulticallUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/MulticallUpgradeable.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {CIDV1} from "src/utils/Common.sol";
+import {ICore} from "src/core/interfaces/ICore.sol";
+import {IDeal} from "src/deal/interfaces/IDeal.sol";
+import {IOffer} from "src/core/modules/market/interfaces/IOffer.sol";
+import {IMarket} from "src/core/modules/market/interfaces/IMarket.sol";
+import {OwnableUpgradableDiamond} from "src/utils/OwnableUpgradableDiamond.sol";
+import {DealSnapshot} from "src/deal/DealSnapshot.sol";
+import {WorkerManager} from "src/deal/WorkerManager.sol";
 
 contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
     using SafeERC20 for IERC20;

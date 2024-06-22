@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
-
 pragma solidity ^0.8.19;
 
-import "./IEpochController.sol";
+import {IEpochController} from "src/core/interfaces/IEpochController.sol";
 
 
 /// @title Capacity constants contract interface

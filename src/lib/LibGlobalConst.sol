@@ -17,4 +17,20 @@ library LibGlobalConst {
             s.slot := storageSlot
         }
     }
+
+    function minDealDepositedEpochs() internal view returns (uint256) {
+        return store().minDealDepositedEpochs;
+    }
+
+    function minDealRematchingEpochs() internal view returns (uint256) {
+        return store().minDealRematchingEpochs;
+    }
+
+    function minProtocolVersion() internal view returns (uint256) {
+        return store().minProtocolVersion;
+    }
+
+    function maxProtocolVersion() internal view returns (uint256) {
+        return store().maxProtocolVersion;
+    }
 }

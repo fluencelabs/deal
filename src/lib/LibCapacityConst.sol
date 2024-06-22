@@ -168,7 +168,7 @@ library LibCapacityConst {
         return value;
     }
 
-    function _setActiveUnitCount(uint256 activeUnitCount_) internal {
+    function setActiveUnitCount(uint256 activeUnitCount_) internal {
         CapacityConstStorage storage constantsStorage = store();
 
         constantsStorage.activeUnitCount = activeUnitCount_;

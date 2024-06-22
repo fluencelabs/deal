@@ -17,6 +17,6 @@ contract CapacityConstWithPublicInternals is ICapacityConstWithPublicInternals, 
     }
 
     function setActiveUnitCount(uint256 activeUnitCount_) public {
-        LibCapacityConst._setActiveUnitCount(activeUnitCount_);
+        LibCapacityConst.setActiveUnitCount(activeUnitCount_);
     }
 }

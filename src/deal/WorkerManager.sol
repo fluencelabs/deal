@@ -2,10 +2,13 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import "./Config.sol";
-import "./interfaces/IWorkerManager.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {CIDV1} from "src/utils/Common.sol";
+import {Config} from "src/deal/Config.sol";
+import {IWorkerManager} from "src/deal/interfaces/IWorkerManager.sol";
+import {ICore} from "src/core/interfaces/ICore.sol";
 
 abstract contract WorkerManager is Config, IWorkerManager {
     using EnumerableSet for EnumerableSet.Bytes32Set;

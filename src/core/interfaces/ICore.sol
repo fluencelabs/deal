@@ -1,33 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
-
 pragma solidity ^0.8.19;
 
-import "src/core/modules/capacity/interfaces/ICapacity.sol";
-import "src/core/modules/market/interfaces/IMarket.sol";
-import "src/core/modules/market/interfaces/IDealFactory.sol";
-import "src/deal/interfaces/IDeal.sol";
-import "./IGlobalConst.sol";
+import {IDeal} from "src/deal/interfaces/IDeal.sol";
+import {IGlobalConst} from "src/core/interfaces/IGlobalConst.sol";
 
 /// @title Core contract interface
 /// @dev Core contract is the main contract of the system and it is responsible for navigation between modules
 interface ICore is IGlobalConst {
     event DealImplSet(IDeal dealImpl);
-
-    // ------------------ Initializer ------------------
-
-
-    // function initialize(
-    //     uint256 epochDuration_,
-    //     uint256 minDepositedEpochs_,
-    //     uint256 minRematchingEpochs_,
-    //     uint256 minProtocolVersion_,
-    //     uint256 maxProtocolVersion_,
-    //     IDeal dealImpl_,
-    //     bool isWhitelistEnabled_,
-    //     CapacityConstInitArgs memory capacityConstInitArgs_
-    // ) external;
-
-    // ------------------ External View Functions ------------------
 
     function dealImpl() external view returns (IDeal);
     function setActiveUnitCount(uint256 activeUnitCount_) external;

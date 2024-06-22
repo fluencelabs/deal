@@ -2,16 +2,20 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./interfaces/IMatcher.sol";
-import "src/deal/interfaces/IDeal.sol";
-import "src/deal/interfaces/IConfig.sol";
-import "./Offer.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IMatcher} from "src/core/modules/market/interfaces/IMatcher.sol";
+import {IDeal} from "src/deal/interfaces/IDeal.sol";
+import {IConfig} from "src/deal/interfaces/IConfig.sol";
+import {ICapacity} from "src/core/modules/capacity/interfaces/ICapacity.sol";
+import {Offer} from "src/core/modules/market/Offer.sol";
 import {LibEpochController} from "src/lib/LibEpochController.sol";
 import {LibOffer} from "src/lib/LibOffer.sol";
 import {LibMatcher, MatcherStorage} from "src/lib/LibMatcher.sol";
 import {LibCapacity} from "src/lib/LibCapacity.sol";
+import {LibGlobalConst} from "src/lib/LibGlobalConst.sol";
+import {OwnableUpgradableDiamond} from "src/utils/OwnableUpgradableDiamond.sol";
+import {CIDV1} from "src/utils/Common.sol";
 
 abstract contract Matcher is Offer, IMatcher {
     using SafeERC20 for IERC20;
@@ -50,7 +54,7 @@ abstract contract Matcher is Offer, IMatcher {
         uint256 lastMatchedEpoch = matcherStorage.lastMatchedEpoch[address(deal)];
         uint256 currentEpoch = LibEpochController.currentEpoch();
         require(
-            lastMatchedEpoch == 0 || currentEpoch > lastMatchedEpoch + core.minDealRematchingEpochs(),
+            lastMatchedEpoch == 0 || currentEpoch > lastMatchedEpoch + LibGlobalConst.minDealRematchingEpochs(),
             "Matcher: too early to rematch"
         );
 

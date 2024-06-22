@@ -2,10 +2,10 @@
 
 pragma solidity ^0.8.19;
 
-import "src/deal/interfaces/IDeal.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IDeal} from "src/deal/interfaces/IDeal.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {CIDV1} from "src/utils/Common.sol";
-import "src/deal/interfaces/IConfig.sol";
+import {IConfig} from "src/deal/interfaces/IConfig.sol";
 
 /// @title Deal factory contract interface
 /// @dev Deal factory contract is responsible for creating deals

@@ -2,40 +2,27 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "src/utils/OwnableUpgradableDiamond.sol";
-import "src/deal/interfaces/IDeal.sol";
-import "src/deal/DealProxy.sol";
-import "src/core/modules/BaseModule.sol";
-import "./interfaces/IDealFactory.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {OwnableUpgradableDiamond} from "src/utils/OwnableUpgradableDiamond.sol";
+import {IDeal} from "src/deal/interfaces/IDeal.sol";
+import {ICore} from "src/core/interfaces/ICore.sol";
+import {IConfig} from "src/deal/interfaces/IConfig.sol";
+import {CIDV1} from "src/utils/Common.sol";
+import {DealProxy} from "src/deal/DealProxy.sol";
+import {IDealFactory} from "src/core/modules/market/interfaces/IDealFactory.sol";
 import {LibEpochController} from "src/lib/LibEpochController.sol";
+import {LibDealFactory, DealFactoryStorage} from "src/lib/LibDealFactory.sol";
+import {LibGlobalConst} from "src/lib/LibGlobalConst.sol";
 
 /*
  * @dev On init mas.sender becomes owner.
  */
-contract DealFactoryFacet is BaseModule, IDealFactory {
+contract DealFactoryFacet is IDealFactory {
     using SafeERC20 for IERC20;
 
-    // ------------------ Storage ------------------
-    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.market.storage.v1.dealFactory")) - 1);
-
-    struct DealFactoryStorage {
-        mapping(IDeal => bool) hasDeal;
-    }
-
-    constructor(ICore core_) BaseModule(core_) {} // disables initializer, immutable set
-
-    function _getDealFactoryStorage() private pure returns (DealFactoryStorage storage s) {
-        bytes32 storageSlot = _STORAGE_SLOT;
-        assembly {
-            s.slot := storageSlot
-        }
-    }
-
-    // ----------------- View -----------------
     function hasDeal(IDeal deal) external view returns (bool) {
-        return _getDealFactoryStorage().hasDeal[deal];
+        return LibDealFactory.store().hasDeal[deal];
     }
 
     // ----------------- Mutable -----------------
@@ -52,15 +39,15 @@ contract DealFactoryFacet is BaseModule, IDealFactory {
         address[] calldata providersAccessList_,
         uint256 protocolVersion_
     ) external returns (IDeal) {
-        DealFactoryStorage storage dealFactoryStorage = _getDealFactoryStorage();
+        DealFactoryStorage storage dealFactoryStorage = LibDealFactory.store();
 
         IDeal deal = IDeal(
             address(
                 new DealProxy(
-                    core,
+                    ICore(address(this)), // TODO DIAMOND, types (not ICore)
                     abi.encodeWithSelector(
                         IDeal.initialize.selector,
-                        core,
+                        address(this),
                         appCID_,
                         paymentToken_,
                         minWorkers_,
@@ -78,7 +65,7 @@ contract DealFactoryFacet is BaseModule, IDealFactory {
 
         dealFactoryStorage.hasDeal[deal] = true;
 
-        uint256 minAmount = pricePerWorkerEpoch_ * targetWorkers_ * core.minDealDepositedEpochs();
+        uint256 minAmount = pricePerWorkerEpoch_ * targetWorkers_ * LibGlobalConst.minDealDepositedEpochs();
 
         require(depositAmount_ >= minAmount, "Deposit amount is less than minimum required");
 

@@ -2,14 +2,12 @@
 
 pragma solidity ^0.8.19;
 
-import "src/deal/interfaces/IDeal.sol";
+import {IDeal} from "src/deal/interfaces/IDeal.sol";
 import {CIDV1} from "src/utils/Common.sol";
-import {IBaseModule} from "src/core/modules/interfaces/IBaseModule.sol";
 
 /// @title Offer contract interface
 /// @dev Offer contract is responsible for managing the offers in the market
-interface IOffer is IBaseModule {
-    // ------------------ Types ------------------
+interface IOffer {
     struct ProviderInfo {
         string name;
         CIDV1 metadata;

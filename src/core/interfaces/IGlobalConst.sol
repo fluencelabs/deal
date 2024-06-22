@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
-
 pragma solidity ^0.8.19;
 
-import "./ICapacityConst.sol";
+
+import {ICapacityConst} from "src/core/interfaces/ICapacityConst.sol";
 
 /// @title Global Constants contract interface
 /// @dev Global Constants contract stores global constants of the system and it is responsible for changing them

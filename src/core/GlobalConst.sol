@@ -14,20 +14,20 @@ contract GlobalConst is IGlobalConst, CapacityConst {
         return PRECISION;
     }
 
-    function minDealDepositedEpochs() public view override returns (uint256) {
-        return LibGlobalConst.store().minDealDepositedEpochs;
+    function minDealDepositedEpochs() external view override returns (uint256) {
+        return LibGlobalConst.minDealDepositedEpochs();
     }
 
-    function minDealRematchingEpochs() public view override returns (uint256) {
-        return LibGlobalConst.store().minDealRematchingEpochs;
+    function minDealRematchingEpochs() external view override returns (uint256) {
+        return LibGlobalConst.minDealRematchingEpochs();
     }
 
-    function minProtocolVersion() public view override returns (uint256) {
-        return LibGlobalConst.store().minProtocolVersion;
+    function minProtocolVersion() external view override returns (uint256) {
+        return LibGlobalConst.minProtocolVersion();
     }
 
-    function maxProtocolVersion() public view override returns (uint256) {
-        return LibGlobalConst.store().maxProtocolVersion;
+    function maxProtocolVersion() external view override returns (uint256) {
+        return LibGlobalConst.maxProtocolVersion();
     }
 
     function setConstant(ConstantType constantType, uint256 v) external {

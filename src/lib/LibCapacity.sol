@@ -191,9 +191,9 @@ library LibCapacity {
             if (snapshotCache.current.status == ICapacity.CCStatus.Failed) {
                 emit ICapacity.CommitmentFailed(commitmentId, snapshotCache.current.failedEpoch);
 
-                LibCapacityConst._setActiveUnitCount(LibCapacityConst.activeUnitCount() - initialActiveUnitCount_);
+                LibCapacityConst.setActiveUnitCount(LibCapacityConst.activeUnitCount() - initialActiveUnitCount_);
             } else if (snapshotCache.current.status == ICapacity.CCStatus.Inactive) {
-                LibCapacityConst._setActiveUnitCount(LibCapacityConst.activeUnitCount() - initialActiveUnitCount_);
+                LibCapacityConst.setActiveUnitCount(LibCapacityConst.activeUnitCount() - initialActiveUnitCount_);
             }
         }
 
@@ -331,7 +331,7 @@ library LibCapacity {
 
         unitInfo.isInactive = true;
         cc.progress.activeUnitCount--;
-        LibCapacityConst._setActiveUnitCount(LibCapacityConst.activeUnitCount() - 1);
+        LibCapacityConst.setActiveUnitCount(LibCapacityConst.activeUnitCount() - 1);
 
         emit ICapacity.CommitmentStatsUpdated(
             commitmentId,
@@ -379,7 +379,7 @@ library LibCapacity {
 
         // add one active unit to global activeUnitCount and commitment activeUnitCount
         cc.progress.nextAdditionalActiveUnitCount += 1;
-        LibCapacityConst._setActiveUnitCount(LibCapacityConst.activeUnitCount() + 1);
+        LibCapacityConst.setActiveUnitCount(LibCapacityConst.activeUnitCount() + 1);
 
         LibOffer.setStartEpoch(unitId, startEpoch);
 

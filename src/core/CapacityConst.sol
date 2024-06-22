@@ -2,7 +2,6 @@
 
 pragma solidity ^0.8.19;
 
-import "src/utils/OwnableUpgradableDiamond.sol";
 import {PRECISION} from "src/utils/Common.sol";
 import "./interfaces/ICapacityConst.sol";
 import {CapacityConstStorage, LibCapacityConst, RewardPoolPerEpoch} from "src/lib/LibCapacityConst.sol";

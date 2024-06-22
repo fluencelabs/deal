@@ -2,15 +2,18 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import "src/deal/interfaces/IDeal.sol";
-import "src/core/modules/BaseModule.sol";
-import "./interfaces/IOffer.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {CIDV1} from "src/utils/Common.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {IDeal} from "src/deal/interfaces/IDeal.sol";
+import {IOffer} from "src/core/modules/market/interfaces/IOffer.sol";
 import {LibOffer, OfferStorage} from "src/lib/LibOffer.sol";
 import {LibCapacity} from "src/lib/LibCapacity.sol";
+import {LibGlobalConst} from "src/lib/LibGlobalConst.sol";
+import {LibDiamond} from "src/lib/LibDiamond.sol";
 
-abstract contract Offer is BaseModule, IOffer {
+abstract contract Offer is IOffer {
     using SafeERC20 for IERC20;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
@@ -96,8 +99,8 @@ abstract contract Offer is BaseModule, IOffer {
         require(offerStorage.offers[offerId].paymentToken == address(0x00), "Offer already exists");
         require(minPricePerWorkerEpoch > 0, "Min price per epoch should be greater than 0");
         require(address(paymentToken) != address(0x00), "Payment token should be not zero address");
-        require(minProtocolVersion >= core.minProtocolVersion(), "Min protocol version too small");
-        require(maxProtocolVersion <= core.maxProtocolVersion(), "Max protocol version too big");
+        require(minProtocolVersion >= LibGlobalConst.minProtocolVersion(), "Min protocol version too small");
+        require(maxProtocolVersion <= LibGlobalConst.maxProtocolVersion(), "Max protocol version too big");
         require(minProtocolVersion <= maxProtocolVersion, "Wrong protocol versions");
 
         // create market offer
@@ -277,8 +280,8 @@ abstract contract Offer is BaseModule, IOffer {
     // Effector info
     function setEffectorInfo(CIDV1 calldata id, string calldata description, CIDV1 calldata metadata)
         external
-        onlyCoreOwner
     {
+        LibDiamond.enforceIsContractOwner();
         OfferStorage storage offerStorage = LibOffer.store();
         require(bytes(description).length > 0, "Description should be not empty");
 
@@ -291,7 +294,8 @@ abstract contract Offer is BaseModule, IOffer {
         emit EffectorInfoSet(id, description, metadata);
     }
 
-    function removeEffectorInfo(CIDV1 calldata id) external onlyCoreOwner {
+    function removeEffectorInfo(CIDV1 calldata id) external {
+        LibDiamond.enforceIsContractOwner();
         OfferStorage storage offerStorage = LibOffer.store();
 
         bytes32 effectorHash = LibOffer._hashEffectorCID(id);

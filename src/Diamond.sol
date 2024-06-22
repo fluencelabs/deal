@@ -8,33 +8,32 @@ pragma solidity ^0.8.0;
 * Implementation of a diamond.
 /******************************************************************************/
 
-import {LibDiamond} from "./lib/LibDiamond.sol";
-import {IDiamondCut} from "./interfaces/IDiamondCut.sol";
-import {IERC165} from "./interfaces/IERC165.sol";
-import {IDiamondLoupe} from "./interfaces/IDiamondLoupe.sol";
-import {ICapacityConst} from "./core/interfaces/ICapacityConst.sol";
+import {LibDiamond} from "src/lib/LibDiamond.sol";
+import {LibCore} from "src/lib/LibCore.sol";
+import {LibWhitelist} from "src/lib/LibWhitelist.sol";
+import {IDiamondCut} from "src/interfaces/IDiamondCut.sol";
+import {IERC165} from "src/interfaces/IERC165.sol";
+import {IDiamondLoupe} from "src/interfaces/IDiamondLoupe.sol";
+import {ICapacityConst} from "src/core/interfaces/ICapacityConst.sol";
 import {GlobalConstStorage, LibGlobalConst} from "src/lib/LibGlobalConst.sol";
 import {CapacityConstStorage, LibCapacityConst, RewardPoolPerEpoch} from "src/lib/LibCapacityConst.sol";
 import {EpochControllerStorage, LibEpochController} from "src/lib/LibEpochController.sol";
-import {IDeal} from "./deal/interfaces/IDeal.sol";
+import {IDeal} from "src/deal/interfaces/IDeal.sol";
+import {ICore} from "src/core/interfaces/ICore.sol";
 
 contract Diamond {    
     struct CoreParams {
-        uint256 epochDuration_;
-        uint256 minDepositedEpochs_;
-        uint256 minRematchingEpochs_;
-        uint256 minProtocolVersion_;
-        uint256 maxProtocolVersion_;
-        IDeal dealImpl_;
-        bool isWhitelistEnabled_;
-        ICapacityConst.CapacityConstInitArgs capacityConstInitArgs_;
+        uint256 epochDuration;
+        IDeal dealImpl;
+        bool isWhitelistEnabled;
+        ICapacityConst.CapacityConstInitArgs capacityConstInitArgs;
     }
 
     struct GlobalConstParams {
-        uint256 minDealDepositedEpochs_;
-        uint256 minDealRematchingEpochs_;
-        uint256 minProtocolVersion_;
-        uint256 maxProtocolVersion_;
+        uint256 minDealDepositedEpochs;
+        uint256 minDealRematchingEpochs;
+        uint256 minProtocolVersion;
+        uint256 maxProtocolVersion;
     }
 
     constructor(
@@ -62,22 +61,20 @@ contract Diamond {
         ds.supportedInterfaces[type(IDiamondLoupe).interfaceId] = true;
 
         // from Core
-        //     __Whitelist_init(isWhitelistEnabled_);
-        //     __CapacityConst_init(capacityConstInitArgs_);
-
-        //     _getCoreStorage().dealImpl = dealImpl_;
-        //     emit DealImplSet(dealImpl_);
+        LibCore.store().dealImpl = coreParams.dealImpl;
+        emit ICore.DealImplSet(coreParams.dealImpl);
+        LibWhitelist.store().isWhitelistEnabled = coreParams.isWhitelistEnabled;
 
         // from GlobalConst
         GlobalConstStorage storage globalConstantsStorage = LibGlobalConst.store();
-        globalConstantsStorage.minDealDepositedEpochs = globalConstParams.minDealDepositedEpochs_;
-        globalConstantsStorage.minDealRematchingEpochs = globalConstParams.minDealRematchingEpochs_;
-        globalConstantsStorage.minProtocolVersion = globalConstParams.minProtocolVersion_;
-        globalConstantsStorage.maxProtocolVersion = globalConstParams.maxProtocolVersion_;
+        globalConstantsStorage.minDealDepositedEpochs = globalConstParams.minDealDepositedEpochs;
+        globalConstantsStorage.minDealRematchingEpochs = globalConstParams.minDealRematchingEpochs;
+        globalConstantsStorage.minProtocolVersion = globalConstParams.minProtocolVersion;
+        globalConstantsStorage.maxProtocolVersion = globalConstParams.maxProtocolVersion;
 
         // from CapacityConst
         CapacityConstStorage storage constantsStorage = LibCapacityConst.store();
-        ICapacityConst.CapacityConstInitArgs memory initArgs = coreParams.capacityConstInitArgs_;
+        ICapacityConst.CapacityConstInitArgs memory initArgs = coreParams.capacityConstInitArgs;
         constantsStorage.commitment.minDuration = initArgs.minDuration;
         constantsStorage.commitment.usdCollateralPerUnit = initArgs.usdCollateralPerUnit;
         constantsStorage.commitment.slashingRate = initArgs.slashingRate;
@@ -108,7 +105,7 @@ contract Diamond {
 
         // from EpochController
         EpochControllerStorage storage epochControllerStorage = LibEpochController.store();
-        epochControllerStorage.epochDuration = coreParams.epochDuration_;
+        epochControllerStorage.epochDuration = coreParams.epochDuration;
         epochControllerStorage.initTimestamp = block.timestamp;
     }
 

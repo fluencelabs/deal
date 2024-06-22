@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.19;
 
-import "src/deal/interfaces/IDeal.sol";
+import {IDeal} from "src/deal/interfaces/IDeal.sol";
 import {CIDV1} from "src/utils/Common.sol";
 import {IOffer} from "src/core/modules/market/interfaces/IOffer.sol";
 

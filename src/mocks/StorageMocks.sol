@@ -1,29 +1,20 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.19;
 
-import {CoreFacet} from "src/core/CoreFacet.sol";
+import {OwnableUpgradableDiamond} from "src/utils/OwnableUpgradableDiamond.sol";
 import {CoreStorage} from "src/lib/LibCore.sol";
 import {CapacityConstStorage} from "src/lib/LibCapacityConst.sol";
 import {EpochControllerStorage} from "src/lib/LibEpochController.sol";
 import {GlobalConstStorage} from "src/lib/LibGlobalConst.sol";
 import {MatcherStorage} from "src/lib/LibMatcher.sol";
+import {CommitmentStorage} from "src/lib/LibCapacity.sol";
+import {OfferStorage} from "src/lib/LibOffer.sol";
+import {DealFactoryStorage} from "src/lib/LibDealFactory.sol";
+import {IDeal} from "src/deal/interfaces/IDeal.sol";
+import {Config} from "src/deal/Config.sol";
+import {WorkerManager} from "src/deal/WorkerManager.sol";
+import {WhitelistStorage} from "src/lib/LibWhitelist.sol";
 
-import "src/core/CapacityConst.sol";
-import "src/core/GlobalConst.sol";
-
-import "src/core/modules/capacity/CapacityFacet.sol";
-
-import {MarketFacet} from "src/core/modules/market/MarketFacet.sol";
-import {Matcher} from "src/core/modules/market/Matcher.sol";
-import "src/core/modules/market/Offer.sol";
-import {DealFactoryFacet} from "src/core/modules/market/DealFactoryFacet.sol";
-
-import "src/deal/Deal.sol";
-import "src/deal/Config.sol";
-import "src/deal/WorkerManager.sol";
-
-import "src/utils/OwnableUpgradableDiamond.sol";
-import "src/utils/Whitelist.sol";
 
 // #region core
 contract CoreStorageMock {
@@ -59,7 +50,7 @@ contract OfferStorageMock {
 }
 
 contract DealFactoryStorageMock {
-    DealFactoryFacet.DealFactoryStorage internal _dealFactoryStorage;
+    DealFactoryStorage internal _dealFactoryStorage;
 }
 
 // #endregion
@@ -67,7 +58,7 @@ contract DealFactoryStorageMock {
 // #region deal
 
 contract DealStorageMock {
-    Deal.DealStorage internal _dealStorage;
+    IDeal.DealStorage internal _dealStorage;
 }
 
 contract ConfigStorageMock {
@@ -85,6 +76,6 @@ contract OwnableUpgradableDiamondStorageMock {
 }
 
 contract WhitelistStorageMock {
-    Whitelist.WhitelistStorage internal _whitelistStorage;
+    WhitelistStorage internal _whitelistStorage;
 }
 // #endregion utils

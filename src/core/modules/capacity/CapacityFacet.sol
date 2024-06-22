@@ -2,26 +2,26 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "src/core/modules/BaseModule.sol";
-import "@openzeppelin/contracts-upgradeable/utils/MulticallUpgradeable.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
-import "src/utils/RandomXProxy.sol";
-import "src/utils/BytesConverter.sol";
-import "src/utils/Whitelist.sol";
-import "./interfaces/ICapacity.sol";
-import "./Vesting.sol";
-import "forge-std/console.sol";
-import {PRECISION, CIDV1} from "src/utils/Common.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {ICore} from "src/core/interfaces/ICore.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+import {RandomXProxy} from "src/utils/RandomXProxy.sol";
+import {BytesConverter} from "src/utils/BytesConverter.sol";
+import {Whitelist} from "src/utils/Whitelist.sol";
+import {ICapacity} from "src/core/modules/capacity/interfaces/ICapacity.sol";
+import {Vesting} from "src/core/modules/capacity/Vesting.sol";
+import {PRECISION} from "src/utils/Common.sol";
 import {LibEpochController} from "src/lib/LibEpochController.sol";
 import {LibCapacity, CommitmentStorage, RewardInfo} from "src/lib/LibCapacity.sol";
 import {LibCapacityConst} from "src/lib/LibCapacityConst.sol";
 import {LibOffer} from "src/lib/LibOffer.sol";
+import {LibWhitelist} from "src/lib/LibWhitelist.sol";
+import {LibDiamond} from "src/lib/LibDiamond.sol";
 import {Snapshot} from "src/core/modules/capacity/Snapshot.sol";
 import {IOffer} from "src/core/modules/market/interfaces/IOffer.sol";
 
-contract CapacityFacet is BaseModule, ICapacity {
+contract CapacityFacet is ICapacity {
     using SafeERC20 for IERC20;
     using BytesConverter for bytes;
     using Address for address payable;
@@ -31,8 +31,6 @@ contract CapacityFacet is BaseModule, ICapacity {
     receive() external payable {
         LibCapacity.store().rewardBalance += msg.value;
     }
-
-    constructor(ICore core_) BaseModule(core_) {}
 
     function initialize(bytes32 initGlobalNonce_) external /*initializer*/ {
         // TODO DIAMOND
@@ -44,8 +42,7 @@ contract CapacityFacet is BaseModule, ICapacity {
 
     // #region ------------------ Modifiers ------------------
     modifier onlyApproved() {
-        // TODO DIAMOMD to wl lib
-        require(Whitelist(address(core)).isApproved(msg.sender), "Whitelist: provider is not approved");
+        require(LibWhitelist.isApproved(msg.sender), "Whitelist: provider is not approved");
         _;
     }
     // #endregion
@@ -197,7 +194,7 @@ contract CapacityFacet is BaseModule, ICapacity {
             cc.progress.snapshotEpoch = currentEpoch_;
             cc.progress.activeUnitCount = unitCount;
 
-            core.setActiveUnitCount(core.activeUnitCount() + unitCount);
+            LibCapacityConst.setActiveUnitCount(LibCapacityConst.activeUnitCount() + unitCount);
             cc.info.status = CCStatus.Active; // it's not WaitStart because WaitStart is dynamic status
 
             emit CollateralDeposited(commitmentId, collateral);
@@ -256,7 +253,7 @@ contract CapacityFacet is BaseModule, ICapacity {
         // #endregion
 
         uint256 unitProofCount = unitInfo.proofCountByEpoch[currentEpoch] + 1;
-        if (unitProofCount > core.maxProofsPerEpoch()) {
+        if (unitProofCount > LibCapacityConst.maxProofsPerEpoch()) {
             revert TooManyProofs();
         }
 
@@ -273,7 +270,7 @@ contract CapacityFacet is BaseModule, ICapacity {
         RewardInfo storage rewardInfo = s.rewardInfoByEpoch[currentEpoch];
         uint256 minProofsPerEpoch_ = rewardInfo.minProofsPerEpoch;
         if (minProofsPerEpoch_ == 0) {
-            minProofsPerEpoch_ = core.minProofsPerEpoch();
+            minProofsPerEpoch_ = LibCapacityConst.minProofsPerEpoch();
             rewardInfo.minProofsPerEpoch = minProofsPerEpoch_;
         }
 
@@ -289,13 +286,13 @@ contract CapacityFacet is BaseModule, ICapacity {
         // #endregion
 
         // #region check proof
-        (bool success, bytes memory randomXResultHash) = core.randomXProxy().delegatecall(
+        (bool success, bytes memory randomXResultHash) = LibCapacityConst.randomXProxy().delegatecall(
             abi.encodeWithSelector(RandomXProxy.run.selector, globalUnitNonce_, localUnitNonce)
         );
 
         require(success, "RandomXProxy.run failed");
         require(randomXResultHash.toBytes32() == resultHash, "Proof is not valid");
-        require(resultHash <= core.difficulty(), "Proof is bigger than difficulty");
+        require(resultHash <= LibCapacityConst.difficulty(), "Proof is bigger than difficulty");
         // #endregion
 
         emit CommitmentStatsUpdated(
@@ -330,7 +327,7 @@ contract CapacityFacet is BaseModule, ICapacity {
         // #endregion
 
         require(
-            status != CCStatus.Failed || currentEpoch_ >= cc.finish.failedEpoch + core.withdrawEpochsAfterFailed(),
+            status != CCStatus.Failed || currentEpoch_ >= cc.finish.failedEpoch + LibCapacityConst.withdrawEpochsAfterFailed(),
             "Capacity commitment is failed and not enough epochs passed"
         );
 
@@ -350,7 +347,7 @@ contract CapacityFacet is BaseModule, ICapacity {
         uint256 totalCollateral = collateralPerUnit_ * unitCount;
 
         delegator.sendValue(totalCollateral - cc.finish.totalSlashedCollateral);
-        payable(owner()).sendValue(cc.finish.totalSlashedCollateral);
+        payable(LibDiamond.contractOwner()).sendValue(cc.finish.totalSlashedCollateral);
         // #endregion
 
         emit CommitmentFinished(commitmentId);

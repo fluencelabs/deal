@@ -2,7 +2,8 @@
 
 pragma solidity ^0.8.19;
 
-import "./interfaces/ICapacity.sol";
+import {ICapacity} from "src/core/modules/capacity/interfaces/ICapacity.sol";
+
 library Snapshot {
     struct Cache {
         Params initial;

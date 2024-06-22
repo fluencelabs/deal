@@ -2,8 +2,7 @@
 
 pragma solidity ^0.8.19;
 
-import "./IOffer.sol";
-import "./IMatcher.sol";
+import {IMatcher} from "src/core/modules/market/interfaces/IMatcher.sol";
 
 /// @title Market contract interface
 /// @dev Market contract is responsible for managing the deals and offers
