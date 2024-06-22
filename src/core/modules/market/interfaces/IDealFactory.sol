@@ -41,8 +41,6 @@ interface IDealFactory {
         uint256 protocolVersion_
     );
 
-    function initialize() external;
-
     // ----------------- View -----------------
     /// @dev Returns true if the deal exists
     /// @param deal The deal address

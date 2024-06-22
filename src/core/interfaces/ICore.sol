@@ -15,41 +15,21 @@ interface ICore is IGlobalConst {
 
     // ------------------ Initializer ------------------
 
-    /// @dev initializes the contract
-    /// @param epochDuration_ Epoch duration in seconds
-    /// @param minDepositedEpochs_ Min deposited Epochs constant for new deals
-    /// @param minRematchingEpochs_ Min rematching Epochs constant for all deals
-    /// @param dealImpl_ Deal implementation contract address
-    function initialize(
-        uint256 epochDuration_,
-        uint256 minDepositedEpochs_,
-        uint256 minRematchingEpochs_,
-        uint256 minProtocolVersion_,
-        uint256 maxProtocolVersion_,
-        IDeal dealImpl_,
-        bool isWhitelistEnabled_,
-        CapacityConstInitArgs memory capacityConstInitArgs_
-    ) external;
 
-    /// @dev Sets modules
-    /// @param capacity Capacity module address
-    /// @param market Market module address
-    function initializeModules(ICapacity capacity, IMarket market, IDealFactory dealFactory) external;
+    // function initialize(
+    //     uint256 epochDuration_,
+    //     uint256 minDepositedEpochs_,
+    //     uint256 minRematchingEpochs_,
+    //     uint256 minProtocolVersion_,
+    //     uint256 maxProtocolVersion_,
+    //     IDeal dealImpl_,
+    //     bool isWhitelistEnabled_,
+    //     CapacityConstInitArgs memory capacityConstInitArgs_
+    // ) external;
 
     // ------------------ External View Functions ------------------
-    /// @dev Returns capacity module
-    /// @return capacity module address
-    function capacity() external view returns (ICapacity);
-
-    /// @dev Returns market module
-    /// @return market module address
-    function market() external view returns (IMarket);
-
-    function dealFactory() external view returns (IDealFactory);
 
     function dealImpl() external view returns (IDeal);
-
     function setActiveUnitCount(uint256 activeUnitCount_) external;
-    // ------------------ External Mutable Functions ------------------
     function setDealImpl(IDeal dealImpl_) external;
 }

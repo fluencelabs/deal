@@ -2,67 +2,37 @@
 
 pragma solidity ^0.8.19;
 
-import "./CapacityConst.sol";
 import "./interfaces/IGlobalConst.sol";
+import {GlobalConstStorage, LibGlobalConst} from "../lib/LibGlobalConst.sol";
+import {CapacityConst} from "./CapacityConst.sol";
+import {LibDiamond} from "src/lib/LibDiamond.sol";
+import {PRECISION} from "src/utils/Common.sol";
 
 
 contract GlobalConst is IGlobalConst, CapacityConst {
-    // ------------------ Storage ------------------
-    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.core.storage.v1.globalConst")) - 1);
-
-    struct GlobalConstStorage {
-        uint256 minDealDepositedEpochs;
-        uint256 minDealRematchingEpochs;
-        uint256 minProtocolVersion;
-        uint256 maxProtocolVersion;
-    }
-
-    function _getGlobalConstStorage() private pure returns (GlobalConstStorage storage s) {
-        bytes32 storageSlot = _STORAGE_SLOT;
-        assembly {
-            s.slot := storageSlot
-        }
-    }
-
-    // ------------------ Initializer ------------------
-    function __GlobalConst_init(
-        uint256 minDealDepositedEpochs_,
-        uint256 minDealRematchingEpochs_,
-        uint256 minProtocolVersion_,
-        uint256 maxProtocolVersion_
-    ) internal onlyInitializing {
-        GlobalConstStorage storage globalConstantsStorage = _getGlobalConstStorage();
-
-        globalConstantsStorage.minDealDepositedEpochs = minDealDepositedEpochs_;
-        globalConstantsStorage.minDealRematchingEpochs = minDealRematchingEpochs_;
-        globalConstantsStorage.minProtocolVersion = minProtocolVersion_;
-        globalConstantsStorage.maxProtocolVersion = maxProtocolVersion_;
-    }
-
-    // ------------------ External View Functions ------------------
     function precision() public pure override returns (uint256) {
         return PRECISION;
     }
 
     function minDealDepositedEpochs() public view override returns (uint256) {
-        return _getGlobalConstStorage().minDealDepositedEpochs;
+        return LibGlobalConst.store().minDealDepositedEpochs;
     }
 
     function minDealRematchingEpochs() public view override returns (uint256) {
-        return _getGlobalConstStorage().minDealRematchingEpochs;
+        return LibGlobalConst.store().minDealRematchingEpochs;
     }
 
     function minProtocolVersion() public view override returns (uint256) {
-        return _getGlobalConstStorage().minProtocolVersion;
+        return LibGlobalConst.store().minProtocolVersion;
     }
 
     function maxProtocolVersion() public view override returns (uint256) {
-        return _getGlobalConstStorage().maxProtocolVersion;
+        return LibGlobalConst.store().maxProtocolVersion;
     }
 
-    // ------------------ External Mutable Functions ------------------
-    function setConstant(ConstantType constantType, uint256 v) external onlyOwner {
-        GlobalConstStorage storage globalConstantsStorage = _getGlobalConstStorage();
+    function setConstant(ConstantType constantType, uint256 v) external {
+        LibDiamond.enforceIsContractOwner();
+        GlobalConstStorage storage globalConstantsStorage = LibGlobalConst.store();
 
         if (constantType == ConstantType.MinDealDepositedEpochs) {
             globalConstantsStorage.minDealDepositedEpochs = v;

@@ -8,23 +8,14 @@ import "./interfaces/IMatcher.sol";
 import "src/deal/interfaces/IDeal.sol";
 import "src/deal/interfaces/IConfig.sol";
 import "./Offer.sol";
+import {LibEpochController} from "src/lib/LibEpochController.sol";
+import {LibOffer} from "src/lib/LibOffer.sol";
+import {LibMatcher, MatcherStorage} from "src/lib/LibMatcher.sol";
+import {LibCapacity} from "src/lib/LibCapacity.sol";
 
 abstract contract Matcher is Offer, IMatcher {
     using SafeERC20 for IERC20;
 
-    // ------------------ Storage ------------------
-    bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.market.storage.v1.matcher")) - 1);
-
-    struct MatcherStorage {
-        mapping(address => uint256) lastMatchedEpoch;
-    }
-
-    function _getMatcherStorage() private pure returns (MatcherStorage storage s) {
-        bytes32 storageSlot = _STORAGE_SLOT;
-        assembly {
-            s.slot := storageSlot
-        }
-    }
 
     // ----------------- External Mutable -----------------
     /**
@@ -46,8 +37,7 @@ abstract contract Matcher is Offer, IMatcher {
      * @param computeUnits: Compute Units per offer id (2D array) to match with.
      */
     function matchDeal(IDeal deal, bytes32[] calldata offers, bytes32[][] calldata computeUnits) external {
-        ICapacity capacity = core.capacity();
-        MatcherStorage storage matcherStorage = _getMatcherStorage();
+        MatcherStorage storage matcherStorage = LibMatcher.store();
 
         require(OwnableUpgradableDiamond(address(deal)).owner() == msg.sender, "Matcher: sender is not deal owner");
 
@@ -58,7 +48,7 @@ abstract contract Matcher is Offer, IMatcher {
         );
 
         uint256 lastMatchedEpoch = matcherStorage.lastMatchedEpoch[address(deal)];
-        uint256 currentEpoch = core.currentEpoch();
+        uint256 currentEpoch = LibEpochController.currentEpoch();
         require(
             lastMatchedEpoch == 0 || currentEpoch > lastMatchedEpoch + core.minDealRematchingEpochs(),
             "Matcher: too early to rematch"
@@ -87,7 +77,7 @@ abstract contract Matcher is Offer, IMatcher {
             if (
                 // Check for blacklisted provider and others.
                 !deal.isProviderAllowed(offer.provider) || pricePerWorkerEpoch < offer.minPricePerWorkerEpoch
-                    || paymentToken != offer.paymentToken || !_hasOfferEffectors(offerId, effectors)
+                    || paymentToken != offer.paymentToken || !LibOffer._hasOfferEffectors(offerId, effectors)
                     || offer.minProtocolVersion > protocolVersion || offer.maxProtocolVersion < protocolVersion
             ) {
                 continue;
@@ -121,7 +111,7 @@ abstract contract Matcher is Offer, IMatcher {
                     providersAccessType != IConfig.AccessType.WHITELIST
                         && (
                             computeUnit.deal != address(0) || peer.commitmentId == bytes32(0x000000000)
-                                || capacity.getStatus(peer.commitmentId) != ICapacity.CCStatus.Active
+                                || LibCapacity.getStatus(peer.commitmentId) != ICapacity.CCStatus.Active
                         )
                 ) {
                     continue;
@@ -132,7 +122,7 @@ abstract contract Matcher is Offer, IMatcher {
                     continue;
                 }
 
-                _mvComputeUnitToDeal(computeUnitId, deal);
+                LibOffer._mvComputeUnitToDeal(computeUnitId, deal);
 
                 emit ComputeUnitMatched(peerId, deal, computeUnitId, creationBlock, appCID);
 
@@ -151,7 +141,7 @@ abstract contract Matcher is Offer, IMatcher {
         }
 
         if (isDealMatched) {
-            _getMatcherStorage().lastMatchedEpoch[address(deal)] = currentEpoch;
+            LibMatcher.store().lastMatchedEpoch[address(deal)] = currentEpoch;
         }
     }
 }

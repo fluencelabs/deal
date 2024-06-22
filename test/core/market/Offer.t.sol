@@ -499,17 +499,6 @@ contract OfferTest is TestWithDeployment {
         peers[0] = IOffer.RegisterComputePeer({peerId: bytes32(uint256(1)), unitIds: unitIds, owner: peerUniqueOwner});
         deployment.market.addComputePeers(offerId, peers);
 
-        vm.expectRevert("BaseModule: caller is not the capacity");
-        deployment.market.setCommitmentId(peers[0].peerId, bytes32(uint256(4343434)));
-
-        vm.prank(address(deployment.capacity));
-        deployment.market.setCommitmentId(peers[0].peerId, bytes32(uint256(4343434)));
-
-        vm.expectRevert("BaseModule: caller is not the capacity");
-        deployment.market.setStartEpoch(peers[0].peerId, 123);
-
-        vm.prank(address(deployment.capacity));
-        deployment.market.setStartEpoch(peers[0].peerId, 123);
     }
 
     // TODO _mvComputeUnitToDeal errors and events, possibly in another test

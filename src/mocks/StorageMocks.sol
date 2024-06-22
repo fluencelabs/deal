@@ -1,18 +1,22 @@
 // SPDX-License-Identifier: Apache-2.0
-
 pragma solidity ^0.8.19;
 
-import "src/core/Core.sol";
+import {CoreFacet} from "src/core/CoreFacet.sol";
+import {CoreStorage} from "src/lib/LibCore.sol";
+import {CapacityConstStorage} from "src/lib/LibCapacityConst.sol";
+import {EpochControllerStorage} from "src/lib/LibEpochController.sol";
+import {GlobalConstStorage} from "src/lib/LibGlobalConst.sol";
+import {MatcherStorage} from "src/lib/LibMatcher.sol";
+
 import "src/core/CapacityConst.sol";
-import "src/core/EpochController.sol";
 import "src/core/GlobalConst.sol";
 
-import "src/core/modules/capacity/Capacity.sol";
+import "src/core/modules/capacity/CapacityFacet.sol";
 
-import "src/core/modules/market/Market.sol";
-import "src/core/modules/market/Matcher.sol";
+import {MarketFacet} from "src/core/modules/market/MarketFacet.sol";
+import {Matcher} from "src/core/modules/market/Matcher.sol";
 import "src/core/modules/market/Offer.sol";
-import "src/core/modules/market/DealFactory.sol";
+import {DealFactoryFacet} from "src/core/modules/market/DealFactoryFacet.sol";
 
 import "src/deal/Deal.sol";
 import "src/deal/Config.sol";
@@ -23,39 +27,39 @@ import "src/utils/Whitelist.sol";
 
 // #region core
 contract CoreStorageMock {
-    Core.CoreStorage internal _coreStorage;
+    CoreStorage internal _coreStorage;
 }
 
 contract CapacityConstStorageMock {
-    CapacityConst.ConstStorage internal _capacityConstStorage;
+    CapacityConstStorage internal _capacityConstStorage;
 }
 
 contract EpochControllerStorageMock {
-    EpochController.EpochControllerStorage internal _epochControllerStorage;
+    EpochControllerStorage internal _epochControllerStorage;
 }
 
 contract GlobalStorageMock {
-    GlobalConst.GlobalConstStorage internal _globalStorage;
+    GlobalConstStorage internal _globalStorage;
 }
 // #endregion
 
 // #region capacity
 contract CapacityStorageMock {
-    Capacity.CommitmentStorage internal _capacityStorage;
+    CommitmentStorage internal _capacityStorage;
 }
 // #endregion
 // #region market
 
 contract MatcherStorageMock {
-    Matcher.MatcherStorage internal _matcherStorage;
+    MatcherStorage internal _matcherStorage;
 }
 
 contract OfferStorageMock {
-    Offer.OfferStorage internal _offerStorage;
+    OfferStorage internal _offerStorage;
 }
 
 contract DealFactoryStorageMock {
-    DealFactory.DealFactoryStorage internal _dealFactoryStorage;
+    DealFactoryFacet.DealFactoryStorage internal _dealFactoryStorage;
 }
 
 // #endregion

@@ -7,7 +7,7 @@ pragma solidity ^0.8.0;
 /******************************************************************************/
 
 import { IDiamondCut } from "../interfaces/IDiamondCut.sol";
-import { LibDiamond } from "../libraries/LibDiamond.sol";
+import { LibDiamond } from "../lib/LibDiamond.sol";
 
 // Remember to add the loupe functions from DiamondLoupeFacet to the diamond.
 // The loupe functions are required by the EIP2535 Diamonds standard

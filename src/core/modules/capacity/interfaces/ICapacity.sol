@@ -185,10 +185,6 @@ interface ICapacity {
     function unlockedRewards(bytes32 commitmentId) external view returns (uint256);
     function getGlobalNonce() external view returns (bytes32);
 
-    // ----------------- Deal Callbacks -----------------
-    function onUnitMovedToDeal(bytes32 commitmentId, bytes32 unitId) external;
-    function onUnitReturnedFromDeal(bytes32 commitmentId, bytes32 unitId) external;
-
     // ----------------- Mutable -----------------
     /// @dev Creates a new commitment
     /// @param peerId Peer id which linked to the commitment

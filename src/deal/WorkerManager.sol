@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "./Config.sol";
 import "./interfaces/IWorkerManager.sol";
 
-contract WorkerManager is Config, IWorkerManager {
+abstract contract WorkerManager is Config, IWorkerManager {
     using EnumerableSet for EnumerableSet.Bytes32Set;
     using SafeERC20 for IERC20;
 

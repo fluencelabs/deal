@@ -9,11 +9,12 @@ import "src/deal/interfaces/IDeal.sol";
 import "src/deal/DealProxy.sol";
 import "src/core/modules/BaseModule.sol";
 import "./interfaces/IDealFactory.sol";
+import {LibEpochController} from "src/lib/LibEpochController.sol";
 
 /*
  * @dev On init mas.sender becomes owner.
  */
-contract DealFactory is UUPSUpgradeable, BaseModule, IDealFactory {
+contract DealFactoryFacet is BaseModule, IDealFactory {
     using SafeERC20 for IERC20;
 
     // ------------------ Storage ------------------
@@ -24,10 +25,6 @@ contract DealFactory is UUPSUpgradeable, BaseModule, IDealFactory {
     }
 
     constructor(ICore core_) BaseModule(core_) {} // disables initializer, immutable set
-
-    function initialize() public initializer {
-        __UUPSUpgradeable_init();
-    }
 
     function _getDealFactoryStorage() private pure returns (DealFactoryStorage storage s) {
         bytes32 storageSlot = _STORAGE_SLOT;
@@ -94,7 +91,7 @@ contract DealFactory is UUPSUpgradeable, BaseModule, IDealFactory {
         emit DealCreated(
             msg.sender,
             deal,
-            core.currentEpoch(),
+            LibEpochController.currentEpoch(),
             paymentToken_,
             minWorkers_,
             targetWorkers_,
@@ -109,6 +106,4 @@ contract DealFactory is UUPSUpgradeable, BaseModule, IDealFactory {
 
         return deal;
     }
-
-    function _authorizeUpgrade(address) internal override onlyCoreOwner {}
 }

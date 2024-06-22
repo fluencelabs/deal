@@ -106,11 +106,6 @@ contract Config is OwnableUpgradableDiamond, IConfig {
         _;
     }
 
-    modifier onlyMarket() {
-        require(msg.sender == address(_getConfigStorage().globalCore.market()), "Config: caller is not the Market");
-        _;
-    }
-
     // ------------------ View Internal Functions ------------------
     function _globalCore() internal view returns (ICore) {
         return _getConfigStorage().globalCore;

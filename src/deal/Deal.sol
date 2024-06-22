@@ -162,7 +162,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         emit Withdrawn(amount);
     }
 
-    function addComputeUnit(address computeProvider, bytes32 computeUnitId, bytes32 peerId) public onlyMarket {
+    function addComputeUnit(address computeProvider, bytes32 computeUnitId, bytes32 peerId) public onlyCore {
         require(getStatus() != Status.ENDED, "Deal is ended");
 
         _addComputeUnit(computeProvider, computeUnitId, peerId);
@@ -174,9 +174,9 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
 
         DealStorage storage dealStorage = _getDealStorage();
 
-        ICore core = _globalCore();
+        ICore core = _globalCore(); // TODO DIAMOND rename to globalDiamond
         ComputeUnit memory unit = getComputeUnit(computeUnitId);
-        IMarket.ComputePeer memory marketPeer = core.market().getComputePeer(unit.peerId);
+        IOffer.ComputePeer memory marketPeer = IOffer(address(core)).getComputePeer(unit.peerId);
 
         require(msg.sender == unit.provider || msg.sender == marketPeer.owner, "Only provider or owner can set worker");
 
@@ -196,7 +196,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         computeUnitPaymentInfo.gapsDelta = snapshot.getGapsEpochCount();
     }
 
-    function removeComputeUnit(bytes32 computeUnitId) public onlyMarket {
+    function removeComputeUnit(bytes32 computeUnitId) public onlyCore {
         DealStorage storage dealStorage = _getDealStorage();
 
         ComputeUnit memory unit = getComputeUnit(computeUnitId);
@@ -214,7 +214,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         ComputeUnit memory unit = getComputeUnit(computeUnitId);
         DealSnapshot.Cache memory snapshot = _preCommitPeriod();
 
-        IMarket market = _globalCore().market();
+        IMarket market = IMarket(address(_globalCore()));
         IMarket.ComputePeer memory marketPeer = market.getComputePeer(unit.peerId);
         IMarket.Offer memory marketOffer = market.getOffer(marketPeer.offerId);
 

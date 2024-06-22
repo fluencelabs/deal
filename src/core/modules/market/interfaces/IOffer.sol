@@ -4,10 +4,11 @@ pragma solidity ^0.8.19;
 
 import "src/deal/interfaces/IDeal.sol";
 import {CIDV1} from "src/utils/Common.sol";
+import {IBaseModule} from "src/core/modules/interfaces/IBaseModule.sol";
 
 /// @title Offer contract interface
 /// @dev Offer contract is responsible for managing the offers in the market
-interface IOffer {
+interface IOffer is IBaseModule {
     // ------------------ Types ------------------
     struct ProviderInfo {
         string name;
@@ -218,12 +219,6 @@ interface IOffer {
     // Unit management
     /// @dev Return the compute unit from a deal
     function returnComputeUnitFromDeal(bytes32 unitId) external;
-
-    /// @dev Set the commitment id for a peer. Only one commitment id for the peer
-    function setCommitmentId(bytes32 peerId, bytes32 commitmentId) external;
-
-    /// @dev Set the start epoch of a compute unit
-    function setStartEpoch(bytes32 unitId, uint256 startEpoch) external;
 
     // Effector info
     /// @dev Set the effector info. Effector info can be added by the contract owner
