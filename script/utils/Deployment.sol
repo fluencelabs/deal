@@ -8,7 +8,6 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "forge-std/Script.sol";
 import "forge-std/Vm.sol";
 import "src/deal/Deal.sol";
-import "src/core/Core.sol";
 import "src/dev/OwnableFaucet.sol";
 import "src/dev/TestERC20.sol";
 

@@ -5,12 +5,14 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "forge-std/Script.sol";
-import "./utils/Deployment.sol";
-import "src/core/Core.sol";
-import "src/core/interfaces/ICore.sol";
-import "src/core/modules/market/interfaces/IMarket.sol";
-import "src/core/modules/capacity/interfaces/ICapacity.sol";
+import "script/utils/Deployment.sol";
+import {ICore} from "src/core/interfaces/ICore.sol";
+import {IMarket} from "src/core/modules/market/interfaces/IMarket.sol";
+import {ICapacity} from "src/core/modules/capacity/interfaces/ICapacity.sol";
+import {IDealFactory} from "src/core/modules/market/interfaces/IDealFactory.sol";
+import {ICapacityConst} from "src/core/interfaces/ICapacityConst.sol";
 import "src/utils/Multicall3.sol";
+import {PRECISION} from "src/utils/Common.sol";
 
 contract DeployContracts is Deployment, Script {
     using SafeERC20 for IERC20;

@@ -7,7 +7,8 @@ import "forge-std/console.sol";
 import "test/utils/TestWithDeployment.sol";
 import "test/utils/TestHelper.sol";
 
-import "src/core/modules/market/interfaces/IMarket.sol";
+import {IMarket} from "src/core/modules/market/interfaces/IMarket.sol";
+import {IOffer} from "src/core/modules/market/interfaces/IOffer.sol";
 
 contract MarketTest is TestWithDeployment {
     using SafeERC20 for IERC20;

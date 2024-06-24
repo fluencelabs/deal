@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import {Test} from "forge-std/Test.sol";
 import "test/utils/TestWithDeployment.sol";
 import "test/utils/TestHelper.sol";
+import {IOffer} from "src/core/modules/market/interfaces/IOffer.sol";
 
 contract OfferTest is TestWithDeployment {
     using SafeERC20 for IERC20;
