@@ -6,8 +6,7 @@ import {Test} from "forge-std/Test.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {CIDV1} from "src/utils/Common.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {ICore} from "src/core/interfaces/ICore.sol";
 import {IDeal} from "src/deal/interfaces/IDeal.sol";
 import {IConfig} from "src/deal/interfaces/IConfig.sol";

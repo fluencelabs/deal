@@ -2,7 +2,8 @@
 pragma solidity ^0.8.19;
 
 import {Test, console2} from "forge-std/Test.sol";
-import "src/dev/OwnableFaucet.sol";
+import {OwnableFaucet} from "src/dev/OwnableFaucet.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract ContractWhichCantReceiveEther {}
 

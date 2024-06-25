@@ -2,13 +2,16 @@
 pragma solidity ^0.8.19;
 
 import {Test} from "forge-std/Test.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {CIDV1} from "src/utils/Common.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import {IConfig} from "src/deal/interfaces/IConfig.sol";
+import {IDiamond} from "src/interfaces/IDiamond.sol";
+import {IConfigWithPublicInternals} from "src/dev/test/interfaces/IConfigWithPublicInternals.sol";
+import {TestWithDeployment} from "test/utils/TestWithDeployment.sol";
+import {TestHelper} from "test/utils/TestHelper.sol";
 
-import "src/deal/interfaces/IConfig.sol";
-import "src/dev/test/interfaces/IConfigWithPublicInternals.sol";
-
-import "test/utils/TestWithDeployment.sol";
-import "test/utils/TestHelper.sol";
 
 contract ConfigContract is TestWithDeployment {
     using SafeERC20 for IERC20;

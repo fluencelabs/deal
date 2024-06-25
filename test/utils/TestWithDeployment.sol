@@ -3,7 +3,6 @@ pragma solidity ^0.8.19;
 
 import {Test} from "forge-std/Test.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
 import {ICore} from "src/core/interfaces/ICore.sol";
 import {ICapacityConst} from "src/core/interfaces/ICapacityConst.sol";
 import {IGlobalConst} from "src/core/interfaces/IGlobalConst.sol";
@@ -18,6 +17,7 @@ import {IDiamondCut} from "src/interfaces/IDiamondCut.sol";
 import {IDiamondLoupe} from "src/interfaces/IDiamondLoupe.sol";
 import {IDiamond} from "src/interfaces/IDiamond.sol";
 import {PRECISION} from "src/utils/Common.sol";
+
 
 contract TestWithDeployment is Test {
     // ------------------ Types ------------------

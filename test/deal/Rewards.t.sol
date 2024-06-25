@@ -2,15 +2,14 @@
 pragma solidity ^0.8.19;
 
 import {Test} from "forge-std/Test.sol";
-import "forge-std/StdCheats.sol";
-
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
+import {StdCheats} from "forge-std/StdCheats.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IDeal} from "src/deal/interfaces/IDeal.sol";
 import {IOffer} from "src/core/interfaces/IOffer.sol";
+import {TestWithDeployment} from "test/utils/TestWithDeployment.sol";
+import {TestHelper} from "test/utils/TestHelper.sol";
 
-import "test/utils/TestWithDeployment.sol";
-import "test/utils/TestHelper.sol";
 
 contract Rewards is TestWithDeployment {
     using SafeERC20 for IERC20;
