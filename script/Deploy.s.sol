@@ -28,6 +28,7 @@ import "src/core/interfaces/ICore.sol";
 import "src/core/modules/market/interfaces/IMarket.sol";
 import "src/core/modules/capacity/interfaces/ICapacity.sol";
 import "src/utils/Multicall3.sol";
+import "src/mocks/RandomXProxyMock.sol";
 
 contract DeployContracts is Deployment, Script {
     using SafeERC20 for IERC20;
@@ -38,6 +39,7 @@ contract DeployContracts is Deployment, Script {
     uint256 constant LOCAL_tUSD_BALANCE = 1000000 ether;
 
     // ------------------ Default constant ------------------
+    // need to make it longer than integration tests, so 3600s
     uint256 constant DEFAULT_EPOCH_DURATION = 15 seconds;
     uint256 constant DEFAULT_MIN_DEPOSITED_EPOCHS = 2;
     uint256 constant DEFAULT_MIN_REMATCHING_EPOCHS = 2;
@@ -60,7 +62,7 @@ contract DeployContracts is Deployment, Script {
     bool constant DEFAULT_IS_WHITELIST_ENABLED = false;
     bytes32 public constant DEFAULT_INIT_GLOBAL_NONCE = keccak256("init_global_nonce");
     bytes32 public constant DEFAULT_DIFFICULTY = 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
-    uint256 constant DEFAULT_INIT_REWARD_POOL = 10 ether;
+    uint256 constant DEFAULT_INIT_REWARD_POOL = DEFAULT_MIN_REWARD_PER_EPOCH;
     uint256 constant DEFAULT_INIT_CC_BALANCE = DEFAULT_INIT_REWARD_POOL * 100;
     bool constant IS_MOCKED_RANDOMX = true;
 

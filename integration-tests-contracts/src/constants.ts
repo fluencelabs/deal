@@ -39,3 +39,6 @@ export enum CapacityConstantType {
 export const CC_DURATION_DEFAULT = 5n;
 export const CC_MIN_DURATION = 0n;
 export const CC_MAX_FAILED_RATIO = 3n;
+export const CC_SLASHING_RATE_PERCENT = 1n;
+export const CC_PRECISION = 10000000n;
+export const DEFAULT_DELEGATION_RATE = CC_PRECISION / 2n; // 50%

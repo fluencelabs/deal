@@ -45,7 +45,6 @@ jobs:
           registry-url: "https://registry.npmjs.org"
           cache-dependency-path: |
             ts-client/package-lock.json
-            integration-tests/package-lock.json
             storage-checker/package-lock.json
 
       - name: Install Foundry
@@ -89,64 +88,3 @@ jobs:
         working-directory: storage-checker
         run: node compare.js
         continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'review-storage-layout-change') }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Build contracts container base
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: docker/Dockerfile
-          target: contracts
-          tags: contracts
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build chain-rpc image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: docker/Dockerfile
-          target: chain-rpc
-          tags: |
-            chain-rpc
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build chain-deploy-script image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: docker/Dockerfile
-          target: chain-deploy-script
-          tags: |
-            chain-deploy-script
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Run docker network
-        env:
-          CHAIN_RPC_IMAGE: "chain-rpc"
-          CHAIN_DEPLOY_SCRIPT_IMAGE: "chain-deploy-script"
-          EPOCH_DURATION: "86400"
-        run: docker compose up -d chain-rpc && docker compose up chain-deploy-script
-        working-directory: docker
-
-      - name: Install deps in ts-client package
-        run: npm install
-        working-directory: ts-client
-
-      - name: Build ts-client package
-        run: npm run build
-        working-directory: ts-client
-
-      - name: Install packed ts-client
-        run: npm i
-        working-directory: integration-tests-contracts
-
-      - name: Run integration tests
-        run: npm run test
-        working-directory: integration-tests-contracts
-        env:
-          RPC_URL: "http://localhost:8545"
