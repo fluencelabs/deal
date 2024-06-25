@@ -2,15 +2,15 @@
 pragma solidity ^0.8.19;
 
 import {Test} from "forge-std/Test.sol";
-import "forge-std/StdCheats.sol";
-import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "filecoin-solidity/v0.8/utils/Actor.sol";
-import "src/dev/test/interfaces/ICapacityConstWithPublicInternals.sol";
-import "src/core/interfaces/ICapacityConst.sol";
-import "src/utils/BytesConverter.sol";
-import "test/utils/TestWithDeployment.sol";
-import "test/utils/TestHelper.sol";
+import {StdCheats} from "forge-std/StdCheats.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {PRECISION} from "src/utils/Common.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol"; // TODO DIAMOND change to diamond
+import {ICapacityConstWithPublicInternals} from "src/dev/test/interfaces/ICapacityConstWithPublicInternals.sol";
+import {ICapacityConst} from "src/core/interfaces/ICapacityConst.sol";
+import {TestWithDeployment} from "test/utils/TestWithDeployment.sol";
+import {TestHelper} from "test/utils/TestHelper.sol";
 
 interface ISetConstant {
     function setCapacityConstant(uint8 constantType, uint256 newValue) external;
@@ -18,7 +18,6 @@ interface ISetConstant {
 
 contract CapacityConstTest is TestWithDeployment {
     using SafeERC20 for IERC20;
-    using BytesConverter for bytes32;
 
     address constant NOT_AN_OWNER = address(1234);
 

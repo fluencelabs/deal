@@ -2,16 +2,17 @@
 pragma solidity ^0.8.19;
 
 import {Test} from "forge-std/Test.sol";
-import "forge-std/console.sol";
-import "forge-std/StdCheats.sol";
+import {StdCheats} from "forge-std/StdCheats.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {CIDV1} from "src/utils/Common.sol";
+import {IConfig} from "src/deal/interfaces/IConfig.sol";
+import {IDeal} from "src/deal/interfaces/IDeal.sol";
+import {IMarket} from "src/core/interfaces/IMarket.sol";
+import {IOffer} from "src/core/interfaces/IOffer.sol";
+import {TestWithDeployment} from "test/utils/TestWithDeployment.sol";
+import {TestHelper} from "test/utils/TestHelper.sol";
 
-import "src/deal/interfaces/IConfig.sol";
-import "src/deal/interfaces/IDeal.sol";
-import "src/core/interfaces/IMarket.sol";
-import "src/core/interfaces/IOffer.sol";
-
-import "test/utils/TestWithDeployment.sol";
-import "test/utils/TestHelper.sol";
 
 contract MatcherTest is TestWithDeployment {
     using SafeERC20 for IERC20;

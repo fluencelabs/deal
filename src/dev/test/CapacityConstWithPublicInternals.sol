@@ -2,8 +2,8 @@
 // only for tests
 pragma solidity ^0.8.19;
 
-import "src/core/CapacityConst.sol";
-import "./interfaces/ICapacityConstWithPublicInternals.sol";
+import {CapacityConst} from "src/core/CapacityConst.sol";
+import {ICapacityConstWithPublicInternals} from "src/dev/test/interfaces/ICapacityConstWithPublicInternals.sol";
 import {LibCapacityConst} from "src/lib/LibCapacityConst.sol";
 
 contract CapacityConstWithPublicInternals is ICapacityConstWithPublicInternals, CapacityConst {

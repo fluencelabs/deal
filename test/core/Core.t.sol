@@ -2,12 +2,14 @@
 pragma solidity ^0.8.19;
 
 import {Test, console2} from "forge-std/Test.sol";
-import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {ICore} from "src/core/interfaces/ICore.sol";
+import {ICapacityConst} from "src/core/interfaces/ICapacityConst.sol";
+import {IGlobalConst} from "src/core/interfaces/IGlobalConst.sol";
+import {IDeal} from "src/deal/interfaces/IDeal.sol";
+import {TestWithDeployment} from "test/utils/TestWithDeployment.sol";
 
-import "src/core/interfaces/ICore.sol";
-import "src/core/interfaces/ICapacityConst.sol";
-import "test/utils/TestWithDeployment.sol";
 
 contract CoreTest is TestWithDeployment {
     using SafeERC20 for IERC20;
@@ -24,7 +26,7 @@ contract CoreTest is TestWithDeployment {
     }
 
     function test_CoreHasInitializedValues() external {
-        assertNotEq(address(deployment.diamondAsCore.dealImpl()), address(0), "Deal impl not initialized in Core");
+        assertNotEq(address(deployment.diamondAsCore.dealImpl()), address(0), "Deal impl not initialized in Diamond");
         assertEq(deployment.diamondAsCore.epochDuration(), TestWithDeployment.DEFAULT_EPOCH_DURATION, "Epoch duration not set");
         assertEq(
             deployment.diamondAsCore.minDealDepositedEpochs(),
@@ -45,7 +47,7 @@ contract CoreTest is TestWithDeployment {
         IDeal newDealImpl = IDeal(deployCode("out/Deal.sol/Deal.json"));
 
         // ownable check
-        vm.expectRevert(abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, NOT_AN_OWNER));
+        vm.expectRevert("LibDiamond: Must be contract owner");
         vm.prank(NOT_AN_OWNER);
         deployment.diamondAsCore.setDealImpl(newDealImpl);
 
@@ -67,11 +69,11 @@ contract CoreTest is TestWithDeployment {
         assertEq(deployment.diamondAsCore.minDealRematchingEpochs(), 200, "Min deal rematching Epochs not set");
 
         // ownable test
-        vm.expectRevert(abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, NOT_AN_OWNER));
+        vm.expectRevert("LibDiamond: Must be contract owner");
         vm.prank(NOT_AN_OWNER);
         deployment.diamondAsCore.setConstant(IGlobalConst.ConstantType.MinDealDepositedEpochs, 300);
 
-        vm.expectRevert(abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, NOT_AN_OWNER));
+        vm.expectRevert("LibDiamond: Must be contract owner");
         vm.prank(NOT_AN_OWNER);
         deployment.diamondAsCore.setConstant(IGlobalConst.ConstantType.MinDealRematchingEpochs, 400);
     }
