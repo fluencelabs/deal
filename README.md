@@ -260,3 +260,14 @@ make deploy-contracts-local
 ```
 
 and do not forget to repeat from 3d step (depends on your needs).
+
+## Contributing
+
+Any interested person is welcome to contribute to the project. Please, make sure
+you read and follow some basic [rules](./CONTRIBUTING.md). The Contributor
+License Agreement can be found [here](./FluenceCLA.md).
+
+## License
+
+All software code is copyright (c) Fluence Labs, Inc. under the
+[AGPL v3](./LICENSE) license.
