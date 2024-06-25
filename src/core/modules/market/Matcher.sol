@@ -4,10 +4,10 @@ pragma solidity ^0.8.19;
 
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {IMatcher} from "src/core/modules/market/interfaces/IMatcher.sol";
+import {IMatcher} from "src/core/interfaces/IMatcher.sol";
 import {IDeal} from "src/deal/interfaces/IDeal.sol";
 import {IConfig} from "src/deal/interfaces/IConfig.sol";
-import {ICapacity} from "src/core/modules/capacity/interfaces/ICapacity.sol";
+import {ICapacity} from "src/core/interfaces/ICapacity.sol";
 import {Offer} from "src/core/modules/market/Offer.sol";
 import {LibEpochController} from "src/lib/LibEpochController.sol";
 import {LibOffer} from "src/lib/LibOffer.sol";

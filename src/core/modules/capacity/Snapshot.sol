@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.19;
 
-import {ICapacity} from "src/core/modules/capacity/interfaces/ICapacity.sol";
+import {ICapacity} from "src/core/interfaces/ICapacity.sol";
 
 library Snapshot {
     struct Cache {

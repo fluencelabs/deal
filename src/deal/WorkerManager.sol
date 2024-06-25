@@ -9,6 +9,7 @@ import {CIDV1} from "src/utils/Common.sol";
 import {Config} from "src/deal/Config.sol";
 import {IWorkerManager} from "src/deal/interfaces/IWorkerManager.sol";
 import {ICore} from "src/core/interfaces/ICore.sol";
+import {IDiamond} from "src/interfaces/IDiamond.sol";
 
 abstract contract WorkerManager is Config, IWorkerManager {
     using EnumerableSet for EnumerableSet.Bytes32Set;
@@ -43,7 +44,7 @@ abstract contract WorkerManager is Config, IWorkerManager {
 
     // ------------------ Initializer ------------------
     function __WorkerManager_init(
-        ICore globalCore_,
+        IDiamond diamond_,
         CIDV1 calldata appCID_,
         IERC20 paymentToken_,
         uint256 minWorkers_,
@@ -56,7 +57,7 @@ abstract contract WorkerManager is Config, IWorkerManager {
         address[] calldata providersAccessList_
     ) internal onlyInitializing {
         __Config_init(
-            globalCore_,
+            diamond_,
             appCID_,
             paymentToken_,
             minWorkers_,
@@ -123,7 +124,7 @@ abstract contract WorkerManager is Config, IWorkerManager {
             workerId: bytes32(0),
             peerId: peerId,
             provider: computeProvider,
-            joinedEpoch: _globalCore().currentEpoch()
+            joinedEpoch: ICore(_diamond()).currentEpoch()
         });
 
         // add ComputeUnit to list

@@ -5,7 +5,7 @@ import {Test} from "forge-std/Test.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "src/deal/interfaces/IDeal.sol";
-import "src/core/modules/market/interfaces/IOffer.sol";
+import "src/core/interfaces/IOffer.sol";
 
 import "test/utils/TestWithDeployment.sol";
 import "test/utils/TestHelper.sol";
@@ -42,7 +42,7 @@ contract AddWorkers is TestWithDeployment {
         uint256 minWorkers = 10;
         uint256 targetWorkers = 100;
         uint256 pricePerEpoch = 1 ether;
-        uint256 startDeposit = deployment.core.minDealDepositedEpochs() * pricePerEpoch * targetWorkers;
+        uint256 startDeposit = deployment.diamondAsCore.minDealDepositedEpochs() * pricePerEpoch * targetWorkers;
         IDeal deal = deployment.deployDealWithoutFactory(minWorkers, targetWorkers, 1, pricePerEpoch, startDeposit);
 
         (address[] memory computeProviders, bytes32[] memory peerIds, bytes32[] memory unitIds) =
@@ -55,18 +55,18 @@ contract AddWorkers is TestWithDeployment {
         assertEq(deal.getWorkerCount(), minWorkers, "workerCount is not match");
         assertEq(deal.getComputeUnitCount(), minWorkers, "unitCount is not match");
 
-        uint256 currentEpoch = deployment.core.currentEpoch();
+        uint256 currentEpoch = deployment.diamondAsCore.currentEpoch();
         uint256 expectedPaidEpoch = startDeposit / (pricePerEpoch * minWorkers) - 1;
         assertEq(deal.getMaxPaidEpoch(), currentEpoch + expectedPaidEpoch, "maxPaidEpoch mismatch");
         assertEq(uint256(deal.getStatus()), uint256(IDeal.Status.ACTIVE), "status should be ACTIVE");
     }
 
     function _addOneWorker(IDeal deal, address computeProvider, bytes32 unitId, bytes32 peerId) private {
-        vm.prank(address(deployment.market));
+        vm.prank(address(deployment.diamond));
         deal.addComputeUnit(computeProvider, unitId, peerId);
 
         vm.mockCall(
-            address(deployment.core.market()),
+            address(deployment.diamond),
             abi.encodeWithSelector(IOffer.getComputePeer.selector, peerId),
             abi.encode(TestHelper.pseudoRandom("offerId"), TestHelper.pseudoRandom("commitmentId"), 1, computeProvider)
         );

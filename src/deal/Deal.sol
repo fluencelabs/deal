@@ -8,8 +8,9 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {CIDV1} from "src/utils/Common.sol";
 import {ICore} from "src/core/interfaces/ICore.sol";
 import {IDeal} from "src/deal/interfaces/IDeal.sol";
-import {IOffer} from "src/core/modules/market/interfaces/IOffer.sol";
-import {IMarket} from "src/core/modules/market/interfaces/IMarket.sol";
+import {IOffer} from "src/core/interfaces/IOffer.sol";
+import {IMarket} from "src/core/interfaces/IMarket.sol";
+import {IDiamond} from "src/interfaces/IDiamond.sol";
 import {OwnableUpgradableDiamond} from "src/utils/OwnableUpgradableDiamond.sol";
 import {DealSnapshot} from "src/deal/DealSnapshot.sol";
 import {WorkerManager} from "src/deal/WorkerManager.sol";
@@ -30,7 +31,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
 
     // ------------------ Modifiers ------------------
     modifier onlyCoreOwner() {
-        require(msg.sender == OwnableUpgradableDiamond(address(_globalCore())).owner(), "Only core owner can call");
+        require(msg.sender == OwnableUpgradableDiamond(_diamond()).owner(), "Only diamond owner can call");
         _;
     }
 
@@ -41,7 +42,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
 
     // ------------------ Init ------------------
     function initialize(
-        ICore globalCore_,
+        IDiamond diamond_,
         CIDV1 calldata appCID_,
         IERC20 paymentToken_,
         uint256 minWorkers_,
@@ -54,7 +55,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         uint256 protocolVersion_
     ) public initializer {
         __WorkerManager_init(
-            globalCore_,
+            diamond_,
             appCID_,
             paymentToken_,
             minWorkers_,
@@ -69,7 +70,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         _getDealStorage().protocolVersion = protocolVersion_;
         __Multicall_init();
 
-        uint256 prevEpoch = _globalCore().currentEpoch() - 1;
+        uint256 prevEpoch = ICore(_diamond()).currentEpoch() - 1;
 
         DealStorage storage dealStorage = _getDealStorage();
         dealStorage.lastCommitedEpoch = prevEpoch;
@@ -92,7 +93,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
 
         if (
             snapshot.getTotalBalance()
-                < (_globalCore().minDealDepositedEpochs() * snapshot.getPricePerWorkerEpoch() * targetWorkers())
+                < (ICore(_diamond()).minDealDepositedEpochs() * snapshot.getPricePerWorkerEpoch() * targetWorkers())
         ) {
             return Status.SMALL_BALANCE;
         } else if (snapshot.getCurrentWorkerCount() < minWorkers()) {
@@ -145,13 +146,13 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         DealSnapshot.Cache memory snapshot = _preCommitPeriod();
 
         uint256 minBalance =
-            _globalCore().minDealDepositedEpochs() * snapshot.getPricePerWorkerEpoch() * targetWorkers();
+            ICore(_diamond()).minDealDepositedEpochs() * snapshot.getPricePerWorkerEpoch() * targetWorkers();
         snapshot.setTotalBalance(snapshot.getTotalBalance() - amount);
 
         uint256 newTotalBalance = snapshot.getTotalBalance();
         if (snapshot.isEnded() && newTotalBalance < minBalance) {
             require(
-                snapshot.getCurrentEpoch() > dealStorage.endedEpoch + _globalCore().minDealDepositedEpochs(),
+                snapshot.getCurrentEpoch() > dealStorage.endedEpoch + ICore(_diamond()).minDealDepositedEpochs(),
                 "Can't withdraw before minDealDepositedEpochs after deal end"
             );
             dealStorage.totalBalance -= amount;
@@ -166,7 +167,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         emit Withdrawn(amount);
     }
 
-    function addComputeUnit(address computeProvider, bytes32 computeUnitId, bytes32 peerId) public onlyCore {
+    function addComputeUnit(address computeProvider, bytes32 computeUnitId, bytes32 peerId) public onlyDiamond {
         require(getStatus() != Status.ENDED, "Deal is ended");
 
         _addComputeUnit(computeProvider, computeUnitId, peerId);
@@ -178,9 +179,8 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
 
         DealStorage storage dealStorage = _getDealStorage();
 
-        ICore core = _globalCore(); // TODO DIAMOND rename to globalDiamond
         ComputeUnit memory unit = getComputeUnit(computeUnitId);
-        IOffer.ComputePeer memory marketPeer = IOffer(address(core)).getComputePeer(unit.peerId);
+        IOffer.ComputePeer memory marketPeer = IOffer(_diamond()).getComputePeer(unit.peerId);
 
         require(msg.sender == unit.provider || msg.sender == marketPeer.owner, "Only provider or owner can set worker");
 
@@ -200,7 +200,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         computeUnitPaymentInfo.gapsDelta = snapshot.getGapsEpochCount();
     }
 
-    function removeComputeUnit(bytes32 computeUnitId) public onlyCore {
+    function removeComputeUnit(bytes32 computeUnitId) public onlyDiamond {
         DealStorage storage dealStorage = _getDealStorage();
 
         ComputeUnit memory unit = getComputeUnit(computeUnitId);
@@ -218,7 +218,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         ComputeUnit memory unit = getComputeUnit(computeUnitId);
         DealSnapshot.Cache memory snapshot = _preCommitPeriod();
 
-        IMarket market = IMarket(address(_globalCore()));
+        IMarket market = IMarket(_diamond());
         IMarket.ComputePeer memory marketPeer = market.getComputePeer(unit.peerId);
         IMarket.Offer memory marketOffer = market.getOffer(marketPeer.offerId);
 
@@ -238,7 +238,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
         DealSnapshot.Cache memory snapshot = _preCommitPeriod();
         _postCommitPeriod(snapshot, snapshot.getCurrentWorkerCount());
 
-        uint256 currentEpoch = _globalCore().currentEpoch();
+        uint256 currentEpoch = ICore(_diamond()).currentEpoch();
         if (dealStorage.maxPaidEpoch > currentEpoch) {
             dealStorage.maxPaidEpoch = currentEpoch;
             emit MaxPaidEpochUpdated(currentEpoch);
@@ -253,7 +253,7 @@ contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
 
     function _preCommitPeriod() internal view returns (DealSnapshot.Cache memory snapshot) {
         DealStorage storage dealStorage = _getDealStorage();
-        uint256 currentEpoch = _globalCore().currentEpoch();
+        uint256 currentEpoch = ICore(_diamond()).currentEpoch();
         uint256 commitEpoch = currentEpoch - 1;
 
         uint256 endedEpoch = dealStorage.endedEpoch;

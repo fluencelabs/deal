@@ -9,7 +9,7 @@ import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {RandomXProxy} from "src/utils/RandomXProxy.sol";
 import {BytesConverter} from "src/utils/BytesConverter.sol";
 import {Whitelist} from "src/utils/Whitelist.sol";
-import {ICapacity} from "src/core/modules/capacity/interfaces/ICapacity.sol";
+import {ICapacity} from "src/core/interfaces/ICapacity.sol";
 import {Vesting} from "src/core/modules/capacity/Vesting.sol";
 import {PRECISION} from "src/utils/Common.sol";
 import {LibEpochController} from "src/lib/LibEpochController.sol";
@@ -19,7 +19,7 @@ import {LibOffer} from "src/lib/LibOffer.sol";
 import {LibWhitelist} from "src/lib/LibWhitelist.sol";
 import {LibDiamond} from "src/lib/LibDiamond.sol";
 import {Snapshot} from "src/core/modules/capacity/Snapshot.sol";
-import {IOffer} from "src/core/modules/market/interfaces/IOffer.sol";
+import {IOffer} from "src/core/interfaces/IOffer.sol";
 
 contract CapacityFacet is ICapacity {
     using SafeERC20 for IERC20;
@@ -31,14 +31,6 @@ contract CapacityFacet is ICapacity {
     receive() external payable {
         LibCapacity.store().rewardBalance += msg.value;
     }
-
-    function initialize(bytes32 initGlobalNonce_) external /*initializer*/ {
-        // TODO DIAMOND
-        CommitmentStorage storage s = LibCapacity.store();
-        s.globalNonce = initGlobalNonce_;
-        s.changedNonceEpoch = LibEpochController.currentEpoch();
-    }
-
 
     // #region ------------------ Modifiers ------------------
     modifier onlyApproved() {

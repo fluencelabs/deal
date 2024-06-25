@@ -160,9 +160,6 @@ interface ICapacity {
         uint256 exitedUnitCount;
     }
 
-    // ------------------ Initializer ------------------
-    function initialize(bytes32 initGlobalNonce_) external;
-
     // ------------------ Views ------------------
     /// @dev Returns the commitment status
     /// @param commitmentId Commitment id

@@ -12,36 +12,26 @@ import {LibDiamond} from "src/lib/LibDiamond.sol";
 import {LibCore} from "src/lib/LibCore.sol";
 import {LibWhitelist} from "src/lib/LibWhitelist.sol";
 import {IDiamondCut} from "src/interfaces/IDiamondCut.sol";
-import {IERC165} from "src/interfaces/IERC165.sol";
 import {IDiamondLoupe} from "src/interfaces/IDiamondLoupe.sol";
+import {IERC165} from "src/interfaces/IERC165.sol";
 import {ICapacityConst} from "src/core/interfaces/ICapacityConst.sol";
 import {GlobalConstStorage, LibGlobalConst} from "src/lib/LibGlobalConst.sol";
 import {CapacityConstStorage, LibCapacityConst, RewardPoolPerEpoch} from "src/lib/LibCapacityConst.sol";
+import {CommitmentStorage, LibCapacity} from "src/lib/LibCapacity.sol";
 import {EpochControllerStorage, LibEpochController} from "src/lib/LibEpochController.sol";
-import {IDeal} from "src/deal/interfaces/IDeal.sol";
 import {ICore} from "src/core/interfaces/ICore.sol";
+import {IDiamond} from "src/interfaces/IDiamond.sol";
 
-contract Diamond {    
-    struct CoreParams {
-        uint256 epochDuration;
-        IDeal dealImpl;
-        bool isWhitelistEnabled;
-        ICapacityConst.CapacityConstInitArgs capacityConstInitArgs;
-    }
-
-    struct GlobalConstParams {
-        uint256 minDealDepositedEpochs;
-        uint256 minDealRematchingEpochs;
-        uint256 minProtocolVersion;
-        uint256 maxProtocolVersion;
-    }
-
+contract Diamond is IDiamond {    
     constructor(
         address _diamondCutFacet,
         CoreParams memory coreParams,
+        CapacityParams memory capacityParams,
         GlobalConstParams memory globalConstParams
     ) payable {        
         LibDiamond.setContractOwner(msg.sender);
+
+        uint256 INITIAL_EPOCH = 1; // TODO DIAMOND ensure it is 1
 
         // Add the diamondCut external function from the diamondCutFacet
         IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](1);
@@ -64,6 +54,11 @@ contract Diamond {
         LibCore.store().dealImpl = coreParams.dealImpl;
         emit ICore.DealImplSet(coreParams.dealImpl);
         LibWhitelist.store().isWhitelistEnabled = coreParams.isWhitelistEnabled;
+
+        // from Capacity
+        CommitmentStorage storage capacityStorage = LibCapacity.store();
+        capacityStorage.changedNonceEpoch = INITIAL_EPOCH;
+        capacityStorage.globalNonce = capacityParams.initGlobalNonce;
 
         // from GlobalConst
         GlobalConstStorage storage globalConstantsStorage = LibGlobalConst.store();
@@ -96,7 +91,7 @@ contract Diamond {
         constantsStorage.oracle = initArgs.oracle;
 
         constantsStorage.reward.rewardPoolPerEpochs.push(
-            RewardPoolPerEpoch({epoch: 1, value: initArgs.initRewardPool}) // TODO DIAMOND ensure it is 1
+            RewardPoolPerEpoch({epoch: INITIAL_EPOCH, value: initArgs.initRewardPool})
         );
 
         constantsStorage.fltPrice = initArgs.fltPrice;

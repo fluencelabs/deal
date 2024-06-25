@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {IOffer} from "src/core/modules/market/interfaces/IOffer.sol";
+import {IOffer} from "src/core/interfaces/IOffer.sol";
 import {LibCapacity} from "src/lib/LibCapacity.sol";
 import {IDeal} from "src/deal/interfaces/IDeal.sol";
 import {CIDV1} from "src/utils/Common.sol";
@@ -53,14 +53,14 @@ library LibOffer {
         return computePeer;
     }
 
-    function getComputeUnit(bytes32 unitId) public view returns (IOffer.ComputeUnit memory) {
+    function getComputeUnit(bytes32 unitId) internal view returns (IOffer.ComputeUnit memory) {
         IOffer.ComputeUnit storage computeUnit = store().computeUnits[unitId];
         require(computeUnit.peerId != bytes32(0x00), "Compute unit doesn't exist");
 
         return computeUnit;
     }
 
-    function getComputeUnitIds(bytes32 peerId) public view returns (bytes32[] memory) {
+    function getComputeUnitIds(bytes32 peerId) internal view returns (bytes32[] memory) {
         return store().computeUnitIdsByPeerId[peerId].values();
     }
 

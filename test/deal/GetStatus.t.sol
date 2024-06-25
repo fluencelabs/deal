@@ -15,19 +15,19 @@ contract GetStatus is TestWithDeployment {
     using SafeERC20 for IERC20;
     using TestHelper for TestWithDeployment.Deployment;
 
-    TestCore testCore;
+    TestDiamond testDiamond;
     IDealWithPublicInternals dealContract;
 
     // ------------------ Test ------------------
     function setUp() public {
-        testCore = new TestCore();
+        testDiamond = new TestDiamond();
         dealContract =
             IDealWithPublicInternals(deployCode("out/DealWithPublicInternals.sol/DealWithPublicInternals.json"));
-        dealContract.setCore(ICore(address(testCore)));
+        dealContract.setDiamond(IDiamond(payable(address(testDiamond))));
     }
 
     function test_WhenEnded() public {
-        testCore.setCurrentEpoch(101);
+        testDiamond.setCurrentEpoch(101);
         dealContract.setEndedEpoch(101);
         assertEq(uint8(dealContract.getStatus()), uint8(IDeal.Status.ENDED), "Status mismatch");
     }
@@ -37,11 +37,11 @@ contract GetStatus is TestWithDeployment {
         dealContract.setTargetWorkers(10);
         dealContract.setPricePerWorkerEpoch(1 ether);
         dealContract.setMaxPaidEpoch(0);
-        testCore.setCurrentEpoch(101);
+        testDiamond.setCurrentEpoch(101);
         dealContract.setLastCommitedEpoch(100);
         dealContract.setMaxPaidEpoch(0);
         uint256 minBalance =
-            dealContract.targetWorkers() * testCore.minDealDepositedEpochs() * dealContract.pricePerWorkerEpoch();
+            dealContract.targetWorkers() * testDiamond.minDealDepositedEpochs() * dealContract.pricePerWorkerEpoch();
         dealContract.setTotalBalance(minBalance);
         assertEq(uint8(dealContract.getStatus()), uint8(IDeal.Status.NOT_ENOUGH_WORKERS), "Status mismatch");
     }
@@ -49,7 +49,7 @@ contract GetStatus is TestWithDeployment {
         dealContract.setMinWorkers(10);
         dealContract.setWorkerCount(10);
         dealContract.setPricePerWorkerEpoch(1 ether);
-        testCore.setCurrentEpoch(101);
+        testDiamond.setCurrentEpoch(101);
         dealContract.setMaxPaidEpoch(100);
         dealContract.setTargetWorkers(100);
         dealContract.setLastCommitedEpoch(100);
@@ -59,11 +59,11 @@ contract GetStatus is TestWithDeployment {
         dealContract.setMinWorkers(10);
         dealContract.setWorkerCount(10);
         dealContract.setPricePerWorkerEpoch(1 ether);
-        testCore.setCurrentEpoch(101);
+        testDiamond.setCurrentEpoch(101);
         dealContract.setMaxPaidEpoch(0);
         dealContract.setTargetWorkers(100);
         uint256 minBalance =
-            dealContract.targetWorkers() * testCore.minDealDepositedEpochs() * dealContract.pricePerWorkerEpoch();
+            dealContract.targetWorkers() * testDiamond.minDealDepositedEpochs() * dealContract.pricePerWorkerEpoch();
         dealContract.setTotalBalance(minBalance - 1);
         assertEq(uint8(dealContract.getStatus()), uint8(IDeal.Status.SMALL_BALANCE), "Status mismatch");
     }
@@ -72,16 +72,16 @@ contract GetStatus is TestWithDeployment {
         dealContract.setTargetWorkers(10);
         dealContract.setWorkerCount(10);
         dealContract.setPricePerWorkerEpoch(1 ether);
-        testCore.setCurrentEpoch(100);
+        testDiamond.setCurrentEpoch(100);
         dealContract.setLastCommitedEpoch(99);
         dealContract.setMaxPaidEpoch(100);
         uint256 minBalance =
-            dealContract.targetWorkers() * testCore.minDealDepositedEpochs() * dealContract.pricePerWorkerEpoch();
+            dealContract.targetWorkers() * testDiamond.minDealDepositedEpochs() * dealContract.pricePerWorkerEpoch();
         dealContract.setTotalBalance(minBalance);
         assertEq(uint8(dealContract.getStatus()), uint8(IDeal.Status.ACTIVE), "Status mismatc");
     }
 }
-contract TestCore {
+contract TestDiamond {
     uint256 public currentEpoch;
     function setCurrentEpoch(uint256 epoch) public {
         currentEpoch = epoch;

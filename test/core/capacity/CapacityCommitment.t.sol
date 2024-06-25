@@ -1,18 +1,20 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.19;
 
-import {Test} from "forge-std/Test.sol";
-import "forge-std/StdCheats.sol";
-import "filecoin-solidity/v0.8/utils/Actor.sol";
-import {IOffer} from "src/core/modules/market/interfaces/IOffer.sol";
-import {ICapacity} from "src/core/modules/capacity/interfaces/ICapacity.sol";
-import "src/utils/BytesConverter.sol";
-import "test/utils/TestWithDeployment.sol";
-import "test/utils/TestHelper.sol";
+import {Test, Vm} from "forge-std/Test.sol";
+import {StdCheats} from "forge-std/StdCheats.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {CIDV1} from "src/utils/Common.sol";
+import {IOffer} from "src/core/interfaces/IOffer.sol";
+import {ICapacity} from "src/core/interfaces/ICapacity.sol";
+import {IDeal} from "src/deal/interfaces/IDeal.sol";
+import {IMarket} from "src/core/interfaces/IMarket.sol";
+import {TestWithDeployment} from "test/utils/TestWithDeployment.sol";
+import {TestHelper} from "test/utils/TestHelper.sol";
 
 contract CapacityCommitmentTest is TestWithDeployment {
     using SafeERC20 for IERC20;
-    using BytesConverter for bytes32;
     using TestHelper for TestWithDeployment.Deployment;
 
     // ------------------ Events ------------------
@@ -75,7 +77,7 @@ contract CapacityCommitmentTest is TestWithDeployment {
             );
         }
 
-        ccDuration = deployment.core.minDuration();
+        ccDuration = deployment.diamondAsCore.minDuration();
         ccDelegator = address(bytes20(TestHelper.pseudoRandom(abi.encode("delegator"))));
 
         vm.deal(ccDelegator, type(uint256).max);
@@ -84,14 +86,14 @@ contract CapacityCommitmentTest is TestWithDeployment {
     }
 
     function test_CreateCapacityCommitment() public {
-        deployment.market.setProviderInfo("name", CIDV1({prefixes: 0x12345678, hash: bytes32(0)}));
-        deployment.market.registerMarketOffer(
+        deployment.diamondAsMarket.setProviderInfo("name", CIDV1({prefixes: 0x12345678, hash: bytes32(0)}));
+        deployment.diamondAsMarket.registerMarketOffer(
             minPricePerWorkerEpoch,
             paymentToken,
             effectors,
             registerPeers,
-            deployment.core.minProtocolVersion(),
-            deployment.core.maxProtocolVersion()
+            deployment.diamondAsCore.minProtocolVersion(),
+            deployment.diamondAsCore.maxProtocolVersion()
         );
 
         bytes32 peerId = registerPeers[0].peerId;
@@ -99,41 +101,41 @@ contract CapacityCommitmentTest is TestWithDeployment {
             keccak256(abi.encodePacked(block.number, peerId, ccDuration, ccDelegator, rewardCCDelegationRate));
 
         // expect emit CommitmentCreated
-        vm.expectEmit(true, true, false, true, address(deployment.capacity));
+        vm.expectEmit(true, true, false, true, address(deployment.diamond));
         emit CommitmentCreated(
             peerId,
             commitmentId,
             ccDuration,
             ccDelegator,
             rewardCCDelegationRate,
-            deployment.core.fltCollateralPerUnit()
+            deployment.diamondAsCore.fltCollateralPerUnit()
         );
 
         // call createCapacityCommitment
-        deployment.capacity.createCommitment(peerId, ccDuration, ccDelegator, rewardCCDelegationRate);
+        deployment.diamondAsCapacity.createCommitment(peerId, ccDuration, ccDelegator, rewardCCDelegationRate);
     }
 
     function test_GetCapacityCommitment() public {
-        deployment.market.setProviderInfo("name", CIDV1({prefixes: 0x12345678, hash: bytes32(0)}));
+        deployment.diamondAsMarket.setProviderInfo("name", CIDV1({prefixes: 0x12345678, hash: bytes32(0)}));
 
-        deployment.market.registerMarketOffer(
+        deployment.diamondAsMarket.registerMarketOffer(
             minPricePerWorkerEpoch,
             paymentToken,
             effectors,
             registerPeers,
-            deployment.core.minProtocolVersion(),
-            deployment.core.maxProtocolVersion()
+            deployment.diamondAsCore.minProtocolVersion(),
+            deployment.diamondAsCore.maxProtocolVersion()
         );
 
         bytes32 peerId = registerPeers[0].peerId;
 
         bytes32 commitmentId = _createCapacityCommitment(peerId);
 
-        ICapacity.CommitmentView memory commitment = deployment.capacity.getCommitment(commitmentId);
+        ICapacity.CommitmentView memory commitment = deployment.diamondAsCapacity.getCommitment(commitmentId);
 
         assertEq(uint256(commitment.status), uint256(ICapacity.CCStatus.WaitDelegation), "Status mismatch");
         assertEq(commitment.peerId, peerId, "PeerId mismatch");
-        assertEq(commitment.collateralPerUnit, deployment.core.fltCollateralPerUnit(), "CollateralPerUnit mismatch");
+        assertEq(commitment.collateralPerUnit, deployment.diamondAsCore.fltCollateralPerUnit(), "CollateralPerUnit mismatch");
         assertEq(commitment.endEpoch, commitment.startEpoch + ccDuration, "Duration mismatch");
         assertEq(commitment.rewardDelegatorRate, rewardCCDelegationRate, "RewardDelegatorRate mismatch");
         assertEq(commitment.delegator, ccDelegator, "Delegator mismatch");
@@ -144,22 +146,22 @@ contract CapacityCommitmentTest is TestWithDeployment {
     }
 
     function test_DepositCollateral() public {
-        deployment.market.setProviderInfo("name", CIDV1({prefixes: 0x12345678, hash: bytes32(0)}));
+        deployment.diamondAsMarket.setProviderInfo("name", CIDV1({prefixes: 0x12345678, hash: bytes32(0)}));
 
-        deployment.market.registerMarketOffer(
+        deployment.diamondAsMarket.registerMarketOffer(
             minPricePerWorkerEpoch,
             paymentToken,
             effectors,
             registerPeers,
-            deployment.core.minProtocolVersion(),
-            deployment.core.maxProtocolVersion()
+            deployment.diamondAsCore.minProtocolVersion(),
+            deployment.diamondAsCore.maxProtocolVersion()
         );
 
         uint256 amountTotal = 0;
         bytes32[] memory createdCCIds = new bytes32[](registerPeers.length);
         uint256[] memory amounts = new uint256[](registerPeers.length);
         uint256 unitCountTotal = 0;
-        uint256 activeUnitCountBefore = deployment.core.activeUnitCount();
+        uint256 activeUnitCountBefore = deployment.diamondAsCore.activeUnitCount();
         for (uint256 i = 0; i < registerPeers.length; ++i) {
             bytes32 peerId = registerPeers[i].peerId;
             uint256 unitCount = registerPeers[i].unitIds.length;
@@ -167,19 +169,19 @@ contract CapacityCommitmentTest is TestWithDeployment {
             bytes32 commitmentId = _createCapacityCommitment(peerId);
             createdCCIds[i] = commitmentId;
 
-            uint256 amount = unitCount * deployment.core.fltCollateralPerUnit();
+            uint256 amount = unitCount * deployment.diamondAsCore.fltCollateralPerUnit();
             amounts[i] = amount;
             amountTotal += amount;
         }
 
         vm.startPrank(ccDelegator);
-        uint256 currentEpoch = deployment.core.currentEpoch();
+        uint256 currentEpoch = deployment.diamondAsCore.currentEpoch();
 
         for (uint256 i = 0; i < registerPeers.length; ++i) {
-            vm.expectEmit(true, true, false, true, address(deployment.capacity));
+            vm.expectEmit(true, true, false, true, address(deployment.diamond));
             emit CollateralDeposited(createdCCIds[i], amounts[i]);
 
-            vm.expectEmit(true, true, true, true, address(deployment.capacity));
+            vm.expectEmit(true, true, true, true, address(deployment.diamond));
             emit CommitmentActivated(
                 registerPeers[i].peerId,
                 createdCCIds[i],
@@ -189,24 +191,24 @@ contract CapacityCommitmentTest is TestWithDeployment {
             );
         }
 
-        deployment.capacity.depositCollateral{value: amountTotal}(createdCCIds);
+        deployment.diamondAsCapacity.depositCollateral{value: amountTotal}(createdCCIds);
         vm.stopPrank();
 
-        StdCheats.skip(uint256(deployment.core.epochDuration()));
+        StdCheats.skip(uint256(deployment.diamondAsCore.epochDuration()));
 
-        uint256 activeUnitCountAfter = deployment.core.activeUnitCount();
+        uint256 activeUnitCountAfter = deployment.diamondAsCore.activeUnitCount();
         assertEq(activeUnitCountAfter, activeUnitCountBefore + unitCountTotal, "ActiveUnitCount mismatch");
 
         // Verify commitments info.
         for (uint256 i = 0; i < registerPeers.length; ++i) {
-            ICapacity.CommitmentView memory commitment = deployment.capacity.getCommitment(createdCCIds[i]);
+            ICapacity.CommitmentView memory commitment = deployment.diamondAsCapacity.getCommitment(createdCCIds[i]);
             assertEq(uint256(commitment.status), uint256(ICapacity.CCStatus.Active), "Status mismatch");
             assertEq(commitment.peerId, registerPeers[i].peerId, "PeerId mismatch");
-            assertEq(commitment.collateralPerUnit, deployment.core.fltCollateralPerUnit(), "CollateralPerUnit mismatch");
-            assertEq(commitment.endEpoch, deployment.core.currentEpoch() + ccDuration, "Duration mismatch");
+            assertEq(commitment.collateralPerUnit, deployment.diamondAsCore.fltCollateralPerUnit(), "CollateralPerUnit mismatch");
+            assertEq(commitment.endEpoch, deployment.diamondAsCore.currentEpoch() + ccDuration, "Duration mismatch");
             assertEq(commitment.rewardDelegatorRate, rewardCCDelegationRate, "RewardDelegatorRate mismatch");
             assertEq(commitment.delegator, ccDelegator, "Delegator mismatch");
-            assertEq(commitment.startEpoch, deployment.core.currentEpoch(), "StartEpoch mismatch");
+            assertEq(commitment.startEpoch, deployment.diamondAsCore.currentEpoch(), "StartEpoch mismatch");
             assertEq(commitment.failedEpoch, 0, "FailedEpoch mismatch");
             assertEq(commitment.exitedUnitCount, 0, "ExitedUnitCount mismatch");
         }
@@ -220,18 +222,18 @@ contract CapacityCommitmentTest is TestWithDeployment {
 
         (bytes32 commitmentId,) = _createAndDepositCapacityCommitment(peerId, unitCount);
 
-        StdCheats.skip(uint256(deployment.core.epochDuration()));
+        StdCheats.skip(uint256(deployment.diamondAsCore.epochDuration()));
 
         vm.startPrank(peerOwner);
 
         bytes32 localUnitNonce = keccak256(abi.encodePacked("localUnitNonce"));
         // RandomXProxyMock returns difficulty
-        bytes32 targetHash = deployment.core.difficulty();
+        bytes32 targetHash = deployment.diamondAsCore.difficulty();
 
-        vm.expectEmit(true, true, false, true, address(deployment.capacity));
+        vm.expectEmit(true, true, false, true, address(deployment.diamond));
         emit ProofSubmitted(commitmentId, unitId, localUnitNonce);
 
-        deployment.capacity.submitProof(unitId, localUnitNonce, targetHash);
+        deployment.diamondAsCapacity.submitProof(unitId, localUnitNonce, targetHash);
 
         vm.stopPrank();
     }
@@ -243,7 +245,7 @@ contract CapacityCommitmentTest is TestWithDeployment {
 
         (bytes32 commitmentId,) = _createAndDepositCapacityCommitment(peerId, unitCount);
 
-        StdCheats.skip(uint256(deployment.core.epochDuration()));
+        StdCheats.skip(uint256(deployment.diamondAsCore.epochDuration()));
 
         vm.startPrank(peerOwner);
 
@@ -255,13 +257,13 @@ contract CapacityCommitmentTest is TestWithDeployment {
             unitIds[i] = registerPeers[0].unitIds[i % unitCount];
             localUnitNonces[i] = keccak256(abi.encodePacked("localUnitNonce", i));
             // RandomXProxyMock returns difficulty
-            targetHashes[i] = deployment.core.difficulty();
+            targetHashes[i] = deployment.diamondAsCore.difficulty();
 
-            vm.expectEmit(true, true, false, true, address(deployment.capacity));
+            vm.expectEmit(true, true, false, true, address(deployment.diamond));
             emit ProofSubmitted(commitmentId, unitIds[i], localUnitNonces[i]);
         }
 
-        deployment.capacity.submitProofs(unitIds, localUnitNonces, targetHashes);
+        deployment.diamondAsCapacity.submitProofs(unitIds, localUnitNonces, targetHashes);
 
         vm.stopPrank();
     }
@@ -273,11 +275,11 @@ contract CapacityCommitmentTest is TestWithDeployment {
 
         (bytes32 commitmentId,) = _createAndDepositCapacityCommitment(peerId, unitCount);
 
-        StdCheats.skip(uint256(deployment.core.epochDuration()));
+        StdCheats.skip(uint256(deployment.diamondAsCore.epochDuration()));
 
         vm.startPrank(peerOwner);
 
-        uint256 maxProofs = deployment.core.maxProofsPerEpoch();
+        uint256 maxProofs = deployment.diamondAsCore.maxProofsPerEpoch();
 
         bytes32[] memory unitIds = new bytes32[](unitCount + maxProofs);
         bytes32[] memory localUnitNonces = new bytes32[](unitCount + maxProofs);
@@ -286,19 +288,19 @@ contract CapacityCommitmentTest is TestWithDeployment {
             unitIds[i] = registerPeers[0].unitIds[i];
             localUnitNonces[i] = keccak256(abi.encodePacked("localUnitNonce", i));
             // RandomXProxyMock returns difficulty
-            targetHashes[i] = deployment.core.difficulty();
+            targetHashes[i] = deployment.diamondAsCore.difficulty();
         }
 
         for (uint256 i = unitCount; i < maxProofs + unitCount; ++i) {
             unitIds[i] = registerPeers[0].unitIds[0];
             localUnitNonces[i] = keccak256(abi.encodePacked("localUnitNonce-max", i));
             // RandomXProxyMock returns difficulty
-            targetHashes[i] = deployment.core.difficulty();
+            targetHashes[i] = deployment.diamondAsCore.difficulty();
         }
 
         vm.expectRevert(TooManyProofs.selector);
 
-        deployment.capacity.submitProofs(unitIds, localUnitNonces, targetHashes);
+        deployment.diamondAsCapacity.submitProofs(unitIds, localUnitNonces, targetHashes);
 
         vm.stopPrank();
     }
@@ -310,7 +312,7 @@ contract CapacityCommitmentTest is TestWithDeployment {
 
         (bytes32 commitmentId,) = _createAndDepositCapacityCommitment(peerId, unitCount);
 
-        StdCheats.skip(uint256(deployment.core.epochDuration()));
+        StdCheats.skip(uint256(deployment.diamondAsCore.epochDuration()));
 
         vm.startPrank(peerOwner);
 
@@ -321,18 +323,18 @@ contract CapacityCommitmentTest is TestWithDeployment {
             unitIds[i] = registerPeers[0].unitIds[i];
             localUnitNonces[i] = keccak256(abi.encodePacked("localUnitNonce", i));
             // RandomXProxyMock returns difficulty
-            targetHashes[i] = deployment.core.difficulty();
+            targetHashes[i] = deployment.diamondAsCore.difficulty();
         }
 
         unitIds[unitCount] = registerPeers[0].unitIds[0];
         // Repeated local unit nonce
         localUnitNonces[unitCount] = keccak256(abi.encodePacked("localUnitNonce", uint256(0)));
         // RandomXProxyMock returns difficulty
-        targetHashes[unitCount] = deployment.core.difficulty();
+        targetHashes[unitCount] = deployment.diamondAsCore.difficulty();
         
         vm.expectRevert("Proof is already submitted for this unit");
 
-        deployment.capacity.submitProofs(unitIds, localUnitNonces, targetHashes);
+        deployment.diamondAsCapacity.submitProofs(unitIds, localUnitNonces, targetHashes);
 
         vm.stopPrank();
     }
@@ -346,32 +348,32 @@ contract CapacityCommitmentTest is TestWithDeployment {
         (bytes32 commitmentId,) = _createAndDepositCapacityCommitment(peerId, unitCount);
 
         // warp to next epoch
-        StdCheats.skip(deployment.core.epochDuration());
+        StdCheats.skip(deployment.diamondAsCore.epochDuration());
 
         // RandomXProxyMock returns difficulty
-        bytes32 targetHash = deployment.core.difficulty();
+        bytes32 targetHash = deployment.diamondAsCore.difficulty();
 
         vm.startPrank(peerOwner);
-        uint256 maxProofsPerEpoch = deployment.core.maxProofsPerEpoch();
+        uint256 maxProofsPerEpoch = deployment.diamondAsCore.maxProofsPerEpoch();
         for (uint256 i = 0; i < maxProofsPerEpoch; i++) {
             bytes32 localUnitNonce_ = keccak256(abi.encodePacked("localUnitNonce", i));
 
-            vm.expectEmit(true, true, false, true, address(deployment.capacity));
+            vm.expectEmit(true, true, false, true, address(deployment.diamond));
             emit ProofSubmitted(commitmentId, unitId, localUnitNonce_);
 
-            deployment.capacity.submitProof(unitId, localUnitNonce_, targetHash);
+            deployment.diamondAsCapacity.submitProof(unitId, localUnitNonce_, targetHash);
         }
 
         uint256 reward = (
-            deployment.core.getRewardPool(deployment.core.currentEpoch()) / deployment.core.vestingPeriodCount()
-        ) * deployment.core.vestingPeriodCount();
-        StdCheats.skip(deployment.core.epochDuration());
+            deployment.diamondAsCore.getRewardPool(deployment.diamondAsCore.currentEpoch()) / deployment.diamondAsCore.vestingPeriodCount()
+        ) * deployment.diamondAsCore.vestingPeriodCount();
+        StdCheats.skip(deployment.diamondAsCore.epochDuration());
 
         bytes32 localUnitNonce = keccak256(abi.encodePacked("localUnitNonce"));
-        deployment.capacity.submitProof(unitId, localUnitNonce, targetHash);
+        deployment.diamondAsCapacity.submitProof(unitId, localUnitNonce, targetHash);
 
-        assertEq(deployment.capacity.totalRewards(commitmentId), reward, "TotalRewards mismatch");
-        assertEq(deployment.capacity.unlockedRewards(commitmentId), 0, "UnlockedRewards mismatch");
+        assertEq(deployment.diamondAsCapacity.totalRewards(commitmentId), reward, "TotalRewards mismatch");
+        assertEq(deployment.diamondAsCapacity.unlockedRewards(commitmentId), 0, "UnlockedRewards mismatch");
 
         vm.stopPrank();
     }
@@ -383,13 +385,13 @@ contract CapacityCommitmentTest is TestWithDeployment {
         (bytes32 commitmentId,) = _createAndDepositCapacityCommitment(peerId, unitCount);
 
         // warp to next epoch
-        StdCheats.skip(deployment.core.epochDuration());
+        StdCheats.skip(deployment.diamondAsCore.epochDuration());
 
         StdCheats.skip(ccDuration * 2000);
-        bytes32[] memory unitIds = deployment.market.getComputeUnitIds(peerId);
+        bytes32[] memory unitIds = deployment.diamondAsMarket.getComputeUnitIds(peerId);
 
-        deployment.capacity.removeCUFromCC(commitmentId, unitIds);
-        deployment.capacity.finishCommitment(commitmentId);
+        deployment.diamondAsCapacity.removeCUFromCC(commitmentId, unitIds);
+        deployment.diamondAsCapacity.finishCommitment(commitmentId);
     }
 
     function test_ExitCommitmentWithDealAfterTime() external {
@@ -399,14 +401,14 @@ contract CapacityCommitmentTest is TestWithDeployment {
         (bytes32 commitmentId, bytes32 offerId) = _createAndDepositCapacityCommitment(peerId, unitCount);
 
         // warp to next epoch
-        StdCheats.skip(deployment.core.epochDuration());
+        StdCheats.skip(deployment.diamondAsCore.epochDuration());
 
         uint256 pricePerWorkerEpoch = 1 ether;
         uint256 targetWorkers = 3;
-        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.core.minDealDepositedEpochs();
+        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.diamondAsCore.minDealDepositedEpochs();
 
-        deployment.tUSD.safeApprove(address(deployment.dealFactory), minAmount);
-        uint256 protocolVersion = deployment.core.minProtocolVersion();
+        deployment.tUSD.safeApprove(address(deployment.diamond), minAmount);
+        uint256 protocolVersion = deployment.diamondAsCore.minProtocolVersion();
         (IDeal d,) = deployment.deployDeal(
             TestHelper.DeployDealParams({
                 minWorkers: 1,
@@ -418,25 +420,25 @@ contract CapacityCommitmentTest is TestWithDeployment {
             })
         );
 
-        bytes32[] memory unitIds = deployment.market.getComputeUnitIds(peerId);
+        bytes32[] memory unitIds = deployment.diamondAsMarket.getComputeUnitIds(peerId);
         bytes32[][] memory unitIds2d = new bytes32[][](1);
         unitIds2d[0] = unitIds;
 
         bytes32[] memory offerIds = new bytes32[](1);
         offerIds[0] = offerId;
 
-        deployment.market.matchDeal(d, offerIds, unitIds2d);
+        deployment.diamondAsMarket.matchDeal(d, offerIds, unitIds2d);
 
         StdCheats.skip(ccDuration * 2000);
 
-        deployment.capacity.removeCUFromCC(commitmentId, unitIds);
-        deployment.capacity.finishCommitment(commitmentId);
+        deployment.diamondAsCapacity.removeCUFromCC(commitmentId, unitIds);
+        deployment.diamondAsCapacity.finishCommitment(commitmentId);
     }
 
     // ------------------ Internals ------------------
     function _createCapacityCommitment(bytes32 peerId) internal returns (bytes32 commitmentId) {
         vm.recordLogs();
-        deployment.capacity.createCommitment(peerId, ccDuration, ccDelegator, rewardCCDelegationRate);
+        deployment.diamondAsCapacity.createCommitment(peerId, ccDuration, ccDelegator, rewardCCDelegationRate);
 
         Vm.Log[] memory entries = vm.getRecordedLogs();
 
@@ -449,14 +451,14 @@ contract CapacityCommitmentTest is TestWithDeployment {
         internal
         returns (bytes32 commitmentId, bytes32 offerId)
     {
-        deployment.market.setProviderInfo("name", CIDV1({prefixes: 0x12345678, hash: bytes32(0)}));
-        offerId = deployment.market.registerMarketOffer(
+        deployment.diamondAsMarket.setProviderInfo("name", CIDV1({prefixes: 0x12345678, hash: bytes32(0)}));
+        offerId = deployment.diamondAsMarket.registerMarketOffer(
             minPricePerWorkerEpoch,
             paymentToken,
             effectors,
             registerPeers,
-            deployment.core.minProtocolVersion(),
-            deployment.core.maxProtocolVersion()
+            deployment.diamondAsCore.minProtocolVersion(),
+            deployment.diamondAsCore.maxProtocolVersion()
         );
 
         commitmentId = _createCapacityCommitment(peerId);
@@ -466,7 +468,7 @@ contract CapacityCommitmentTest is TestWithDeployment {
         bytes32[] memory commitmentIds = new bytes32[](1);
         commitmentIds[0] = commitmentId;
 
-        deployment.capacity.depositCollateral{value: unitCount * deployment.core.fltCollateralPerUnit()}(commitmentIds);
+        deployment.diamondAsCapacity.depositCollateral{value: unitCount * deployment.diamondAsCore.fltCollateralPerUnit()}(commitmentIds);
         vm.stopPrank();
     }
 

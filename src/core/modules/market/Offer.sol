@@ -7,7 +7,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {CIDV1} from "src/utils/Common.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {IDeal} from "src/deal/interfaces/IDeal.sol";
-import {IOffer} from "src/core/modules/market/interfaces/IOffer.sol";
+import {IOffer} from "src/core/interfaces/IOffer.sol";
 import {LibOffer, OfferStorage} from "src/lib/LibOffer.sol";
 import {LibCapacity} from "src/lib/LibCapacity.sol";
 import {LibGlobalConst} from "src/lib/LibGlobalConst.sol";

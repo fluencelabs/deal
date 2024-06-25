@@ -6,8 +6,8 @@ import "forge-std/StdCheats.sol";
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import "src/deal/interfaces/IDeal.sol";
-import "src/core/modules/market/interfaces/IOffer.sol";
+import {IDeal} from "src/deal/interfaces/IDeal.sol";
+import {IOffer} from "src/core/interfaces/IOffer.sol";
 
 import "test/utils/TestWithDeployment.sol";
 import "test/utils/TestHelper.sol";
@@ -36,11 +36,11 @@ contract Rewards is TestWithDeployment {
             targetWorkers: 3,
             pricePerWorkerEpoch: 1 ether,
             minAmount: 0,
-            protocolVersion: deployment.core.minProtocolVersion()
+            protocolVersion: deployment.diamondAsCore.minProtocolVersion()
         });
-        params.minAmount = params.pricePerWorkerEpoch * params.targetWorkers * deployment.core.minDealDepositedEpochs();
+        params.minAmount = params.pricePerWorkerEpoch * params.targetWorkers * deployment.diamondAsCore.minDealDepositedEpochs();
 
-        deployment.tUSD.safeApprove(address(deployment.dealFactory), params.minAmount);
+        deployment.tUSD.safeApprove(address(deployment.diamondAsDealFactory), params.minAmount);
         (IDeal deal,) = deployment.deployDeal(
             TestHelper.DeployDealParams({
                 minWorkers: params.minWorkers,
@@ -62,14 +62,14 @@ contract Rewards is TestWithDeployment {
         uint256 balanceProviderBefore = deployment.tUSD.balanceOf(computeProvider);
 
         vm.mockCall(
-            address(deployment.market),
+            address(deployment.diamond),
             abi.encodeWithSelector(IOffer.getComputePeer.selector, peerId),
             abi.encode(
                 IOffer.ComputePeer({offerId: offerId, commitmentId: bytes32(0), unitCount: 1, owner: computeProvider})
             )
         );
         vm.mockCall(
-            address(deployment.market),
+            address(deployment.diamond),
             abi.encodeWithSelector(IOffer.getOffer.selector, offerId),
             abi.encode(
                 IOffer.Offer({
@@ -77,32 +77,32 @@ contract Rewards is TestWithDeployment {
                     minPricePerWorkerEpoch: params.pricePerWorkerEpoch,
                     paymentToken: address(deployment.tUSD),
                     peerCount: 1,
-                    minProtocolVersion: deployment.core.minProtocolVersion(),
-                    maxProtocolVersion: deployment.core.maxProtocolVersion()
+                    minProtocolVersion: deployment.diamondAsCore.minProtocolVersion(),
+                    maxProtocolVersion: deployment.diamondAsCore.maxProtocolVersion()
                 })
             )
         );
-        vm.startPrank(address(deployment.market));
+        vm.startPrank(address(deployment.diamond));
         deal.addComputeUnit(computeProvider, unitId, peerId);
         vm.stopPrank();
 
         vm.startPrank(computeProvider);
         deal.setWorker(unitId, workerId);
 
-        StdCheats.skip(deployment.core.epochDuration() * deployment.core.minDealDepositedEpochs());
+        StdCheats.skip(deployment.diamondAsCore.epochDuration() * deployment.diamondAsCore.minDealDepositedEpochs());
 
         uint256 amount = deal.getRewardAmount(unitId);
-        assertEq(amount, params.pricePerWorkerEpoch * (deployment.core.minDealDepositedEpochs()), "reward amount");
+        assertEq(amount, params.pricePerWorkerEpoch * (deployment.diamondAsCore.minDealDepositedEpochs()), "reward amount");
 
         vm.mockCall(
-            address(deployment.market),
+            address(deployment.diamond),
             abi.encodeWithSelector(IOffer.getComputePeer.selector, peerId),
             abi.encode(
                 IOffer.ComputePeer({offerId: offerId, commitmentId: bytes32(0), unitCount: 1, owner: computeProvider})
             )
         );
         vm.mockCall(
-            address(deployment.market),
+            address(deployment.diamond),
             abi.encodeWithSelector(IOffer.getOffer.selector, offerId),
             abi.encode(
                 IOffer.Offer({
@@ -110,8 +110,8 @@ contract Rewards is TestWithDeployment {
                     minPricePerWorkerEpoch: params.pricePerWorkerEpoch,
                     paymentToken: address(deployment.tUSD),
                     peerCount: 1,
-                    minProtocolVersion: deployment.core.minProtocolVersion(),
-                    maxProtocolVersion: deployment.core.maxProtocolVersion()
+                    minProtocolVersion: deployment.diamondAsCore.minProtocolVersion(),
+                    maxProtocolVersion: deployment.diamondAsCore.maxProtocolVersion()
                 })
             )
         );

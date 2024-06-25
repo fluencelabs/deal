@@ -1,11 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.19;
 
-import "src/deal/Config.sol";
+import {Config} from "src/deal/Config.sol";
+import {ICore} from "src/core/interfaces/ICore.sol";
+import {IConfigWithPublicInternals} from "src/dev/test/interfaces/IConfigWithPublicInternals.sol";
+import {IDiamond} from "src/interfaces/IDiamond.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {CIDV1} from "src/utils/Common.sol";
 
-contract ConfigWithPublicInternals is Initializable, Config {
+
+contract ConfigWithPublicInternals is Initializable, Config, IConfigWithPublicInternals {
     function Config_init(
-        ICore globalCore_,
+        IDiamond diamond_,
         CIDV1 calldata appCID_,
         IERC20 paymentToken_,
         uint256 minWorkers_,
@@ -18,7 +25,7 @@ contract ConfigWithPublicInternals is Initializable, Config {
         address[] calldata providersAccessList_
     ) public initializer {
         __Config_init(
-            globalCore_,
+            diamond_,
             appCID_,
             paymentToken_,
             minWorkers_,
@@ -32,7 +39,7 @@ contract ConfigWithPublicInternals is Initializable, Config {
         );
     }
 
-    function globalCore() public view returns (ICore) {
-        return _globalCore();
+    function diamond() public view returns (IDiamond) {
+        return IDiamond(payable(_diamond()));
     }
 }

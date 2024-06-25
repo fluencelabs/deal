@@ -70,8 +70,8 @@ contract DealWithPublicInternals is IDealWithPublicInternals, Deal {
         _getConfigStorageTest().minWorkers = minWorkers_;
     }
 
-    function setCore(ICore core_) public {
-        _getConfigStorageTest().globalCore = core_;
+    function setDiamond(IDiamond diamond_) public {
+        _getConfigStorageTest().diamond = diamond_;
     }
 
     function setTargetWorkers(uint256 targetWorkers_) public {

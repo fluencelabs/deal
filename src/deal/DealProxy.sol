@@ -7,16 +7,16 @@ import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {ICore} from "src/core/interfaces/ICore.sol";
 
 contract DealProxy is Proxy {
-    ICore immutable _core;
+    ICore immutable _diamond;
 
-    constructor(ICore core_, bytes memory data_) {
-        _core = core_;
+    constructor(ICore diamond_, bytes memory data_) {
+        _diamond = diamond_;
         if (data_.length > 0) {
-            Address.functionDelegateCall(address(core_.dealImpl()), data_);
+            Address.functionDelegateCall(address(diamond_.dealImpl()), data_);
         }
     }
 
     function _implementation() internal view override returns (address) {
-        return address(_core.dealImpl());
+        return address(_diamond.dealImpl());
     }
 }

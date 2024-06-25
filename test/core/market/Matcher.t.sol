@@ -7,8 +7,8 @@ import "forge-std/StdCheats.sol";
 
 import "src/deal/interfaces/IConfig.sol";
 import "src/deal/interfaces/IDeal.sol";
-import "src/core/modules/market/interfaces/IMarket.sol";
-import "src/core/modules/market/interfaces/IOffer.sol";
+import "src/core/interfaces/IMarket.sol";
+import "src/core/interfaces/IOffer.sol";
 
 import "test/utils/TestWithDeployment.sol";
 import "test/utils/TestHelper.sol";
@@ -54,8 +54,8 @@ contract MatcherTest is TestWithDeployment {
                 peers[j] = IOffer.RegisterComputePeer({peerId: peerId, unitIds: unitIds[i][j], owner: address(this)});
             }
 
-            deployment.market.setProviderInfo("test", CIDV1({prefixes: 0x12345678, hash: bytes32(0x00)}));
-            offerIds[i] = deployment.market.registerMarketOffer(
+            deployment.diamondAsMarket.setProviderInfo("test", CIDV1({prefixes: 0x12345678, hash: bytes32(0x00)}));
+            offerIds[i] = deployment.diamondAsMarket.registerMarketOffer(
                 minPricePerWorkerEpoch, paymentToken, effectors, peers, minProtocolVersion, maxProtocolVersion
             );
 
@@ -64,13 +64,13 @@ contract MatcherTest is TestWithDeployment {
 
             for (uint256 j = 0; j < peerCountPerOffer; j++) {
                 bytes32 commitmentId =
-                    deployment.capacity.createCommitment(peerIds[i][j], deployment.core.minDuration(), address(this), 1);
+                    deployment.diamondAsCapacity.createCommitment(peerIds[i][j], deployment.diamondAsCore.minDuration(), address(this), 1);
                 commitmentIds[j] = commitmentId;
 
-                amount += deployment.capacity.getCommitment(commitmentId).collateralPerUnit * unitIds[i][j].length;
+                amount += deployment.diamondAsCapacity.getCommitment(commitmentId).collateralPerUnit * unitIds[i][j].length;
             }
 
-            deployment.capacity.depositCollateral{value: amount}(commitmentIds);
+            deployment.diamondAsCapacity.depositCollateral{value: amount}(commitmentIds);
         }
     }
 
@@ -130,7 +130,7 @@ contract MatcherTest is TestWithDeployment {
             params.maxProtocolVersion
         );
 
-        StdCheats.skip(uint256(deployment.core.epochDuration()));
+        StdCheats.skip(uint256(deployment.diamondAsCore.epochDuration()));
         // Convert units 3D array to 2D array.
         // Choose the first targetWorkers.
         bytes32[][] memory unitIds2D = new bytes32[][](offerIds.length);
@@ -156,20 +156,20 @@ contract MatcherTest is TestWithDeployment {
                     currentUnitIdx += 1;
                     chosenComputeUnits += 1;
 
-                    vm.expectEmit(true, true, true, true, address(deployment.market));
+                    vm.expectEmit(true, true, true, true, address(deployment.diamond));
                     emit ComputeUnitMatched(
                         peerIds[i][j], IDeal(address(params.deal)), unitIds[i][j][k], args.creationBlock, args.appCID
                     );
                 }
             }
         }
-        deployment.market.matchDeal(IDeal(address(params.deal)), offerIds, unitIds2D);
+        deployment.diamondAsMarket.matchDeal(IDeal(address(params.deal)), offerIds, unitIds2D);
 
         assertEq(params.deal.getComputeUnitCount(), args.targetWorkers, "Wrong number of compute units");
         uint256 currentUnit = 0;
         for (uint256 i = 0; i < offerIds.length; i++) {
             bytes32 offerId = offerIds[i];
-            IMarket.Offer memory offer = deployment.market.getOffer(offerId);
+            IMarket.Offer memory offer = deployment.diamondAsMarket.getOffer(offerId);
 
             for (uint256 j = 0; j < peerIds[i].length; j++) {
                 for (uint256 k = 0; k < unitIds[i][j].length; k++) {
@@ -177,13 +177,13 @@ contract MatcherTest is TestWithDeployment {
 
                     if (currentUnit < args.targetWorkers) {
                         // We should found out that those CU are matched.
-                        assertEq(deployment.market.getComputeUnit(unitId).deal, address(params.deal), "Wrong deal");
+                        assertEq(deployment.diamondAsMarket.getComputeUnit(unitId).deal, address(params.deal), "Wrong deal");
                         assertEq(params.deal.computeProviderByUnitId(unitId), offer.provider, "Wrong compute provider");
                         assertEq(params.deal.peerIdByUnitId(unitId), peerIds[i][j], "Wrong peer id");
                         assertTrue(params.deal.unitExists(unitId), "Unit does not exist");
                     } else {
                         // We should found out that those CU are still free.
-                        assertEq(deployment.market.getComputeUnit(unitId).deal, address(0), "Expected no deal.");
+                        assertEq(deployment.diamondAsMarket.getComputeUnit(unitId).deal, address(0), "Expected no deal.");
                         assertEq(params.deal.computeProviderByUnitId(unitId), address(0), "Expected no provider.");
                         assertEq(params.deal.peerIdByUnitId(unitId), bytes32(0), "Expected no peer id.");
                         assertTrue(!params.deal.unitExists(unitId), "Expected unitExists == false.");

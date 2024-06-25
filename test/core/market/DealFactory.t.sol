@@ -22,12 +22,12 @@ contract DealFactoryTest is TestWithDeployment {
     function test_Deploy() public {
         uint256 pricePerWorkerEpoch = 1 ether;
         uint256 targetWorkers = 3;
-        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.core.minDealDepositedEpochs();
+        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.diamondAsCore.minDealDepositedEpochs();
 
         uint256 balanceBefore = deployment.tUSD.balanceOf(address(this));
 
-        deployment.tUSD.safeApprove(address(deployment.dealFactory), minAmount);
-        uint256 protocolVersion = deployment.core.minProtocolVersion();
+        deployment.tUSD.safeApprove(address(deployment.diamond), minAmount);
+        uint256 protocolVersion = deployment.diamondAsCore.minProtocolVersion();
 
         (IDeal d, TestHelper.DealParams memory dealParams) = deployment.deployDeal(
             TestHelper.DeployDealParams({
@@ -44,7 +44,7 @@ contract DealFactoryTest is TestWithDeployment {
 
         assertEq(balanceDiff, minAmount, "Should transfer minAmount from msg.sender to Core");
         assertEq(deployment.tUSD.balanceOf(address(d)), minAmount, "Should deposit minAmount to Deal");
-        assertEq(deployment.tUSD.allowance(address(this), address(deployment.core)), 0, "Should reset allowance");
+        assertEq(deployment.tUSD.allowance(address(this), address(deployment.diamond)), 0, "Should reset allowance");
         assertEq(dealParams.appCID.prefixes, d.appCID().prefixes, "Should set appCID (prefixes)");
         assertEq(dealParams.appCID.hash, d.appCID().hash, "Should set appCID (hash)");
         assertEq(address(dealParams.paymentToken), address(d.paymentToken()), "Should set paymentToken");
@@ -58,7 +58,7 @@ contract DealFactoryTest is TestWithDeployment {
             assertEq(dealParams.effectors[i].hash, d.effectors()[i].hash, "Should set effector (hash)");
         }
 
-        assertEq(deployment.dealFactory.hasDeal(d), true, "Should deal set in Core");
+        assertEq(deployment.diamondAsDealFactory.hasDeal(d), true, "Should deal set in Core");
 
         //TODO: Check events
     }
@@ -66,8 +66,8 @@ contract DealFactoryTest is TestWithDeployment {
     function test_RevertIf_NoTokenAllowance() public {
         uint256 pricePerWorkerEpoch = 1 ether;
         uint256 targetWorkers = 3;
-        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.core.minDealDepositedEpochs();
-        uint256 protocolVersion = deployment.core.minProtocolVersion();
+        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.diamondAsCore.minDealDepositedEpochs();
+        uint256 protocolVersion = deployment.diamondAsCore.minProtocolVersion();
 
         vm.expectRevert("ERC20: insufficient allowance");
         deployment.deployDeal(
@@ -85,12 +85,12 @@ contract DealFactoryTest is TestWithDeployment {
     function test_RevertIf_NoEnoughBalance() public {
         uint256 pricePerWorkerEpoch = 1 ether;
         uint256 targetWorkers = 3;
-        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.core.minDealDepositedEpochs();
+        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.diamondAsCore.minDealDepositedEpochs();
 
         vm.startPrank(address(0x01));
 
-        deployment.tUSD.safeApprove(address(deployment.dealFactory), minAmount * 100);
-        uint256 protocolVersion = deployment.core.minProtocolVersion();
+        deployment.tUSD.safeApprove(address(deployment.diamond), minAmount * 100);
+        uint256 protocolVersion = deployment.diamondAsCore.minProtocolVersion();
 
         vm.expectRevert("ERC20: transfer amount exceeds balance");
         deployment.deployDeal(

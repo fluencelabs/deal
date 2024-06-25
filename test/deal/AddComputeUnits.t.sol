@@ -28,7 +28,7 @@ contract AddComputeUnits is TestWithDeployment {
 
         (address[] memory computeProviders, bytes32[] memory peerIds, bytes32[] memory unitIds) =
             TestHelper.generateProviders(1);
-        vm.prank(address(deployment.market));
+        vm.prank(address(deployment.diamond));
         deal.addComputeUnit(computeProviders[0], unitIds[0], peerIds[0]);
         assertEq(deal.getWorkerCount(), 0, "workerCount should be 0");
         assertEq(deal.getComputeUnitCount(), 1, "unitCount should be 1");
@@ -50,7 +50,7 @@ contract AddComputeUnits is TestWithDeployment {
         (address[] memory computeProviders, bytes32[] memory peerIds, bytes32[] memory unitIds) =
             TestHelper.generateProviders(minWorkers);
         for (uint256 i = 0; i < minWorkers; i++) {
-            vm.prank(address(deployment.market));
+            vm.prank(address(deployment.diamond));
             deal.addComputeUnit(computeProviders[i], unitIds[i], peerIds[i]);
         }
         assertEq(deal.getWorkerCount(), 0, "workerCount should be 0");
@@ -73,7 +73,7 @@ contract AddComputeUnits is TestWithDeployment {
         (address[] memory computeProviders, bytes32[] memory peerIds, bytes32[] memory unitIds) =
             TestHelper.generateProviders(targetWorkers);
         for (uint256 i = 0; i < targetWorkers; i++) {
-            vm.prank(address(deployment.market));
+            vm.prank(address(deployment.diamond));
             deal.addComputeUnit(computeProviders[i], unitIds[i], peerIds[i]);
         }
         assertEq(deal.getWorkerCount(), 0, "workerCount should be 0");

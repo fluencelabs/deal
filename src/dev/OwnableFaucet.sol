@@ -5,7 +5,6 @@ pragma solidity ^0.8.19;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Multicall} from "@openzeppelin/contracts/utils/Multicall.sol";
-import {TestERC20} from "src/dev/TestERC20.sol";
 
 contract OwnableFaucet is Ownable, Multicall {
     IERC20 public immutable usdToken;

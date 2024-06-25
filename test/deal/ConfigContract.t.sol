@@ -14,7 +14,7 @@ contract ConfigContract is TestWithDeployment {
     using SafeERC20 for IERC20;
 
     struct ConfigContractParams {
-        ICore globalCore;
+        IDiamond diamond;
         CIDV1 appCID;
         IERC20 paymentToken;
         uint256 minWorkers;
@@ -32,7 +32,7 @@ contract ConfigContract is TestWithDeployment {
     function setUp() public {
         _deploySystem();
 
-        configParams.globalCore = deployment.core;
+        configParams.diamond = deployment.diamond;
         configParams.appCID = CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("appCID", 0))});
         configParams.paymentToken = IERC20(address(deployment.tUSD));
         configParams.minWorkers = 1;
@@ -55,7 +55,7 @@ contract ConfigContract is TestWithDeployment {
                     address(configImpl),
                     abi.encodeWithSelector(
                         configImpl.Config_init.selector,
-                        configParams.globalCore,
+                        configParams.diamond,
                         configParams.appCID,
                         configParams.paymentToken,
                         configParams.minWorkers,
@@ -73,7 +73,7 @@ contract ConfigContract is TestWithDeployment {
     }
 
     function test_InitContract() public {
-        assertEq(address(config.globalCore()), address(configParams.globalCore));
+        assertEq(address(config.diamond()), address(configParams.diamond));
 
         CIDV1 memory appCID = config.appCID();
         assertEq(appCID.prefixes, configParams.appCID.prefixes);

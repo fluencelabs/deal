@@ -6,15 +6,11 @@ import {console} from "forge-std/console.sol";
 import {StdStyle} from "forge-std/StdStyle.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {Diamond} from "src/Diamond.sol";
-import {DiamondCutFacet} from "src/diamond/DiamondCutFacet.sol";
-import {DiamondLoupeFacet} from "src/diamond/DiamondLoupeFacet.sol";
-import {OwnershipFacet} from "src/diamond/OwnershipFacet.sol";
 import {IDeal} from "src/deal/interfaces/IDeal.sol";
 import {ICapacityConst} from "src/core/interfaces/ICapacityConst.sol";
-import {Multicall3} from "src/utils/Multicall3.sol";
 import {PRECISION} from "src/utils/Common.sol";
 import {Deployment} from "script/utils/Deployment.sol";
+import {IDiamond} from "src/interfaces/IDiamond.sol";
 
 
 contract DeployDiamond is Script, Deployment {
@@ -85,6 +81,36 @@ contract DeployDiamond is Script, Deployment {
         bool isMockedRandomX;
     }
 
+    struct CoreDeployData {
+        uint256 epochDuration_;
+        uint256 minDepositedEpochs_;
+        uint256 minRematchingEpochs_;
+        uint256 minProtocolVersion_;
+        uint256 maxProtocolVersion_;
+        uint256 fltPrice_;
+        uint256 usdCollateralPerUnit_;
+        uint256 usdTargetRevenuePerEpoch_;
+        uint256 minDuration_;
+        uint256 minRewardPerEpoch_;
+        uint256 maxRewardPerEpoch_;
+    }
+
+    struct CoreDeployDataExt {
+        uint256 vestingPeriodDuration_;
+        uint256 vestingPeriodCount_;
+        uint256 slashingRate_;
+        uint256 minProofsPerEpoch_;
+        uint256 maxProofsPerEpoch_;
+        uint256 withdrawEpochsAfterFailed_;
+        uint256 maxFailedRatio_;
+        bool isWhitelistEnabled_;
+        bytes32 initGlobalNonce_;
+        bytes32 difficulty_;
+        uint256 initRewardPool_;
+        uint256 initCCBalance_;
+        bool isMockedRandomX_;
+    }
+
     function setUp() external {
         string memory envName = vm.envString("CONTRACTS_ENV_NAME");
         string memory fileNames = string.concat(envName, ".json");
@@ -114,7 +140,7 @@ contract DeployDiamond is Script, Deployment {
             }
         }
 
-        _deployCore(
+        CoreDeployData memory coreDeployData = CoreDeployData(
             env.epochDuration,
             env.minDepositedEpochs,
             env.minRematchingEpochs,
@@ -125,7 +151,9 @@ contract DeployDiamond is Script, Deployment {
             env.usdTargetRevenuePerEpoch,
             env.minDuration,
             env.minRewardPerEpoch,
-            env.maxRewardPerEpoch,
+            env.maxRewardPerEpoch
+        );
+        CoreDeployDataExt memory coreDeployDataExt = CoreDeployDataExt(
             env.vestingPeriodDuration,
             env.vestingPeriodCount,
             env.slashingRate,
@@ -140,6 +168,8 @@ contract DeployDiamond is Script, Deployment {
             env.initCCBalance,
             env.isMockedRandomX
         );
+
+        _deployCore(coreDeployData, coreDeployDataExt);
 
         _stopDeploy();
     }
@@ -175,13 +205,15 @@ contract DeployDiamond is Script, Deployment {
         uint256 initCCBalance = vm.envOr("INIT_CC_BALANCE", DEFAULT_INIT_CC_BALANCE);
         bool isMockedRandomX = vm.envOr("IS_MOCKED_RANDOMX", IS_MOCKED_RANDOMX);
 
-        console.log("----------------- ENV -----------------");
-        console.log(StdStyle.blue("CHAIN_ID:"), block.chainid);
-        console.log(StdStyle.blue("EPOCH_DURATION:"), epochDuration);
-        console.log(StdStyle.blue("MIN_DEPOSITED_EPOCHS:"), minDepositedEpochs);
-        console.log(StdStyle.blue("MIN_REMATCHING_EPOCHS:"), minRematchingEpochs);
-        console.log(StdStyle.blue("MIN_PROTOCOL_VERSION:"), minProtocolVersion);
-        console.log(StdStyle.blue("MAX_PROTOCOL_VERSION:"), maxProtocolVersion);
+        {
+            console.log("----------------- ENV -----------------");
+            console.log(StdStyle.blue("CHAIN_ID:"), block.chainid);
+            console.log(StdStyle.blue("EPOCH_DURATION:"), epochDuration);
+            console.log(StdStyle.blue("MIN_DEPOSITED_EPOCHS:"), minDepositedEpochs);
+            console.log(StdStyle.blue("MIN_REMATCHING_EPOCHS:"), minRematchingEpochs);
+            console.log(StdStyle.blue("MIN_PROTOCOL_VERSION:"), minProtocolVersion);
+            console.log(StdStyle.blue("MAX_PROTOCOL_VERSION:"), maxProtocolVersion);
+        }
 
         console.log(StdStyle.blue("FLT_PRICE:"), fltPrice);
         console.log(StdStyle.blue("USD_COLLATERAL_PER_UNIT:"), usdCollateralPerUnit);
@@ -239,9 +271,9 @@ contract DeployDiamond is Script, Deployment {
         tUSD = IERC20(_deployContract("axlUSDC", "TestERC20", args));
     }
 
-    function _deployMulticall3() internal returns (Multicall3 multicall) {
+    function _deployMulticall3() internal {
         bytes memory args = abi.encode();
-        multicall = Multicall3(_deployContract("Multicall3", "Multicall3", args));
+        _deployContract("Multicall3", "Multicall3", args);
     }
 
     function _deployTestFaucet(IERC20 tUSD) internal returns (address faucet, bool isNew) {
@@ -259,82 +291,67 @@ contract DeployDiamond is Script, Deployment {
         console.log("\nStart deploying...");
     }
 
-    function _deployCore(
-        uint256 epochDuration_,
-        uint256 minDepositedEpochs_,
-        uint256 minRematchingEpochs_,
-        uint256 minProtocolVersion_,
-        uint256 maxProtocolVersion_,
-        uint256 fltPrice_,
-        uint256 usdCollateralPerUnit_,
-        uint256 usdTargetRevenuePerEpoch_,
-        uint256 minDuration_,
-        uint256 minRewardPerEpoch_,
-        uint256 maxRewardPerEpoch_,
-        uint256 vestingPeriodDuration_,
-        uint256 vestingPeriodCount_,
-        uint256 slashingRate_,
-        uint256 minProofsPerEpoch_,
-        uint256 maxProofsPerEpoch_,
-        uint256 withdrawEpochsAfterFailed_,
-        uint256 maxFailedRatio_,
-        bool isWhitelistEnabled_,
-        bytes32 initGlobalNonce_,
-        bytes32 difficulty_,
-        uint256 initRewardPool_,
-        uint256 initCCBalance_,
-        bool isMockedRandomX_
-    ) internal {
-        DiamondCutFacet diamondCutFacet = DiamondCutFacet(new DiamondCutFacet());
-        DiamondLoupeFacet diamondLoupeFacet = DiamondLoupeFacet(new DiamondLoupeFacet());
-        OwnershipFacet ownershipFacet = OwnershipFacet(new OwnershipFacet());
+    function _deployCore(CoreDeployData memory data, CoreDeployDataExt memory dataExt) internal {
+        address diamondCutFacet = _deployContract("DiamondCutFacet", "DiamondCutFacet", new bytes(0));
+        address diamondLoupeFacet = _deployContract("DiamondLoupeFacet", "DiamondLoupeFacet", new bytes(0));
+        address ownershipFacet = _deployContract("OwnershipFacet", "OwnershipFacet", new bytes(0));
+
+        address coreFacet = _deployContract("CoreFacet", "CoreFacet", new bytes(0));
 
         address dealImpl = _deployContract("DealImpl", "Deal", new bytes(0));
 
         address randomXProxy;
-        if (isMockedRandomX_) {
-            randomXProxy = _deployContract("RandomXProxy", "RandomXProxyMock", abi.encode(difficulty_));
+        if (dataExt.isMockedRandomX_) {
+            randomXProxy = _deployContract("RandomXProxy", "RandomXProxyMock", abi.encode(dataExt.difficulty_));
         } else {
             randomXProxy = _deployContract("RandomXProxy", "RandomXProxy", new bytes(0));
         }
 
-        // Diamond.CoreParams memory coreParams = Diamond.CoreParams({
-        //     epochDuration: epochDuration_,
-        //     dealImpl: IDeal(dealImpl),
-        //     isWhitelistEnabled: isWhitelistEnabled_,
-        //     capacityConstInitArgs: ICapacityConst.CapacityConstInitArgs({
-        //         fltPrice: fltPrice_,
-        //         usdCollateralPerUnit: usdCollateralPerUnit_,
-        //         usdTargetRevenuePerEpoch: usdTargetRevenuePerEpoch_,
-        //         minDuration: minDuration_,
-        //         slashingRate: slashingRate_,
-        //         withdrawEpochsAfterFailed: withdrawEpochsAfterFailed_,
-        //         maxFailedRatio: maxFailedRatio_,
-        //         minRewardPerEpoch: minRewardPerEpoch_,
-        //         maxRewardPerEpoch: maxRewardPerEpoch_,
-        //         vestingPeriodDuration: vestingPeriodDuration_,
-        //         vestingPeriodCount: vestingPeriodCount_,
-        //         minProofsPerEpoch: minProofsPerEpoch_,
-        //         maxProofsPerEpoch: maxProofsPerEpoch_,
-        //         difficulty: difficulty_,
-        //         initRewardPool: initRewardPool_,
-        //         randomXProxy: randomXProxy,
-        //         oracle: address(0)
-        //     })
-        // });
+        IDiamond.CoreParams memory coreParams = IDiamond.CoreParams({
+            epochDuration: data.epochDuration_,
+            dealImpl: IDeal(dealImpl),
+            isWhitelistEnabled: dataExt.isWhitelistEnabled_,
+            capacityConstInitArgs: ICapacityConst.CapacityConstInitArgs({
+                fltPrice: data.fltPrice_,
+                usdCollateralPerUnit: data.usdCollateralPerUnit_,
+                usdTargetRevenuePerEpoch: data.usdTargetRevenuePerEpoch_,
+                minDuration: data.minDuration_,
+                slashingRate: dataExt.slashingRate_,
+                withdrawEpochsAfterFailed: dataExt.withdrawEpochsAfterFailed_,
+                maxFailedRatio: dataExt.maxFailedRatio_,
+                minRewardPerEpoch: data.minRewardPerEpoch_,
+                maxRewardPerEpoch: data.maxRewardPerEpoch_,
+                vestingPeriodDuration: dataExt.vestingPeriodDuration_,
+                vestingPeriodCount: dataExt.vestingPeriodCount_,
+                minProofsPerEpoch: dataExt.minProofsPerEpoch_,
+                maxProofsPerEpoch: dataExt.maxProofsPerEpoch_,
+                difficulty: dataExt.difficulty_,
+                initRewardPool: dataExt.initRewardPool_,
+                randomXProxy: randomXProxy,
+                oracle: address(0)
+            })
+        });
 
-        // Diamond.GlobalConstParams memory globalConstParams = Diamond.GlobalConstParams({
-        //     minDealDepositedEpochs: minDepositedEpochs_,
-        //     minDealRematchingEpochs: minRematchingEpochs_,
-        //     minProtocolVersion: minProtocolVersion_,
-        //     maxProtocolVersion: maxProtocolVersion_
-        // });
+        IDiamond.CapacityParams memory capacityParams = IDiamond.CapacityParams({
+            initGlobalNonce: dataExt.initGlobalNonce_
+        });
 
-        // Diamond diamond = new Diamond(
-        //     address(diamondCutFacet),
-        //     coreParams,
-        //     globalConstParams
-        // );
+        IDiamond.GlobalConstParams memory globalConstParams = IDiamond.GlobalConstParams({
+            minDealDepositedEpochs: data.minDepositedEpochs_,
+            minDealRematchingEpochs: data.minRematchingEpochs_,
+            minProtocolVersion: data.minProtocolVersion_,
+            maxProtocolVersion: data.maxProtocolVersion_
+        });
+
+        address diamond = _deployContract(
+            "Diamond",
+            "Diamond",
+            abi.encode(
+                diamondCutFacet,
+                coreParams,
+                globalConstParams
+            )
+        );
     }
 
     function _stopDeploy() internal virtual {

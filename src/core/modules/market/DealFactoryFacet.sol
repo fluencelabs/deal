@@ -10,7 +10,7 @@ import {ICore} from "src/core/interfaces/ICore.sol";
 import {IConfig} from "src/deal/interfaces/IConfig.sol";
 import {CIDV1} from "src/utils/Common.sol";
 import {DealProxy} from "src/deal/DealProxy.sol";
-import {IDealFactory} from "src/core/modules/market/interfaces/IDealFactory.sol";
+import {IDealFactory} from "src/core/interfaces/IDealFactory.sol";
 import {LibEpochController} from "src/lib/LibEpochController.sol";
 import {LibDealFactory, DealFactoryStorage} from "src/lib/LibDealFactory.sol";
 import {LibGlobalConst} from "src/lib/LibGlobalConst.sol";
@@ -44,7 +44,7 @@ contract DealFactoryFacet is IDealFactory {
         IDeal deal = IDeal(
             address(
                 new DealProxy(
-                    ICore(address(this)), // TODO DIAMOND, types (not ICore)
+                    ICore(address(this)),
                     abi.encodeWithSelector(
                         IDeal.initialize.selector,
                         address(this),

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.19;
 
-import "src/core/interfaces/ICore.sol";
+import "src/interfaces/IDiamond.sol";
 import "src/deal/interfaces/IConfig.sol";
 
 interface IConfigWithPublicInternals is IConfig {
     function Config_init(
-        ICore globalCore_,
+        IDiamond diamond_,
         CIDV1 calldata appCID_,
         IERC20 paymentToken_,
         uint256 minWorkers_,
@@ -19,5 +19,5 @@ interface IConfigWithPublicInternals is IConfig {
         address[] calldata providersAccessList_
     ) external;
 
-    function globalCore() external view returns (ICore);
+    function diamond() external view returns (IDiamond);
 }

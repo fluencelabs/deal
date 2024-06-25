@@ -2,12 +2,13 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./IConfig.sol";
-import "./IWorkerManager.sol";
-import "src/core/interfaces/ICore.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IWorkerManager} from "src/deal/interfaces/IWorkerManager.sol";
+import {ICore} from "src/core/interfaces/ICore.sol";
+import {IDiamond} from "src/interfaces/IDiamond.sol";
+import {CIDV1} from "src/utils/Common.sol";
 
-interface IDeal is IConfig, IWorkerManager {
+interface IDeal is IWorkerManager {
     // ------------------ Types ------------------
     enum Status {
         // the deal does have enough funds to pay for the workers
@@ -55,7 +56,7 @@ interface IDeal is IConfig, IWorkerManager {
 
     // ------------------ Init ------------------
     function initialize(
-        ICore globalCore_,
+        IDiamond diamond_,
         CIDV1 calldata appCID_,
         IERC20 paymentToken_,
         uint256 minWorkers_,

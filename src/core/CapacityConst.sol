@@ -3,7 +3,7 @@
 pragma solidity ^0.8.19;
 
 import {PRECISION} from "src/utils/Common.sol";
-import "./interfaces/ICapacityConst.sol";
+import {ICapacityConst} from "src/core/interfaces/ICapacityConst.sol";
 import {CapacityConstStorage, LibCapacityConst, RewardPoolPerEpoch} from "src/lib/LibCapacityConst.sol";
 import {LibEpochController} from "src/lib/LibEpochController.sol";
 import {LibDiamond} from "src/lib/LibDiamond.sol";
