@@ -29,5 +29,5 @@ src = "test"
 out = "out-test"
 test = "test"
 script = "script-local"
-via_ir = false
+via_ir = true
 optimizer = false
