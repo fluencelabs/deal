@@ -6,6 +6,7 @@ pragma solidity ^0.8.0;
 * EIP-2535 Diamonds: https://eips.ethereum.org/EIPS/eip-2535
 /******************************************************************************/
 import {IDiamondCut} from "src/interfaces/IDiamondCut.sol";
+import {IERC173} from "src/interfaces/IERC173.sol";
 
 // Remember to add the loupe functions from DiamondLoupeFacet to the diamond.
 // The loupe functions are required by the EIP2535 Diamonds standard
@@ -49,13 +50,11 @@ library LibDiamond {
         }
     }
 
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
-
     function setContractOwner(address _newOwner) internal {
         DiamondStorage storage ds = diamondStorage();
         address previousOwner = ds.contractOwner;
         ds.contractOwner = _newOwner;
-        emit OwnershipTransferred(previousOwner, _newOwner);
+        emit IERC173.OwnershipTransferred(previousOwner, _newOwner);
     }
 
     function contractOwner() internal view returns (address contractOwner_) {
@@ -65,8 +64,6 @@ library LibDiamond {
     function enforceIsContractOwner() internal view {
         require(msg.sender == diamondStorage().contractOwner, "LibDiamond: Must be contract owner");
     }
-
-    event DiamondCut(IDiamondCut.FacetCut[] _diamondCut, address _init, bytes _calldata);
 
     // Internal function version of diamondCut
     function diamondCut(
@@ -86,7 +83,7 @@ library LibDiamond {
                 revert("LibDiamondCut: Incorrect FacetCutAction");
             }
         }
-        emit DiamondCut(_diamondCut, _init, _calldata);
+        emit IDiamondCut.DiamondCut(_diamondCut, _init, _calldata);
         initializeDiamondCut(_init, _calldata);
     }
 

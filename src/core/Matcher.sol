@@ -31,8 +31,8 @@ import {LibOffer} from "src/lib/LibOffer.sol";
 import {LibMatcher, MatcherStorage} from "src/lib/LibMatcher.sol";
 import {LibCapacity} from "src/lib/LibCapacity.sol";
 import {LibGlobalConst} from "src/lib/LibGlobalConst.sol";
-import {OwnableUpgradableDiamond} from "src/utils/OwnableUpgradableDiamond.sol";
 import {CIDV1} from "src/utils/Common.sol";
+import {IERC173} from "src/interfaces/IERC173.sol";
 
 
 abstract contract Matcher is Offer, IMatcher {
@@ -61,7 +61,7 @@ abstract contract Matcher is Offer, IMatcher {
     function matchDeal(IDeal deal, bytes32[] calldata offers, bytes32[][] calldata computeUnits) external {
         MatcherStorage storage matcherStorage = LibMatcher.store();
 
-        require(OwnableUpgradableDiamond(address(deal)).owner() == msg.sender, "Matcher: sender is not deal owner");
+        require(IERC173(address(deal)).owner() == msg.sender, "Matcher: sender is not deal owner");
 
         IDeal.Status dealStatus = deal.getStatus();
         require(
