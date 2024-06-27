@@ -5,7 +5,7 @@ pragma solidity ^0.8.19;
 import {IEpochController} from "src/core/interfaces/IEpochController.sol";
 import {EpochControllerStorage, LibEpochController} from "src/lib/LibEpochController.sol";
 
-contract EpochController is IEpochController {
+abstract contract EpochController is IEpochController {
     // ------------------ View ------------------
     /// @dev This function mirrored in:
     /// @dev - ts-client/src/dealMatcherClient/dealMatcherClient.ts

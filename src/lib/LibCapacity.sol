@@ -4,12 +4,12 @@ pragma solidity ^0.8.0;
 import {IDeal} from "src/deal/interfaces/IDeal.sol";
 import {ICapacity} from "src/core/interfaces/ICapacity.sol";
 import {IOffer} from "src/core/interfaces/IOffer.sol";
-import {Snapshot} from "src/core/modules/capacity/Snapshot.sol";
+import {Snapshot} from "src/core/Snapshot.sol";
 import {LibOffer} from "src/lib/LibOffer.sol";
 import {LibEpochController} from "src/lib/LibEpochController.sol";
 import {LibCapacityConst} from "src/lib/LibCapacityConst.sol";
 import {PRECISION} from "src/utils/Common.sol";
-import {Vesting} from "src/core/modules/capacity/Vesting.sol";
+import {Vesting} from "src/core/Vesting.sol";
 
 struct CommitmentStorage {
     mapping(bytes32 => ICapacity.Commitment) commitments;

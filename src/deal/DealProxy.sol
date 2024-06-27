@@ -6,6 +6,7 @@ import {Proxy} from "@openzeppelin/contracts/proxy/Proxy.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {ICore} from "src/core/interfaces/ICore.sol";
 
+
 contract DealProxy is Proxy {
     ICore immutable _diamond;
 

@@ -9,7 +9,7 @@ import {ICore} from "src/core/interfaces/ICore.sol";
 import {IDiamond} from "src/interfaces/IDiamond.sol";
 import {IConfig} from "src/deal/interfaces/IConfig.sol";
 
-contract Config is OwnableUpgradableDiamond, IConfig {
+abstract contract Config is OwnableUpgradableDiamond, IConfig {
     // ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.deal.storage.v1.config")) - 1);
 

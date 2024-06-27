@@ -8,7 +8,7 @@ import {IMatcher} from "src/core/interfaces/IMatcher.sol";
 import {IDeal} from "src/deal/interfaces/IDeal.sol";
 import {IConfig} from "src/deal/interfaces/IConfig.sol";
 import {ICapacity} from "src/core/interfaces/ICapacity.sol";
-import {Offer} from "src/core/modules/market/Offer.sol";
+import {Offer} from "src/core/Offer.sol";
 import {LibEpochController} from "src/lib/LibEpochController.sol";
 import {LibOffer} from "src/lib/LibOffer.sol";
 import {LibMatcher, MatcherStorage} from "src/lib/LibMatcher.sol";
@@ -16,6 +16,7 @@ import {LibCapacity} from "src/lib/LibCapacity.sol";
 import {LibGlobalConst} from "src/lib/LibGlobalConst.sol";
 import {OwnableUpgradableDiamond} from "src/utils/OwnableUpgradableDiamond.sol";
 import {CIDV1} from "src/utils/Common.sol";
+
 
 abstract contract Matcher is Offer, IMatcher {
     using SafeERC20 for IERC20;

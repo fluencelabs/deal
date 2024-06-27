@@ -20,7 +20,6 @@ contract GetStatus is TestWithDeployment {
     TestDiamond testDiamond;
     IDealWithPublicInternals dealContract;
 
-    // ------------------ Test ------------------
     function setUp() public {
         testDiamond = new TestDiamond();
         dealContract =

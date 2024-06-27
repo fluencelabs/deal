@@ -15,6 +15,7 @@ import {OwnableUpgradableDiamond} from "src/utils/OwnableUpgradableDiamond.sol";
 import {DealSnapshot} from "src/deal/DealSnapshot.sol";
 import {WorkerManager} from "src/deal/WorkerManager.sol";
 
+
 contract Deal is MulticallUpgradeable, WorkerManager, IDeal {
     using SafeERC20 for IERC20;
     using DealSnapshot for DealSnapshot.Cache;

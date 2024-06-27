@@ -11,16 +11,15 @@ import {IWorkerManager} from "src/deal/interfaces/IWorkerManager.sol";
 import {ICore} from "src/core/interfaces/ICore.sol";
 import {IDiamond} from "src/interfaces/IDiamond.sol";
 
+
 abstract contract WorkerManager is Config, IWorkerManager {
     using EnumerableSet for EnumerableSet.Bytes32Set;
     using SafeERC20 for IERC20;
 
-    // ------------------ Types ------------------
     struct ComputeProviderInfo {
         uint256 computeUnitCount;
     }
 
-    // ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.deal.storage.v1.workerManager")) - 1);
 
     struct WorkerManagerStorage {

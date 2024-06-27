@@ -10,7 +10,7 @@ import {RandomXProxy} from "src/utils/RandomXProxy.sol";
 import {BytesConverter} from "src/utils/BytesConverter.sol";
 import {Whitelist} from "src/utils/Whitelist.sol";
 import {ICapacity} from "src/core/interfaces/ICapacity.sol";
-import {Vesting} from "src/core/modules/capacity/Vesting.sol";
+import {Vesting} from "src/core/Vesting.sol";
 import {PRECISION} from "src/utils/Common.sol";
 import {LibEpochController} from "src/lib/LibEpochController.sol";
 import {LibCapacity, CommitmentStorage, RewardInfo} from "src/lib/LibCapacity.sol";
@@ -18,7 +18,7 @@ import {LibCapacityConst} from "src/lib/LibCapacityConst.sol";
 import {LibOffer} from "src/lib/LibOffer.sol";
 import {LibWhitelist} from "src/lib/LibWhitelist.sol";
 import {LibDiamond} from "src/lib/LibDiamond.sol";
-import {Snapshot} from "src/core/modules/capacity/Snapshot.sol";
+import {Snapshot} from "src/core/Snapshot.sol";
 import {IOffer} from "src/core/interfaces/IOffer.sol";
 
 contract CapacityFacet is ICapacity {

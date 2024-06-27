@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 
 import {IDeal} from "src/deal/interfaces/IDeal.sol";
 
+
 library DealSnapshot {
     // ------------------ TYPES ------------------
     struct Cache {

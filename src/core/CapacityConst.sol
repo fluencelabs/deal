@@ -9,7 +9,8 @@ import {LibEpochController} from "src/lib/LibEpochController.sol";
 import {LibDiamond} from "src/lib/LibDiamond.sol";
 import {EpochController} from "src/core/EpochController.sol";
 
-contract CapacityConst is ICapacityConst, EpochController {
+
+abstract contract CapacityConst is ICapacityConst, EpochController {
     function fltPrice() external view returns (uint256) {
         return LibCapacityConst.fltPrice();
     }

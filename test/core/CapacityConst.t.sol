@@ -6,7 +6,6 @@ import {StdCheats} from "forge-std/StdCheats.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {PRECISION} from "src/utils/Common.sol";
-import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol"; // TODO DIAMOND change to diamond
 import {ICapacityConstWithPublicInternals} from "src/dev/test/interfaces/ICapacityConstWithPublicInternals.sol";
 import {ICapacityConst} from "src/core/interfaces/ICapacityConst.sol";
 import {TestWithDeployment} from "test/utils/TestWithDeployment.sol";
@@ -21,22 +20,11 @@ contract CapacityConstTest is TestWithDeployment {
 
     address constant NOT_AN_OWNER = address(1234);
 
-    // ------------------ Events ------------------
-    error OwnableUnauthorizedAccount(address account);
-
-    // ------------------ Variables ------------------
-
-    // ------------------ Test ------------------
-    ICapacityConstWithPublicInternals capacityConst;
+    ICapacityConst capacityConst;
 
     function setUp() public {
-        capacityConst = ICapacityConstWithPublicInternals(
-            address(
-                new ERC1967Proxy(
-                    deployCode("out/CapacityConstWithPublicInternals.sol/CapacityConstWithPublicInternals.json"),
-                    new bytes(0)
-                )
-            )
+        capacityConst = ICapacityConst(
+            deployCode("out/CapacityConstWithPublicInternals.sol/CapacityConstWithPublicInternals.json")
         );
     }
 
@@ -171,7 +159,7 @@ contract CapacityConstTest is TestWithDeployment {
         address sender = address(0x1234567890123456789012345678901234567890);
         vm.startPrank(sender);
 
-        vm.expectRevert(abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, sender));
+        vm.expectRevert("LibDiamond: Must be contract owner");
         capacityConst.setCapacityConstant(ICapacityConst.CapacityConstantType.MinDuration, 10);
         vm.stopPrank();
     }
@@ -202,13 +190,13 @@ contract CapacityConstTest is TestWithDeployment {
         _initCapacityConst(args);
 
         uint256 activeUnitCount = 10;
-        capacityConst.setActiveUnitCount(activeUnitCount);
+       ICapacityConstWithPublicInternals(address(capacityConst)).setActiveUnitCount(activeUnitCount);
 
         uint256 newPrice = 4 * PRECISION;
 
         // #region set price in first epoch
         vm.startPrank(NOT_AN_OWNER);
-        vm.expectRevert(abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, NOT_AN_OWNER));
+        vm.expectRevert("LibDiamond: Must be contract owner");
         capacityConst.setOracle(address(12345678));
         vm.stopPrank();
 
@@ -296,10 +284,13 @@ contract CapacityConstTest is TestWithDeployment {
     }
 
     function _initCapacityConst(ICapacityConst.CapacityConstInitArgs memory args) internal {
-        capacityConst.init(args);
+        ICapacityConstWithPublicInternals(address(capacityConst)).init(args);
     }
 
+    event Ver1();
+
     function _verifyCapacityConst(uint256 currentEpoch, ICapacityConst.CapacityConstInitArgs memory args) internal {
+        emit Ver1();
         assertEq(capacityConst.fltPrice(), args.fltPrice, "fltPrice mismatch");
         assertEq(capacityConst.usdCollateralPerUnit(), args.usdCollateralPerUnit, "usdCollateralPerUnit mismatch");
         assertEq(

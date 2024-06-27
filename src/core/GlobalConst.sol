@@ -2,14 +2,14 @@
 
 pragma solidity ^0.8.19;
 
-import "./interfaces/IGlobalConst.sol";
-import {GlobalConstStorage, LibGlobalConst} from "../lib/LibGlobalConst.sol";
-import {CapacityConst} from "./CapacityConst.sol";
+import {IGlobalConst} from "src/core/interfaces/IGlobalConst.sol";
+import {GlobalConstStorage, LibGlobalConst} from "src/lib/LibGlobalConst.sol";
+import {CapacityConst} from "src/core/CapacityConst.sol";
 import {LibDiamond} from "src/lib/LibDiamond.sol";
 import {PRECISION} from "src/utils/Common.sol";
 
 
-contract GlobalConst is IGlobalConst, CapacityConst {
+abstract contract GlobalConst is IGlobalConst, CapacityConst {
     function precision() public pure override returns (uint256) {
         return PRECISION;
     }

@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.19;
 
-import {Vesting} from "src/core/modules/capacity/Vesting.sol";
+import {Vesting} from "src/core/Vesting.sol";
 
 /// @title Capacity contract interface
 /// @dev Capacity contract is responsible for managing the commitments

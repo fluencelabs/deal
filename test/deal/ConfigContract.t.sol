@@ -27,11 +27,9 @@ contract ConfigContract is TestWithDeployment {
         CIDV1[] effectors;
     }
 
-    // ------------------ Variables ------------------
     IConfigWithPublicInternals config;
     ConfigContractParams configParams;
 
-    // ------------------ Test ------------------
     function setUp() public {
         _deploySystem();
 

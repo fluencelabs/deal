@@ -2,7 +2,8 @@
 pragma solidity ^0.8.19;
 
 import {Test} from "forge-std/Test.sol";
-import {Vesting} from "src/core/modules/capacity/Vesting.sol";
+import {Vesting} from "src/core/Vesting.sol";
+
 
 contract VestingTest is Test {
     using Vesting for Vesting.Info;
