@@ -1,13 +1,31 @@
-// SPDX-License-Identifier: Apache-2.0
+/*
+ * Fluence Compute Marketplace
+ *
+ * Copyright (C) 2024 Fluence DAO
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation version 3 of the
+ * License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./IConfig.sol";
-import "./IWorkerManager.sol";
-import "src/core/interfaces/ICore.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IWorkerManager} from "src/deal/interfaces/IWorkerManager.sol";
+import {ICore} from "src/core/interfaces/ICore.sol";
+import {IDiamond} from "src/interfaces/IDiamond.sol";
+import {CIDV1} from "src/utils/Common.sol";
 
-interface IDeal is IConfig, IWorkerManager {
+interface IDeal is IWorkerManager {
     // ------------------ Types ------------------
     enum Status {
         // the deal does have enough funds to pay for the workers
@@ -55,7 +73,7 @@ interface IDeal is IConfig, IWorkerManager {
 
     // ------------------ Init ------------------
     function initialize(
-        ICore globalCore_,
+        IDiamond diamond_,
         CIDV1 calldata appCID_,
         IERC20 paymentToken_,
         uint256 minWorkers_,

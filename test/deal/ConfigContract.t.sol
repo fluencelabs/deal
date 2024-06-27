@@ -1,20 +1,40 @@
-// SPDX-License-Identifier: Apache-2.0
+/*
+ * Fluence Compute Marketplace
+ *
+ * Copyright (C) 2024 Fluence DAO
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation version 3 of the
+ * License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 pragma solidity ^0.8.19;
 
 import {Test} from "forge-std/Test.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {CIDV1} from "src/utils/Common.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import {IConfig} from "src/deal/interfaces/IConfig.sol";
+import {IDiamond} from "src/interfaces/IDiamond.sol";
+import {IConfigWithPublicInternals} from "src/dev/test/interfaces/IConfigWithPublicInternals.sol";
+import {TestWithDeployment} from "test/utils/TestWithDeployment.sol";
+import {TestHelper} from "test/utils/TestHelper.sol";
 
-import "src/deal/interfaces/IConfig.sol";
-import "src/dev/test/interfaces/IConfigWithPublicInternals.sol";
-
-import "test/utils/TestWithDeployment.sol";
-import "test/utils/TestHelper.sol";
 
 contract ConfigContract is TestWithDeployment {
     using SafeERC20 for IERC20;
 
     struct ConfigContractParams {
-        ICore globalCore;
+        IDiamond diamond;
         CIDV1 appCID;
         IERC20 paymentToken;
         uint256 minWorkers;
@@ -24,15 +44,13 @@ contract ConfigContract is TestWithDeployment {
         CIDV1[] effectors;
     }
 
-    // ------------------ Variables ------------------
     IConfigWithPublicInternals config;
     ConfigContractParams configParams;
 
-    // ------------------ Test ------------------
     function setUp() public {
         _deploySystem();
 
-        configParams.globalCore = deployment.core;
+        configParams.diamond = deployment.diamond;
         configParams.appCID = CIDV1({prefixes: 0x12345678, hash: TestHelper.pseudoRandom(abi.encode("appCID", 0))});
         configParams.paymentToken = IERC20(address(deployment.tUSD));
         configParams.minWorkers = 1;
@@ -55,7 +73,7 @@ contract ConfigContract is TestWithDeployment {
                     address(configImpl),
                     abi.encodeWithSelector(
                         configImpl.Config_init.selector,
-                        configParams.globalCore,
+                        configParams.diamond,
                         configParams.appCID,
                         configParams.paymentToken,
                         configParams.minWorkers,
@@ -73,7 +91,7 @@ contract ConfigContract is TestWithDeployment {
     }
 
     function test_InitContract() public {
-        assertEq(address(config.globalCore()), address(configParams.globalCore));
+        assertEq(address(config.diamond()), address(configParams.diamond));
 
         CIDV1 memory appCID = config.appCID();
         assertEq(appCID.prefixes, configParams.appCID.prefixes);

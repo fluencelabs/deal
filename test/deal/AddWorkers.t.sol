@@ -1,20 +1,35 @@
-// SPDX-License-Identifier: Apache-2.0
+/*
+ * Fluence Compute Marketplace
+ *
+ * Copyright (C) 2024 Fluence DAO
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation version 3 of the
+ * License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 pragma solidity ^0.8.19;
 
 import {Test} from "forge-std/Test.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IDeal} from "src/deal/interfaces/IDeal.sol";
+import {IOffer} from "src/core/interfaces/IOffer.sol";
+import {TestWithDeployment} from "test/utils/TestWithDeployment.sol";
+import {TestHelper} from "test/utils/TestHelper.sol";
 
-import "src/deal/interfaces/IDeal.sol";
-import "src/core/modules/market/interfaces/IOffer.sol";
-
-import "test/utils/TestWithDeployment.sol";
-import "test/utils/TestHelper.sol";
 
 contract AddWorkers is TestWithDeployment {
     using SafeERC20 for IERC20;
     using TestHelper for TestWithDeployment.Deployment;
-
-    // ------------------ Test ------------------
 
     function setUp() public {
         _deploySystem();
@@ -42,7 +57,7 @@ contract AddWorkers is TestWithDeployment {
         uint256 minWorkers = 10;
         uint256 targetWorkers = 100;
         uint256 pricePerEpoch = 1 ether;
-        uint256 startDeposit = deployment.core.minDealDepositedEpochs() * pricePerEpoch * targetWorkers;
+        uint256 startDeposit = deployment.diamondAsCore.minDealDepositedEpochs() * pricePerEpoch * targetWorkers;
         IDeal deal = deployment.deployDealWithoutFactory(minWorkers, targetWorkers, 1, pricePerEpoch, startDeposit);
 
         (address[] memory computeProviders, bytes32[] memory peerIds, bytes32[] memory unitIds) =
@@ -55,18 +70,18 @@ contract AddWorkers is TestWithDeployment {
         assertEq(deal.getWorkerCount(), minWorkers, "workerCount is not match");
         assertEq(deal.getComputeUnitCount(), minWorkers, "unitCount is not match");
 
-        uint256 currentEpoch = deployment.core.currentEpoch();
+        uint256 currentEpoch = deployment.diamondAsCore.currentEpoch();
         uint256 expectedPaidEpoch = startDeposit / (pricePerEpoch * minWorkers) - 1;
         assertEq(deal.getMaxPaidEpoch(), currentEpoch + expectedPaidEpoch, "maxPaidEpoch mismatch");
         assertEq(uint256(deal.getStatus()), uint256(IDeal.Status.ACTIVE), "status should be ACTIVE");
     }
 
     function _addOneWorker(IDeal deal, address computeProvider, bytes32 unitId, bytes32 peerId) private {
-        vm.prank(address(deployment.market));
+        vm.prank(address(deployment.diamond));
         deal.addComputeUnit(computeProvider, unitId, peerId);
 
         vm.mockCall(
-            address(deployment.core.market()),
+            address(deployment.diamond),
             abi.encodeWithSelector(IOffer.getComputePeer.selector, peerId),
             abi.encode(TestHelper.pseudoRandom("offerId"), TestHelper.pseudoRandom("commitmentId"), 1, computeProvider)
         );

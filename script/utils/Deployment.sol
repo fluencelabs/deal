@@ -1,16 +1,25 @@
-// SPDX-License-Identifier: Apache-2.0
+/*
+ * Fluence Compute Marketplace
+ *
+ * Copyright (C) 2024 Fluence DAO
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation version 3 of the
+ * License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
-import "forge-std/Script.sol";
-import "forge-std/Vm.sol";
-import "src/deal/Deal.sol";
-import "src/core/Core.sol";
-import "src/dev/OwnableFaucet.sol";
-import "src/dev/TestERC20.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {ScriptBase, stdJson, StdStyle, console} from "forge-std/Script.sol";
 
 contract Deployment is ScriptBase {
     using Strings for string;

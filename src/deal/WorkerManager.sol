@@ -1,22 +1,42 @@
-// SPDX-License-Identifier: Apache-2.0
+/*
+ * Fluence Compute Marketplace
+ *
+ * Copyright (C) 2024 Fluence DAO
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation version 3 of the
+ * License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import "./Config.sol";
-import "./interfaces/IWorkerManager.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {CIDV1} from "src/utils/Common.sol";
+import {Config} from "src/deal/Config.sol";
+import {IWorkerManager} from "src/deal/interfaces/IWorkerManager.sol";
+import {ICore} from "src/core/interfaces/ICore.sol";
+import {IDiamond} from "src/interfaces/IDiamond.sol";
 
-contract WorkerManager is Config, IWorkerManager {
+
+abstract contract WorkerManager is Config, IWorkerManager {
     using EnumerableSet for EnumerableSet.Bytes32Set;
     using SafeERC20 for IERC20;
 
-    // ------------------ Types ------------------
     struct ComputeProviderInfo {
         uint256 computeUnitCount;
     }
 
-    // ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.deal.storage.v1.workerManager")) - 1);
 
     struct WorkerManagerStorage {
@@ -40,7 +60,7 @@ contract WorkerManager is Config, IWorkerManager {
 
     // ------------------ Initializer ------------------
     function __WorkerManager_init(
-        ICore globalCore_,
+        IDiamond diamond_,
         CIDV1 calldata appCID_,
         IERC20 paymentToken_,
         uint256 minWorkers_,
@@ -53,7 +73,7 @@ contract WorkerManager is Config, IWorkerManager {
         address[] calldata providersAccessList_
     ) internal onlyInitializing {
         __Config_init(
-            globalCore_,
+            diamond_,
             appCID_,
             paymentToken_,
             minWorkers_,
@@ -120,7 +140,7 @@ contract WorkerManager is Config, IWorkerManager {
             workerId: bytes32(0),
             peerId: peerId,
             provider: computeProvider,
-            joinedEpoch: _globalCore().currentEpoch()
+            joinedEpoch: ICore(_diamond()).currentEpoch()
         });
 
         // add ComputeUnit to list

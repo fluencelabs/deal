@@ -1,16 +1,35 @@
-// SPDX-License-Identifier: Apache-2.0
+/*
+ * Fluence Compute Marketplace
+ *
+ * Copyright (C) 2024 Fluence DAO
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation version 3 of the
+ * License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "forge-std/Script.sol";
-import "./utils/Deployment.sol";
-import "src/core/Core.sol";
-import "src/core/interfaces/ICore.sol";
-import "src/core/modules/market/interfaces/IMarket.sol";
-import "src/core/modules/capacity/interfaces/ICapacity.sol";
+import "script/utils/Deployment.sol";
+import {ICore} from "src/core/interfaces/ICore.sol";
+import {IMarket} from "src/core/modules/market/interfaces/IMarket.sol";
+import {ICapacity} from "src/core/modules/capacity/interfaces/ICapacity.sol";
+import {IDealFactory} from "src/core/modules/market/interfaces/IDealFactory.sol";
+import {ICapacityConst} from "src/core/interfaces/ICapacityConst.sol";
 import "src/utils/Multicall3.sol";
+import {PRECISION} from "src/utils/Common.sol";
 
 contract DeployContracts is Deployment, Script {
     using SafeERC20 for IERC20;
@@ -93,7 +112,7 @@ contract DeployContracts is Deployment, Script {
         IERC20 tUSD = _deployTestTokens();
 
         // Deploy Multicall3 as **helper** contract to fetch info only from the chain.
-        // Thus, this contract is not belongs to Fluence contract ecosystem.
+        // Thus, this contract does not belong to Fluence contract ecosystem.
         _deployMulticall3();
 
         if (env.chainId == LOCAL_CHAIN_ID) {
@@ -148,7 +167,7 @@ contract DeployContracts is Deployment, Script {
         uint256 minProtocolVersion = vm.envOr("MIN_PROTOCOL_VERSION", DEFAULT_MIN_PROTOCOL_VERSION);
         uint256 maxProtocolVersion = vm.envOr("MAX_PROTOCOL_VERSION", DEFAULT_MAX_PROTOCOL_VERSION);
 
-        uint256 fltPice = vm.envOr("FLT_PRICE", DEFAULT_FLT_PRICE);
+        uint256 fltPrice = vm.envOr("FLT_PRICE", DEFAULT_FLT_PRICE);
         uint256 usdCollateralPerUnit = vm.envOr("USD_COLLATERAL_PER_UNIT", DEFAULT_USD_COLLATERAL_PER_UNIT);
         uint256 usdTargetRevenuePerEpoch =
             vm.envOr("USD_TARGET_REVENUE_PER_EPOCH", DEFAULT_USD_TARGET_REVENUE_PER_EPOCH);
@@ -178,7 +197,7 @@ contract DeployContracts is Deployment, Script {
         console.log(StdStyle.blue("MIN_PROTOCOL_VERSION:"), minProtocolVersion);
         console.log(StdStyle.blue("MAX_PROTOCOL_VERSION:"), maxProtocolVersion);
 
-        console.log(StdStyle.blue("FLT_PRICE:"), fltPice);
+        console.log(StdStyle.blue("FLT_PRICE:"), fltPrice);
         console.log(StdStyle.blue("USD_COLLATERAL_PER_UNIT:"), usdCollateralPerUnit);
         console.log(StdStyle.blue("USD_TARGET_REVENUE_PER_EPOCH:"), usdTargetRevenuePerEpoch);
         console.log(StdStyle.blue("MIN_DURATION:"), minDuration);
@@ -207,7 +226,7 @@ contract DeployContracts is Deployment, Script {
             minRematchingEpochs: minRematchingEpochs,
             minProtocolVersion: minProtocolVersion,
             maxProtocolVersion: maxProtocolVersion,
-            fltPrice: fltPice,
+            fltPrice: fltPrice,
             usdCollateralPerUnit: usdCollateralPerUnit,
             usdTargetRevenuePerEpoch: usdTargetRevenuePerEpoch,
             minDuration: minDuration,

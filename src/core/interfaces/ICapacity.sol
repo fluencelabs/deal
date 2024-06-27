@@ -1,8 +1,25 @@
-// SPDX-License-Identifier: Apache-2.0
+/*
+ * Fluence Compute Marketplace
+ *
+ * Copyright (C) 2024 Fluence DAO
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation version 3 of the
+ * License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 pragma solidity ^0.8.19;
 
-import "../Vesting.sol";
+import {Vesting} from "src/core/Vesting.sol";
 
 /// @title Capacity contract interface
 /// @dev Capacity contract is responsible for managing the commitments
@@ -160,9 +177,6 @@ interface ICapacity {
         uint256 exitedUnitCount;
     }
 
-    // ------------------ Initializer ------------------
-    function initialize(bytes32 initGlobalNonce_) external;
-
     // ------------------ Views ------------------
     /// @dev Returns the commitment status
     /// @param commitmentId Commitment id
@@ -184,10 +198,6 @@ interface ICapacity {
     /// @return totalVestedRewards total vested reward of the commitment
     function unlockedRewards(bytes32 commitmentId) external view returns (uint256);
     function getGlobalNonce() external view returns (bytes32);
-
-    // ----------------- Deal Callbacks -----------------
-    function onUnitMovedToDeal(bytes32 commitmentId, bytes32 unitId) external;
-    function onUnitReturnedFromDeal(bytes32 commitmentId, bytes32 unitId) external;
 
     // ----------------- Mutable -----------------
     /// @dev Creates a new commitment
@@ -213,10 +223,20 @@ interface ICapacity {
     /// @param commitmentIds Commitment ids
     function depositCollateral(bytes32[] calldata commitmentIds) external payable;
 
+    /// @dev Submits proofs for the commitment
+    /// @param unitIds Compute unit ids which provide the proof
+    /// @param localUnitNonces Local nonces of the units for calculating the target hashes. It's the proof
+    /// @param resultHashes Target hashes of this proof
+    function submitProofs(
+        bytes32[] memory unitIds,
+        bytes32[] memory localUnitNonces,
+        bytes32[] memory resultHashes
+    ) external;
+
     /// @dev Submits a proof for the commitment
     /// @param unitId Compute unit id which provide the proof
-    /// @param localUnitNonce The local nonce of the unit for calculating the target hash. It's the proof
-    /// @param resultHash The target hash of this proof
+    /// @param localUnitNonce Local nonce of the unit for calculating the target hash. It's the proof
+    /// @param resultHash Target hash of this proof
     function submitProof(bytes32 unitId, bytes32 localUnitNonce, bytes32 resultHash) external;
 
     /// @dev Remove CU from Ended or Failed CC. Need to call this function before finish the commitment

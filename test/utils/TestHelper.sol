@@ -1,14 +1,35 @@
-// SPDX-License-Identifier: Apache-2.0
+/*
+ * Fluence Compute Marketplace
+ *
+ * Copyright (C) 2024 Fluence DAO
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation version 3 of the
+ * License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 pragma solidity ^0.8.19;
 
 import {Test} from "forge-std/Test.sol";
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-
-import "src/core/interfaces/ICore.sol";
-import "src/deal/interfaces/IDeal.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {CIDV1} from "src/utils/Common.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import {ICore} from "src/core/interfaces/ICore.sol";
+import {IDeal} from "src/deal/interfaces/IDeal.sol";
+import {IConfig} from "src/deal/interfaces/IConfig.sol";
+import {IDealFactory} from "src/core/interfaces/IDealFactory.sol";
+import {IDiamond} from "src/interfaces/IDiamond.sol";
+import {IGlobalConst} from "src/core/interfaces/IGlobalConst.sol";
 
 import "./TestWithDeployment.sol";
 
@@ -75,7 +96,7 @@ library TestHelper {
             protocolVersion: params.protocolVersion
         });
 
-        IDeal deal = deployment.dealFactory.deployDeal(
+        IDeal deal = IDealFactory(address(deployment.diamond)).deployDeal(
             dealParams.appCID,
             dealParams.paymentToken,
             params.depositAmount,
@@ -104,7 +125,7 @@ library TestHelper {
             address(deployment.dealImpl),
             abi.encodeWithSelector(
                 IDeal.initialize.selector,
-                deployment.core,
+                deployment.diamond,
                 CIDV1({prefixes: 0x12345678, hash: pseudoRandom(abi.encode("appCID", 0))}),
                 IERC20(address(deployment.tUSD)),
                 minWorkers_,
@@ -133,7 +154,7 @@ library TestHelper {
         uint256 maxWorkersPerProvider_,
         uint256 pricePerWorkerEpoch_
     ) internal returns (IDeal) {
-        uint256 deposit_ = deployment.core.minDealDepositedEpochs() * pricePerWorkerEpoch_ * targetWorkers_;
+        uint256 deposit_ = IGlobalConst(address(deployment.diamond)).minDealDepositedEpochs() * pricePerWorkerEpoch_ * targetWorkers_;
         return deployDealWithoutFactory(
             deployment, minWorkers_, targetWorkers_, maxWorkersPerProvider_, pricePerWorkerEpoch_, deposit_
         );

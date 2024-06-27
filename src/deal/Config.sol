@@ -1,17 +1,37 @@
-// SPDX-License-Identifier: Apache-2.0
+/*
+ * Fluence Compute Marketplace
+ *
+ * Copyright (C) 2024 Fluence DAO
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation version 3 of the
+ * License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 pragma solidity ^0.8.19;
 
-import "src/utils/OwnableUpgradableDiamond.sol";
-import "src/core/interfaces/ICore.sol";
-import "./interfaces/IConfig.sol";
+import {OwnableUpgradableDiamond} from "src/utils/OwnableUpgradableDiamond.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {CIDV1} from "src/utils/Common.sol";
+import {ICore} from "src/core/interfaces/ICore.sol";
+import {IDiamond} from "src/interfaces/IDiamond.sol";
+import {IConfig} from "src/deal/interfaces/IConfig.sol";
 
-contract Config is OwnableUpgradableDiamond, IConfig {
+abstract contract Config is OwnableUpgradableDiamond, IConfig {
     // ------------------ Storage ------------------
     bytes32 private constant _STORAGE_SLOT = bytes32(uint256(keccak256("fluence.deal.storage.v1.config")) - 1);
 
     struct ConfigStorage {
-        ICore globalCore;
+        IDiamond diamond;
         uint256 creationBlock;
         CIDV1 appCID;
         // --- deal config ---
@@ -35,7 +55,7 @@ contract Config is OwnableUpgradableDiamond, IConfig {
 
     // ------------------ Initializer ------------------
     function __Config_init(
-        ICore globalCore_,
+        IDiamond diamond_,
         CIDV1 calldata appCID_,
         IERC20 paymentToken_,
         uint256 minWorkers_,
@@ -50,7 +70,7 @@ contract Config is OwnableUpgradableDiamond, IConfig {
         __Ownable_init(owner_);
 
         __Config_init_unchained(
-            globalCore_,
+            diamond_,
             paymentToken_,
             minWorkers_,
             targetWorkers_,
@@ -65,7 +85,7 @@ contract Config is OwnableUpgradableDiamond, IConfig {
     }
 
     function __Config_init_unchained(
-        ICore globalCore_,
+        IDiamond diamond_,
         IERC20 paymentToken_,
         uint256 minWorkers_,
         uint256 targetWorkers_,
@@ -83,7 +103,7 @@ contract Config is OwnableUpgradableDiamond, IConfig {
         configStorage.creationBlock = block.number;
 
         // --- init deal config ---
-        configStorage.globalCore = globalCore_;
+        configStorage.diamond = diamond_;
         configStorage.paymentToken = paymentToken_;
         configStorage.minWorkers = minWorkers_;
         configStorage.targetWorkers = targetWorkers_;
@@ -101,19 +121,14 @@ contract Config is OwnableUpgradableDiamond, IConfig {
     }
 
     // ------------------ Modifiers ------------------
-    modifier onlyCore() {
-        require(msg.sender == address(_getConfigStorage().globalCore), "Config: caller is not the Core");
-        _;
-    }
-
-    modifier onlyMarket() {
-        require(msg.sender == address(_getConfigStorage().globalCore.market()), "Config: caller is not the Market");
+    modifier onlyDiamond() {
+        require(msg.sender == address(_getConfigStorage().diamond), "Config: caller is not the Diamond");
         _;
     }
 
     // ------------------ View Internal Functions ------------------
-    function _globalCore() internal view returns (ICore) {
-        return _getConfigStorage().globalCore;
+    function _diamond() internal view returns (address) {
+        return address(_getConfigStorage().diamond);
     }
 
     // ------------------ Mutable Internal Functions ------------------

@@ -1,14 +1,31 @@
-// SPDX-License-Identifier: Apache-2.0
+/*
+ * Fluence Compute Marketplace
+ *
+ * Copyright (C) 2024 Fluence DAO
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation version 3 of the
+ * License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 pragma solidity ^0.8.19;
 
 
 import {Test} from "forge-std/Test.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {TestWithDeployment} from "test/utils/TestWithDeployment.sol";
+import {TestHelper} from "test/utils/TestHelper.sol";
+import {IDeal} from "src/deal/interfaces/IDeal.sol";
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-
-import "test/utils/TestWithDeployment.sol";
-import "test/utils/TestHelper.sol";
 
 contract DealFactoryTest is TestWithDeployment {
     using SafeERC20 for IERC20;
@@ -22,12 +39,12 @@ contract DealFactoryTest is TestWithDeployment {
     function test_Deploy() public {
         uint256 pricePerWorkerEpoch = 1 ether;
         uint256 targetWorkers = 3;
-        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.core.minDealDepositedEpochs();
+        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.diamondAsCore.minDealDepositedEpochs();
 
         uint256 balanceBefore = deployment.tUSD.balanceOf(address(this));
 
-        deployment.tUSD.safeApprove(address(deployment.dealFactory), minAmount);
-        uint256 protocolVersion = deployment.core.minProtocolVersion();
+        deployment.tUSD.safeApprove(address(deployment.diamond), minAmount);
+        uint256 protocolVersion = deployment.diamondAsCore.minProtocolVersion();
 
         (IDeal d, TestHelper.DealParams memory dealParams) = deployment.deployDeal(
             TestHelper.DeployDealParams({
@@ -44,7 +61,7 @@ contract DealFactoryTest is TestWithDeployment {
 
         assertEq(balanceDiff, minAmount, "Should transfer minAmount from msg.sender to Core");
         assertEq(deployment.tUSD.balanceOf(address(d)), minAmount, "Should deposit minAmount to Deal");
-        assertEq(deployment.tUSD.allowance(address(this), address(deployment.core)), 0, "Should reset allowance");
+        assertEq(deployment.tUSD.allowance(address(this), address(deployment.diamond)), 0, "Should reset allowance");
         assertEq(dealParams.appCID.prefixes, d.appCID().prefixes, "Should set appCID (prefixes)");
         assertEq(dealParams.appCID.hash, d.appCID().hash, "Should set appCID (hash)");
         assertEq(address(dealParams.paymentToken), address(d.paymentToken()), "Should set paymentToken");
@@ -58,7 +75,7 @@ contract DealFactoryTest is TestWithDeployment {
             assertEq(dealParams.effectors[i].hash, d.effectors()[i].hash, "Should set effector (hash)");
         }
 
-        assertEq(deployment.dealFactory.hasDeal(d), true, "Should deal set in Core");
+        assertEq(deployment.diamondAsDealFactory.hasDeal(d), true, "Should deal set in Core");
 
         //TODO: Check events
     }
@@ -66,8 +83,8 @@ contract DealFactoryTest is TestWithDeployment {
     function test_RevertIf_NoTokenAllowance() public {
         uint256 pricePerWorkerEpoch = 1 ether;
         uint256 targetWorkers = 3;
-        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.core.minDealDepositedEpochs();
-        uint256 protocolVersion = deployment.core.minProtocolVersion();
+        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.diamondAsCore.minDealDepositedEpochs();
+        uint256 protocolVersion = deployment.diamondAsCore.minProtocolVersion();
 
         vm.expectRevert("ERC20: insufficient allowance");
         deployment.deployDeal(
@@ -85,12 +102,12 @@ contract DealFactoryTest is TestWithDeployment {
     function test_RevertIf_NoEnoughBalance() public {
         uint256 pricePerWorkerEpoch = 1 ether;
         uint256 targetWorkers = 3;
-        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.core.minDealDepositedEpochs();
+        uint256 minAmount = pricePerWorkerEpoch * targetWorkers * deployment.diamondAsCore.minDealDepositedEpochs();
 
         vm.startPrank(address(0x01));
 
-        deployment.tUSD.safeApprove(address(deployment.dealFactory), minAmount * 100);
-        uint256 protocolVersion = deployment.core.minProtocolVersion();
+        deployment.tUSD.safeApprove(address(deployment.diamond), minAmount * 100);
+        uint256 protocolVersion = deployment.diamondAsCore.minProtocolVersion();
 
         vm.expectRevert("ERC20: transfer amount exceeds balance");
         deployment.deployDeal(

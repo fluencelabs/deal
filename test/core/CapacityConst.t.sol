@@ -1,16 +1,32 @@
-// SPDX-License-Identifier: Apache-2.0
+/*
+ * Fluence Compute Marketplace
+ *
+ * Copyright (C) 2024 Fluence DAO
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation version 3 of the
+ * License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 pragma solidity ^0.8.19;
 
 import {Test} from "forge-std/Test.sol";
-import "forge-std/StdCheats.sol";
-import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "filecoin-solidity/v0.8/utils/Actor.sol";
-import "src/dev/test/interfaces/ICapacityConstWithPublicInternals.sol";
-import "src/core/interfaces/ICapacityConst.sol";
-import "src/utils/BytesConverter.sol";
-import "test/utils/TestWithDeployment.sol";
-import "test/utils/TestHelper.sol";
+import {StdCheats} from "forge-std/StdCheats.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {PRECISION} from "src/utils/Common.sol";
+import {ICapacityConstWithPublicInternals} from "src/dev/test/interfaces/ICapacityConstWithPublicInternals.sol";
+import {ICapacityConst} from "src/core/interfaces/ICapacityConst.sol";
+import {TestWithDeployment} from "test/utils/TestWithDeployment.sol";
+import {TestHelper} from "test/utils/TestHelper.sol";
 
 interface ISetConstant {
     function setCapacityConstant(uint8 constantType, uint256 newValue) external;
@@ -18,26 +34,14 @@ interface ISetConstant {
 
 contract CapacityConstTest is TestWithDeployment {
     using SafeERC20 for IERC20;
-    using BytesConverter for bytes32;
 
     address constant NOT_AN_OWNER = address(1234);
 
-    // ------------------ Events ------------------
-    error OwnableUnauthorizedAccount(address account);
-
-    // ------------------ Variables ------------------
-
-    // ------------------ Test ------------------
-    ICapacityConstWithPublicInternals capacityConst;
+    ICapacityConst capacityConst;
 
     function setUp() public {
-        capacityConst = ICapacityConstWithPublicInternals(
-            address(
-                new ERC1967Proxy(
-                    deployCode("out/CapacityConstWithPublicInternals.sol/CapacityConstWithPublicInternals.json"),
-                    new bytes(0)
-                )
-            )
+        capacityConst = ICapacityConst(
+            deployCode("out/CapacityConstWithPublicInternals.sol/CapacityConstWithPublicInternals.json")
         );
     }
 
@@ -172,7 +176,7 @@ contract CapacityConstTest is TestWithDeployment {
         address sender = address(0x1234567890123456789012345678901234567890);
         vm.startPrank(sender);
 
-        vm.expectRevert(abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, sender));
+        vm.expectRevert("LibDiamond: Must be contract owner");
         capacityConst.setCapacityConstant(ICapacityConst.CapacityConstantType.MinDuration, 10);
         vm.stopPrank();
     }
@@ -203,13 +207,13 @@ contract CapacityConstTest is TestWithDeployment {
         _initCapacityConst(args);
 
         uint256 activeUnitCount = 10;
-        capacityConst.setActiveUnitCount(activeUnitCount);
+       ICapacityConstWithPublicInternals(address(capacityConst)).setActiveUnitCount(activeUnitCount);
 
         uint256 newPrice = 4 * PRECISION;
 
         // #region set price in first epoch
         vm.startPrank(NOT_AN_OWNER);
-        vm.expectRevert(abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, NOT_AN_OWNER));
+        vm.expectRevert("LibDiamond: Must be contract owner");
         capacityConst.setOracle(address(12345678));
         vm.stopPrank();
 
@@ -297,10 +301,13 @@ contract CapacityConstTest is TestWithDeployment {
     }
 
     function _initCapacityConst(ICapacityConst.CapacityConstInitArgs memory args) internal {
-        capacityConst.init(args);
+        ICapacityConstWithPublicInternals(address(capacityConst)).init(args);
     }
 
+    event Ver1();
+
     function _verifyCapacityConst(uint256 currentEpoch, ICapacityConst.CapacityConstInitArgs memory args) internal {
+        emit Ver1();
         assertEq(capacityConst.fltPrice(), args.fltPrice, "fltPrice mismatch");
         assertEq(capacityConst.usdCollateralPerUnit(), args.usdCollateralPerUnit, "usdCollateralPerUnit mismatch");
         assertEq(

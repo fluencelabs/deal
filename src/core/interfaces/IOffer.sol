@@ -1,14 +1,30 @@
-// SPDX-License-Identifier: Apache-2.0
+/*
+ * Fluence Compute Marketplace
+ *
+ * Copyright (C) 2024 Fluence DAO
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation version 3 of the
+ * License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 pragma solidity ^0.8.19;
 
-import "src/deal/interfaces/IDeal.sol";
+import {IDeal} from "src/deal/interfaces/IDeal.sol";
 import {CIDV1} from "src/utils/Common.sol";
 
 /// @title Offer contract interface
 /// @dev Offer contract is responsible for managing the offers in the market
 interface IOffer {
-    // ------------------ Types ------------------
     struct ProviderInfo {
         string name;
         CIDV1 metadata;
@@ -218,12 +234,6 @@ interface IOffer {
     // Unit management
     /// @dev Return the compute unit from a deal
     function returnComputeUnitFromDeal(bytes32 unitId) external;
-
-    /// @dev Set the commitment id for a peer. Only one commitment id for the peer
-    function setCommitmentId(bytes32 peerId, bytes32 commitmentId) external;
-
-    /// @dev Set the start epoch of a compute unit
-    function setStartEpoch(bytes32 unitId, uint256 startEpoch) external;
 
     // Effector info
     /// @dev Set the effector info. Effector info can be added by the contract owner

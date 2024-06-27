@@ -1,12 +1,29 @@
-// SPDX-License-Identifier: Apache-2.0
+/*
+ * Fluence Compute Marketplace
+ *
+ * Copyright (C) 2024 Fluence DAO
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation version 3 of the
+ * License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 pragma solidity ^0.8.19;
 
-import "src/core/interfaces/ICore.sol";
+import "src/interfaces/IDiamond.sol";
 import "src/deal/interfaces/IConfig.sol";
 
 interface IConfigWithPublicInternals is IConfig {
     function Config_init(
-        ICore globalCore_,
+        IDiamond diamond_,
         CIDV1 calldata appCID_,
         IERC20 paymentToken_,
         uint256 minWorkers_,
@@ -19,5 +36,5 @@ interface IConfigWithPublicInternals is IConfig {
         address[] calldata providersAccessList_
     ) external;
 
-    function globalCore() external view returns (ICore);
+    function diamond() external view returns (IDiamond);
 }

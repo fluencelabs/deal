@@ -1,13 +1,33 @@
-// SPDX-License-Identifier: Apache-2.0
+/*
+ * Fluence Compute Marketplace
+ *
+ * Copyright (C) 2024 Fluence DAO
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation version 3 of the
+ * License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 pragma solidity ^0.8.19;
 
 import {Test} from "forge-std/Test.sol";
-import "forge-std/console.sol";
+import {TestWithDeployment} from "test/utils/TestWithDeployment.sol";
+import {TestHelper} from "test/utils/TestHelper.sol";
 
-import "test/utils/TestWithDeployment.sol";
-import "test/utils/TestHelper.sol";
+import {IMarket} from "src/core/interfaces/IMarket.sol";
+import {IOffer} from "src/core/interfaces/IOffer.sol";
+import {CIDV1} from "src/utils/Common.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import "src/core/modules/market/interfaces/IMarket.sol";
 
 contract MarketTest is TestWithDeployment {
     using SafeERC20 for IERC20;
@@ -91,9 +111,9 @@ contract MarketTest is TestWithDeployment {
         );
 
         // Register offer
-        deployment.market.setProviderInfo("test", CIDV1({prefixes: 0x12345678, hash: bytes32(0x00)}));
+        deployment.diamondAsMarket.setProviderInfo("test", CIDV1({prefixes: 0x12345678, hash: bytes32(0x00)}));
 
-        vm.expectEmit(true, true, false, true, address(deployment.market));
+        vm.expectEmit(true, true, false, true, address(deployment.diamond));
         emit MarketOfferRegistered(
             address(this),
             offerId,
@@ -107,18 +127,18 @@ contract MarketTest is TestWithDeployment {
         for (uint256 i = 0; i < registerPeers.length; i++) {
             IOffer.RegisterComputePeer memory registerPeer = registerPeers[i];
 
-            vm.expectEmit(true, true, false, true, address(deployment.market));
+            vm.expectEmit(true, true, false, true, address(deployment.diamond));
             emit PeerCreated(offerId, registerPeer.peerId, registerPeer.owner);
 
             for (uint256 j = 0; j < registerPeer.unitIds.length; j++) {
                 bytes32 unitId = registerPeer.unitIds[j];
 
-                vm.expectEmit(true, true, false, true, address(deployment.market));
+                vm.expectEmit(true, true, false, true, address(deployment.diamond));
                 emit ComputeUnitCreated(registerPeer.peerId, unitId);
             }
         }
 
-        bytes32 retOfferId = deployment.market.registerMarketOffer(
+        bytes32 retOfferId = deployment.diamondAsMarket.registerMarketOffer(
             minPricePerWorkerEpoch, paymentToken, effectors, registerPeers, minProtocolVersion, maxProtocolVersion
         );
 
@@ -126,12 +146,12 @@ contract MarketTest is TestWithDeployment {
     }
 
     function test_GetOfferPeersUnits() public {
-        deployment.market.setProviderInfo("test", CIDV1({prefixes: 0x12345678, hash: bytes32(0x00)}));
-        bytes32 offerId = deployment.market.registerMarketOffer(
+        deployment.diamondAsMarket.setProviderInfo("test", CIDV1({prefixes: 0x12345678, hash: bytes32(0x00)}));
+        bytes32 offerId = deployment.diamondAsMarket.registerMarketOffer(
             minPricePerWorkerEpoch, paymentToken, effectors, registerPeers, minProtocolVersion, maxProtocolVersion
         );
 
-        IMarket.Offer memory offer = deployment.market.getOffer(offerId);
+        IMarket.Offer memory offer = deployment.diamondAsMarket.getOffer(offerId);
         assertEq(offer.provider, address(this));
         assertEq(offer.minPricePerWorkerEpoch, minPricePerWorkerEpoch);
         assertEq(offer.paymentToken, paymentToken);
@@ -140,7 +160,7 @@ contract MarketTest is TestWithDeployment {
 
         for (uint256 i = 0; i < registerPeers.length; i++) {
             IMarket.RegisterComputePeer memory registerPeer = registerPeers[i];
-            IMarket.ComputePeer memory computePeer = deployment.market.getComputePeer(registerPeer.peerId);
+            IMarket.ComputePeer memory computePeer = deployment.diamondAsMarket.getComputePeer(registerPeer.peerId);
 
             require(computePeer.offerId == offerId, "OfferId mismatch");
             require(computePeer.unitCount == registerPeer.unitIds.length, "NextUnitIndex mismatch");
@@ -148,7 +168,7 @@ contract MarketTest is TestWithDeployment {
 
             for (uint256 j = 0; j < registerPeer.unitIds.length; j++) {
                 bytes32 unitId = registerPeer.unitIds[j];
-                IMarket.ComputeUnit memory computeUnit = deployment.market.getComputeUnit(unitId);
+                IMarket.ComputeUnit memory computeUnit = deployment.diamondAsMarket.getComputeUnit(unitId);
 
                 require(computeUnit.peerId == registerPeer.peerId, "PeerId mismatch");
                 require(computeUnit.deal == address(0), "Deal address mismatch");

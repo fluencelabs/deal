@@ -1,16 +1,33 @@
-// SPDX-License-Identifier: Apache-2.0
+/*
+ * Fluence Compute Marketplace
+ *
+ * Copyright (C) 2024 Fluence DAO
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation version 3 of the
+ * License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 pragma solidity ^0.8.19;
 
 import {Test} from "forge-std/Test.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IDeal} from "src/deal/interfaces/IDeal.sol";
+import {IEpochController} from "src/core/interfaces/IEpochController.sol";
+import {DealSnapshot} from "src/deal/DealSnapshot.sol";
+import {IDealWithPublicInternals} from "src/dev/test/interfaces/IDealWithPublicInternals.sol";
+import {TestWithDeployment} from "test/utils/TestWithDeployment.sol";
+import {TestHelper} from "test/utils/TestHelper.sol";
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
-import "src/deal/interfaces/IDeal.sol";
-import "src/deal/DealSnapshot.sol";
-import "src/dev/test/interfaces/IDealWithPublicInternals.sol";
-
-import "test/utils/TestWithDeployment.sol";
-import "test/utils/TestHelper.sol";
 
 contract CommitPeriod is TestWithDeployment {
     using SafeERC20 for IERC20;
