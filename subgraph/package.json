@@ -25,7 +25,7 @@
     "import-config-networks": "tsc scripts/import-config-networks.ts && node scripts/import-config-networks.js"
   },
   "dependencies": {
-    "@graphprotocol/graph-cli": "0.67.4",
+    "@graphprotocol/graph-cli": "0.78.0",
     "@graphprotocol/graph-ts": "0.32.0"
   },
   "devDependencies": {
