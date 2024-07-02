@@ -292,14 +292,14 @@ jobs:
           path: deployments/local.json
           if-no-files-found: error
 
-      - name: Commit local.json
-        if: github.event_name == 'pull_request'
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "Update local.json"
-          commit_user_name: fluencebot
-          commit_user_email: devops@fluence.one
-          commit_author: fluencebot <devops@fluence.one>
+      # - name: Commit local.json
+      #   if: github.event_name == 'pull_request'
+      #   uses: stefanzweifel/git-auto-commit-action@v5
+      #   with:
+      #     commit_message: "Update local.json"
+      #     commit_user_name: fluencebot
+      #     commit_user_email: devops@fluence.one
+      #     commit_author: fluencebot <devops@fluence.one>
 
   deal-ts-clients:
     name: "Publish deal-ts-clients snapshot"
